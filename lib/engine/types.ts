@@ -351,7 +351,10 @@ export type ResultTopSignal = {
   signalId: SignalId;
   signalKey: SignalKey;
   title: string;
+  domainId: DomainId;
+  domainKey: DomainKey;
   normalizedValue: number;
+  rawTotal: number;
   percentage: number;
   rank: 1;
 };
@@ -360,8 +363,14 @@ export type ResultRankedSignal = {
   signalId: SignalId;
   signalKey: SignalKey;
   title: string;
+  domainId: DomainId;
+  domainKey: DomainKey;
   normalizedValue: number;
+  rawTotal: number;
   percentage: number;
+  domainPercentage: number;
+  isOverlay: boolean;
+  overlayType: SignalOverlayType;
   rank: number;
 };
 
@@ -383,20 +392,26 @@ export type ResultDiagnostics = {
   normalization: NormalizationDiagnostics;
   answeredQuestionCount: number;
   totalQuestionCount: number;
-  missingQuestionIds: QuestionId[];
+  missingQuestionIds: readonly QuestionId[];
+  topSignalSelectionBasis: 'normalized_rank';
+  rankedSignalCount: number;
+  domainCount: number;
+  zeroMass: boolean;
+  zeroMassTopSignalFallbackApplied: boolean;
+  warnings: readonly string[];
   generatedAt: string;
 };
 
 export type CanonicalResultPayload = {
   metadata: ResultMetadata;
   topSignal: ResultTopSignal | null;
-  rankedSignals: ResultRankedSignal[];
-  normalizedScores: NormalizedSignalScore[];
-  domainSummaries: NormalizedDomainSummary[];
+  rankedSignals: readonly ResultRankedSignal[];
+  normalizedScores: readonly NormalizedSignalScore[];
+  domainSummaries: readonly NormalizedDomainSummary[];
   overviewSummary: ResultOverviewSummary;
-  strengths: ResultBulletItem[];
-  watchouts: ResultBulletItem[];
-  developmentFocus: ResultBulletItem[];
+  strengths: readonly ResultBulletItem[];
+  watchouts: readonly ResultBulletItem[];
+  developmentFocus: readonly ResultBulletItem[];
   diagnostics: ResultDiagnostics;
 };
 
