@@ -1,0 +1,315 @@
+Sonartra MVP Web App — Build Task Roadmap
+
+Purpose:
+This document defines the full sequential build plan for the Sonartra MVP web application.
+It is the master execution roadmap for all Codex tasks.
+
+The system must be built engine-first, with a single canonical runtime and result contract.
+
+--------------------------------------------------
+PHASE 0 — FOUNDATION AND REPO SETUP
+--------------------------------------------------
+
+Task 1 — Bootstrap Sonartra MVP Engine App
+- Initialize Next.js (App Router) + TypeScript app
+- Setup base project structure
+- Configure linting, formatting, env handling
+- Create engine-first folder structure
+- Ensure build passes
+
+Task 2 — Define canonical engine architecture
+- Define engine boundaries
+- Define canonical result contract
+- Define lifecycle states
+- Define service/repository structure
+- Define admin vs user vs marketing separation
+
+Task 3 — Create initial app routing structure
+- Scaffold route groups:
+  - public (marketing)
+  - user app
+  - admin app
+  - admin assessments module
+- Create placeholder pages
+
+--------------------------------------------------
+PHASE 1 — DATABASE AND ENGINE KERNEL
+--------------------------------------------------
+
+Task 4 — Design and implement MVP database schema
+- assessments
+- assessment_versions
+- domains
+- signals
+- questions
+- options
+- option_signal_weights
+- attempts
+- responses
+- results
+
+Task 5 — Seed flagship assessment (WPLP-80)
+- Insert structured seed data into DB
+- Maintain deterministic ordering and IDs
+- Ensure all relationships resolve
+
+Task 6 — Build engine core types
+- assessment definition
+- runtime question model
+- response set
+- score result
+- normalized result
+- result payload
+- readiness status
+
+Task 7 — Build assessment definition repositories
+- load published assessment
+- load domains, signals, questions, options, weights
+
+Task 8 — Build runtime execution model loader
+- assemble fully resolved runtime definition
+- ensure no missing references
+
+--------------------------------------------------
+PHASE 2 — SCORING AND RESULT GENERATION
+--------------------------------------------------
+
+Task 9 — Build raw scoring engine
+- aggregate option → signal weights
+- deterministic scoring only
+
+Task 10 — Build normalization engine
+- convert scores to percentages
+- produce rankings
+- ensure consistency and stability
+
+Task 11 — Build canonical result payload
+- define single result structure
+- include all required sections
+
+Task 12 — Build readiness validator
+- enforce strict "ready" criteria
+- reject incomplete or invalid results
+
+Task 13 — Add engine unit tests
+- scoring correctness
+- normalization correctness
+- payload structure
+- readiness validation
+
+--------------------------------------------------
+PHASE 3 — USER RUNTIME FLOW
+--------------------------------------------------
+
+Task 14 — Build assessment attempt lifecycle
+- create or resume attempt
+
+Task 15 — Build question delivery
+- ordered question serving
+- include options
+
+Task 16 — Build response persistence
+- one response per question
+- overwrite allowed before completion
+
+Task 17 — Build completion pipeline
+- load responses
+- score
+- normalize
+- build result
+- persist result
+- mark ready
+
+Task 18 — Build end-to-end engine tests
+- start → answer → complete → ready result
+
+--------------------------------------------------
+PHASE 4 — USER-FACING APPLICATION
+--------------------------------------------------
+
+Task 19 — Build user dashboard
+- layout
+- latest activity
+- summary card
+
+Task 20 — Build assessments page
+- list assessments
+- show status:
+  - not started
+  - in progress
+  - ready
+
+Task 21 — Build assessment runner UI
+- question flow
+- answer selection
+- submission
+
+Task 22 — Build results list
+- list completed results
+
+Task 23 — Build result detail page
+- render canonical result payload
+
+Task 24 — Wire dashboard result summary
+- show latest ready result
+
+--------------------------------------------------
+PHASE 5 — ADMIN ASSESSMENT AUTHORING
+--------------------------------------------------
+
+Task 25 — Build admin shell
+- protect routes
+- layout structure
+
+Task 26 — Build admin assessments dashboard
+- list assessments
+- show versions and statuses
+
+Task 27 — Build assessment creation flow
+- create metadata
+- define base structure
+
+Task 28 — Build domain + signal authoring
+- create/edit domains and signals
+
+Task 29 — Build question + option authoring
+- CRUD for questions and answers
+
+Task 30 — Build weighting configuration
+- define option → signal mappings
+
+Task 31 — Build versioning and publish flow
+- draft vs published
+- single active version
+
+Task 32 — Add admin validation rules
+- no orphan records
+- all questions have options
+- all options have weights
+- structure is complete
+
+--------------------------------------------------
+PHASE 6 — RESULT STABILITY AND REGRESSION
+--------------------------------------------------
+
+Task 33 — Build result retrieval services
+- latest result
+- results list
+- result detail
+
+Task 34 — Add regression tests
+- publish → start → complete → retrieve
+- dashboard visibility
+
+Task 35 — Add clean-room test assessment
+- dedicated QA fixture
+
+Task 36 — Build QA checklist
+- document verification steps
+
+--------------------------------------------------
+PHASE 7 — PUBLIC WEBSITE
+--------------------------------------------------
+
+Task 37 — Build homepage
+- hero
+- three-layer model
+- what Sonartra measures
+- how it works
+- pilot outcomes
+- CTA
+
+Task 38 — Build product pages
+- Platform
+- Sonartra Signals
+- Case Studies
+- Contact
+
+Task 39 — Build login / onboarding
+- connect public → user app
+
+--------------------------------------------------
+PHASE 8 — OPERATIONAL HARDENING
+--------------------------------------------------
+
+Task 40 — Add audit and diagnostics
+- publish
+- start
+- completion
+- ready result
+- failures
+
+Task 41 — Add admin QA visibility
+- inspect generated results
+
+Task 42 — Improve error handling
+- incomplete attempts
+- failed completion
+- invalid data
+
+Task 43 — Finalise deployment setup
+- production config
+- migrations
+- seed strategy
+- preview validation
+
+--------------------------------------------------
+PHASE 9 — EXPANSION
+--------------------------------------------------
+
+Task 44 — Add second assessment
+- validate engine reusability
+
+Task 45 — Refine output-rule system
+- strengthen deterministic outputs
+
+Task 46 — Improve admin UX
+- better editing experience
+
+Task 47 — Add organisation outputs
+- only after individual flow stable
+
+Task 48 — Add JSON import/export (optional)
+- only after DB-first model proven
+
+--------------------------------------------------
+MILESTONES
+--------------------------------------------------
+
+Milestone 1:
+Tasks 1–8 complete
+→ Engine foundation + seeded assessment
+
+Milestone 2:
+Tasks 9–18 complete
+→ Backend engine works end-to-end
+
+Milestone 3:
+Tasks 19–24 complete
+→ User can complete and view results
+
+Milestone 4:
+Tasks 25–32 complete
+→ Admin can create and publish assessments
+
+Milestone 5:
+Tasks 33–36 complete
+→ Result stability and regression protection
+
+Milestone 6:
+Tasks 37–43 complete
+→ Full MVP product shell ready
+
+--------------------------------------------------
+PRIORITY RULE
+--------------------------------------------------
+
+Build in this order:
+
+1–18 → core engine
+19–24 → user flow
+33–36 → stability
+25–32 → admin
+37+ → marketing
+
+Do NOT build UI or admin features before engine core is proven.
