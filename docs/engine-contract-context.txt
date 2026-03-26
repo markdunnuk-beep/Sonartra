@@ -1,0 +1,252 @@
+Sonartra Assessment Engine — Runtime Contract (MVP)
+
+Purpose:
+This file defines the canonical runtime behavior of the Sonartra assessment engine.
+
+It acts as the governing contract for:
+- scoring
+- normalization
+- result generation
+- readiness
+- data flow
+
+All implementation must adhere to this contract.
+
+--------------------------------------------------
+CORE PRINCIPLE
+--------------------------------------------------
+
+One engine.
+One execution path.
+One result contract.
+
+There must be:
+- no alternative scoring paths
+- no duplicate logic across layers
+- no UI-side computation
+- no multiple result formats
+
+--------------------------------------------------
+SOURCE OF TRUTH
+--------------------------------------------------
+
+The engine operates ONLY on structured database data.
+
+Primary inputs:
+- assessment definitions (from seed data)
+- domains
+- signals
+- questions
+- options
+- option → signal weights
+- thresholds
+- archetypes
+- sentence library
+- rule engine definitions
+
+The engine MUST NOT:
+- read Excel files
+- parse JSON packages at runtime
+- depend on external formats
+
+--------------------------------------------------
+RUNTIME PIPELINE
+--------------------------------------------------
+
+The engine execution flow must be strictly:
+
+1. Start Assessment
+- create or resume attempt
+- load published assessment definition
+
+2. Question Delivery
+- serve ordered questions
+- include options per question
+- preserve defined ordering
+
+3. Response Capture
+- store one response per question
+- allow overwrite until completion
+
+4. Completion
+On submit:
+
+- load all responses
+- resolve selected options
+- map options to signal weights
+- aggregate raw signal scores
+- normalize scores
+- rank signals
+- compute domain summaries
+- determine top signal(s)
+- generate output sections
+- build canonical result payload
+- persist result
+- mark result as READY
+
+5. Retrieval
+- results are read from persisted payload only
+- no recomputation at retrieval time
+
+--------------------------------------------------
+SCORING RULES
+--------------------------------------------------
+
+- scoring must be deterministic
+- all scores derived from optionSignalWeights
+- no implicit or hidden weighting logic
+- no randomness
+- all signals must be resolved explicitly
+
+--------------------------------------------------
+NORMALIZATION RULES
+--------------------------------------------------
+
+- convert raw scores into comparable values
+- produce percentages and rankings
+- normalization must be consistent across all runs
+- no division-by-zero errors
+- output must be stable and reproducible
+
+--------------------------------------------------
+RESULT PAYLOAD CONTRACT
+--------------------------------------------------
+
+Each completed assessment must produce one canonical result object.
+
+Minimum structure:
+
+- metadata
+  - assessmentKey
+  - version
+  - attemptId
+
+- topSignal
+- rankedSignals
+- normalizedScores
+- domainSummaries
+- overviewSummary
+- strengths
+- watchouts
+- developmentFocus
+- diagnostics
+
+This payload is the ONLY data used by:
+- dashboard
+- results list
+- result detail views
+
+--------------------------------------------------
+OUTPUT GENERATION RULES
+--------------------------------------------------
+
+Outputs must be:
+
+- deterministic
+- rule-based
+- derived from:
+  - top signals
+  - ranked signals
+  - domain summaries
+  - thresholds
+  - archetypes
+  - sentence library
+  - rule engine
+
+The engine MUST NOT:
+- generate outputs using AI for MVP
+- produce inconsistent narrative structures
+
+--------------------------------------------------
+READINESS RULE
+--------------------------------------------------
+
+A result is considered READY only if:
+
+- all questions are answered
+- scoring completed successfully
+- normalization completed successfully
+- result payload is structurally complete
+
+If any step fails:
+- mark as FAILED or PROCESSING
+- do not surface as READY
+
+--------------------------------------------------
+DATA INTEGRITY RULES
+--------------------------------------------------
+
+The engine must enforce:
+
+- no missing questions
+- no missing options
+- no orphan weights
+- all signals exist
+- all mappings resolve
+
+Failures must be explicit, not silent.
+
+--------------------------------------------------
+SYSTEM BOUNDARIES
+--------------------------------------------------
+
+The engine is responsible for:
+- scoring
+- normalization
+- output generation
+- result payload creation
+
+The engine is NOT responsible for:
+- UI layout
+- admin workflows
+- marketing content
+
+--------------------------------------------------
+PROHIBITED PATTERNS
+--------------------------------------------------
+
+The system must NOT:
+
+- reintroduce multiple engine versions (v1/v2/hybrid)
+- compute scores in UI components
+- create multiple result payload formats
+- bypass the canonical pipeline
+- allow partial or inconsistent results to be treated as READY
+
+--------------------------------------------------
+EXTENSIBILITY RULE
+--------------------------------------------------
+
+Future assessments must:
+
+- use the same engine pipeline
+- use the same result contract
+- only vary in:
+  - data (domains, signals, questions, weights)
+  - output rules
+
+The engine logic must remain shared and consistent.
+
+--------------------------------------------------
+ACCEPTANCE TEST (MANDATORY)
+--------------------------------------------------
+
+The engine is considered valid only if:
+
+1. WPLP-80 seed data is loaded
+2. A user can start an assessment
+3. All questions can be answered
+4. Completion produces a result
+5. Result is marked READY
+6. Result appears in:
+   - dashboard
+   - results list
+   - result detail page
+7. Output matches deterministic rules
+
+--------------------------------------------------
+FINAL RULE
+--------------------------------------------------
+
+If the engine cannot run WPLP-80 end-to-end cleanly and deterministically,
+the engine is not complete.
