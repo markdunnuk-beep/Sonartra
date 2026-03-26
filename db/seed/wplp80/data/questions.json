@@ -1,0 +1,642 @@
+[
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_core_personality",
+    "key": "wplp80_q01",
+    "text": "When beginning a new initiative, I usually:",
+    "order": 1,
+    "sourceQuestionNumber": 1
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_core_personality",
+    "key": "wplp80_q02",
+    "text": "My natural energy level at work is:",
+    "order": 2,
+    "sourceQuestionNumber": 2
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_core_personality",
+    "key": "wplp80_q03",
+    "text": "When priorities change suddenly:",
+    "order": 3,
+    "sourceQuestionNumber": 3
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_core_personality",
+    "key": "wplp80_q04",
+    "text": "I prefer tasks that are:",
+    "order": 4,
+    "sourceQuestionNumber": 4
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_core_personality",
+    "key": "wplp80_q05",
+    "text": "In uncertain situations I:",
+    "order": 5,
+    "sourceQuestionNumber": 5
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_core_personality",
+    "key": "wplp80_q06",
+    "text": "My attention to detail is:",
+    "order": 6,
+    "sourceQuestionNumber": 6
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_core_personality",
+    "key": "wplp80_q07",
+    "text": "Feedback typically:",
+    "order": 7,
+    "sourceQuestionNumber": 7
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_core_personality",
+    "key": "wplp80_q08",
+    "text": "My decision-making style is:",
+    "order": 8,
+    "sourceQuestionNumber": 8
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behaviour_style",
+    "key": "wplp80_q09",
+    "text": "In meetings I tend to:",
+    "order": 9,
+    "sourceQuestionNumber": 9
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behaviour_style",
+    "key": "wplp80_q10",
+    "text": "My communication is:",
+    "order": 10,
+    "sourceQuestionNumber": 10
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behaviour_style",
+    "key": "wplp80_q11",
+    "text": "When leading a project I:",
+    "order": 11,
+    "sourceQuestionNumber": 11
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behaviour_style",
+    "key": "wplp80_q12",
+    "text": "Under time pressure I:",
+    "order": 12,
+    "sourceQuestionNumber": 12
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behaviour_style",
+    "key": "wplp80_q13",
+    "text": "I am most comfortable when:",
+    "order": 13,
+    "sourceQuestionNumber": 13
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behaviour_style",
+    "key": "wplp80_q14",
+    "text": "Others likely see me as:",
+    "order": 14,
+    "sourceQuestionNumber": 14
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behaviour_style",
+    "key": "wplp80_q15",
+    "text": "I am frustrated by:",
+    "order": 15,
+    "sourceQuestionNumber": 15
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_motivational_drivers",
+    "key": "wplp80_q16",
+    "text": "I am most driven by:",
+    "order": 16,
+    "sourceQuestionNumber": 16
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_motivational_drivers",
+    "key": "wplp80_q17",
+    "text": "Recognition matters to me because:",
+    "order": 17,
+    "sourceQuestionNumber": 17
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_motivational_drivers",
+    "key": "wplp80_q18",
+    "text": "I would prefer:",
+    "order": 18,
+    "sourceQuestionNumber": 18
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_motivational_drivers",
+    "key": "wplp80_q19",
+    "text": "If given total freedom, I would:",
+    "order": 19,
+    "sourceQuestionNumber": 19
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_motivational_drivers",
+    "key": "wplp80_q20",
+    "text": "I measure success by:",
+    "order": 20,
+    "sourceQuestionNumber": 20
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_motivational_drivers",
+    "key": "wplp80_q21",
+    "text": "I am energised when:",
+    "order": 21,
+    "sourceQuestionNumber": 21
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_motivational_drivers",
+    "key": "wplp80_q22",
+    "text": "I disengage when:",
+    "order": 22,
+    "sourceQuestionNumber": 22
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_interpersonal_needs",
+    "key": "wplp80_q23",
+    "text": "I prefer leaders who:",
+    "order": 23,
+    "sourceQuestionNumber": 23
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_interpersonal_needs",
+    "key": "wplp80_q24",
+    "text": "I feel valued when:",
+    "order": 24,
+    "sourceQuestionNumber": 24
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_interpersonal_needs",
+    "key": "wplp80_q25",
+    "text": "In teams I typically:",
+    "order": 25,
+    "sourceQuestionNumber": 25
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_interpersonal_needs",
+    "key": "wplp80_q26",
+    "text": "I prefer working:",
+    "order": 26,
+    "sourceQuestionNumber": 26
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_interpersonal_needs",
+    "key": "wplp80_q27",
+    "text": "When excluded from decisions I:",
+    "order": 27,
+    "sourceQuestionNumber": 27
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_interpersonal_needs",
+    "key": "wplp80_q28",
+    "text": "I seek:",
+    "order": 28,
+    "sourceQuestionNumber": 28
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_conflict_style",
+    "key": "wplp80_q29",
+    "text": "In disagreement I:",
+    "order": 29,
+    "sourceQuestionNumber": 29
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_conflict_style",
+    "key": "wplp80_q30",
+    "text": "When challenged publicly:",
+    "order": 30,
+    "sourceQuestionNumber": 30
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_conflict_style",
+    "key": "wplp80_q31",
+    "text": "If a colleague underperforms:",
+    "order": 31,
+    "sourceQuestionNumber": 31
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_conflict_style",
+    "key": "wplp80_q32",
+    "text": "I avoid conflict when:",
+    "order": 32,
+    "sourceQuestionNumber": 32
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_conflict_style",
+    "key": "wplp80_q33",
+    "text": "My conflict strength is:",
+    "order": 33,
+    "sourceQuestionNumber": 33
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_conflict_style",
+    "key": "wplp80_q34",
+    "text": "My conflict risk is:",
+    "order": 34,
+    "sourceQuestionNumber": 34
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_stress_and_derailers",
+    "key": "wplp80_q35",
+    "text": "Under prolonged pressure I may:",
+    "order": 35,
+    "sourceQuestionNumber": 35
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_stress_and_derailers",
+    "key": "wplp80_q36",
+    "text": "When overwhelmed I:",
+    "order": 36,
+    "sourceQuestionNumber": 36
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_stress_and_derailers",
+    "key": "wplp80_q37",
+    "text": "When trust is broken I:",
+    "order": 37,
+    "sourceQuestionNumber": 37
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_stress_and_derailers",
+    "key": "wplp80_q38",
+    "text": "I can be perceived as:",
+    "order": 38,
+    "sourceQuestionNumber": 38
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_stress_and_derailers",
+    "key": "wplp80_q39",
+    "text": "My biggest blind spot may be:",
+    "order": 39,
+    "sourceQuestionNumber": 39
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_stress_and_derailers",
+    "key": "wplp80_q40",
+    "text": "Under threat I:",
+    "order": 40,
+    "sourceQuestionNumber": 40
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_decision_and_risk",
+    "key": "wplp80_q41",
+    "text": "Risk is:",
+    "order": 41,
+    "sourceQuestionNumber": 41
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_decision_and_risk",
+    "key": "wplp80_q42",
+    "text": "I prefer decisions that are:",
+    "order": 42,
+    "sourceQuestionNumber": 42
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_decision_and_risk",
+    "key": "wplp80_q43",
+    "text": "In high-stakes decisions I:",
+    "order": 43,
+    "sourceQuestionNumber": 43
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_decision_and_risk",
+    "key": "wplp80_q44",
+    "text": "I trust:",
+    "order": 44,
+    "sourceQuestionNumber": 44
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_decision_and_risk",
+    "key": "wplp80_q45",
+    "text": "I am comfortable with:",
+    "order": 45,
+    "sourceQuestionNumber": 45
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_leadership_orientation",
+    "key": "wplp80_q46",
+    "text": "A leader’s primary job is to:",
+    "order": 46,
+    "sourceQuestionNumber": 46
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_leadership_orientation",
+    "key": "wplp80_q47",
+    "text": "Poor performance should be handled by:",
+    "order": 47,
+    "sourceQuestionNumber": 47
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_leadership_orientation",
+    "key": "wplp80_q48",
+    "text": "I lead best by:",
+    "order": 48,
+    "sourceQuestionNumber": 48
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_leadership_orientation",
+    "key": "wplp80_q49",
+    "text": "Authority should:",
+    "order": 49,
+    "sourceQuestionNumber": 49
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_leadership_orientation",
+    "key": "wplp80_q50",
+    "text": "I am most confident leading:",
+    "order": 50,
+    "sourceQuestionNumber": 50
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_culture_preference",
+    "key": "wplp80_q51",
+    "text": "Ideal culture is:",
+    "order": 51,
+    "sourceQuestionNumber": 51
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_culture_preference",
+    "key": "wplp80_q52",
+    "text": "Success should be measured by:",
+    "order": 52,
+    "sourceQuestionNumber": 52
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_culture_preference",
+    "key": "wplp80_q53",
+    "text": "Culture should prioritise:",
+    "order": 53,
+    "sourceQuestionNumber": 53
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_culture_preference",
+    "key": "wplp80_q54",
+    "text": "Accountability should be:",
+    "order": 54,
+    "sourceQuestionNumber": 54
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_culture_preference",
+    "key": "wplp80_q55",
+    "text": "I struggle in cultures that are:",
+    "order": 55,
+    "sourceQuestionNumber": 55
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_role_fit",
+    "key": "wplp80_q56",
+    "text": "I am best suited to:",
+    "order": 56,
+    "sourceQuestionNumber": 56
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_role_fit",
+    "key": "wplp80_q57",
+    "text": "My natural strength lies in:",
+    "order": 57,
+    "sourceQuestionNumber": 57
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_role_fit",
+    "key": "wplp80_q58",
+    "text": "I thrive where:",
+    "order": 58,
+    "sourceQuestionNumber": 58
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_role_fit",
+    "key": "wplp80_q59",
+    "text": "My greatest value to a company is:",
+    "order": 59,
+    "sourceQuestionNumber": 59
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q60",
+    "text": "When progress stalls on an important initiative I typically:",
+    "order": 60,
+    "sourceQuestionNumber": 60
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q61",
+    "text": "If a colleague challenges my idea strongly I:",
+    "order": 61,
+    "sourceQuestionNumber": 61
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q62",
+    "text": "In high-performing teams I value most:",
+    "order": 62,
+    "sourceQuestionNumber": 62
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q63",
+    "text": "If a project begins to drift I prefer to:",
+    "order": 63,
+    "sourceQuestionNumber": 63
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q64",
+    "text": "When evaluating a risky opportunity I focus primarily on:",
+    "order": 64,
+    "sourceQuestionNumber": 64
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q65",
+    "text": "If a team member disagrees with me privately I am most likely to:",
+    "order": 65,
+    "sourceQuestionNumber": 65
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q66",
+    "text": "When organisations grow quickly they most often fail because:",
+    "order": 66,
+    "sourceQuestionNumber": 66
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q67",
+    "text": "In emotionally charged environments I:",
+    "order": 67,
+    "sourceQuestionNumber": 67
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q68",
+    "text": "In difficult conversations I prioritise:",
+    "order": 68,
+    "sourceQuestionNumber": 68
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q69",
+    "text": "When a decision proves wrong I:",
+    "order": 69,
+    "sourceQuestionNumber": 69
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q70",
+    "text": "When joining a new organisation I first try to understand:",
+    "order": 70,
+    "sourceQuestionNumber": 70
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q71",
+    "text": "My leadership impact is strongest when I:",
+    "order": 71,
+    "sourceQuestionNumber": 71
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q72",
+    "text": "When faced with conflicting priorities I typically:",
+    "order": 72,
+    "sourceQuestionNumber": 72
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q73",
+    "text": "Uncertainty in organisations usually signals:",
+    "order": 73,
+    "sourceQuestionNumber": 73
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q74",
+    "text": "The most damaging leadership behaviour is:",
+    "order": 74,
+    "sourceQuestionNumber": 74
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q75",
+    "text": "When results matter most I:",
+    "order": 75,
+    "sourceQuestionNumber": 75
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q76",
+    "text": "The best leaders create organisations that are:",
+    "order": 76,
+    "sourceQuestionNumber": 76
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q77",
+    "text": "If data contradicts my intuition I usually:",
+    "order": 77,
+    "sourceQuestionNumber": 77
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q78",
+    "text": "In organisational change my instinct is to:",
+    "order": 78,
+    "sourceQuestionNumber": 78
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q79",
+    "text": "I perform best in organisations that reward:",
+    "order": 79,
+    "sourceQuestionNumber": 79
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "section_behavioural_integrity_and_nuance",
+    "key": "wplp80_q80",
+    "text": "When evaluating people’s performance I value most:",
+    "order": 80,
+    "sourceQuestionNumber": 80
+  }
+]

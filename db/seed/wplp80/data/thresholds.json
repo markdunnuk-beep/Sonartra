@@ -1,0 +1,37 @@
+[
+  {
+    "measureKey": "normalised_score",
+    "lowMax": 0.33,
+    "mediumMax": 0.66,
+    "highMax": 1,
+    "notes": "Used for Low / Medium / High banding."
+  },
+  {
+    "measureKey": "narrative_strong",
+    "lowMax": 0,
+    "mediumMax": 0,
+    "highMax": 0.75,
+    "notes": "Use strong sentence if score/share >= this threshold."
+  },
+  {
+    "measureKey": "narrative_moderate",
+    "lowMax": 0,
+    "mediumMax": 0.55,
+    "highMax": 0.74,
+    "notes": "Use moderate sentence if score/share >= this threshold and < strong."
+  },
+  {
+    "measureKey": "leadership_potential_strong",
+    "lowMax": 0,
+    "mediumMax": 0,
+    "highMax": 0.7,
+    "notes": "Composite threshold."
+  },
+  {
+    "measureKey": "role_alignment_strong",
+    "lowMax": 0,
+    "mediumMax": 0,
+    "highMax": 0.7,
+    "notes": "Composite threshold."
+  }
+]

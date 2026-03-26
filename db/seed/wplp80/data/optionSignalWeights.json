@@ -1,0 +1,6302 @@
+[
+  {
+    "optionKey": "wplp80_q01_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|A"
+  },
+  {
+    "optionKey": "wplp80_q01_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|A"
+  },
+  {
+    "optionKey": "wplp80_q01_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|A"
+  },
+  {
+    "optionKey": "wplp80_q01_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|B"
+  },
+  {
+    "optionKey": "wplp80_q01_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|B"
+  },
+  {
+    "optionKey": "wplp80_q01_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|B"
+  },
+  {
+    "optionKey": "wplp80_q01_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|C"
+  },
+  {
+    "optionKey": "wplp80_q01_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|C"
+  },
+  {
+    "optionKey": "wplp80_q01_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|C"
+  },
+  {
+    "optionKey": "wplp80_q01_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|D"
+  },
+  {
+    "optionKey": "wplp80_q01_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|D"
+  },
+  {
+    "optionKey": "wplp80_q01_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "1|D"
+  },
+  {
+    "optionKey": "wplp80_q02_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|A"
+  },
+  {
+    "optionKey": "wplp80_q02_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|A"
+  },
+  {
+    "optionKey": "wplp80_q02_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|A"
+  },
+  {
+    "optionKey": "wplp80_q02_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|B"
+  },
+  {
+    "optionKey": "wplp80_q02_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|B"
+  },
+  {
+    "optionKey": "wplp80_q02_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|B"
+  },
+  {
+    "optionKey": "wplp80_q02_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|C"
+  },
+  {
+    "optionKey": "wplp80_q02_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|C"
+  },
+  {
+    "optionKey": "wplp80_q02_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|C"
+  },
+  {
+    "optionKey": "wplp80_q02_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|D"
+  },
+  {
+    "optionKey": "wplp80_q02_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|D"
+  },
+  {
+    "optionKey": "wplp80_q02_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "2|D"
+  },
+  {
+    "optionKey": "wplp80_q03_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|A"
+  },
+  {
+    "optionKey": "wplp80_q03_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|A"
+  },
+  {
+    "optionKey": "wplp80_q03_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|A"
+  },
+  {
+    "optionKey": "wplp80_q03_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|B"
+  },
+  {
+    "optionKey": "wplp80_q03_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|B"
+  },
+  {
+    "optionKey": "wplp80_q03_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|B"
+  },
+  {
+    "optionKey": "wplp80_q03_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|C"
+  },
+  {
+    "optionKey": "wplp80_q03_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|C"
+  },
+  {
+    "optionKey": "wplp80_q03_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|C"
+  },
+  {
+    "optionKey": "wplp80_q03_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|D"
+  },
+  {
+    "optionKey": "wplp80_q03_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|D"
+  },
+  {
+    "optionKey": "wplp80_q03_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "3|D"
+  },
+  {
+    "optionKey": "wplp80_q04_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|A"
+  },
+  {
+    "optionKey": "wplp80_q04_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|A"
+  },
+  {
+    "optionKey": "wplp80_q04_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|A"
+  },
+  {
+    "optionKey": "wplp80_q04_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|B"
+  },
+  {
+    "optionKey": "wplp80_q04_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|B"
+  },
+  {
+    "optionKey": "wplp80_q04_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|B"
+  },
+  {
+    "optionKey": "wplp80_q04_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|C"
+  },
+  {
+    "optionKey": "wplp80_q04_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|C"
+  },
+  {
+    "optionKey": "wplp80_q04_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|C"
+  },
+  {
+    "optionKey": "wplp80_q04_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|D"
+  },
+  {
+    "optionKey": "wplp80_q04_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|D"
+  },
+  {
+    "optionKey": "wplp80_q04_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "4|D"
+  },
+  {
+    "optionKey": "wplp80_q05_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|A"
+  },
+  {
+    "optionKey": "wplp80_q05_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|A"
+  },
+  {
+    "optionKey": "wplp80_q05_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|A"
+  },
+  {
+    "optionKey": "wplp80_q05_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|B"
+  },
+  {
+    "optionKey": "wplp80_q05_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|B"
+  },
+  {
+    "optionKey": "wplp80_q05_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|B"
+  },
+  {
+    "optionKey": "wplp80_q05_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|C"
+  },
+  {
+    "optionKey": "wplp80_q05_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|C"
+  },
+  {
+    "optionKey": "wplp80_q05_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|C"
+  },
+  {
+    "optionKey": "wplp80_q05_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|D"
+  },
+  {
+    "optionKey": "wplp80_q05_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|D"
+  },
+  {
+    "optionKey": "wplp80_q05_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "5|D"
+  },
+  {
+    "optionKey": "wplp80_q06_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|A"
+  },
+  {
+    "optionKey": "wplp80_q06_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|A"
+  },
+  {
+    "optionKey": "wplp80_q06_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|A"
+  },
+  {
+    "optionKey": "wplp80_q06_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|B"
+  },
+  {
+    "optionKey": "wplp80_q06_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|B"
+  },
+  {
+    "optionKey": "wplp80_q06_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|B"
+  },
+  {
+    "optionKey": "wplp80_q06_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|C"
+  },
+  {
+    "optionKey": "wplp80_q06_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|C"
+  },
+  {
+    "optionKey": "wplp80_q06_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|C"
+  },
+  {
+    "optionKey": "wplp80_q06_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|D"
+  },
+  {
+    "optionKey": "wplp80_q06_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|D"
+  },
+  {
+    "optionKey": "wplp80_q06_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "6|D"
+  },
+  {
+    "optionKey": "wplp80_q07_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|A"
+  },
+  {
+    "optionKey": "wplp80_q07_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|A"
+  },
+  {
+    "optionKey": "wplp80_q07_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|A"
+  },
+  {
+    "optionKey": "wplp80_q07_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|B"
+  },
+  {
+    "optionKey": "wplp80_q07_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|B"
+  },
+  {
+    "optionKey": "wplp80_q07_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|B"
+  },
+  {
+    "optionKey": "wplp80_q07_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|C"
+  },
+  {
+    "optionKey": "wplp80_q07_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|C"
+  },
+  {
+    "optionKey": "wplp80_q07_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|C"
+  },
+  {
+    "optionKey": "wplp80_q07_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|D"
+  },
+  {
+    "optionKey": "wplp80_q07_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|D"
+  },
+  {
+    "optionKey": "wplp80_q07_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "7|D"
+  },
+  {
+    "optionKey": "wplp80_q08_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|A"
+  },
+  {
+    "optionKey": "wplp80_q08_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|A"
+  },
+  {
+    "optionKey": "wplp80_q08_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|A"
+  },
+  {
+    "optionKey": "wplp80_q08_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|B"
+  },
+  {
+    "optionKey": "wplp80_q08_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|B"
+  },
+  {
+    "optionKey": "wplp80_q08_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|B"
+  },
+  {
+    "optionKey": "wplp80_q08_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|C"
+  },
+  {
+    "optionKey": "wplp80_q08_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|C"
+  },
+  {
+    "optionKey": "wplp80_q08_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|C"
+  },
+  {
+    "optionKey": "wplp80_q08_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|D"
+  },
+  {
+    "optionKey": "wplp80_q08_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|D"
+  },
+  {
+    "optionKey": "wplp80_q08_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "8|D"
+  },
+  {
+    "optionKey": "wplp80_q09_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|A"
+  },
+  {
+    "optionKey": "wplp80_q09_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|A"
+  },
+  {
+    "optionKey": "wplp80_q09_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|A"
+  },
+  {
+    "optionKey": "wplp80_q09_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|B"
+  },
+  {
+    "optionKey": "wplp80_q09_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|B"
+  },
+  {
+    "optionKey": "wplp80_q09_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|B"
+  },
+  {
+    "optionKey": "wplp80_q09_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|C"
+  },
+  {
+    "optionKey": "wplp80_q09_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|C"
+  },
+  {
+    "optionKey": "wplp80_q09_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|C"
+  },
+  {
+    "optionKey": "wplp80_q09_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|D"
+  },
+  {
+    "optionKey": "wplp80_q09_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|D"
+  },
+  {
+    "optionKey": "wplp80_q09_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "9|D"
+  },
+  {
+    "optionKey": "wplp80_q10_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|A"
+  },
+  {
+    "optionKey": "wplp80_q10_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|A"
+  },
+  {
+    "optionKey": "wplp80_q10_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|A"
+  },
+  {
+    "optionKey": "wplp80_q10_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|B"
+  },
+  {
+    "optionKey": "wplp80_q10_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|B"
+  },
+  {
+    "optionKey": "wplp80_q10_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|B"
+  },
+  {
+    "optionKey": "wplp80_q10_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|C"
+  },
+  {
+    "optionKey": "wplp80_q10_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|C"
+  },
+  {
+    "optionKey": "wplp80_q10_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|C"
+  },
+  {
+    "optionKey": "wplp80_q10_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|D"
+  },
+  {
+    "optionKey": "wplp80_q10_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|D"
+  },
+  {
+    "optionKey": "wplp80_q10_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "10|D"
+  },
+  {
+    "optionKey": "wplp80_q11_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|A"
+  },
+  {
+    "optionKey": "wplp80_q11_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|A"
+  },
+  {
+    "optionKey": "wplp80_q11_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|A"
+  },
+  {
+    "optionKey": "wplp80_q11_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|B"
+  },
+  {
+    "optionKey": "wplp80_q11_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|B"
+  },
+  {
+    "optionKey": "wplp80_q11_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|B"
+  },
+  {
+    "optionKey": "wplp80_q11_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|C"
+  },
+  {
+    "optionKey": "wplp80_q11_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|C"
+  },
+  {
+    "optionKey": "wplp80_q11_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|C"
+  },
+  {
+    "optionKey": "wplp80_q11_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|D"
+  },
+  {
+    "optionKey": "wplp80_q11_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|D"
+  },
+  {
+    "optionKey": "wplp80_q11_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "11|D"
+  },
+  {
+    "optionKey": "wplp80_q12_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|A"
+  },
+  {
+    "optionKey": "wplp80_q12_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|A"
+  },
+  {
+    "optionKey": "wplp80_q12_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|A"
+  },
+  {
+    "optionKey": "wplp80_q12_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|B"
+  },
+  {
+    "optionKey": "wplp80_q12_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|B"
+  },
+  {
+    "optionKey": "wplp80_q12_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|B"
+  },
+  {
+    "optionKey": "wplp80_q12_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|C"
+  },
+  {
+    "optionKey": "wplp80_q12_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|C"
+  },
+  {
+    "optionKey": "wplp80_q12_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|C"
+  },
+  {
+    "optionKey": "wplp80_q12_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|D"
+  },
+  {
+    "optionKey": "wplp80_q12_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|D"
+  },
+  {
+    "optionKey": "wplp80_q12_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "12|D"
+  },
+  {
+    "optionKey": "wplp80_q13_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|A"
+  },
+  {
+    "optionKey": "wplp80_q13_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|A"
+  },
+  {
+    "optionKey": "wplp80_q13_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|A"
+  },
+  {
+    "optionKey": "wplp80_q13_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|B"
+  },
+  {
+    "optionKey": "wplp80_q13_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|B"
+  },
+  {
+    "optionKey": "wplp80_q13_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|B"
+  },
+  {
+    "optionKey": "wplp80_q13_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|C"
+  },
+  {
+    "optionKey": "wplp80_q13_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|C"
+  },
+  {
+    "optionKey": "wplp80_q13_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|C"
+  },
+  {
+    "optionKey": "wplp80_q13_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|D"
+  },
+  {
+    "optionKey": "wplp80_q13_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|D"
+  },
+  {
+    "optionKey": "wplp80_q13_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "13|D"
+  },
+  {
+    "optionKey": "wplp80_q14_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|A"
+  },
+  {
+    "optionKey": "wplp80_q14_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|A"
+  },
+  {
+    "optionKey": "wplp80_q14_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|A"
+  },
+  {
+    "optionKey": "wplp80_q14_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|B"
+  },
+  {
+    "optionKey": "wplp80_q14_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|B"
+  },
+  {
+    "optionKey": "wplp80_q14_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|B"
+  },
+  {
+    "optionKey": "wplp80_q14_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|C"
+  },
+  {
+    "optionKey": "wplp80_q14_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|C"
+  },
+  {
+    "optionKey": "wplp80_q14_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|C"
+  },
+  {
+    "optionKey": "wplp80_q14_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|D"
+  },
+  {
+    "optionKey": "wplp80_q14_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|D"
+  },
+  {
+    "optionKey": "wplp80_q14_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "14|D"
+  },
+  {
+    "optionKey": "wplp80_q15_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|A"
+  },
+  {
+    "optionKey": "wplp80_q15_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|A"
+  },
+  {
+    "optionKey": "wplp80_q15_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|A"
+  },
+  {
+    "optionKey": "wplp80_q15_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|B"
+  },
+  {
+    "optionKey": "wplp80_q15_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|B"
+  },
+  {
+    "optionKey": "wplp80_q15_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|B"
+  },
+  {
+    "optionKey": "wplp80_q15_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|C"
+  },
+  {
+    "optionKey": "wplp80_q15_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|C"
+  },
+  {
+    "optionKey": "wplp80_q15_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|C"
+  },
+  {
+    "optionKey": "wplp80_q15_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|D"
+  },
+  {
+    "optionKey": "wplp80_q15_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|D"
+  },
+  {
+    "optionKey": "wplp80_q15_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "15|D"
+  },
+  {
+    "optionKey": "wplp80_q16_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "16|A"
+  },
+  {
+    "optionKey": "wplp80_q16_a",
+    "signalKey": "mot_achievement",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "16|A"
+  },
+  {
+    "optionKey": "wplp80_q16_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "16|B"
+  },
+  {
+    "optionKey": "wplp80_q16_b",
+    "signalKey": "mot_influence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "16|B"
+  },
+  {
+    "optionKey": "wplp80_q16_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "16|C"
+  },
+  {
+    "optionKey": "wplp80_q16_c",
+    "signalKey": "mot_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "16|C"
+  },
+  {
+    "optionKey": "wplp80_q16_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "16|D"
+  },
+  {
+    "optionKey": "wplp80_q16_d",
+    "signalKey": "mot_mastery",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "16|D"
+  },
+  {
+    "optionKey": "wplp80_q17_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "17|A"
+  },
+  {
+    "optionKey": "wplp80_q17_a",
+    "signalKey": "mot_achievement",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "17|A"
+  },
+  {
+    "optionKey": "wplp80_q17_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "17|B"
+  },
+  {
+    "optionKey": "wplp80_q17_b",
+    "signalKey": "mot_influence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "17|B"
+  },
+  {
+    "optionKey": "wplp80_q17_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "17|C"
+  },
+  {
+    "optionKey": "wplp80_q17_c",
+    "signalKey": "mot_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "17|C"
+  },
+  {
+    "optionKey": "wplp80_q17_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "17|D"
+  },
+  {
+    "optionKey": "wplp80_q17_d",
+    "signalKey": "mot_mastery",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "17|D"
+  },
+  {
+    "optionKey": "wplp80_q18_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "18|A"
+  },
+  {
+    "optionKey": "wplp80_q18_a",
+    "signalKey": "mot_achievement",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "18|A"
+  },
+  {
+    "optionKey": "wplp80_q18_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "18|B"
+  },
+  {
+    "optionKey": "wplp80_q18_b",
+    "signalKey": "mot_influence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "18|B"
+  },
+  {
+    "optionKey": "wplp80_q18_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "18|C"
+  },
+  {
+    "optionKey": "wplp80_q18_c",
+    "signalKey": "mot_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "18|C"
+  },
+  {
+    "optionKey": "wplp80_q18_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "18|D"
+  },
+  {
+    "optionKey": "wplp80_q18_d",
+    "signalKey": "mot_mastery",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "18|D"
+  },
+  {
+    "optionKey": "wplp80_q19_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "19|A"
+  },
+  {
+    "optionKey": "wplp80_q19_a",
+    "signalKey": "mot_achievement",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "19|A"
+  },
+  {
+    "optionKey": "wplp80_q19_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "19|B"
+  },
+  {
+    "optionKey": "wplp80_q19_b",
+    "signalKey": "mot_influence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "19|B"
+  },
+  {
+    "optionKey": "wplp80_q19_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "19|C"
+  },
+  {
+    "optionKey": "wplp80_q19_c",
+    "signalKey": "mot_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "19|C"
+  },
+  {
+    "optionKey": "wplp80_q19_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "19|D"
+  },
+  {
+    "optionKey": "wplp80_q19_d",
+    "signalKey": "mot_mastery",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "19|D"
+  },
+  {
+    "optionKey": "wplp80_q20_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "20|A"
+  },
+  {
+    "optionKey": "wplp80_q20_a",
+    "signalKey": "mot_achievement",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "20|A"
+  },
+  {
+    "optionKey": "wplp80_q20_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "20|B"
+  },
+  {
+    "optionKey": "wplp80_q20_b",
+    "signalKey": "mot_influence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "20|B"
+  },
+  {
+    "optionKey": "wplp80_q20_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "20|C"
+  },
+  {
+    "optionKey": "wplp80_q20_c",
+    "signalKey": "mot_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "20|C"
+  },
+  {
+    "optionKey": "wplp80_q20_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "20|D"
+  },
+  {
+    "optionKey": "wplp80_q20_d",
+    "signalKey": "mot_mastery",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "20|D"
+  },
+  {
+    "optionKey": "wplp80_q21_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "21|A"
+  },
+  {
+    "optionKey": "wplp80_q21_a",
+    "signalKey": "mot_achievement",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "21|A"
+  },
+  {
+    "optionKey": "wplp80_q21_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "21|B"
+  },
+  {
+    "optionKey": "wplp80_q21_b",
+    "signalKey": "mot_influence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "21|B"
+  },
+  {
+    "optionKey": "wplp80_q21_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "21|C"
+  },
+  {
+    "optionKey": "wplp80_q21_c",
+    "signalKey": "mot_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "21|C"
+  },
+  {
+    "optionKey": "wplp80_q21_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "21|D"
+  },
+  {
+    "optionKey": "wplp80_q21_d",
+    "signalKey": "mot_mastery",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "21|D"
+  },
+  {
+    "optionKey": "wplp80_q22_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "22|A"
+  },
+  {
+    "optionKey": "wplp80_q22_a",
+    "signalKey": "mot_achievement",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "22|A"
+  },
+  {
+    "optionKey": "wplp80_q22_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "22|B"
+  },
+  {
+    "optionKey": "wplp80_q22_b",
+    "signalKey": "mot_influence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "22|B"
+  },
+  {
+    "optionKey": "wplp80_q22_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "22|C"
+  },
+  {
+    "optionKey": "wplp80_q22_c",
+    "signalKey": "mot_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "22|C"
+  },
+  {
+    "optionKey": "wplp80_q22_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "22|D"
+  },
+  {
+    "optionKey": "wplp80_q22_d",
+    "signalKey": "mot_mastery",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "22|D"
+  },
+  {
+    "optionKey": "wplp80_q23_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|A"
+  },
+  {
+    "optionKey": "wplp80_q23_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|A"
+  },
+  {
+    "optionKey": "wplp80_q23_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|A"
+  },
+  {
+    "optionKey": "wplp80_q23_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|B"
+  },
+  {
+    "optionKey": "wplp80_q23_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|B"
+  },
+  {
+    "optionKey": "wplp80_q23_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|B"
+  },
+  {
+    "optionKey": "wplp80_q23_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|C"
+  },
+  {
+    "optionKey": "wplp80_q23_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|C"
+  },
+  {
+    "optionKey": "wplp80_q23_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|C"
+  },
+  {
+    "optionKey": "wplp80_q23_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|D"
+  },
+  {
+    "optionKey": "wplp80_q23_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|D"
+  },
+  {
+    "optionKey": "wplp80_q23_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "23|D"
+  },
+  {
+    "optionKey": "wplp80_q24_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|A"
+  },
+  {
+    "optionKey": "wplp80_q24_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|A"
+  },
+  {
+    "optionKey": "wplp80_q24_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|A"
+  },
+  {
+    "optionKey": "wplp80_q24_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|B"
+  },
+  {
+    "optionKey": "wplp80_q24_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|B"
+  },
+  {
+    "optionKey": "wplp80_q24_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|B"
+  },
+  {
+    "optionKey": "wplp80_q24_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|C"
+  },
+  {
+    "optionKey": "wplp80_q24_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|C"
+  },
+  {
+    "optionKey": "wplp80_q24_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|C"
+  },
+  {
+    "optionKey": "wplp80_q24_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|D"
+  },
+  {
+    "optionKey": "wplp80_q24_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|D"
+  },
+  {
+    "optionKey": "wplp80_q24_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "24|D"
+  },
+  {
+    "optionKey": "wplp80_q25_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|A"
+  },
+  {
+    "optionKey": "wplp80_q25_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|A"
+  },
+  {
+    "optionKey": "wplp80_q25_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|A"
+  },
+  {
+    "optionKey": "wplp80_q25_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|B"
+  },
+  {
+    "optionKey": "wplp80_q25_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|B"
+  },
+  {
+    "optionKey": "wplp80_q25_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|B"
+  },
+  {
+    "optionKey": "wplp80_q25_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|C"
+  },
+  {
+    "optionKey": "wplp80_q25_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|C"
+  },
+  {
+    "optionKey": "wplp80_q25_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|C"
+  },
+  {
+    "optionKey": "wplp80_q25_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|D"
+  },
+  {
+    "optionKey": "wplp80_q25_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|D"
+  },
+  {
+    "optionKey": "wplp80_q25_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "25|D"
+  },
+  {
+    "optionKey": "wplp80_q26_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|A"
+  },
+  {
+    "optionKey": "wplp80_q26_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|A"
+  },
+  {
+    "optionKey": "wplp80_q26_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|A"
+  },
+  {
+    "optionKey": "wplp80_q26_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|B"
+  },
+  {
+    "optionKey": "wplp80_q26_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|B"
+  },
+  {
+    "optionKey": "wplp80_q26_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|B"
+  },
+  {
+    "optionKey": "wplp80_q26_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|C"
+  },
+  {
+    "optionKey": "wplp80_q26_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|C"
+  },
+  {
+    "optionKey": "wplp80_q26_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|C"
+  },
+  {
+    "optionKey": "wplp80_q26_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|D"
+  },
+  {
+    "optionKey": "wplp80_q26_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|D"
+  },
+  {
+    "optionKey": "wplp80_q26_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "26|D"
+  },
+  {
+    "optionKey": "wplp80_q27_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|A"
+  },
+  {
+    "optionKey": "wplp80_q27_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|A"
+  },
+  {
+    "optionKey": "wplp80_q27_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|A"
+  },
+  {
+    "optionKey": "wplp80_q27_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|B"
+  },
+  {
+    "optionKey": "wplp80_q27_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|B"
+  },
+  {
+    "optionKey": "wplp80_q27_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|B"
+  },
+  {
+    "optionKey": "wplp80_q27_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|C"
+  },
+  {
+    "optionKey": "wplp80_q27_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|C"
+  },
+  {
+    "optionKey": "wplp80_q27_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|C"
+  },
+  {
+    "optionKey": "wplp80_q27_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|D"
+  },
+  {
+    "optionKey": "wplp80_q27_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|D"
+  },
+  {
+    "optionKey": "wplp80_q27_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "27|D"
+  },
+  {
+    "optionKey": "wplp80_q28_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|A"
+  },
+  {
+    "optionKey": "wplp80_q28_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|A"
+  },
+  {
+    "optionKey": "wplp80_q28_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|A"
+  },
+  {
+    "optionKey": "wplp80_q28_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|B"
+  },
+  {
+    "optionKey": "wplp80_q28_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|B"
+  },
+  {
+    "optionKey": "wplp80_q28_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|B"
+  },
+  {
+    "optionKey": "wplp80_q28_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|C"
+  },
+  {
+    "optionKey": "wplp80_q28_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|C"
+  },
+  {
+    "optionKey": "wplp80_q28_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|C"
+  },
+  {
+    "optionKey": "wplp80_q28_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|D"
+  },
+  {
+    "optionKey": "wplp80_q28_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|D"
+  },
+  {
+    "optionKey": "wplp80_q28_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "28|D"
+  },
+  {
+    "optionKey": "wplp80_q29_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|A"
+  },
+  {
+    "optionKey": "wplp80_q29_a",
+    "signalKey": "conflict_compete",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|A"
+  },
+  {
+    "optionKey": "wplp80_q29_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|B"
+  },
+  {
+    "optionKey": "wplp80_q29_b",
+    "signalKey": "conflict_collaborate",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|B"
+  },
+  {
+    "optionKey": "wplp80_q29_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|C"
+  },
+  {
+    "optionKey": "wplp80_q29_c",
+    "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|C"
+  },
+  {
+    "optionKey": "wplp80_q29_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|D"
+  },
+  {
+    "optionKey": "wplp80_q29_d",
+    "signalKey": "conflict_avoid",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|D"
+  },
+  {
+    "optionKey": "wplp80_q30_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|A"
+  },
+  {
+    "optionKey": "wplp80_q30_a",
+    "signalKey": "conflict_compete",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|A"
+  },
+  {
+    "optionKey": "wplp80_q30_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|B"
+  },
+  {
+    "optionKey": "wplp80_q30_b",
+    "signalKey": "conflict_collaborate",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|B"
+  },
+  {
+    "optionKey": "wplp80_q30_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|C"
+  },
+  {
+    "optionKey": "wplp80_q30_c",
+    "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|C"
+  },
+  {
+    "optionKey": "wplp80_q30_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|D"
+  },
+  {
+    "optionKey": "wplp80_q30_d",
+    "signalKey": "conflict_avoid",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|D"
+  },
+  {
+    "optionKey": "wplp80_q31_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|A"
+  },
+  {
+    "optionKey": "wplp80_q31_a",
+    "signalKey": "conflict_compete",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|A"
+  },
+  {
+    "optionKey": "wplp80_q31_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|B"
+  },
+  {
+    "optionKey": "wplp80_q31_b",
+    "signalKey": "conflict_collaborate",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|B"
+  },
+  {
+    "optionKey": "wplp80_q31_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|C"
+  },
+  {
+    "optionKey": "wplp80_q31_c",
+    "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|C"
+  },
+  {
+    "optionKey": "wplp80_q31_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|D"
+  },
+  {
+    "optionKey": "wplp80_q31_d",
+    "signalKey": "conflict_avoid",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|D"
+  },
+  {
+    "optionKey": "wplp80_q32_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|A"
+  },
+  {
+    "optionKey": "wplp80_q32_a",
+    "signalKey": "conflict_compete",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|A"
+  },
+  {
+    "optionKey": "wplp80_q32_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|B"
+  },
+  {
+    "optionKey": "wplp80_q32_b",
+    "signalKey": "conflict_collaborate",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|B"
+  },
+  {
+    "optionKey": "wplp80_q32_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|C"
+  },
+  {
+    "optionKey": "wplp80_q32_c",
+    "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|C"
+  },
+  {
+    "optionKey": "wplp80_q32_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|D"
+  },
+  {
+    "optionKey": "wplp80_q32_d",
+    "signalKey": "conflict_avoid",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|D"
+  },
+  {
+    "optionKey": "wplp80_q33_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|A"
+  },
+  {
+    "optionKey": "wplp80_q33_a",
+    "signalKey": "conflict_compete",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|A"
+  },
+  {
+    "optionKey": "wplp80_q33_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|B"
+  },
+  {
+    "optionKey": "wplp80_q33_b",
+    "signalKey": "conflict_collaborate",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|B"
+  },
+  {
+    "optionKey": "wplp80_q33_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|C"
+  },
+  {
+    "optionKey": "wplp80_q33_c",
+    "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|C"
+  },
+  {
+    "optionKey": "wplp80_q33_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|D"
+  },
+  {
+    "optionKey": "wplp80_q33_d",
+    "signalKey": "conflict_avoid",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|D"
+  },
+  {
+    "optionKey": "wplp80_q34_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|A"
+  },
+  {
+    "optionKey": "wplp80_q34_a",
+    "signalKey": "conflict_compete",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|A"
+  },
+  {
+    "optionKey": "wplp80_q34_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|B"
+  },
+  {
+    "optionKey": "wplp80_q34_b",
+    "signalKey": "conflict_collaborate",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|B"
+  },
+  {
+    "optionKey": "wplp80_q34_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|C"
+  },
+  {
+    "optionKey": "wplp80_q34_c",
+    "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|C"
+  },
+  {
+    "optionKey": "wplp80_q34_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|D"
+  },
+  {
+    "optionKey": "wplp80_q34_d",
+    "signalKey": "conflict_avoid",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|D"
+  },
+  {
+    "optionKey": "wplp80_q35_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "35|A"
+  },
+  {
+    "optionKey": "wplp80_q35_a",
+    "signalKey": "stress_control",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "35|A"
+  },
+  {
+    "optionKey": "wplp80_q35_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "35|B"
+  },
+  {
+    "optionKey": "wplp80_q35_b",
+    "signalKey": "stress_scatter",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "35|B"
+  },
+  {
+    "optionKey": "wplp80_q35_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "35|C"
+  },
+  {
+    "optionKey": "wplp80_q35_c",
+    "signalKey": "stress_avoidance",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "35|C"
+  },
+  {
+    "optionKey": "wplp80_q35_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "35|D"
+  },
+  {
+    "optionKey": "wplp80_q35_d",
+    "signalKey": "stress_criticality",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "35|D"
+  },
+  {
+    "optionKey": "wplp80_q36_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "36|A"
+  },
+  {
+    "optionKey": "wplp80_q36_a",
+    "signalKey": "stress_control",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "36|A"
+  },
+  {
+    "optionKey": "wplp80_q36_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "36|B"
+  },
+  {
+    "optionKey": "wplp80_q36_b",
+    "signalKey": "stress_scatter",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "36|B"
+  },
+  {
+    "optionKey": "wplp80_q36_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "36|C"
+  },
+  {
+    "optionKey": "wplp80_q36_c",
+    "signalKey": "stress_avoidance",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "36|C"
+  },
+  {
+    "optionKey": "wplp80_q36_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "36|D"
+  },
+  {
+    "optionKey": "wplp80_q36_d",
+    "signalKey": "stress_criticality",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "36|D"
+  },
+  {
+    "optionKey": "wplp80_q37_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "37|A"
+  },
+  {
+    "optionKey": "wplp80_q37_a",
+    "signalKey": "stress_control",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "37|A"
+  },
+  {
+    "optionKey": "wplp80_q37_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "37|B"
+  },
+  {
+    "optionKey": "wplp80_q37_b",
+    "signalKey": "stress_scatter",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "37|B"
+  },
+  {
+    "optionKey": "wplp80_q37_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "37|C"
+  },
+  {
+    "optionKey": "wplp80_q37_c",
+    "signalKey": "stress_avoidance",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "37|C"
+  },
+  {
+    "optionKey": "wplp80_q37_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "37|D"
+  },
+  {
+    "optionKey": "wplp80_q37_d",
+    "signalKey": "stress_criticality",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "37|D"
+  },
+  {
+    "optionKey": "wplp80_q38_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "38|A"
+  },
+  {
+    "optionKey": "wplp80_q38_a",
+    "signalKey": "stress_control",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "38|A"
+  },
+  {
+    "optionKey": "wplp80_q38_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "38|B"
+  },
+  {
+    "optionKey": "wplp80_q38_b",
+    "signalKey": "stress_scatter",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "38|B"
+  },
+  {
+    "optionKey": "wplp80_q38_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "38|C"
+  },
+  {
+    "optionKey": "wplp80_q38_c",
+    "signalKey": "stress_avoidance",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "38|C"
+  },
+  {
+    "optionKey": "wplp80_q38_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "38|D"
+  },
+  {
+    "optionKey": "wplp80_q38_d",
+    "signalKey": "stress_criticality",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "38|D"
+  },
+  {
+    "optionKey": "wplp80_q39_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "39|A"
+  },
+  {
+    "optionKey": "wplp80_q39_a",
+    "signalKey": "stress_control",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "39|A"
+  },
+  {
+    "optionKey": "wplp80_q39_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "39|B"
+  },
+  {
+    "optionKey": "wplp80_q39_b",
+    "signalKey": "stress_scatter",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "39|B"
+  },
+  {
+    "optionKey": "wplp80_q39_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "39|C"
+  },
+  {
+    "optionKey": "wplp80_q39_c",
+    "signalKey": "stress_avoidance",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "39|C"
+  },
+  {
+    "optionKey": "wplp80_q39_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "39|D"
+  },
+  {
+    "optionKey": "wplp80_q39_d",
+    "signalKey": "stress_criticality",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "39|D"
+  },
+  {
+    "optionKey": "wplp80_q40_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "40|A"
+  },
+  {
+    "optionKey": "wplp80_q40_a",
+    "signalKey": "stress_control",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "40|A"
+  },
+  {
+    "optionKey": "wplp80_q40_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "40|B"
+  },
+  {
+    "optionKey": "wplp80_q40_b",
+    "signalKey": "stress_scatter",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "40|B"
+  },
+  {
+    "optionKey": "wplp80_q40_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "40|C"
+  },
+  {
+    "optionKey": "wplp80_q40_c",
+    "signalKey": "stress_avoidance",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "40|C"
+  },
+  {
+    "optionKey": "wplp80_q40_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "40|D"
+  },
+  {
+    "optionKey": "wplp80_q40_d",
+    "signalKey": "stress_criticality",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "40|D"
+  },
+  {
+    "optionKey": "wplp80_q41_a",
+    "signalKey": "style_driver",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|A"
+  },
+  {
+    "optionKey": "wplp80_q41_a",
+    "signalKey": "lead_results",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|A"
+  },
+  {
+    "optionKey": "wplp80_q41_a",
+    "signalKey": "culture_market",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|A"
+  },
+  {
+    "optionKey": "wplp80_q41_a",
+    "signalKey": "stress_control",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|A"
+  },
+  {
+    "optionKey": "wplp80_q41_a",
+    "signalKey": "decision_agility",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|A"
+  },
+  {
+    "optionKey": "wplp80_q41_b",
+    "signalKey": "style_influencer",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|B"
+  },
+  {
+    "optionKey": "wplp80_q41_b",
+    "signalKey": "lead_vision",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|B"
+  },
+  {
+    "optionKey": "wplp80_q41_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|B"
+  },
+  {
+    "optionKey": "wplp80_q41_b",
+    "signalKey": "stress_scatter",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|B"
+  },
+  {
+    "optionKey": "wplp80_q41_b",
+    "signalKey": "decision_consensus",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|B"
+  },
+  {
+    "optionKey": "wplp80_q41_c",
+    "signalKey": "style_operator",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|C"
+  },
+  {
+    "optionKey": "wplp80_q41_c",
+    "signalKey": "lead_people",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|C"
+  },
+  {
+    "optionKey": "wplp80_q41_c",
+    "signalKey": "culture_clan",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|C"
+  },
+  {
+    "optionKey": "wplp80_q41_c",
+    "signalKey": "stress_avoidance",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|C"
+  },
+  {
+    "optionKey": "wplp80_q41_c",
+    "signalKey": "decision_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|C"
+  },
+  {
+    "optionKey": "wplp80_q41_d",
+    "signalKey": "style_analyst",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|D"
+  },
+  {
+    "optionKey": "wplp80_q41_d",
+    "signalKey": "lead_process",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|D"
+  },
+  {
+    "optionKey": "wplp80_q41_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|D"
+  },
+  {
+    "optionKey": "wplp80_q41_d",
+    "signalKey": "stress_criticality",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|D"
+  },
+  {
+    "optionKey": "wplp80_q41_d",
+    "signalKey": "decision_evidence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "41|D"
+  },
+  {
+    "optionKey": "wplp80_q42_a",
+    "signalKey": "style_driver",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|A"
+  },
+  {
+    "optionKey": "wplp80_q42_a",
+    "signalKey": "lead_results",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|A"
+  },
+  {
+    "optionKey": "wplp80_q42_a",
+    "signalKey": "culture_market",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|A"
+  },
+  {
+    "optionKey": "wplp80_q42_a",
+    "signalKey": "stress_control",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|A"
+  },
+  {
+    "optionKey": "wplp80_q42_a",
+    "signalKey": "decision_agility",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|A"
+  },
+  {
+    "optionKey": "wplp80_q42_b",
+    "signalKey": "style_influencer",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|B"
+  },
+  {
+    "optionKey": "wplp80_q42_b",
+    "signalKey": "lead_vision",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|B"
+  },
+  {
+    "optionKey": "wplp80_q42_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|B"
+  },
+  {
+    "optionKey": "wplp80_q42_b",
+    "signalKey": "stress_scatter",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|B"
+  },
+  {
+    "optionKey": "wplp80_q42_b",
+    "signalKey": "decision_consensus",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|B"
+  },
+  {
+    "optionKey": "wplp80_q42_c",
+    "signalKey": "style_operator",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|C"
+  },
+  {
+    "optionKey": "wplp80_q42_c",
+    "signalKey": "lead_people",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|C"
+  },
+  {
+    "optionKey": "wplp80_q42_c",
+    "signalKey": "culture_clan",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|C"
+  },
+  {
+    "optionKey": "wplp80_q42_c",
+    "signalKey": "stress_avoidance",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|C"
+  },
+  {
+    "optionKey": "wplp80_q42_c",
+    "signalKey": "decision_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|C"
+  },
+  {
+    "optionKey": "wplp80_q42_d",
+    "signalKey": "style_analyst",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|D"
+  },
+  {
+    "optionKey": "wplp80_q42_d",
+    "signalKey": "lead_process",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|D"
+  },
+  {
+    "optionKey": "wplp80_q42_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|D"
+  },
+  {
+    "optionKey": "wplp80_q42_d",
+    "signalKey": "stress_criticality",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|D"
+  },
+  {
+    "optionKey": "wplp80_q42_d",
+    "signalKey": "decision_evidence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "42|D"
+  },
+  {
+    "optionKey": "wplp80_q43_a",
+    "signalKey": "style_driver",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|A"
+  },
+  {
+    "optionKey": "wplp80_q43_a",
+    "signalKey": "lead_results",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|A"
+  },
+  {
+    "optionKey": "wplp80_q43_a",
+    "signalKey": "culture_market",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|A"
+  },
+  {
+    "optionKey": "wplp80_q43_a",
+    "signalKey": "stress_control",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|A"
+  },
+  {
+    "optionKey": "wplp80_q43_a",
+    "signalKey": "decision_agility",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|A"
+  },
+  {
+    "optionKey": "wplp80_q43_b",
+    "signalKey": "style_influencer",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|B"
+  },
+  {
+    "optionKey": "wplp80_q43_b",
+    "signalKey": "lead_vision",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|B"
+  },
+  {
+    "optionKey": "wplp80_q43_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|B"
+  },
+  {
+    "optionKey": "wplp80_q43_b",
+    "signalKey": "stress_scatter",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|B"
+  },
+  {
+    "optionKey": "wplp80_q43_b",
+    "signalKey": "decision_consensus",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|B"
+  },
+  {
+    "optionKey": "wplp80_q43_c",
+    "signalKey": "style_operator",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|C"
+  },
+  {
+    "optionKey": "wplp80_q43_c",
+    "signalKey": "lead_people",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|C"
+  },
+  {
+    "optionKey": "wplp80_q43_c",
+    "signalKey": "culture_clan",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|C"
+  },
+  {
+    "optionKey": "wplp80_q43_c",
+    "signalKey": "stress_avoidance",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|C"
+  },
+  {
+    "optionKey": "wplp80_q43_c",
+    "signalKey": "decision_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|C"
+  },
+  {
+    "optionKey": "wplp80_q43_d",
+    "signalKey": "style_analyst",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|D"
+  },
+  {
+    "optionKey": "wplp80_q43_d",
+    "signalKey": "lead_process",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|D"
+  },
+  {
+    "optionKey": "wplp80_q43_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|D"
+  },
+  {
+    "optionKey": "wplp80_q43_d",
+    "signalKey": "stress_criticality",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|D"
+  },
+  {
+    "optionKey": "wplp80_q43_d",
+    "signalKey": "decision_evidence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "43|D"
+  },
+  {
+    "optionKey": "wplp80_q44_a",
+    "signalKey": "style_driver",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|A"
+  },
+  {
+    "optionKey": "wplp80_q44_a",
+    "signalKey": "lead_results",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|A"
+  },
+  {
+    "optionKey": "wplp80_q44_a",
+    "signalKey": "culture_market",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|A"
+  },
+  {
+    "optionKey": "wplp80_q44_a",
+    "signalKey": "stress_control",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|A"
+  },
+  {
+    "optionKey": "wplp80_q44_a",
+    "signalKey": "decision_agility",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|A"
+  },
+  {
+    "optionKey": "wplp80_q44_b",
+    "signalKey": "style_influencer",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|B"
+  },
+  {
+    "optionKey": "wplp80_q44_b",
+    "signalKey": "lead_vision",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|B"
+  },
+  {
+    "optionKey": "wplp80_q44_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|B"
+  },
+  {
+    "optionKey": "wplp80_q44_b",
+    "signalKey": "stress_scatter",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|B"
+  },
+  {
+    "optionKey": "wplp80_q44_b",
+    "signalKey": "decision_consensus",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|B"
+  },
+  {
+    "optionKey": "wplp80_q44_c",
+    "signalKey": "style_operator",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|C"
+  },
+  {
+    "optionKey": "wplp80_q44_c",
+    "signalKey": "lead_people",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|C"
+  },
+  {
+    "optionKey": "wplp80_q44_c",
+    "signalKey": "culture_clan",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|C"
+  },
+  {
+    "optionKey": "wplp80_q44_c",
+    "signalKey": "stress_avoidance",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|C"
+  },
+  {
+    "optionKey": "wplp80_q44_c",
+    "signalKey": "decision_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|C"
+  },
+  {
+    "optionKey": "wplp80_q44_d",
+    "signalKey": "style_analyst",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|D"
+  },
+  {
+    "optionKey": "wplp80_q44_d",
+    "signalKey": "lead_process",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|D"
+  },
+  {
+    "optionKey": "wplp80_q44_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|D"
+  },
+  {
+    "optionKey": "wplp80_q44_d",
+    "signalKey": "stress_criticality",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|D"
+  },
+  {
+    "optionKey": "wplp80_q44_d",
+    "signalKey": "decision_evidence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "44|D"
+  },
+  {
+    "optionKey": "wplp80_q45_a",
+    "signalKey": "style_driver",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|A"
+  },
+  {
+    "optionKey": "wplp80_q45_a",
+    "signalKey": "lead_results",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|A"
+  },
+  {
+    "optionKey": "wplp80_q45_a",
+    "signalKey": "culture_market",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|A"
+  },
+  {
+    "optionKey": "wplp80_q45_a",
+    "signalKey": "stress_control",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|A"
+  },
+  {
+    "optionKey": "wplp80_q45_a",
+    "signalKey": "decision_agility",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|A"
+  },
+  {
+    "optionKey": "wplp80_q45_b",
+    "signalKey": "style_influencer",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|B"
+  },
+  {
+    "optionKey": "wplp80_q45_b",
+    "signalKey": "lead_vision",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|B"
+  },
+  {
+    "optionKey": "wplp80_q45_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|B"
+  },
+  {
+    "optionKey": "wplp80_q45_b",
+    "signalKey": "stress_scatter",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|B"
+  },
+  {
+    "optionKey": "wplp80_q45_b",
+    "signalKey": "decision_consensus",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|B"
+  },
+  {
+    "optionKey": "wplp80_q45_c",
+    "signalKey": "style_operator",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|C"
+  },
+  {
+    "optionKey": "wplp80_q45_c",
+    "signalKey": "lead_people",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|C"
+  },
+  {
+    "optionKey": "wplp80_q45_c",
+    "signalKey": "culture_clan",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|C"
+  },
+  {
+    "optionKey": "wplp80_q45_c",
+    "signalKey": "stress_avoidance",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|C"
+  },
+  {
+    "optionKey": "wplp80_q45_c",
+    "signalKey": "decision_stability",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|C"
+  },
+  {
+    "optionKey": "wplp80_q45_d",
+    "signalKey": "style_analyst",
+    "weight": 1.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|D"
+  },
+  {
+    "optionKey": "wplp80_q45_d",
+    "signalKey": "lead_process",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|D"
+  },
+  {
+    "optionKey": "wplp80_q45_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 1,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|D"
+  },
+  {
+    "optionKey": "wplp80_q45_d",
+    "signalKey": "stress_criticality",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|D"
+  },
+  {
+    "optionKey": "wplp80_q45_d",
+    "signalKey": "decision_evidence",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "45|D"
+  },
+  {
+    "optionKey": "wplp80_q46_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "46|A"
+  },
+  {
+    "optionKey": "wplp80_q46_a",
+    "signalKey": "lead_results",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "46|A"
+  },
+  {
+    "optionKey": "wplp80_q46_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "46|B"
+  },
+  {
+    "optionKey": "wplp80_q46_b",
+    "signalKey": "lead_vision",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "46|B"
+  },
+  {
+    "optionKey": "wplp80_q46_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "46|C"
+  },
+  {
+    "optionKey": "wplp80_q46_c",
+    "signalKey": "lead_people",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "46|C"
+  },
+  {
+    "optionKey": "wplp80_q46_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "46|D"
+  },
+  {
+    "optionKey": "wplp80_q46_d",
+    "signalKey": "lead_process",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "46|D"
+  },
+  {
+    "optionKey": "wplp80_q47_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "47|A"
+  },
+  {
+    "optionKey": "wplp80_q47_a",
+    "signalKey": "lead_results",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "47|A"
+  },
+  {
+    "optionKey": "wplp80_q47_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "47|B"
+  },
+  {
+    "optionKey": "wplp80_q47_b",
+    "signalKey": "lead_vision",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "47|B"
+  },
+  {
+    "optionKey": "wplp80_q47_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "47|C"
+  },
+  {
+    "optionKey": "wplp80_q47_c",
+    "signalKey": "lead_people",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "47|C"
+  },
+  {
+    "optionKey": "wplp80_q47_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "47|D"
+  },
+  {
+    "optionKey": "wplp80_q47_d",
+    "signalKey": "lead_process",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "47|D"
+  },
+  {
+    "optionKey": "wplp80_q48_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "48|A"
+  },
+  {
+    "optionKey": "wplp80_q48_a",
+    "signalKey": "lead_results",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "48|A"
+  },
+  {
+    "optionKey": "wplp80_q48_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "48|B"
+  },
+  {
+    "optionKey": "wplp80_q48_b",
+    "signalKey": "lead_vision",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "48|B"
+  },
+  {
+    "optionKey": "wplp80_q48_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "48|C"
+  },
+  {
+    "optionKey": "wplp80_q48_c",
+    "signalKey": "lead_people",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "48|C"
+  },
+  {
+    "optionKey": "wplp80_q48_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "48|D"
+  },
+  {
+    "optionKey": "wplp80_q48_d",
+    "signalKey": "lead_process",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "48|D"
+  },
+  {
+    "optionKey": "wplp80_q49_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "49|A"
+  },
+  {
+    "optionKey": "wplp80_q49_a",
+    "signalKey": "lead_results",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "49|A"
+  },
+  {
+    "optionKey": "wplp80_q49_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "49|B"
+  },
+  {
+    "optionKey": "wplp80_q49_b",
+    "signalKey": "lead_vision",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "49|B"
+  },
+  {
+    "optionKey": "wplp80_q49_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "49|C"
+  },
+  {
+    "optionKey": "wplp80_q49_c",
+    "signalKey": "lead_people",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "49|C"
+  },
+  {
+    "optionKey": "wplp80_q49_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "49|D"
+  },
+  {
+    "optionKey": "wplp80_q49_d",
+    "signalKey": "lead_process",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "49|D"
+  },
+  {
+    "optionKey": "wplp80_q50_a",
+    "signalKey": "style_driver",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "50|A"
+  },
+  {
+    "optionKey": "wplp80_q50_a",
+    "signalKey": "lead_results",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "50|A"
+  },
+  {
+    "optionKey": "wplp80_q50_b",
+    "signalKey": "style_influencer",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "50|B"
+  },
+  {
+    "optionKey": "wplp80_q50_b",
+    "signalKey": "lead_vision",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "50|B"
+  },
+  {
+    "optionKey": "wplp80_q50_c",
+    "signalKey": "style_operator",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "50|C"
+  },
+  {
+    "optionKey": "wplp80_q50_c",
+    "signalKey": "lead_people",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "50|C"
+  },
+  {
+    "optionKey": "wplp80_q50_d",
+    "signalKey": "style_analyst",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "50|D"
+  },
+  {
+    "optionKey": "wplp80_q50_d",
+    "signalKey": "lead_process",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "50|D"
+  },
+  {
+    "optionKey": "wplp80_q51_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "51|A"
+  },
+  {
+    "optionKey": "wplp80_q51_a",
+    "signalKey": "culture_market",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "51|A"
+  },
+  {
+    "optionKey": "wplp80_q51_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "51|B"
+  },
+  {
+    "optionKey": "wplp80_q51_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "51|B"
+  },
+  {
+    "optionKey": "wplp80_q51_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "51|C"
+  },
+  {
+    "optionKey": "wplp80_q51_c",
+    "signalKey": "culture_clan",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "51|C"
+  },
+  {
+    "optionKey": "wplp80_q51_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "51|D"
+  },
+  {
+    "optionKey": "wplp80_q51_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "51|D"
+  },
+  {
+    "optionKey": "wplp80_q52_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "52|A"
+  },
+  {
+    "optionKey": "wplp80_q52_a",
+    "signalKey": "culture_market",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "52|A"
+  },
+  {
+    "optionKey": "wplp80_q52_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "52|B"
+  },
+  {
+    "optionKey": "wplp80_q52_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "52|B"
+  },
+  {
+    "optionKey": "wplp80_q52_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "52|C"
+  },
+  {
+    "optionKey": "wplp80_q52_c",
+    "signalKey": "culture_clan",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "52|C"
+  },
+  {
+    "optionKey": "wplp80_q52_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "52|D"
+  },
+  {
+    "optionKey": "wplp80_q52_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "52|D"
+  },
+  {
+    "optionKey": "wplp80_q53_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "53|A"
+  },
+  {
+    "optionKey": "wplp80_q53_a",
+    "signalKey": "culture_market",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "53|A"
+  },
+  {
+    "optionKey": "wplp80_q53_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "53|B"
+  },
+  {
+    "optionKey": "wplp80_q53_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "53|B"
+  },
+  {
+    "optionKey": "wplp80_q53_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "53|C"
+  },
+  {
+    "optionKey": "wplp80_q53_c",
+    "signalKey": "culture_clan",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "53|C"
+  },
+  {
+    "optionKey": "wplp80_q53_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "53|D"
+  },
+  {
+    "optionKey": "wplp80_q53_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "53|D"
+  },
+  {
+    "optionKey": "wplp80_q54_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "54|A"
+  },
+  {
+    "optionKey": "wplp80_q54_a",
+    "signalKey": "culture_market",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "54|A"
+  },
+  {
+    "optionKey": "wplp80_q54_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "54|B"
+  },
+  {
+    "optionKey": "wplp80_q54_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "54|B"
+  },
+  {
+    "optionKey": "wplp80_q54_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "54|C"
+  },
+  {
+    "optionKey": "wplp80_q54_c",
+    "signalKey": "culture_clan",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "54|C"
+  },
+  {
+    "optionKey": "wplp80_q54_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "54|D"
+  },
+  {
+    "optionKey": "wplp80_q54_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "54|D"
+  },
+  {
+    "optionKey": "wplp80_q55_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "55|A"
+  },
+  {
+    "optionKey": "wplp80_q55_a",
+    "signalKey": "culture_market",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "55|A"
+  },
+  {
+    "optionKey": "wplp80_q55_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "55|B"
+  },
+  {
+    "optionKey": "wplp80_q55_b",
+    "signalKey": "culture_adhocracy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "55|B"
+  },
+  {
+    "optionKey": "wplp80_q55_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "55|C"
+  },
+  {
+    "optionKey": "wplp80_q55_c",
+    "signalKey": "culture_clan",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "55|C"
+  },
+  {
+    "optionKey": "wplp80_q55_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "55|D"
+  },
+  {
+    "optionKey": "wplp80_q55_d",
+    "signalKey": "culture_hierarchy",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "55|D"
+  },
+  {
+    "optionKey": "wplp80_q56_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|A"
+  },
+  {
+    "optionKey": "wplp80_q56_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|A"
+  },
+  {
+    "optionKey": "wplp80_q56_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|A"
+  },
+  {
+    "optionKey": "wplp80_q56_a",
+    "signalKey": "role_commercial_leadership",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|A"
+  },
+  {
+    "optionKey": "wplp80_q56_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|B"
+  },
+  {
+    "optionKey": "wplp80_q56_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|B"
+  },
+  {
+    "optionKey": "wplp80_q56_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|B"
+  },
+  {
+    "optionKey": "wplp80_q56_b",
+    "signalKey": "role_business_development",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|B"
+  },
+  {
+    "optionKey": "wplp80_q56_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|C"
+  },
+  {
+    "optionKey": "wplp80_q56_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|C"
+  },
+  {
+    "optionKey": "wplp80_q56_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|C"
+  },
+  {
+    "optionKey": "wplp80_q56_c",
+    "signalKey": "role_operations_management",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|C"
+  },
+  {
+    "optionKey": "wplp80_q56_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|D"
+  },
+  {
+    "optionKey": "wplp80_q56_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|D"
+  },
+  {
+    "optionKey": "wplp80_q56_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|D"
+  },
+  {
+    "optionKey": "wplp80_q56_d",
+    "signalKey": "role_technical_specialist",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "56|D"
+  },
+  {
+    "optionKey": "wplp80_q57_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|A"
+  },
+  {
+    "optionKey": "wplp80_q57_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|A"
+  },
+  {
+    "optionKey": "wplp80_q57_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|A"
+  },
+  {
+    "optionKey": "wplp80_q57_a",
+    "signalKey": "role_commercial_leadership",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|A"
+  },
+  {
+    "optionKey": "wplp80_q57_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|B"
+  },
+  {
+    "optionKey": "wplp80_q57_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|B"
+  },
+  {
+    "optionKey": "wplp80_q57_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|B"
+  },
+  {
+    "optionKey": "wplp80_q57_b",
+    "signalKey": "role_business_development",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|B"
+  },
+  {
+    "optionKey": "wplp80_q57_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|C"
+  },
+  {
+    "optionKey": "wplp80_q57_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|C"
+  },
+  {
+    "optionKey": "wplp80_q57_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|C"
+  },
+  {
+    "optionKey": "wplp80_q57_c",
+    "signalKey": "role_operations_management",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|C"
+  },
+  {
+    "optionKey": "wplp80_q57_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|D"
+  },
+  {
+    "optionKey": "wplp80_q57_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|D"
+  },
+  {
+    "optionKey": "wplp80_q57_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|D"
+  },
+  {
+    "optionKey": "wplp80_q57_d",
+    "signalKey": "role_technical_specialist",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "57|D"
+  },
+  {
+    "optionKey": "wplp80_q58_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|A"
+  },
+  {
+    "optionKey": "wplp80_q58_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|A"
+  },
+  {
+    "optionKey": "wplp80_q58_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|A"
+  },
+  {
+    "optionKey": "wplp80_q58_a",
+    "signalKey": "role_commercial_leadership",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|A"
+  },
+  {
+    "optionKey": "wplp80_q58_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|B"
+  },
+  {
+    "optionKey": "wplp80_q58_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|B"
+  },
+  {
+    "optionKey": "wplp80_q58_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|B"
+  },
+  {
+    "optionKey": "wplp80_q58_b",
+    "signalKey": "role_business_development",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|B"
+  },
+  {
+    "optionKey": "wplp80_q58_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|C"
+  },
+  {
+    "optionKey": "wplp80_q58_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|C"
+  },
+  {
+    "optionKey": "wplp80_q58_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|C"
+  },
+  {
+    "optionKey": "wplp80_q58_c",
+    "signalKey": "role_operations_management",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|C"
+  },
+  {
+    "optionKey": "wplp80_q58_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|D"
+  },
+  {
+    "optionKey": "wplp80_q58_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|D"
+  },
+  {
+    "optionKey": "wplp80_q58_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|D"
+  },
+  {
+    "optionKey": "wplp80_q58_d",
+    "signalKey": "role_technical_specialist",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "58|D"
+  },
+  {
+    "optionKey": "wplp80_q59_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|A"
+  },
+  {
+    "optionKey": "wplp80_q59_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|A"
+  },
+  {
+    "optionKey": "wplp80_q59_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|A"
+  },
+  {
+    "optionKey": "wplp80_q59_a",
+    "signalKey": "role_commercial_leadership",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|A"
+  },
+  {
+    "optionKey": "wplp80_q59_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|B"
+  },
+  {
+    "optionKey": "wplp80_q59_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|B"
+  },
+  {
+    "optionKey": "wplp80_q59_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|B"
+  },
+  {
+    "optionKey": "wplp80_q59_b",
+    "signalKey": "role_business_development",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|B"
+  },
+  {
+    "optionKey": "wplp80_q59_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|C"
+  },
+  {
+    "optionKey": "wplp80_q59_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|C"
+  },
+  {
+    "optionKey": "wplp80_q59_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|C"
+  },
+  {
+    "optionKey": "wplp80_q59_c",
+    "signalKey": "role_operations_management",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|C"
+  },
+  {
+    "optionKey": "wplp80_q59_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|D"
+  },
+  {
+    "optionKey": "wplp80_q59_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|D"
+  },
+  {
+    "optionKey": "wplp80_q59_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|D"
+  },
+  {
+    "optionKey": "wplp80_q59_d",
+    "signalKey": "role_technical_specialist",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "59|D"
+  },
+  {
+    "optionKey": "wplp80_q60_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|A"
+  },
+  {
+    "optionKey": "wplp80_q60_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|A"
+  },
+  {
+    "optionKey": "wplp80_q60_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|A"
+  },
+  {
+    "optionKey": "wplp80_q60_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|B"
+  },
+  {
+    "optionKey": "wplp80_q60_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|B"
+  },
+  {
+    "optionKey": "wplp80_q60_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|B"
+  },
+  {
+    "optionKey": "wplp80_q60_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|C"
+  },
+  {
+    "optionKey": "wplp80_q60_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|C"
+  },
+  {
+    "optionKey": "wplp80_q60_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|C"
+  },
+  {
+    "optionKey": "wplp80_q60_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|D"
+  },
+  {
+    "optionKey": "wplp80_q60_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|D"
+  },
+  {
+    "optionKey": "wplp80_q60_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "60|D"
+  },
+  {
+    "optionKey": "wplp80_q61_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|A"
+  },
+  {
+    "optionKey": "wplp80_q61_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|A"
+  },
+  {
+    "optionKey": "wplp80_q61_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|A"
+  },
+  {
+    "optionKey": "wplp80_q61_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|B"
+  },
+  {
+    "optionKey": "wplp80_q61_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|B"
+  },
+  {
+    "optionKey": "wplp80_q61_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|B"
+  },
+  {
+    "optionKey": "wplp80_q61_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|C"
+  },
+  {
+    "optionKey": "wplp80_q61_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|C"
+  },
+  {
+    "optionKey": "wplp80_q61_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|C"
+  },
+  {
+    "optionKey": "wplp80_q61_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|D"
+  },
+  {
+    "optionKey": "wplp80_q61_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|D"
+  },
+  {
+    "optionKey": "wplp80_q61_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "61|D"
+  },
+  {
+    "optionKey": "wplp80_q62_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|A"
+  },
+  {
+    "optionKey": "wplp80_q62_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|A"
+  },
+  {
+    "optionKey": "wplp80_q62_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|A"
+  },
+  {
+    "optionKey": "wplp80_q62_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|B"
+  },
+  {
+    "optionKey": "wplp80_q62_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|B"
+  },
+  {
+    "optionKey": "wplp80_q62_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|B"
+  },
+  {
+    "optionKey": "wplp80_q62_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|C"
+  },
+  {
+    "optionKey": "wplp80_q62_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|C"
+  },
+  {
+    "optionKey": "wplp80_q62_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|C"
+  },
+  {
+    "optionKey": "wplp80_q62_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|D"
+  },
+  {
+    "optionKey": "wplp80_q62_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|D"
+  },
+  {
+    "optionKey": "wplp80_q62_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "62|D"
+  },
+  {
+    "optionKey": "wplp80_q63_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|A"
+  },
+  {
+    "optionKey": "wplp80_q63_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|A"
+  },
+  {
+    "optionKey": "wplp80_q63_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|A"
+  },
+  {
+    "optionKey": "wplp80_q63_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|B"
+  },
+  {
+    "optionKey": "wplp80_q63_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|B"
+  },
+  {
+    "optionKey": "wplp80_q63_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|B"
+  },
+  {
+    "optionKey": "wplp80_q63_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|C"
+  },
+  {
+    "optionKey": "wplp80_q63_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|C"
+  },
+  {
+    "optionKey": "wplp80_q63_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|C"
+  },
+  {
+    "optionKey": "wplp80_q63_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|D"
+  },
+  {
+    "optionKey": "wplp80_q63_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|D"
+  },
+  {
+    "optionKey": "wplp80_q63_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "63|D"
+  },
+  {
+    "optionKey": "wplp80_q64_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|A"
+  },
+  {
+    "optionKey": "wplp80_q64_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|A"
+  },
+  {
+    "optionKey": "wplp80_q64_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|A"
+  },
+  {
+    "optionKey": "wplp80_q64_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|B"
+  },
+  {
+    "optionKey": "wplp80_q64_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|B"
+  },
+  {
+    "optionKey": "wplp80_q64_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|B"
+  },
+  {
+    "optionKey": "wplp80_q64_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|C"
+  },
+  {
+    "optionKey": "wplp80_q64_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|C"
+  },
+  {
+    "optionKey": "wplp80_q64_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|C"
+  },
+  {
+    "optionKey": "wplp80_q64_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|D"
+  },
+  {
+    "optionKey": "wplp80_q64_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|D"
+  },
+  {
+    "optionKey": "wplp80_q64_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "64|D"
+  },
+  {
+    "optionKey": "wplp80_q65_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|A"
+  },
+  {
+    "optionKey": "wplp80_q65_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|A"
+  },
+  {
+    "optionKey": "wplp80_q65_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|A"
+  },
+  {
+    "optionKey": "wplp80_q65_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|B"
+  },
+  {
+    "optionKey": "wplp80_q65_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|B"
+  },
+  {
+    "optionKey": "wplp80_q65_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|B"
+  },
+  {
+    "optionKey": "wplp80_q65_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|C"
+  },
+  {
+    "optionKey": "wplp80_q65_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|C"
+  },
+  {
+    "optionKey": "wplp80_q65_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|C"
+  },
+  {
+    "optionKey": "wplp80_q65_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|D"
+  },
+  {
+    "optionKey": "wplp80_q65_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|D"
+  },
+  {
+    "optionKey": "wplp80_q65_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "65|D"
+  },
+  {
+    "optionKey": "wplp80_q66_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|A"
+  },
+  {
+    "optionKey": "wplp80_q66_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|A"
+  },
+  {
+    "optionKey": "wplp80_q66_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|A"
+  },
+  {
+    "optionKey": "wplp80_q66_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|B"
+  },
+  {
+    "optionKey": "wplp80_q66_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|B"
+  },
+  {
+    "optionKey": "wplp80_q66_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|B"
+  },
+  {
+    "optionKey": "wplp80_q66_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|C"
+  },
+  {
+    "optionKey": "wplp80_q66_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|C"
+  },
+  {
+    "optionKey": "wplp80_q66_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|C"
+  },
+  {
+    "optionKey": "wplp80_q66_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|D"
+  },
+  {
+    "optionKey": "wplp80_q66_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|D"
+  },
+  {
+    "optionKey": "wplp80_q66_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "66|D"
+  },
+  {
+    "optionKey": "wplp80_q67_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|A"
+  },
+  {
+    "optionKey": "wplp80_q67_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|A"
+  },
+  {
+    "optionKey": "wplp80_q67_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|A"
+  },
+  {
+    "optionKey": "wplp80_q67_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|B"
+  },
+  {
+    "optionKey": "wplp80_q67_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|B"
+  },
+  {
+    "optionKey": "wplp80_q67_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|B"
+  },
+  {
+    "optionKey": "wplp80_q67_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|C"
+  },
+  {
+    "optionKey": "wplp80_q67_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|C"
+  },
+  {
+    "optionKey": "wplp80_q67_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|C"
+  },
+  {
+    "optionKey": "wplp80_q67_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|D"
+  },
+  {
+    "optionKey": "wplp80_q67_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|D"
+  },
+  {
+    "optionKey": "wplp80_q67_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "67|D"
+  },
+  {
+    "optionKey": "wplp80_q68_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|A"
+  },
+  {
+    "optionKey": "wplp80_q68_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|A"
+  },
+  {
+    "optionKey": "wplp80_q68_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|A"
+  },
+  {
+    "optionKey": "wplp80_q68_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|B"
+  },
+  {
+    "optionKey": "wplp80_q68_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|B"
+  },
+  {
+    "optionKey": "wplp80_q68_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|B"
+  },
+  {
+    "optionKey": "wplp80_q68_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|C"
+  },
+  {
+    "optionKey": "wplp80_q68_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|C"
+  },
+  {
+    "optionKey": "wplp80_q68_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|C"
+  },
+  {
+    "optionKey": "wplp80_q68_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|D"
+  },
+  {
+    "optionKey": "wplp80_q68_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|D"
+  },
+  {
+    "optionKey": "wplp80_q68_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "68|D"
+  },
+  {
+    "optionKey": "wplp80_q69_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|A"
+  },
+  {
+    "optionKey": "wplp80_q69_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|A"
+  },
+  {
+    "optionKey": "wplp80_q69_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|A"
+  },
+  {
+    "optionKey": "wplp80_q69_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|B"
+  },
+  {
+    "optionKey": "wplp80_q69_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|B"
+  },
+  {
+    "optionKey": "wplp80_q69_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|B"
+  },
+  {
+    "optionKey": "wplp80_q69_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|C"
+  },
+  {
+    "optionKey": "wplp80_q69_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|C"
+  },
+  {
+    "optionKey": "wplp80_q69_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|C"
+  },
+  {
+    "optionKey": "wplp80_q69_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|D"
+  },
+  {
+    "optionKey": "wplp80_q69_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|D"
+  },
+  {
+    "optionKey": "wplp80_q69_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "69|D"
+  },
+  {
+    "optionKey": "wplp80_q70_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|A"
+  },
+  {
+    "optionKey": "wplp80_q70_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|A"
+  },
+  {
+    "optionKey": "wplp80_q70_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|A"
+  },
+  {
+    "optionKey": "wplp80_q70_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|B"
+  },
+  {
+    "optionKey": "wplp80_q70_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|B"
+  },
+  {
+    "optionKey": "wplp80_q70_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|B"
+  },
+  {
+    "optionKey": "wplp80_q70_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|C"
+  },
+  {
+    "optionKey": "wplp80_q70_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|C"
+  },
+  {
+    "optionKey": "wplp80_q70_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|C"
+  },
+  {
+    "optionKey": "wplp80_q70_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|D"
+  },
+  {
+    "optionKey": "wplp80_q70_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|D"
+  },
+  {
+    "optionKey": "wplp80_q70_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "70|D"
+  },
+  {
+    "optionKey": "wplp80_q71_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|A"
+  },
+  {
+    "optionKey": "wplp80_q71_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|A"
+  },
+  {
+    "optionKey": "wplp80_q71_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|A"
+  },
+  {
+    "optionKey": "wplp80_q71_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|B"
+  },
+  {
+    "optionKey": "wplp80_q71_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|B"
+  },
+  {
+    "optionKey": "wplp80_q71_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|B"
+  },
+  {
+    "optionKey": "wplp80_q71_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|C"
+  },
+  {
+    "optionKey": "wplp80_q71_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|C"
+  },
+  {
+    "optionKey": "wplp80_q71_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|C"
+  },
+  {
+    "optionKey": "wplp80_q71_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|D"
+  },
+  {
+    "optionKey": "wplp80_q71_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|D"
+  },
+  {
+    "optionKey": "wplp80_q71_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "71|D"
+  },
+  {
+    "optionKey": "wplp80_q72_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|A"
+  },
+  {
+    "optionKey": "wplp80_q72_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|A"
+  },
+  {
+    "optionKey": "wplp80_q72_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|A"
+  },
+  {
+    "optionKey": "wplp80_q72_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|B"
+  },
+  {
+    "optionKey": "wplp80_q72_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|B"
+  },
+  {
+    "optionKey": "wplp80_q72_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|B"
+  },
+  {
+    "optionKey": "wplp80_q72_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|C"
+  },
+  {
+    "optionKey": "wplp80_q72_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|C"
+  },
+  {
+    "optionKey": "wplp80_q72_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|C"
+  },
+  {
+    "optionKey": "wplp80_q72_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|D"
+  },
+  {
+    "optionKey": "wplp80_q72_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|D"
+  },
+  {
+    "optionKey": "wplp80_q72_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "72|D"
+  },
+  {
+    "optionKey": "wplp80_q73_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|A"
+  },
+  {
+    "optionKey": "wplp80_q73_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|A"
+  },
+  {
+    "optionKey": "wplp80_q73_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|A"
+  },
+  {
+    "optionKey": "wplp80_q73_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|B"
+  },
+  {
+    "optionKey": "wplp80_q73_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|B"
+  },
+  {
+    "optionKey": "wplp80_q73_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|B"
+  },
+  {
+    "optionKey": "wplp80_q73_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|C"
+  },
+  {
+    "optionKey": "wplp80_q73_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|C"
+  },
+  {
+    "optionKey": "wplp80_q73_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|C"
+  },
+  {
+    "optionKey": "wplp80_q73_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|D"
+  },
+  {
+    "optionKey": "wplp80_q73_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|D"
+  },
+  {
+    "optionKey": "wplp80_q73_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "73|D"
+  },
+  {
+    "optionKey": "wplp80_q74_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|A"
+  },
+  {
+    "optionKey": "wplp80_q74_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|A"
+  },
+  {
+    "optionKey": "wplp80_q74_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|A"
+  },
+  {
+    "optionKey": "wplp80_q74_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|B"
+  },
+  {
+    "optionKey": "wplp80_q74_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|B"
+  },
+  {
+    "optionKey": "wplp80_q74_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|B"
+  },
+  {
+    "optionKey": "wplp80_q74_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|C"
+  },
+  {
+    "optionKey": "wplp80_q74_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|C"
+  },
+  {
+    "optionKey": "wplp80_q74_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|C"
+  },
+  {
+    "optionKey": "wplp80_q74_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|D"
+  },
+  {
+    "optionKey": "wplp80_q74_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|D"
+  },
+  {
+    "optionKey": "wplp80_q74_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "74|D"
+  },
+  {
+    "optionKey": "wplp80_q75_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|A"
+  },
+  {
+    "optionKey": "wplp80_q75_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|A"
+  },
+  {
+    "optionKey": "wplp80_q75_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|A"
+  },
+  {
+    "optionKey": "wplp80_q75_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|B"
+  },
+  {
+    "optionKey": "wplp80_q75_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|B"
+  },
+  {
+    "optionKey": "wplp80_q75_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|B"
+  },
+  {
+    "optionKey": "wplp80_q75_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|C"
+  },
+  {
+    "optionKey": "wplp80_q75_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|C"
+  },
+  {
+    "optionKey": "wplp80_q75_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|C"
+  },
+  {
+    "optionKey": "wplp80_q75_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|D"
+  },
+  {
+    "optionKey": "wplp80_q75_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|D"
+  },
+  {
+    "optionKey": "wplp80_q75_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "75|D"
+  },
+  {
+    "optionKey": "wplp80_q76_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|A"
+  },
+  {
+    "optionKey": "wplp80_q76_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|A"
+  },
+  {
+    "optionKey": "wplp80_q76_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|A"
+  },
+  {
+    "optionKey": "wplp80_q76_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|B"
+  },
+  {
+    "optionKey": "wplp80_q76_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|B"
+  },
+  {
+    "optionKey": "wplp80_q76_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|B"
+  },
+  {
+    "optionKey": "wplp80_q76_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|C"
+  },
+  {
+    "optionKey": "wplp80_q76_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|C"
+  },
+  {
+    "optionKey": "wplp80_q76_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|C"
+  },
+  {
+    "optionKey": "wplp80_q76_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|D"
+  },
+  {
+    "optionKey": "wplp80_q76_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|D"
+  },
+  {
+    "optionKey": "wplp80_q76_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "76|D"
+  },
+  {
+    "optionKey": "wplp80_q77_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|A"
+  },
+  {
+    "optionKey": "wplp80_q77_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|A"
+  },
+  {
+    "optionKey": "wplp80_q77_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|A"
+  },
+  {
+    "optionKey": "wplp80_q77_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|B"
+  },
+  {
+    "optionKey": "wplp80_q77_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|B"
+  },
+  {
+    "optionKey": "wplp80_q77_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|B"
+  },
+  {
+    "optionKey": "wplp80_q77_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|C"
+  },
+  {
+    "optionKey": "wplp80_q77_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|C"
+  },
+  {
+    "optionKey": "wplp80_q77_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|C"
+  },
+  {
+    "optionKey": "wplp80_q77_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|D"
+  },
+  {
+    "optionKey": "wplp80_q77_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|D"
+  },
+  {
+    "optionKey": "wplp80_q77_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": true,
+    "sourceWeightKey": "77|D"
+  },
+  {
+    "optionKey": "wplp80_q78_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|A"
+  },
+  {
+    "optionKey": "wplp80_q78_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|A"
+  },
+  {
+    "optionKey": "wplp80_q78_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|A"
+  },
+  {
+    "optionKey": "wplp80_q78_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|B"
+  },
+  {
+    "optionKey": "wplp80_q78_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|B"
+  },
+  {
+    "optionKey": "wplp80_q78_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|B"
+  },
+  {
+    "optionKey": "wplp80_q78_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|C"
+  },
+  {
+    "optionKey": "wplp80_q78_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|C"
+  },
+  {
+    "optionKey": "wplp80_q78_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|C"
+  },
+  {
+    "optionKey": "wplp80_q78_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|D"
+  },
+  {
+    "optionKey": "wplp80_q78_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|D"
+  },
+  {
+    "optionKey": "wplp80_q78_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "78|D"
+  },
+  {
+    "optionKey": "wplp80_q79_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|A"
+  },
+  {
+    "optionKey": "wplp80_q79_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|A"
+  },
+  {
+    "optionKey": "wplp80_q79_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|A"
+  },
+  {
+    "optionKey": "wplp80_q79_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|B"
+  },
+  {
+    "optionKey": "wplp80_q79_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|B"
+  },
+  {
+    "optionKey": "wplp80_q79_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|B"
+  },
+  {
+    "optionKey": "wplp80_q79_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|C"
+  },
+  {
+    "optionKey": "wplp80_q79_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|C"
+  },
+  {
+    "optionKey": "wplp80_q79_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|C"
+  },
+  {
+    "optionKey": "wplp80_q79_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|D"
+  },
+  {
+    "optionKey": "wplp80_q79_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|D"
+  },
+  {
+    "optionKey": "wplp80_q79_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "79|D"
+  },
+  {
+    "optionKey": "wplp80_q80_a",
+    "signalKey": "style_driver",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|A"
+  },
+  {
+    "optionKey": "wplp80_q80_a",
+    "signalKey": "mot_achievement",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|A"
+  },
+  {
+    "optionKey": "wplp80_q80_a",
+    "signalKey": "lead_results",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|A"
+  },
+  {
+    "optionKey": "wplp80_q80_b",
+    "signalKey": "style_influencer",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|B"
+  },
+  {
+    "optionKey": "wplp80_q80_b",
+    "signalKey": "mot_influence",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|B"
+  },
+  {
+    "optionKey": "wplp80_q80_b",
+    "signalKey": "lead_vision",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|B"
+  },
+  {
+    "optionKey": "wplp80_q80_c",
+    "signalKey": "style_operator",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|C"
+  },
+  {
+    "optionKey": "wplp80_q80_c",
+    "signalKey": "mot_stability",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|C"
+  },
+  {
+    "optionKey": "wplp80_q80_c",
+    "signalKey": "lead_people",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|C"
+  },
+  {
+    "optionKey": "wplp80_q80_d",
+    "signalKey": "style_analyst",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|D"
+  },
+  {
+    "optionKey": "wplp80_q80_d",
+    "signalKey": "mot_mastery",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|D"
+  },
+  {
+    "optionKey": "wplp80_q80_d",
+    "signalKey": "lead_process",
+    "weight": 0.5,
+    "reverseFlag": false,
+    "sourceWeightKey": "80|D"
+  }
+]

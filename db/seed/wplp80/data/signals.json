@@ -1,0 +1,266 @@
+[
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_style",
+    "key": "style_driver",
+    "title": "Driver",
+    "order": 1,
+    "sourceColumn": "Style_Driver"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_style",
+    "key": "style_influencer",
+    "title": "Influencer",
+    "order": 2,
+    "sourceColumn": "Style_Influencer"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_style",
+    "key": "style_operator",
+    "title": "Operator",
+    "order": 3,
+    "sourceColumn": "Style_Operator"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_style",
+    "key": "style_analyst",
+    "title": "Analyst",
+    "order": 4,
+    "sourceColumn": "Style_Analyst"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_mot",
+    "key": "mot_achievement",
+    "title": "Achievement",
+    "order": 1,
+    "sourceColumn": "Mot_Achievement"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_mot",
+    "key": "mot_influence",
+    "title": "Influence",
+    "order": 2,
+    "sourceColumn": "Mot_Influence"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_mot",
+    "key": "mot_stability",
+    "title": "Stability",
+    "order": 3,
+    "sourceColumn": "Mot_Stability"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_mot",
+    "key": "mot_mastery",
+    "title": "Mastery",
+    "order": 4,
+    "sourceColumn": "Mot_Mastery"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_lead",
+    "key": "lead_results",
+    "title": "Results",
+    "order": 1,
+    "sourceColumn": "Lead_Results"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_lead",
+    "key": "lead_vision",
+    "title": "Vision",
+    "order": 2,
+    "sourceColumn": "Lead_Vision"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_lead",
+    "key": "lead_people",
+    "title": "People",
+    "order": 3,
+    "sourceColumn": "Lead_People"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_lead",
+    "key": "lead_process",
+    "title": "Process",
+    "order": 4,
+    "sourceColumn": "Lead_Process"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_conflict",
+    "key": "conflict_compete",
+    "title": "Compete",
+    "order": 1,
+    "sourceColumn": "Conflict_Compete"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_conflict",
+    "key": "conflict_collaborate",
+    "title": "Collaborate",
+    "order": 2,
+    "sourceColumn": "Conflict_Collaborate"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_conflict",
+    "key": "conflict_compromise",
+    "title": "Compromise",
+    "order": 3,
+    "sourceColumn": "Conflict_Compromise"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_conflict",
+    "key": "conflict_accommodate",
+    "title": "Accommodate",
+    "order": 4,
+    "sourceColumn": "Conflict_Accommodate"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_conflict",
+    "key": "conflict_avoid",
+    "title": "Avoid",
+    "order": 5,
+    "sourceColumn": "Conflict_Avoid"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_culture",
+    "key": "culture_market",
+    "title": "Market",
+    "order": 1,
+    "sourceColumn": "Culture_Market"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_culture",
+    "key": "culture_adhocracy",
+    "title": "Adhocracy",
+    "order": 2,
+    "sourceColumn": "Culture_Adhocracy"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_culture",
+    "key": "culture_clan",
+    "title": "Clan",
+    "order": 3,
+    "sourceColumn": "Culture_Clan"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_culture",
+    "key": "culture_hierarchy",
+    "title": "Hierarchy",
+    "order": 4,
+    "sourceColumn": "Culture_Hierarchy"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_stress",
+    "key": "stress_control",
+    "title": "Control",
+    "order": 1,
+    "sourceColumn": "Stress_Control"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_stress",
+    "key": "stress_scatter",
+    "title": "Scatter",
+    "order": 2,
+    "sourceColumn": "Stress_Scatter"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_stress",
+    "key": "stress_avoidance",
+    "title": "Avoidance",
+    "order": 3,
+    "sourceColumn": "Stress_Avoidance"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_stress",
+    "key": "stress_criticality",
+    "title": "Criticality",
+    "order": 4,
+    "sourceColumn": "Stress_Criticality"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_decision",
+    "key": "decision_agility",
+    "title": "Agility",
+    "order": 1,
+    "sourceColumn": "Decision_Agility"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_decision",
+    "key": "decision_consensus",
+    "title": "Consensus",
+    "order": 2,
+    "sourceColumn": "Decision_Consensus"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_decision",
+    "key": "decision_stability",
+    "title": "Stability",
+    "order": 3,
+    "sourceColumn": "Decision_Stability"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_decision",
+    "key": "decision_evidence",
+    "title": "Evidence",
+    "order": 4,
+    "sourceColumn": "Decision_Evidence"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_role",
+    "key": "role_commercial_leadership",
+    "title": "Commercial Leadership",
+    "order": 1,
+    "sourceColumn": "Role_Commercial Leadership"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_role",
+    "key": "role_business_development",
+    "title": "Business Development",
+    "order": 2,
+    "sourceColumn": "Role_Business Development"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_role",
+    "key": "role_operations_management",
+    "title": "Operations Management",
+    "order": 3,
+    "sourceColumn": "Role_Operations Management"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "domainKey": "signal_role",
+    "key": "role_technical_specialist",
+    "title": "Technical Specialist",
+    "order": 4,
+    "sourceColumn": "Role_Technical Specialist"
+  }
+]

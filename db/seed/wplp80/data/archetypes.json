@@ -1,0 +1,86 @@
+[
+  {
+    "key": "driver_analyst",
+    "primarySignalKey": "style_driver",
+    "secondarySignalKey": "style_analyst",
+    "archetypeName": "Strategic Operator",
+    "identitySentence": "You are a decisive and structured operator who takes control quickly while grounding decisions in logic and analysis."
+  },
+  {
+    "key": "driver_influencer",
+    "primarySignalKey": "style_driver",
+    "secondarySignalKey": "style_influencer",
+    "archetypeName": "Growth Leader",
+    "identitySentence": "You are an energetic, persuasive leader who creates momentum through confidence, visibility, and forward drive."
+  },
+  {
+    "key": "driver_operator",
+    "primarySignalKey": "style_driver",
+    "secondarySignalKey": "style_operator",
+    "archetypeName": "Execution Leader",
+    "identitySentence": "You are a controlled, delivery-focused leader who drives results while protecting consistency and operational reliability."
+  },
+  {
+    "key": "influencer_driver",
+    "primarySignalKey": "style_influencer",
+    "secondarySignalKey": "style_driver",
+    "archetypeName": "Persuasive Driver",
+    "identitySentence": "You are a charismatic, fast-moving achiever who influences others to build momentum and deliver outcomes."
+  },
+  {
+    "key": "influencer_operator",
+    "primarySignalKey": "style_influencer",
+    "secondarySignalKey": "style_operator",
+    "archetypeName": "Culture Builder",
+    "identitySentence": "You are a relationship-focused connector who strengthens trust, morale, and cohesion across teams."
+  },
+  {
+    "key": "influencer_analyst",
+    "primarySignalKey": "style_influencer",
+    "secondarySignalKey": "style_analyst",
+    "archetypeName": "Communicating Strategist",
+    "identitySentence": "You are an articulate and thoughtful communicator who translates complexity into insight and direction."
+  },
+  {
+    "key": "analyst_driver",
+    "primarySignalKey": "style_analyst",
+    "secondarySignalKey": "style_driver",
+    "archetypeName": "Systems Commander",
+    "identitySentence": "You are a logical and performance-focused builder of systems, standards, and disciplined execution."
+  },
+  {
+    "key": "analyst_operator",
+    "primarySignalKey": "style_analyst",
+    "secondarySignalKey": "style_operator",
+    "archetypeName": "Systems Architect",
+    "identitySentence": "You are a dependable, detail-focused architect of stable systems, reliable processes, and measured execution."
+  },
+  {
+    "key": "operator_driver",
+    "primarySignalKey": "style_operator",
+    "secondarySignalKey": "style_driver",
+    "archetypeName": "Operational Leader",
+    "identitySentence": "You are a dependable execution-focused leader who brings order, continuity, and disciplined follow-through to delivery."
+  },
+  {
+    "key": "operator_influencer",
+    "primarySignalKey": "style_operator",
+    "secondarySignalKey": "style_influencer",
+    "archetypeName": "People Operator",
+    "identitySentence": "You are a supportive, steady connector who keeps teams aligned, calm, and practically engaged."
+  },
+  {
+    "key": "operator_analyst",
+    "primarySignalKey": "style_operator",
+    "secondarySignalKey": "style_analyst",
+    "archetypeName": "Reliability Architect",
+    "identitySentence": "You are a consistent, process-minded operator who protects quality, stability, and operational integrity."
+  },
+  {
+    "key": "analyst_influencer",
+    "primarySignalKey": "style_analyst",
+    "secondarySignalKey": "style_influencer",
+    "archetypeName": "Insight Translator",
+    "identitySentence": "You combine analysis with communication, helping others understand patterns, risks, and opportunities clearly."
+  }
+]

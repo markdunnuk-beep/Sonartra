@@ -1,0 +1,2242 @@
+[
+  {
+    "questionKey": "wplp80_q01",
+    "key": "wplp80_q01_a",
+    "label": "A",
+    "text": "Start immediately and refine as I go",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q01",
+    "key": "wplp80_q01_b",
+    "label": "B",
+    "text": "Map out the plan in detail first",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q01",
+    "key": "wplp80_q01_c",
+    "label": "C",
+    "text": "Speak to key stakeholders before acting",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q01",
+    "key": "wplp80_q01_d",
+    "label": "D",
+    "text": "Wait for clarity and direction",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q02",
+    "key": "wplp80_q02_a",
+    "label": "A",
+    "text": "High and intense",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q02",
+    "key": "wplp80_q02_b",
+    "label": "B",
+    "text": "Consistent and steady",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q02",
+    "key": "wplp80_q02_c",
+    "label": "C",
+    "text": "Calm and reflective",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q02",
+    "key": "wplp80_q02_d",
+    "label": "D",
+    "text": "Variable depending on environment",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q03",
+    "key": "wplp80_q03_a",
+    "label": "A",
+    "text": "Adapt quickly",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q03",
+    "key": "wplp80_q03_b",
+    "label": "B",
+    "text": "Reassess methodically",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q03",
+    "key": "wplp80_q03_c",
+    "label": "C",
+    "text": "Check impact on others",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q03",
+    "key": "wplp80_q03_d",
+    "label": "D",
+    "text": "Feel unsettled",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q04",
+    "key": "wplp80_q04_a",
+    "label": "A",
+    "text": "Challenging and visible",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q04",
+    "key": "wplp80_q04_b",
+    "label": "B",
+    "text": "Structured and defined",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q04",
+    "key": "wplp80_q04_c",
+    "label": "C",
+    "text": "Collaborative",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q04",
+    "key": "wplp80_q04_d",
+    "label": "D",
+    "text": "Technical or analytical",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q05",
+    "key": "wplp80_q05_a",
+    "label": "A",
+    "text": "Move forward confidently",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q05",
+    "key": "wplp80_q05_b",
+    "label": "B",
+    "text": "Gather more data",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q05",
+    "key": "wplp80_q05_c",
+    "label": "C",
+    "text": "Seek reassurance",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q05",
+    "key": "wplp80_q05_d",
+    "label": "D",
+    "text": "Maintain stability",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q06",
+    "key": "wplp80_q06_a",
+    "label": "A",
+    "text": "Secondary to momentum",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q06",
+    "key": "wplp80_q06_b",
+    "label": "B",
+    "text": "Balanced",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q06",
+    "key": "wplp80_q06_c",
+    "label": "C",
+    "text": "Very high",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q06",
+    "key": "wplp80_q06_d",
+    "label": "D",
+    "text": "Delegated where possible",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q07",
+    "key": "wplp80_q07_a",
+    "label": "A",
+    "text": "Motivates me",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q07",
+    "key": "wplp80_q07_b",
+    "label": "B",
+    "text": "Helps refine performance",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q07",
+    "key": "wplp80_q07_c",
+    "label": "C",
+    "text": "Feels personal",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q07",
+    "key": "wplp80_q07_d",
+    "label": "D",
+    "text": "Must be logical to matter",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q08",
+    "key": "wplp80_q08_a",
+    "label": "A",
+    "text": "Fast",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q08",
+    "key": "wplp80_q08_b",
+    "label": "B",
+    "text": "Balanced",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q08",
+    "key": "wplp80_q08_c",
+    "label": "C",
+    "text": "Cautious",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q08",
+    "key": "wplp80_q08_d",
+    "label": "D",
+    "text": "Data-driven",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q09",
+    "key": "wplp80_q09_a",
+    "label": "A",
+    "text": "Direct the discussion",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q09",
+    "key": "wplp80_q09_b",
+    "label": "B",
+    "text": "Generate ideas",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q09",
+    "key": "wplp80_q09_c",
+    "label": "C",
+    "text": "Support others",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q09",
+    "key": "wplp80_q09_d",
+    "label": "D",
+    "text": "Question assumptions",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q10",
+    "key": "wplp80_q10_a",
+    "label": "A",
+    "text": "Direct and concise",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q10",
+    "key": "wplp80_q10_b",
+    "label": "B",
+    "text": "Persuasive and expressive",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q10",
+    "key": "wplp80_q10_c",
+    "label": "C",
+    "text": "Patient and empathetic",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q10",
+    "key": "wplp80_q10_d",
+    "label": "D",
+    "text": "Precise and factual",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q11",
+    "key": "wplp80_q11_a",
+    "label": "A",
+    "text": "Set aggressive goals",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q11",
+    "key": "wplp80_q11_b",
+    "label": "B",
+    "text": "Inspire enthusiasm",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q11",
+    "key": "wplp80_q11_c",
+    "label": "C",
+    "text": "Ensure everyone feels included",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q11",
+    "key": "wplp80_q11_d",
+    "label": "D",
+    "text": "Focus on systems and accuracy",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q12",
+    "key": "wplp80_q12_a",
+    "label": "A",
+    "text": "Push harder",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q12",
+    "key": "wplp80_q12_b",
+    "label": "B",
+    "text": "Motivate the team",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q12",
+    "key": "wplp80_q12_c",
+    "label": "C",
+    "text": "Protect morale",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q12",
+    "key": "wplp80_q12_d",
+    "label": "D",
+    "text": "Double-check details",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q13",
+    "key": "wplp80_q13_a",
+    "label": "A",
+    "text": "In control",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q13",
+    "key": "wplp80_q13_b",
+    "label": "B",
+    "text": "Influencing",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q13",
+    "key": "wplp80_q13_c",
+    "label": "C",
+    "text": "Supporting",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q13",
+    "key": "wplp80_q13_d",
+    "label": "D",
+    "text": "Analysing",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q14",
+    "key": "wplp80_q14_a",
+    "label": "A",
+    "text": "Decisive",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q14",
+    "key": "wplp80_q14_b",
+    "label": "B",
+    "text": "Charismatic",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q14",
+    "key": "wplp80_q14_c",
+    "label": "C",
+    "text": "Reliable",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q14",
+    "key": "wplp80_q14_d",
+    "label": "D",
+    "text": "Thoughtful",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q15",
+    "key": "wplp80_q15_a",
+    "label": "A",
+    "text": "Slow decision-making",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q15",
+    "key": "wplp80_q15_b",
+    "label": "B",
+    "text": "Lack of enthusiasm",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q15",
+    "key": "wplp80_q15_c",
+    "label": "C",
+    "text": "Harsh conflict",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q15",
+    "key": "wplp80_q15_d",
+    "label": "D",
+    "text": "Poor logic",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q16",
+    "key": "wplp80_q16_a",
+    "label": "A",
+    "text": "Achievement",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q16",
+    "key": "wplp80_q16_b",
+    "label": "B",
+    "text": "Influence",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q16",
+    "key": "wplp80_q16_c",
+    "label": "C",
+    "text": "Stability",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q16",
+    "key": "wplp80_q16_d",
+    "label": "D",
+    "text": "Mastery",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q17",
+    "key": "wplp80_q17_a",
+    "label": "A",
+    "text": "It reflects success",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q17",
+    "key": "wplp80_q17_b",
+    "label": "B",
+    "text": "It builds visibility",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q17",
+    "key": "wplp80_q17_c",
+    "label": "C",
+    "text": "It strengthens relationships",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q17",
+    "key": "wplp80_q17_d",
+    "label": "D",
+    "text": "It validates expertise",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q18",
+    "key": "wplp80_q18_a",
+    "label": "A",
+    "text": "Stretch targets",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q18",
+    "key": "wplp80_q18_b",
+    "label": "B",
+    "text": "Bigger network",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q18",
+    "key": "wplp80_q18_c",
+    "label": "C",
+    "text": "Job security",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q18",
+    "key": "wplp80_q18_d",
+    "label": "D",
+    "text": "Skill depth",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q19",
+    "key": "wplp80_q19_a",
+    "label": "A",
+    "text": "Compete",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q19",
+    "key": "wplp80_q19_b",
+    "label": "B",
+    "text": "Build",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q19",
+    "key": "wplp80_q19_c",
+    "label": "C",
+    "text": "Protect",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q19",
+    "key": "wplp80_q19_d",
+    "label": "D",
+    "text": "Optimise",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q20",
+    "key": "wplp80_q20_a",
+    "label": "A",
+    "text": "Results",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q20",
+    "key": "wplp80_q20_b",
+    "label": "B",
+    "text": "Impact",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q20",
+    "key": "wplp80_q20_c",
+    "label": "C",
+    "text": "Harmony",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q20",
+    "key": "wplp80_q20_d",
+    "label": "D",
+    "text": "Quality",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q21",
+    "key": "wplp80_q21_a",
+    "label": "A",
+    "text": "Winning",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q21",
+    "key": "wplp80_q21_b",
+    "label": "B",
+    "text": "Inspiring",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q21",
+    "key": "wplp80_q21_c",
+    "label": "C",
+    "text": "Supporting",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q21",
+    "key": "wplp80_q21_d",
+    "label": "D",
+    "text": "Solving",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q22",
+    "key": "wplp80_q22_a",
+    "label": "A",
+    "text": "Goals are weak",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q22",
+    "key": "wplp80_q22_b",
+    "label": "B",
+    "text": "Voice is ignored",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q22",
+    "key": "wplp80_q22_c",
+    "label": "C",
+    "text": "Conflict escalates",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q22",
+    "key": "wplp80_q22_d",
+    "label": "D",
+    "text": "Standards slip",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q23",
+    "key": "wplp80_q23_a",
+    "label": "A",
+    "text": "Take charge",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q23",
+    "key": "wplp80_q23_b",
+    "label": "B",
+    "text": "Set vision",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q23",
+    "key": "wplp80_q23_c",
+    "label": "C",
+    "text": "Develop people",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q23",
+    "key": "wplp80_q23_d",
+    "label": "D",
+    "text": "Provide clarity",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q24",
+    "key": "wplp80_q24_a",
+    "label": "A",
+    "text": "Trusted with responsibility",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q24",
+    "key": "wplp80_q24_b",
+    "label": "B",
+    "text": "Consulted",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q24",
+    "key": "wplp80_q24_c",
+    "label": "C",
+    "text": "Included",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q24",
+    "key": "wplp80_q24_d",
+    "label": "D",
+    "text": "Recognised for expertise",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q25",
+    "key": "wplp80_q25_a",
+    "label": "A",
+    "text": "Lead",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q25",
+    "key": "wplp80_q25_b",
+    "label": "B",
+    "text": "Connect",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q25",
+    "key": "wplp80_q25_c",
+    "label": "C",
+    "text": "Stabilise",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q25",
+    "key": "wplp80_q25_d",
+    "label": "D",
+    "text": "Specialise",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q26",
+    "key": "wplp80_q26_a",
+    "label": "A",
+    "text": "Independently",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q26",
+    "key": "wplp80_q26_b",
+    "label": "B",
+    "text": "Collaboratively",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q26",
+    "key": "wplp80_q26_c",
+    "label": "C",
+    "text": "In predictable teams",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q26",
+    "key": "wplp80_q26_d",
+    "label": "D",
+    "text": "With intellectual challenge",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q27",
+    "key": "wplp80_q27_a",
+    "label": "A",
+    "text": "Challenge",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q27",
+    "key": "wplp80_q27_b",
+    "label": "B",
+    "text": "Re-engage",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q27",
+    "key": "wplp80_q27_c",
+    "label": "C",
+    "text": "Withdraw",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q27",
+    "key": "wplp80_q27_d",
+    "label": "D",
+    "text": "Analyse",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q28",
+    "key": "wplp80_q28_a",
+    "label": "A",
+    "text": "Authority",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q28",
+    "key": "wplp80_q28_b",
+    "label": "B",
+    "text": "Influence",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q28",
+    "key": "wplp80_q28_c",
+    "label": "C",
+    "text": "Belonging",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q28",
+    "key": "wplp80_q28_d",
+    "label": "D",
+    "text": "Competence",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q29",
+    "key": "wplp80_q29_a",
+    "label": "A",
+    "text": "Compete",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q29",
+    "key": "wplp80_q29_b",
+    "label": "B",
+    "text": "Persuade",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q29",
+    "key": "wplp80_q29_c",
+    "label": "C",
+    "text": "Compromise",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q29",
+    "key": "wplp80_q29_d",
+    "label": "D",
+    "text": "Withdraw",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q30",
+    "key": "wplp80_q30_a",
+    "label": "A",
+    "text": "Stand firm",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q30",
+    "key": "wplp80_q30_b",
+    "label": "B",
+    "text": "Respond emotionally",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q30",
+    "key": "wplp80_q30_c",
+    "label": "C",
+    "text": "De-escalate",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q30",
+    "key": "wplp80_q30_d",
+    "label": "D",
+    "text": "Clarify facts",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q31",
+    "key": "wplp80_q31_a",
+    "label": "A",
+    "text": "Address directly",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q31",
+    "key": "wplp80_q31_b",
+    "label": "B",
+    "text": "Encourage",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q31",
+    "key": "wplp80_q31_c",
+    "label": "C",
+    "text": "Support quietly",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q31",
+    "key": "wplp80_q31_d",
+    "label": "D",
+    "text": "Review process",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q32",
+    "key": "wplp80_q32_a",
+    "label": "A",
+    "text": "Stakes are low",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q32",
+    "key": "wplp80_q32_b",
+    "label": "B",
+    "text": "Relationships matter",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q32",
+    "key": "wplp80_q32_c",
+    "label": "C",
+    "text": "It feels aggressive",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q32",
+    "key": "wplp80_q32_d",
+    "label": "D",
+    "text": "It lacks logic",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q33",
+    "key": "wplp80_q33_a",
+    "label": "A",
+    "text": "Courage",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q33",
+    "key": "wplp80_q33_b",
+    "label": "B",
+    "text": "Influence",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q33",
+    "key": "wplp80_q33_c",
+    "label": "C",
+    "text": "Empathy",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q33",
+    "key": "wplp80_q33_d",
+    "label": "D",
+    "text": "Objectivity",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q34",
+    "key": "wplp80_q34_a",
+    "label": "A",
+    "text": "Over-dominance",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q34",
+    "key": "wplp80_q34_b",
+    "label": "B",
+    "text": "Over-talking",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q34",
+    "key": "wplp80_q34_c",
+    "label": "C",
+    "text": "Avoidance",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q34",
+    "key": "wplp80_q34_d",
+    "label": "D",
+    "text": "Over-analysis",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q35",
+    "key": "wplp80_q35_a",
+    "label": "A",
+    "text": "Become controlling",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q35",
+    "key": "wplp80_q35_b",
+    "label": "B",
+    "text": "Become scattered",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q35",
+    "key": "wplp80_q35_c",
+    "label": "C",
+    "text": "Avoid difficult conversations",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q35",
+    "key": "wplp80_q35_d",
+    "label": "D",
+    "text": "Become overly critical",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q36",
+    "key": "wplp80_q36_a",
+    "label": "A",
+    "text": "Take over",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q36",
+    "key": "wplp80_q36_b",
+    "label": "B",
+    "text": "Talk more",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q36",
+    "key": "wplp80_q36_c",
+    "label": "C",
+    "text": "Retreat",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q36",
+    "key": "wplp80_q36_d",
+    "label": "D",
+    "text": "Analyse obsessively",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q37",
+    "key": "wplp80_q37_a",
+    "label": "A",
+    "text": "React",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q37",
+    "key": "wplp80_q37_b",
+    "label": "B",
+    "text": "Express frustration",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q37",
+    "key": "wplp80_q37_c",
+    "label": "C",
+    "text": "Internalise",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q37",
+    "key": "wplp80_q37_d",
+    "label": "D",
+    "text": "Distance emotionally",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q38",
+    "key": "wplp80_q38_a",
+    "label": "A",
+    "text": "Intimidating",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q38",
+    "key": "wplp80_q38_b",
+    "label": "B",
+    "text": "Dramatic",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q38",
+    "key": "wplp80_q38_c",
+    "label": "C",
+    "text": "Passive",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q38",
+    "key": "wplp80_q38_d",
+    "label": "D",
+    "text": "Detached",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q39",
+    "key": "wplp80_q39_a",
+    "label": "A",
+    "text": "Impatience",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q39",
+    "key": "wplp80_q39_b",
+    "label": "B",
+    "text": "Over-optimism",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q39",
+    "key": "wplp80_q39_c",
+    "label": "C",
+    "text": "Avoidance",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q39",
+    "key": "wplp80_q39_d",
+    "label": "D",
+    "text": "Perfectionism",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q40",
+    "key": "wplp80_q40_a",
+    "label": "A",
+    "text": "Fight",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q40",
+    "key": "wplp80_q40_b",
+    "label": "B",
+    "text": "Defend",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q40",
+    "key": "wplp80_q40_c",
+    "label": "C",
+    "text": "Freeze",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q40",
+    "key": "wplp80_q40_d",
+    "label": "D",
+    "text": "Overthink",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q41",
+    "key": "wplp80_q41_a",
+    "label": "A",
+    "text": "Opportunity",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q41",
+    "key": "wplp80_q41_b",
+    "label": "B",
+    "text": "Necessary",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q41",
+    "key": "wplp80_q41_c",
+    "label": "C",
+    "text": "Manageable",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q41",
+    "key": "wplp80_q41_d",
+    "label": "D",
+    "text": "Dangerous",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q42",
+    "key": "wplp80_q42_a",
+    "label": "A",
+    "text": "Fast",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q42",
+    "key": "wplp80_q42_b",
+    "label": "B",
+    "text": "Consensus-based",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q42",
+    "key": "wplp80_q42_c",
+    "label": "C",
+    "text": "Safe",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q42",
+    "key": "wplp80_q42_d",
+    "label": "D",
+    "text": "Evidence-based",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q43",
+    "key": "wplp80_q43_a",
+    "label": "A",
+    "text": "Act",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q43",
+    "key": "wplp80_q43_b",
+    "label": "B",
+    "text": "Influence",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q43",
+    "key": "wplp80_q43_c",
+    "label": "C",
+    "text": "Stabilise",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q43",
+    "key": "wplp80_q43_d",
+    "label": "D",
+    "text": "Model scenarios",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q44",
+    "key": "wplp80_q44_a",
+    "label": "A",
+    "text": "Instinct",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q44",
+    "key": "wplp80_q44_b",
+    "label": "B",
+    "text": "People",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q44",
+    "key": "wplp80_q44_c",
+    "label": "C",
+    "text": "Stability",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q44",
+    "key": "wplp80_q44_d",
+    "label": "D",
+    "text": "Data",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q45",
+    "key": "wplp80_q45_a",
+    "label": "A",
+    "text": "Volatility",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q45",
+    "key": "wplp80_q45_b",
+    "label": "B",
+    "text": "Change",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q45",
+    "key": "wplp80_q45_c",
+    "label": "C",
+    "text": "Routine",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q45",
+    "key": "wplp80_q45_d",
+    "label": "D",
+    "text": "Structure",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q46",
+    "key": "wplp80_q46_a",
+    "label": "A",
+    "text": "Deliver results",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q46",
+    "key": "wplp80_q46_b",
+    "label": "B",
+    "text": "Inspire",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q46",
+    "key": "wplp80_q46_c",
+    "label": "C",
+    "text": "Develop",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q46",
+    "key": "wplp80_q46_d",
+    "label": "D",
+    "text": "Design systems",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q47",
+    "key": "wplp80_q47_a",
+    "label": "A",
+    "text": "Raising standards",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q47",
+    "key": "wplp80_q47_b",
+    "label": "B",
+    "text": "Motivating",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q47",
+    "key": "wplp80_q47_c",
+    "label": "C",
+    "text": "Coaching",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q47",
+    "key": "wplp80_q47_d",
+    "label": "D",
+    "text": "Redesigning process",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q48",
+    "key": "wplp80_q48_a",
+    "label": "A",
+    "text": "Direction",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q48",
+    "key": "wplp80_q48_b",
+    "label": "B",
+    "text": "Energy",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q48",
+    "key": "wplp80_q48_c",
+    "label": "C",
+    "text": "Support",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q48",
+    "key": "wplp80_q48_d",
+    "label": "D",
+    "text": "Expertise",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q49",
+    "key": "wplp80_q49_a",
+    "label": "A",
+    "text": "Be asserted",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q49",
+    "key": "wplp80_q49_b",
+    "label": "B",
+    "text": "Be earned",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q49",
+    "key": "wplp80_q49_c",
+    "label": "C",
+    "text": "Be shared",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q49",
+    "key": "wplp80_q49_d",
+    "label": "D",
+    "text": "Be structured",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q50",
+    "key": "wplp80_q50_a",
+    "label": "A",
+    "text": "In crisis",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q50",
+    "key": "wplp80_q50_b",
+    "label": "B",
+    "text": "In growth",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q50",
+    "key": "wplp80_q50_c",
+    "label": "C",
+    "text": "In stability",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q50",
+    "key": "wplp80_q50_d",
+    "label": "D",
+    "text": "In complexity",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q51",
+    "key": "wplp80_q51_a",
+    "label": "A",
+    "text": "Competitive",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q51",
+    "key": "wplp80_q51_b",
+    "label": "B",
+    "text": "Innovative",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q51",
+    "key": "wplp80_q51_c",
+    "label": "C",
+    "text": "Collaborative",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q51",
+    "key": "wplp80_q51_d",
+    "label": "D",
+    "text": "Structured",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q52",
+    "key": "wplp80_q52_a",
+    "label": "A",
+    "text": "Profit",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q52",
+    "key": "wplp80_q52_b",
+    "label": "B",
+    "text": "Growth",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q52",
+    "key": "wplp80_q52_c",
+    "label": "C",
+    "text": "Engagement",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q52",
+    "key": "wplp80_q52_d",
+    "label": "D",
+    "text": "Efficiency",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q53",
+    "key": "wplp80_q53_a",
+    "label": "A",
+    "text": "Performance",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q53",
+    "key": "wplp80_q53_b",
+    "label": "B",
+    "text": "Creativity",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q53",
+    "key": "wplp80_q53_c",
+    "label": "C",
+    "text": "Belonging",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q53",
+    "key": "wplp80_q53_d",
+    "label": "D",
+    "text": "Consistency",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q54",
+    "key": "wplp80_q54_a",
+    "label": "A",
+    "text": "High and visible",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q54",
+    "key": "wplp80_q54_b",
+    "label": "B",
+    "text": "Inspiring",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q54",
+    "key": "wplp80_q54_c",
+    "label": "C",
+    "text": "Fair",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q54",
+    "key": "wplp80_q54_d",
+    "label": "D",
+    "text": "Measured",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q55",
+    "key": "wplp80_q55_a",
+    "label": "A",
+    "text": "Slow",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q55",
+    "key": "wplp80_q55_b",
+    "label": "B",
+    "text": "Conservative",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q55",
+    "key": "wplp80_q55_c",
+    "label": "C",
+    "text": "Harsh",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q55",
+    "key": "wplp80_q55_d",
+    "label": "D",
+    "text": "Chaotic",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q56",
+    "key": "wplp80_q56_a",
+    "label": "A",
+    "text": "Commercial leadership",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q56",
+    "key": "wplp80_q56_b",
+    "label": "B",
+    "text": "Business development",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q56",
+    "key": "wplp80_q56_c",
+    "label": "C",
+    "text": "Operations management",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q56",
+    "key": "wplp80_q56_d",
+    "label": "D",
+    "text": "Technical specialist",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q57",
+    "key": "wplp80_q57_a",
+    "label": "A",
+    "text": "Driving change",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q57",
+    "key": "wplp80_q57_b",
+    "label": "B",
+    "text": "Influencing",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q57",
+    "key": "wplp80_q57_c",
+    "label": "C",
+    "text": "Maintaining",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q57",
+    "key": "wplp80_q57_d",
+    "label": "D",
+    "text": "Analysing",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q58",
+    "key": "wplp80_q58_a",
+    "label": "A",
+    "text": "Targets are aggressive",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q58",
+    "key": "wplp80_q58_b",
+    "label": "B",
+    "text": "Relationships are key",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q58",
+    "key": "wplp80_q58_c",
+    "label": "C",
+    "text": "Stability exists",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q58",
+    "key": "wplp80_q58_d",
+    "label": "D",
+    "text": "Systems matter",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q59",
+    "key": "wplp80_q59_a",
+    "label": "A",
+    "text": "Momentum",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q59",
+    "key": "wplp80_q59_b",
+    "label": "B",
+    "text": "Engagement",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q59",
+    "key": "wplp80_q59_c",
+    "label": "C",
+    "text": "Reliability",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q59",
+    "key": "wplp80_q59_d",
+    "label": "D",
+    "text": "Precision",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q60",
+    "key": "wplp80_q60_a",
+    "label": "A",
+    "text": "Push harder and accelerate decisions",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q60",
+    "key": "wplp80_q60_b",
+    "label": "B",
+    "text": "Rally people and re-energise the group",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q60",
+    "key": "wplp80_q60_c",
+    "label": "C",
+    "text": "Maintain stability and reduce disruption",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q60",
+    "key": "wplp80_q60_d",
+    "label": "D",
+    "text": "Re-evaluate the system or assumptions",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q61",
+    "key": "wplp80_q61_a",
+    "label": "A",
+    "text": "Defend my position immediately",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q61",
+    "key": "wplp80_q61_b",
+    "label": "B",
+    "text": "Reframe the discussion to win support",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q61",
+    "key": "wplp80_q61_c",
+    "label": "C",
+    "text": "De-escalate and keep harmony",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q61",
+    "key": "wplp80_q61_d",
+    "label": "D",
+    "text": "Examine their reasoning carefully",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q62",
+    "key": "wplp80_q62_a",
+    "label": "A",
+    "text": "Momentum and execution",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q62",
+    "key": "wplp80_q62_b",
+    "label": "B",
+    "text": "Inspiration and energy",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q62",
+    "key": "wplp80_q62_c",
+    "label": "C",
+    "text": "Trust and cohesion",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q62",
+    "key": "wplp80_q62_d",
+    "label": "D",
+    "text": "Precision and expertise",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q63",
+    "key": "wplp80_q63_a",
+    "label": "A",
+    "text": "Take direct control of the situation",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q63",
+    "key": "wplp80_q63_b",
+    "label": "B",
+    "text": "Influence the team informally",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q63",
+    "key": "wplp80_q63_c",
+    "label": "C",
+    "text": "Encourage collaboration",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q63",
+    "key": "wplp80_q63_d",
+    "label": "D",
+    "text": "Improve the process or structure",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q64",
+    "key": "wplp80_q64_a",
+    "label": "A",
+    "text": "Potential upside",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q64",
+    "key": "wplp80_q64_b",
+    "label": "B",
+    "text": "Strategic narrative",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q64",
+    "key": "wplp80_q64_c",
+    "label": "C",
+    "text": "Impact on people",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q64",
+    "key": "wplp80_q64_d",
+    "label": "D",
+    "text": "Evidence and probability",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q65",
+    "key": "wplp80_q65_a",
+    "label": "A",
+    "text": "Expect alignment with my decision",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q65",
+    "key": "wplp80_q65_b",
+    "label": "B",
+    "text": "Try to win them over",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q65",
+    "key": "wplp80_q65_c",
+    "label": "C",
+    "text": "Explore their concerns",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q65",
+    "key": "wplp80_q65_d",
+    "label": "D",
+    "text": "Analyse the logic together",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q66",
+    "key": "wplp80_q66_a",
+    "label": "A",
+    "text": "Leadership loses control",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q66",
+    "key": "wplp80_q66_b",
+    "label": "B",
+    "text": "Vision becomes diluted",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q66",
+    "key": "wplp80_q66_c",
+    "label": "C",
+    "text": "Culture becomes fragmented",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q66",
+    "key": "wplp80_q66_d",
+    "label": "D",
+    "text": "Systems fail to scale",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q67",
+    "key": "wplp80_q67_a",
+    "label": "A",
+    "text": "Become more forceful",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q67",
+    "key": "wplp80_q67_b",
+    "label": "B",
+    "text": "Become more expressive",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q67",
+    "key": "wplp80_q67_c",
+    "label": "C",
+    "text": "Try to calm the situation",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q67",
+    "key": "wplp80_q67_d",
+    "label": "D",
+    "text": "Become more analytical",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q68",
+    "key": "wplp80_q68_a",
+    "label": "A",
+    "text": "Directness",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q68",
+    "key": "wplp80_q68_b",
+    "label": "B",
+    "text": "Influence",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q68",
+    "key": "wplp80_q68_c",
+    "label": "C",
+    "text": "Sensitivity",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q68",
+    "key": "wplp80_q68_d",
+    "label": "D",
+    "text": "Accuracy",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q69",
+    "key": "wplp80_q69_a",
+    "label": "A",
+    "text": "Correct course quickly",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q69",
+    "key": "wplp80_q69_b",
+    "label": "B",
+    "text": "Re-inspire commitment",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q69",
+    "key": "wplp80_q69_c",
+    "label": "C",
+    "text": "Maintain morale",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q69",
+    "key": "wplp80_q69_d",
+    "label": "D",
+    "text": "Investigate root causes",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q70",
+    "key": "wplp80_q70_a",
+    "label": "A",
+    "text": "Power and decision authority",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q70",
+    "key": "wplp80_q70_b",
+    "label": "B",
+    "text": "Informal influence networks",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q70",
+    "key": "wplp80_q70_c",
+    "label": "C",
+    "text": "Social dynamics and trust",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q70",
+    "key": "wplp80_q70_d",
+    "label": "D",
+    "text": "Systems and processes",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q71",
+    "key": "wplp80_q71_a",
+    "label": "A",
+    "text": "Drive performance",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q71",
+    "key": "wplp80_q71_b",
+    "label": "B",
+    "text": "Inspire confidence",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q71",
+    "key": "wplp80_q71_c",
+    "label": "C",
+    "text": "Build stability",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q71",
+    "key": "wplp80_q71_d",
+    "label": "D",
+    "text": "Provide expertise",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q72",
+    "key": "wplp80_q72_a",
+    "label": "A",
+    "text": "Choose the fastest path forward",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q72",
+    "key": "wplp80_q72_b",
+    "label": "B",
+    "text": "Align stakeholders first",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q72",
+    "key": "wplp80_q72_c",
+    "label": "C",
+    "text": "Seek consensus",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q72",
+    "key": "wplp80_q72_d",
+    "label": "D",
+    "text": "Analyse implications",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q73",
+    "key": "wplp80_q73_a",
+    "label": "A",
+    "text": "Opportunity",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q73",
+    "key": "wplp80_q73_b",
+    "label": "B",
+    "text": "Energy",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q73",
+    "key": "wplp80_q73_c",
+    "label": "C",
+    "text": "Instability",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q73",
+    "key": "wplp80_q73_d",
+    "label": "D",
+    "text": "Complexity",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q74",
+    "key": "wplp80_q74_a",
+    "label": "A",
+    "text": "Indecision",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q74",
+    "key": "wplp80_q74_b",
+    "label": "B",
+    "text": "Ego-driven leadership",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q74",
+    "key": "wplp80_q74_c",
+    "label": "C",
+    "text": "Disconnection from people",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q74",
+    "key": "wplp80_q74_d",
+    "label": "D",
+    "text": "Poor judgement",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q75",
+    "key": "wplp80_q75_a",
+    "label": "A",
+    "text": "Increase pressure",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q75",
+    "key": "wplp80_q75_b",
+    "label": "B",
+    "text": "Increase communication",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q75",
+    "key": "wplp80_q75_c",
+    "label": "C",
+    "text": "Increase support",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q75",
+    "key": "wplp80_q75_d",
+    "label": "D",
+    "text": "Increase analysis",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q76",
+    "key": "wplp80_q76_a",
+    "label": "A",
+    "text": "Competitive",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q76",
+    "key": "wplp80_q76_b",
+    "label": "B",
+    "text": "Inspired",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q76",
+    "key": "wplp80_q76_c",
+    "label": "C",
+    "text": "Cohesive",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q76",
+    "key": "wplp80_q76_d",
+    "label": "D",
+    "text": "Systematically effective",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q77",
+    "key": "wplp80_q77_a",
+    "label": "A",
+    "text": "Trust instinct",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q77",
+    "key": "wplp80_q77_b",
+    "label": "B",
+    "text": "Seek additional perspectives",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q77",
+    "key": "wplp80_q77_c",
+    "label": "C",
+    "text": "Reflect carefully",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q77",
+    "key": "wplp80_q77_d",
+    "label": "D",
+    "text": "Follow the evidence",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q78",
+    "key": "wplp80_q78_a",
+    "label": "A",
+    "text": "Drive transformation quickly",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q78",
+    "key": "wplp80_q78_b",
+    "label": "B",
+    "text": "Communicate the vision",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q78",
+    "key": "wplp80_q78_c",
+    "label": "C",
+    "text": "Protect stability",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q78",
+    "key": "wplp80_q78_d",
+    "label": "D",
+    "text": "Design the transition carefully",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q79",
+    "key": "wplp80_q79_a",
+    "label": "A",
+    "text": "Winning",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q79",
+    "key": "wplp80_q79_b",
+    "label": "B",
+    "text": "Visibility",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q79",
+    "key": "wplp80_q79_c",
+    "label": "C",
+    "text": "Loyalty",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q79",
+    "key": "wplp80_q79_d",
+    "label": "D",
+    "text": "Competence",
+    "order": 4
+  },
+  {
+    "questionKey": "wplp80_q80",
+    "key": "wplp80_q80_a",
+    "label": "A",
+    "text": "Results delivered",
+    "order": 1
+  },
+  {
+    "questionKey": "wplp80_q80",
+    "key": "wplp80_q80_b",
+    "label": "B",
+    "text": "Influence created",
+    "order": 2
+  },
+  {
+    "questionKey": "wplp80_q80",
+    "key": "wplp80_q80_c",
+    "label": "C",
+    "text": "Relationships maintained",
+    "order": 3
+  },
+  {
+    "questionKey": "wplp80_q80",
+    "key": "wplp80_q80_d",
+    "label": "D",
+    "text": "Quality of thinking",
+    "order": 4
+  }
+]

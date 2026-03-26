@@ -1,0 +1,135 @@
+[
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_core_personality",
+    "title": "Core Personality",
+    "order": 1,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_behaviour_style",
+    "title": "Behaviour Style",
+    "order": 2,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_motivational_drivers",
+    "title": "Motivational Drivers",
+    "order": 3,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_interpersonal_needs",
+    "title": "Interpersonal Needs",
+    "order": 4,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_conflict_style",
+    "title": "Conflict Style",
+    "order": 5,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_stress_and_derailers",
+    "title": "Stress & Derailers",
+    "order": 6,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_decision_and_risk",
+    "title": "Decision & Risk",
+    "order": 7,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_leadership_orientation",
+    "title": "Leadership Orientation",
+    "order": 8,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_culture_preference",
+    "title": "Culture Preference",
+    "order": 9,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_role_fit",
+    "title": "Role Fit",
+    "order": 10,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "section_behavioural_integrity_and_nuance",
+    "title": "Behavioural Integrity & Nuance",
+    "order": 11,
+    "source": "question_section"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "signal_style",
+    "title": "Style",
+    "order": 12,
+    "source": "signal_group"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "signal_mot",
+    "title": "Motivators",
+    "order": 13,
+    "source": "signal_group"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "signal_lead",
+    "title": "Leadership",
+    "order": 14,
+    "source": "signal_group"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "signal_conflict",
+    "title": "Conflict",
+    "order": 15,
+    "source": "signal_group"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "signal_culture",
+    "title": "Culture",
+    "order": 16,
+    "source": "signal_group"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "signal_stress",
+    "title": "Stress",
+    "order": 17,
+    "source": "signal_group"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "signal_decision",
+    "title": "Decision",
+    "order": 18,
+    "source": "signal_group"
+  },
+  {
+    "assessmentKey": "wplp80",
+    "key": "signal_role",
+    "title": "Role Fit",
+    "order": 19,
+    "source": "signal_group"
+  }
+]
