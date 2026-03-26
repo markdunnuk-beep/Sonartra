@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+main {
+  @apply mx-auto min-h-[calc(100vh-4rem)] w-full max-w-6xl px-6 py-10;
+}
+
+.sonartra-panel {
+  @apply rounded-xl border border-white/10 bg-surface/70 p-6;
+}
