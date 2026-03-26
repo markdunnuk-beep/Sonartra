@@ -1,0 +1,367 @@
+Sonartra — Assessment Report Reference (Insights Benchmark)
+
+Purpose:
+This document captures the structural, content, and UX patterns observed in the Insights Discovery report.
+
+It serves as a benchmark for:
+- Individual assessment output design
+- Report structure and flow
+- Content framing and tone
+- Actionable insight delivery
+
+Primary reference:
+Insights Discovery Profile (22 pages)
+:contentReference[oaicite:0]{index=0}
+
+--------------------------------------------------
+1. OVERALL REPORT STRUCTURE
+--------------------------------------------------
+
+Insights reports follow a highly structured, repeatable flow:
+
+1. Introduction (context + methodology)
+2. Overview (broad behavioural summary)
+3. Core behavioural breakdown:
+   - Personal Style
+   - Interacting with Others
+   - Decision Making
+4. Strengths & Weaknesses
+5. Team Contribution
+6. Communication Guidance
+7. Self-awareness (Blind Spots)
+8. Opposites / Friction points
+9. Development Recommendations
+10. Management Guidance
+11. Motivators & Environment
+12. Visual Models (Wheel + Colour dynamics)
+
+Key observation:
+- The report is modular and predictable
+- Each section builds progressively from awareness → application
+
+Design takeaway for Sonartra:
+- Structure outputs in layered sections
+- Move from descriptive → actionable → strategic
+- Ensure consistency across all reports
+
+--------------------------------------------------
+2. INTRODUCTION — CREDIBILITY + CONTEXT
+--------------------------------------------------
+
+(Page 4)
+
+Key elements:
+- Reference to psychological theory (Jung)
+- Explanation of how the report is generated
+- Emphasis on uniqueness of output
+- Instruction on how to use the report
+
+Tone:
+- Academic but accessible
+- Credibility-first
+
+Design takeaway:
+- Include a short “how this works” section
+- Anchor outputs in a clear model/framework
+- Reinforce that outputs are personalised but interpretable
+
+--------------------------------------------------
+3. OVERVIEW — NARRATIVE IDENTITY
+--------------------------------------------------
+
+(Page 5–6)
+
+Sections:
+- Personal Style
+- Interacting with Others
+- Decision Making
+
+Characteristics:
+- Written in narrative paragraph form
+- Rich descriptive language
+- Behaviour patterns explained in context
+
+Example patterns:
+- “At his best…”
+- “He tends to…”
+- “He may…”
+
+Key insight:
+- Uses probabilistic language (not absolute claims)
+- Balances strengths and limitations within same narrative
+
+Design takeaway:
+- Provide a high-level behavioural narrative
+- Use balanced language (avoid absolutes)
+- Combine personality + behaviour + context
+
+--------------------------------------------------
+4. STRENGTHS & WEAKNESSES — BULLET CLARITY
+--------------------------------------------------
+
+(Page 7–8)
+
+Structure:
+- Clear section split:
+  - Strengths
+  - Possible Weaknesses
+
+Format:
+- Bullet points
+- Short, punchy statements
+
+Examples:
+- “Often charming and persuasive”
+- “May not finish everything he starts”
+
+Key insight:
+- Weaknesses framed as “possible”
+- Weakness = overused strength
+
+Design takeaway:
+- Use concise bullet summaries
+- Pair strengths with potential risks
+- Avoid negative framing — keep developmental tone
+
+--------------------------------------------------
+5. VALUE TO TEAM — PRACTICAL APPLICATION
+--------------------------------------------------
+
+(Page 9)
+
+Structure:
+- “As a team member, John:”
+- Bullet list of contributions
+
+Focus:
+- Real-world behaviour in teams
+- Social and functional value
+
+Design takeaway:
+- Translate personality into workplace impact
+- Show “how this person adds value”
+- Make it immediately usable for teams
+
+--------------------------------------------------
+6. COMMUNICATION — ACTIONABLE GUIDANCE
+--------------------------------------------------
+
+(Page 10–11)
+
+Split into two sections:
+
+A. Effective Communication
+- What TO DO
+
+B. Barriers to Communication
+- What NOT to do
+
+Format:
+- Bullet points
+- Highly practical
+
+Examples:
+- “Keep the conversation lively”
+- “Avoid unnecessary distractions”
+- “Do not overload with irrelevant information”
+
+Key insight:
+- One of the most actionable sections in the report
+
+Design takeaway:
+- Always include:
+  - “Do”
+  - “Avoid”
+- Keep guidance simple and behavioural
+
+--------------------------------------------------
+7. BLIND SPOTS — SELF-AWARENESS LAYER
+--------------------------------------------------
+
+(Page 12)
+
+Purpose:
+- Highlight behaviours others see but user may not
+
+Characteristics:
+- More direct language
+- Slightly more critical tone
+- Still framed constructively
+
+Example themes:
+- Avoidance of problems
+- Over-reliance on feelings
+- Lack of focus or discipline
+
+Design takeaway:
+- Include a “self-awareness gap” section
+- Make it reflective, not confrontational
+- Encourage validation with others
+
+--------------------------------------------------
+8. OPPOSITE TYPE — FRICTION MODEL
+--------------------------------------------------
+
+(Page 13–14)
+
+Structure:
+- Description of opposite personality type
+- How conflict may arise
+- How to adapt communication
+
+Key insight:
+- Introduces relational tension model
+- Helps user understand others, not just themselves
+
+Design takeaway:
+- Include “friction profiles” or opposing styles
+- Provide adaptation strategies
+- Expand beyond self into interaction dynamics
+
+--------------------------------------------------
+9. DEVELOPMENT — ACTION ORIENTATION
+--------------------------------------------------
+
+(Page 15)
+
+Format:
+- Bullet list of development suggestions
+
+Examples:
+- “Pay attention to detail”
+- “Gather more information”
+- “Focus on task completion”
+
+Key insight:
+- Moves from insight → action
+
+Design takeaway:
+- Always include a development section
+- Keep actions specific and practical
+- Avoid generic advice
+
+--------------------------------------------------
+10. MANAGEMENT — CONTEXTUAL APPLICATION
+--------------------------------------------------
+
+(Page 16–19)
+
+Subsections:
+- Ideal Environment
+- Managing the Individual
+- Motivating the Individual
+- Management Style
+
+Characteristics:
+- Highly practical
+- Workplace-focused
+- Actionable for managers
+
+Key insight:
+- Report is not just for the individual
+- It is also for managers and teams
+
+Design takeaway:
+- Include dual perspective:
+  - “About you”
+  - “How to manage you”
+- Increase organisational utility
+
+--------------------------------------------------
+11. VISUAL MODELS — SYSTEM IDENTITY
+--------------------------------------------------
+
+(Page 20–21)
+
+Includes:
+- 72 Type Wheel (visual identity system)
+- Colour dynamics chart (quantitative view)
+
+Key insight:
+- Visual model reinforces system credibility
+- Provides “anchor” for interpretation
+
+Design takeaway:
+- Sonartra should include:
+  - Signal map / radar
+  - Domain distributions
+- Visuals must be meaningful, not decorative
+
+--------------------------------------------------
+12. LANGUAGE STYLE — CRITICAL PATTERNS
+--------------------------------------------------
+
+Insights uses consistent language rules:
+
+1. Probabilistic language:
+- “May…”
+- “Tends to…”
+- “At times…”
+
+2. Balanced tone:
+- Strength + limitation in same sentence
+
+3. Behavioural focus:
+- Not traits, but actions
+
+4. Human-readable:
+- No jargon
+- No technical overload
+
+Design takeaway:
+- Avoid absolute claims
+- Avoid corporate jargon
+- Keep outputs readable and relatable
+
+--------------------------------------------------
+SONARTRA REPORT PRINCIPLES (DERIVED)
+--------------------------------------------------
+
+1. Layered output structure
+- Overview → Detail → Action → Application
+
+2. Scan + depth balance
+- Narrative + bullets
+
+3. Actionability is critical
+- Every section must be usable
+
+4. Multi-audience design
+- Individual
+- Manager
+- Team
+
+5. System anchoring
+- Tie everything back to signals/domains
+
+6. Consistency
+- Same structure across all reports
+
+--------------------------------------------------
+WHAT TO AVOID
+--------------------------------------------------
+
+- Overly generic personality descriptions
+- Long unstructured text blocks
+- No actionable output
+- Purely descriptive reports
+- Lack of real-world application
+
+--------------------------------------------------
+FINAL RULE
+--------------------------------------------------
+
+Insights reports succeed because they are:
+
+- Structured
+- Practical
+- Balanced
+- Actionable
+
+Sonartra reports should match this standard,
+but improve on:
+
+- Visual clarity
+- Signal transparency
+- Precision of outputs
+- Modern UX presentation
