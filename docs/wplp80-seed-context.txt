@@ -1,0 +1,125 @@
+WPLP-80 Seed Data Context
+
+Purpose:
+This file defines how the WPLP-80 seed data should be understood and used within the Sonartra MVP assessment engine project.
+
+Primary Role:
+The WPLP-80 seed data represents the canonical, structured version of the Sonartra Signals flagship assessment. It is the first fully implemented assessment within the new engine and serves as the reference model for all future assessments.
+
+Location:
+- db/seed/wplp80/
+- db/seed/wplp80/data/*.json
+- db/seed/wplp80/index.ts
+
+Source:
+The seed data was programmatically generated from:
+- Sonartra_WPLP80_Full_Report_Model.xlsx
+
+The Excel file is a design artifact only. It is NOT used at runtime.
+
+Key Principle:
+The seed data is now the source of truth for the assessment engine.
+All runtime behavior must be driven from these structured seed files, not from Excel or legacy formats.
+
+What the Seed Data Contains:
+- Assessment definition (metadata)
+- Domains (question sections + signal groups)
+- Signals (all scoring dimensions, including overlays such as Decision and Role)
+- Questions (80 total)
+- Options (320 total)
+- Option → Signal weight mappings (~900 non-zero rows)
+- Thresholds
+- Archetypes
+- Sentence library (output language components)
+- Rule engine definitions (deterministic output logic)
+
+How It Should Be Used:
+
+1. Database Seeding
+The seed data must be inserted into the database in the correct order:
+- assessment
+- domains
+- signals
+- questions
+- options
+- optionSignalWeights
+- thresholds
+- archetypes
+- sentenceLibrary
+- ruleEngine
+
+2. Engine Runtime
+The engine must:
+- load assessment definitions from the database
+- serve questions and options from seeded data
+- compute scores using optionSignalWeights
+- normalize and rank signals
+- generate outputs using sentenceLibrary + ruleEngine
+- persist a canonical result payload
+
+3. Result Generation
+Outputs must be deterministic and rule-based.
+Do NOT use AI-generated text for MVP outputs.
+Use:
+- archetypes
+- thresholds
+- sentence library
+- rule engine logic
+
+4. UI Consumption
+All UI layers (dashboard, results pages) must consume:
+- the persisted result payload only
+- no recalculation or alternative scoring paths
+
+Important Constraints:
+
+- Do NOT modify seed data at runtime
+- Do NOT introduce alternative scoring logic outside the engine core
+- Do NOT bypass optionSignalWeights
+- Do NOT reintroduce Excel or JSON package parsing into runtime
+- Do NOT create multiple competing result formats
+
+Domain Structure Note:
+
+The seed data contains two types of domains:
+1. Question-section domains (used for grouping questions)
+2. Signal-group domains (used for scoring and output)
+
+These are intentionally separated to preserve workbook fidelity.
+The engine should treat signal groups as the primary scoring structure.
+
+Decision and Role Dimensions:
+
+- Decision and Role signals are preserved as overlays
+- They are part of the scoring model
+- They may be excluded from primary user-facing summaries initially if needed
+- Do NOT discard them without explicit design decision
+
+Verification:
+
+The seed data has been verified for:
+- complete question coverage (80/80)
+- complete option coverage (320/320)
+- valid signal mappings (no orphan weights)
+- no duplicate keys
+- count parity with workbook source
+
+See:
+- scripts/verify-wplp80-seeds.ts
+
+Mapping Documentation:
+
+Full extraction and mapping details are documented in:
+- docs/wplp80-extraction-mapping.md
+
+Future Use:
+
+This WPLP-80 seed set should be used as:
+- the first live assessment in the system
+- the testbed for engine validation
+- the template for creating future assessments
+
+Guiding Rule:
+
+The engine must be built to run THIS data cleanly and deterministically.
+If the engine cannot run WPLP-80 end-to-end, the engine is not complete.
