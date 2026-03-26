@@ -1,0 +1,202 @@
+[
+  {
+    "key": "core_identity_driver_high",
+    "category": "Core Identity",
+    "signalKey": "style_driver",
+    "band": "High",
+    "sentence": "You naturally take control and focus on outcomes.",
+    "sourceSheetRow": 2
+  },
+  {
+    "key": "core_identity_influencer_high",
+    "category": "Core Identity",
+    "signalKey": "style_influencer",
+    "band": "High",
+    "sentence": "You bring energy, engagement, and visibility into group environments.",
+    "sourceSheetRow": 3
+  },
+  {
+    "key": "core_identity_operator_high",
+    "category": "Core Identity",
+    "signalKey": "style_operator",
+    "band": "High",
+    "sentence": "You focus on consistent execution, reliability, and maintaining operational stability.",
+    "sourceSheetRow": 4
+  },
+  {
+    "key": "core_identity_analyst_high",
+    "category": "Core Identity",
+    "signalKey": "style_analyst",
+    "band": "High",
+    "sentence": "You rely on logic, structure, and evidence when making decisions.",
+    "sourceSheetRow": 5
+  },
+  {
+    "key": "how_you_operate_achievement_high",
+    "category": "How You Operate",
+    "signalKey": "mot_achievement",
+    "band": "High",
+    "sentence": "You are driven by measurable success and clear outcomes.",
+    "sourceSheetRow": 6
+  },
+  {
+    "key": "how_you_operate_influence_high",
+    "category": "How You Operate",
+    "signalKey": "mot_influence",
+    "band": "High",
+    "sentence": "You are motivated by visibility, reach, and the ability to shape others thinking.",
+    "sourceSheetRow": 7
+  },
+  {
+    "key": "how_you_operate_stability_high",
+    "category": "How You Operate",
+    "signalKey": "decision_stability",
+    "band": "High",
+    "sentence": "You are motivated by security, continuity, and low-friction execution.",
+    "sourceSheetRow": 8
+  },
+  {
+    "key": "how_you_operate_mastery_high",
+    "category": "How You Operate",
+    "signalKey": "mot_mastery",
+    "band": "High",
+    "sentence": "You are motivated by expertise, precision, and continual improvement.",
+    "sourceSheetRow": 9
+  },
+  {
+    "key": "leadership_results_high",
+    "category": "Leadership",
+    "signalKey": "lead_results",
+    "band": "High",
+    "sentence": "You lead with a strong bias toward delivery, standards, and performance.",
+    "sourceSheetRow": 10
+  },
+  {
+    "key": "leadership_vision_high",
+    "category": "Leadership",
+    "signalKey": "lead_vision",
+    "band": "High",
+    "sentence": "You lead by creating belief, momentum, and future direction.",
+    "sourceSheetRow": 11
+  },
+  {
+    "key": "leadership_people_high",
+    "category": "Leadership",
+    "signalKey": "lead_people",
+    "band": "High",
+    "sentence": "You lead by building trust, support, and team development.",
+    "sourceSheetRow": 12
+  },
+  {
+    "key": "leadership_process_high",
+    "category": "Leadership",
+    "signalKey": "lead_process",
+    "band": "High",
+    "sentence": "You lead through clarity, structure, and system design.",
+    "sourceSheetRow": 13
+  },
+  {
+    "key": "conflict_compete_high",
+    "category": "Conflict",
+    "signalKey": "conflict_compete",
+    "band": "High",
+    "sentence": "In conflict, you are likely to take a firm position and push for resolution.",
+    "sourceSheetRow": 14
+  },
+  {
+    "key": "conflict_collaborate_high",
+    "category": "Conflict",
+    "signalKey": "conflict_collaborate",
+    "band": "High",
+    "sentence": "In conflict, you are inclined to seek alignment and shared movement.",
+    "sourceSheetRow": 15
+  },
+  {
+    "key": "conflict_compromise_high",
+    "category": "Conflict",
+    "signalKey": "conflict_compromise",
+    "band": "High",
+    "sentence": "In conflict, you tend to look for balanced, workable middle ground.",
+    "sourceSheetRow": 16
+  },
+  {
+    "key": "conflict_accommodate_high",
+    "category": "Conflict",
+    "signalKey": "conflict_accommodate",
+    "band": "High",
+    "sentence": "In conflict, you may prioritise harmony and relationship preservation.",
+    "sourceSheetRow": 17
+  },
+  {
+    "key": "conflict_avoid_high",
+    "category": "Conflict",
+    "signalKey": "conflict_avoid",
+    "band": "High",
+    "sentence": "In conflict, you may step back until there is more clarity or lower emotional intensity.",
+    "sourceSheetRow": 18
+  },
+  {
+    "key": "pressure_control_high",
+    "category": "Pressure",
+    "signalKey": "stress_control",
+    "band": "High",
+    "sentence": "Under pressure, you may become more controlling and less tolerant of delay.",
+    "sourceSheetRow": 19
+  },
+  {
+    "key": "pressure_scatter_high",
+    "category": "Pressure",
+    "signalKey": "stress_scatter",
+    "band": "High",
+    "sentence": "Under pressure, you may lose focus and become more reactive or diffuse.",
+    "sourceSheetRow": 20
+  },
+  {
+    "key": "pressure_avoidance_high",
+    "category": "Pressure",
+    "signalKey": "stress_avoidance",
+    "band": "High",
+    "sentence": "Under pressure, you may retreat from difficult conversations or unresolved tension.",
+    "sourceSheetRow": 21
+  },
+  {
+    "key": "pressure_criticality_high",
+    "category": "Pressure",
+    "signalKey": "stress_criticality",
+    "band": "High",
+    "sentence": "Under pressure, you may become more critical, exacting, or perfection-focused.",
+    "sourceSheetRow": 22
+  },
+  {
+    "key": "culture_market_high",
+    "category": "Culture",
+    "signalKey": "culture_market",
+    "band": "High",
+    "sentence": "You are likely to thrive in high-accountability, performance-driven cultures.",
+    "sourceSheetRow": 23
+  },
+  {
+    "key": "culture_adhocracy_high",
+    "category": "Culture",
+    "signalKey": "culture_adhocracy",
+    "band": "High",
+    "sentence": "You are likely to thrive in innovative, change-oriented cultures.",
+    "sourceSheetRow": 24
+  },
+  {
+    "key": "culture_clan_high",
+    "category": "Culture",
+    "signalKey": "culture_clan",
+    "band": "High",
+    "sentence": "You are likely to thrive in collaborative, trust-based cultures.",
+    "sourceSheetRow": 25
+  },
+  {
+    "key": "culture_hierarchy_high",
+    "category": "Culture",
+    "signalKey": "culture_hierarchy",
+    "band": "High",
+    "sentence": "You are likely to thrive in structured, process-driven cultures.",
+    "sourceSheetRow": 26
+  }
+]

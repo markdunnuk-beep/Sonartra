@@ -1,0 +1,20 @@
+{
+  "name": "sonartra",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "convert:wplp80": "tsx scripts/convert-wplp80-excel-to-seeds.ts",
+    "verify:wplp80": "tsx scripts/verify-wplp80-seeds.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "xlsx": "^0.18.5"
+  }
+}

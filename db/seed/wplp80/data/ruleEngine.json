@@ -1,0 +1,44 @@
+[
+  {
+    "key": "rule_01",
+    "ruleType": "Tension",
+    "condition": "Driver high & Operator high",
+    "output": "You balance a desire for control with a need for stability, which can create friction in fast-changing environments.",
+    "sourceSheetRow": 2
+  },
+  {
+    "key": "rule_02",
+    "ruleType": "Tension",
+    "condition": "Influencer high & Analyst high",
+    "output": "You combine communication and structured thinking, though you may shift between intuition and logic depending on context.",
+    "sourceSheetRow": 3
+  },
+  {
+    "key": "rule_03",
+    "ruleType": "Risk Modifier",
+    "condition": "Driver high & Stress Control high",
+    "output": "Under strain, your drive for results can become over-control.",
+    "sourceSheetRow": 4
+  },
+  {
+    "key": "rule_04",
+    "ruleType": "Risk Modifier",
+    "condition": "Analyst high & Stress Criticality high",
+    "output": "Under strain, your standards can harden into excessive criticism or over-analysis.",
+    "sourceSheetRow": 5
+  },
+  {
+    "key": "rule_05",
+    "ruleType": "Risk Modifier",
+    "condition": "Operator high & Stress Avoidance high",
+    "output": "Under strain, your preference for stability can become withdrawal from difficult issues.",
+    "sourceSheetRow": 6
+  },
+  {
+    "key": "rule_06",
+    "ruleType": "Risk Modifier",
+    "condition": "Influencer high & Stress Scatter high",
+    "output": "Under strain, your energy can become diffuse and less focused.",
+    "sourceSheetRow": 7
+  }
+]
