@@ -1,20 +1,36 @@
 {
   "name": "sonartra",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "Sonartra MVP Engine App foundation",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
     "convert:wplp80": "tsx scripts/convert-wplp80-excel-to-seeds.ts",
     "verify:wplp80": "tsx scripts/verify-wplp80-seeds.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "@types/node": "^25.5.0",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.36.0",
+    "eslint-config-next": "latest",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
