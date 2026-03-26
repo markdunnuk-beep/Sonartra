@@ -291,29 +291,48 @@ export type ScoreResult = {
 export type NormalizedSignalScore = {
   signalId: SignalId;
   signalKey: SignalKey;
+  signalTitle: string;
+  domainId: DomainId;
+  domainKey: DomainKey;
+  domainSource: DomainSource;
+  isOverlay: boolean;
+  overlayType: SignalOverlayType;
   rawTotal: number;
   normalizedValue: number;
   percentage: number;
+  domainPercentage: number;
   rank: number;
 };
 
 export type NormalizedDomainSummary = {
   domainId: DomainId;
   domainKey: DomainKey;
-  averageNormalizedValue: number;
-  averagePercentage: number;
-  rankedSignalIds: SignalId[];
+  domainTitle: string;
+  domainSource: DomainSource;
+  rawTotal: number;
+  normalizedValue: number;
+  percentage: number;
+  signalScores: readonly NormalizedSignalScore[];
+  signalCount: number;
+  answeredQuestionCount: number;
+  rankedSignalIds: readonly SignalId[];
 };
 
 export type NormalizationDiagnostics = {
-  normalizationMethod: string;
-  zeroSafeApplied: boolean;
+  normalizationMethod: 'largest_remainder_integer_percentages';
+  totalScoreMass: number;
+  zeroMass: boolean;
+  globalPercentageSum: number;
+  domainPercentageSums: Readonly<Record<DomainId, number>>;
+  roundingAdjustmentsApplied: number;
+  zeroScoreSignalCount: number;
+  warnings: readonly string[];
   generatedAt: string;
 };
 
 export type NormalizedResult = {
-  signalScores: NormalizedSignalScore[];
-  domainSummaries: NormalizedDomainSummary[];
+  signalScores: readonly NormalizedSignalScore[];
+  domainSummaries: readonly NormalizedDomainSummary[];
   topSignalId: SignalId | null;
   diagnostics: NormalizationDiagnostics;
 };
