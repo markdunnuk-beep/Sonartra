@@ -243,26 +243,44 @@ export type RuntimeResponseSet = {
 export type RawSignalScore = {
   signalId: SignalId;
   signalKey: SignalKey;
+  signalTitle: string;
+  domainId: DomainId;
+  domainKey: DomainKey;
+  domainSource: DomainSource;
+  isOverlay: boolean;
+  overlayType: SignalOverlayType;
+  orderIndex: number;
   rawTotal: number;
 };
 
 export type RawDomainScoreSummary = {
   domainId: DomainId;
   domainKey: DomainKey;
+  domainTitle: string;
+  domainSource: DomainSource;
   rawTotal: number;
+  signalScores: RawSignalScore[];
   signalCount: number;
+  answeredQuestionCount: number;
 };
 
 export type ScoreDiagnostics = {
   scoringMethod: 'option_signal_weights_only';
-  processedResponseCount: number;
-  ignoredResponseCount: number;
+  totalQuestions: number;
+  answeredQuestions: number;
+  unansweredQuestions: number;
+  totalResponsesProcessed: number;
+  totalWeightsApplied: number;
+  totalScoreMass: number;
+  zeroScoreSignalCount: number;
+  zeroAnswerSubmission: boolean;
+  warnings: readonly string[];
   generatedAt: string;
 };
 
 export type ScoreResult = {
-  signalScores: RawSignalScore[];
-  domainSummaries?: RawDomainScoreSummary[];
+  signalScores: readonly RawSignalScore[];
+  domainSummaries: readonly RawDomainScoreSummary[];
   diagnostics: ScoreDiagnostics;
 };
 
