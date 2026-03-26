@@ -1,0 +1,248 @@
+Sonartra MVP — Design Inspiration Reference
+
+Purpose:
+This document captures key design patterns, layout structures, and UX principles extracted from reference websites:
+- Palantir
+- Supabase
+- Vercel
+
+These references guide the visual and interaction design of the Sonartra web application, particularly:
+- Homepage
+- Product pages
+- Dashboard framing
+- Enterprise positioning
+
+--------------------------------------------------
+REFERENCE SOURCES
+--------------------------------------------------
+
+Palantir Homepage
+Source file: Palantir Homepage.pdf
+:contentReference[oaicite:0]{index=0}
+
+Supabase Homepage
+Source file: Supabase Homepage.pdf
+:contentReference[oaicite:1]{index=1}
+
+Vercel Homepage
+Source file: Vercel Homepage.pdf
+:contentReference[oaicite:2]{index=2}
+
+--------------------------------------------------
+1. PALANTIR — ENTERPRISE AUTHORITY + TRUST
+--------------------------------------------------
+
+Key characteristics:
+
+1. Strong, bold hero messaging
+- Example (page 1):
+  “Driving productivity across the UK through AI-powered software”
+- Large typography
+- Minimal clutter
+- Immediate positioning
+
+2. Institutional credibility framing
+- “Trusted by the UK’s most vital organisations…”
+- Industry segmentation:
+  - Healthcare
+  - Defence
+  - Government
+  - Public safety
+
+3. Use-case grid layout
+- Visual cards with:
+  - image
+  - short description
+  - link/CTA
+- Scannable and structured
+
+4. Content hierarchy
+- Clear sections:
+  - Hero
+  - Use cases
+  - News / credibility
+  - Security & compliance
+  - Blog
+  - CTA
+
+5. Trust & security emphasis
+- Dedicated section on:
+  - data security
+  - privacy
+  - infrastructure
+- Enterprise reassurance language
+
+6. Minimalist CTAs
+- “Request a demo”
+- Not aggressive or sales-heavy
+
+Design takeaway for Sonartra:
+- Position as a serious, enterprise-grade intelligence platform
+- Use bold, declarative headlines
+- Include structured “use case” or “what it enables” sections
+- Build trust early (not later)
+
+--------------------------------------------------
+2. SUPABASE — PRODUCT CLARITY + MODULAR VALUE
+--------------------------------------------------
+
+Key characteristics:
+
+1. Clear product promise
+- Example (page 1):
+  “Build in a weekend. Scale to millions”
+- Simple, developer-focused value proposition
+
+2. Modular feature cards
+- Grid layout:
+  - Database
+  - Auth
+  - Edge Functions
+  - Storage
+  - Realtime
+  - Vector
+
+3. Platform framing
+- “Use one or all. Best of breed products”
+- Integrated ecosystem messaging
+
+4. Developer-first UX
+- Clean UI blocks
+- Code examples
+- Tool previews
+
+5. Social proof
+- Logos and customer stories
+- Community testimonials (page 3)
+
+6. Strong mid-page CTAs
+- “Start building in seconds”
+- Repeated engagement points
+
+7. Dark UI with accent colour
+- Consistent visual identity
+- Clean spacing and alignment
+
+Design takeaway for Sonartra:
+- Break platform into clear components:
+  - Signals
+  - Individual Intelligence
+  - Team Intelligence
+- Use card-based layouts for clarity
+- Keep messaging simple and functional
+- Reinforce “platform” rather than “tool”
+
+--------------------------------------------------
+3. VERCEL — SPEED + MODERN UX + PERFORMANCE
+--------------------------------------------------
+
+Key characteristics:
+
+1. Clean, modern hero
+- Example (page 1):
+  “Build and deploy on the AI Cloud”
+- Balanced text + visual
+
+2. Performance messaging
+- Metrics-driven:
+  - “95% reduction”
+  - “24x faster builds”
+
+3. Structured product sections
+- Cards:
+  - Web Apps
+  - Agents
+  - AI Apps
+  - Commerce
+
+4. Visual system clarity
+- Grid-based layout
+- Consistent spacing
+- Minimal text per block
+
+5. Infrastructure storytelling
+- “From code to infrastructure in one git push”
+- Explains capability simply
+
+6. Repeated CTA rhythm
+- “Start Deploying”
+- “Get a Demo”
+
+7. Enterprise + developer blend
+- Appeals to both technical and business users
+
+Design takeaway for Sonartra:
+- Emphasise outcomes (performance, decisions, clarity)
+- Use structured grids for content
+- Keep pages highly scannable
+- Blend technical credibility with business value
+
+--------------------------------------------------
+SONARTRA DESIGN PRINCIPLES (DERIVED)
+--------------------------------------------------
+
+1. Enterprise-first positioning
+- Avoid startup-style fluff
+- Use confident, declarative language
+
+2. Scan-first layout
+- Users should understand value in seconds
+- Use:
+  - large headings
+  - short supporting text
+  - visual sections
+
+3. Structured sections
+Homepage should follow:
+
+- Hero (clear positioning)
+- What Sonartra is
+- What it measures
+- How it works
+- Use cases / outcomes
+- Proof / credibility
+- CTA
+
+4. Card-based UI
+- Assessments
+- Domains
+- Outputs
+- Use cases
+
+5. Minimal but strong CTAs
+- “Start assessment”
+- “View results”
+- “Request demo”
+
+6. Dark, premium visual style
+- Inspired by Supabase + Palantir
+- Clean typography
+- Subtle motion (later phase)
+
+7. No clutter
+- Avoid:
+  - long paragraphs
+  - unnecessary UI elements
+  - complex navigation
+
+--------------------------------------------------
+WHAT TO AVOID
+--------------------------------------------------
+
+- Overly playful or consumer-style UI
+- Dense text-heavy pages
+- Multiple competing CTAs
+- Complex onboarding flows early
+- AI-generated vague marketing language
+
+--------------------------------------------------
+FINAL RULE
+--------------------------------------------------
+
+Sonartra should feel like:
+
+- Palantir (authority and trust)
+- Supabase (clarity and modularity)
+- Vercel (speed and modern UX)
+
+Combined into a clean, intelligence-focused platform experience.
