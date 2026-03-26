@@ -120,7 +120,7 @@ for (const domain of seeds.domains) {
       assessmentVersionId,
       domain.key,
       domain.title,
-      domain.description ?? null,
+      null,
       'QUESTION_SECTION',
       domain.order,
     ],

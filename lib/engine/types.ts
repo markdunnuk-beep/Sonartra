@@ -139,6 +139,9 @@ export type RuntimeAssessmentDefinition = {
   questions: RuntimeQuestion[];
 };
 
+export type RuntimeLookupById<TKey extends string, TValue> = Readonly<Record<TKey, TValue>>;
+export type RuntimeLookupByKey<TKey extends string, TValue> = Readonly<Record<TKey, TValue>>;
+
 export type RuntimeDomain = {
   id: DomainId;
   key: DomainKey;
@@ -184,6 +187,26 @@ export type RuntimeOptionSignalWeight = {
   weight: number;
   reverseFlag: boolean;
   sourceWeightKey: string | null;
+};
+
+export type RuntimeExecutionIndexes = {
+  domainById: RuntimeLookupById<DomainId, RuntimeDomain>;
+  domainByKey: RuntimeLookupByKey<DomainKey, RuntimeDomain>;
+  signalById: RuntimeLookupById<SignalId, RuntimeSignal>;
+  signalByKey: RuntimeLookupByKey<SignalKey, RuntimeSignal>;
+  questionById: RuntimeLookupById<QuestionId, RuntimeQuestion>;
+  questionByKey: RuntimeLookupByKey<QuestionKey, RuntimeQuestion>;
+  optionById: RuntimeLookupById<OptionId, RuntimeOption>;
+  optionsByQuestionId: RuntimeLookupById<QuestionId, readonly RuntimeOption[]>;
+};
+
+export type RuntimeExecutionModel = {
+  definition: RuntimeAssessmentDefinition;
+  indexes: RuntimeExecutionIndexes;
+  domains: readonly RuntimeDomain[];
+  signals: readonly RuntimeSignal[];
+  questions: readonly RuntimeQuestion[];
+  options: readonly RuntimeOption[];
 };
 
 /* ----------------------------------

@@ -14,6 +14,7 @@ export type DomainSeed = {
   title: string;
   order: number;
   source: 'question_section' | 'signal_group';
+  description?: string;
 };
 
 export type SignalSeed = {
