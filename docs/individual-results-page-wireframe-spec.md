@@ -1,4 +1,26 @@
-# Sonartra MVP — Individual Results Page (Production Wireframe Spec)
+# Sonartra MVP — Individual Results Page (Production Wireframe Spec v2)
+
+## RESULT PAGE PURPOSE
+
+The Individual Results page is the **summary intelligence layer** of the Sonartra experience.
+
+It is designed to:
+- deliver the core behavioural insight quickly
+- highlight the most important signals
+- provide a small number of actionable outputs
+- feel accurate and immediately relatable
+
+It is NOT designed to:
+- present full analytical depth
+- expose every signal or diagnostic
+- replicate a full assessment report
+
+The full detailed output will be delivered via a separate PDF report.
+
+Design principle:
+**"Enough to understand. Not everything to analyse."**
+
+---
 
 ## 1) PAGE STRUCTURE OVERVIEW
 
@@ -38,302 +60,231 @@
 - Single horizontal bar card, height `56px`
 - Left group:
   - `Assessment name` (semibold, 16px)
-  - small separator dot
-  - `Completion date` (13px muted text)
+  - separator dot
+  - `Completion date` (13px muted)
 - Right group:
-  - Status pill (`Ready`) if status is present
+  - Status pill (`Ready`) if present
 
 **Visual treatment**
-- Card background: `#111827`
+- Background: `#111827`
 - Border: `1px solid #1F2937`
 - Radius: `12px`
-- Internal padding: `0 16px`
+- Padding: `0 16px`
 
-**Content mapping**
-- assessment name ← payload metadata context
-- completion date ← stored completion timestamp
-- status ← result status only (no derived states)
+---
 
 ### 2.2 Hero — Core Insight (Critical)
 
-**Purpose**: make top signal obvious in under 5 seconds.
+**Purpose**: make the top signal immediately clear and meaningful.
 
 **Layout**
 - Full-width dominant card, min height `220px`
-- Two-column split (desktop `8/4`):
-  - Left (`8` cols): insight text stack
-  - Right (`4` cols): dominant top signal visual block
+- Desktop split: `8 / 4`
 
-**Left stack (top to bottom)**
-1. Label: `Top Signal` (12px uppercase tracking)
-2. Top signal title (36px, bold)
-3. Core one-line insight (18px, medium)
-4. Optional supporting sentence (14px muted), max 140 characters, single paragraph
+**Left (8 cols)**
+1. Label: `Top Signal` (12px uppercase)
+2. Signal name (36px bold)
+3. Core insight (18px)
+4. Supporting / impact sentence (14px muted, max 140 chars)
 
-**Right visual block**
-- Large score chip: normalized score for top signal (e.g., `86%`)
-- Thin progress bar under score (purely representational from existing normalized value)
-- Optional rank badge `#1`
+**Right (4 cols)**
+- Large score chip (e.g. `86%`)
+- Thin progress bar
+- Rank badge `#1`
 
 **Visual treatment**
-- Background: elevated dark (`#0F172A`)
-- Border: subtle (`#243244`)
+- Background: `#0F172A`
+- Border: `#243244`
 - Radius: `16px`
 - Padding: `24px`
 
 **Always visible**
-- top signal name
-- core insight sentence
-- top score
+- Signal name
+- Core insight
+- Score
 
-### 2.3 Signal Hierarchy Section
+---
 
-**Purpose**: show full ranking with clear emphasis bands.
+### 2.3 Signal Hierarchy
 
-**Layout**
-- Section title row + signal content block.
-- Content split into 2 tiers:
+**Purpose**: show ranking with clear emphasis bands.
 
-**Tier A — Prominent secondary (Top 2–5)**
-- 4 equal cards in a 2x2 grid (desktop), stacked on smaller screens.
-- Each card includes:
-  - rank label (`#2` to `#5`)
+**Tier A — Top 2–5**
+- 2x2 grid (desktop)
+- Each card:
+  - rank label
   - signal name
-  - normalized score percentage
-  - horizontal score bar
+  - score %
+  - bar
 
-**Tier B — Remaining signals (de-emphasized)**
-- Collapsible list card below Tier A.
-- Default state: collapsed.
-- Collapsed preview shows first 3 remaining signals as muted rows.
-- Expanded state shows all remaining ranked signals in order.
+**Tier B — Remaining**
+- Collapsible list
+- Default: collapsed
+- Preview: first 3 muted rows
+- Expand: full ranked list
 
-**Scoring display rule**
-- Use percentage values exactly as provided in `ranked_signals` / normalized scores.
-- No recalculation in UI.
+**Rules**
+- No recalculation
+- Use payload scores directly
+
+---
 
 ### 2.4 Domain Summaries
 
-**Purpose**: grouped interpretation without dense prose.
+**Purpose**: provide grouped interpretation without density.
 
 **Layout**
-- Section title + card grid.
-- Desktop: 2-column cards; Tablet/Mobile: single column.
+- 2-column grid (desktop)
 
-**Domain card structure**
-1. Domain name (16px semibold)
-2. One concise summary sentence from `domain_summaries`
-3. Optional micro-list (max 2 bullets) only if already present in payload text; do not generate new bullets
+**Card**
+- Domain name
+- 1 concise summary sentence
+- Optional micro-list (max 2 bullets if already present)
 
-**Expand/collapse behavior**
-- Show first **4 domains** by default.
-- If more than 4 domains exist, remainder are inside `Show all domains` collapsible container.
-- Expanded preserves original payload order.
+**Visibility rules**
+- Show first **2 domains** by default
+- Remaining domains inside `Show all domains` collapsible
+- Preserve original order
+
+---
 
 ### 2.5 Action Block — Practical Outputs
 
-**Purpose**: highest business value after hero.
+**Purpose**: deliver operational value.
 
 **Layout**
-- One parent container with three child cards in fixed order:
-  1. Strengths
-  2. Watchouts
-  3. Development Focus
-- Desktop: 3-column layout
-- Tablet: 2 columns (`Strengths` and `Watchouts` top, `Development Focus` full-width below)
-- Mobile: single-column stack
+- 3 cards:
+  - Strengths
+  - Watchouts
+  - Development Focus
 
-**Each child card**
-- Title row
-- Bullet list from payload array
-- Max visible bullets before scroll: 6 (internal scroll if longer)
+**Responsive**
+- Desktop: 3 columns
+- Tablet: 2 + 1 layout
+- Mobile: stacked
 
-**Tone controls in UI**
-- Neutral labels only; no decorative adjectives.
-- No icons that imply severity scoring.
+**Content rules**
+- Bullet list from payload
+- Max visible bullets: **3–4**
+- Additional items behind `Show more`
+- Avoid internal scroll where possible
+
+**Tone**
+- Neutral
+- Action-oriented
+- No decorative UI
+
+---
 
 ### 2.6 Optional Overview Summary
 
-**Inclusion rule**
-- Render only if `overview_summary` is present and non-empty.
+**Render only if present**
+
+**Suppression rule**
+- If it duplicates the hero insight → omit entirely
 
 **Layout**
-- Compact single card at bottom.
-- Title: `Overview`
-- Body text max 3 lines by default, with `Read more` expand for longer content.
+- Small card at bottom
+- Max 3 lines visible
+- `Read more` expands
 
-**De-emphasis rules**
-- Smaller than hero/action typography.
-- Muted background and text contrast lower than hero.
+**Visual**
+- Lower contrast than hero
+- De-emphasised
 
 ---
 
 ## 3) COMPONENT DEFINITIONS
 
-### A. `ContextBar`
-- Props: `assessmentName`, `completedAt`, `status?`
-- Height: `56px`
-- No expand behavior
+- `ContextBar`
+- `CoreInsightHero`
+- `SignalCard`
+- `SignalRemainderList`
+- `DomainSummaryCard`
+- `ActionColumnCard`
+- `OverviewSummaryCard`
 
-### B. `CoreInsightHero`
-- Props: `topSignal`, `coreInsightLine`, `supportingSentence?`, `topSignalScore`
-- Min height: `220px`
-- Mandatory data guard: do not render placeholders like `N/A`; hide optional sentence if missing
-
-### C. `SignalCard`
-- Props: `rank`, `signalName`, `score`
-- Used for Top 2–5 only
-
-### D. `SignalRemainderList`
-- Props: `signals[]` (rank > 5)
-- Default collapsed
-- Toggle label: `Show all signals` / `Hide signals`
-
-### E. `DomainSummaryCard`
-- Props: `domainName`, `summaryText`
-- Optional expand if summary exceeds 220 chars
-
-### F. `ActionColumnCard`
-- Props: `title`, `items[]`
-- Titles locked to exact payload sections
-
-### G. `OverviewSummaryCard`
-- Props: `overviewSummary`
-- Optional render only
+(All props unchanged from v1 spec)
 
 ---
 
 ## 4) HIERARCHY & VISUAL PRIORITY
 
-**Priority 1 (largest / highest contrast)**
-- Top signal name
-- Core insight sentence
-- Top signal score
+**Priority 1**
+- Top signal
+- Core insight
+- Score
 
 **Priority 2**
-- Top 2–5 signal cards
-- Action block section headings
+- Top 2–5 signals
+- Action headings
 
 **Priority 3**
-- Domain summaries
-- Header context metadata
+- Domains
+- Context bar
 
-**Priority 4 (lowest emphasis)**
-- Overview summary
-- Collapsed remainder signals
-
-**Typography scale**
-- Hero title: `36px`
-- Section headings: `20px`
-- Card headings: `16px`
-- Body: `14px`
-- Meta/captions: `12px`
+**Priority 4**
+- Overview
+- Collapsed signals
 
 ---
 
-## 5) CONTENT RULES (WHAT IS SHOWN / HIDDEN)
+## 5) CONTENT RULES
 
 **Always shown**
-- Header context fields (if present)
-- Hero top signal block
-- Top 2–5 signals
-- Action block (Strengths, Watchouts, Development Focus)
+- Hero
+- Top signals
+- Action block
 
 **Conditionally shown**
-- Status pill: only if status exists
-- Supporting sentence in hero: only if present
-- Overview summary section: only if present
-- Extra domains/signals: behind collapsible controls when count exceeds defaults
+- Status pill
+- Supporting sentence
+- Overview
+- Extra domains/signals
 
-**Never shown on this page**
-- `diagnostics`
-- raw scoring internals
-- computed/derived narratives not present in payload
-
-**Formatting constraints**
-- Preserve payload wording; no rewriting in UI layer.
-- Truncate only for layout, with explicit expand interactions.
+**Never shown**
+- diagnostics
+- raw scoring
+- derived narratives
 
 ---
 
 ## 6) INTERACTION PATTERNS
 
-1. **Show/Hide remaining signals**
-   - Default: collapsed
-   - Click toggles full ranked remainder list
-   - State persists during page session
+- Toggle signals
+- Toggle domains
+- Show more (actions)
+- Read more (overview)
 
-2. **Show all domains**
-   - Default: first 4 visible
-   - Toggle reveals remaining domain cards
-
-3. **Read more / less (Overview only)**
-   - Trigger only when text exceeds 3 lines
-   - Smooth height transition (`150–200ms`)
-
-4. **No sortable/reorder interactions**
-   - Ranking order is fixed from payload
-
-5. **No edit mode / personalization controls**
-   - Results are read-only
+No reordering. No editing.
 
 ---
 
 ## 7) RESPONSIVE BEHAVIOUR
 
-### Desktop (`>=1200px`)
-- 12-column grid
-- Hero split 8/4
-- Signal Top 2–5 in 2x2 grid
-- Action block in 3 columns
-
-### Tablet (`768px–1199px`)
-- 8-column grid
-- Hero stacked (text first, score block second)
-- Signal Top 2–5 in 2 columns
-- Action block in 2-row hybrid layout
-
-### Mobile (`<768px`)
-- Single column
-- Hero text and score stacked
-- All cards full-width
-- Collapse controls remain available to reduce vertical overload
-
-**Minimum tap target**
-- 40px for all interactive toggles
+Unchanged from v1 (desktop / tablet / mobile rules preserved)
 
 ---
 
-## 8) IMPLEMENTATION NOTES (FOR FRONTEND DEV)
+## 8) IMPLEMENTATION NOTES
 
-1. **Data contract usage**
-   - Consume canonical result payload directly.
-   - Do not compute ranking, score normalization, or inferred commentary in the client.
+- No UI-side computation
+- Fixed section order
+- Omit empty sections
+- Accessible toggles
+- CSS-based bars
+- Optional telemetry
 
-2. **Section rendering sequence**
-   - Render sections in fixed order exactly as specified.
+---
 
-3. **Loading and empty states**
-   - Loading: skeleton placeholders matching final card dimensions.
-   - Empty/missing optional blocks: omit section, do not render empty cards.
+## FINAL RULE
 
-4. **Accessibility**
-   - Minimum text contrast ratio 4.5:1 for body text.
-   - Toggle controls use `button` semantics with `aria-expanded`.
-   - Section headings follow descending semantic order (`h1` hero signal, `h2` sections).
+This page is a **summary layer**.
 
-5. **Performance**
-   - No heavy charting library required for MVP.
-   - Use lightweight CSS bars for score visualization.
+The **PDF report is the full analysis layer**.
 
-6. **Telemetry (optional but recommended)**
-   - Track expand/collapse interactions for:
-     - remaining signals
-     - extra domains
-     - overview read-more
+Do not expand this page into a full report.
 
-7. **Visual density controls**
-   - Keep max line length to ~80 chars in summary text blocks.
-   - Enforce consistent card padding (`16px` standard, `24px` hero).
+---
 
-This is the single approved layout for Sonartra MVP Individual Results.
+**This is the single approved layout for Sonartra MVP Individual Results.**
