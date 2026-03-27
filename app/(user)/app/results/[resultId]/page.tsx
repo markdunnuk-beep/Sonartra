@@ -19,7 +19,58 @@ type ResultDetailPageProps = {
 
 const PROMINENT_SIGNAL_LIMIT = 5;
 const VISIBLE_ACTION_LIMIT = 3;
-const VISIBLE_DOMAIN_LIMIT = 2;
+const INTELLIGENCE_DOMAIN_ORDER = [
+  'signal_style',
+  'signal_mot',
+  'signal_lead',
+  'signal_conflict',
+  'signal_culture',
+  'signal_stress',
+] as const;
+
+const INTELLIGENCE_DOMAIN_CONFIG: Record<(typeof INTELLIGENCE_DOMAIN_ORDER)[number], {
+  title: string;
+  eyebrow: string;
+  summaryLabel: string;
+  fallback: string;
+}> = {
+  signal_style: {
+    title: 'Behaviour Style',
+    eyebrow: 'How you tend to show up',
+    summaryLabel: 'How you operate',
+    fallback: 'This area shows the clearest working style that tends to shape your day-to-day approach.',
+  },
+  signal_mot: {
+    title: 'Motivators',
+    eyebrow: 'What tends to energise you',
+    summaryLabel: 'What keeps you engaged',
+    fallback: 'This area shows the conditions and outcomes most likely to keep your energy steady.',
+  },
+  signal_lead: {
+    title: 'Leadership',
+    eyebrow: 'How you tend to lead',
+    summaryLabel: 'How your leadership shows up',
+    fallback: 'This area shows the form of direction and support you are most likely to bring when others look to you.',
+  },
+  signal_conflict: {
+    title: 'Conflict',
+    eyebrow: 'How you tend to handle tension',
+    summaryLabel: 'How you respond when tensions rise',
+    fallback: 'This area shows the conflict response you are most likely to rely on when the situation becomes difficult.',
+  },
+  signal_culture: {
+    title: 'Culture',
+    eyebrow: 'Where you are likely to work best',
+    summaryLabel: 'What kind of environment fits best',
+    fallback: 'This area shows the kind of environment where your strengths are more likely to come through cleanly.',
+  },
+  signal_stress: {
+    title: 'Stress',
+    eyebrow: 'How pressure may change your pattern',
+    summaryLabel: 'What to notice under pressure',
+    fallback: 'This area shows the pressure pattern most worth noticing early so it does not take over.',
+  },
+};
 
 function formatResultDate(value: string | null): string {
   if (!value) {
@@ -45,6 +96,11 @@ function formatDomainLabel(value: string): string {
     .join(' ');
 }
 
+function getUserFacingDomainTitle(domainKey: string): string {
+  const config = INTELLIGENCE_DOMAIN_CONFIG[domainKey as keyof typeof INTELLIGENCE_DOMAIN_CONFIG];
+  return config?.title ?? formatDomainLabel(domainKey);
+}
+
 function getHeroNarrative(result: AssessmentResultDetailViewModel): string {
   const narrative = result.overviewSummary.narrative?.trim();
   if (narrative) {
@@ -62,6 +118,62 @@ function getSignalTitle(signal: AssessmentResultSignalViewModel): string {
   return 'title' in signal ? signal.title : signal.signalTitle;
 }
 
+function splitNarrative(value: string): readonly string[] {
+  return value
+    .split(/(?<=[.!?])\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function getSecondaryHeroSignal(result: AssessmentResultDetailViewModel): AssessmentResultSignalViewModel | null {
+  const primarySignalId = result.topSignal?.signalId ?? result.rankedSignals[0]?.signalId ?? null;
+  return result.rankedSignals.find((signal) => signal.signalId !== primarySignalId) ?? null;
+}
+
+function getHeroHeading(result: AssessmentResultDetailViewModel, secondarySignal: AssessmentResultSignalViewModel | null): string {
+  const headline = result.overviewSummary.headline?.trim();
+  if (headline) {
+    return headline;
+  }
+
+  if (result.topSignal && secondarySignal) {
+    return `${result.topSignal.title} with ${getSignalTitle(secondarySignal)}`;
+  }
+
+  if (result.topSignal) {
+    return result.topSignal.title;
+  }
+
+  return 'Overall pattern';
+}
+
+function getCombinedInterpretation(
+  result: AssessmentResultDetailViewModel,
+  secondarySignal: AssessmentResultSignalViewModel | null,
+): string {
+  if (result.topSignal && secondarySignal) {
+    return `${result.topSignal.title} leads, with ${getSignalTitle(secondarySignal)} shaping how that pattern comes through day to day.`;
+  }
+
+  if (result.topSignal) {
+    return `${result.topSignal.title} is the clearest pattern in this result.`;
+  }
+
+  return 'This result shows a clear overall pattern ready for review.';
+}
+
+function getHeroSupport(result: AssessmentResultDetailViewModel): {
+  narrative: string;
+  support: string | null;
+} {
+  const [narrative, support] = splitNarrative(getHeroNarrative(result));
+
+  return {
+    narrative: narrative ?? 'This result is ready to review.',
+    support: support ?? null,
+  };
+}
+
 function getVisibleSignals(result: AssessmentResultDetailViewModel): {
   leadSignal: AssessmentResultSignalViewModel | null;
   prominentSignals: readonly AssessmentResultSignalViewModel[];
@@ -76,28 +188,6 @@ function getVisibleSignals(result: AssessmentResultDetailViewModel): {
     leadSignal,
     prominentSignals,
     secondarySignals,
-  };
-}
-
-function getPrioritizedDomains(result: AssessmentResultDetailViewModel): {
-  visibleDomains: readonly AssessmentResultDomainViewModel[];
-  additionalDomains: readonly AssessmentResultDomainViewModel[];
-} {
-  const prioritized = [...result.domainSummaries].sort((left, right) => {
-    if (left.domainSource !== right.domainSource) {
-      return left.domainSource === 'signal_group' ? -1 : 1;
-    }
-
-    if (right.percentage !== left.percentage) {
-      return right.percentage - left.percentage;
-    }
-
-    return left.domainTitle.localeCompare(right.domainTitle);
-  });
-
-  return {
-    visibleDomains: prioritized.slice(0, VISIBLE_DOMAIN_LIMIT),
-    additionalDomains: prioritized.slice(VISIBLE_DOMAIN_LIMIT),
   };
 }
 
@@ -132,6 +222,61 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
   return (
     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">{children}</p>
   );
+}
+
+function getSignalSummaryLine(signal: AssessmentResultSignalViewModel | null, fallback: string): string {
+  if (!signal) {
+    return fallback;
+  }
+
+  return signal.isOverlay ? `${getSignalTitle(signal)} adds a supporting layer here.` : `${getSignalTitle(signal)} sets the tone in this area.`;
+}
+
+function getDomainInterpretation(domainKey: string, primarySignal: AssessmentResultSignalViewModel | null, secondarySignal: AssessmentResultSignalViewModel | null): {
+  summary: string;
+  support: string | null;
+} {
+  const config = INTELLIGENCE_DOMAIN_CONFIG[domainKey as keyof typeof INTELLIGENCE_DOMAIN_CONFIG];
+  const primaryTitle = primarySignal ? getSignalTitle(primarySignal) : null;
+  const secondaryTitle = secondarySignal ? getSignalTitle(secondarySignal) : null;
+
+  if (!config) {
+    return {
+      summary: getSignalSummaryLine(primarySignal, 'A clear pattern is available in this area.'),
+      support: secondaryTitle ? `${secondaryTitle} adds a second influence to how this shows up.` : null,
+    };
+  }
+
+  if (primaryTitle && secondaryTitle) {
+    return {
+      summary: `${config.summaryLabel} centres on ${primaryTitle}, with ${secondaryTitle} adding the second strongest influence.`,
+      support: `${primaryTitle} tends to come through first, while ${secondaryTitle} shapes the tone around it.`,
+    };
+  }
+
+  if (primaryTitle) {
+    return {
+      summary: `${config.summaryLabel} centres on ${primaryTitle}.`,
+      support: null,
+    };
+  }
+
+  return {
+    summary: config.fallback,
+    support: null,
+  };
+}
+
+function getIntelligenceDomains(result: AssessmentResultDetailViewModel): readonly AssessmentResultDomainViewModel[] {
+  const domainByKey = new Map(
+    result.domainSummaries
+      .filter((domain) => domain.domainSource === 'signal_group')
+      .map((domain) => [domain.domainKey, domain] as const),
+  );
+
+  return INTELLIGENCE_DOMAIN_ORDER
+    .map((domainKey) => domainByKey.get(domainKey))
+    .filter((domain): domain is AssessmentResultDomainViewModel => Boolean(domain));
 }
 
 function ActionList({
@@ -192,84 +337,69 @@ function ActionList({
 
 function DomainCard({
   domain,
-  defaultOpen,
 }: {
   domain: AssessmentResultDomainViewModel;
-  defaultOpen?: boolean;
 }) {
-  const visibleSignals = domain.signalScores.slice(0, 3);
-  const hiddenSignals = domain.signalScores.slice(3);
+  const config = INTELLIGENCE_DOMAIN_CONFIG[domain.domainKey as keyof typeof INTELLIGENCE_DOMAIN_CONFIG] ?? {
+    title: domain.domainTitle,
+    eyebrow: 'Domain',
+    summaryLabel: 'Pattern',
+    fallback: 'A persisted domain summary is available for this area.',
+  };
+  const visibleSignals = domain.signalScores.slice(0, 2);
+  const hiddenSignals = domain.signalScores.slice(2);
+  const primarySignal = visibleSignals[0] ?? null;
+  const secondarySignal = visibleSignals[1] ?? null;
+  const interpretation = getDomainInterpretation(domain.domainKey, primarySignal, secondarySignal);
 
   return (
     <article className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-2">
-          <SectionEyebrow>{domain.domainSource === 'signal_group' ? 'Signal Domain' : 'Question Section'}</SectionEyebrow>
-          <h3 className="text-xl font-semibold text-white">{domain.domainTitle}</h3>
-          <p className="text-sm text-white/55">
-            {domain.answeredQuestionCount} answered - {formatPercent(domain.percentage)} of overall signal share
-          </p>
-        </div>
-        <div className="min-w-[10rem]">
-          <div className="mb-2 flex items-center justify-between text-xs text-white/45">
-            <span>Domain concentration</span>
-            <span>{formatPercent(domain.percentage)}</span>
-          </div>
-          <SignalMeter value={domain.percentage} tone="muted" />
-        </div>
+      <div className="space-y-2">
+        <SectionEyebrow>{config.eyebrow}</SectionEyebrow>
+        <h3 className="text-xl font-semibold text-white">{config.title}</h3>
+        <p className="max-w-2xl text-sm leading-7 text-white/62">{interpretation.summary}</p>
+        {interpretation.support ? (
+          <p className="max-w-2xl text-sm leading-7 text-white/48">{interpretation.support}</p>
+        ) : null}
       </div>
 
-      {domain.signalScores.length > 0 ? (
+      {visibleSignals.length > 0 ? (
         <>
-          <div className="mt-5 space-y-3">
-            {visibleSignals.map((signal) => (
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {visibleSignals.map((signal, index) => (
               <div
                 key={signal.signalId}
-                className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3"
+                className="rounded-2xl border border-white/8 bg-black/20 p-4"
               >
-                <div className="flex items-center justify-between gap-4 text-sm">
-                  <div>
-                    <p className="font-medium text-white/88">{signal.signalTitle}</p>
-                    <p className="mt-1 text-xs text-white/45">
-                      Rank #{signal.rank}
-                      {signal.isOverlay ? ' - overlay' : ''}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-white">{formatPercent(signal.percentage)}</p>
-                    <p className="text-xs text-white/45">
-                      {formatPercent(signal.domainPercentage)} in domain
-                    </p>
-                  </div>
-                </div>
+                <p className="text-xs uppercase tracking-[0.18em] text-white/45">
+                  {index === 0 ? 'Primary signal' : 'Secondary signal'}
+                </p>
+                <p className="mt-3 text-lg font-semibold text-white">{signal.signalTitle}</p>
+                <p className="mt-2 text-sm leading-6 text-white/58">
+                  {index === 0
+                    ? `${signal.signalTitle} is the clearest pattern here.`
+                    : `${signal.signalTitle} adds a secondary influence.`}
+                </p>
               </div>
             ))}
           </div>
 
           {hiddenSignals.length > 0 ? (
-            <details
-              className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4"
-              open={defaultOpen}
-            >
+            <details className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
               <summary className="cursor-pointer list-none text-sm font-medium text-white/72 marker:hidden">
-                Show full domain breakdown
+                Show remaining signals in this domain
               </summary>
               <div className="mt-4 space-y-3">
                 {hiddenSignals.map((signal) => (
                   <div
                     key={signal.signalId}
-                    className="flex items-center justify-between gap-3 rounded-2xl bg-white/[0.03] px-4 py-3 text-sm"
+                    className="rounded-2xl bg-white/[0.03] px-4 py-3 text-sm"
                   >
-                    <div>
-                      <p className="font-medium text-white/82">{signal.signalTitle}</p>
-                      <p className="mt-1 text-xs text-white/45">
-                        {signal.isOverlay ? 'Overlay' : 'Scored signal'} - Rank #{signal.rank}
-                      </p>
-                    </div>
-                    <div className="text-right text-white/60">
-                      <p>{formatPercent(signal.percentage)}</p>
-                      <p className="text-xs">{formatPercent(signal.domainPercentage)} in domain</p>
-                    </div>
+                    <p className="font-medium text-white/82">{signal.signalTitle}</p>
+                    <p className="mt-1 text-xs text-white/45">
+                      Additional supporting signal
+                      {signal.isOverlay ? ' - overlay' : ''}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -278,7 +408,7 @@ function DomainCard({
         </>
       ) : (
         <p className="mt-5 rounded-2xl border border-dashed border-white/10 p-4 text-sm text-white/45">
-          This section has no scored signals in the persisted result payload.
+          No persisted domain signals are available for this area.
         </p>
       )}
     </article>
@@ -306,10 +436,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     throw error;
   }
 
-  const { leadSignal, prominentSignals, secondarySignals } = getVisibleSignals(result);
-  const { visibleDomains, additionalDomains } = getPrioritizedDomains(result);
+  const { leadSignal } = getVisibleSignals(result);
+  const intelligenceDomains = getIntelligenceDomains(result);
   const completionDate = formatResultDate(result.generatedAt ?? result.createdAt);
-  const heroNarrative = getHeroNarrative(result);
+  const secondaryHeroSignal = getSecondaryHeroSignal(result);
+  const heroHeading = getHeroHeading(result, secondaryHeroSignal);
+  const combinedInterpretation = getCombinedInterpretation(result, secondaryHeroSignal);
+  const heroSupport = getHeroSupport(result);
 
   return (
     <main className="space-y-8">
@@ -329,152 +462,62 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
       </header>
 
       <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(124,146,255,0.24),_transparent_42%),linear-gradient(180deg,_rgba(255,255,255,0.06),_rgba(255,255,255,0.02))] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.35)] md:p-8">
-        <div className="grid gap-8 xl:grid-cols-[1.4fr_0.8fr]">
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <SectionEyebrow>Core Insight</SectionEyebrow>
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
-                {result.topSignal?.title ?? result.overviewSummary.headline}
-              </h1>
-              <p className="max-w-2xl text-lg leading-8 text-white/72">{heroNarrative}</p>
-              {result.overviewSummary.headline &&
-              result.topSignal?.title !== result.overviewSummary.headline ? (
-                <p className="max-w-2xl text-sm uppercase tracking-[0.18em] text-white/42">
-                  {result.overviewSummary.headline}
-                </p>
-              ) : null}
-            </div>
-
+        <div className="space-y-4">
+          <SectionEyebrow>Overall Pattern</SectionEyebrow>
+          <div className="flex flex-wrap gap-3">
+            <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/60">
+              {result.topSignal?.title ?? 'Primary pattern unavailable'}
+            </span>
+            {secondaryHeroSignal ? (
+              <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/60">
+                with {getSignalTitle(secondaryHeroSignal)}
+              </span>
+            ) : null}
             {leadSignal ? (
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/45">Top signal</p>
-                  <p className="mt-3 text-2xl font-semibold text-white">{getSignalTitle(leadSignal)}</p>
-                  <p className="mt-2 text-sm text-white/52">{formatDomainLabel(leadSignal.domainKey)}</p>
-                </div>
-                <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/45">Normalized score</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">{formatPercent(leadSignal.percentage)}</p>
-                  <SignalMeter value={leadSignal.percentage} />
-                </div>
-                <div className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/45">Rank position</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">#{leadSignal.rank}</p>
-                  <p className="mt-2 text-sm text-white/52">Raw total {leadSignal.rawTotal}</p>
-                </div>
-              </div>
+              <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/45">
+                {getUserFacingDomainTitle(leadSignal.domainKey)}
+              </span>
             ) : null}
           </div>
-
-          <aside className="rounded-[1.75rem] border border-white/10 bg-black/20 p-5">
-            <SectionEyebrow>Signal Hierarchy</SectionEyebrow>
-            <div className="mt-4 space-y-3">
-              {prominentSignals.map((signal) => (
-                <div
-                  key={signal.signalId}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-white/88">
-                        #{signal.rank} {getSignalTitle(signal)}
-                      </p>
-                      <p className="mt-1 text-xs text-white/45">
-                        {formatDomainLabel(signal.domainKey)}
-                        {signal.isOverlay ? ' - overlay' : ''}
-                      </p>
-                    </div>
-                    <p className="text-sm font-medium text-white">{formatPercent(signal.percentage)}</p>
-                  </div>
-                  <div className="mt-3">
-                    <SignalMeter value={signal.percentage} tone="muted" />
-                  </div>
-                </div>
-              ))}
-
-              {prominentSignals.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 p-4 text-sm text-white/45">
-                  No additional ranked signals are available.
-                </div>
-              ) : null}
-            </div>
-
-            {secondarySignals.length > 0 ? (
-              <details className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <summary className="cursor-pointer list-none text-sm font-medium text-white/72 marker:hidden">
-                  Show {secondarySignals.length} lower-priority signals
-                </summary>
-                <div className="mt-4 space-y-3">
-                  {secondarySignals.map((signal) => (
-                    <div
-                      key={signal.signalId}
-                      className="flex items-center justify-between gap-3 rounded-2xl bg-black/20 px-4 py-3 text-sm"
-                    >
-                      <div>
-                        <p className="font-medium text-white/82">
-                          #{signal.rank} {getSignalTitle(signal)}
-                        </p>
-                        <p className="mt-1 text-xs text-white/45">
-                          {formatDomainLabel(signal.domainKey)}
-                          {signal.isOverlay ? ' - overlay' : ''}
-                        </p>
-                      </div>
-                      <p className="text-white/60">{formatPercent(signal.percentage)}</p>
-                    </div>
-                  ))}
-                </div>
-              </details>
-            ) : null}
-          </aside>
+          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
+            {heroHeading}
+          </h1>
+          <p className="max-w-3xl text-lg leading-8 text-white/72">{combinedInterpretation}</p>
+          <p className="max-w-3xl text-sm leading-7 text-white/52">
+            In practice: {heroSupport.narrative}
+          </p>
+          {heroSupport.support ? (
+            <p className="max-w-3xl text-sm leading-7 text-white/42">{heroSupport.support}</p>
+          ) : null}
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <SectionEyebrow>Domain Summaries</SectionEyebrow>
-            <p className="max-w-2xl text-sm leading-7 text-white/58">
-              The strongest domains are expanded first. Lower-priority sections stay available
-              without taking over the page.
-            </p>
-          </div>
-
-          <div className="space-y-5">
-            {visibleDomains.map((domain, index) => (
-              <DomainCard
-                key={domain.domainId}
-                domain={domain}
-                defaultOpen={index === 0 && domain.signalScores.length > 3}
-              />
-            ))}
-          </div>
-
-          {additionalDomains.length > 0 ? (
-            <details className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5">
-              <summary className="cursor-pointer list-none text-sm font-medium text-white/72 marker:hidden">
-                Show {additionalDomains.length} more domain summaries
-              </summary>
-              <div className="mt-5 space-y-5">
-                {additionalDomains.map((domain) => (
-                  <DomainCard key={domain.domainId} domain={domain} />
-                ))}
-              </div>
-            </details>
-          ) : null}
+      <section className="space-y-6">
+        <div className="space-y-2">
+          <SectionEyebrow>Six Intelligence Areas</SectionEyebrow>
+          <p className="max-w-3xl text-sm leading-7 text-white/58">
+            The six core areas show how the strongest patterns come through across the parts of work that matter most.
+          </p>
         </div>
 
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <SectionEyebrow>Action Focus</SectionEyebrow>
-            <p className="text-sm leading-7 text-white/58">
-              Practical signals to keep, manage, and strengthen. These are concise on purpose.
-            </p>
-          </div>
-
-          <ActionList title="Strengths" items={result.strengths} tone="positive" />
-          <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
-          <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
+        <div className="grid gap-5 xl:grid-cols-2">
+          {intelligenceDomains.map((domain) => (
+            <DomainCard key={domain.domainId} domain={domain} />
+          ))}
         </div>
+      </section>
+
+      <section className="space-y-5">
+        <div className="space-y-2">
+          <SectionEyebrow>Action Focus</SectionEyebrow>
+          <p className="text-sm leading-7 text-white/58">
+            Practical signals to keep, manage, and strengthen. These stay concise on purpose.
+          </p>
+        </div>
+
+        <ActionList title="Strengths" items={result.strengths} tone="positive" />
+        <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
+        <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
       </section>
     </main>
   );
