@@ -462,7 +462,7 @@ test('lifecycle status mapping returns canonical CTA labels', () => {
     {
       action: 'start',
       label: 'Start',
-      href: '/app/assessments#wplp80',
+      href: '/app/assessments/wplp80',
       disabled: false,
     },
   );
@@ -519,6 +519,7 @@ test('recommendation priority prefers in-progress over ready and startable state
 
   assert.equal(recommendation?.kind, 'resume');
   assert.equal(recommendation?.cta.label, 'Resume');
+  assert.equal(recommendation?.cta.href, '/app/assessments/signals');
   assert.match(recommendation?.description ?? '', /6 of 12/);
 });
 

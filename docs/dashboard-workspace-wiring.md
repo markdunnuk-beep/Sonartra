@@ -57,11 +57,15 @@ Canonical lifecycle states from Task 14 are mapped consistently as:
 
 - `/app/results/[resultId]`
 
-`Start`, `Resume`, and `Review` currently point to the assessment workspace anchor for the relevant assessment card:
+`Start` and `Resume` now point to the real runner entry route:
+
+- `/app/assessments/[assessmentKey]`
+
+That route creates or reuses the canonical in-progress attempt and redirects into the owned runner.
+
+`Review` still points to the assessment workspace anchor:
 
 - `/app/assessments#[assessmentKey]`
-
-This preserves route compatibility without introducing a parallel runner flow in this task.
 
 ## Recommendation priority
 

@@ -85,6 +85,10 @@ function getAssessmentWorkspaceHref(assessmentKey: string): string {
   return `/app/assessments#${assessmentKey}`;
 }
 
+function getAssessmentEntryHref(assessmentKey: string): string {
+  return `/app/assessments/${assessmentKey}`;
+}
+
 function getResultHref(resultId: string): string {
   return `/app/results/${resultId}`;
 }
@@ -111,14 +115,14 @@ export function mapLifecycleStatusToCta(params: {
       return {
         action: 'start',
         label: 'Start',
-        href: getAssessmentWorkspaceHref(params.assessmentKey),
+        href: getAssessmentEntryHref(params.assessmentKey),
         disabled: false,
       };
     case 'in_progress':
       return {
         action: 'resume',
         label: 'Resume',
-        href: getAssessmentWorkspaceHref(params.assessmentKey),
+        href: getAssessmentEntryHref(params.assessmentKey),
         disabled: false,
       };
     case 'completed_processing':
