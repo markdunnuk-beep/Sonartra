@@ -69,7 +69,7 @@ export default async function UserResultsPage() {
               </div>
 
               <Link
-                href={`/results/${result.resultId}`}
+                href={`/app/results/${result.resultId}`}
                 className="inline-flex items-center justify-center rounded-md border border-neutral-900 px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-900 hover:text-white"
               >
                 View result
