@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useRef, useState, useTransition } from 'react';
+import { useRef, useState } from 'react';
 
+import { getResumeQuestionIndex } from '@/lib/assessment-runner/runner-ux';
 import type { AssessmentRunnerViewModel } from '@/lib/server/assessment-runner-types';
 
 type AssessmentRunnerClientProps = {
@@ -17,12 +18,22 @@ type SavePayload = {
   completionPercentage: number;
 };
 
+type CompletionResponseBody = {
+  error?: string;
+  resultId?: string | null;
+  resultStatus?: 'ready' | 'processing' | 'failed';
+  alreadyCompleted?: boolean;
+};
+
+type CompletionUiState = 'idle' | 'submitting' | 'processing' | 'redirecting';
+
 export function AssessmentRunnerClient({
   userId,
   runner,
 }: AssessmentRunnerClientProps) {
   const router = useRouter();
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const initialQuestionIndex = getResumeQuestionIndex(runner.questions);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialQuestionIndex);
   const [selectedByQuestionId, setSelectedByQuestionId] = useState<Record<string, string | null>>(
     () =>
       Object.fromEntries(
@@ -34,12 +45,19 @@ export function AssessmentRunnerClient({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isSubmitting, startSubmitting] = useTransition();
+  const [completionState, setCompletionState] = useState<CompletionUiState>('idle');
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const submitLockedRef = useRef(false);
 
   const currentQuestion = runner.questions[currentQuestionIndex] ?? null;
   const totalQuestions = runner.totalQuestions;
-  const canSubmit = answeredQuestions === totalQuestions && !isSaving && !isSubmitting && !saveError;
+  const canSubmit =
+    answeredQuestions === totalQuestions &&
+    !isSaving &&
+    completionState === 'idle' &&
+    !saveError;
+  const interactionLocked = completionState !== 'idle';
+  const resumedAwayFromStart = initialQuestionIndex > 0;
 
   function goToQuestion(index: number) {
     setCurrentQuestionIndex(Math.max(0, Math.min(index, runner.questions.length - 1)));
@@ -71,6 +89,10 @@ export function AssessmentRunnerClient({
   }
 
   function handleSelect(questionId: string, selectedOptionId: string) {
+    if (interactionLocked) {
+      return;
+    }
+
     setSelectedByQuestionId((current) => ({
       ...current,
       [questionId]: selectedOptionId,
@@ -97,10 +119,16 @@ export function AssessmentRunnerClient({
     saveQueueRef.current = nextSave.catch(() => undefined);
   }
 
-  function handleSubmit() {
-    setSubmitError(null);
+  async function handleSubmit() {
+    if (!canSubmit || submitLockedRef.current) {
+      return;
+    }
 
-    startSubmitting(async () => {
+    submitLockedRef.current = true;
+    setSubmitError(null);
+    setCompletionState('submitting');
+
+    try {
       await saveQueueRef.current;
 
       const response = await fetch('/api/assessments/complete', {
@@ -114,25 +142,53 @@ export function AssessmentRunnerClient({
         }),
       });
 
-      const body = (await response.json()) as {
-        error?: string;
-        resultId?: string | null;
-        resultStatus?: 'ready' | 'processing' | 'failed';
-      };
+      const body = (await response.json()) as CompletionResponseBody;
 
       if (!response.ok) {
         setSubmitError(body.error ?? 'Unable to complete assessment');
+        setCompletionState('idle');
         router.refresh();
         return;
       }
 
       if (body.resultStatus === 'ready' && body.resultId) {
-        router.push(`/app/results/${body.resultId}`);
+        setCompletionState('redirecting');
+        router.replace(`/app/results/${body.resultId}`);
         return;
       }
 
+      if (body.resultStatus === 'processing') {
+        setCompletionState('processing');
+        router.refresh();
+        return;
+      }
+
+      setSubmitError(body.error ?? 'Completion could not be finalized.');
+      setCompletionState('idle');
       router.refresh();
-    });
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Unable to complete assessment');
+      setCompletionState('idle');
+      router.refresh();
+    } finally {
+      submitLockedRef.current = false;
+    }
+  }
+
+  function getCompletionMessage(): string | null {
+    if (completionState === 'submitting') {
+      return 'Submitting your responses. Please keep this tab open.';
+    }
+
+    if (completionState === 'processing') {
+      return 'Responses submitted. Opening the processing state now.';
+    }
+
+    if (completionState === 'redirecting') {
+      return 'Result ready. Opening your result.';
+    }
+
+    return null;
   }
 
   if (!currentQuestion) {
@@ -161,9 +217,18 @@ export function AssessmentRunnerClient({
             <p className="text-sm text-white/65">
               {answeredQuestions} answered of {totalQuestions}. Progress {completionPercentage}%.
             </p>
+            {resumedAwayFromStart ? (
+              <p className="text-sm text-white/50">
+                Resume opened at the next useful question based on your saved answers.
+              </p>
+            ) : null}
           </div>
           <div className="text-sm text-white/55">
-            {isSaving ? 'Saving latest selection...' : 'Selections save automatically.'}
+            {completionState === 'idle'
+              ? isSaving
+                ? 'Saving latest selection...'
+                : 'Selections save automatically.'
+              : 'Completion is in progress.'}
           </div>
         </div>
 
@@ -192,11 +257,12 @@ export function AssessmentRunnerClient({
                 key={option.optionId}
                 type="button"
                 onClick={() => handleSelect(currentQuestion.questionId, option.optionId)}
+                disabled={interactionLocked}
                 className={`rounded-xl border p-4 text-left transition ${
                   selected
                     ? 'border-white bg-white text-neutral-950'
                     : 'border-white/10 bg-white/5 text-white hover:border-white/25 hover:bg-white/8'
-                }`}
+                } disabled:cursor-not-allowed disabled:opacity-70`}
               >
                 <div className="flex items-start gap-3">
                   {option.label ? (
@@ -225,12 +291,18 @@ export function AssessmentRunnerClient({
           </p>
         ) : null}
 
+        {getCompletionMessage() ? (
+          <p className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/72">
+            {getCompletionMessage()}
+          </p>
+        ) : null}
+
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-3">
             <button
               type="button"
               onClick={() => goToQuestion(currentQuestionIndex - 1)}
-              disabled={currentQuestionIndex === 0}
+              disabled={currentQuestionIndex === 0 || interactionLocked}
               className="inline-flex items-center justify-center rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-white/35"
             >
               Back
@@ -238,7 +310,7 @@ export function AssessmentRunnerClient({
             <button
               type="button"
               onClick={() => goToQuestion(currentQuestionIndex + 1)}
-              disabled={currentQuestionIndex >= runner.questions.length - 1}
+              disabled={currentQuestionIndex >= runner.questions.length - 1 || interactionLocked}
               className="inline-flex items-center justify-center rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-white/35"
             >
               Next
@@ -251,11 +323,17 @@ export function AssessmentRunnerClient({
             disabled={!canSubmit}
             className="inline-flex items-center justify-center rounded-md border border-white/15 bg-white px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
           >
-            {isSubmitting ? 'Submitting...' : 'Complete Assessment'}
+            {completionState === 'submitting'
+              ? 'Submitting...'
+              : completionState === 'processing'
+                ? 'Opening processing state...'
+                : completionState === 'redirecting'
+                  ? 'Opening result...'
+                  : 'Complete Assessment'}
           </button>
         </div>
 
-        {!canSubmit ? (
+        {!canSubmit && completionState === 'idle' ? (
           <p className="text-sm text-white/55">
             Completion is available once every question has a saved answer and no save is pending.
           </p>
@@ -272,13 +350,14 @@ export function AssessmentRunnerClient({
               key={question.questionId}
               type="button"
               onClick={() => goToQuestion(index)}
+              disabled={interactionLocked}
               className={`rounded-lg border px-3 py-2 text-left text-sm transition ${
                 active
                   ? 'border-white bg-white text-neutral-950'
                   : answered
                     ? 'border-white/20 bg-white/10 text-white'
                     : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20'
-              }`}
+              } disabled:cursor-not-allowed disabled:opacity-60`}
             >
               {index + 1}
             </button>
