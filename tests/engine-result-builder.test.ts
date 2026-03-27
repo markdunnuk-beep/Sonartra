@@ -248,17 +248,70 @@ test('overview summary classification is deterministic for concentrated profiles
     normalizedResult: buildNormalizedResultFixture(),
   });
 
-  assert.match(payload.overviewSummary.narrative, /concentrated/i);
+  assert.equal(payload.overviewSummary.headline, 'A clear operating preference is coming through');
+  assert.match(payload.overviewSummary.narrative, /dependable way to approach work/i);
 });
 
-test('overview summary classification is deterministic for balanced profiles', () => {
+test('overview summary uses top-signal interpretation when a mapped signal leads', () => {
+  const mappedSignals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 46,
+      domainPercentage: 46,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-evidence',
+      signalKey: 'decision_evidence',
+      title: 'Evidence',
+      domainId: 'domain-decision',
+      domainKey: 'signal_decision',
+      rawTotal: 3,
+      percentage: 31,
+      domainPercentage: 31,
+      rank: 2,
+      isOverlay: true,
+      overlayType: 'decision',
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-mastery',
+      signalKey: 'mot_mastery',
+      title: 'Mastery',
+      domainId: 'domain-mot',
+      domainKey: 'signal_mot',
+      rawTotal: 2,
+      percentage: 23,
+      domainPercentage: 23,
+      rank: 3,
+    }),
+  ]);
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: mappedSignals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-analyst',
+    }),
+  });
+
+  assert.equal(payload.overviewSummary.headline, 'Structured, thoughtful and evidence-led');
+  assert.match(payload.overviewSummary.narrative, /logic rather than impulse/i);
+  assert.match(payload.overviewSummary.narrative, /accuracy, sound judgement, and careful problem-solving/i);
+});
+
+test('overview summary uses secondary support language for balanced profiles', () => {
   const balancedSignals = Object.freeze([
     buildNormalizedSignal({
       signalId: 'signal-a',
-      signalKey: 'signal_a',
-      title: 'Signal A',
-      domainId: 'domain-signals',
-      domainKey: 'signals',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
       rawTotal: 4,
       percentage: 36,
       domainPercentage: 36,
@@ -266,10 +319,10 @@ test('overview summary classification is deterministic for balanced profiles', (
     }),
     buildNormalizedSignal({
       signalId: 'signal-b',
-      signalKey: 'signal_b',
-      title: 'Signal B',
-      domainId: 'domain-signals',
-      domainKey: 'signals',
+      signalKey: 'mot_achievement',
+      title: 'Achievement',
+      domainId: 'domain-mot',
+      domainKey: 'signal_mot',
       rawTotal: 4,
       percentage: 34,
       domainPercentage: 34,
@@ -277,10 +330,10 @@ test('overview summary classification is deterministic for balanced profiles', (
     }),
     buildNormalizedSignal({
       signalId: 'signal-c',
-      signalKey: 'signal_c',
-      title: 'Signal C',
-      domainId: 'domain-signals',
-      domainKey: 'signals',
+      signalKey: 'decision_agility',
+      title: 'Agility',
+      domainId: 'domain-decision',
+      domainKey: 'signal_decision',
       rawTotal: 3,
       percentage: 30,
       domainPercentage: 30,
@@ -291,119 +344,171 @@ test('overview summary classification is deterministic for balanced profiles', (
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture({
       signalScores: balancedSignals,
-      domainSummaries: Object.freeze([
-        buildDomainSummary({
-          domainId: 'domain-signals',
-          domainKey: 'signals',
-          title: 'Signals',
-          rawTotal: 11,
-          percentage: 100,
-          signalScores: balancedSignals,
-          answeredQuestionCount: 3,
-        }),
-      ]),
+      domainSummaries: Object.freeze([]),
       topSignalId: 'signal-a',
     }),
   });
 
-  assert.match(payload.overviewSummary.narrative, /balanced/i);
-});
-
-test('overview summary classification is deterministic for mixed profiles', () => {
-  const mixedSignals = Object.freeze([
-    buildNormalizedSignal({
-      signalId: 'signal-a',
-      signalKey: 'signal_a',
-      title: 'Signal A',
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      rawTotal: 5,
-      percentage: 42,
-      domainPercentage: 42,
-      rank: 1,
-    }),
-    buildNormalizedSignal({
-      signalId: 'signal-b',
-      signalKey: 'signal_b',
-      title: 'Signal B',
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      rawTotal: 3,
-      percentage: 25,
-      domainPercentage: 25,
-      rank: 2,
-    }),
-    buildNormalizedSignal({
-      signalId: 'signal-c',
-      signalKey: 'signal_c',
-      title: 'Signal C',
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      rawTotal: 2,
-      percentage: 18,
-      domainPercentage: 18,
-      rank: 3,
-    }),
-    buildNormalizedSignal({
-      signalId: 'signal-d',
-      signalKey: 'signal_d',
-      title: 'Signal D',
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      rawTotal: 2,
-      percentage: 15,
-      domainPercentage: 15,
-      rank: 4,
-    }),
-  ]);
-
-  const payload = buildCanonicalResultPayload({
-    normalizedResult: buildNormalizedResultFixture({
-      signalScores: mixedSignals,
-      domainSummaries: Object.freeze([
-        buildDomainSummary({
-          domainId: 'domain-signals',
-          domainKey: 'signals',
-          title: 'Signals',
-          rawTotal: 12,
-          percentage: 100,
-          signalScores: mixedSignals,
-          answeredQuestionCount: 3,
-        }),
-      ]),
-      topSignalId: 'signal-a',
-    }),
-  });
-
-  assert.match(payload.overviewSummary.narrative, /mixed/i);
+  assert.match(payload.overviewSummary.narrative, /close secondary signal in Achievement/i);
+  assert.match(payload.overviewSummary.narrative, /extra energy in that direction/i);
 });
 
 test('strengths are generated deterministically from top-ranked signals', () => {
   const payload = buildCanonicalResultPayload({
-    normalizedResult: buildNormalizedResultFixture(),
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 50,
+          domainPercentage: 50,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-results',
+          signalKey: 'lead_results',
+          title: 'Results',
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          rawTotal: 3,
+          percentage: 30,
+          domainPercentage: 30,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-achievement',
+          signalKey: 'mot_achievement',
+          title: 'Achievement',
+          domainId: 'domain-mot',
+          domainKey: 'signal_mot',
+          rawTotal: 2,
+          percentage: 20,
+          domainPercentage: 20,
+          rank: 3,
+        }),
+      ]),
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
   });
 
   assert.equal(payload.strengths.length, 3);
-  assert.equal(payload.strengths[0]?.signalId, 'signal-focus');
-  assert.match(payload.strengths[0]?.detail ?? '', /50%/);
+  assert.equal(payload.strengths[0]?.signalId, 'signal-driver');
+  assert.match(payload.strengths[0]?.detail ?? '', /direction, urgency, or firmer calls/i);
+  assert.doesNotMatch(payload.strengths[0]?.detail ?? '', /\d+%/);
 });
 
-test('watchouts are generated deterministically from concentration or imbalance patterns', () => {
+test('watchouts are generated deterministically from overuse, pressure rules, and lower-access signals', () => {
   const payload = buildCanonicalResultPayload({
-    normalizedResult: buildNormalizedResultFixture(),
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 42,
+          domainPercentage: 42,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-control',
+          signalKey: 'stress_control',
+          title: 'Control',
+          domainId: 'domain-stress',
+          domainKey: 'signal_stress',
+          rawTotal: 4,
+          percentage: 33,
+          domainPercentage: 33,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-avoid',
+          signalKey: 'conflict_avoid',
+          title: 'Avoid',
+          domainId: 'domain-conflict',
+          domainKey: 'signal_conflict',
+          rawTotal: 1,
+          percentage: 10,
+          domainPercentage: 10,
+          rank: 3,
+        }),
+      ]),
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
   });
 
-  assert.ok(payload.watchouts.length >= 1);
-  assert.match(payload.watchouts[0]?.title ?? '', /Concentration Risk|Sharp Drop-Off|Limited Range/);
+  assert.equal(payload.watchouts[0]?.title, 'Overused Driver');
+  assert.match(payload.watchouts[0]?.detail ?? '', /too forceful, too fast, or too impatient/i);
+  assert.match(payload.watchouts[1]?.detail ?? '', /over-control/i);
+  assert.equal(payload.watchouts[2]?.title, 'Lower access to Avoid');
 });
 
 test('development focus is generated deterministically from lower-ranked signals', () => {
   const payload = buildCanonicalResultPayload({
-    normalizedResult: buildNormalizedResultFixture(),
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 55,
+          domainPercentage: 55,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-collaborate',
+          signalKey: 'conflict_collaborate',
+          title: 'Collaborate',
+          domainId: 'domain-conflict',
+          domainKey: 'signal_conflict',
+          rawTotal: 3,
+          percentage: 29,
+          domainPercentage: 29,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-evidence',
+          signalKey: 'decision_evidence',
+          title: 'Evidence',
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          rawTotal: 1,
+          percentage: 10,
+          domainPercentage: 10,
+          rank: 3,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-people',
+          signalKey: 'lead_people',
+          title: 'People',
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          rawTotal: 1,
+          percentage: 6,
+          domainPercentage: 6,
+          rank: 4,
+        }),
+      ]),
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
   });
 
-  assert.ok(payload.developmentFocus.length >= 1);
-  assert.equal(payload.developmentFocus[payload.developmentFocus.length - 1]?.signalId, 'signal-balance');
+  assert.equal(payload.developmentFocus.length, 2);
+  assert.equal(payload.developmentFocus[0]?.signalId, 'signal-evidence');
+  assert.match(payload.developmentFocus[0]?.detail ?? '', /concise evidence checks/i);
+  assert.equal(payload.developmentFocus[1]?.signalId, 'signal-people');
 });
 
 test('zero-mass behavior remains explicit and still builds successfully', () => {
