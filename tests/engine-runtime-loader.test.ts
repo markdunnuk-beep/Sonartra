@@ -240,6 +240,40 @@ test('fails when an option signal weight references a missing signal', () => {
   );
 });
 
+test('fails when a non-overlay signal has no incoming option signal weights', () => {
+  const definition = buildValidDefinition();
+  definition.questions[0] = {
+    ...definition.questions[0],
+    options: [
+      {
+        ...definition.questions[0]!.options[0]!,
+        signalWeights: [
+          {
+            ...definition.questions[0]!.options[0]!.signalWeights[0]!,
+            signalId: 'signal-overlay',
+          },
+        ],
+      },
+    ],
+  };
+  definition.questions[1] = {
+    ...definition.questions[1],
+    options: definition.questions[1]!.options.map((option) => ({
+      ...option,
+      signalWeights: option.signalWeights.map((weight) => ({
+        ...weight,
+        signalId: 'signal-overlay',
+      })),
+    })),
+  };
+
+  assert.throws(
+    () => loadRuntimeExecutionModel(definition),
+    (error: unknown) =>
+      error instanceof RuntimeExecutionModelValidationError && error.code === 'orphan_signal',
+  );
+});
+
 test('fails on duplicate keys', () => {
   const definition = buildValidDefinition();
   definition.signals[1] = {

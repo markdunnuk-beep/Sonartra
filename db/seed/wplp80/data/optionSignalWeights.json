@@ -2184,6 +2184,13 @@
     "sourceWeightKey": "29|B"
   },
   {
+    "optionKey": "wplp80_q29_b",
+    "signalKey": "conflict_accommodate",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "29|B"
+  },
+  {
     "optionKey": "wplp80_q29_c",
     "signalKey": "style_operator",
     "weight": 0.5,
@@ -2249,6 +2256,13 @@
   {
     "optionKey": "wplp80_q30_c",
     "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "30|C"
+  },
+  {
+    "optionKey": "wplp80_q30_c",
+    "signalKey": "conflict_accommodate",
     "weight": 3,
     "reverseFlag": false,
     "sourceWeightKey": "30|C"
@@ -2305,6 +2319,13 @@
   {
     "optionKey": "wplp80_q31_c",
     "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "31|C"
+  },
+  {
+    "optionKey": "wplp80_q31_c",
+    "signalKey": "conflict_accommodate",
     "weight": 3,
     "reverseFlag": false,
     "sourceWeightKey": "31|C"
@@ -2347,6 +2368,13 @@
   {
     "optionKey": "wplp80_q32_b",
     "signalKey": "conflict_collaborate",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "32|B"
+  },
+  {
+    "optionKey": "wplp80_q32_b",
+    "signalKey": "conflict_accommodate",
     "weight": 3,
     "reverseFlag": false,
     "sourceWeightKey": "32|B"
@@ -2417,6 +2445,13 @@
   {
     "optionKey": "wplp80_q33_c",
     "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "33|C"
+  },
+  {
+    "optionKey": "wplp80_q33_c",
+    "signalKey": "conflict_accommodate",
     "weight": 3,
     "reverseFlag": false,
     "sourceWeightKey": "33|C"
@@ -2473,6 +2508,13 @@
   {
     "optionKey": "wplp80_q34_c",
     "signalKey": "conflict_compromise",
+    "weight": 3,
+    "reverseFlag": false,
+    "sourceWeightKey": "34|C"
+  },
+  {
+    "optionKey": "wplp80_q34_c",
+    "signalKey": "conflict_accommodate",
     "weight": 3,
     "reverseFlag": false,
     "sourceWeightKey": "34|C"
