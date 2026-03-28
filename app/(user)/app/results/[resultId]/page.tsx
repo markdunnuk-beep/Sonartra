@@ -81,16 +81,31 @@ const INTELLIGENCE_DOMAIN_CONFIG: Record<
   },
 };
 
-function formatResultDate(value: string | null): string {
+function formatResultTimestamp(value: string | null): {
+  date: string;
+  time: string | null;
+} {
   if (!value) {
-    return 'No completion date';
+    return {
+      date: 'No completion date',
+      time: null,
+    };
   }
 
-  return new Date(value).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  const timestamp = new Date(value);
+
+  return {
+    date: timestamp.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }),
+    time: timestamp.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }),
+  };
 }
 
 function formatPercent(value: number): string {
@@ -244,12 +259,14 @@ function getPersistedDomainInterpretation(domain: AssessmentResultDomainViewMode
   };
 }
 
-function getSignalCardMicrocopy(params: { signalTitle: string; isPrimary: boolean }): string {
-  if (params.isPrimary) {
-    return `${params.signalTitle} most strongly shapes how this area tends to show up.`;
+function getDomainDetailsCtaLabel(domain: AssessmentResultDomainViewModel): string {
+  const primarySignalTitle = domain.signalScores[0]?.signalTitle ?? null;
+
+  if (primarySignalTitle) {
+    return `See why ${primarySignalTitle} leads here`;
   }
 
-  return `${params.signalTitle} remains close enough to meaningfully shape how this area comes through.`;
+  return 'Explore this area in more detail';
 }
 
 function getIntelligenceDomains(
@@ -344,6 +361,7 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
   const visibleSignals = domain.signalScores.slice(0, 2);
   const hiddenSignals = domain.signalScores.slice(2);
   const interpretation = getPersistedDomainInterpretation(domain);
+  const detailsCtaLabel = getDomainDetailsCtaLabel(domain);
 
   return (
     <SurfaceCard className="p-7 md:p-8">
@@ -368,12 +386,6 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
                       {index === 0 ? 'Primary signal' : 'Secondary signal'}
                     </p>
                     <p className="text-lg font-semibold text-white">{signal.signalTitle}</p>
-                    <p className="text-white/56 max-w-2xl text-sm leading-7">
-                      {getSignalCardMicrocopy({
-                        signalTitle: signal.signalTitle,
-                        isPrimary: index === 0,
-                      })}
-                    </p>
                   </div>
                   <p className="text-white/68 text-base font-medium">
                     {formatPercent(signal.domainPercentage)}
@@ -397,7 +409,7 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
         {hiddenSignals.length > 0 ? (
           <details className="border-white/8 bg-black/14 rounded-[1.25rem] border px-5 py-4">
             <summary className="text-white/72 cursor-pointer list-none text-sm font-medium marker:hidden">
-              Show remaining signals in this area
+              {detailsCtaLabel}
             </summary>
             <div className="mt-4 space-y-3">
               {hiddenSignals.map((signal) => (
@@ -450,7 +462,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const { leadSignal } = getVisibleSignals(result);
   const intelligenceDomains = getIntelligenceDomains(result);
   const heroPrimarySignalChips = getHeroPrimarySignalChips(intelligenceDomains);
-  const completionDate = formatResultDate(result.generatedAt ?? result.createdAt);
+  const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   const secondaryHeroSignal = getSecondaryHeroSignal(result);
   const heroHeading = getHeroHeading(result, secondaryHeroSignal);
   const combinedInterpretation = getCombinedInterpretation(result, secondaryHeroSignal);
@@ -465,7 +477,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             <span className="hidden text-white/20 md:inline">/</span>
             <span>Version {result.version}</span>
             <span className="hidden text-white/20 md:inline">/</span>
-            <span>{completionDate}</span>
+            <span>{completionTimestamp.date}</span>
+            {completionTimestamp.time ? (
+              <>
+                <span className="hidden text-white/20 md:inline">/</span>
+                <span>{completionTimestamp.time}</span>
+              </>
+            ) : null}
           </div>
           <StatusPill status="ready" label="Ready" />
         </div>
