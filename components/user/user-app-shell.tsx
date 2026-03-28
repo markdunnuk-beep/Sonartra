@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { cn } from '@/components/shared/user-app-ui';
 import {
   getUserAppNavSections,
   type UserAppNavItem,
@@ -13,20 +14,12 @@ import {
 const SHELL_COLLAPSE_STORAGE_KEY = 'sonartra:user-shell-collapsed';
 
 function isItemActive(pathname: string, item: UserAppNavItem): boolean {
-  return item.match.some((candidate) => pathname === candidate || pathname.startsWith(`${candidate}/`));
+  return item.match.some(
+    (candidate) => pathname === candidate || pathname.startsWith(`${candidate}/`),
+  );
 }
 
-function cn(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(' ');
-}
-
-function NavIcon({
-  icon,
-  active,
-}: {
-  icon: UserAppNavItem['icon'];
-  active: boolean;
-}) {
+function NavIcon({ icon, active }: { icon: UserAppNavItem['icon']; active: boolean }) {
   const strokeClass = active ? 'text-white' : 'text-white/58';
 
   switch (icon) {
@@ -114,11 +107,11 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group flex items-center gap-3 rounded-2xl border px-3 py-3 text-sm font-medium transition',
-        collapsed ? 'justify-center' : 'justify-start',
+        'group flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm font-medium transition duration-200',
+        collapsed ? 'justify-center px-0' : 'justify-start',
         active
-          ? 'border-white/16 bg-white/[0.08] text-white shadow-[0_16px_40px_rgba(0,0,0,0.22)]'
-          : 'border-transparent text-white/62 hover:border-white/10 hover:bg-white/[0.05] hover:text-white',
+          ? 'border-white/12 bg-white/[0.06] text-white'
+          : 'text-white/58 hover:border-white/8 hover:text-white/88 border-transparent hover:bg-white/[0.035]',
       )}
       href={item.href}
       onClick={onNavigate}
@@ -126,10 +119,10 @@ function SidebarLink({
     >
       <span
         className={cn(
-          'flex h-10 w-10 items-center justify-center rounded-xl border transition',
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border transition duration-200',
           active
-            ? 'border-white/14 bg-white/[0.09]'
-            : 'border-white/8 bg-black/15 group-hover:border-white/10 group-hover:bg-white/[0.04]',
+            ? 'border-white/12 bg-white/[0.08]'
+            : 'border-white/6 group-hover:border-white/8 bg-black/10 group-hover:bg-white/[0.04]',
         )}
       >
         <NavIcon active={active} icon={item.icon} />
@@ -151,12 +144,7 @@ function SidebarSection({
   return (
     <div className="space-y-2">
       {section.items.map((item) => (
-        <SidebarLink
-          collapsed={collapsed}
-          item={item}
-          key={item.key}
-          onNavigate={onNavigate}
-        />
+        <SidebarLink collapsed={collapsed} item={item} key={item.key} onNavigate={onNavigate} />
       ))}
     </div>
   );
@@ -186,32 +174,37 @@ export function UserAppShell({
   }, [collapsed]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,rgba(10,16,32,0.98),rgba(10,16,32,1))]">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(96,119,255,0.08),_transparent_32%),linear-gradient(180deg,rgba(9,17,31,0.98),rgba(8,15,28,1))]">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1560px]">
         <aside
           className={cn(
-            'sonartra-scrollbar fixed inset-y-0 left-0 z-40 flex w-[18rem] flex-col border-r border-white/10 bg-[linear-gradient(180deg,rgba(15,23,46,0.96),rgba(8,13,27,0.96))] px-4 py-5 shadow-[0_30px_80px_rgba(0,0,0,0.38)] backdrop-blur transition-transform duration-300 lg:sticky lg:translate-x-0',
-            collapsed ? 'lg:w-[6rem]' : 'lg:w-[18rem]',
+            'sonartra-scrollbar border-white/6 fixed inset-y-0 left-0 z-40 flex w-[17.5rem] flex-col border-r bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-transform duration-300 lg:sticky lg:translate-x-0',
+            collapsed ? 'lg:w-[5.5rem]' : 'lg:w-[17.5rem]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
           )}
         >
-          <div className={cn('flex items-center', collapsed ? 'justify-center' : 'justify-between')}>
+          <div
+            className={cn(
+              'flex items-center',
+              collapsed ? 'justify-center' : 'justify-between gap-3',
+            )}
+          >
             <Link
               className={cn(
-                'flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-3 transition hover:bg-white/[0.06]',
-                collapsed ? 'justify-center px-0 py-2.5' : '',
+                'border-white/8 flex items-center gap-3 rounded-[1.25rem] border bg-white/[0.03] px-3 py-3 transition duration-200 hover:bg-white/[0.045]',
+                collapsed ? 'h-12 w-12 justify-center px-0 py-0' : 'flex-1',
               )}
               href="/app/workspace"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-accent/15 text-sm font-semibold tracking-[0.24em] text-white">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-accent/15 text-sm font-semibold tracking-[0.2em] text-white">
                 S
               </span>
               {!collapsed ? (
                 <span className="space-y-1">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
+                  <span className="text-white/36 block text-[11px] font-semibold uppercase tracking-[0.22em]">
                     Sonartra
                   </span>
-                  <span className="block text-sm font-medium text-white/88">Workspace</span>
+                  <span className="text-white/86 block text-sm font-medium">Workspace</span>
                 </span>
               ) : null}
             </Link>
@@ -219,7 +212,7 @@ export function UserAppShell({
             {!collapsed ? (
               <button
                 aria-label="Collapse sidebar"
-                className="hidden h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/65 transition hover:border-white/14 hover:bg-white/[0.08] hover:text-white lg:inline-flex"
+                className="border-white/8 hover:border-white/12 hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white/[0.03] text-white/55 transition duration-200 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
                 onClick={() => setCollapsed(true)}
                 type="button"
               >
@@ -239,7 +232,7 @@ export function UserAppShell({
           {collapsed ? (
             <button
               aria-label="Expand sidebar"
-              className="mt-4 hidden h-10 w-10 self-center rounded-xl border border-white/10 bg-white/[0.04] text-white/65 transition hover:border-white/14 hover:bg-white/[0.08] hover:text-white lg:inline-flex"
+              className="border-white/8 hover:border-white/12 mt-4 hidden h-9 w-9 self-center rounded-xl border bg-white/[0.03] text-white/55 transition duration-200 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
               onClick={() => setCollapsed(false)}
               type="button"
             >
@@ -255,7 +248,7 @@ export function UserAppShell({
             </button>
           ) : null}
 
-          <div className="mt-8 flex-1 space-y-6 overflow-y-auto pb-4">
+          <div className="mt-6 flex-1 space-y-4 overflow-y-auto pb-4">
             {navSections.map((section) => (
               <SidebarSection
                 collapsed={collapsed}
@@ -267,15 +260,15 @@ export function UserAppShell({
           </div>
 
           {!collapsed ? (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
+            <div className="border-white/8 rounded-[1.25rem] border bg-white/[0.03] p-4">
+              <p className="text-white/36 text-[11px] font-semibold uppercase tracking-[0.18em]">
                 Session
               </p>
-              <p className="mt-2 truncate text-sm text-white/76">{userLabel}</p>
+              <p className="text-white/72 mt-2 truncate text-sm">{userLabel}</p>
             </div>
           ) : (
             <div
-              className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-medium text-white/76"
+              className="border-white/8 text-white/72 mx-auto flex h-10 w-10 items-center justify-center rounded-full border bg-white/[0.03] text-sm font-medium"
               title={userLabel}
             >
               {userLabel.charAt(0).toUpperCase()}
@@ -293,10 +286,10 @@ export function UserAppShell({
         ) : null}
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <div className="flex items-center justify-between border-b border-white/8 px-4 py-4 lg:hidden">
+          <div className="border-white/6 flex items-center justify-between border-b px-4 py-4 lg:hidden">
             <button
               aria-label="Open sidebar"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/70 transition hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
+              className="border-white/8 text-white/62 hover:border-white/12 inline-flex h-11 w-11 items-center justify-center rounded-xl border bg-white/[0.03] transition duration-200 hover:bg-white/[0.06] hover:text-white"
               onClick={() => setMobileOpen(true)}
               type="button"
             >
@@ -309,14 +302,17 @@ export function UserAppShell({
                 />
               </svg>
             </button>
-            <Link className="text-sm font-semibold tracking-[0.22em] text-white/70" href="/app/workspace">
+            <Link
+              className="text-white/68 text-sm font-semibold tracking-[0.22em]"
+              href="/app/workspace"
+            >
               SONARTRA
             </Link>
             <div className="w-11" />
           </div>
 
-          <div className="flex-1 px-2 py-2 lg:px-4 lg:py-4">
-            <div className="min-h-full rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] shadow-[0_30px_100px_rgba(0,0,0,0.22)]">
+          <div className="flex-1 px-2 py-2 lg:px-5 lg:py-5">
+            <div className="border-white/6 min-h-full rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl">
               {children}
             </div>
           </div>

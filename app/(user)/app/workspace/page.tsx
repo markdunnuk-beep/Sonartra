@@ -1,5 +1,12 @@
-import Link from 'next/link';
-
+import {
+  ButtonLink,
+  MetaItem,
+  PageFrame,
+  PageHeader,
+  SectionHeader,
+  StatusPill,
+  SurfaceCard,
+} from '@/components/shared/user-app-ui';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createWorkspaceService } from '@/lib/server/workspace-service';
@@ -20,17 +27,6 @@ function formatEstimatedTime(value: number | null): string {
   return `${value} min`;
 }
 
-function getStatusTone(status: 'not_started' | 'in_progress' | 'results_ready'): string {
-  switch (status) {
-    case 'results_ready':
-      return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100';
-    case 'in_progress':
-      return 'border-sky-400/25 bg-sky-400/10 text-sky-100';
-    case 'not_started':
-      return 'border-white/10 bg-white/[0.05] text-white/68';
-  }
-}
-
 export default async function UserWorkspacePage() {
   const userId = await getRequestUserId();
   const viewModel = await createWorkspaceService({
@@ -38,143 +34,111 @@ export default async function UserWorkspacePage() {
   }).getWorkspaceViewModel({ userId });
 
   return (
-    <main className="space-y-10 px-6 py-8 lg:px-8 lg:py-10">
-      <header className="space-y-3">
-        <p className="text-sm uppercase tracking-[0.2em] text-white/45">User App</p>
-        <h1 className="text-3xl font-semibold text-white">Workspace</h1>
-        <p className="max-w-3xl text-sm text-white/62">
-          Track progress, continue assessments, and review completed results.
-        </p>
-      </header>
+    <PageFrame>
+      <PageHeader
+        title="Workspace"
+        description="Track progress, continue assessments, and review completed results."
+      />
 
       {viewModel.recommendedAction ? (
-        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(124,146,255,0.22),_transparent_42%),linear-gradient(180deg,_rgba(255,255,255,0.06),_rgba(255,255,255,0.02))] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.34)] lg:p-8">
+        <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
-              <p className="text-sm uppercase tracking-[0.2em] text-white/45">Recommended Next Action</p>
-              <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <p className="sonartra-page-eyebrow">Recommended Next Action</p>
+              <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.6rem]">
                 {viewModel.recommendedAction.title}
               </h2>
-              <p className="max-w-2xl text-sm leading-7 text-white/68">
+              <p className="text-white/68 max-w-2xl text-sm leading-7">
                 {viewModel.recommendedAction.description}
               </p>
             </div>
 
-            <Link
-              href={viewModel.recommendedAction.href}
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white px-5 py-3 text-sm font-medium text-neutral-950 transition hover:bg-white/90"
-            >
+            <ButtonLink href={viewModel.recommendedAction.href} variant="primary" className="px-5">
               {viewModel.recommendedAction.ctaLabel}
-            </Link>
+            </ButtonLink>
           </div>
-        </section>
+        </SurfaceCard>
       ) : null}
 
-      <section className="space-y-5">
-        <div className="space-y-2">
-          <p className="text-sm uppercase tracking-[0.2em] text-white/45">Assessment Overview</p>
-          <h2 className="text-2xl font-semibold text-white">Available assessments</h2>
-          <p className="max-w-3xl text-sm text-white/58">
-            A compact view of what is available, where you are, and the next sensible action.
-          </p>
-        </div>
+      <section className="sonartra-section">
+        <SectionHeader
+          eyebrow="Assessment Overview"
+          title="Available assessments"
+          description="A compact view of what is available, where you are, and the next sensible action."
+        />
 
         {viewModel.assessments.length > 0 ? (
           <div className="grid gap-4 xl:grid-cols-2">
             {viewModel.assessments.map((assessment) => (
-              <article
-                key={assessment.assessmentId}
-                className="rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]"
-              >
+              <SurfaceCard key={assessment.assessmentId} interactive className="p-5">
                 <div className="flex flex-col gap-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-white/55">
+                        <span className="sonartra-status sonartra-status-neutral">
                           {assessment.typeLabel}
                         </span>
-                        <span
-                          className={`rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] ${getStatusTone(assessment.status)}`}
-                        >
-                          {assessment.statusLabel}
-                        </span>
+                        <StatusPill status={assessment.status} label={assessment.statusLabel} />
                       </div>
-                      <h3 className="text-xl font-semibold text-white">{assessment.title}</h3>
-                      <p className="max-w-xl text-sm leading-6 text-white/62">
-                        {assessment.description ?? 'Published assessment available in the workspace.'}
+                      <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
+                        {assessment.title}
+                      </h3>
+                      <p className="text-white/62 max-w-xl text-sm leading-7">
+                        {assessment.description ??
+                          'Published assessment available in the workspace.'}
                       </p>
                     </div>
 
-                    <Link
-                      href={assessment.href}
-                      className="inline-flex items-center justify-center rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-                    >
-                      {assessment.ctaLabel}
-                    </Link>
+                    <ButtonLink href={assessment.href}>{assessment.ctaLabel}</ButtonLink>
                   </div>
 
-                  <div className="grid gap-3 border-t border-white/8 pt-4 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-white/8 bg-black/15 px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
-                        Estimated time
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-white/78">
-                        {formatEstimatedTime(assessment.estimatedTimeMinutes)}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-white/8 bg-black/15 px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
-                        Current state
-                      </p>
-                      <p className="mt-2 text-sm font-medium text-white/78">{assessment.statusLabel}</p>
-                    </div>
+                  <div className="border-white/8 grid gap-3 border-t pt-4 sm:grid-cols-2">
+                    <MetaItem
+                      label="Estimated time"
+                      value={formatEstimatedTime(assessment.estimatedTimeMinutes)}
+                    />
+                    <MetaItem label="Current state" value={assessment.statusLabel} />
                   </div>
                 </div>
-              </article>
+              </SurfaceCard>
             ))}
           </div>
         ) : (
-          <div className="rounded-[1.6rem] border border-dashed border-white/10 bg-white/[0.03] p-6">
+          <SurfaceCard dashed muted className="p-6">
             <h3 className="text-lg font-semibold text-white">No published assessments</h3>
-            <p className="mt-2 max-w-2xl text-sm text-white/58">
+            <p className="text-white/58 mt-2 max-w-2xl text-sm leading-7">
               Published assessments will appear here when they are available for this user.
             </p>
-          </div>
+          </SurfaceCard>
         )}
       </section>
 
-      <section className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-sm uppercase tracking-[0.2em] text-white/45">Latest Result</p>
-          <h2 className="text-2xl font-semibold text-white">Most recent completed result</h2>
-        </div>
+      <section className="sonartra-section">
+        <SectionHeader eyebrow="Latest Result" title="Most recent completed result" />
 
         {viewModel.latestResult ? (
-          <article className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.2)]">
+          <SurfaceCard interactive className="p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
-                <h3 className="text-xl font-semibold text-white">{viewModel.latestResult.assessmentTitle}</h3>
-                <p className="text-sm text-white/58">
+                <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
+                  {viewModel.latestResult.assessmentTitle}
+                </h3>
+                <p className="text-white/58 text-sm leading-7">
                   Completed {formatDate(viewModel.latestResult.completedAt)}
                 </p>
               </div>
 
-              <Link
-                href={viewModel.latestResult.href}
-                className="inline-flex items-center justify-center rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-              >
-                Open result
-              </Link>
+              <ButtonLink href={viewModel.latestResult.href}>Open result</ButtonLink>
             </div>
-          </article>
+          </SurfaceCard>
         ) : (
-          <div className="rounded-[1.5rem] border border-dashed border-white/10 bg-white/[0.03] p-5">
-            <p className="text-sm text-white/58">
+          <SurfaceCard dashed muted className="p-5">
+            <p className="text-white/58 text-sm leading-7">
               No completed ready result is available yet.
             </p>
-          </div>
+          </SurfaceCard>
         )}
       </section>
-    </main>
+    </PageFrame>
   );
 }

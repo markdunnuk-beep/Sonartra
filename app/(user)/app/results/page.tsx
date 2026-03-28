@@ -1,5 +1,10 @@
-import Link from 'next/link';
-
+import {
+  ButtonLink,
+  PageFrame,
+  PageHeader,
+  SectionHeader,
+  SurfaceCard,
+} from '@/components/shared/user-app-ui';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createResultsService } from '@/lib/server/results-service';
@@ -19,56 +24,44 @@ export default async function UserResultsPage() {
   }).listResults({ userId });
 
   return (
-    <main className="space-y-8 px-6 py-8 lg:px-8 lg:py-10">
-      <header className="space-y-3">
-        <p className="text-sm uppercase tracking-[0.2em] text-white/45">User App</p>
-        <h1 className="text-3xl font-semibold text-white">Results</h1>
-        <p className="max-w-3xl text-sm text-white/62">
-          View and revisit your completed assessments.
-        </p>
-      </header>
+    <PageFrame>
+      <PageHeader title="Results" description="View and revisit your completed assessments." />
 
       {results.length === 0 ? (
-        <section className="rounded-[1.6rem] border border-dashed border-white/10 bg-white/[0.03] p-6">
+        <SurfaceCard dashed muted className="p-6">
           <h2 className="text-xl font-semibold text-white">No results yet</h2>
-          <p className="mt-2 max-w-2xl text-sm text-white/58">
+          <p className="text-white/58 mt-2 max-w-2xl text-sm leading-7">
             Complete an assessment to see your results here.
           </p>
           <div className="mt-5">
-            <Link
-              href="/app/assessments"
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-            >
-              Open Assessments
-            </Link>
+            <ButtonLink href="/app/assessments">Open Assessments</ButtonLink>
           </div>
-        </section>
+        </SurfaceCard>
       ) : (
-        <section className="space-y-4">
+        <section className="sonartra-section">
+          <SectionHeader
+            eyebrow="Completed Results"
+            title="Ready to revisit"
+            description="Completed assessments are listed here using the persisted canonical result payload."
+          />
           {results.map((result) => (
-            <article
-              key={result.resultId}
-              className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.2)]"
-            >
+            <SurfaceCard key={result.resultId} interactive className="p-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="space-y-2">
-                  <h2 className="text-xl font-semibold text-white">{result.assessmentTitle}</h2>
-                  <p className="text-sm text-white/58">
+                  <h2 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
+                    {result.assessmentTitle}
+                  </h2>
+                  <p className="text-white/58 text-sm leading-7">
                     Completed {formatResultDate(result.completedAt)}
                   </p>
                 </div>
 
-                <Link
-                  href={result.href}
-                  className="inline-flex items-center justify-center rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-                >
-                  View Result
-                </Link>
+                <ButtonLink href={result.href}>View Result</ButtonLink>
               </div>
-            </article>
+            </SurfaceCard>
           ))}
         </section>
       )}
-    </main>
+    </PageFrame>
   );
 }

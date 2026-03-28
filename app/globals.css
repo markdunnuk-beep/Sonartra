@@ -4,18 +4,52 @@
 
 :root {
   color-scheme: dark;
+  --sonartra-bg: #09111f;
+  --sonartra-bg-elevated: #0d1627;
+  --sonartra-panel: rgba(15, 24, 40, 0.82);
+  --sonartra-panel-strong: rgba(20, 31, 52, 0.9);
+  --sonartra-panel-soft: rgba(255, 255, 255, 0.035);
+  --sonartra-border: rgba(223, 232, 255, 0.09);
+  --sonartra-border-strong: rgba(223, 232, 255, 0.14);
+  --sonartra-text: rgba(236, 241, 255, 0.94);
+  --sonartra-text-muted: rgba(210, 220, 247, 0.68);
+  --sonartra-text-soft: rgba(191, 202, 228, 0.5);
+  --sonartra-accent: #8ea2ff;
+  --sonartra-accent-soft: rgba(142, 162, 255, 0.16);
+}
+
+html {
+  background:
+    radial-gradient(circle at top, rgba(96, 119, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, #0a1020 0%, #09111f 44%, #08101c 100%);
 }
 
 body {
-  @apply bg-background text-foreground antialiased;
+  @apply text-foreground antialiased;
+  background:
+    radial-gradient(circle at top, rgba(96, 119, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, #0a1020 0%, #09111f 44%, #08101c 100%);
+  color: var(--sonartra-text);
+  font-family:
+    'Segoe UI',
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Helvetica Neue',
+    sans-serif;
 }
 
 main {
-  @apply mx-auto min-h-[calc(100vh-4rem)] w-full max-w-6xl px-6 py-10;
+  @apply mx-auto min-h-[calc(100vh-4rem)] w-full max-w-[1120px] px-5 py-8 sm:px-6 lg:px-10 lg:py-10;
 }
 
 .sonartra-panel {
-  @apply rounded-xl border border-white/10 bg-surface/70 p-6;
+  @apply rounded-[1.5rem] border p-6;
+  border-color: var(--sonartra-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(18px);
 }
 
 .sonartra-scrollbar {
@@ -35,4 +69,139 @@ main {
 .sonartra-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.16);
   border-radius: 9999px;
+}
+
+@layer components {
+  .sonartra-page {
+    @apply space-y-10;
+  }
+
+  .sonartra-page-header {
+    @apply space-y-3;
+  }
+
+  .sonartra-page-eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.22em];
+    color: var(--sonartra-text-soft);
+  }
+
+  .sonartra-page-title {
+    @apply text-[2rem] font-semibold tracking-[-0.03em] text-white sm:text-[2.35rem];
+  }
+
+  .sonartra-page-description {
+    @apply max-w-3xl text-[15px] leading-7;
+    color: var(--sonartra-text-muted);
+  }
+
+  .sonartra-section {
+    @apply space-y-5;
+  }
+
+  .sonartra-section-header {
+    @apply space-y-2;
+  }
+
+  .sonartra-section-title {
+    @apply text-[1.45rem] font-semibold tracking-[-0.025em] text-white;
+  }
+
+  .sonartra-section-description {
+    @apply max-w-3xl text-sm leading-7;
+    color: var(--sonartra-text-muted);
+  }
+
+  .sonartra-card {
+    @apply rounded-[1.5rem] border p-6 transition duration-200;
+    border-color: var(--sonartra-border);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02)),
+      rgba(12, 19, 33, 0.78);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  }
+
+  .sonartra-card-interactive {
+    @apply hover:-translate-y-0.5;
+    border-color: rgba(223, 232, 255, 0.11);
+  }
+
+  .sonartra-card-hero {
+    background:
+      radial-gradient(circle at top left, rgba(142, 162, 255, 0.18), transparent 42%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+      rgba(13, 21, 38, 0.88);
+    box-shadow: 0 28px 88px rgba(0, 0, 0, 0.24);
+  }
+
+  .sonartra-card-muted {
+    background: rgba(255, 255, 255, 0.026);
+  }
+
+  .sonartra-card-dashed {
+    @apply border-dashed;
+    background: rgba(255, 255, 255, 0.022);
+  }
+
+  .sonartra-meta-card {
+    @apply rounded-[1.15rem] border px-4 py-3;
+    border-color: rgba(223, 232, 255, 0.08);
+    background: rgba(6, 10, 20, 0.18);
+  }
+
+  .sonartra-meta-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.18em];
+    color: var(--sonartra-text-soft);
+  }
+
+  .sonartra-meta-value {
+    @apply mt-2 text-sm font-medium;
+    color: rgba(231, 237, 255, 0.8);
+  }
+
+  .sonartra-button {
+    @apply inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition duration-200;
+  }
+
+  .sonartra-button-primary {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(245, 247, 255, 0.96);
+    color: #0b1120;
+  }
+
+  .sonartra-button-primary:hover {
+    background: white;
+  }
+
+  .sonartra-button-secondary {
+    border-color: rgba(223, 232, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(236, 241, 255, 0.92);
+  }
+
+  .sonartra-button-secondary:hover {
+    border-color: rgba(223, 232, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .sonartra-status {
+    @apply inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em];
+  }
+
+  .sonartra-status-neutral {
+    border-color: rgba(223, 232, 255, 0.1);
+    background: rgba(255, 255, 255, 0.045);
+    color: rgba(225, 232, 251, 0.72);
+  }
+
+  .sonartra-status-progress {
+    border-color: rgba(126, 179, 255, 0.22);
+    background: rgba(126, 179, 255, 0.1);
+    color: rgba(214, 232, 255, 0.84);
+  }
+
+  .sonartra-status-ready {
+    border-color: rgba(116, 209, 177, 0.22);
+    background: rgba(116, 209, 177, 0.1);
+    color: rgba(214, 246, 233, 0.86);
+  }
 }

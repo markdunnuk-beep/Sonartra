@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
+import { StatusPill } from '@/components/shared/user-app-ui';
 import type {
   AssessmentResultDetailViewModel,
   AssessmentResultDomainViewModel,
@@ -28,17 +29,21 @@ const INTELLIGENCE_DOMAIN_ORDER = [
   'signal_stress',
 ] as const;
 
-const INTELLIGENCE_DOMAIN_CONFIG: Record<(typeof INTELLIGENCE_DOMAIN_ORDER)[number], {
-  title: string;
-  eyebrow: string;
-  summaryLabel: string;
-  fallback: string;
-}> = {
+const INTELLIGENCE_DOMAIN_CONFIG: Record<
+  (typeof INTELLIGENCE_DOMAIN_ORDER)[number],
+  {
+    title: string;
+    eyebrow: string;
+    summaryLabel: string;
+    fallback: string;
+  }
+> = {
   signal_style: {
     title: 'Behaviour Style',
     eyebrow: 'How you tend to show up',
     summaryLabel: 'How you operate',
-    fallback: 'This area shows the clearest working style that tends to shape your day-to-day approach.',
+    fallback:
+      'This area shows the clearest working style that tends to shape your day-to-day approach.',
   },
   signal_mot: {
     title: 'Motivators',
@@ -50,25 +55,29 @@ const INTELLIGENCE_DOMAIN_CONFIG: Record<(typeof INTELLIGENCE_DOMAIN_ORDER)[numb
     title: 'Leadership',
     eyebrow: 'How you tend to lead',
     summaryLabel: 'How your leadership shows up',
-    fallback: 'This area shows the form of direction and support you are most likely to bring when others look to you.',
+    fallback:
+      'This area shows the form of direction and support you are most likely to bring when others look to you.',
   },
   signal_conflict: {
     title: 'Conflict',
     eyebrow: 'How you tend to handle tension',
     summaryLabel: 'How you respond when tensions rise',
-    fallback: 'This area shows the conflict response you are most likely to rely on when the situation becomes difficult.',
+    fallback:
+      'This area shows the conflict response you are most likely to rely on when the situation becomes difficult.',
   },
   signal_culture: {
     title: 'Culture',
     eyebrow: 'Where you are likely to work best',
     summaryLabel: 'What kind of environment fits best',
-    fallback: 'This area shows the kind of environment where your strengths are more likely to come through cleanly.',
+    fallback:
+      'This area shows the kind of environment where your strengths are more likely to come through cleanly.',
   },
   signal_stress: {
     title: 'Stress',
     eyebrow: 'How pressure may change your pattern',
     summaryLabel: 'What to notice under pressure',
-    fallback: 'This area shows the pressure pattern most worth noticing early so it does not take over.',
+    fallback:
+      'This area shows the pressure pattern most worth noticing early so it does not take over.',
   },
 };
 
@@ -125,12 +134,17 @@ function splitNarrative(value: string): readonly string[] {
     .filter(Boolean);
 }
 
-function getSecondaryHeroSignal(result: AssessmentResultDetailViewModel): AssessmentResultSignalViewModel | null {
+function getSecondaryHeroSignal(
+  result: AssessmentResultDetailViewModel,
+): AssessmentResultSignalViewModel | null {
   const primarySignalId = result.topSignal?.signalId ?? result.rankedSignals[0]?.signalId ?? null;
   return result.rankedSignals.find((signal) => signal.signalId !== primarySignalId) ?? null;
 }
 
-function getHeroHeading(result: AssessmentResultDetailViewModel, secondarySignal: AssessmentResultSignalViewModel | null): string {
+function getHeroHeading(
+  result: AssessmentResultDetailViewModel,
+  secondarySignal: AssessmentResultSignalViewModel | null,
+): string {
   const headline = result.overviewSummary.headline?.trim();
   if (headline) {
     return headline;
@@ -201,13 +215,7 @@ function getVisibleItems<T>(items: readonly T[]): {
   };
 }
 
-function SignalMeter({
-  value,
-  tone = 'accent',
-}: {
-  value: number;
-  tone?: 'accent' | 'muted';
-}) {
+function SignalMeter({ value, tone = 'accent' }: { value: number; tone?: 'accent' | 'muted' }) {
   const width = `${Math.max(0, Math.min(value, 100))}%`;
   const fillClass = tone === 'accent' ? 'bg-accent' : 'bg-white/35';
 
@@ -220,7 +228,9 @@ function SignalMeter({
 
 function SectionEyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">{children}</p>
+    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
+      {children}
+    </p>
   );
 }
 
@@ -245,10 +255,7 @@ function getPersistedDomainInterpretation(domain: AssessmentResultDomainViewMode
   };
 }
 
-function getSignalCardMicrocopy(params: {
-  signalTitle: string;
-  isPrimary: boolean;
-}): string {
+function getSignalCardMicrocopy(params: { signalTitle: string; isPrimary: boolean }): string {
   if (params.isPrimary) {
     return `${params.signalTitle} most strongly shapes how this area tends to show up.`;
   }
@@ -256,16 +263,18 @@ function getSignalCardMicrocopy(params: {
   return `${params.signalTitle} remains close enough to meaningfully shape how this area comes through.`;
 }
 
-function getIntelligenceDomains(result: AssessmentResultDetailViewModel): readonly AssessmentResultDomainViewModel[] {
+function getIntelligenceDomains(
+  result: AssessmentResultDetailViewModel,
+): readonly AssessmentResultDomainViewModel[] {
   const domainByKey = new Map(
     result.domainSummaries
       .filter((domain) => domain.domainSource === 'signal_group')
       .map((domain) => [domain.domainKey, domain] as const),
   );
 
-  return INTELLIGENCE_DOMAIN_ORDER
-    .map((domainKey) => domainByKey.get(domainKey))
-    .filter((domain): domain is AssessmentResultDomainViewModel => Boolean(domain));
+  return INTELLIGENCE_DOMAIN_ORDER.map((domainKey) => domainByKey.get(domainKey)).filter(
+    (domain): domain is AssessmentResultDomainViewModel => Boolean(domain),
+  );
 }
 
 function getHeroPrimarySignalChips(
@@ -300,10 +309,12 @@ function ActionList({
         {visible.length > 0 ? (
           visible.map((item) => (
             <li key={item.key} className="rounded-2xl bg-black/20 p-4">
-              <p className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${accentClass}`}>
+              <p
+                className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${accentClass}`}
+              >
                 {item.title}
               </p>
-              <p className="mt-3 text-sm leading-6 text-white/72">{item.detail}</p>
+              <p className="text-white/72 mt-3 text-sm leading-6">{item.detail}</p>
             </li>
           ))
         ) : (
@@ -315,13 +326,13 @@ function ActionList({
 
       {overflow.length > 0 ? (
         <details className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
-          <summary className="cursor-pointer list-none text-sm font-medium text-white/72 marker:hidden">
+          <summary className="text-white/72 cursor-pointer list-none text-sm font-medium marker:hidden">
             Show {overflow.length} more
           </summary>
           <ul className="mt-4 space-y-3">
             {overflow.map((item) => (
               <li key={item.key} className="rounded-2xl bg-white/[0.03] p-4">
-                <p className="text-sm font-medium text-white/88">{item.title}</p>
+                <p className="text-white/88 text-sm font-medium">{item.title}</p>
                 <p className="mt-2 text-sm leading-6 text-white/60">{item.detail}</p>
               </li>
             ))}
@@ -332,12 +343,10 @@ function ActionList({
   );
 }
 
-function DomainCard({
-  domain,
-}: {
-  domain: AssessmentResultDomainViewModel;
-}) {
-  const config = INTELLIGENCE_DOMAIN_CONFIG[domain.domainKey as keyof typeof INTELLIGENCE_DOMAIN_CONFIG] ?? {
+function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
+  const config = INTELLIGENCE_DOMAIN_CONFIG[
+    domain.domainKey as keyof typeof INTELLIGENCE_DOMAIN_CONFIG
+  ] ?? {
     title: domain.domainTitle,
     eyebrow: 'Domain',
     summaryLabel: 'Pattern',
@@ -352,12 +361,12 @@ function DomainCard({
       <div className="space-y-2">
         <SectionEyebrow>{config.eyebrow}</SectionEyebrow>
         <h3 className="text-xl font-semibold text-white">{config.title}</h3>
-        <p className="max-w-2xl text-sm leading-7 text-white/62">{interpretation.summary}</p>
+        <p className="text-white/62 max-w-2xl text-sm leading-7">{interpretation.summary}</p>
         {interpretation.support ? (
-          <p className="max-w-2xl text-sm leading-7 text-white/48">{interpretation.support}</p>
+          <p className="text-white/48 max-w-2xl text-sm leading-7">{interpretation.support}</p>
         ) : null}
         {interpretation.tension ? (
-          <p className="max-w-2xl text-sm leading-7 text-white/42">{interpretation.tension}</p>
+          <p className="text-white/42 max-w-2xl text-sm leading-7">{interpretation.tension}</p>
         ) : null}
       </div>
 
@@ -367,16 +376,18 @@ function DomainCard({
             {visibleSignals.map((signal, index) => (
               <div
                 key={signal.signalId}
-                className="rounded-2xl border border-white/8 bg-black/20 p-4"
+                className="border-white/8 rounded-2xl border bg-black/20 p-4"
               >
                 <p className="text-xs uppercase tracking-[0.18em] text-white/45">
                   {index === 0 ? 'Primary signal' : 'Secondary signal'}
                 </p>
                 <div className="mt-3 flex items-baseline justify-between gap-3">
                   <p className="text-lg font-semibold text-white">{signal.signalTitle}</p>
-                  <p className="text-sm font-medium text-white/68">{formatPercent(signal.domainPercentage)}</p>
+                  <p className="text-white/68 text-sm font-medium">
+                    {formatPercent(signal.domainPercentage)}
+                  </p>
                 </div>
-                <p className="mt-2 text-sm leading-6 text-white/58">
+                <p className="text-white/58 mt-2 text-sm leading-6">
                   {getSignalCardMicrocopy({
                     signalTitle: signal.signalTitle,
                     isPrimary: index === 0,
@@ -388,7 +399,7 @@ function DomainCard({
 
           {hiddenSignals.length > 0 ? (
             <details className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
-              <summary className="cursor-pointer list-none text-sm font-medium text-white/72 marker:hidden">
+              <summary className="text-white/72 cursor-pointer list-none text-sm font-medium marker:hidden">
                 Show remaining signals in this domain
               </summary>
               <div className="mt-4 space-y-3">
@@ -397,7 +408,7 @@ function DomainCard({
                     key={signal.signalId}
                     className="rounded-2xl bg-white/[0.03] px-4 py-3 text-sm"
                   >
-                    <p className="font-medium text-white/82">{signal.signalTitle}</p>
+                    <p className="text-white/82 font-medium">{signal.signalTitle}</p>
                     <p className="mt-1 text-xs text-white/45">
                       {formatPercent(signal.domainPercentage)} supporting signal
                       {signal.isOverlay ? ' | overlay' : ''}
@@ -458,9 +469,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             <span className="hidden text-white/20 md:inline">/</span>
             <span>{completionDate}</span>
           </div>
-          <span className="inline-flex w-fit rounded-full border border-emerald-400/25 bg-emerald-400/12 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-emerald-200">
-            Ready
-          </span>
+          <StatusPill status="ready" label="Ready" />
         </div>
       </header>
 
@@ -485,12 +494,12 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
             {heroHeading}
           </h1>
-          <p className="max-w-3xl text-lg leading-8 text-white/72">{combinedInterpretation}</p>
-          <p className="max-w-3xl text-sm leading-7 text-white/52">
+          <p className="text-white/72 max-w-3xl text-lg leading-8">{combinedInterpretation}</p>
+          <p className="text-white/52 max-w-3xl text-sm leading-7">
             In practice: {heroSupport.narrative}
           </p>
           {heroSupport.support ? (
-            <p className="max-w-3xl text-sm leading-7 text-white/42">{heroSupport.support}</p>
+            <p className="text-white/42 max-w-3xl text-sm leading-7">{heroSupport.support}</p>
           ) : null}
         </div>
       </section>
@@ -498,8 +507,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
       <section className="space-y-6">
         <div className="space-y-2">
           <SectionEyebrow>Six Intelligence Areas</SectionEyebrow>
-          <p className="max-w-3xl text-sm leading-7 text-white/58">
-            The six core areas show how the strongest patterns come through across the parts of work that matter most.
+          <p className="text-white/58 max-w-3xl text-sm leading-7">
+            The six core areas show how the strongest patterns come through across the parts of work
+            that matter most.
           </p>
         </div>
 
@@ -513,8 +523,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
       <section className="space-y-5">
         <div className="space-y-2">
           <SectionEyebrow>Action Focus</SectionEyebrow>
-          <p className="text-sm leading-7 text-white/58">
-            Practical strengths to build on, risks to manage, and areas worth strengthening. These stay concise on purpose.
+          <p className="text-white/58 text-sm leading-7">
+            Practical strengths to build on, risks to manage, and areas worth strengthening. These
+            stay concise on purpose.
           </p>
         </div>
 
