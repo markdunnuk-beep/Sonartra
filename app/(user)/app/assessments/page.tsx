@@ -1,5 +1,7 @@
 import {
   ButtonLink,
+  EmptyState,
+  LabelPill,
   MetaItem,
   PageFrame,
   PageHeader,
@@ -33,12 +35,10 @@ export default async function UserAssessmentsPage() {
       />
 
       {viewModel.assessments.length === 0 ? (
-        <SurfaceCard dashed muted className="p-6">
-          <h2 className="text-xl font-semibold text-white">No assessments available</h2>
-          <p className="text-white/58 mt-2 max-w-2xl text-sm leading-7">
-            Published assessments will appear here when they are available.
-          </p>
-        </SurfaceCard>
+        <EmptyState
+          title="No assessments available"
+          description="Published assessments will appear here when they are available."
+        />
       ) : (
         <section className="sonartra-section">
           <SectionHeader
@@ -52,9 +52,7 @@ export default async function UserAssessmentsPage() {
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="sonartra-status sonartra-status-neutral">
-                        {assessment.typeLabel}
-                      </span>
+                      <LabelPill>{assessment.typeLabel}</LabelPill>
                       <StatusPill status={assessment.status} label={assessment.statusLabel} />
                     </div>
                     <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-white">

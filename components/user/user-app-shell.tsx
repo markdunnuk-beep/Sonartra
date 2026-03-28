@@ -107,10 +107,10 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'group flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm font-medium transition duration-200',
+        'sonartra-focus-ring group flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm font-medium transition duration-200',
         collapsed ? 'justify-center px-0' : 'justify-start',
         active
-          ? 'border-white/12 bg-white/[0.06] text-white'
+          ? 'border-white/12 bg-white/[0.06] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]'
           : 'text-white/58 hover:border-white/8 hover:text-white/88 border-transparent hover:bg-white/[0.035]',
       )}
       href={item.href}
@@ -191,7 +191,7 @@ export function UserAppShell({
           >
             <Link
               className={cn(
-                'border-white/8 flex items-center gap-3 rounded-[1.25rem] border bg-white/[0.03] px-3 py-3 transition duration-200 hover:bg-white/[0.045]',
+                'sonartra-focus-ring border-white/8 flex items-center gap-3 rounded-[1.25rem] border bg-white/[0.03] px-3 py-3 transition duration-200 hover:bg-white/[0.045]',
                 collapsed ? 'h-12 w-12 justify-center px-0 py-0' : 'flex-1',
               )}
               href="/app/workspace"
@@ -212,7 +212,7 @@ export function UserAppShell({
             {!collapsed ? (
               <button
                 aria-label="Collapse sidebar"
-                className="border-white/8 hover:border-white/12 hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white/[0.03] text-white/55 transition duration-200 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
+                className="sonartra-focus-ring border-white/8 hover:border-white/12 hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white/[0.03] text-white/55 transition duration-200 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
                 onClick={() => setCollapsed(true)}
                 type="button"
               >
@@ -232,7 +232,7 @@ export function UserAppShell({
           {collapsed ? (
             <button
               aria-label="Expand sidebar"
-              className="border-white/8 hover:border-white/12 mt-4 hidden h-9 w-9 self-center rounded-xl border bg-white/[0.03] text-white/55 transition duration-200 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
+              className="sonartra-focus-ring border-white/8 hover:border-white/12 mt-4 hidden h-9 w-9 self-center rounded-xl border bg-white/[0.03] text-white/55 transition duration-200 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
               onClick={() => setCollapsed(false)}
               type="button"
             >
@@ -289,7 +289,7 @@ export function UserAppShell({
           <div className="border-white/6 flex items-center justify-between border-b px-4 py-4 lg:hidden">
             <button
               aria-label="Open sidebar"
-              className="border-white/8 text-white/62 hover:border-white/12 inline-flex h-11 w-11 items-center justify-center rounded-xl border bg-white/[0.03] transition duration-200 hover:bg-white/[0.06] hover:text-white"
+              className="sonartra-focus-ring border-white/8 text-white/62 hover:border-white/12 inline-flex h-11 w-11 items-center justify-center rounded-xl border bg-white/[0.03] transition duration-200 hover:bg-white/[0.06] hover:text-white"
               onClick={() => setMobileOpen(true)}
               type="button"
             >

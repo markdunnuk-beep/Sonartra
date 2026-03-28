@@ -292,7 +292,7 @@ function ActionList({
         : 'bg-white/8 text-white/78 ring-1 ring-white/10';
 
   return (
-    <section className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
+    <SurfaceCard className="p-5">
       <SectionEyebrow>{title}</SectionEyebrow>
       <ul className="mt-4 space-y-3">
         {visible.length > 0 ? (
@@ -314,7 +314,7 @@ function ActionList({
       </ul>
 
       {overflow.length > 0 ? (
-        <details className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
+        <details className="border-white/8 bg-black/14 mt-4 rounded-[1.15rem] border p-4">
           <summary className="text-white/72 cursor-pointer list-none text-sm font-medium marker:hidden">
             Show {overflow.length} more
           </summary>
@@ -328,7 +328,7 @@ function ActionList({
           </ul>
         </details>
       ) : null}
-    </section>
+    </SurfaceCard>
   );
 }
 
@@ -458,7 +458,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-10">
-      <header className="border-white/8 rounded-[1.6rem] border bg-white/[0.035] px-5 py-4 shadow-[0_20px_60px_rgba(0,0,0,0.2)] backdrop-blur">
+      <SurfaceCard className="rounded-[1.6rem] px-5 py-4">
         <div className="flex flex-col gap-2 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <span>{result.assessmentTitle}</span>
@@ -469,7 +469,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           </div>
           <StatusPill status="ready" label="Ready" />
         </div>
-      </header>
+      </SurfaceCard>
 
       <SurfaceCard accent className="overflow-hidden p-7 md:p-9">
         <div className="space-y-5">
@@ -517,13 +517,11 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
       </section>
 
       <section className="space-y-5">
-        <div className="space-y-2">
-          <SectionEyebrow>Action Focus</SectionEyebrow>
-          <p className="text-white/58 text-sm leading-7">
-            Practical strengths to build on, risks to manage, and areas worth strengthening. These
-            stay concise on purpose.
-          </p>
-        </div>
+        <SectionHeader
+          eyebrow="Action Focus"
+          title="Practical synthesis"
+          description="Practical strengths to build on, risks to manage, and areas worth strengthening. These stay concise on purpose."
+        />
 
         <ActionList title="Strengths" items={result.strengths} tone="positive" />
         <ActionList title="Watchouts" items={result.watchouts} tone="warning" />

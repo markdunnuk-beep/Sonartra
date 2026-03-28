@@ -16,6 +16,9 @@
   --sonartra-text-soft: rgba(191, 202, 228, 0.5);
   --sonartra-accent: #8ea2ff;
   --sonartra-accent-soft: rgba(142, 162, 255, 0.16);
+  --sonartra-focus-ring: rgba(142, 162, 255, 0.42);
+  --sonartra-focus-shadow: rgba(142, 162, 255, 0.16);
+  --sonartra-transition-fast: 160ms;
 }
 
 html {
@@ -112,17 +115,19 @@ main {
   }
 
   .sonartra-card {
-    @apply rounded-[1.5rem] border p-6 transition duration-200;
+    @apply rounded-[1.5rem] border p-6 transition;
     border-color: var(--sonartra-border);
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02)),
       rgba(12, 19, 33, 0.78);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+    transition-duration: var(--sonartra-transition-fast);
   }
 
   .sonartra-card-interactive {
     @apply hover:-translate-y-0.5;
     border-color: rgba(223, 232, 255, 0.11);
+    box-shadow: 0 28px 72px rgba(0, 0, 0, 0.22);
   }
 
   .sonartra-card-hero {
@@ -159,7 +164,8 @@ main {
   }
 
   .sonartra-button {
-    @apply inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition duration-200;
+    @apply inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium leading-none transition;
+    transition-duration: var(--sonartra-transition-fast);
   }
 
   .sonartra-button-primary {
@@ -183,8 +189,16 @@ main {
     background: rgba(255, 255, 255, 0.06);
   }
 
+  .sonartra-button:focus-visible,
+  .sonartra-focus-ring:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 1px var(--sonartra-focus-ring),
+      0 0 0 4px var(--sonartra-focus-shadow);
+  }
+
   .sonartra-status {
-    @apply inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em];
+    @apply inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em];
   }
 
   .sonartra-status-neutral {
@@ -203,5 +217,25 @@ main {
     border-color: rgba(116, 209, 177, 0.22);
     background: rgba(116, 209, 177, 0.1);
     color: rgba(214, 246, 233, 0.86);
+  }
+
+  .sonartra-chip {
+    @apply inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em];
+    border-color: rgba(223, 232, 255, 0.1);
+    background: rgba(255, 255, 255, 0.045);
+    color: rgba(225, 232, 251, 0.72);
+  }
+
+  .sonartra-empty-state {
+    @apply space-y-4;
+  }
+
+  .sonartra-empty-title {
+    @apply text-xl font-semibold tracking-[-0.02em] text-white;
+  }
+
+  .sonartra-empty-copy {
+    @apply max-w-2xl text-sm leading-7;
+    color: var(--sonartra-text-muted);
   }
 }

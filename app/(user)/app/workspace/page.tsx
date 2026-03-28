@@ -1,5 +1,7 @@
 import {
   ButtonLink,
+  EmptyState,
+  LabelPill,
   MetaItem,
   PageFrame,
   PageHeader,
@@ -75,9 +77,7 @@ export default async function UserWorkspacePage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="sonartra-status sonartra-status-neutral">
-                          {assessment.typeLabel}
-                        </span>
+                        <LabelPill>{assessment.typeLabel}</LabelPill>
                         <StatusPill status={assessment.status} label={assessment.statusLabel} />
                       </div>
                       <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
@@ -104,12 +104,10 @@ export default async function UserWorkspacePage() {
             ))}
           </div>
         ) : (
-          <SurfaceCard dashed muted className="p-6">
-            <h3 className="text-lg font-semibold text-white">No published assessments</h3>
-            <p className="text-white/58 mt-2 max-w-2xl text-sm leading-7">
-              Published assessments will appear here when they are available for this user.
-            </p>
-          </SurfaceCard>
+          <EmptyState
+            title="No published assessments"
+            description="Published assessments will appear here when they are available for this user."
+          />
         )}
       </section>
 
@@ -132,11 +130,11 @@ export default async function UserWorkspacePage() {
             </div>
           </SurfaceCard>
         ) : (
-          <SurfaceCard dashed muted className="p-5">
-            <p className="text-white/58 text-sm leading-7">
-              No completed ready result is available yet.
-            </p>
-          </SurfaceCard>
+          <EmptyState
+            title="No completed result yet"
+            description="A ready result will appear here after an assessment has been completed."
+            className="p-5"
+          />
         )}
       </section>
     </PageFrame>

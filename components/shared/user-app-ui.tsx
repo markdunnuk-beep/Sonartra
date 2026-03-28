@@ -99,6 +99,16 @@ export function MetaItem({
   );
 }
 
+export function LabelPill({
+  children,
+  className,
+}: Readonly<{
+  children: ReactNode;
+  className?: string;
+}>) {
+  return <span className={cn('sonartra-chip', className)}>{children}</span>;
+}
+
 export function ButtonLink({
   href,
   children,
@@ -114,7 +124,7 @@ export function ButtonLink({
     <Link
       href={href}
       className={cn(
-        'sonartra-button',
+        'sonartra-button sonartra-focus-ring',
         variant === 'primary' ? 'sonartra-button-primary' : 'sonartra-button-secondary',
         className,
       )}
@@ -139,4 +149,26 @@ export function StatusPill({
         : 'sonartra-status-neutral';
 
   return <span className={cn('sonartra-status', toneClass)}>{label}</span>;
+}
+
+export function EmptyState({
+  title,
+  description,
+  action,
+  className,
+}: Readonly<{
+  title: string;
+  description: string;
+  action?: ReactNode;
+  className?: string;
+}>) {
+  return (
+    <SurfaceCard dashed muted className={cn('sonartra-empty-state p-6', className)}>
+      <div className="space-y-2">
+        <h2 className="sonartra-empty-title">{title}</h2>
+        <p className="sonartra-empty-copy">{description}</p>
+      </div>
+      {action ? <div className="pt-1">{action}</div> : null}
+    </SurfaceCard>
+  );
 }

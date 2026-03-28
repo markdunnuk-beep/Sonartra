@@ -1,5 +1,6 @@
 import {
   ButtonLink,
+  EmptyState,
   PageFrame,
   PageHeader,
   SectionHeader,
@@ -28,15 +29,11 @@ export default async function UserResultsPage() {
       <PageHeader title="Results" description="View and revisit your completed assessments." />
 
       {results.length === 0 ? (
-        <SurfaceCard dashed muted className="p-6">
-          <h2 className="text-xl font-semibold text-white">No results yet</h2>
-          <p className="text-white/58 mt-2 max-w-2xl text-sm leading-7">
-            Complete an assessment to see your results here.
-          </p>
-          <div className="mt-5">
-            <ButtonLink href="/app/assessments">Open Assessments</ButtonLink>
-          </div>
-        </SurfaceCard>
+        <EmptyState
+          title="No results yet"
+          description="Complete an assessment to see your results here."
+          action={<ButtonLink href="/app/assessments">Open Assessments</ButtonLink>}
+        />
       ) : (
         <section className="sonartra-section">
           <SectionHeader
