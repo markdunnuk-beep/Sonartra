@@ -17,3 +17,22 @@ main {
 .sonartra-panel {
   @apply rounded-xl border border-white/10 bg-surface/70 p-6;
 }
+
+.sonartra-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.sonartra-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.sonartra-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sonartra-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
