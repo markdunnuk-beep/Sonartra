@@ -51,6 +51,11 @@ export function AssessmentRunnerClient({
 
   const currentQuestion = runner.questions[currentQuestionIndex] ?? null;
   const totalQuestions = runner.totalQuestions;
+  const unansweredQuestions = Math.max(0, totalQuestions - answeredQuestions);
+  const isFinalQuestion = currentQuestionIndex === runner.questions.length - 1;
+  const currentQuestionAnswered = currentQuestion
+    ? selectedByQuestionId[currentQuestion.questionId] !== null
+    : false;
   const canSubmit =
     answeredQuestions === totalQuestions &&
     !isSaving &&
@@ -58,9 +63,20 @@ export function AssessmentRunnerClient({
     !saveError;
   const interactionLocked = completionState !== 'idle';
   const resumedAwayFromStart = initialQuestionIndex > 0;
+  const showCompleteAction = isFinalQuestion || completionState !== 'idle' || submitError !== null;
 
   function goToQuestion(index: number) {
     setCurrentQuestionIndex(Math.max(0, Math.min(index, runner.questions.length - 1)));
+  }
+
+  function goToFirstUnanswered() {
+    const nextIndex = runner.questions.findIndex(
+      (question) => selectedByQuestionId[question.questionId] === null,
+    );
+
+    if (nextIndex >= 0) {
+      goToQuestion(nextIndex);
+    }
   }
 
   async function persistSelection(params: {
@@ -206,164 +222,254 @@ export function AssessmentRunnerClient({
   }
 
   return (
-    <div className="space-y-6">
-      <section className="sonartra-panel space-y-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-2">
-            <p className="text-sm uppercase tracking-[0.2em] text-white/45">
-              Question {currentQuestionIndex + 1} of {totalQuestions}
-            </p>
-            <h2 className="text-2xl font-semibold text-white">{runner.assessmentTitle}</h2>
-            <p className="text-sm text-white/65">
-              {answeredQuestions} answered of {totalQuestions}. Progress {completionPercentage}%.
-            </p>
-            {resumedAwayFromStart ? (
-              <p className="text-sm text-white/50">
-                Resume opened at the next useful question based on your saved answers.
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
+      <div className="space-y-4">
+        <section className="sonartra-panel space-y-4 p-5 lg:p-6">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">
+                <span>Assessment Runner</span>
+                <span className="text-white/22">/</span>
+                <span>{runner.assessmentTitle}</span>
+              </div>
+              <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+                <h2 className="text-[1.55rem] font-semibold tracking-[-0.03em] text-white lg:text-[1.8rem]">
+                  Question {currentQuestionIndex + 1}
+                </h2>
+                <p className="pb-0.5 text-sm text-white/58">of {totalQuestions}</p>
+              </div>
+              <p className="text-sm text-white/65">
+                {answeredQuestions} complete, {unansweredQuestions} remaining. Progress{' '}
+                {completionPercentage}%.
               </p>
+              {resumedAwayFromStart ? (
+                <p className="text-sm text-white/46">
+                  Resume opened at the next unanswered question from your saved progress.
+                </p>
+              ) : null}
+            </div>
+            <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-white/58">
+              {completionState === 'idle'
+                ? isSaving
+                  ? 'Saving latest selection...'
+                  : 'Selections save automatically.'
+                : 'Completion is in progress.'}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-medium text-white/44">
+              <span>Completion</span>
+              <span>{completionPercentage}%</span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-white/8">
+              <div
+                className="h-full rounded-full bg-white transition-all"
+                style={{ width: `${completionPercentage}%` }}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="sonartra-panel space-y-5 p-5 lg:p-6">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/58">
+                {currentQuestion.domainTitle}
+              </span>
+              <span
+                className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                  currentQuestionAnswered
+                    ? 'border-emerald-400/18 bg-emerald-400/10 text-emerald-100'
+                    : 'border-white/10 bg-white/[0.03] text-white/52'
+                }`}
+              >
+                {currentQuestionAnswered ? 'Answered' : 'Awaiting response'}
+              </span>
+            </div>
+            <h3 className="max-w-4xl text-[1.8rem] font-semibold tracking-[-0.03em] text-white lg:text-[2rem]">
+              {currentQuestion.prompt}
+            </h3>
+          </div>
+
+          <div className="grid gap-3">
+            {currentQuestion.options.map((option) => {
+              const selected = selectedByQuestionId[currentQuestion.questionId] === option.optionId;
+
+              return (
+                <button
+                  key={option.optionId}
+                  type="button"
+                  onClick={() => handleSelect(currentQuestion.questionId, option.optionId)}
+                  disabled={interactionLocked}
+                  className={`rounded-[1.1rem] border px-4 py-3.5 text-left transition ${
+                    selected
+                      ? 'border-white bg-white text-neutral-950 shadow-[0_14px_30px_rgba(255,255,255,0.08)]'
+                      : 'border-white/10 bg-white/[0.03] text-white hover:border-white/24 hover:bg-white/[0.055]'
+                  } disabled:cursor-not-allowed disabled:opacity-70`}
+                >
+                  <div className="flex items-start gap-3">
+                    {option.label ? (
+                      <span
+                        className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
+                          selected ? 'bg-neutral-950/10 text-neutral-950' : 'bg-white/10 text-white'
+                        }`}
+                      >
+                        {option.label}
+                      </span>
+                    ) : null}
+                    <span className="text-sm leading-6 lg:text-[0.95rem]">{option.text}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {saveError ? (
+            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+              {saveError}
+            </p>
+          ) : null}
+
+          {submitError ? (
+            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+              {submitError}
+            </p>
+          ) : null}
+
+          {getCompletionMessage() ? (
+            <p className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/72">
+              {getCompletionMessage()}
+            </p>
+          ) : null}
+
+          <div className="border-white/8 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-1 gap-3">
+              <button
+                type="button"
+                onClick={() => goToQuestion(currentQuestionIndex - 1)}
+                disabled={currentQuestionIndex === 0 || interactionLocked}
+                className="inline-flex h-12 min-w-[7rem] items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] px-5 text-sm font-semibold text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:text-white/35"
+              >
+                Back
+              </button>
+              {!isFinalQuestion ? (
+                <button
+                  type="button"
+                  onClick={() => goToQuestion(currentQuestionIndex + 1)}
+                  disabled={interactionLocked}
+                  className="inline-flex h-12 min-w-[8rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
+                >
+                  Next
+                </button>
+              ) : unansweredQuestions > 0 ? (
+                <button
+                  type="button"
+                  onClick={goToFirstUnanswered}
+                  disabled={interactionLocked}
+                  className="inline-flex h-12 min-w-[10.5rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
+                >
+                  Next Unanswered
+                </button>
+              ) : null}
+            </div>
+
+            {showCompleteAction ? (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                className="inline-flex h-12 min-w-[12rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
+              >
+                {completionState === 'submitting'
+                  ? 'Submitting...'
+                  : completionState === 'processing'
+                    ? 'Opening processing state...'
+                    : completionState === 'redirecting'
+                      ? 'Opening result...'
+                      : 'Complete Assessment'}
+              </button>
             ) : null}
           </div>
-          <div className="text-sm text-white/55">
-            {completionState === 'idle'
-              ? isSaving
-                ? 'Saving latest selection...'
-                : 'Selections save automatically.'
-              : 'Completion is in progress.'}
-          </div>
-        </div>
 
-        <div className="h-2 overflow-hidden rounded-full bg-white/10">
-          <div
-            className="h-full rounded-full bg-white transition-all"
-            style={{ width: `${completionPercentage}%` }}
-          />
-        </div>
-      </section>
+          {showCompleteAction && !canSubmit && completionState === 'idle' ? (
+            <p className="text-sm text-white/52">
+              {unansweredQuestions > 0
+                ? `Complete the remaining ${unansweredQuestions} question${unansweredQuestions === 1 ? '' : 's'} before submitting.`
+                : 'Completion is available once every question has a saved answer and no save is pending.'}
+            </p>
+          ) : null}
+        </section>
+      </div>
 
-      <section className="sonartra-panel space-y-5">
-        <div className="space-y-2">
-          <p className="text-sm uppercase tracking-[0.2em] text-white/45">
-            {currentQuestion.domainTitle}
-          </p>
-          <h3 className="text-2xl font-semibold text-white">{currentQuestion.prompt}</h3>
-        </div>
-
-        <div className="grid gap-3">
-          {currentQuestion.options.map((option) => {
-            const selected = selectedByQuestionId[currentQuestion.questionId] === option.optionId;
-
-            return (
-              <button
-                key={option.optionId}
-                type="button"
-                onClick={() => handleSelect(currentQuestion.questionId, option.optionId)}
-                disabled={interactionLocked}
-                className={`rounded-xl border p-4 text-left transition ${
-                  selected
-                    ? 'border-white bg-white text-neutral-950'
-                    : 'border-white/10 bg-white/5 text-white hover:border-white/25 hover:bg-white/8'
-                } disabled:cursor-not-allowed disabled:opacity-70`}
-              >
-                <div className="flex items-start gap-3">
-                  {option.label ? (
-                    <span className={`mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
-                      selected ? 'bg-neutral-950/10 text-neutral-950' : 'bg-white/10 text-white'
-                    }`}>
-                      {option.label}
-                    </span>
-                  ) : null}
-                  <span className="text-sm leading-6">{option.text}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {saveError ? (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-            {saveError}
-          </p>
-        ) : null}
-
-        {submitError ? (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-            {submitError}
-          </p>
-        ) : null}
-
-        {getCompletionMessage() ? (
-          <p className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/72">
-            {getCompletionMessage()}
-          </p>
-        ) : null}
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => goToQuestion(currentQuestionIndex - 1)}
-              disabled={currentQuestionIndex === 0 || interactionLocked}
-              className="inline-flex items-center justify-center rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-white/35"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={() => goToQuestion(currentQuestionIndex + 1)}
-              disabled={currentQuestionIndex >= runner.questions.length - 1 || interactionLocked}
-              className="inline-flex items-center justify-center rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-white/35"
-            >
-              Next
-            </button>
+      <aside className="xl:sticky xl:top-6">
+        <section className="sonartra-panel space-y-4 p-4">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">
+              Question Map
+            </p>
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-2xl font-semibold tracking-[-0.03em] text-white">
+                  {answeredQuestions}/{totalQuestions}
+                </p>
+                <p className="text-sm text-white/58">Questions completed</p>
+              </div>
+              <p className="text-sm text-white/46">{unansweredQuestions} remaining</p>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            className="inline-flex items-center justify-center rounded-md border border-white/15 bg-white px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
-          >
-            {completionState === 'submitting'
-              ? 'Submitting...'
-              : completionState === 'processing'
-                ? 'Opening processing state...'
-                : completionState === 'redirecting'
-                  ? 'Opening result...'
-                  : 'Complete Assessment'}
-          </button>
-        </div>
+          <div className="flex flex-wrap gap-2 text-[11px] text-white/48">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1">
+              <span className="h-2 w-2 rounded-full bg-white" />
+              Current
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/18 bg-emerald-400/10 px-2.5 py-1 text-emerald-100">
+              <span className="h-2 w-2 rounded-full bg-emerald-200" />
+              Complete
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1">
+              <span className="h-2 w-2 rounded-full bg-white/35" />
+              Incomplete
+            </span>
+          </div>
 
-        {!canSubmit && completionState === 'idle' ? (
-          <p className="text-sm text-white/55">
-            Completion is available once every question has a saved answer and no save is pending.
-          </p>
-        ) : null}
-      </section>
+          <div className="grid grid-cols-5 gap-2">
+            {runner.questions.map((question, index) => {
+              const answered = selectedByQuestionId[question.questionId] !== null;
+              const active = index === currentQuestionIndex;
 
-      <section className="grid gap-2 md:grid-cols-5 xl:grid-cols-8">
-        {runner.questions.map((question, index) => {
-          const answered = selectedByQuestionId[question.questionId] !== null;
-          const active = index === currentQuestionIndex;
-
-          return (
-            <button
-              key={question.questionId}
-              type="button"
-              onClick={() => goToQuestion(index)}
-              disabled={interactionLocked}
-              className={`rounded-lg border px-3 py-2 text-left text-sm transition ${
-                active
-                  ? 'border-white bg-white text-neutral-950'
-                  : answered
-                    ? 'border-white/20 bg-white/10 text-white'
-                    : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20'
-              } disabled:cursor-not-allowed disabled:opacity-60`}
-            >
-              {index + 1}
-            </button>
-          );
-        })}
-      </section>
+              return (
+                <button
+                  key={question.questionId}
+                  type="button"
+                  onClick={() => goToQuestion(index)}
+                  disabled={interactionLocked}
+                  aria-label={`Question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
+                  className={`relative rounded-xl border px-2 py-2.5 text-center text-sm font-medium transition ${
+                    active
+                      ? 'border-white bg-white text-neutral-950 shadow-[0_12px_24px_rgba(255,255,255,0.08)]'
+                      : answered
+                        ? 'border-emerald-400/18 bg-emerald-400/10 text-white hover:border-emerald-300/28 hover:bg-emerald-400/14'
+                        : 'border-white/10 bg-white/[0.03] text-white/58 hover:border-white/18 hover:bg-white/[0.05]'
+                  } disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  <span>{index + 1}</span>
+                  <span
+                    className={`absolute right-2 top-2 h-1.5 w-1.5 rounded-full ${
+                      active
+                        ? 'bg-neutral-950/45'
+                        : answered
+                          ? 'bg-emerald-200'
+                          : 'bg-white/28'
+                    }`}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      </aside>
     </div>
   );
 }

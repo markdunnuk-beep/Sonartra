@@ -49,15 +49,7 @@ export default async function AssessmentAttemptRunnerPage({
   }
 
   return (
-    <main className="space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm uppercase tracking-[0.2em] text-white/45">Assessment Runner</p>
-        <h1 className="text-3xl font-semibold text-white">{runner.assessmentTitle}</h1>
-        <p className="max-w-3xl text-sm text-white/65">
-          {runner.assessmentDescription ?? 'Persisted assessment definition and response state.'}
-        </p>
-      </header>
-
+    <main className="space-y-5">
       {runner.status === 'completed_processing' ? (
         <section className="sonartra-panel space-y-4">
           <h2 className="text-2xl font-semibold text-white">Processing result</h2>
