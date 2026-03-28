@@ -9,17 +9,10 @@ import {
   StatusPill,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
+import { formatAssessmentEstimatedDuration } from '@/lib/ui/assessment-duration';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createWorkspaceService } from '@/lib/server/workspace-service';
-
-function formatEstimatedTime(value: number | null): string {
-  if (value === null) {
-    return 'Time not set';
-  }
-
-  return `${value} min`;
-}
 
 export default async function UserAssessmentsPage() {
   const userId = await getRequestUserId();
@@ -70,7 +63,11 @@ export default async function UserAssessmentsPage() {
                   <MetaItem label="Type" value={assessment.typeLabel} />
                   <MetaItem
                     label="Estimated time"
-                    value={formatEstimatedTime(assessment.estimatedTimeMinutes)}
+                    value={formatAssessmentEstimatedDuration({
+                      assessmentKey: assessment.assessmentKey,
+                      estimatedTimeMinutes: assessment.estimatedTimeMinutes,
+                      questionCount: assessment.questionCount,
+                    })}
                   />
                 </div>
               </div>

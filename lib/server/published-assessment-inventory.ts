@@ -8,6 +8,7 @@ export type PublishedAssessmentInventoryItem = {
   assessmentVersionId: string;
   versionTag: string;
   publishedAt: string | null;
+  questionCount: number;
 };
 
 type PublishedAssessmentInventoryRow = {
@@ -18,6 +19,7 @@ type PublishedAssessmentInventoryRow = {
   assessment_version_id: string;
   version_tag: string;
   published_at: string | null;
+  question_count: string;
 };
 
 function mapPublishedAssessmentInventoryRow(
@@ -31,6 +33,7 @@ function mapPublishedAssessmentInventoryRow(
     assessmentVersionId: row.assessment_version_id,
     versionTag: row.version_tag,
     publishedAt: row.published_at,
+    questionCount: Number(row.question_count),
   };
 }
 
@@ -46,10 +49,20 @@ export async function listPublishedAssessmentInventory(
       a.description AS assessment_description,
       av.id AS assessment_version_id,
       av.version AS version_tag,
-      av.published_at
+      av.published_at,
+      COUNT(q.id) AS question_count
     FROM assessments a
     INNER JOIN assessment_versions av ON av.assessment_id = a.id
+    LEFT JOIN questions q ON q.assessment_version_id = av.id
     WHERE av.lifecycle_status = 'PUBLISHED'
+    GROUP BY
+      a.id,
+      a.assessment_key,
+      a.title,
+      a.description,
+      av.id,
+      av.version,
+      av.published_at
     ORDER BY a.title ASC, a.assessment_key ASC
     `,
   );

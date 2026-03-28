@@ -13,6 +13,94 @@ import {
 
 const SHELL_COLLAPSE_STORAGE_KEY = 'sonartra:user-shell-collapsed';
 
+function SessionAvatar({
+  userLabel,
+  className,
+}: {
+  userLabel: string;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        'flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.06] text-sm font-semibold text-white',
+        className,
+      )}
+    >
+      {userLabel.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+function LogoutIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24">
+      <path
+        d="M10.25 5.75H8.5a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h1.75M13 8.75l3.75 3.25L13 15.25M16.5 12H9.75"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.7"
+      />
+    </svg>
+  );
+}
+
+function SessionFooter({
+  collapsed,
+  onNavigate,
+  userLabel,
+}: {
+  collapsed: boolean;
+  onNavigate?: () => void;
+  userLabel: string;
+}) {
+  if (collapsed) {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <div title={userLabel}>
+          <SessionAvatar
+            className="border-white/8 bg-white/[0.03] text-white/76"
+            userLabel={userLabel}
+          />
+        </div>
+        <Link
+          aria-label="Log out"
+          className="sonartra-focus-ring border-white/8 text-white/60 hover:border-white/12 hover:bg-white/[0.06] hover:text-white mx-auto flex h-10 w-10 items-center justify-center rounded-[1rem] border bg-white/[0.03] transition duration-200"
+          href="/"
+          onClick={onNavigate}
+          title="Log out"
+        >
+          <LogoutIcon className="h-4 w-4" />
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border-white/8 rounded-[1.4rem] border bg-white/[0.03] p-3">
+      <div className="flex items-center gap-3">
+        <SessionAvatar userLabel={userLabel} />
+        <div className="min-w-0 flex-1">
+          <p className="text-white/34 text-[11px] font-semibold uppercase tracking-[0.18em]">
+            Workspace session
+          </p>
+          <p className="text-white/78 mt-1 truncate text-sm">{userLabel}</p>
+        </div>
+        <Link
+          aria-label="Log out"
+          className="sonartra-focus-ring border-white/8 text-white/60 hover:border-white/12 hover:bg-white/[0.06] hover:text-white flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border bg-white/[0.03] transition duration-200"
+          href="/"
+          onClick={onNavigate}
+          title="Log out"
+        >
+          <LogoutIcon className="h-4 w-4" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function isItemActive(pathname: string, item: UserAppNavItem): boolean {
   return item.match.some(
     (candidate) => pathname === candidate || pathname.startsWith(`${candidate}/`),
@@ -178,9 +266,10 @@ export function UserAppShell({
       <div className="mx-auto flex min-h-screen w-full max-w-[1560px]">
         <aside
           className={cn(
-            'sonartra-scrollbar border-white/6 fixed inset-y-0 left-0 z-40 flex w-[17.5rem] flex-col border-r bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-transform duration-300 lg:sticky lg:translate-x-0',
+            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 flex w-[17.5rem] flex-col bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:rounded-[2rem] lg:border lg:translate-x-0',
             collapsed ? 'lg:w-[5.5rem]' : 'lg:w-[17.5rem]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
+            'lg:sticky',
           )}
         >
           <div
@@ -259,21 +348,11 @@ export function UserAppShell({
             ))}
           </div>
 
-          {!collapsed ? (
-            <div className="border-white/8 rounded-[1.25rem] border bg-white/[0.03] p-4">
-              <p className="text-white/36 text-[11px] font-semibold uppercase tracking-[0.18em]">
-                Session
-              </p>
-              <p className="text-white/72 mt-2 truncate text-sm">{userLabel}</p>
-            </div>
-          ) : (
-            <div
-              className="border-white/8 text-white/72 mx-auto flex h-10 w-10 items-center justify-center rounded-full border bg-white/[0.03] text-sm font-medium"
-              title={userLabel}
-            >
-              {userLabel.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <SessionFooter
+            collapsed={collapsed}
+            onNavigate={() => setMobileOpen(false)}
+            userLabel={userLabel}
+          />
         </aside>
 
         {mobileOpen ? (

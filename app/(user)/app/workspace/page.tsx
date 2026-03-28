@@ -9,6 +9,7 @@ import {
   StatusPill,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
+import { formatAssessmentEstimatedDuration } from '@/lib/ui/assessment-duration';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createWorkspaceService } from '@/lib/server/workspace-service';
@@ -19,14 +20,6 @@ function formatDate(value: string): string {
     month: 'short',
     year: 'numeric',
   });
-}
-
-function formatEstimatedTime(value: number | null): string {
-  if (value === null) {
-    return 'Time not set';
-  }
-
-  return `${value} min`;
 }
 
 export default async function UserWorkspacePage() {
@@ -95,7 +88,11 @@ export default async function UserWorkspacePage() {
                   <div className="border-white/8 grid gap-3 border-t pt-4 sm:grid-cols-2">
                     <MetaItem
                       label="Estimated time"
-                      value={formatEstimatedTime(assessment.estimatedTimeMinutes)}
+                      value={formatAssessmentEstimatedDuration({
+                        assessmentKey: assessment.assessmentKey,
+                        estimatedTimeMinutes: assessment.estimatedTimeMinutes,
+                        questionCount: assessment.questionCount,
+                      })}
                     />
                     <MetaItem label="Current state" value={assessment.statusLabel} />
                   </div>

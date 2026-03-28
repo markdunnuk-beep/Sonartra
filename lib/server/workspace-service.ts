@@ -21,6 +21,7 @@ export type WorkspaceAssessmentItem = {
   title: string;
   description: string | null;
   estimatedTimeMinutes: number | null;
+  questionCount: number | null;
   typeLabel: string;
   status: WorkspaceAssessmentStatus;
   statusLabel: string;
@@ -170,6 +171,7 @@ export function createWorkspaceService(deps: WorkspaceServiceDeps) {
           title: assessment.title,
           description: assessment.description,
           estimatedTimeMinutes: null,
+          questionCount: assessment.questionCount,
           typeLabel: 'Individual',
           status,
           statusLabel: mapStatusLabel(status),
