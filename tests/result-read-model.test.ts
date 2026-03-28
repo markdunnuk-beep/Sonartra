@@ -128,6 +128,7 @@ function buildPayload(params?: {
             signalCount: 0,
             answeredQuestionCount: 1,
             rankedSignalIds: Object.freeze([]),
+            interpretation: null,
           }]
         : []),
       {
@@ -175,6 +176,23 @@ function buildPayload(params?: {
         signalCount: includeZeroSignal ? 2 : 1,
         answeredQuestionCount: 1,
         rankedSignalIds: Object.freeze(includeZeroSignal ? ['signal-core', 'signal-overlay'] : ['signal-core']),
+        interpretation: {
+          domainKey: 'signals',
+          primarySignalKey: 'core_focus',
+          primaryPercent: 70,
+          secondarySignalKey: includeZeroSignal ? 'role_executor' : null,
+          secondaryPercent: includeZeroSignal ? 0 : null,
+          summary: 'Core Focus leads this domain, with Role Executor adding a secondary influence.',
+          supportingLine: null,
+          diagnostics: {
+            strategy: includeZeroSignal ? 'fragment_fallback' : 'single_signal_fallback',
+            ruleKey: null,
+            primaryBand: 'dominant',
+            secondaryBand: includeZeroSignal ? 'low' : null,
+            blendProfile: 'concentrated',
+            primarySecondaryGap: includeZeroSignal ? 70 : 70,
+          },
+        },
       },
     ]),
     overviewSummary: {
@@ -382,6 +400,7 @@ test('detail load returns canonical payload projection including empty domains a
   assert.equal(detail.domainSummaries[0]?.domainSource, 'question_section');
   assert.equal(detail.normalizedScores[1]?.rawTotal, 0);
   assert.equal(detail.normalizedScores[1]?.isOverlay, true);
+  assert.equal(detail.domainSummaries[1]?.interpretation?.primarySignalKey, 'core_focus');
 });
 
 test('malformed payload triggers explicit payload error', async () => {

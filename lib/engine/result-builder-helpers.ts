@@ -3,12 +3,14 @@ import type {
   NormalizedDomainSummary,
   NormalizedResult,
   NormalizedSignalScore,
+  ResultDomainSummary,
   ResultDiagnostics,
   ResultMetadata,
   ResultRankedSignal,
   ResultTopSignal,
   ScoreDiagnostics,
 } from '@/lib/engine/types';
+import { buildDomainInterpretation } from '@/lib/engine/domain-interpretation';
 import {
   buildDevelopmentFocus,
   buildOverviewSummary,
@@ -89,12 +91,13 @@ export function buildNormalizedScores(normalizedResult: NormalizedResult): reado
   return Object.freeze([...normalizedResult.signalScores]);
 }
 
-export function buildDomainSummaries(normalizedResult: NormalizedResult): readonly NormalizedDomainSummary[] {
+export function buildDomainSummaries(normalizedResult: NormalizedResult): readonly ResultDomainSummary[] {
   return Object.freeze(
     normalizedResult.domainSummaries.map((domainSummary) => ({
       ...domainSummary,
       signalScores: Object.freeze([...domainSummary.signalScores]),
       rankedSignalIds: Object.freeze([...domainSummary.rankedSignalIds]),
+      interpretation: buildDomainInterpretation(domainSummary),
     })),
   );
 }

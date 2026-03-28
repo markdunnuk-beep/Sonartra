@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "convert:wplp80": "tsx scripts/convert-wplp80-excel-to-seeds.ts",
     "verify:wplp80": "tsx scripts/verify-wplp80-seeds.ts",
-    "seed:wplp80": "tsx scripts/seed-wplp80.ts"
+    "seed:wplp80": "tsx scripts/seed-wplp80.ts",
+    "review:wplp80-domain-language": "tsx scripts/review-wplp80-domain-interpretations.ts"
   },
   "dependencies": {
     "dotenv": "^17.3.1",

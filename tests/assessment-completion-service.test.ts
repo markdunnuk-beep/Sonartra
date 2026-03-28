@@ -130,8 +130,8 @@ function buildPayload(signalId: string): CanonicalResultPayload {
     rankedSignals: Object.freeze([{ signalId, signalKey, title, domainId: 'domain-signals', domainKey: 'signals', normalizedValue: 100, rawTotal: 1, percentage: 100, domainPercentage: 100, isOverlay, overlayType, rank: 1 }]),
     normalizedScores: Object.freeze([normalizedSignal]),
     domainSummaries: Object.freeze([
-      { domainId: 'domain-section', domainKey: 'section_a', domainTitle: 'Section A', domainSource: 'question_section' as const, rawTotal: 0, normalizedValue: 0, percentage: 0, signalScores: Object.freeze([]), signalCount: 0, answeredQuestionCount: 1, rankedSignalIds: Object.freeze([]) },
-      { domainId: 'domain-signals', domainKey: 'signals', domainTitle: 'Signals', domainSource: 'signal_group' as const, rawTotal: 1, normalizedValue: 100, percentage: 100, signalScores: Object.freeze([normalizedSignal]), signalCount: 1, answeredQuestionCount: 1, rankedSignalIds: Object.freeze([signalId]) },
+      { domainId: 'domain-section', domainKey: 'section_a', domainTitle: 'Section A', domainSource: 'question_section' as const, rawTotal: 0, normalizedValue: 0, percentage: 0, signalScores: Object.freeze([]), signalCount: 0, answeredQuestionCount: 1, rankedSignalIds: Object.freeze([]), interpretation: null },
+      { domainId: 'domain-signals', domainKey: 'signals', domainTitle: 'Signals', domainSource: 'signal_group' as const, rawTotal: 1, normalizedValue: 100, percentage: 100, signalScores: Object.freeze([normalizedSignal]), signalCount: 1, answeredQuestionCount: 1, rankedSignalIds: Object.freeze([signalId]), interpretation: { domainKey: 'signals', primarySignalKey: signalKey, primaryPercent: 100, secondarySignalKey: null, secondaryPercent: null, summary: `${title} is the clearest signal in this domain.`, supportingLine: null, diagnostics: { strategy: 'single_signal_fallback', ruleKey: null, primaryBand: 'dominant', secondaryBand: null, blendProfile: 'concentrated', primarySecondaryGap: 100 } } },
     ]),
     overviewSummary: { headline: 'Headline', narrative: 'Narrative' },
     strengths: Object.freeze([]),

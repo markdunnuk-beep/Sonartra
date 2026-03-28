@@ -224,46 +224,24 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
   );
 }
 
-function getSignalSummaryLine(signal: AssessmentResultSignalViewModel | null, fallback: string): string {
-  if (!signal) {
-    return fallback;
-  }
-
-  return signal.isOverlay ? `${getSignalTitle(signal)} adds a supporting layer here.` : `${getSignalTitle(signal)} sets the tone in this area.`;
-}
-
-function getDomainInterpretation(domainKey: string, primarySignal: AssessmentResultSignalViewModel | null, secondarySignal: AssessmentResultSignalViewModel | null): {
+function getPersistedDomainInterpretation(domain: AssessmentResultDomainViewModel): {
   summary: string;
   support: string | null;
+  tension: string | null;
 } {
-  const config = INTELLIGENCE_DOMAIN_CONFIG[domainKey as keyof typeof INTELLIGENCE_DOMAIN_CONFIG];
-  const primaryTitle = primarySignal ? getSignalTitle(primarySignal) : null;
-  const secondaryTitle = secondarySignal ? getSignalTitle(secondarySignal) : null;
-
-  if (!config) {
+  const interpretation = domain.interpretation;
+  if (interpretation?.summary) {
     return {
-      summary: getSignalSummaryLine(primarySignal, 'A clear pattern is available in this area.'),
-      support: secondaryTitle ? `${secondaryTitle} adds a second influence to how this shows up.` : null,
-    };
-  }
-
-  if (primaryTitle && secondaryTitle) {
-    return {
-      summary: `${config.summaryLabel} centres on ${primaryTitle}, with ${secondaryTitle} adding the second strongest influence.`,
-      support: `${primaryTitle} tends to come through first, while ${secondaryTitle} shapes the tone around it.`,
-    };
-  }
-
-  if (primaryTitle) {
-    return {
-      summary: `${config.summaryLabel} centres on ${primaryTitle}.`,
-      support: null,
+      summary: interpretation.summary,
+      support: interpretation.supportingLine ?? null,
+      tension: interpretation.tensionClause ?? null,
     };
   }
 
   return {
-    summary: config.fallback,
+    summary: 'Interpretation is not available in this persisted result.',
     support: null,
+    tension: null,
   };
 }
 
@@ -277,6 +255,14 @@ function getIntelligenceDomains(result: AssessmentResultDetailViewModel): readon
   return INTELLIGENCE_DOMAIN_ORDER
     .map((domainKey) => domainByKey.get(domainKey))
     .filter((domain): domain is AssessmentResultDomainViewModel => Boolean(domain));
+}
+
+function getHeroPrimarySignalChips(
+  domains: readonly AssessmentResultDomainViewModel[],
+): readonly string[] {
+  return domains
+    .map((domain) => domain.signalScores[0]?.signalTitle ?? null)
+    .filter((signalTitle): signalTitle is string => Boolean(signalTitle));
 }
 
 function ActionList({
@@ -348,9 +334,7 @@ function DomainCard({
   };
   const visibleSignals = domain.signalScores.slice(0, 2);
   const hiddenSignals = domain.signalScores.slice(2);
-  const primarySignal = visibleSignals[0] ?? null;
-  const secondarySignal = visibleSignals[1] ?? null;
-  const interpretation = getDomainInterpretation(domain.domainKey, primarySignal, secondarySignal);
+  const interpretation = getPersistedDomainInterpretation(domain);
 
   return (
     <article className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
@@ -360,6 +344,9 @@ function DomainCard({
         <p className="max-w-2xl text-sm leading-7 text-white/62">{interpretation.summary}</p>
         {interpretation.support ? (
           <p className="max-w-2xl text-sm leading-7 text-white/48">{interpretation.support}</p>
+        ) : null}
+        {interpretation.tension ? (
+          <p className="max-w-2xl text-sm leading-7 text-white/42">{interpretation.tension}</p>
         ) : null}
       </div>
 
@@ -374,7 +361,10 @@ function DomainCard({
                 <p className="text-xs uppercase tracking-[0.18em] text-white/45">
                   {index === 0 ? 'Primary signal' : 'Secondary signal'}
                 </p>
-                <p className="mt-3 text-lg font-semibold text-white">{signal.signalTitle}</p>
+                <div className="mt-3 flex items-baseline justify-between gap-3">
+                  <p className="text-lg font-semibold text-white">{signal.signalTitle}</p>
+                  <p className="text-sm font-medium text-white/68">{formatPercent(signal.domainPercentage)}</p>
+                </div>
                 <p className="mt-2 text-sm leading-6 text-white/58">
                   {index === 0
                     ? `${signal.signalTitle} is the clearest pattern here.`
@@ -397,7 +387,7 @@ function DomainCard({
                   >
                     <p className="font-medium text-white/82">{signal.signalTitle}</p>
                     <p className="mt-1 text-xs text-white/45">
-                      Additional supporting signal
+                      {formatPercent(signal.domainPercentage)} supporting signal
                       {signal.isOverlay ? ' - overlay' : ''}
                     </p>
                   </div>
@@ -438,6 +428,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   const { leadSignal } = getVisibleSignals(result);
   const intelligenceDomains = getIntelligenceDomains(result);
+  const heroPrimarySignalChips = getHeroPrimarySignalChips(intelligenceDomains);
   const completionDate = formatResultDate(result.generatedAt ?? result.createdAt);
   const secondaryHeroSignal = getSecondaryHeroSignal(result);
   const heroHeading = getHeroHeading(result, secondaryHeroSignal);
@@ -465,15 +456,15 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <div className="space-y-4">
           <SectionEyebrow>Overall Pattern</SectionEyebrow>
           <div className="flex flex-wrap gap-3">
-            <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/60">
-              {result.topSignal?.title ?? 'Primary pattern unavailable'}
-            </span>
-            {secondaryHeroSignal ? (
-              <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/60">
-                with {getSignalTitle(secondaryHeroSignal)}
+            {heroPrimarySignalChips.map((chip) => (
+              <span
+                key={chip}
+                className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/45"
+              >
+                {chip}
               </span>
-            ) : null}
-            {leadSignal ? (
+            ))}
+            {heroPrimarySignalChips.length === 0 && leadSignal ? (
               <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/45">
                 {getUserFacingDomainTitle(leadSignal.domainKey)}
               </span>

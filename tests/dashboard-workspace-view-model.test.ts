@@ -144,6 +144,23 @@ function buildPayload(params?: {
       signalCount: 1,
       answeredQuestionCount: 1,
       rankedSignalIds: Object.freeze(['signal-core']),
+      interpretation: {
+        domainKey: 'signals',
+        primarySignalKey: 'core_focus',
+        primaryPercent: topSignalPercentage,
+        secondarySignalKey: null,
+        secondaryPercent: null,
+        summary: `${topSignalTitle} is the clearest signal in this domain.`,
+        supportingLine: null,
+        diagnostics: {
+          strategy: 'single_signal_fallback',
+          ruleKey: null,
+          primaryBand: 'dominant',
+          secondaryBand: null,
+          blendProfile: 'concentrated',
+          primarySecondaryGap: topSignalPercentage,
+        },
+      },
     }]),
     overviewSummary: {
       headline: `${topSignalTitle} leads the current pattern`,

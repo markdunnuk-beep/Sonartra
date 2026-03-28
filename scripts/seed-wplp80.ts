@@ -3,6 +3,7 @@ dotenv.config({ path: '.env.local' });
 
 import { Pool } from 'pg';
 import { loadWplp80Seeds } from '../db/seed/wplp80';
+import { mapSeedDomainSourceToDatabaseType } from '../db/seed/wplp80/seed-mappers';
 
 type IdRow = { id: string };
 
@@ -121,7 +122,7 @@ for (const domain of seeds.domains) {
       domain.key,
       domain.title,
       null,
-      'QUESTION_SECTION',
+      mapSeedDomainSourceToDatabaseType(domain.source),
       domain.order,
     ],
   );

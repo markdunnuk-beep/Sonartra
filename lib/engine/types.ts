@@ -338,6 +338,59 @@ export type NormalizedResult = {
 };
 
 /* ----------------------------------
+ * Domain interpretation model
+ * ---------------------------------- */
+
+export type SignalIntensityBand = 'dominant' | 'strong' | 'moderate' | 'secondary' | 'low';
+
+export type DomainBlendProfile = 'concentrated' | 'layered' | 'balanced';
+
+export type SentenceFragmentCategory =
+  | 'core_trait'
+  | 'pace_orientation'
+  | 'decision_orientation'
+  | 'collaboration_orientation'
+  | 'tension_pattern'
+  | 'environment_preference'
+  | 'stress_expression'
+  | 'balancing_clause'
+  | 'risk_clause'
+  | 'supporting_line';
+
+export type DomainInterpretationInput = {
+  domainKey: DomainKey;
+  primarySignalKey: SignalKey | null;
+  primaryPercent: number | null;
+  secondarySignalKey: SignalKey | null;
+  secondaryPercent: number | null;
+  rankedSignals: ReadonlyArray<{
+    signalKey: SignalKey;
+    percent: number;
+  }>;
+};
+
+export type DomainInterpretationDiagnostics = {
+  strategy: 'pairwise_rule' | 'fragment_fallback' | 'single_signal_fallback' | 'empty_domain';
+  ruleKey: string | null;
+  primaryBand: SignalIntensityBand | null;
+  secondaryBand: SignalIntensityBand | null;
+  blendProfile: DomainBlendProfile | null;
+  primarySecondaryGap: number | null;
+};
+
+export type DomainInterpretationOutput = {
+  domainKey: DomainKey;
+  primarySignalKey: SignalKey | null;
+  primaryPercent: number | null;
+  secondarySignalKey: SignalKey | null;
+  secondaryPercent: number | null;
+  summary: string;
+  supportingLine?: string | null;
+  tensionClause?: string | null;
+  diagnostics?: DomainInterpretationDiagnostics;
+};
+
+/* ----------------------------------
  * Canonical result payload model
  * ---------------------------------- */
 
@@ -386,6 +439,10 @@ export type ResultBulletItem = {
   signalId?: SignalId;
 };
 
+export type ResultDomainSummary = NormalizedDomainSummary & {
+  interpretation: DomainInterpretationOutput | null;
+};
+
 export type ResultDiagnostics = {
   readinessStatus: ResultReadinessStatus;
   scoring: ScoreDiagnostics;
@@ -407,7 +464,7 @@ export type CanonicalResultPayload = {
   topSignal: ResultTopSignal | null;
   rankedSignals: readonly ResultRankedSignal[];
   normalizedScores: readonly NormalizedSignalScore[];
-  domainSummaries: readonly NormalizedDomainSummary[];
+  domainSummaries: readonly ResultDomainSummary[];
   overviewSummary: ResultOverviewSummary;
   strengths: readonly ResultBulletItem[];
   watchouts: readonly ResultBulletItem[];

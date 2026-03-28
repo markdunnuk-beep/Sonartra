@@ -241,6 +241,141 @@ test('domain summaries include all domains including empty question-section doma
   );
   assert.equal(payload.domainSummaries[0]?.signalScores.length, 0);
   assert.equal(payload.domainSummaries[0]?.domainSource, 'question_section');
+  assert.equal(payload.domainSummaries[0]?.interpretation, null);
+});
+
+test('core signal-group domains receive persisted interpretation with pairwise diagnostics', () => {
+  const styleSignals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 39,
+      domainPercentage: 39,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 3,
+      percentage: 24,
+      domainPercentage: 24,
+      rank: 2,
+    }),
+  ]);
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: styleSignals,
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: styleSignals,
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  assert.equal(payload.domainSummaries[0]?.interpretation?.primarySignalKey, 'style_driver');
+  assert.equal(payload.domainSummaries[0]?.interpretation?.primaryPercent, 39);
+  assert.equal(payload.domainSummaries[0]?.interpretation?.secondarySignalKey, 'style_analyst');
+  assert.equal(payload.domainSummaries[0]?.interpretation?.secondaryPercent, 24);
+  assert.match(payload.domainSummaries[0]?.interpretation?.summary ?? '', /moves quickly toward outcomes/i);
+  assert.match(payload.domainSummaries[0]?.interpretation?.tensionClause ?? '', /urgency cuts short reflection|precision slows decisions/i);
+  assert.equal(payload.domainSummaries[0]?.interpretation?.diagnostics?.ruleKey, 'style_driver_analyst');
+});
+
+test('conflict and stress interpretations persist refined pairwise language in the canonical payload', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-collaborate',
+      signalKey: 'conflict_collaborate',
+      title: 'Collaborate',
+      domainId: 'domain-conflict',
+      domainKey: 'signal_conflict',
+      rawTotal: 4,
+      percentage: 35,
+      domainPercentage: 35,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-accommodate',
+      signalKey: 'conflict_accommodate',
+      title: 'Accommodate',
+      domainId: 'domain-conflict',
+      domainKey: 'signal_conflict',
+      rawTotal: 3,
+      percentage: 28,
+      domainPercentage: 28,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-control',
+      signalKey: 'stress_control',
+      title: 'Control',
+      domainId: 'domain-stress',
+      domainKey: 'signal_stress',
+      rawTotal: 5,
+      percentage: 37,
+      domainPercentage: 37,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-avoidance',
+      signalKey: 'stress_avoidance',
+      title: 'Avoidance',
+      domainId: 'domain-stress',
+      domainKey: 'signal_stress',
+      rawTotal: 3,
+      percentage: 29,
+      domainPercentage: 29,
+      rank: 2,
+    }),
+  ]);
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-conflict',
+          domainKey: 'signal_conflict',
+          title: 'Conflict',
+          rawTotal: 7,
+          percentage: 100,
+          signalScores: signals.filter((signal) => signal.domainKey === 'signal_conflict'),
+          answeredQuestionCount: 8,
+        }),
+        buildDomainSummary({
+          domainId: 'domain-stress',
+          domainKey: 'signal_stress',
+          title: 'Stress',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: signals.filter((signal) => signal.domainKey === 'signal_stress'),
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-control',
+    }),
+  });
+
+  assert.equal(payload.domainSummaries[0]?.interpretation?.diagnostics?.ruleKey, 'conflict_collaborate_accommodate');
+  assert.match(payload.domainSummaries[0]?.interpretation?.summary ?? '', /relationship intact|tone constructive/i);
+  assert.equal(payload.domainSummaries[1]?.interpretation?.diagnostics?.ruleKey, 'stress_control_avoidance');
+  assert.match(payload.domainSummaries[1]?.interpretation?.tensionClause ?? '', /manage around the problem|real tension stays untouched/i);
 });
 
 test('overview summary classification is deterministic for concentrated profiles', () => {
@@ -350,7 +485,7 @@ test('overview summary uses secondary support language for balanced profiles', (
   });
 
   assert.match(payload.overviewSummary.narrative, /close secondary signal in Achievement/i);
-  assert.match(payload.overviewSummary.narrative, /extra energy in that direction/i);
+  assert.match(payload.overviewSummary.narrative, /more visible drive and stretch/i);
 });
 
 test('strengths are generated deterministically from top-ranked signals', () => {
@@ -399,6 +534,7 @@ test('strengths are generated deterministically from top-ranked signals', () => 
   assert.equal(payload.strengths.length, 3);
   assert.equal(payload.strengths[0]?.signalId, 'signal-driver');
   assert.match(payload.strengths[0]?.detail ?? '', /direction, urgency, or firmer calls/i);
+  assert.match(payload.strengths[0]?.detail ?? '', /create movement quickly/i);
   assert.doesNotMatch(payload.strengths[0]?.detail ?? '', /\d+%/);
 });
 
@@ -448,6 +584,7 @@ test('watchouts are generated deterministically from overuse, pressure rules, an
   assert.equal(payload.watchouts[0]?.title, 'Overused Driver');
   assert.match(payload.watchouts[0]?.detail ?? '', /too forceful, too fast, or too impatient/i);
   assert.match(payload.watchouts[1]?.detail ?? '', /over-control/i);
+  assert.doesNotMatch(payload.watchouts[0]?.detail ?? '', /undefined|null/i);
   assert.equal(payload.watchouts[2]?.title, 'Lower access to Avoid');
 });
 
@@ -508,6 +645,7 @@ test('development focus is generated deterministically from lower-ranked signals
   assert.equal(payload.developmentFocus.length, 2);
   assert.equal(payload.developmentFocus[0]?.signalId, 'signal-evidence');
   assert.match(payload.developmentFocus[0]?.detail ?? '', /concise evidence checks/i);
+  assert.match(payload.developmentFocus[0]?.detail ?? '', /sharper calls/i);
   assert.equal(payload.developmentFocus[1]?.signalId, 'signal-people');
 });
 

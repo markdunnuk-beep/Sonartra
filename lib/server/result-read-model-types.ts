@@ -1,7 +1,7 @@
 import type {
   CanonicalResultPayload,
-  NormalizedDomainSummary,
   NormalizedSignalScore,
+  ResultDomainSummary,
   ResultDiagnostics,
   ResultOverviewSummary,
   ResultRankedSignal,
@@ -27,7 +27,7 @@ export type AssessmentResultListItem = AssessmentResultSummary;
 
 export type AssessmentResultSignalViewModel = NormalizedSignalScore | ResultRankedSignal;
 
-export type AssessmentResultDomainViewModel = NormalizedDomainSummary;
+export type AssessmentResultDomainViewModel = ResultDomainSummary;
 
 export type AssessmentResultDetailViewModel = {
   resultId: string;
@@ -40,7 +40,7 @@ export type AssessmentResultDetailViewModel = {
   topSignal: ResultTopSignal | null;
   rankedSignals: readonly ResultRankedSignal[];
   normalizedScores: readonly NormalizedSignalScore[];
-  domainSummaries: readonly NormalizedDomainSummary[];
+  domainSummaries: readonly ResultDomainSummary[];
   overviewSummary: ResultOverviewSummary;
   strengths: CanonicalResultPayload['strengths'];
   watchouts: CanonicalResultPayload['watchouts'];
