@@ -102,6 +102,83 @@ test('pairwise style rule selects richer Driver plus Analyst summary', () => {
   assert.equal(interpretation?.diagnostics?.ruleKey, 'style_driver_analyst');
 });
 
+test('primary and secondary signals follow domain percentage order even when input arrays are unsorted', () => {
+  const interpretation = buildDomainInterpretation(
+    buildDomainSummary({
+      domainId: 'domain-lead',
+      domainKey: 'signal_lead',
+      title: 'Leadership',
+      signalScores: Object.freeze([
+        buildSignal({
+          signalId: 'signal-results',
+          signalKey: 'lead_results',
+          title: 'Results',
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          domainPercentage: 25,
+          percentage: 25,
+          rank: 2,
+        }),
+        buildSignal({
+          signalId: 'signal-vision',
+          signalKey: 'lead_vision',
+          title: 'Vision',
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          domainPercentage: 29,
+          percentage: 29,
+          rank: 1,
+        }),
+      ]),
+    }),
+  );
+
+  assert.ok(interpretation);
+  assert.equal(interpretation?.primarySignalKey, 'lead_vision');
+  assert.equal(interpretation?.primaryPercent, 29);
+  assert.equal(interpretation?.secondarySignalKey, 'lead_results');
+  assert.equal(interpretation?.secondaryPercent, 25);
+  assert.ok((interpretation?.primaryPercent ?? 0) >= (interpretation?.secondaryPercent ?? 0));
+});
+
+test('domain tie handling stays deterministic for primary and secondary signals', () => {
+  const interpretation = buildDomainInterpretation(
+    buildDomainSummary({
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      title: 'Behaviour Style',
+      signalScores: Object.freeze([
+        buildSignal({
+          signalId: 'signal-operator',
+          signalKey: 'style_operator',
+          title: 'Operator',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          domainPercentage: 30,
+          percentage: 30,
+          rank: 2,
+        }),
+        buildSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          domainPercentage: 30,
+          percentage: 30,
+          rank: 1,
+        }),
+      ]),
+    }),
+  );
+
+  assert.ok(interpretation);
+  assert.equal(interpretation?.primarySignalKey, 'style_driver');
+  assert.equal(interpretation?.secondarySignalKey, 'style_operator');
+  assert.equal(interpretation?.primaryPercent, 30);
+  assert.equal(interpretation?.secondaryPercent, 30);
+});
+
 test('generic non-core domain uses fallback assembly rather than empty output', () => {
   const interpretation = buildDomainInterpretation(
     buildDomainSummary({

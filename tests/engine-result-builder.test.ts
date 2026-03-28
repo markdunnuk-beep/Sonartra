@@ -297,6 +297,154 @@ test('core signal-group domains receive persisted interpretation with pairwise d
   assert.equal(payload.domainSummaries[0]?.interpretation?.diagnostics?.ruleKey, 'style_driver_analyst');
 });
 
+test('domain summaries persist signal scores in canonical display order and align interpretation fields', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-results',
+          signalKey: 'lead_results',
+          title: 'Results',
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          rawTotal: 2,
+          percentage: 25,
+          domainPercentage: 25,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-vision',
+          signalKey: 'lead_vision',
+          title: 'Vision',
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          rawTotal: 3,
+          percentage: 29,
+          domainPercentage: 29,
+          rank: 1,
+        }),
+      ]),
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          title: 'Leadership',
+          rawTotal: 5,
+          percentage: 100,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-results',
+              signalKey: 'lead_results',
+              title: 'Results',
+              domainId: 'domain-lead',
+              domainKey: 'signal_lead',
+              rawTotal: 2,
+              percentage: 25,
+              domainPercentage: 25,
+              rank: 2,
+            }),
+            buildNormalizedSignal({
+              signalId: 'signal-vision',
+              signalKey: 'lead_vision',
+              title: 'Vision',
+              domainId: 'domain-lead',
+              domainKey: 'signal_lead',
+              rawTotal: 3,
+              percentage: 29,
+              domainPercentage: 29,
+              rank: 1,
+            }),
+          ]),
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-vision',
+    }),
+  });
+
+  const domain = payload.domainSummaries[0];
+  assert.deepEqual(domain?.signalScores.map((signal) => signal.signalKey), ['lead_vision', 'lead_results']);
+  assert.deepEqual(domain?.rankedSignalIds, ['signal-vision', 'signal-results']);
+  assert.equal(domain?.interpretation?.primarySignalKey, domain?.signalScores[0]?.signalKey);
+  assert.equal(domain?.interpretation?.primaryPercent, domain?.signalScores[0]?.domainPercentage);
+  assert.equal(domain?.interpretation?.secondarySignalKey, domain?.signalScores[1]?.signalKey);
+  assert.equal(domain?.interpretation?.secondaryPercent, domain?.signalScores[1]?.domainPercentage);
+  assert.ok((domain?.interpretation?.primaryPercent ?? 0) >= (domain?.interpretation?.secondaryPercent ?? 0));
+});
+
+test('domain ordering tie handling is deterministic in persisted payloads', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-operator',
+          signalKey: 'style_operator',
+          title: 'Operator',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 3,
+          percentage: 30,
+          domainPercentage: 30,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 3,
+          percentage: 30,
+          domainPercentage: 30,
+          rank: 1,
+        }),
+      ]),
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 6,
+          percentage: 100,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-operator',
+              signalKey: 'style_operator',
+              title: 'Operator',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 3,
+              percentage: 30,
+              domainPercentage: 30,
+              rank: 2,
+            }),
+            buildNormalizedSignal({
+              signalId: 'signal-driver',
+              signalKey: 'style_driver',
+              title: 'Driver',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 3,
+              percentage: 30,
+              domainPercentage: 30,
+              rank: 1,
+            }),
+          ]),
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  assert.deepEqual(payload.domainSummaries[0]?.signalScores.map((signal) => signal.signalKey), [
+    'style_driver',
+    'style_operator',
+  ]);
+  assert.equal(payload.domainSummaries[0]?.interpretation?.primarySignalKey, 'style_driver');
+  assert.equal(payload.domainSummaries[0]?.interpretation?.secondarySignalKey, 'style_operator');
+});
+
 test('conflict and stress interpretations persist refined pairwise language in the canonical payload', () => {
   const signals = Object.freeze([
     buildNormalizedSignal({
@@ -581,11 +729,12 @@ test('watchouts are generated deterministically from overuse, pressure rules, an
     }),
   });
 
-  assert.equal(payload.watchouts[0]?.title, 'Overused Driver');
+  assert.equal(payload.watchouts[0]?.title, 'Over-reliance on drive');
   assert.match(payload.watchouts[0]?.detail ?? '', /too forceful, too fast, or too impatient/i);
+  assert.equal(payload.watchouts[1]?.title, 'Pattern under pressure');
   assert.match(payload.watchouts[1]?.detail ?? '', /over-control/i);
   assert.doesNotMatch(payload.watchouts[0]?.detail ?? '', /undefined|null/i);
-  assert.equal(payload.watchouts[2]?.title, 'Lower access to Avoid');
+  assert.equal(payload.watchouts[2]?.title, 'Limited use of avoidance');
 });
 
 test('development focus is generated deterministically from lower-ranked signals', () => {

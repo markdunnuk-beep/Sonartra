@@ -245,6 +245,17 @@ function getPersistedDomainInterpretation(domain: AssessmentResultDomainViewMode
   };
 }
 
+function getSignalCardMicrocopy(params: {
+  signalTitle: string;
+  isPrimary: boolean;
+}): string {
+  if (params.isPrimary) {
+    return `${params.signalTitle} most strongly shapes how this area tends to show up.`;
+  }
+
+  return `${params.signalTitle} remains close enough to meaningfully shape how this area comes through.`;
+}
+
 function getIntelligenceDomains(result: AssessmentResultDetailViewModel): readonly AssessmentResultDomainViewModel[] {
   const domainByKey = new Map(
     result.domainSummaries
@@ -366,9 +377,10 @@ function DomainCard({
                   <p className="text-sm font-medium text-white/68">{formatPercent(signal.domainPercentage)}</p>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-white/58">
-                  {index === 0
-                    ? `${signal.signalTitle} is the clearest pattern here.`
-                    : `${signal.signalTitle} adds a secondary influence.`}
+                  {getSignalCardMicrocopy({
+                    signalTitle: signal.signalTitle,
+                    isPrimary: index === 0,
+                  })}
                 </p>
               </div>
             ))}
@@ -388,7 +400,7 @@ function DomainCard({
                     <p className="font-medium text-white/82">{signal.signalTitle}</p>
                     <p className="mt-1 text-xs text-white/45">
                       {formatPercent(signal.domainPercentage)} supporting signal
-                      {signal.isOverlay ? ' - overlay' : ''}
+                      {signal.isOverlay ? ' | overlay' : ''}
                     </p>
                   </div>
                 ))}
@@ -502,7 +514,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <div className="space-y-2">
           <SectionEyebrow>Action Focus</SectionEyebrow>
           <p className="text-sm leading-7 text-white/58">
-            Practical signals to keep, manage, and strengthen. These stay concise on purpose.
+            Practical strengths to build on, risks to manage, and areas worth strengthening. These stay concise on purpose.
           </p>
         </div>
 

@@ -10,6 +10,7 @@ import type {
   ResultTopSignal,
   ScoreDiagnostics,
 } from '@/lib/engine/types';
+import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking';
 import { buildDomainInterpretation } from '@/lib/engine/domain-interpretation';
 import {
   buildDevelopmentFocus,
@@ -91,15 +92,87 @@ export function buildNormalizedScores(normalizedResult: NormalizedResult): reado
   return Object.freeze([...normalizedResult.signalScores]);
 }
 
+function assertDomainSignalOrdering(domainSummary: ResultDomainSummary): void {
+  const sortedSignalScores = sortDomainSignalsForDisplay(domainSummary.signalScores);
+
+  for (let index = 0; index < sortedSignalScores.length; index += 1) {
+    const persistedSignal = domainSummary.signalScores[index];
+    const expectedSignal = sortedSignalScores[index];
+
+    if (!persistedSignal || !expectedSignal) {
+      throw new Error(`Domain ${domainSummary.domainKey} has incomplete signal ordering.`);
+    }
+
+    if (persistedSignal.signalId !== expectedSignal.signalId) {
+      throw new Error(
+        `Domain ${domainSummary.domainKey} signalScores are not persisted in canonical descending order.`,
+      );
+    }
+  }
+
+  const primarySignal = domainSummary.signalScores[0] ?? null;
+  const secondarySignal = domainSummary.signalScores[1] ?? null;
+  const interpretation = domainSummary.interpretation;
+
+  if (!interpretation) {
+    return;
+  }
+
+  if (interpretation.primarySignalKey !== (primarySignal?.signalKey ?? null)) {
+    throw new Error(
+      `Domain ${domainSummary.domainKey} interpretation primary signal does not match persisted ordering.`,
+    );
+  }
+
+  if (interpretation.primaryPercent !== (primarySignal?.domainPercentage ?? null)) {
+    throw new Error(
+      `Domain ${domainSummary.domainKey} interpretation primary percent does not match persisted ordering.`,
+    );
+  }
+
+  if (interpretation.secondarySignalKey !== (secondarySignal?.signalKey ?? null)) {
+    throw new Error(
+      `Domain ${domainSummary.domainKey} interpretation secondary signal does not match persisted ordering.`,
+    );
+  }
+
+  if (interpretation.secondaryPercent !== (secondarySignal?.domainPercentage ?? null)) {
+    throw new Error(
+      `Domain ${domainSummary.domainKey} interpretation secondary percent does not match persisted ordering.`,
+    );
+  }
+
+  if (
+    interpretation.primaryPercent !== null &&
+    interpretation.secondaryPercent !== null &&
+    interpretation.primaryPercent < interpretation.secondaryPercent
+  ) {
+    throw new Error(
+      `Domain ${domainSummary.domainKey} interpretation primary percent cannot be lower than secondary percent.`,
+    );
+  }
+}
+
 export function buildDomainSummaries(normalizedResult: NormalizedResult): readonly ResultDomainSummary[] {
-  return Object.freeze(
-    normalizedResult.domainSummaries.map((domainSummary) => ({
+  const domainSummaries = normalizedResult.domainSummaries.map((domainSummary) => {
+    const sortedSignalScores = Object.freeze(sortDomainSignalsForDisplay(domainSummary.signalScores));
+    const rankedSignalIds = Object.freeze(sortedSignalScores.map((signalScore) => signalScore.signalId));
+    const canonicalDomainSummary: NormalizedDomainSummary = {
       ...domainSummary,
-      signalScores: Object.freeze([...domainSummary.signalScores]),
-      rankedSignalIds: Object.freeze([...domainSummary.rankedSignalIds]),
-      interpretation: buildDomainInterpretation(domainSummary),
-    })),
-  );
+      signalScores: sortedSignalScores,
+      rankedSignalIds,
+    };
+    const persistedDomainSummary = {
+      ...canonicalDomainSummary,
+      interpretation: buildDomainInterpretation(canonicalDomainSummary),
+    } satisfies ResultDomainSummary;
+
+    assertDomainSignalOrdering(persistedDomainSummary);
+
+    return persistedDomainSummary;
+  });
+
+  return Object.freeze(domainSummaries);
 }
 
 export function buildDiagnostics(params: {

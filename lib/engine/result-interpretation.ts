@@ -318,6 +318,55 @@ function makeBulletItem(params: {
   };
 }
 
+function toSentenceCase(value: string): string {
+  return value.charAt(0).toLowerCase() + value.slice(1);
+}
+
+function getActionFocusSignalLabel(signalScore: NormalizedSignalScore): string {
+  switch (signalScore.signalKey) {
+    case 'style_driver':
+      return 'Driver';
+    case 'style_influencer':
+      return 'Influence';
+    case 'style_operator':
+      return 'Steady execution';
+    case 'style_analyst':
+      return 'Analysis';
+    case 'conflict_avoid':
+      return 'Use of avoidance';
+    case 'role_technical_specialist':
+      return 'Deep technical focus';
+    case 'role_business_development':
+      return 'Business development focus';
+    case 'role_operations_management':
+      return 'Operational leadership focus';
+    case 'role_commercial_leadership':
+      return 'Commercial leadership focus';
+    default:
+      return signalScore.signalTitle;
+  }
+}
+
+function getWatchoutLabel(signalScore: NormalizedSignalScore): string {
+  switch (signalScore.signalKey) {
+    case 'style_driver':
+      return 'drive';
+    case 'conflict_avoid':
+      return 'avoidance';
+    default:
+      return toSentenceCase(getActionFocusSignalLabel(signalScore));
+  }
+}
+
+function getLowAccessLabel(signalScore: NormalizedSignalScore): string {
+  switch (signalScore.signalKey) {
+    case 'conflict_avoid':
+      return 'avoidance';
+    default:
+      return toSentenceCase(getActionFocusSignalLabel(signalScore));
+  }
+}
+
 function getUniqueSignals(signalScores: readonly NormalizedSignalScore[], count: number): readonly NormalizedSignalScore[] {
   const seen = new Set<string>();
   const unique: NormalizedSignalScore[] = [];
@@ -374,7 +423,7 @@ export function buildStrengths(normalizedResult: NormalizedResult): readonly Res
     getUniqueSignals(getTopSignalsInRankOrder(normalizedResult.signalScores), MAX_STRENGTH_COUNT).map((signalScore) =>
       makeBulletItem({
         key: `strength_${signalScore.signalKey}`,
-        title: signalScore.signalTitle,
+        title: getActionFocusSignalLabel(signalScore),
         detail: getSignalTemplate(signalScore.signalKey).strength,
         signalId: signalScore.signalId,
       }),
@@ -393,7 +442,7 @@ export function buildWatchouts(normalizedResult: NormalizedResult): readonly Res
     bullets.push(
       makeBulletItem({
         key: `watchout_overuse_${topSignal.signalKey}`,
-        title: `Overused ${topSignal.signalTitle}`,
+        title: `Over-reliance on ${getWatchoutLabel(topSignal)}`,
         detail: getSignalTemplate(topSignal.signalKey).watchout,
         signalId: topSignal.signalId,
       }),
@@ -409,7 +458,7 @@ export function buildWatchouts(normalizedResult: NormalizedResult): readonly Res
       bullets.push(
         makeBulletItem({
           key: `watchout_rule_${rule.keys.join('_')}`,
-          title: rule.title,
+          title: rule.title === 'Pressure Pattern' ? 'Pattern under pressure' : rule.title,
           detail: rule.detail,
         }),
       );
@@ -420,7 +469,7 @@ export function buildWatchouts(normalizedResult: NormalizedResult): readonly Res
     bullets.push(
       makeBulletItem({
         key: `watchout_low_${lowestSignal.signalKey}`,
-        title: `Lower access to ${lowestSignal.signalTitle}`,
+        title: `Limited use of ${getLowAccessLabel(lowestSignal)}`,
         detail: getSignalTemplate(lowestSignal.signalKey).lowSignalRisk,
         signalId: lowestSignal.signalId,
       }),
@@ -442,7 +491,7 @@ export function buildDevelopmentFocus(normalizedResult: NormalizedResult): reado
     lowestSignals.map((signalScore) =>
       makeBulletItem({
         key: `development_${signalScore.signalKey}`,
-        title: signalScore.signalTitle,
+        title: getActionFocusSignalLabel(signalScore),
         detail: getSignalTemplate(signalScore.signalKey).development,
         signalId: signalScore.signalId,
       }),

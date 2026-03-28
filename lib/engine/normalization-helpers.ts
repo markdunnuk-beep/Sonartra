@@ -9,6 +9,7 @@ import type {
   ScoreResult,
   SignalId,
 } from '@/lib/engine/types';
+import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking';
 
 type PercentageAllocationItem = {
   id: string;
@@ -261,28 +262,8 @@ export function buildNormalizedDomainSummaries(params: {
       ...signalScore,
       domainPercentage: localAllocation.percentagesById[signalScore.signalId] ?? 0,
     }));
-
-    const rankedSignalIds = [...signalScoresWithLocalPercentages]
-      .sort((left, right) => {
-        if (right.percentage !== left.percentage) {
-          return right.percentage - left.percentage;
-        }
-
-        if (right.rawTotal !== left.rawTotal) {
-          return right.rawTotal - left.rawTotal;
-        }
-
-        if (left.rank !== right.rank) {
-          return left.rank - right.rank;
-        }
-
-        if (left.signalKey !== right.signalKey) {
-          return left.signalKey.localeCompare(right.signalKey);
-        }
-
-        return left.signalId.localeCompare(right.signalId);
-      })
-      .map((signalScore) => signalScore.signalId);
+    const sortedSignalScores = sortDomainSignalsForDisplay(signalScoresWithLocalPercentages);
+    const rankedSignalIds = sortedSignalScores.map((signalScore) => signalScore.signalId);
 
     return {
       domainId: domainSummary.domainId,
@@ -292,7 +273,7 @@ export function buildNormalizedDomainSummaries(params: {
       rawTotal: domainSummary.rawTotal,
       normalizedValue: domainPercentages.percentagesById[domainSummary.domainId] ?? 0,
       percentage: domainPercentages.percentagesById[domainSummary.domainId] ?? 0,
-      signalScores: Object.freeze(signalScoresWithLocalPercentages),
+      signalScores: Object.freeze(sortedSignalScores),
       signalCount: domainSummary.signalCount,
       answeredQuestionCount: domainSummary.answeredQuestionCount,
       rankedSignalIds: Object.freeze(rankedSignalIds),
