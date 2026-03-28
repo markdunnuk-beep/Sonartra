@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { StatusPill } from '@/components/shared/user-app-ui';
+import { PageFrame, SectionHeader, StatusPill, SurfaceCard } from '@/components/shared/user-app-ui';
 import type {
   AssessmentResultDetailViewModel,
   AssessmentResultDomainViewModel,
@@ -215,17 +215,6 @@ function getVisibleItems<T>(items: readonly T[]): {
   };
 }
 
-function SignalMeter({ value, tone = 'accent' }: { value: number; tone?: 'accent' | 'muted' }) {
-  const width = `${Math.max(0, Math.min(value, 100))}%`;
-  const fillClass = tone === 'accent' ? 'bg-accent' : 'bg-white/35';
-
-  return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
-      <div className={`h-full rounded-full ${fillClass}`} style={{ width }} />
-    </div>
-  );
-}
-
 function SectionEyebrow({ children }: { children: ReactNode }) {
   return (
     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
@@ -357,74 +346,83 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
   const interpretation = getPersistedDomainInterpretation(domain);
 
   return (
-    <article className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
-      <div className="space-y-2">
-        <SectionEyebrow>{config.eyebrow}</SectionEyebrow>
-        <h3 className="text-xl font-semibold text-white">{config.title}</h3>
-        <p className="text-white/62 max-w-2xl text-sm leading-7">{interpretation.summary}</p>
-        {interpretation.support ? (
-          <p className="text-white/48 max-w-2xl text-sm leading-7">{interpretation.support}</p>
-        ) : null}
-        {interpretation.tension ? (
-          <p className="text-white/42 max-w-2xl text-sm leading-7">{interpretation.tension}</p>
-        ) : null}
-      </div>
+    <SurfaceCard className="p-7 md:p-8">
+      <div className="space-y-7">
+        <div className="space-y-3">
+          <SectionEyebrow>{config.eyebrow}</SectionEyebrow>
+          <h3 className="text-[1.8rem] font-semibold tracking-[-0.03em] text-white">
+            {config.title}
+          </h3>
+        </div>
 
-      {visibleSignals.length > 0 ? (
-        <>
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
+        {visibleSignals.length > 0 ? (
+          <div className="space-y-3">
             {visibleSignals.map((signal, index) => (
               <div
                 key={signal.signalId}
-                className="border-white/8 rounded-2xl border bg-black/20 p-4"
+                className="border-white/8 bg-black/18 rounded-[1.25rem] border px-5 py-4"
               >
-                <p className="text-xs uppercase tracking-[0.18em] text-white/45">
-                  {index === 0 ? 'Primary signal' : 'Secondary signal'}
-                </p>
-                <div className="mt-3 flex items-baseline justify-between gap-3">
-                  <p className="text-lg font-semibold text-white">{signal.signalTitle}</p>
-                  <p className="text-white/68 text-sm font-medium">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="space-y-2">
+                    <p className="text-white/42 text-[11px] uppercase tracking-[0.18em]">
+                      {index === 0 ? 'Primary signal' : 'Secondary signal'}
+                    </p>
+                    <p className="text-lg font-semibold text-white">{signal.signalTitle}</p>
+                    <p className="text-white/56 max-w-2xl text-sm leading-7">
+                      {getSignalCardMicrocopy({
+                        signalTitle: signal.signalTitle,
+                        isPrimary: index === 0,
+                      })}
+                    </p>
+                  </div>
+                  <p className="text-white/68 text-base font-medium">
                     {formatPercent(signal.domainPercentage)}
                   </p>
                 </div>
-                <p className="text-white/58 mt-2 text-sm leading-6">
-                  {getSignalCardMicrocopy({
-                    signalTitle: signal.signalTitle,
-                    isPrimary: index === 0,
-                  })}
-                </p>
               </div>
             ))}
           </div>
+        ) : null}
 
-          {hiddenSignals.length > 0 ? (
-            <details className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
-              <summary className="text-white/72 cursor-pointer list-none text-sm font-medium marker:hidden">
-                Show remaining signals in this domain
-              </summary>
-              <div className="mt-4 space-y-3">
-                {hiddenSignals.map((signal) => (
-                  <div
-                    key={signal.signalId}
-                    className="rounded-2xl bg-white/[0.03] px-4 py-3 text-sm"
-                  >
-                    <p className="text-white/82 font-medium">{signal.signalTitle}</p>
-                    <p className="mt-1 text-xs text-white/45">
-                      {formatPercent(signal.domainPercentage)} supporting signal
-                      {signal.isOverlay ? ' | overlay' : ''}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </details>
+        <div className="border-white/8 space-y-3 border-t pt-6">
+          <p className="text-white/64 max-w-3xl text-[15px] leading-8">{interpretation.summary}</p>
+          {interpretation.support ? (
+            <p className="max-w-3xl text-sm leading-7 text-white/50">{interpretation.support}</p>
           ) : null}
-        </>
-      ) : (
-        <p className="mt-5 rounded-2xl border border-dashed border-white/10 p-4 text-sm text-white/45">
-          No persisted domain signals are available for this area.
-        </p>
-      )}
-    </article>
+          {interpretation.tension ? (
+            <p className="text-white/42 max-w-3xl text-sm leading-7">{interpretation.tension}</p>
+          ) : null}
+        </div>
+
+        {hiddenSignals.length > 0 ? (
+          <details className="border-white/8 bg-black/14 rounded-[1.25rem] border px-5 py-4">
+            <summary className="text-white/72 cursor-pointer list-none text-sm font-medium marker:hidden">
+              Show remaining signals in this area
+            </summary>
+            <div className="mt-4 space-y-3">
+              {hiddenSignals.map((signal) => (
+                <div
+                  key={signal.signalId}
+                  className="rounded-[1rem] bg-white/[0.03] px-4 py-3 text-sm"
+                >
+                  <p className="text-white/82 font-medium">{signal.signalTitle}</p>
+                  <p className="mt-1 text-xs text-white/45">
+                    {formatPercent(signal.domainPercentage)} supporting signal
+                    {signal.isOverlay ? ' | overlay' : ''}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </details>
+        ) : null}
+
+        {visibleSignals.length === 0 ? (
+          <p className="rounded-[1.25rem] border border-dashed border-white/10 p-4 text-sm text-white/45">
+            No persisted domain signals are available for this area.
+          </p>
+        ) : null}
+      </div>
+    </SurfaceCard>
   );
 }
 
@@ -459,8 +457,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const heroSupport = getHeroSupport(result);
 
   return (
-    <main className="space-y-8">
-      <header className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] px-5 py-4 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur">
+    <PageFrame className="space-y-10">
+      <header className="border-white/8 rounded-[1.6rem] border bg-white/[0.035] px-5 py-4 shadow-[0_20px_60px_rgba(0,0,0,0.2)] backdrop-blur">
         <div className="flex flex-col gap-2 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <span>{result.assessmentTitle}</span>
@@ -473,8 +471,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </div>
       </header>
 
-      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(124,146,255,0.24),_transparent_42%),linear-gradient(180deg,_rgba(255,255,255,0.06),_rgba(255,255,255,0.02))] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.35)] md:p-8">
-        <div className="space-y-4">
+      <SurfaceCard accent className="overflow-hidden p-7 md:p-9">
+        <div className="space-y-5">
           <SectionEyebrow>Overall Pattern</SectionEyebrow>
           <div className="flex flex-wrap gap-3">
             {heroPrimarySignalChips.map((chip) => (
@@ -495,25 +493,23 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             {heroHeading}
           </h1>
           <p className="text-white/72 max-w-3xl text-lg leading-8">{combinedInterpretation}</p>
-          <p className="text-white/52 max-w-3xl text-sm leading-7">
+          <p className="text-white/52 max-w-3xl text-sm leading-8">
             In practice: {heroSupport.narrative}
           </p>
           {heroSupport.support ? (
             <p className="text-white/42 max-w-3xl text-sm leading-7">{heroSupport.support}</p>
           ) : null}
         </div>
-      </section>
+      </SurfaceCard>
 
       <section className="space-y-6">
-        <div className="space-y-2">
-          <SectionEyebrow>Six Intelligence Areas</SectionEyebrow>
-          <p className="text-white/58 max-w-3xl text-sm leading-7">
-            The six core areas show how the strongest patterns come through across the parts of work
-            that matter most.
-          </p>
-        </div>
+        <SectionHeader
+          eyebrow="Six Intelligence Areas"
+          title="The main reading journey"
+          description="The six core areas show how the strongest patterns come through across the parts of work that matter most."
+        />
 
-        <div className="grid gap-5 xl:grid-cols-2">
+        <div className="space-y-6">
           {intelligenceDomains.map((domain) => (
             <DomainCard key={domain.domainId} domain={domain} />
           ))}
@@ -533,6 +529,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
         <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
       </section>
-    </main>
+    </PageFrame>
   );
 }
