@@ -45,7 +45,7 @@ const primaryItems: readonly UserAppNavItem[] = [
 const secondaryItems: readonly UserAppNavItem[] = [
   {
     key: 'admin',
-    href: '/admin/dashboard',
+    href: '/admin',
     label: 'Admin',
     icon: 'admin',
     match: ['/admin'],

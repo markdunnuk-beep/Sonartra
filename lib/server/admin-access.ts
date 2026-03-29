@@ -1,3 +1,7 @@
+import { redirect } from 'next/navigation';
+
+import { getRequestUserContext, type RequestUserContext } from '@/lib/server/request-user';
+
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -18,4 +22,14 @@ export function isApprovedAdminEmail(email: string | null): boolean {
   }
 
   return getApprovedAdminEmails().includes(normalizeEmail(email));
+}
+
+export async function requireAdminRequestUserContext(): Promise<RequestUserContext> {
+  const requestUser = await getRequestUserContext();
+
+  if (!isApprovedAdminEmail(requestUser.userEmail)) {
+    redirect('/app/workspace');
+  }
+
+  return requestUser;
 }

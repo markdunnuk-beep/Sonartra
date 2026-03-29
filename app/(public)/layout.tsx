@@ -8,7 +8,7 @@ const navItems = [
   { href: '/contact', label: 'Contact' },
   { href: '/get-started', label: 'Get Started' },
   { href: '/app/workspace', label: 'User App' },
-  { href: '/admin/dashboard', label: 'Admin' },
+  { href: '/admin', label: 'Admin' },
 ];
 
 export default function PublicLayout({
