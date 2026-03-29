@@ -3,28 +3,13 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
+import { normalizeAssessmentKeyInput } from '@/lib/admin/assessment-key';
 import {
-  ASSESSMENT_KEY_PATTERN,
-  MAX_ASSESSMENT_KEY_LENGTH,
-  normalizeAssessmentKeyInput,
-} from '@/lib/admin/assessment-key';
+  type AdminAssessmentCreateFormState,
+  type AdminAssessmentCreateFormValues,
+  validateAdminAssessmentCreateValues,
+} from '@/lib/admin/admin-assessment-create';
 import { getDbPool } from '@/lib/server/db';
-
-export type AdminAssessmentCreateFormValues = {
-  title: string;
-  assessmentKey: string;
-  description: string;
-};
-
-export type AdminAssessmentCreateFormState = {
-  formError: string | null;
-  fieldErrors: {
-    title?: string;
-    assessmentKey?: string;
-    description?: string;
-  };
-  values: AdminAssessmentCreateFormValues;
-};
 
 type InsertAssessmentRecord = {
   id: string;
@@ -51,52 +36,12 @@ type CreateAssessmentActionDependencies = {
 
 const INITIAL_VERSION_TAG = '1.0.0';
 
-export const emptyAdminAssessmentCreateFormValues: AdminAssessmentCreateFormValues = {
-  title: '',
-  assessmentKey: '',
-  description: '',
-};
-
-export const initialAdminAssessmentCreateFormState: AdminAssessmentCreateFormState = {
-  formError: null,
-  fieldErrors: {},
-  values: emptyAdminAssessmentCreateFormValues,
-};
-
 function normalizeFormValue(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
 function normalizeAssessmentKey(value: string): string {
   return normalizeAssessmentKeyInput(value);
-}
-
-export function validateAdminAssessmentCreateValues(
-  values: AdminAssessmentCreateFormValues,
-): AdminAssessmentCreateFormState {
-  const fieldErrors: AdminAssessmentCreateFormState['fieldErrors'] = {};
-
-  if (!values.title) {
-    fieldErrors.title = 'Assessment title is required.';
-  }
-
-  if (!values.assessmentKey) {
-    fieldErrors.assessmentKey = 'Assessment key is required.';
-  } else if (!ASSESSMENT_KEY_PATTERN.test(values.assessmentKey)) {
-    fieldErrors.assessmentKey = 'Use lowercase letters, numbers, and single hyphens only.';
-  } else if (values.assessmentKey.length > MAX_ASSESSMENT_KEY_LENGTH) {
-    fieldErrors.assessmentKey = `Assessment key must be ${MAX_ASSESSMENT_KEY_LENGTH} characters or fewer.`;
-  }
-
-  if (values.description.length > 600) {
-    fieldErrors.description = 'Description must be 600 characters or fewer.';
-  }
-
-  return {
-    formError: null,
-    fieldErrors,
-    values,
-  };
 }
 
 function isAssessmentKeyExistsError(error: unknown): boolean {

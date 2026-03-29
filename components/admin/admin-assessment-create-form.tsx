@@ -10,11 +10,11 @@ import {
   cn,
 } from '@/components/shared/user-app-ui';
 import {
-  createAssessmentAction,
   emptyAdminAssessmentCreateFormValues,
   initialAdminAssessmentCreateFormState,
   type AdminAssessmentCreateFormState,
-} from '@/lib/server/admin-assessment-create';
+} from '@/lib/admin/admin-assessment-create';
+import { createAssessmentAction } from '@/lib/server/admin-assessment-create';
 import { syncAssessmentKeyFromTitle } from '@/lib/admin/assessment-key';
 
 function FieldShell({

@@ -4,9 +4,11 @@ import assert from 'node:assert/strict';
 import {
   createAdminAssessmentRecords,
   createAssessmentActionWithDependencies,
+} from '@/lib/server/admin-assessment-create';
+import {
   initialAdminAssessmentCreateFormState,
   validateAdminAssessmentCreateValues,
-} from '@/lib/server/admin-assessment-create';
+} from '@/lib/admin/admin-assessment-create';
 import {
   deriveAssessmentKeyFromTitle,
   syncAssessmentKeyFromTitle,
