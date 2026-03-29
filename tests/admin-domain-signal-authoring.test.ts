@@ -5,6 +5,8 @@ import {
   createDomainRecord,
   createSignalRecord,
   deleteDomainRecord,
+  regenerateDomainKey,
+  regenerateSignalKey,
   updateDomainRecord,
   updateDomainLabel,
   updateSignalRecord,
@@ -33,15 +35,40 @@ type StoredSignal = {
 function createFakeDb(seed?: {
   domains?: StoredDomain[];
   signals?: StoredSignal[];
+}, config?: {
+  failSignalUpdateId?: string;
 }) {
   const state = {
     domains: [...(seed?.domains ?? [])],
     signals: [...(seed?.signals ?? [])],
   };
+  let transactionSnapshot: { domains: StoredDomain[]; signals: StoredSignal[] } | null = null;
 
   return {
     db: {
       async query<T>(text: string, params?: readonly unknown[]) {
+        if (text === 'BEGIN') {
+          transactionSnapshot = {
+            domains: state.domains.map((domain) => ({ ...domain })),
+            signals: state.signals.map((signal) => ({ ...signal })),
+          };
+          return { rows: [] as T[] };
+        }
+
+        if (text === 'COMMIT') {
+          transactionSnapshot = null;
+          return { rows: [] as T[] };
+        }
+
+        if (text === 'ROLLBACK') {
+          if (transactionSnapshot) {
+            state.domains = transactionSnapshot.domains;
+            state.signals = transactionSnapshot.signals;
+          }
+          transactionSnapshot = null;
+          return { rows: [] as T[] };
+        }
+
         if (text.includes('FROM domains') && text.includes('domain_key = $2')) {
           const [assessmentVersionId, domainKey, excludedDomainId] = params as [string, string, string | null];
           const rows = state.domains
@@ -62,6 +89,18 @@ function createFakeDb(seed?: {
           );
           return {
             rows: match ? ([{ domain_key: match.domainKey }] as unknown as T[]) : ([] as T[]),
+          };
+        }
+
+        if (text.includes('SELECT id, domain_key, label') && text.includes('FROM domains')) {
+          const [domainId, assessmentVersionId] = params as [string, string];
+          const match = state.domains.find(
+            (domain) => domain.id === domainId && domain.assessmentVersionId === assessmentVersionId,
+          );
+          return {
+            rows: match
+              ? ([{ id: match.id, domain_key: match.domainKey, label: match.label }] as unknown as T[])
+              : ([] as T[]),
           };
         }
 
@@ -101,6 +140,17 @@ function createFakeDb(seed?: {
           return {
             rows: ([{ id: match.id, label: match.label, domain_key: match.domainKey }] as unknown) as T[],
           };
+        }
+
+        if (text.includes('SET') && text.includes('domain_key = $3') && text.includes("domain_type = 'SIGNAL_GROUP'")) {
+          const [domainId, assessmentVersionId, domainKey] = params as [string, string, string];
+          const match = state.domains.find(
+            (domain) => domain.id === domainId && domain.assessmentVersionId === assessmentVersionId,
+          );
+          if (match) {
+            match.domainKey = domainKey;
+          }
+          return { rows: [] as T[] };
         }
 
         if (text.includes('UPDATE domains')) {
@@ -160,6 +210,22 @@ function createFakeDb(seed?: {
           return { rows: rows as T[] };
         }
 
+        if (text.includes('SELECT id, label') && text.includes('FROM signals') && text.includes('ORDER BY order_index ASC')) {
+          const [assessmentVersionId, domainId] = params as [string, string];
+          const rows = state.signals
+            .filter(
+              (signal) =>
+                signal.assessmentVersionId === assessmentVersionId &&
+                signal.domainId === domainId,
+            )
+            .sort((left, right) => left.orderIndex - right.orderIndex || left.id.localeCompare(right.id))
+            .map((signal) => ({
+              id: signal.id,
+              label: signal.label,
+            }));
+          return { rows: rows as unknown as T[] };
+        }
+
         if (text.includes('MAX(order_index)') && text.includes('FROM signals')) {
           const [assessmentVersionId, domainId] = params as [string, string];
           const next =
@@ -185,6 +251,37 @@ function createFakeDb(seed?: {
               signal.domainId === domainId,
           );
           return { rows: match ? ([{ id: match.id }] as unknown as T[]) : ([] as T[]) };
+        }
+
+        if (
+          text.includes('SELECT') &&
+          text.includes('s.signal_key') &&
+          text.includes('d.domain_key') &&
+          text.includes('FROM signals s')
+        ) {
+          const [signalId, assessmentVersionId] = params as [string, string];
+          const match = state.signals.find(
+            (signal) => signal.id === signalId && signal.assessmentVersionId === assessmentVersionId,
+          );
+          const domain = match
+            ? state.domains.find(
+                (candidate) =>
+                  candidate.id === match.domainId &&
+                  candidate.assessmentVersionId === assessmentVersionId,
+              )
+            : null;
+          return {
+            rows:
+              match && domain
+                ? ([{
+                    id: match.id,
+                    signal_key: match.signalKey,
+                    label: match.label,
+                    domain_id: domain.id,
+                    domain_key: domain.domainKey,
+                  }] as unknown as T[])
+                : ([] as T[]),
+          };
         }
 
         if (text.includes('INSERT INTO signals')) {
@@ -220,6 +317,28 @@ function createFakeDb(seed?: {
           return {
             rows: ([{ id: match.id, label: match.label, signal_key: match.signalKey }] as unknown) as T[],
           };
+        }
+
+        if (text.includes('SET') && text.includes('signal_key = $4') && text.includes('domain_id = $3')) {
+          const [signalId, assessmentVersionId, domainId, signalKey] = params as [
+            string,
+            string,
+            string,
+            string,
+          ];
+          const match = state.signals.find(
+            (signal) =>
+              signal.id === signalId &&
+              signal.assessmentVersionId === assessmentVersionId &&
+              signal.domainId === domainId,
+          );
+          if (config?.failSignalUpdateId && signalId === config.failSignalUpdateId) {
+            throw new Error('SIGNAL_UPDATE_FAILED');
+          }
+          if (match) {
+            match.signalKey = signalKey;
+          }
+          return { rows: [] as T[] };
         }
 
         if (text.includes('UPDATE signals')) {
@@ -488,4 +607,245 @@ test('inline domain and signal label updates reject empty values', async () => {
       }),
     /SIGNAL_LABEL_REQUIRED/,
   );
+});
+
+test('regenerates a domain key from the latest label and cascades to child signal keys', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'style',
+        label: 'Leadership Style',
+        description: null,
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-2',
+        domainKey: 'style',
+        label: 'Other version',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        signalKey: 'style_directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+      },
+      {
+        id: 'signal-2',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        signalKey: 'style_supportive',
+        label: 'Supportive',
+        description: null,
+        orderIndex: 1,
+      },
+      {
+        id: 'signal-3',
+        assessmentVersionId: 'version-2',
+        domainId: 'domain-2',
+        signalKey: 'style_directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const updated = await regenerateDomainKey({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    domainId: 'domain-1',
+  });
+
+  assert.equal(updated.domainKey, 'leadership_style');
+  assert.equal(fake.state.domains[0]?.domainKey, 'leadership_style');
+  assert.equal(fake.state.signals[0]?.signalKey, 'leadership_style_directive');
+  assert.equal(fake.state.signals[1]?.signalKey, 'leadership_style_supportive');
+  assert.equal(fake.state.signals[2]?.signalKey, 'style_directive');
+});
+
+test('regenerates a signal key from the latest signal label and current parent domain key', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'leadership_style',
+        label: 'Leadership Style',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        signalKey: 'style_directive',
+        label: 'Clear Direction',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const updated = await regenerateSignalKey({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    signalId: 'signal-1',
+  });
+
+  assert.equal(updated.signalKey, 'leadership_style_clear_direction');
+  assert.equal(fake.state.signals[0]?.signalKey, 'leadership_style_clear_direction');
+});
+
+test('regenerate key rejects uniqueness conflicts safely', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'style',
+        label: 'Leadership Style',
+        description: null,
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'leadership_style',
+        label: 'Leadership Style Existing',
+        description: null,
+        orderIndex: 1,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        signalKey: 'style_directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+      },
+      {
+        id: 'signal-2',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        signalKey: 'style_supportive',
+        label: 'Supportive',
+        description: null,
+        orderIndex: 1,
+      },
+      {
+        id: 'signal-3',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-2',
+        signalKey: 'leadership_style_supportive',
+        label: 'Supportive',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  await assert.rejects(
+    () =>
+      regenerateDomainKey({
+        db: fake.db,
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+      }),
+    /DOMAIN_KEY_EXISTS/,
+  );
+
+  fake.state.domains[1]!.domainKey = 'another_domain';
+
+  await assert.rejects(
+    () =>
+      regenerateDomainKey({
+        db: fake.db,
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+      }),
+    /SIGNAL_KEY_EXISTS/,
+  );
+
+  fake.state.domains[0]!.domainKey = 'leadership_style';
+
+  await assert.rejects(
+    () =>
+      regenerateSignalKey({
+        db: fake.db,
+        assessmentVersionId: 'version-1',
+        signalId: 'signal-2',
+      }),
+    /SIGNAL_KEY_EXISTS/,
+  );
+});
+
+test('domain key regeneration rolls back when cascading signal updates fail', async () => {
+  const fake = createFakeDb(
+    {
+      domains: [
+        {
+          id: 'domain-1',
+          assessmentVersionId: 'version-1',
+          domainKey: 'style',
+          label: 'Leadership Style',
+          description: null,
+          orderIndex: 0,
+        },
+      ],
+      signals: [
+        {
+          id: 'signal-1',
+          assessmentVersionId: 'version-1',
+          domainId: 'domain-1',
+          signalKey: 'style_directive',
+          label: 'Directive',
+          description: null,
+          orderIndex: 0,
+        },
+        {
+          id: 'signal-2',
+          assessmentVersionId: 'version-1',
+          domainId: 'domain-1',
+          signalKey: 'style_supportive',
+          label: 'Supportive',
+          description: null,
+          orderIndex: 1,
+        },
+      ],
+    },
+    {
+      failSignalUpdateId: 'signal-2',
+    },
+  );
+
+  await fake.db.query('BEGIN');
+  await assert.rejects(
+    () =>
+      regenerateDomainKey({
+        db: fake.db,
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+      }),
+    /SIGNAL_UPDATE_FAILED/,
+  );
+  await fake.db.query('ROLLBACK');
+
+  assert.equal(fake.state.domains[0]?.domainKey, 'style');
+  assert.equal(fake.state.signals[0]?.signalKey, 'style_directive');
+  assert.equal(fake.state.signals[1]?.signalKey, 'style_supportive');
 });

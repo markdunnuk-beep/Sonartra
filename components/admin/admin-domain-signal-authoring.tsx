@@ -21,9 +21,13 @@ import {
   createSignalAction,
   deleteDomainAction,
   deleteSignalAction,
+  regenerateDomainKeyAction,
+  regenerateSignalKeyAction,
   updateDomainLabelAction,
   updateSignalLabelAction,
+  type InlineDomainKeyRegenerateResult,
   type InlineDomainLabelUpdateResult,
+  type InlineSignalKeyRegenerateResult,
   type InlineSignalLabelUpdateResult,
 } from '@/lib/server/admin-domain-signal-authoring';
 
@@ -156,6 +160,83 @@ function InlineError({ message }: { message: string | null }) {
     <div className="rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
       {message}
     </div>
+  );
+}
+
+function InlineActionButton({
+  idleLabel,
+  pendingLabel,
+}: Readonly<{
+  idleLabel: string;
+  pendingLabel: string;
+}>) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      className={cn(
+        'sonartra-focus-ring inline-flex min-h-9 items-center rounded-[0.8rem] border px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] transition',
+        pending
+          ? 'cursor-wait border-white/8 bg-white/[0.05] text-white/44'
+          : 'border-white/10 bg-white/[0.03] text-white/66 hover:border-white/16 hover:bg-white/[0.06] hover:text-white/84',
+      )}
+      disabled={pending}
+      type="submit"
+    >
+      {pending ? pendingLabel : idleLabel}
+    </button>
+  );
+}
+
+function DomainKeyRegenerateForm({
+  assessmentKey,
+  assessmentVersionId,
+  domainId,
+}: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  domainId: string;
+}) {
+  const [state, formAction] = useActionState(
+    regenerateDomainKeyAction.bind(null, {
+      assessmentKey,
+      assessmentVersionId,
+      domainId,
+    }),
+    null as InlineDomainKeyRegenerateResult | null,
+  );
+
+  return (
+    <form action={formAction} className="space-y-2">
+      {state && !state.ok ? <InlineError message={state.error} /> : null}
+      <InlineActionButton idleLabel="Regenerate key" pendingLabel="Updating..." />
+    </form>
+  );
+}
+
+function SignalKeyRegenerateForm({
+  assessmentKey,
+  assessmentVersionId,
+  signalId,
+}: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  signalId: string;
+}) {
+  const [state, formAction] = useActionState(
+    regenerateSignalKeyAction.bind(null, {
+      assessmentKey,
+      assessmentVersionId,
+      signalId,
+    }),
+    null as InlineSignalKeyRegenerateResult | null,
+  );
+
+  return (
+    <form action={formAction} className="space-y-2">
+      {state && !state.ok ? <InlineError message={state.error} /> : null}
+      <InlineActionButton idleLabel="Regenerate key" pendingLabel="Updating..." />
+    </form>
   );
 }
 
@@ -488,25 +569,40 @@ function DomainLabelEditor({
   domain: AdminAssessmentDetailDomain;
 }) {
   return (
-    <InlineTextEditor
-      emptyLabel="Domain name"
-      label="Domain name"
-      onSave={async (nextValue) => {
-        const result: InlineDomainLabelUpdateResult = await updateDomainLabelAction({
-          assessmentKey,
-          assessmentVersionId,
-          domainId: domain.domainId,
-          label: nextValue,
-        });
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <LabelPill>{domain.domainKey}</LabelPill>
+        <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+          Semantic key
+        </LabelPill>
+      </div>
 
-        return result.ok
-          ? { ok: true, value: result.record.label }
-          : { ok: false, error: result.error };
-      }}
-      placeholder="Enter domain name"
-      requiredMessage="Domain name is required."
-      value={domain.label}
-    />
+      <InlineTextEditor
+        emptyLabel="Domain name"
+        label="Domain name"
+        onSave={async (nextValue) => {
+          const result: InlineDomainLabelUpdateResult = await updateDomainLabelAction({
+            assessmentKey,
+            assessmentVersionId,
+            domainId: domain.domainId,
+            label: nextValue,
+          });
+
+          return result.ok
+            ? { ok: true, value: result.record.label }
+            : { ok: false, error: result.error };
+        }}
+        placeholder="Enter domain name"
+        requiredMessage="Domain name is required."
+        value={domain.label}
+      />
+
+      <DomainKeyRegenerateForm
+        assessmentKey={assessmentKey}
+        assessmentVersionId={assessmentVersionId}
+        domainId={domain.domainId}
+      />
+    </div>
   );
 }
 
@@ -577,6 +673,12 @@ function SignalLabelEditor({
         requiredMessage="Signal name is required."
         value={signal.label}
       />
+
+      <SignalKeyRegenerateForm
+        assessmentKey={assessmentKey}
+        assessmentVersionId={assessmentVersionId}
+        signalId={signal.signalId}
+      />
     </div>
   );
 }
@@ -628,7 +730,6 @@ function DomainCard({
     <SurfaceCard className="p-5 lg:p-6">
       <div className="space-y-6">
         <div className="flex flex-wrap items-center gap-2">
-          <LabelPill>{domain.domainKey}</LabelPill>
           <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
             Domain {domain.orderIndex + 1}
           </LabelPill>

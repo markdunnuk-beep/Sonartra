@@ -51,6 +51,51 @@ export type InlineSignalLabelUpdateResult =
       error: string;
     };
 
+export type InlineDomainKeyRegenerateResult =
+  | {
+      ok: true;
+      record: {
+        domainId: string;
+        domainKey: string;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+export type InlineSignalKeyRegenerateResult =
+  | {
+      ok: true;
+      record: {
+        signalId: string;
+        signalKey: string;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+type DomainScopeRow = {
+  id: string;
+  domain_key: string;
+  label: string;
+};
+
+type SignalScopeRow = {
+  id: string;
+  signal_key: string;
+  label: string;
+  domain_id: string;
+  domain_key: string;
+};
+
+type ChildSignalScopeRow = {
+  id: string;
+  label: string;
+};
+
 function normalizeFormValue(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -119,6 +164,70 @@ async function getDomainKey(params: {
   );
 
   return result.rows[0]?.domain_key ?? null;
+}
+
+async function getDomainScope(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  domainId: string;
+}): Promise<DomainScopeRow | null> {
+  const result = await params.db.query<DomainScopeRow>(
+    `
+    SELECT id, domain_key, label
+    FROM domains
+    WHERE id = $1
+      AND assessment_version_id = $2
+      AND domain_type = 'SIGNAL_GROUP'
+    `,
+    [params.domainId, params.assessmentVersionId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function getSignalScope(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  signalId: string;
+}): Promise<SignalScopeRow | null> {
+  const result = await params.db.query<SignalScopeRow>(
+    `
+    SELECT
+      s.id,
+      s.signal_key,
+      s.label,
+      d.id AS domain_id,
+      d.domain_key
+    FROM signals s
+    INNER JOIN domains d
+      ON d.id = s.domain_id
+      AND d.assessment_version_id = s.assessment_version_id
+    WHERE s.id = $1
+      AND s.assessment_version_id = $2
+    `,
+    [params.signalId, params.assessmentVersionId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function getSignalsForDomain(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  domainId: string;
+}): Promise<readonly ChildSignalScopeRow[]> {
+  const result = await params.db.query<ChildSignalScopeRow>(
+    `
+    SELECT id, label
+    FROM signals
+    WHERE assessment_version_id = $1
+      AND domain_id = $2
+    ORDER BY order_index ASC, id ASC
+    `,
+    [params.assessmentVersionId, params.domainId],
+  );
+
+  return result.rows;
 }
 
 async function domainExists(params: {
@@ -335,6 +444,106 @@ export async function updateDomainLabel(params: {
   };
 }
 
+export async function regenerateDomainKey(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  domainId: string;
+}): Promise<{ domainId: string; domainKey: string }> {
+  const domain = await getDomainScope({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    domainId: params.domainId,
+  });
+  if (!domain) {
+    throw new Error('DOMAIN_NOT_FOUND');
+  }
+
+  const regeneratedDomainKey = generateDomainKey(domain.label);
+  if (!regeneratedDomainKey) {
+    throw new Error('DOMAIN_KEY_INVALID');
+  }
+
+  if (
+    regeneratedDomainKey !== domain.domain_key &&
+    (await duplicateDomainKeyExists({
+      db: params.db,
+      assessmentVersionId: params.assessmentVersionId,
+      domainKey: regeneratedDomainKey,
+      excludedDomainId: domain.id,
+    }))
+  ) {
+    throw new Error('DOMAIN_KEY_EXISTS');
+  }
+
+  const childSignals = await getSignalsForDomain({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    domainId: domain.id,
+  });
+  const nextSignalKeys = childSignals.map((signal) => ({
+    signalId: signal.id,
+    signalKey: generateSignalKey(regeneratedDomainKey, signal.label),
+  }));
+
+  if (nextSignalKeys.some((signal) => !signal.signalKey)) {
+    throw new Error('SIGNAL_KEY_INVALID');
+  }
+
+  const localSignalKeySet = new Set<string>();
+  for (const signal of nextSignalKeys) {
+    if (localSignalKeySet.has(signal.signalKey)) {
+      throw new Error('SIGNAL_KEY_EXISTS');
+    }
+    localSignalKeySet.add(signal.signalKey);
+
+    if (
+      await duplicateSignalKeyExists({
+        db: params.db,
+        assessmentVersionId: params.assessmentVersionId,
+        signalKey: signal.signalKey,
+        excludedSignalId: signal.signalId,
+      })
+    ) {
+      throw new Error('SIGNAL_KEY_EXISTS');
+    }
+  }
+
+  if (regeneratedDomainKey !== domain.domain_key) {
+    await params.db.query(
+      `
+      UPDATE domains
+      SET
+        domain_key = $3,
+        updated_at = NOW()
+      WHERE id = $1
+        AND assessment_version_id = $2
+        AND domain_type = 'SIGNAL_GROUP'
+      `,
+      [domain.id, params.assessmentVersionId, regeneratedDomainKey],
+    );
+  }
+
+  for (const signal of nextSignalKeys) {
+    await params.db.query(
+      `
+      UPDATE signals
+      SET
+        signal_key = $4,
+        updated_at = NOW()
+      WHERE id = $1
+        AND assessment_version_id = $2
+        AND domain_id = $3
+      `,
+      [signal.signalId, params.assessmentVersionId, domain.id, signal.signalKey],
+    );
+  }
+
+  return {
+    domainId: domain.id,
+    domainKey: regeneratedDomainKey,
+  };
+}
+
 export async function deleteDomainRecord(params: {
   db: Queryable;
   assessmentVersionId: string;
@@ -529,6 +738,58 @@ export async function updateSignalLabel(params: {
     signalId: updatedSignal.id,
     label: updatedSignal.label,
     signalKey: updatedSignal.signal_key,
+  };
+}
+
+export async function regenerateSignalKey(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  signalId: string;
+}): Promise<{ signalId: string; signalKey: string }> {
+  const signal = await getSignalScope({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    signalId: params.signalId,
+  });
+  if (!signal) {
+    throw new Error('SIGNAL_NOT_FOUND');
+  }
+
+  const regeneratedSignalKey = generateSignalKey(signal.domain_key, signal.label);
+  if (!regeneratedSignalKey) {
+    throw new Error('SIGNAL_KEY_INVALID');
+  }
+
+  if (
+    regeneratedSignalKey !== signal.signal_key &&
+    (await duplicateSignalKeyExists({
+      db: params.db,
+      assessmentVersionId: params.assessmentVersionId,
+      signalKey: regeneratedSignalKey,
+      excludedSignalId: signal.id,
+    }))
+  ) {
+    throw new Error('SIGNAL_KEY_EXISTS');
+  }
+
+  if (regeneratedSignalKey !== signal.signal_key) {
+    await params.db.query(
+      `
+      UPDATE signals
+      SET
+        signal_key = $4,
+        updated_at = NOW()
+      WHERE id = $1
+        AND assessment_version_id = $2
+        AND domain_id = $3
+      `,
+      [signal.id, params.assessmentVersionId, signal.domain_id, regeneratedSignalKey],
+    );
+  }
+
+  return {
+    signalId: signal.id,
+    signalKey: regeneratedSignalKey,
   };
 }
 
@@ -855,6 +1116,92 @@ export async function updateSignalLabelAction(params: {
     }
 
     return { ok: false, error: 'Signal name could not be saved. Try again.' };
+  } finally {
+    client.release();
+  }
+}
+
+export async function regenerateDomainKeyAction(params: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  domainId: string;
+}): Promise<InlineDomainKeyRegenerateResult> {
+  const pool = getDbPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const record = await regenerateDomainKey({
+      db: client,
+      assessmentVersionId: params.assessmentVersionId,
+      domainId: params.domainId,
+    });
+    await client.query('COMMIT');
+    revalidatePath(authoringPath(params.assessmentKey));
+    return { ok: true, record };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'DOMAIN_NOT_FOUND') {
+        return { ok: false, error: 'The selected domain is no longer available in this draft version.' };
+      }
+
+      if (error.message === 'DOMAIN_KEY_INVALID') {
+        return { ok: false, error: 'Use a domain name with letters or numbers to regenerate the key.' };
+      }
+
+      if (error.message === 'DOMAIN_KEY_EXISTS' || error.message === 'SIGNAL_KEY_EXISTS') {
+        return { ok: false, error: 'This key is already in use.' };
+      }
+
+      if (error.message === 'SIGNAL_KEY_INVALID') {
+        return { ok: false, error: 'A child signal needs a valid name before keys can be regenerated.' };
+      }
+    }
+
+    return { ok: false, error: 'Domain key could not be regenerated. Try again.' };
+  } finally {
+    client.release();
+  }
+}
+
+export async function regenerateSignalKeyAction(params: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  signalId: string;
+}): Promise<InlineSignalKeyRegenerateResult> {
+  const pool = getDbPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const record = await regenerateSignalKey({
+      db: client,
+      assessmentVersionId: params.assessmentVersionId,
+      signalId: params.signalId,
+    });
+    await client.query('COMMIT');
+    revalidatePath(authoringPath(params.assessmentKey));
+    return { ok: true, record };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'SIGNAL_NOT_FOUND') {
+        return { ok: false, error: 'The selected signal is no longer available in this draft version.' };
+      }
+
+      if (error.message === 'SIGNAL_KEY_INVALID') {
+        return { ok: false, error: 'Use a signal name with letters or numbers to regenerate the key.' };
+      }
+
+      if (error.message === 'SIGNAL_KEY_EXISTS') {
+        return { ok: false, error: 'This key is already in use.' };
+      }
+    }
+
+    return { ok: false, error: 'Signal key could not be regenerated. Try again.' };
   } finally {
     client.release();
   }
