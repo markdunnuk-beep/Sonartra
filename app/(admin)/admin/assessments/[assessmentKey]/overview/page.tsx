@@ -19,8 +19,8 @@ export default function AdminAssessmentOverviewPage() {
     <section className="space-y-8">
       <SectionHeader
         eyebrow="Overview"
-        title="Assessment version status at a glance"
-        description="Use this page for the assessment name, active version state, lightweight readiness context, and the temporary publish control."
+        title="Overview"
+        description="See the assessment name, version status, and publish state."
       />
 
       <SurfaceCard className="p-5 lg:p-6">
@@ -37,7 +37,7 @@ export default function AdminAssessmentOverviewPage() {
             </h2>
             <p className="max-w-3xl text-sm leading-7 text-white/62">
               {assessment.description ??
-                'This assessment follows the canonical draft-to-published lifecycle, with authoring still bound to the active editable draft only.'}
+                'Build your draft here, then publish when it is ready.'}
             </p>
           </div>
         </div>
@@ -46,22 +46,22 @@ export default function AdminAssessmentOverviewPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetaItem label="Draft version" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
         <MetaItem label="Published version" value={assessment.publishedVersion?.versionTag ?? 'None'} />
-        <MetaItem label="Readiness" value={assessment.draftValidation.isPublishReady ? 'Ready' : 'Needs review'} />
-        <MetaItem label="Blocking issues" value={String(assessment.draftValidation.blockingErrors.length)} />
+        <MetaItem label="Publish check" value={assessment.draftValidation.isPublishReady ? 'Ready' : 'Needs review'} />
+        <MetaItem label="Fix before publishing" value={String(assessment.draftValidation.blockingErrors.length)} />
       </div>
 
       <SurfaceCard className="p-5 lg:p-6">
         <div className="space-y-3">
-          <p className="sonartra-page-eyebrow">Readiness summary</p>
+          <p className="sonartra-page-eyebrow">Publish check</p>
           <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-            Lightweight draft validation status
+            Check before publishing
           </h2>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
             {assessment.draftValidation.isPublishReady
-              ? `Draft ${assessment.draftValidation.draftVersionTag ?? assessment.latestDraftVersion?.versionTag ?? 'version'} currently satisfies the existing publish checks.`
+              ? `Draft ${assessment.draftValidation.draftVersionTag ?? assessment.latestDraftVersion?.versionTag ?? 'version'} is ready to publish.`
               : assessment.draftValidation.status === 'no_draft'
-                ? 'No editable draft exists yet, so readiness cannot be evaluated.'
-                : 'The draft still has blocking structural issues. Use Review & Publish to inspect the full validation output.'}
+                ? 'No draft yet.'
+                : 'Fix the remaining issues before publishing.'}
           </p>
         </div>
       </SurfaceCard>

@@ -24,7 +24,7 @@ export function AdminAssessmentSectionNav({
 
   return (
     <SurfaceCard className="p-2">
-      <nav aria-label="Assessment authoring sections" className="flex flex-wrap gap-2">
+      <nav aria-label="Assessment sections" className="flex flex-wrap gap-2">
         {sections.map((section) => {
           const href = `/admin/assessments/${assessmentKey}/${section.slug}`;
           const isActive = pathname === href;

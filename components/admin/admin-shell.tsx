@@ -307,7 +307,7 @@ export function AdminShell({
                     Phase 5
                   </p>
                   <p className="mt-1 truncate text-sm text-white/72">
-                    Assessment authoring shell foundation
+                    Assessment admin
                   </p>
                 </div>
                 <Link

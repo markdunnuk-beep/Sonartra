@@ -69,9 +69,9 @@ export function AdminAssessmentDeleteGovernance({
   return (
     <section className="sonartra-section">
       <SectionHeader
-        eyebrow="Destructive Governance"
+        eyebrow="Delete assessment"
         title="Delete assessment"
-        description="This permanently removes the canonical assessment definition and all related authoring records. Runtime user data is protected and will block deletion."
+        description="Permanently remove this assessment and its setup data. If people have used it, deletion is blocked."
       />
 
       <SurfaceCard className="p-5 lg:p-6">
@@ -86,12 +86,11 @@ export function AdminAssessmentDeleteGovernance({
               </LabelPill>
             </div>
             <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-              Remove this assessment from the canonical database
+              Remove this assessment
             </h2>
             <p className="max-w-3xl text-sm leading-7 text-white/62">
-              Deletion is irreversible. The assessment record, versions, domains, signals,
-              questions, options, and option to signal weights will be permanently removed if no
-              linked runtime data exists.
+              This cannot be undone. Versions, domains, signals, questions, response options, and
+              response scoring will be removed if no linked user data exists.
             </p>
           </div>
 
@@ -105,8 +104,7 @@ export function AdminAssessmentDeleteGovernance({
                 type="checkbox"
               />
               <span>
-                I understand this will permanently delete this assessment and all related authoring
-                data.
+                I understand this will permanently delete this assessment and its setup data.
               </span>
             </label>
           </div>

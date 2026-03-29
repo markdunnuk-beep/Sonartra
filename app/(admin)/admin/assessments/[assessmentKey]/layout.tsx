@@ -32,7 +32,7 @@ export default async function AdminAssessmentAuthoringLayout({
         <PageHeader
           eyebrow="Admin Workspace"
           title={assessment.title}
-          description="Author draft structure through focused sections, keep navigation persistent, and retain the existing version-aware publish workflow."
+          description="Build this assessment in clear sections."
         />
 
         <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
@@ -56,15 +56,15 @@ export default async function AdminAssessmentAuthoringLayout({
                     : 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]'
                 }
               >
-                {assessment.draftValidation.isPublishReady ? 'Publish ready' : 'Not publish ready'}
+                {assessment.draftValidation.isPublishReady ? 'Ready to publish' : 'Needs review'}
               </LabelPill>
             </div>
             <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.3rem]">
-              Structured authoring for version-aware draft management.
+              Build assessment
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-white/68">
               {assessment.description ??
-                'Authoring remains scoped to the current editable draft version only, while validation and publishing stay available through the same canonical lifecycle.'}
+                'Work through each section, then review and publish.'}
             </p>
           </div>
         </SurfaceCard>
@@ -72,8 +72,8 @@ export default async function AdminAssessmentAuthoringLayout({
         <div className="grid gap-4 xl:grid-cols-4">
           <MetaItem label="Assessment key" value={assessment.assessmentKey} />
           <MetaItem label="Versions" value={String(assessment.versions.length)} />
-          <MetaItem label="Editable draft" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
-          <MetaItem label="Current published" value={assessment.publishedVersion?.versionTag ?? 'None'} />
+          <MetaItem label="Draft" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
+          <MetaItem label="Published" value={assessment.publishedVersion?.versionTag ?? 'None'} />
         </div>
 
         <AdminAssessmentSectionNav assessmentKey={assessment.assessmentKey} />

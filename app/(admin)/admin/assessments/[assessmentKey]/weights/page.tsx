@@ -11,7 +11,7 @@ export default function AdminAssessmentWeightsPage() {
     return (
       <EmptyState
         title="No draft version available"
-        description="Weight authoring is only available when an editable draft version exists for this assessment."
+        description="Create a draft to set response scoring."
       />
     );
   }

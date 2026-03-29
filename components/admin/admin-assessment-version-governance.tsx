@@ -157,7 +157,7 @@ function PublishDraftForm({
   return (
     <form action={formAction} className="space-y-3">
       <ActionNotice state={state} />
-      <SubmitButton idleLabel="Publish draft" pendingLabel="Publishing..." disabled={disabled} />
+      <SubmitButton idleLabel="Publish" pendingLabel="Publishing..." disabled={disabled} />
     </form>
   );
 }
@@ -194,7 +194,7 @@ function VersionRegistry({
   if (versions.length === 0) {
     return (
       <div className="rounded-[1.2rem] border border-dashed border-white/10 bg-white/[0.02] p-4 text-sm leading-7 text-white/54">
-        No persisted versions are available for this assessment yet.
+        No versions yet.
       </div>
     );
   }
@@ -268,28 +268,28 @@ function ValidationSummary({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="sonartra-page-eyebrow">Readiness validation</p>
+            <p className="sonartra-page-eyebrow">Publish check</p>
             <LabelPill className={getReadinessPillClass(validation)}>
               {formatReadinessLabel(validation)}
             </LabelPill>
           </div>
           <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-            Draft publish readiness is evaluated from canonical authored records
+            Check before publishing
           </h2>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
             {validation.isPublishReady
-              ? `Draft ${validation.draftVersionTag ?? 'version'} is structurally complete enough to publish through the existing lifecycle path.`
+              ? `Draft ${validation.draftVersionTag ?? 'version'} is ready to publish.`
               : validation.status === 'no_draft'
-                ? 'No editable draft is available, so readiness cannot be evaluated and publish remains unavailable.'
-                : 'Blocking issues below must be resolved before the current draft can be published.'}
+                ? 'No draft yet, so you cannot publish.'
+                : 'Fix the issues below before publishing.'}
           </p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <MetaItem label="Blocking issues" value={String(validation.blockingErrors.length)} />
-          <MetaItem label="Failing sections" value={String(failingSections.length)} />
+          <MetaItem label="Fix these before publishing" value={String(validation.blockingErrors.length)} />
+          <MetaItem label="Sections to fix" value={String(failingSections.length)} />
           <MetaItem label="Questions" value={String(validation.counts.questionCount)} />
-          <MetaItem label="Unmapped options" value={String(validation.counts.unmappedOptionCount)} />
+          <MetaItem label="Unscored responses" value={String(validation.counts.unmappedOptionCount)} />
         </div>
       </div>
 
@@ -300,7 +300,7 @@ function ValidationSummary({
               <div>
                 <p className="text-sm font-medium text-white">{section.label}</p>
                 <p className="mt-1 text-xs uppercase tracking-[0.18em] text-white/34">
-                  {section.status === 'pass' ? 'Pass' : 'Blocking issues'}
+                  {section.status === 'pass' ? 'Pass' : 'Fix these before publishing'}
                 </p>
               </div>
               <LabelPill
@@ -315,7 +315,7 @@ function ValidationSummary({
             </div>
 
             {section.issues.length === 0 ? (
-              <p className="mt-3 text-sm leading-7 text-white/54">No blocking issues found in this section.</p>
+              <p className="mt-3 text-sm leading-7 text-white/54">No issues in this section.</p>
             ) : (
               <div className="mt-3 space-y-2">
                 {section.issues.map((issue) => (
@@ -354,45 +354,45 @@ export function AdminAssessmentVersionGovernance({
   return (
     <section className="sonartra-section">
       <SectionHeader
-        eyebrow="Version Governance"
-        title="Manage draft and published lifecycle"
-        description="Authoring below always targets the current editable draft version only. Published versions stay stable and visible here until a draft is explicitly promoted or a new draft is explicitly created."
+        eyebrow="Publish"
+        title="Review and publish"
+        description="Check your draft, publish it, or create a new draft."
       />
 
       <div className="grid gap-4 xl:grid-cols-2">
         <VersionSummaryCard
-          label="Editable draft"
+          label="Draft"
           version={latestDraftVersion}
-          emptyCopy="No editable draft exists right now. The authoring sections below will remain inactive until a new draft version is created."
+          emptyCopy="No draft yet. Create one to start building."
         />
         <VersionSummaryCard
-          label="Active published"
+          label="Published"
           version={publishedVersion}
-          emptyCopy="No published version is active for this assessment yet."
+          emptyCopy="Nothing has been published yet."
         />
       </div>
 
       <SurfaceCard className="p-5 lg:p-6">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
           <div className="space-y-3">
-            <p className="sonartra-page-eyebrow">Current lifecycle rule</p>
+            <p className="sonartra-page-eyebrow">Current version</p>
             <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-              Existing authoring surfaces mutate the draft version only
+              Changes are made in the draft only
             </h2>
             <p className="max-w-3xl text-sm leading-7 text-white/62">
               {hasDraft
-                ? `Domains, signals, questions, options, and weights are currently being written to draft ${latestDraftVersion.versionTag}. Publishing is explicit and will promote only that draft.`
+                ? `You are editing draft ${latestDraftVersion.versionTag}. Publishing will make it live.`
                 : hasPublished
-                  ? `Version ${publishedVersion?.versionTag} is published and remains read-only through the current authoring surfaces. Create a new draft version to continue iterating.`
-                  : 'No draft or published version is available yet. This assessment cannot enter the current authoring flow until a draft exists.'}
+                  ? `Version ${publishedVersion?.versionTag} is live. Create a new draft to make changes.`
+                  : 'No draft or published version yet.'}
             </p>
           </div>
 
           <div className="space-y-4 rounded-[1.2rem] border border-white/8 bg-black/10 p-4">
             <div className="space-y-2">
-              <p className="sonartra-page-eyebrow">Lifecycle actions</p>
+              <p className="sonartra-page-eyebrow">Actions</p>
               <p className="text-sm leading-7 text-white/58">
-                Publish promotes the current draft to the single active published version. Create new draft duplicates the latest canonical definition into the next deterministic draft version.
+                Publish the current draft, or create a new draft to keep working.
               </p>
             </div>
 
@@ -413,12 +413,12 @@ export function AdminAssessmentVersionGovernance({
 
       <SurfaceCard className="p-5 lg:p-6">
         <div className="space-y-3">
-          <p className="sonartra-page-eyebrow">Version registry</p>
+          <p className="sonartra-page-eyebrow">Versions</p>
           <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-            Persisted canonical versions for this assessment
+            Versions
           </h2>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Each row represents an `assessment_versions` record only. No alternate content store or runtime snapshot is introduced here.
+            See all versions for this assessment.
           </p>
         </div>
 

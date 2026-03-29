@@ -241,9 +241,9 @@ function AssessmentCard({
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="sonartra-page-eyebrow">Version Registry</p>
+              <p className="sonartra-page-eyebrow">Versions</p>
               <p className="mt-1 text-sm text-white/54">
-                Scan every persisted version and its lifecycle state.
+                See every version and its status.
               </p>
             </div>
             <Link
@@ -275,20 +275,18 @@ export function AdminAssessmentsDashboard({
       <PageHeader
         eyebrow="Admin Workspace"
         title="Assessments"
-        description="Scan the assessment catalogue, inspect version state, and identify what is live, drafted, or inactive before drilling into authoring and publish governance."
+        description="View assessments, drafts, and published versions."
       />
 
       <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <LabelPill className="bg-white/[0.08] text-white/82">Version-aware catalogue</LabelPill>
+            <LabelPill className="bg-white/[0.08] text-white/82">Assessment list</LabelPill>
             <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.45rem]">
-              Catalogue view for version visibility, active publish state, and draft continuation.
+              Build assessments and manage versions.
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-white/68">
-              This dashboard surfaces truthful schema-backed version state, including published and
-              draft context, so lifecycle actions on the detail route stay grounded in canonical
-              assessment version records only.
+              See what is published, what is still a draft, and what needs work.
             </p>
           </div>
 
@@ -296,58 +294,58 @@ export function AdminAssessmentsDashboard({
             <ButtonLink href="/admin/assessments/create" variant="primary">
               Create assessment
             </ButtonLink>
-            <p className="text-sm text-white/54">Create a new assessment and bootstrap its first draft version.</p>
+            <p className="text-sm text-white/54">Create a new assessment and start with a draft.</p>
           </div>
         </div>
       </SurfaceCard>
 
       <section className="sonartra-section">
         <SectionHeader
-          eyebrow="Catalogue Summary"
+          eyebrow="Summary"
           title="Current assessment state"
-          description="Counts are derived from persisted assessments and version lifecycle records only."
+          description="Quick view of your assessments."
         />
 
         <div className="grid gap-4 xl:grid-cols-5">
           <SummaryCard
             label="Assessments"
             value={String(summary.totalAssessments)}
-            detail="Top-level assessment records in the current catalogue."
+            detail="All assessments."
           />
           <SummaryCard
             label="With published"
             value={String(summary.publishedCount)}
-            detail="Assessments that currently expose a published version."
+            detail="Assessments with a published version."
           />
           <SummaryCard
             label="Published + draft"
             value={String(summary.publishedAndDraftCount)}
-            detail="Published definitions with a newer working draft alongside them."
+            detail="Published assessments with a newer draft."
           />
           <SummaryCard
             label="Draft only"
             value={String(summary.draftOnlyCount)}
-            detail="Assessment records that have draft work but no published version."
+            detail="Drafts that are not published yet."
           />
           <SummaryCard
             label="Needs setup"
             value={String(summary.noVersionsCount + summary.setupIncompleteCount)}
-            detail="Assessment records with no versions or only archived/incomplete version state."
+            detail="Assessments that still need setup."
           />
         </div>
       </section>
 
       <section className="sonartra-section">
         <SectionHeader
-          eyebrow="Assessment Catalogue"
-          title="Definitions and version state"
-          description="Each entry shows the live published version, latest draft, full version registry, and the next route for later authoring tasks."
+          eyebrow="Assessments"
+          title="Build assessment"
+          description="Open an assessment to keep building."
         />
 
         {assessments.length === 0 ? (
           <EmptyState
-            title="No assessments in the catalogue"
-            description="Create the first assessment record to start building the authoring workflow."
+            title="No assessments yet"
+            description="Create your first assessment."
             action={
               <ButtonLink href="/admin/assessments/create" variant="primary">
                 Create assessment

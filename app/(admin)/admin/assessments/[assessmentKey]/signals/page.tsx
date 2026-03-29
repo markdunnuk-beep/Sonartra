@@ -11,7 +11,7 @@ export default function AdminAssessmentSignalsPage() {
     return (
       <EmptyState
         title="No draft version available"
-        description="Signal authoring is only available when an editable draft version exists for this assessment."
+        description="Create a draft to add signals."
       />
     );
   }

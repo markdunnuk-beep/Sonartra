@@ -11,7 +11,7 @@ export default function AdminAssessmentDomainsPage() {
     return (
       <EmptyState
         title="No draft version available"
-        description="Domain authoring is only available when an editable draft version exists for this assessment."
+        description="Create a draft to add domains."
       />
     );
   }

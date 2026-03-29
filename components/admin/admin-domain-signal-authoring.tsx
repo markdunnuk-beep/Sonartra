@@ -356,19 +356,18 @@ function CreateDomainForm({
     <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Create domain</p>
+          <p className="sonartra-page-eyebrow">Add domain</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Add a scoring domain to this draft version
+            Add a domain
           </h3>
           <p className="max-w-2xl text-sm leading-7 text-white/62">
-            Domains created here are stored as `SIGNAL_GROUP` records and become the parent
-            containers for the signals authored below.
+            Add the main areas for this assessment.
           </p>
         </div>
 
         <form action={formAction} className="space-y-5">
           <div className="grid gap-5 lg:grid-cols-2">
-            <Field error={currentState.fieldErrors.label} hint="Human-readable domain name." label="Domain name">
+            <Field error={currentState.fieldErrors.label} hint="Name this domain." label="Domain name">
               <TextInput
                 defaultValue={currentState.values.label}
                 error={currentState.fieldErrors.label}
@@ -376,7 +375,7 @@ function CreateDomainForm({
                 placeholder="Leadership style"
               />
             </Field>
-            <Field error={currentState.fieldErrors.key} hint="Stable engine-facing key." label="Domain key">
+            <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Domain key">
               <TextInput
                 defaultValue={currentState.values.key}
                 error={currentState.fieldErrors.key}
@@ -388,7 +387,7 @@ function CreateDomainForm({
 
           <Field
             error={currentState.fieldErrors.description}
-            hint="Optional description for admin context."
+            hint="Optional short note."
             label="Description"
           >
             <TextArea
@@ -431,15 +430,15 @@ function CreateSignalForm({
     <SurfaceCard className="p-4">
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="sonartra-page-eyebrow">Create signal</p>
+          <p className="sonartra-page-eyebrow">Add signal</p>
           <p className="text-sm leading-7 text-white/58">
-            Signals are persisted inside this domain and appended in explicit order.
+            Add signals to this domain.
           </p>
         </div>
 
         <form action={formAction} className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">
-            <Field error={currentState.fieldErrors.label} hint="Signal name." label="Name">
+            <Field error={currentState.fieldErrors.label} hint="Name this signal." label="Name">
               <TextInput
                 defaultValue={currentState.values.label}
                 error={currentState.fieldErrors.label}
@@ -447,7 +446,7 @@ function CreateSignalForm({
                 placeholder="Directive"
               />
             </Field>
-            <Field error={currentState.fieldErrors.key} hint="Stable key." label="Key">
+            <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Key">
               <TextInput
                 defaultValue={currentState.values.key}
                 error={currentState.fieldErrors.key}
@@ -459,7 +458,7 @@ function CreateSignalForm({
 
           <Field
             error={currentState.fieldErrors.description}
-            hint="Optional signal description."
+            hint="Optional short note."
             label="Description"
           >
             <TextArea
@@ -648,7 +647,7 @@ function DomainCard({
             <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
               <p className="sonartra-page-eyebrow">Delete domain</p>
               <p className="mt-2 text-sm leading-7 text-white/58">
-                Removing a domain also removes its nested signals from this draft version.
+                This also removes the signals inside it.
               </p>
               <div className="mt-4">
                 <DeleteDomainForm
@@ -663,7 +662,7 @@ function DomainCard({
           <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
             <p className="text-sm font-medium text-white">{domain.label}</p>
             <p className="mt-2 text-sm leading-7 text-white/58">
-              Signals authored here remain attached to this draft-scoped domain only.
+              Add and edit signals for this domain here.
             </p>
           </div>
         )}
@@ -673,14 +672,14 @@ function DomainCard({
             <div className="space-y-1">
               <p className="sonartra-page-eyebrow">Signals</p>
               <p className="text-sm leading-7 text-white/58">
-                Signals are persisted in explicit order inside this domain.
+                Add signals to this domain.
               </p>
             </div>
 
             {domain.signals.length === 0 ? (
               <EmptyState
                 className="p-4"
-                description="Add the first signal to make this domain usable by later question and weighting authoring."
+                description="Add a signal to this domain."
                 title="No signals yet"
               />
             ) : (
@@ -696,7 +695,7 @@ function DomainCard({
                     <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
                       <p className="sonartra-page-eyebrow">Delete signal</p>
                       <p className="mt-2 text-sm leading-7 text-white/58">
-                        Remove this signal from the current draft version.
+                        Remove this signal.
                       </p>
                       <div className="mt-4">
                         <DeleteSignalForm
@@ -722,8 +721,8 @@ function DomainCard({
           <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
             <p className="sonartra-page-eyebrow">Signals</p>
             <p className="mt-2 text-sm leading-7 text-white/58">
-              {domain.signals.length} signal{domain.signals.length === 1 ? '' : 's'} authored in this domain.
-              Use the Signals section to create, edit, and remove them.
+              {domain.signals.length} signal{domain.signals.length === 1 ? '' : 's'} in this domain.
+              Open Signals to edit them.
             </p>
           </div>
         )}
@@ -758,17 +757,17 @@ export function AdminDomainSignalAuthoring({
         }
         title={
           mode === 'domains'
-            ? 'Manage the scoring domains for this draft'
+            ? 'Set up domains'
             : mode === 'signals'
-              ? 'Manage the signals inside each domain'
-              : 'Author the scoring structure for this draft'
+              ? 'Add signals to each domain'
+              : 'Set up domains and signals'
         }
         description={
           mode === 'domains'
-            ? 'Create and edit signal-group domains only. Domain records remain version-scoped, explicitly ordered, and stored in the canonical engine tables.'
+            ? 'Add and edit domains.'
             : mode === 'signals'
-              ? 'Create and edit signals inside the existing draft domains. Signal records remain version-scoped, explicitly ordered, and stored in the canonical engine tables.'
-              : 'Create signal-group domains and the signals they contain. Everything written here is version-scoped, ordered explicitly, and stored in the canonical engine tables.'
+              ? 'Add and edit signals in each domain.'
+              : 'Add and edit domains and signals.'
         }
       />
 
@@ -783,10 +782,10 @@ export function AdminDomainSignalAuthoring({
         <EmptyState
           description={
             mode === 'signals'
-              ? 'Signals require at least one domain on the draft version. Create a domain first, then return here to author signals.'
-              : 'Create the first domain to start building the scoring structure for this draft version.'
+              ? 'Add a domain first, then come back to add signals.'
+              : 'Add your first domain.'
           }
-          title={mode === 'signals' ? 'No domains available for signals' : 'No domains authored yet'}
+          title="No domains yet"
         />
       ) : (
         <div className="space-y-4">

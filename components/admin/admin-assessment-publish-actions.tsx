@@ -95,7 +95,7 @@ function PublishDraftForm({
       <ActionNotice state={state} />
       <SubmitButton
         disabled={disabled}
-        idleLabel="Publish draft"
+        idleLabel="Publish"
         pendingLabel="Publishing..."
       />
     </form>
@@ -153,8 +153,8 @@ export function AdminAssessmentPublishActions({
 
         <p className="text-sm leading-7 text-white/62">
           {latestDraftVersion
-            ? `Draft ${latestDraftVersion.versionTag} remains the only editable version. Publishing is explicit and still runs through the existing lifecycle action.`
-            : 'No editable draft exists right now. Create a new draft version before returning to the authoring sections.'}
+            ? `You are editing draft ${latestDraftVersion.versionTag}. Publish when you are ready.`
+            : 'No draft yet. Create one to keep building.'}
         </p>
 
         {latestDraftVersion ? (

@@ -14,21 +14,19 @@ export default function AdminLandingPage() {
     <PageFrame>
       <PageHeader
         eyebrow="Admin Workspace"
-        title="Assessment authoring control surface"
-        description="Use the admin workspace to manage assessment structures, organisation access, and user administration without changing the single engine execution path."
+        title="Admin workspace"
+        description="Manage assessments, organisations, and users."
       />
 
       <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <LabelPill className="bg-white/[0.08] text-white/82">Phase 5 foundation</LabelPill>
+            <LabelPill className="bg-white/[0.08] text-white/82">Admin</LabelPill>
             <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.5rem]">
-              Admin routes are now isolated behind the current MVP access gate.
+              Open the area you want to work in.
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-white/68">
-              This shell is intentionally stable and minimal so later authoring tasks can add
-              module-specific functionality without revisiting layout, navigation, or route
-              protection.
+              Choose an admin area to keep building.
             </p>
           </div>
         </div>
@@ -37,8 +35,8 @@ export default function AdminLandingPage() {
       <section className="sonartra-section">
         <SectionHeader
           eyebrow="Admin Areas"
-          title="Ready entry points"
-          description="Each area is wired into the shared shell now, with room for Task 26 onward to add real workflow surfaces."
+          title="Open an area"
+          description="Choose where to work next."
         />
 
         <div className="grid gap-4 xl:grid-cols-2">

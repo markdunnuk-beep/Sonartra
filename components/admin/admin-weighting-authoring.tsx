@@ -217,7 +217,7 @@ function EditWeightForm({
   return (
     <form action={formAction} className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-        <Field error={currentState.fieldErrors.signalId} hint="Draft-scoped signal target." label="Signal">
+        <Field error={currentState.fieldErrors.signalId} hint="Choose a signal." label="Signal">
           <SelectInput
             defaultValue={currentState.values.signalId}
             error={currentState.fieldErrors.signalId}
@@ -225,7 +225,7 @@ function EditWeightForm({
             signals={signals}
           />
         </Field>
-        <Field error={currentState.fieldErrors.weight} hint="Exact numeric weight." label="Weight">
+        <Field error={currentState.fieldErrors.weight} hint="Enter a number." label="Score">
           <TextInput
             defaultValue={currentState.values.weight}
             error={currentState.fieldErrors.weight}
@@ -238,7 +238,7 @@ function EditWeightForm({
       <InlineError message={currentState.formError} />
 
       <div className="flex flex-wrap gap-3">
-        <SubmitButton idleLabel="Save mapping" pendingLabel="Saving..." />
+        <SubmitButton idleLabel="Save" pendingLabel="Saving..." />
       </div>
     </form>
   );
@@ -305,15 +305,15 @@ function CreateWeightForm({
     <SurfaceCard className="p-4">
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="sonartra-page-eyebrow">Add mapping</p>
+          <p className="sonartra-page-eyebrow">Add score</p>
           <p className="text-sm leading-7 text-white/58">
-            Create an explicit option to signal weight row in the canonical runtime table.
+            Set how this response affects a signal.
           </p>
         </div>
 
         <form action={formAction} className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-            <Field error={currentState.fieldErrors.signalId} hint="Draft-scoped signal target." label="Signal">
+            <Field error={currentState.fieldErrors.signalId} hint="Choose a signal." label="Signal">
               <SelectInput
                 defaultValue={currentState.values.signalId}
                 error={currentState.fieldErrors.signalId}
@@ -321,7 +321,7 @@ function CreateWeightForm({
                 signals={signals}
               />
             </Field>
-            <Field error={currentState.fieldErrors.weight} hint="Exact numeric weight." label="Weight">
+            <Field error={currentState.fieldErrors.weight} hint="Enter a number." label="Score">
               <TextInput
                 defaultValue={currentState.values.weight}
                 error={currentState.fieldErrors.weight}
@@ -333,7 +333,7 @@ function CreateWeightForm({
 
           <InlineError message={currentState.formError} />
 
-          <SubmitButton idleLabel="Add mapping" pendingLabel="Adding mapping..." />
+          <SubmitButton idleLabel="Add score" pendingLabel="Adding..." />
         </form>
       </div>
     </SurfaceCard>
@@ -371,22 +371,22 @@ function OptionWeightingCard({
                 : 'border-[rgba(255,210,133,0.24)] bg-[rgba(90,58,20,0.28)] text-[rgba(255,232,185,0.95)]'
             }
           >
-            {option.weightingStatus === 'weighted' ? 'Weighted' : 'No mappings yet'}
+            {option.weightingStatus === 'weighted' ? 'Scored' : 'No scoring yet'}
           </LabelPill>
         </div>
 
         <div className="space-y-1">
           <p className="text-sm font-medium text-white">{option.optionText}</p>
           <p className="text-sm leading-7 text-white/54">
-            {option.signalWeights.length} mapping{option.signalWeights.length === 1 ? '' : 's'} stored for this option.
+            {option.signalWeights.length} score{option.signalWeights.length === 1 ? '' : 's'} set for this response.
           </p>
         </div>
 
         {option.signalWeights.length === 0 ? (
           <EmptyState
             className="p-4"
-            description="Add the first explicit signal mapping for this option. No default weights are inferred."
-            title="No weighting configured"
+              description="Set how this response affects signals."
+              title="No scoring yet"
           />
         ) : (
           <div className="space-y-4">
@@ -399,7 +399,7 @@ function OptionWeightingCard({
                       {mapping.signalLabel}
                     </LabelPill>
                     <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
-                      Stored {mapping.weight}
+                      Score {mapping.weight}
                     </LabelPill>
                   </div>
                   <EditWeightForm
@@ -413,9 +413,9 @@ function OptionWeightingCard({
                   />
                 </div>
                 <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-                  <p className="sonartra-page-eyebrow">Delete mapping</p>
+                  <p className="sonartra-page-eyebrow">Delete score</p>
                   <p className="mt-2 text-sm leading-7 text-white/58">
-                    Remove this explicit weight row from the current draft version only.
+                    Remove this score from the current draft.
                   </p>
                   <div className="mt-4">
                     <DeleteWeightForm
@@ -469,15 +469,15 @@ function QuestionWeightingCard({
         <div className="space-y-1">
           <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">{question.prompt}</h3>
           <p className="text-sm leading-7 text-white/58">
-            Weight each option against one or more signals from this same draft version.
+            Set how each response affects one or more signals.
           </p>
         </div>
 
         {question.options.length === 0 ? (
           <EmptyState
             className="p-4"
-            description="This question needs answer options before weighting can be authored."
-            title="No options available for weighting"
+            description="Add response options before setting scoring."
+            title="Add options"
           />
         ) : (
           <div className="space-y-4">
@@ -515,32 +515,32 @@ export function AdminWeightingAuthoring({
   return (
     <section className="sonartra-section">
       <SectionHeader
-        eyebrow="Weighting Configuration"
-        title="Configure explicit option to signal weights for this draft"
-        description="Each mapping writes directly to the canonical option_signal_weights table. Weights are explicit numeric values only, remain draft-scoped, and are never inferred or auto-balanced in the UI."
+        eyebrow="Response scoring"
+        title="Set response scoring"
+        description="Set how each response affects signals."
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Available signals" value={String(availableSignals.length)} />
+        <SummaryCard label="Signals" value={String(availableSignals.length)} />
         <SummaryCard label="Options" value={String(weightingSummary.totalOptions)} />
-        <SummaryCard label="Weighted options" value={String(weightingSummary.weightedOptions)} />
-        <SummaryCard label="Unmapped options" value={String(weightingSummary.unmappedOptions)} />
+        <SummaryCard label="Scored responses" value={String(weightingSummary.weightedOptions)} />
+        <SummaryCard label="Unscored responses" value={String(weightingSummary.unmappedOptions)} />
       </div>
 
       {questions.length === 0 ? (
         <EmptyState
-          description="Questions and options must exist on the latest draft version before weighting can be configured."
-          title="No question flow available yet"
+          description="Add questions and response options before setting scoring."
+          title="No questions yet"
         />
       ) : optionsCount === 0 ? (
         <EmptyState
-          description="Author options first. Weighting is attached to canonical option records only."
-          title="No options available for weighting"
+          description="Add options before setting scoring."
+          title="Add options"
         />
       ) : availableSignals.length === 0 ? (
         <EmptyState
-          description="Signals must exist on the latest draft version before option weights can be mapped."
-          title="No signals available for weighting"
+          description="Add signals before setting scoring."
+          title="No signals yet"
         />
       ) : (
         <div className="space-y-4">

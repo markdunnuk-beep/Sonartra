@@ -478,14 +478,14 @@ function BulkQuestionForm({
         <div className="space-y-2">
           <p className="sonartra-page-eyebrow">Bulk generation</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Generate scaffolded questions in one pass
+            Generate questions
           </h3>
           <p className="max-w-2xl text-sm leading-7 text-white/62">
-            This creates sequential question records plus default A-D options using the same deterministic keying rules as single-question creation.
+            Create several questions at once with A-D options.
           </p>
         </div>
         <form action={formAction} className="grid gap-4 lg:grid-cols-[220px_auto] lg:items-end">
-          <Field error={currentState.fieldErrors.count} hint="Create 1 to 200 questions in one transaction." label="Question count">
+          <Field error={currentState.fieldErrors.count} hint="Choose how many to add." label="Question count">
             <NumberInput
               defaultValue={currentState.values.count}
               error={currentState.fieldErrors.count}
@@ -495,7 +495,7 @@ function BulkQuestionForm({
             />
           </Field>
           <div className="flex items-end">
-            <SubmitButton idleLabel="Generate Questions" pendingLabel="Generating..." />
+            <SubmitButton idleLabel="Generate questions" pendingLabel="Generating..." />
           </div>
         </form>
         <InlineError message={currentState.formError} />
@@ -549,19 +549,18 @@ function CreateQuestionForm({
     <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Create question</p>
+          <p className="sonartra-page-eyebrow">Add question</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Add a question to this draft version
+            Add a question
           </h3>
           <p className="max-w-2xl text-sm leading-7 text-white/62">
-            Questions are stored in explicit version order and linked directly to a persisted domain
-            record so later weighting can attach to canonical option rows only.
+            Add a question and choose where it belongs.
           </p>
         </div>
 
         <form action={formAction} className="space-y-5">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
-            <Field error={currentState.fieldErrors.prompt} hint="The assessment question shown to users." label="Prompt">
+            <Field error={currentState.fieldErrors.prompt} hint="What people will see." label="Question">
               <TextArea
                 defaultValue={currentState.values.prompt}
                 error={currentState.fieldErrors.prompt}
@@ -571,7 +570,7 @@ function CreateQuestionForm({
               />
             </Field>
             <div className="space-y-5">
-              <Field error={currentState.fieldErrors.key} hint="Stable engine-facing key." label="Question key">
+              <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Question key">
                 <TextInput
                   defaultValue={currentState.values.key}
                   error={currentState.fieldErrors.key}
@@ -579,7 +578,7 @@ function CreateQuestionForm({
                   placeholder="decision-speed"
                 />
               </Field>
-              <Field error={currentState.fieldErrors.domainId} hint="Version-scoped domain linkage." label="Question domain">
+              <Field error={currentState.fieldErrors.domainId} hint="Choose a domain." label="Domain">
                 <SelectInput defaultValue={currentState.values.domainId || domains[0]?.domainId || ''} error={currentState.fieldErrors.domainId} name="domainId">
                   <option value="">Select a domain</option>
                   {domains.map((domain) => (
@@ -684,16 +683,15 @@ function CreateOptionForm({
     <SurfaceCard className="p-4">
       <div className="space-y-4">
         <div className="space-y-1">
-          <p className="sonartra-page-eyebrow">Create option</p>
+          <p className="sonartra-page-eyebrow">Add option</p>
           <p className="text-sm leading-7 text-white/58">
-            Options are persisted in explicit order inside this question and become the canonical
-            targets for later signal weighting.
+            Add response options for this question.
           </p>
         </div>
 
         <form action={formAction} className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-[160px_160px_minmax(0,1fr)]">
-            <Field error={currentState.fieldErrors.key} hint="Stable option key." label="Option key">
+            <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Option key">
               <TextInput
                 defaultValue={currentState.values.key}
                 error={currentState.fieldErrors.key}
@@ -709,7 +707,7 @@ function CreateOptionForm({
                 placeholder="A"
               />
             </Field>
-            <Field error={currentState.fieldErrors.text} hint="User-facing answer text." label="Option text">
+            <Field error={currentState.fieldErrors.text} hint="What people will see." label="Option text">
               <TextInput
                 defaultValue={currentState.values.text}
                 error={currentState.fieldErrors.text}
@@ -846,7 +844,7 @@ function QuestionCard({
             <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
               <p className="sonartra-page-eyebrow">Delete question</p>
               <p className="mt-2 text-sm leading-7 text-white/58">
-                Removing a question also removes its nested options from this draft version.
+                This also removes its response options.
               </p>
               <div className="mt-4">
                 <DeleteQuestionForm
@@ -861,8 +859,7 @@ function QuestionCard({
           <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
             <p className="text-sm font-medium text-white">{question.prompt}</p>
             <p className="mt-2 text-sm leading-7 text-white/58">
-              Response editing stays attached to this draft question only. Question-level duplication
-              actions can be introduced here later without changing the current authoring model.
+              Edit this question&apos;s response options here.
             </p>
           </div>
         )}
@@ -872,15 +869,14 @@ function QuestionCard({
             <div className="space-y-1">
               <p className="sonartra-page-eyebrow">Options</p>
               <p className="text-sm leading-7 text-white/58">
-                Options are persisted in explicit order under this question. Weighting is added in the
-                next task only.
+                Set the response options for this question.
               </p>
             </div>
 
             {question.options.length === 0 ? (
               <EmptyState
                 className="p-4"
-                description="Add the first option so this question can be completed and later weighted."
+                description="Add options for this question."
                 title="No options yet"
               />
             ) : (
@@ -896,7 +892,7 @@ function QuestionCard({
                     <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
                       <p className="sonartra-page-eyebrow">Delete option</p>
                       <p className="mt-2 text-sm leading-7 text-white/58">
-                        Remove this answer option from the current draft version.
+                        Remove this option.
                       </p>
                       <div className="mt-4">
                         <DeleteOptionForm
@@ -922,8 +918,8 @@ function QuestionCard({
           <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
             <p className="sonartra-page-eyebrow">Responses</p>
             <p className="mt-2 text-sm leading-7 text-white/58">
-              {question.options.length} option{question.options.length === 1 ? '' : 's'} authored for this
-              question. Use the Responses section to edit answer text and option sets.
+              {question.options.length} option{question.options.length === 1 ? '' : 's'} for this
+              question. Open Responses to edit them.
             </p>
           </div>
         )}
@@ -960,24 +956,24 @@ export function AdminQuestionOptionAuthoring({
         }
         title={
           mode === 'questions'
-            ? 'Author the assessment question flow for this draft'
+            ? 'Add questions'
             : mode === 'responses'
-              ? 'Author the response options for each question'
-              : 'Author the assessment flow for this draft'
+              ? 'Set response options'
+              : 'Add questions and response options'
         }
         description={
           mode === 'questions'
-            ? 'Create ordered questions, generate scaffolds in bulk, and edit prompts inline. Everything written here remains version-scoped and explicitly ordered in the canonical engine tables.'
+            ? 'Add, edit, and generate questions.'
             : mode === 'responses'
-              ? 'Edit option text and manage per-question response sets only. Response rows remain version-scoped, explicitly ordered, and stored in the canonical engine tables used by the runtime.'
-              : 'Create ordered questions and the answer options they contain. Everything written here is version-scoped, explicitly ordered, and stored in the canonical engine tables used by the runtime.'
+              ? 'Set and edit response options.'
+              : 'Add questions and set response options.'
         }
       />
 
       {domains.length === 0 ? (
         <EmptyState
-          description="Question authoring requires at least one version-scoped domain. Create the structural domains for this draft before adding questions."
-          title="No domains available for question linkage"
+          description="Add a domain before adding questions."
+          title="No domains yet"
         />
       ) : (
         <>
@@ -1000,10 +996,10 @@ export function AdminQuestionOptionAuthoring({
             <EmptyState
               description={
                 mode === 'responses'
-                  ? 'Questions must exist before response options can be edited. Add the draft question flow first, then return here for option authoring.'
-                  : 'Create the first question to start building the ordered assessment flow for this draft version.'
+                  ? 'Add questions before setting response options.'
+                  : 'Add your first question.'
               }
-              title={mode === 'responses' ? 'No questions available for responses' : 'No questions authored yet'}
+              title="No questions yet"
             />
           ) : (
             <div className="space-y-4">

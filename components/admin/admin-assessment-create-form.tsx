@@ -167,13 +167,12 @@ export function AdminAssessmentCreateForm() {
     <div className="space-y-6">
       <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
         <div className="space-y-3">
-          <LabelPill className="bg-white/[0.08] text-white/82">Base definition bootstrap</LabelPill>
+          <LabelPill className="bg-white/[0.08] text-white/82">New assessment</LabelPill>
           <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.3rem]">
-            Create the parent assessment record and first draft version.
+            Create an assessment and start a draft.
           </h2>
           <p className="max-w-2xl text-sm leading-7 text-white/68">
-            This step establishes the canonical base object only. Domain, signal, question, and
-            weighting authoring follow in later tasks.
+            Start with the basics. You can add domains, signals, questions, and scoring next.
           </p>
         </div>
       </SurfaceCard>
@@ -183,7 +182,7 @@ export function AdminAssessmentCreateForm() {
           <div className="grid gap-6 lg:grid-cols-2">
             <FieldShell
               error={safeState.fieldErrors.title}
-              hint="Use the human-readable assessment name that appears in admin catalogue views."
+              hint="This name is shown in admin."
               label="Assessment title"
             >
               <TextInput
@@ -197,7 +196,7 @@ export function AdminAssessmentCreateForm() {
 
             <FieldShell
               error={safeState.fieldErrors.assessmentKey}
-              hint="This becomes the stable key in routes and persisted records. Use lowercase letters, numbers, and hyphens only."
+              hint="Use lowercase letters, numbers, and hyphens."
               label="Assessment key"
             >
               <TextInput
@@ -212,7 +211,7 @@ export function AdminAssessmentCreateForm() {
 
           <FieldShell
             error={safeState.fieldErrors.description}
-            hint="Optional. Add a concise summary so the new assessment is legible in the admin catalogue."
+            hint="Optional short summary."
             label="Description"
           >
             <TextArea
@@ -227,8 +226,7 @@ export function AdminAssessmentCreateForm() {
           <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-4">
             <p className="sonartra-page-eyebrow">Creation result</p>
             <p className="mt-2 text-sm leading-7 text-white/62">
-              Submitting this form creates one `assessments` row and one linked `assessment_versions`
-              row with draft lifecycle status and version `1.0.0`.
+              This creates the assessment and its first draft, version `1.0.0`.
             </p>
           </div>
 

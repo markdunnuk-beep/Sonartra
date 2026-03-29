@@ -7,7 +7,7 @@ export default function AdminAssessmentCreatePlaceholderPage() {
       <PageHeader
         eyebrow="Admin Workspace"
         title="Create assessment"
-        description="Create a new assessment record and bootstrap its first draft version so later authoring tasks can attach structure without revisiting catalogue foundations."
+        description="Create a new assessment and start with a draft."
       />
 
       <AdminAssessmentCreateForm />

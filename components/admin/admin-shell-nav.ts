@@ -18,7 +18,7 @@ export const adminNavItems: readonly AdminNavItem[] = [
     key: 'assessments',
     href: '/admin/assessments',
     label: 'Assessments',
-    description: 'Assessment authoring, versioning, and publishing surfaces.',
+    description: 'Build assessments, manage versions, and publish.',
     match: ['/admin/assessments'],
   },
   {
