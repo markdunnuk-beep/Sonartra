@@ -170,10 +170,11 @@ export function createAssessmentCompletionService(
       }
 
       try {
+        // Runtime bridge: the attempt is pinned to a concrete published version id,
+        // so completion resolves the exact definition that attempt started against.
         const payload = await executeEngine({
           repository,
-          assessmentKey: attempt.assessmentKey,
-          versionKey: attempt.versionTag,
+          assessmentVersionId: attempt.assessmentVersionId,
           responses: responseSet,
         });
 

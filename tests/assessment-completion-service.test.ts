@@ -58,11 +58,15 @@ type FakeDbConfig = {
   failFailedPersist?: boolean;
 };
 
-function buildDefinition(): RuntimeAssessmentDefinition {
+function buildDefinition(params?: {
+  assessmentKey?: string;
+  assessmentVersionId?: string;
+  versionTag?: string;
+}): RuntimeAssessmentDefinition {
   return {
     assessment: {
       id: 'assessment-1',
-      key: 'wplp80',
+      key: params?.assessmentKey ?? 'wplp80',
       title: 'WPLP-80',
       description: 'Assessment',
       estimatedTimeMinutes: 29,
@@ -70,9 +74,9 @@ function buildDefinition(): RuntimeAssessmentDefinition {
       updatedAt: '2026-01-01T00:00:00.000Z',
     },
     version: {
-      id: 'version-1',
+      id: params?.assessmentVersionId ?? 'version-1',
       assessmentId: 'assessment-1',
-      versionTag: '1.0.0',
+      versionTag: params?.versionTag ?? '1.0.0',
       status: 'published',
       isPublished: true,
       publishedAt: '2026-01-01T00:00:00.000Z',
@@ -331,6 +335,75 @@ test('failed prior result retry reruns and response loading respects final-answe
   assert.equal(engineCalls, 1);
   assert.equal(selectedOptionId, 'option-2');
   assert.equal(result.resultStatus, 'ready');
+});
+
+test('completion resolves the runtime definition by the attempt assessmentVersionId', async () => {
+  let publishedCalls = 0;
+  let versionCalls = 0;
+  let capturedParams:
+    | {
+        assessmentVersionId?: string;
+        assessmentKey?: string;
+        version?: string;
+      }
+    | undefined;
+
+  const service = createAssessmentCompletionService({
+    db: createFakeDb({
+      attempts: [{
+        attemptId: 'attempt-2',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-2',
+        assessmentKey: 'custom-live',
+        versionTag: '2.0.0',
+        lifecycleStatus: 'IN_PROGRESS',
+        startedAt: '2026-01-01T00:00:01.000Z',
+        submittedAt: null,
+        completedAt: null,
+        lastActivityAt: '2026-01-01T00:00:05.000Z',
+        createdAt: '2026-01-01T00:00:01.000Z',
+        updatedAt: '2026-01-01T00:00:05.000Z',
+      }],
+      responses: [{
+        responseId: 'response-1',
+        attemptId: 'attempt-2',
+        questionId: 'question-1',
+        selectedOptionId: 'option-1',
+        respondedAt: '2026-01-01T00:00:03.000Z',
+        updatedAt: '2026-01-01T00:00:03.000Z',
+      }],
+    }),
+    repository: {
+      async getPublishedAssessmentDefinitionByKey() {
+        publishedCalls += 1;
+        return buildDefinition({
+          assessmentKey: 'custom-live',
+          assessmentVersionId: 'version-2',
+          versionTag: '2.0.0',
+        });
+      },
+      async getAssessmentDefinitionByVersion(params) {
+        versionCalls += 1;
+        capturedParams = params;
+        return buildDefinition({
+          assessmentKey: 'custom-live',
+          assessmentVersionId: 'version-2',
+          versionTag: '2.0.0',
+        });
+      },
+    },
+  });
+
+  const result = await service.completeAssessmentAttempt({
+    attemptId: 'attempt-2',
+    userId: 'user-1',
+  });
+
+  assert.equal(result.resultStatus, 'ready');
+  assert.equal(publishedCalls, 0);
+  assert.equal(versionCalls, 1);
+  assert.deepEqual(capturedParams, { assessmentVersionId: 'version-2' });
 });
 
 test('engine failure and persistence failure are explicit and do not pretend success', async () => {

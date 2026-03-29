@@ -202,11 +202,21 @@ function createRepositoryFixture(definition: RuntimeAssessmentDefinition | null)
   calls: {
     published: number;
     version: number;
+    lastVersionParams: {
+      assessmentVersionId?: string;
+      assessmentKey?: string;
+      version?: string;
+    } | null;
   };
 } {
   const calls = {
     published: 0,
     version: 0,
+    lastVersionParams: null as {
+      assessmentVersionId?: string;
+      assessmentKey?: string;
+      version?: string;
+    } | null,
   };
 
   return {
@@ -215,8 +225,9 @@ function createRepositoryFixture(definition: RuntimeAssessmentDefinition | null)
         calls.published += 1;
         return definition;
       },
-      async getAssessmentDefinitionByVersion() {
+      async getAssessmentDefinitionByVersion(params) {
         calls.version += 1;
+        calls.lastVersionParams = params;
         return definition;
       },
     },
@@ -266,6 +277,27 @@ test('version path loads by explicit version key', async () => {
 
   assert.equal(calls.published, 0);
   assert.equal(calls.version, 1);
+  assert.deepEqual(calls.lastVersionParams, {
+    assessmentKey: 'wplp80',
+    version: '1.0.0',
+  });
+  assert.equal(payload.metadata.version, '1.0.0');
+});
+
+test('assessment version path loads by explicit assessmentVersionId', async () => {
+  const { repository, calls } = createRepositoryFixture(buildDefinition());
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    responses: buildResponses({ 'question-1': 'option-1' }),
+  });
+
+  assert.equal(calls.published, 0);
+  assert.equal(calls.version, 1);
+  assert.deepEqual(calls.lastVersionParams, {
+    assessmentVersionId: 'version-1',
+  });
   assert.equal(payload.metadata.version, '1.0.0');
 });
 

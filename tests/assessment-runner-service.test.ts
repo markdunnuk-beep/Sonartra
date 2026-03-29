@@ -66,7 +66,11 @@ function createFakeDb(params: {
 
   return {
     async query<T>(text: string, queryParams?: unknown[]) {
-      if (text.includes('FROM attempts t') && text.includes('WHERE t.id = $1')) {
+      if (
+        text.includes('FROM attempts t') &&
+        text.includes('WHERE t.id = $1') &&
+        text.includes('a.assessment_key')
+      ) {
         const attemptId = queryParams?.[0] as string;
         const row = attempts.find((attempt) => attempt.attemptId === attemptId);
 
@@ -127,18 +131,6 @@ function createFakeDb(params: {
         return { rows: rows as T[] };
       }
 
-      if (text.includes('FROM responses') && text.includes('WHERE attempt_id = $1')) {
-        const attemptId = queryParams?.[0] as string;
-        return {
-          rows: responses
-            .filter((response) => response.attemptId === attemptId)
-            .map((response) => ({
-              question_id: response.questionId,
-              selected_option_id: response.selectedOptionId,
-            })) as T[],
-        };
-      }
-
       if (text.includes('SELECT COUNT(*) AS total_questions') && text.includes('CROSS JOIN LATERAL')) {
         const [attemptId, assessmentVersionId] = queryParams as [string, string];
         const totalQuestions = (questionsByVersionId[assessmentVersionId] ?? []).length;
@@ -160,6 +152,22 @@ function createFakeDb(params: {
 
         return {
           rows: (valid ? ([{ valid_row: 1 }] as unknown[]) : []) as T[],
+        };
+      }
+
+      if (
+        text.includes('FROM responses') &&
+        text.includes('WHERE attempt_id = $1') &&
+        text.includes('selected_option_id')
+      ) {
+        const attemptId = queryParams?.[0] as string;
+        return {
+          rows: responses
+            .filter((response) => response.attemptId === attemptId)
+            .map((response) => ({
+              question_id: response.questionId,
+              selected_option_id: response.selectedOptionId,
+            })) as T[],
         };
       }
 
@@ -318,6 +326,63 @@ test('runner view model loads ordered questions and saved responses for owned at
   assert.equal(runner.answeredQuestions, 1);
   assert.equal(runner.totalQuestions, 2);
   assert.equal(runner.completionPercentage, 50);
+});
+
+test('runner view model serves the question structure linked to the attempt version only', async () => {
+  const service = createAssessmentRunnerService({
+    db: createFakeDb({
+      attempts: [{
+        attemptId: 'attempt-2',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        assessmentDescription: 'Signals',
+        assessmentVersionId: 'version-2',
+        versionTag: '2.0.0',
+        lifecycleStatus: 'IN_PROGRESS',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        submittedAt: null,
+        completedAt: null,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      }],
+      questionsByVersionId: {
+        'version-1': [
+          {
+            questionId: 'question-legacy',
+            questionKey: 'legacy',
+            prompt: 'Legacy question?',
+            orderIndex: 1,
+            domainTitle: 'Legacy',
+            options: [
+              { optionId: 'option-legacy', optionKey: 'legacy_a', optionLabel: 'A', optionText: 'Legacy', orderIndex: 1 },
+            ],
+          },
+        ],
+        'version-2': [
+          {
+            questionId: 'question-live',
+            questionKey: 'live',
+            prompt: 'Live question?',
+            orderIndex: 1,
+            domainTitle: 'Published',
+            options: [
+              { optionId: 'option-live', optionKey: 'live_a', optionLabel: 'A', optionText: 'Live', orderIndex: 1 },
+            ],
+          },
+        ],
+      },
+    }),
+  });
+
+  const runner = await service.getAssessmentRunnerViewModel({
+    userId: 'user-1',
+    assessmentKey: 'wplp80',
+    attemptId: 'attempt-2',
+  });
+
+  assert.equal(runner.assessmentVersionId, 'version-2');
+  assert.deepEqual(runner.questions.map((question) => question.questionId), ['question-live']);
 });
 
 test('save response preserves overwrite semantics and returns updated progress', async () => {

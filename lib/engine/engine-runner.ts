@@ -5,6 +5,7 @@ import { scoreAssessmentResponses } from '@/lib/engine/scoring';
 import { normalizeScoreResult } from '@/lib/engine/normalization';
 import type {
   AssessmentKey,
+  AssessmentVersionId,
   AssessmentVersionTag,
   CanonicalResultPayload,
   RuntimeAssessmentDefinition,
@@ -20,6 +21,7 @@ export class EngineNotFoundError extends Error {
 
 export type RunAssessmentEngineParams = {
   repository: AssessmentDefinitionRepository;
+  assessmentVersionId?: AssessmentVersionId;
   assessmentKey?: AssessmentKey;
   versionKey?: AssessmentVersionTag;
   responses: RuntimeResponseSet;
@@ -28,6 +30,20 @@ export type RunAssessmentEngineParams = {
 async function loadDefinition(
   params: RunAssessmentEngineParams,
 ): Promise<RuntimeAssessmentDefinition> {
+  if (params.assessmentVersionId) {
+    const definition = await params.repository.getAssessmentDefinitionByVersion({
+      assessmentVersionId: params.assessmentVersionId,
+    });
+
+    if (!definition) {
+      throw new EngineNotFoundError(
+        `Assessment definition not found for assessment version ${params.assessmentVersionId}`,
+      );
+    }
+
+    return definition;
+  }
+
   if (params.versionKey) {
     const resolvedAssessmentKey = params.assessmentKey ?? params.responses.assessmentKey;
     const definition = await params.repository.getAssessmentDefinitionByVersion({

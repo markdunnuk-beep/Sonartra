@@ -427,6 +427,30 @@ test('startAssessmentAttempt creates a new attempt when none exists', async () =
   assert.equal(lifecycle.status, 'in_progress');
 });
 
+test('startAssessmentAttempt links the new attempt to the current published version', async () => {
+  const service = createAssessmentAttemptLifecycleService({
+    db: createFakeDb({
+      assessment: {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'custom-live',
+        assessmentVersionId: 'version-2',
+        versionTag: '2.0.0',
+      },
+      questionCountByVersionId: { 'version-2': 24 },
+    }),
+  });
+
+  const lifecycle = await service.startAssessmentAttempt({
+    userId: 'user-1',
+    assessmentKey: 'custom-live',
+  });
+
+  assert.equal(lifecycle.attemptId, 'attempt-1');
+  assert.equal(lifecycle.assessmentVersionId, 'version-2');
+  assert.equal(lifecycle.versionTag, '2.0.0');
+  assert.equal(lifecycle.totalQuestions, 24);
+});
+
 test('starting after a completed ready attempt creates a new attempt', async () => {
   const service = createAssessmentAttemptLifecycleService({
     db: createFakeDb({

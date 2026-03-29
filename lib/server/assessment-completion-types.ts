@@ -41,6 +41,7 @@ export type AssessmentCompletionExecuteEngine = (params: {
       version?: string;
     }): Promise<unknown>;
   };
+  assessmentVersionId?: string;
   assessmentKey?: string;
   versionKey?: string;
   responses: RuntimeResponseSet;
