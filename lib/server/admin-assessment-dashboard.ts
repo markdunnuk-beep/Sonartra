@@ -70,6 +70,27 @@ type AdminAssessmentCatalogRow = {
   question_count: string;
 };
 
+function toComparableString(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+function toTimestamp(value: unknown): number {
+  if (typeof value !== 'string') {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+}
+
+function compareStringsDesc(left: unknown, right: unknown): number {
+  return toComparableString(right).localeCompare(toComparableString(left));
+}
+
+function compareTimestampsDesc(left: unknown, right: unknown): number {
+  return toTimestamp(right) - toTimestamp(left);
+}
+
 function normalizeVersionStatus(
   status: AdminAssessmentCatalogRow['version_status'],
 ): AdminAssessmentVersionStatus | null {
@@ -178,18 +199,19 @@ function mapAssessmentDashboardItem(
       ];
     })
     .sort((left, right) => {
-      if (right.updatedAt !== left.updatedAt) {
-        return right.updatedAt.localeCompare(left.updatedAt);
+      const updatedAtComparison = compareTimestampsDesc(left.updatedAt, right.updatedAt);
+      if (updatedAtComparison !== 0) {
+        return updatedAtComparison;
       }
 
-      return right.versionTag.localeCompare(left.versionTag);
+      return compareStringsDesc(left.versionTag, right.versionTag);
     });
 
   const publishedVersion = versions.find((version) => version.status === 'published') ?? null;
   const latestDraftVersion = versions.find((version) => version.status === 'draft') ?? null;
   const latestUpdatedAt =
     [firstRow.assessment_updated_at, ...versions.map((version) => version.updatedAt)]
-      .sort((left, right) => right.localeCompare(left))[0] ?? firstRow.assessment_updated_at;
+      .sort(compareTimestampsDesc)[0] ?? firstRow.assessment_updated_at;
   const statusProjection = formatOverallStatus({
     publishedVersion,
     latestDraftVersion,
