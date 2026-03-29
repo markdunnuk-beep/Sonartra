@@ -43,7 +43,7 @@ type AdminAssessmentDashboardRowFixture = {
 
 function createFakeDb(fixtures: readonly AssessmentDashboardFixture[]): Queryable {
   return {
-    async query<T>(text: string) {
+    async query<T>(text: string, params?: unknown[]) {
       if (text.includes('FROM assessments a') && text.includes('LEFT JOIN assessment_versions av')) {
         const rows: AdminAssessmentDashboardRowFixture[] = [];
 
@@ -96,6 +96,81 @@ function createFakeDb(fixtures: readonly AssessmentDashboardFixture[]): Queryabl
 
         return {
           rows: rows as T[],
+        };
+      }
+
+      if (text.includes('LEFT JOIN LATERAL') && text.includes('draft_version_id')) {
+        const assessmentKey = params?.[0] as string;
+        const fixture = fixtures.find((entry) => entry.assessmentKey === assessmentKey);
+        const draftVersion = fixture?.versions.find((version) => version.status === 'DRAFT') ?? null;
+
+        if (!fixture) {
+          return { rows: [] as T[] };
+        }
+
+        return {
+          rows: [
+            {
+              assessment_id: fixture.assessmentId,
+              assessment_key: fixture.assessmentKey,
+              draft_version_id: draftVersion?.assessmentVersionId ?? null,
+              draft_version_tag: draftVersion?.versionTag ?? null,
+            },
+          ] as T[],
+        };
+      }
+
+      if (text.includes('AS domain_count') && text.includes('AS signal_count')) {
+        const draftVersionId = params?.[0] as string;
+        const isReadyDraft = draftVersionId === 'version-2';
+
+        return {
+          rows: [
+            {
+              domain_count: isReadyDraft ? '2' : '1',
+              signal_count: isReadyDraft ? '2' : '1',
+              orphan_signal_count: '0',
+              cross_version_signal_count: '0',
+            },
+          ] as T[],
+        };
+      }
+
+      if (text.includes('AS question_count') && text.includes('questions_without_options_count')) {
+        const draftVersionId = params?.[0] as string;
+        const isReadyDraft = draftVersionId === 'version-2';
+
+        return {
+          rows: [
+            {
+              question_count: isReadyDraft ? '82' : '24',
+              option_count: isReadyDraft ? '328' : '24',
+              questions_without_options_count: '0',
+              orphan_question_count: '0',
+              cross_version_question_count: '0',
+              orphan_option_count: '0',
+              cross_version_option_count: '0',
+            },
+          ] as T[],
+        };
+      }
+
+      if (text.includes('AS weighted_option_count') && text.includes('cross_version_weight_signal_count')) {
+        const draftVersionId = params?.[0] as string;
+        const isReadyDraft = draftVersionId === 'version-2';
+
+        return {
+          rows: [
+            {
+              weighted_option_count: isReadyDraft ? '328' : '12',
+              unmapped_option_count: isReadyDraft ? '0' : '12',
+              weight_mapping_count: isReadyDraft ? '656' : '12',
+              orphan_weight_option_count: '0',
+              orphan_weight_signal_count: '0',
+              cross_version_weight_option_count: '0',
+              cross_version_weight_signal_count: '0',
+            },
+          ] as T[],
         };
       }
 
@@ -181,6 +256,7 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
   assert.equal(flagship?.overallStatus, 'published_and_draft');
   assert.equal(flagship?.publishedVersion?.versionTag, '1.0.0');
   assert.equal(flagship?.latestDraftVersion?.versionTag, '1.1.0');
+  assert.equal(flagship?.latestDraftReadiness, 'ready');
   assert.equal(flagship?.versions[0]?.versionTag, '1.1.0');
   assert.equal(flagship?.actionHref, '/admin/assessments/wplp80');
 
@@ -188,11 +264,13 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
     (assessment) => assessment.assessmentKey === 'discovery-lite',
   );
   assert.equal(draftOnly?.overallStatus, 'draft_only');
+  assert.equal(draftOnly?.latestDraftReadiness, 'not_ready');
 
   const noVersions = viewModel.assessments.find(
     (assessment) => assessment.assessmentKey === 'team-map',
   );
   assert.equal(noVersions?.overallStatus, 'no_versions');
+  assert.equal(noVersions?.latestDraftReadiness, 'no_draft');
 
   const setupIncomplete = viewModel.assessments.find(
     (assessment) => assessment.assessmentKey === 'archive-only',

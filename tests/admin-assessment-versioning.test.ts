@@ -127,6 +127,117 @@ function createFakeDb(seed?: {
           return { rows: rows as T[] };
         }
 
+        if (text.includes('LEFT JOIN LATERAL') && text.includes('draft_version_id')) {
+          const assessmentKey = params?.[0] as string;
+          const assessment = state.assessments.find((item) => item.assessmentKey === assessmentKey);
+          const draft = assessment
+            ? state.versions
+                .filter((version) => version.assessmentId === assessment.id && version.lifecycleStatus === 'DRAFT')
+                .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))[0] ?? null
+            : null;
+
+          if (!assessment) {
+            return { rows: [] as T[] };
+          }
+
+          return {
+            rows: [
+              {
+                assessment_id: assessment.id,
+                assessment_key: assessment.assessmentKey,
+                draft_version_id: draft?.id ?? null,
+                draft_version_tag: draft?.versionTag ?? null,
+              },
+            ] as T[],
+          };
+        }
+
+        if (text.includes('AS domain_count') && text.includes('AS signal_count')) {
+          const draftVersionId = params?.[0] as string;
+          const domainIds = new Set(
+            state.domains
+              .filter((domain) => domain.assessmentVersionId === draftVersionId)
+              .map((domain) => domain.id),
+          );
+          const signals = state.signals.filter((signal) => signal.assessmentVersionId === draftVersionId);
+
+          return {
+            rows: [
+              {
+                domain_count: String(domainIds.size),
+                signal_count: String(signals.length),
+                orphan_signal_count: String(
+                  signals.filter((signal) => !domainIds.has(signal.domainId)).length,
+                ),
+                cross_version_signal_count: '0',
+              },
+            ] as T[],
+          };
+        }
+
+        if (text.includes('AS question_count') && text.includes('questions_without_options_count')) {
+          const draftVersionId = params?.[0] as string;
+          const questionIds = state.questions
+            .filter((question) => question.assessmentVersionId === draftVersionId)
+            .map((question) => question.id);
+          const questionIdSet = new Set(questionIds);
+          const optionCount = state.options.filter((option) => questionIdSet.has(option.questionId)).length;
+          const questionsWithoutOptionsCount = questionIds.filter(
+            (questionId) => !state.options.some((option) => option.questionId === questionId),
+          ).length;
+
+          return {
+            rows: [
+              {
+                question_count: String(questionIds.length),
+                option_count: String(optionCount),
+                questions_without_options_count: String(questionsWithoutOptionsCount),
+                orphan_question_count: '0',
+                cross_version_question_count: '0',
+                orphan_option_count: '0',
+                cross_version_option_count: '0',
+              },
+            ] as T[],
+          };
+        }
+
+        if (text.includes('AS weighted_option_count') && text.includes('cross_version_weight_signal_count')) {
+          const draftVersionId = params?.[0] as string;
+          const questionIds = new Set(
+            state.questions
+              .filter((question) => question.assessmentVersionId === draftVersionId)
+              .map((question) => question.id),
+          );
+          const optionIds = state.options
+            .filter((option) => questionIds.has(option.questionId))
+            .map((option) => option.id);
+          const optionIdSet = new Set(optionIds);
+          const signalIds = new Set(
+            state.signals
+              .filter((signal) => signal.assessmentVersionId === draftVersionId)
+              .map((signal) => signal.id),
+          );
+          const weightsForDraft = state.weights.filter(
+            (weight) => optionIdSet.has(weight.optionId) && signalIds.has(weight.signalId),
+          );
+          const weightedOptionIds = new Set(weightsForDraft.map((weight) => weight.optionId));
+          const unmappedOptionCount = optionIds.filter((optionId) => !weightedOptionIds.has(optionId)).length;
+
+          return {
+            rows: [
+              {
+                weighted_option_count: String(weightedOptionIds.size),
+                unmapped_option_count: String(unmappedOptionCount),
+                weight_mapping_count: String(weightsForDraft.length),
+                orphan_weight_option_count: '0',
+                orphan_weight_signal_count: '0',
+                cross_version_weight_option_count: '0',
+                cross_version_weight_signal_count: '0',
+              },
+            ] as T[],
+          };
+        }
+
         if (text.includes("UPDATE assessment_versions") && text.includes("lifecycle_status = 'ARCHIVED'")) {
           const [assessmentId, excludedId] = params as [string, string];
           for (const version of state.versions) {
@@ -360,6 +471,67 @@ test('publishes the selected draft and archives the previously published version
         updatedAt: '2026-03-02T00:00:00.000Z',
       },
     ],
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-2',
+        domainKey: 'section-one',
+        label: 'Section One',
+        description: null,
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-2',
+        domainKey: 'leadership',
+        label: 'Leadership',
+        description: null,
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-2',
+        domainId: 'domain-2',
+        signalKey: 'directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+        isOverlay: false,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-2',
+        domainId: 'domain-1',
+        questionKey: 'decision-speed',
+        prompt: 'I make decisions quickly when direction is clear.',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        questionId: 'question-1',
+        optionKey: 'agree',
+        optionLabel: 'A',
+        optionText: 'Agree',
+        orderIndex: 0,
+      },
+    ],
+    weights: [
+      {
+        id: 'weight-1',
+        optionId: 'option-1',
+        signalId: 'signal-1',
+        weight: '1.0000',
+        sourceWeightKey: '1|A',
+      },
+    ],
   });
 
   const result = await publishDraftAssessmentVersionRecords({
@@ -499,6 +671,67 @@ test('publish action revalidates dashboard and detail routes after success', asy
         updatedAt: '2026-03-01T00:00:00.000Z',
       },
     ],
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section One',
+        description: null,
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'leadership',
+        label: 'Leadership',
+        description: null,
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-2',
+        signalKey: 'directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+        isOverlay: false,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'decision-speed',
+        prompt: 'I make decisions quickly when direction is clear.',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        questionId: 'question-1',
+        optionKey: 'agree',
+        optionLabel: 'A',
+        optionText: 'Agree',
+        orderIndex: 0,
+      },
+    ],
+    weights: [
+      {
+        id: 'weight-1',
+        optionId: 'option-1',
+        signalId: 'signal-1',
+        weight: '1.0000',
+        sourceWeightKey: '1|A',
+      },
+    ],
   });
 
   const revalidatedPaths: string[] = [];
@@ -533,6 +766,109 @@ test('publish action revalidates dashboard and detail routes after success', asy
   assert.equal(result.formError, null);
   assert.ok(result.formSuccess?.includes('1.0.0'));
   assert.deepEqual(revalidatedPaths, ['/admin/assessments', '/admin/assessments/wplp80']);
+});
+
+test('publish action returns an inline error when validation blocks readiness', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [
+      {
+        id: 'version-1',
+        assessmentId: 'assessment-1',
+        versionTag: '1.0.0',
+        lifecycleStatus: 'DRAFT',
+        titleOverride: null,
+        descriptionOverride: null,
+        publishedAt: null,
+        createdAt: '2026-03-01T00:00:00.000Z',
+        updatedAt: '2026-03-01T00:00:00.000Z',
+      },
+    ],
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section One',
+        description: null,
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'leadership',
+        label: 'Leadership',
+        description: null,
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-2',
+        signalKey: 'directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+        isOverlay: false,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'decision-speed',
+        prompt: 'I make decisions quickly when direction is clear.',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        questionId: 'question-1',
+        optionKey: 'agree',
+        optionLabel: 'A',
+        optionText: 'Agree',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await publishDraftVersionActionWithDependencies(
+    {
+      assessmentKey: 'wplp80',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminAssessmentVersionActionState,
+    new FormData(),
+    {
+      getDbPool: () => ({
+        async connect() {
+          return {
+            async query<T>(text: string, params?: readonly unknown[]) {
+              if (text.trim() === 'BEGIN' || text.trim() === 'ROLLBACK') {
+                return { rows: [] as T[] };
+              }
+              return fake.db.query<T>(text, params);
+            },
+            release() {},
+          };
+        },
+      }),
+      revalidatePath(): void {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'The current draft is not publish-ready yet. Resolve the blocking validation issues before publishing.',
+  );
+  assert.equal(result.formSuccess, null);
+  assert.equal(fake.state.versions[0]?.lifecycleStatus, 'DRAFT');
 });
 
 test('create draft action returns an inline error when a draft already exists', async () => {

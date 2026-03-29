@@ -6,6 +6,7 @@ import {
   getNextAssessmentVersionTag,
   type AdminAssessmentVersionActionState,
 } from '@/lib/admin/admin-assessment-versioning';
+import { validateLatestDraftAssessmentVersion } from '@/lib/server/admin-assessment-validation';
 import { getDbPool } from '@/lib/server/db';
 
 type Queryable = {
@@ -201,6 +202,11 @@ function mapVersioningErrorToState(error: unknown): AdminAssessmentVersionAction
         formError: 'The selected version is no longer an editable draft.',
         formSuccess: null,
       };
+    case 'DRAFT_VERSION_NOT_PUBLISH_READY':
+      return {
+        formError: 'The current draft is not publish-ready yet. Resolve the blocking validation issues before publishing.',
+        formSuccess: null,
+      };
     case 'DRAFT_VERSION_ALREADY_EXISTS':
       return {
         formError: 'A draft version already exists. Continue authoring that draft instead of creating another one.',
@@ -253,6 +259,11 @@ export async function publishDraftAssessmentVersionRecords(params: {
 
   if (draft.lifecycle_status !== 'DRAFT') {
     throw new Error('DRAFT_VERSION_REQUIRED');
+  }
+
+  const validation = await validateLatestDraftAssessmentVersion(params.db, params.assessmentKey);
+  if (!validation.isPublishReady || validation.draftVersionId !== draft.assessment_version_id) {
+    throw new Error('DRAFT_VERSION_NOT_PUBLISH_READY');
   }
 
   try {

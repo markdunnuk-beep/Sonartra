@@ -99,6 +99,68 @@ function createFakeDb(fixture: DetailFixture): Queryable {
         return { rows: fixture.baseRows as T[] };
       }
 
+      if (text.includes('LEFT JOIN LATERAL') && text.includes('draft_version_id')) {
+        const draft = fixture.baseRows.find((row) => row.version_status === 'DRAFT') ?? null;
+        const first = fixture.baseRows[0];
+        return {
+          rows: first
+            ? ([
+                {
+                  assessment_id: first.assessment_id,
+                  assessment_key: first.assessment_key,
+                  draft_version_id: draft?.assessment_version_id ?? null,
+                  draft_version_tag: draft?.version_tag ?? null,
+                },
+              ] as T[])
+            : ([] as T[]),
+        };
+      }
+
+      if (text.includes('AS domain_count') && text.includes('AS signal_count')) {
+        return {
+          rows: [
+            {
+              domain_count: '2',
+              signal_count: '2',
+              orphan_signal_count: '0',
+              cross_version_signal_count: '0',
+            },
+          ] as T[],
+        };
+      }
+
+      if (text.includes('AS question_count') && text.includes('questions_without_options_count')) {
+        return {
+          rows: [
+            {
+              question_count: '1',
+              option_count: '2',
+              questions_without_options_count: '0',
+              orphan_question_count: '0',
+              cross_version_question_count: '0',
+              orphan_option_count: '0',
+              cross_version_option_count: '0',
+            },
+          ] as T[],
+        };
+      }
+
+      if (text.includes('AS weighted_option_count') && text.includes('cross_version_weight_signal_count')) {
+        return {
+          rows: [
+            {
+              weighted_option_count: '1',
+              unmapped_option_count: '1',
+              weight_mapping_count: '1',
+              orphan_weight_option_count: '0',
+              orphan_weight_signal_count: '0',
+              cross_version_weight_option_count: '0',
+              cross_version_weight_signal_count: '0',
+            },
+          ] as T[],
+        };
+      }
+
       if (text.includes("FROM domains") && text.includes("domain_type = 'SIGNAL_GROUP'")) {
         return { rows: fixture.signalGroupDomains as T[] };
       }
@@ -314,6 +376,9 @@ test('loads latest draft weighting data and coverage for admin assessment detail
     unmappedOptions: 1,
     totalMappings: 1,
   });
+  assert.equal(detail?.draftValidation.status, 'not_ready');
+  assert.equal(detail?.draftValidation.isPublishReady, false);
+  assert.equal(detail?.draftValidation.blockingErrors[0]?.code, 'options_without_weights');
 });
 
 

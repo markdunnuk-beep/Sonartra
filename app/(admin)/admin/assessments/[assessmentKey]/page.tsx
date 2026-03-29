@@ -57,6 +57,15 @@ export default async function AdminAssessmentDetailPlaceholderPage({
                 ? `Published ${assessment.publishedVersion.versionTag}`
                 : 'No published version'}
             </LabelPill>
+            <LabelPill
+              className={
+                assessment.draftValidation.isPublishReady
+                  ? 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]'
+                  : 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]'
+              }
+            >
+              {assessment.draftValidation.isPublishReady ? 'Publish ready' : 'Not publish ready'}
+            </LabelPill>
           </div>
           <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.3rem]">
             Version-aware draft authoring and publish governance.
@@ -95,6 +104,7 @@ export default async function AdminAssessmentDetailPlaceholderPage({
         versions={assessment.versions}
         latestDraftVersion={assessment.latestDraftVersion}
         publishedVersion={assessment.publishedVersion}
+        draftValidation={assessment.draftValidation}
       />
 
       {assessment.latestDraftVersion ? (

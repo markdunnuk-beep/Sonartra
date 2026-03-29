@@ -7,6 +7,7 @@ import {
   initialAdminAssessmentVersionActionState,
   type AdminAssessmentVersionActionState,
 } from '@/lib/admin/admin-assessment-versioning';
+import type { AdminAssessmentValidationResult } from '@/lib/server/admin-assessment-validation';
 import type { AdminAssessmentDetailVersion } from '@/lib/server/admin-assessment-detail';
 import {
   createDraftVersionAction,
@@ -108,24 +109,27 @@ function SubmitButton({
   idleLabel,
   pendingLabel,
   variant = 'primary',
+  disabled = false,
 }: Readonly<{
   idleLabel: string;
   pendingLabel: string;
   variant?: 'primary' | 'secondary';
+  disabled?: boolean;
 }>) {
   const { pending } = useFormStatus();
+  const isDisabled = pending || disabled;
 
   return (
     <button
       className={cn(
         'sonartra-button sonartra-focus-ring',
-        pending
+        isDisabled
           ? 'cursor-wait border-white/8 bg-white/[0.05] text-white/48'
           : variant === 'primary'
             ? 'sonartra-button-primary'
             : 'sonartra-button-secondary',
       )}
-      disabled={pending}
+      disabled={isDisabled}
       type="submit"
     >
       {pending ? pendingLabel : idleLabel}
@@ -136,9 +140,11 @@ function SubmitButton({
 function PublishDraftForm({
   assessmentKey,
   draftVersionId,
+  disabled,
 }: {
   assessmentKey: string;
   draftVersionId: string;
+  disabled: boolean;
 }) {
   const [state, formAction] = useActionState(
     publishDraftVersionAction.bind(null, {
@@ -151,7 +157,7 @@ function PublishDraftForm({
   return (
     <form action={formAction} className="space-y-3">
       <ActionNotice state={state} />
-      <SubmitButton idleLabel="Publish draft" pendingLabel="Publishing..." />
+      <SubmitButton idleLabel="Publish draft" pendingLabel="Publishing..." disabled={disabled} />
     </form>
   );
 }
@@ -225,16 +231,122 @@ function VersionRegistry({
   );
 }
 
+function getReadinessPillClass(validation: AdminAssessmentValidationResult): string {
+  switch (validation.status) {
+    case 'ready':
+      return 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]';
+    case 'not_ready':
+      return 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]';
+    case 'no_draft':
+    case 'missing_assessment':
+      return 'border-white/10 bg-white/[0.045] text-white/68';
+  }
+}
+
+function formatReadinessLabel(validation: AdminAssessmentValidationResult): string {
+  switch (validation.status) {
+    case 'ready':
+      return 'Ready';
+    case 'not_ready':
+      return 'Not ready';
+    case 'no_draft':
+      return 'No draft';
+    case 'missing_assessment':
+      return 'Unavailable';
+  }
+}
+
+function ValidationSummary({
+  validation,
+}: {
+  validation: AdminAssessmentValidationResult;
+}) {
+  const failingSections = validation.sections.filter((section) => section.status === 'fail');
+
+  return (
+    <SurfaceCard className="p-5 lg:p-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="sonartra-page-eyebrow">Readiness validation</p>
+            <LabelPill className={getReadinessPillClass(validation)}>
+              {formatReadinessLabel(validation)}
+            </LabelPill>
+          </div>
+          <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
+            Draft publish readiness is evaluated from canonical authored records
+          </h2>
+          <p className="max-w-3xl text-sm leading-7 text-white/62">
+            {validation.isPublishReady
+              ? `Draft ${validation.draftVersionTag ?? 'version'} is structurally complete enough to publish through the existing lifecycle path.`
+              : validation.status === 'no_draft'
+                ? 'No editable draft is available, so readiness cannot be evaluated and publish remains unavailable.'
+                : 'Blocking issues below must be resolved before the current draft can be published.'}
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <MetaItem label="Blocking issues" value={String(validation.blockingErrors.length)} />
+          <MetaItem label="Failing sections" value={String(failingSections.length)} />
+          <MetaItem label="Questions" value={String(validation.counts.questionCount)} />
+          <MetaItem label="Unmapped options" value={String(validation.counts.unmappedOptionCount)} />
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-4">
+        {validation.sections.map((section) => (
+          <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-4" key={section.key}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-white">{section.label}</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.18em] text-white/34">
+                  {section.status === 'pass' ? 'Pass' : 'Blocking issues'}
+                </p>
+              </div>
+              <LabelPill
+                className={
+                  section.status === 'pass'
+                    ? 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]'
+                    : 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]'
+                }
+              >
+                {section.status}
+              </LabelPill>
+            </div>
+
+            {section.issues.length === 0 ? (
+              <p className="mt-3 text-sm leading-7 text-white/54">No blocking issues found in this section.</p>
+            ) : (
+              <div className="mt-3 space-y-2">
+                {section.issues.map((issue) => (
+                  <div
+                    className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-4 py-3 text-sm leading-6 text-white/74"
+                    key={`${section.key}-${issue.code}`}
+                  >
+                    {issue.message}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </SurfaceCard>
+  );
+}
+
 export function AdminAssessmentVersionGovernance({
   assessmentKey,
   versions,
   latestDraftVersion,
   publishedVersion,
+  draftValidation,
 }: {
   assessmentKey: string;
   versions: readonly AdminAssessmentDetailVersion[];
   latestDraftVersion: AdminAssessmentDetailVersion | null;
   publishedVersion: AdminAssessmentDetailVersion | null;
+  draftValidation: AdminAssessmentValidationResult;
 }) {
   const hasDraft = latestDraftVersion !== null;
   const hasPublished = publishedVersion !== null;
@@ -288,6 +400,7 @@ export function AdminAssessmentVersionGovernance({
               <PublishDraftForm
                 assessmentKey={assessmentKey}
                 draftVersionId={latestDraftVersion.assessmentVersionId}
+                disabled={!draftValidation.isPublishReady}
               />
             ) : null}
 
@@ -295,6 +408,8 @@ export function AdminAssessmentVersionGovernance({
           </div>
         </div>
       </SurfaceCard>
+
+      <ValidationSummary validation={draftValidation} />
 
       <SurfaceCard className="p-5 lg:p-6">
         <div className="space-y-3">

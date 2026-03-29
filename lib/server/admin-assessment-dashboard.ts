@@ -1,5 +1,6 @@
 ﻿import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
+import { validateLatestDraftAssessmentVersion } from '@/lib/server/admin-assessment-validation';
 
 export type AdminAssessmentVersionStatus = 'draft' | 'published' | 'archived';
 export type AdminAssessmentOverallStatus =
@@ -21,6 +22,8 @@ export type AdminAssessmentVersionSummary = {
   updatedAt: string;
 };
 
+export type AdminAssessmentDraftReadiness = 'ready' | 'not_ready' | 'no_draft';
+
 export type AdminAssessmentDashboardItem = {
   assessmentId: string;
   assessmentKey: string;
@@ -33,6 +36,7 @@ export type AdminAssessmentDashboardItem = {
   versionCount: number;
   publishedVersion: AdminAssessmentVersionSummary | null;
   latestDraftVersion: AdminAssessmentVersionSummary | null;
+  latestDraftReadiness: AdminAssessmentDraftReadiness;
   latestUpdatedAt: string;
   actionHref: string;
   versions: readonly AdminAssessmentVersionSummary[];
@@ -162,6 +166,7 @@ function buildActionHref(assessmentKey: string): string {
 
 function mapAssessmentDashboardItem(
   rows: readonly AdminAssessmentCatalogRow[],
+  latestDraftReadiness: AdminAssessmentDraftReadiness,
 ): AdminAssessmentDashboardItem {
   const firstRow = rows[0];
   if (!firstRow) {
@@ -231,6 +236,7 @@ function mapAssessmentDashboardItem(
     versionCount: versions.length,
     publishedVersion,
     latestDraftVersion,
+    latestDraftReadiness,
     latestUpdatedAt,
     actionHref: buildActionHref(firstRow.assessment_key),
     versions: Object.freeze(versions),
@@ -306,8 +312,35 @@ export async function buildAdminAssessmentDashboardViewModel(
     rowsByAssessmentId.set(row.assessment_id, [row]);
   }
 
+  const groupedRows = Array.from(rowsByAssessmentId.values());
+  const readinessByAssessmentKey = new Map<string, AdminAssessmentDraftReadiness>();
+
+  await Promise.all(
+    groupedRows.map(async (group) => {
+      const assessmentKey = group[0]?.assessment_key;
+      if (!assessmentKey) {
+        return;
+      }
+
+      const validation = await validateLatestDraftAssessmentVersion(db, assessmentKey);
+      readinessByAssessmentKey.set(
+        assessmentKey,
+        validation.status === 'ready'
+          ? 'ready'
+          : validation.status === 'no_draft'
+            ? 'no_draft'
+            : 'not_ready',
+      );
+    }),
+  );
+
   const assessments = Object.freeze(
-    Array.from(rowsByAssessmentId.values()).map((group) => mapAssessmentDashboardItem(group)),
+    groupedRows.map((group) =>
+      mapAssessmentDashboardItem(
+        group,
+        readinessByAssessmentKey.get(group[0]?.assessment_key ?? '') ?? 'no_draft',
+      ),
+    ),
   );
 
   return {

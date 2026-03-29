@@ -1,5 +1,9 @@
 ﻿import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
+import {
+  validateLatestDraftAssessmentVersion,
+  type AdminAssessmentValidationResult,
+} from '@/lib/server/admin-assessment-validation';
 
 import type { AdminAssessmentVersionStatus } from '@/lib/server/admin-assessment-dashboard';
 
@@ -116,6 +120,7 @@ export type AdminAssessmentDetailViewModel = {
   authoredQuestions: readonly AdminAssessmentDetailQuestion[];
   availableSignals: readonly AdminAssessmentDetailAvailableSignal[];
   weightingSummary: AdminAssessmentDetailWeightingSummary;
+  draftValidation: AdminAssessmentValidationResult;
 };
 
 type AdminAssessmentDetailRow = {
@@ -633,18 +638,22 @@ export async function getAdminAssessmentDetailByKey(
     });
   const publishedVersion = versions.find((version) => version.status === 'published') ?? null;
   const latestDraftVersion = versions.find((version) => version.status === 'draft') ?? null;
-  const authoredDomains = latestDraftVersion
-    ? await loadAuthoringDomainsForVersion(db, latestDraftVersion.assessmentVersionId)
-    : Object.freeze([]);
-  const questionDomains = latestDraftVersion
-    ? await loadQuestionDomainsForVersion(db, latestDraftVersion.assessmentVersionId)
-    : Object.freeze([]);
-  const authoredQuestions = latestDraftVersion
-    ? await loadQuestionsForVersion(db, latestDraftVersion.assessmentVersionId)
-    : Object.freeze([]);
-  const availableSignals = latestDraftVersion
-    ? await loadAvailableSignalsForVersion(db, latestDraftVersion.assessmentVersionId)
-    : Object.freeze([]);
+  const [authoredDomains, questionDomains, authoredQuestions, availableSignals, draftValidation] =
+    latestDraftVersion
+      ? await Promise.all([
+          loadAuthoringDomainsForVersion(db, latestDraftVersion.assessmentVersionId),
+          loadQuestionDomainsForVersion(db, latestDraftVersion.assessmentVersionId),
+          loadQuestionsForVersion(db, latestDraftVersion.assessmentVersionId),
+          loadAvailableSignalsForVersion(db, latestDraftVersion.assessmentVersionId),
+          validateLatestDraftAssessmentVersion(db, assessmentKey),
+        ])
+      : await Promise.all([
+          Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailDomain[]),
+          Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailQuestionDomain[]),
+          Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailQuestion[]),
+          Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailAvailableSignal[]),
+          validateLatestDraftAssessmentVersion(db, assessmentKey),
+        ]);
   const allOptions = authoredQuestions.flatMap((question) => question.options);
   const weightedOptions = allOptions.filter((option) => option.signalWeights.length > 0).length;
   const totalMappings = allOptions.reduce((sum, option) => sum + option.signalWeights.length, 0);
@@ -670,6 +679,7 @@ export async function getAdminAssessmentDetailByKey(
       unmappedOptions: allOptions.length - weightedOptions,
       totalMappings,
     },
+    draftValidation,
   };
 }
 

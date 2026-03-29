@@ -14,6 +14,7 @@ import {
 import type {
   AdminAssessmentDashboardItem,
   AdminAssessmentDashboardSummary,
+  AdminAssessmentDraftReadiness,
   AdminAssessmentOverallStatus,
   AdminAssessmentVersionSummary,
 } from '@/lib/server/admin-assessment-dashboard';
@@ -53,6 +54,28 @@ function getVersionPillClass(status: AdminAssessmentVersionSummary['status']): s
       return 'border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]';
     case 'archived':
       return 'border-white/10 bg-white/[0.045] text-white/62';
+  }
+}
+
+function getDraftReadinessPillClass(status: AdminAssessmentDraftReadiness): string {
+  switch (status) {
+    case 'ready':
+      return 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]';
+    case 'not_ready':
+      return 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]';
+    case 'no_draft':
+      return 'border-white/10 bg-white/[0.045] text-white/68';
+  }
+}
+
+function formatDraftReadiness(status: AdminAssessmentDraftReadiness): string {
+  switch (status) {
+    case 'ready':
+      return 'Draft ready';
+    case 'not_ready':
+      return 'Draft not ready';
+    case 'no_draft':
+      return 'No draft';
   }
 }
 
@@ -168,6 +191,9 @@ function AssessmentCard({
               <LabelPill className={getStatusPillClass(assessment.overallStatus)}>
                 {assessment.overallStatusLabel}
               </LabelPill>
+              <LabelPill className={getDraftReadinessPillClass(assessment.latestDraftReadiness)}>
+                {formatDraftReadiness(assessment.latestDraftReadiness)}
+              </LabelPill>
               {!assessment.isActive ? (
                 <LabelPill className="border-white/10 bg-white/[0.04] text-white/58">
                   Inactive
@@ -188,13 +214,14 @@ function AssessmentCard({
           <ButtonLink href={assessment.actionHref}>Manage</ButtonLink>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-4">
+        <div className="grid gap-3 lg:grid-cols-5">
           <MetaItem label="Versions" value={String(assessment.versionCount)} />
           <MetaItem
             label="Published version"
             value={assessment.publishedVersion?.versionTag ?? 'None'}
           />
           <MetaItem label="Latest draft" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
+          <MetaItem label="Draft readiness" value={formatDraftReadiness(assessment.latestDraftReadiness)} />
           <MetaItem label="Last updated" value={formatDate(assessment.latestUpdatedAt)} />
         </div>
 
