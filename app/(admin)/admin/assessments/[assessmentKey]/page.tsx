@@ -1,5 +1,6 @@
 ﻿import { notFound } from 'next/navigation';
 
+import { AdminAssessmentDeleteGovernance } from '@/components/admin/admin-assessment-delete-governance';
 import { AdminAssessmentVersionGovernance } from '@/components/admin/admin-assessment-version-governance';
 import { AdminDomainSignalAuthoring } from '@/components/admin/admin-domain-signal-authoring';
 import { AdminQuestionOptionAuthoring } from '@/components/admin/admin-question-option-authoring';
@@ -106,6 +107,8 @@ export default async function AdminAssessmentDetailPlaceholderPage({
         publishedVersion={assessment.publishedVersion}
         draftValidation={assessment.draftValidation}
       />
+
+      <AdminAssessmentDeleteGovernance assessmentKey={assessment.assessmentKey} />
 
       {assessment.latestDraftVersion ? (
         <>
