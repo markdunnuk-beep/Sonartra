@@ -33,14 +33,16 @@ type Queryable = {
 const INITIAL_VERSION_TAG = '1.0.0';
 const KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+export const emptyAdminAssessmentCreateFormValues: AdminAssessmentCreateFormValues = {
+  title: '',
+  assessmentKey: '',
+  description: '',
+};
+
 export const initialAdminAssessmentCreateFormState: AdminAssessmentCreateFormState = {
   formError: null,
   fieldErrors: {},
-  values: {
-    title: '',
-    assessmentKey: '',
-    description: '',
-  },
+  values: emptyAdminAssessmentCreateFormValues,
 };
 
 function normalizeFormValue(value: FormDataEntryValue | null): string {

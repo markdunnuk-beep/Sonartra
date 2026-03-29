@@ -11,7 +11,9 @@ import {
 } from '@/components/shared/user-app-ui';
 import {
   createAssessmentAction,
+  emptyAdminAssessmentCreateFormValues,
   initialAdminAssessmentCreateFormState,
+  type AdminAssessmentCreateFormState,
 } from '@/lib/server/admin-assessment-create';
 
 function FieldShell({
@@ -112,6 +114,17 @@ export function AdminAssessmentCreateForm() {
     createAssessmentAction,
     initialAdminAssessmentCreateFormState,
   );
+  const safeState: AdminAssessmentCreateFormState = {
+    formError: state?.formError ?? null,
+    fieldErrors: state?.fieldErrors ?? {},
+    values: {
+      title: state?.values?.title ?? emptyAdminAssessmentCreateFormValues.title,
+      assessmentKey:
+        state?.values?.assessmentKey ?? emptyAdminAssessmentCreateFormValues.assessmentKey,
+      description:
+        state?.values?.description ?? emptyAdminAssessmentCreateFormValues.description,
+    },
+  };
 
   return (
     <div className="space-y-6">
@@ -132,26 +145,26 @@ export function AdminAssessmentCreateForm() {
         <form action={formAction} className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             <FieldShell
-              error={state.fieldErrors.title}
+              error={safeState.fieldErrors.title}
               hint="Use the human-readable assessment name that appears in admin catalogue views."
               label="Assessment title"
             >
               <TextInput
-                defaultValue={state.values.title}
-                error={state.fieldErrors.title}
+                defaultValue={safeState.values.title}
+                error={safeState.fieldErrors.title}
                 name="title"
                 placeholder="Leadership Signals"
               />
             </FieldShell>
 
             <FieldShell
-              error={state.fieldErrors.assessmentKey}
+              error={safeState.fieldErrors.assessmentKey}
               hint="This becomes the stable key in routes and persisted records. Use lowercase letters, numbers, and hyphens only."
               label="Assessment key"
             >
               <TextInput
-                defaultValue={state.values.assessmentKey}
-                error={state.fieldErrors.assessmentKey}
+                defaultValue={safeState.values.assessmentKey}
+                error={safeState.fieldErrors.assessmentKey}
                 name="assessmentKey"
                 placeholder="leadership-signals"
               />
@@ -159,13 +172,13 @@ export function AdminAssessmentCreateForm() {
           </div>
 
           <FieldShell
-            error={state.fieldErrors.description}
+            error={safeState.fieldErrors.description}
             hint="Optional. Add a concise summary so the new assessment is legible in the admin catalogue."
             label="Description"
           >
             <TextArea
-              defaultValue={state.values.description}
-              error={state.fieldErrors.description}
+              defaultValue={safeState.values.description}
+              error={safeState.fieldErrors.description}
               name="description"
               placeholder="A focused individual assessment for leadership behaviour and decision patterns."
             />
@@ -179,9 +192,9 @@ export function AdminAssessmentCreateForm() {
             </p>
           </div>
 
-          {state.formError ? (
+          {safeState.formError ? (
             <div className="rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
-              {state.formError}
+              {safeState.formError}
             </div>
           ) : null}
 
