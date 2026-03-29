@@ -39,6 +39,8 @@ export type AdminAssessmentDetailOption = {
   orderIndex: number;
   createdAt: string;
   updatedAt: string;
+  weightingStatus: 'weighted' | 'unmapped';
+  signalWeights: readonly AdminAssessmentDetailSignalWeight[];
 };
 
 export type AdminAssessmentDetailQuestion = {
@@ -53,6 +55,38 @@ export type AdminAssessmentDetailQuestion = {
   createdAt: string;
   updatedAt: string;
   options: readonly AdminAssessmentDetailOption[];
+};
+
+export type AdminAssessmentDetailSignalWeight = {
+  optionSignalWeightId: string;
+  signalId: string;
+  signalKey: string;
+  signalLabel: string;
+  signalDomainId: string;
+  signalDomainKey: string;
+  signalDomainLabel: string;
+  weight: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminAssessmentDetailAvailableSignal = {
+  signalId: string;
+  signalKey: string;
+  signalLabel: string;
+  signalDescription: string | null;
+  signalOrderIndex: number;
+  domainId: string;
+  domainKey: string;
+  domainLabel: string;
+  domainOrderIndex: number;
+};
+
+export type AdminAssessmentDetailWeightingSummary = {
+  totalOptions: number;
+  weightedOptions: number;
+  unmappedOptions: number;
+  totalMappings: number;
 };
 
 export type AdminAssessmentDetailVersion = {
@@ -78,6 +112,8 @@ export type AdminAssessmentDetailViewModel = {
   authoredDomains: readonly AdminAssessmentDetailDomain[];
   questionDomains: readonly AdminAssessmentDetailQuestionDomain[];
   authoredQuestions: readonly AdminAssessmentDetailQuestion[];
+  availableSignals: readonly AdminAssessmentDetailAvailableSignal[];
+  weightingSummary: AdminAssessmentDetailWeightingSummary;
 };
 
 type AdminAssessmentDetailRow = {
@@ -144,6 +180,32 @@ type AdminAssessmentQuestionRow = {
   option_order_index: number | null;
   option_created_at: string | null;
   option_updated_at: string | null;
+};
+
+type AdminAssessmentAvailableSignalRow = {
+  signal_id: string;
+  signal_key: string;
+  signal_label: string;
+  signal_description: string | null;
+  signal_order_index: number;
+  domain_id: string;
+  domain_key: string;
+  domain_label: string;
+  domain_order_index: number;
+};
+
+type AdminAssessmentSignalWeightRow = {
+  option_id: string;
+  option_signal_weight_id: string;
+  signal_id: string;
+  signal_key: string;
+  signal_label: string;
+  signal_domain_id: string;
+  signal_domain_key: string;
+  signal_domain_label: string;
+  weight: string;
+  weight_created_at: string;
+  weight_updated_at: string;
 };
 
 function normalizeVersionStatus(
@@ -303,34 +365,86 @@ async function loadQuestionsForVersion(
   db: Queryable,
   assessmentVersionId: string,
 ): Promise<readonly AdminAssessmentDetailQuestion[]> {
-  const result = await db.query<AdminAssessmentQuestionRow>(
-    `
-    SELECT
-      q.id AS question_id,
-      q.question_key,
-      q.prompt,
-      q.order_index AS question_order_index,
-      q.created_at AS question_created_at,
-      q.updated_at AS question_updated_at,
-      d.id AS domain_id,
-      d.domain_key,
-      d.label AS domain_label,
-      d.domain_type,
-      o.id AS option_id,
-      o.option_key,
-      o.option_label,
-      o.option_text,
-      o.order_index AS option_order_index,
-      o.created_at AS option_created_at,
-      o.updated_at AS option_updated_at
-    FROM questions q
-    INNER JOIN domains d ON d.id = q.domain_id
-    LEFT JOIN options o ON o.question_id = q.id
-    WHERE q.assessment_version_id = $1
-    ORDER BY q.order_index ASC, q.id ASC, o.order_index ASC NULLS LAST, o.id ASC NULLS LAST
-    `,
-    [assessmentVersionId],
-  );
+  const [result, weightsResult] = await Promise.all([
+    db.query<AdminAssessmentQuestionRow>(
+      `
+      SELECT
+        q.id AS question_id,
+        q.question_key,
+        q.prompt,
+        q.order_index AS question_order_index,
+        q.created_at AS question_created_at,
+        q.updated_at AS question_updated_at,
+        d.id AS domain_id,
+        d.domain_key,
+        d.label AS domain_label,
+        d.domain_type,
+        o.id AS option_id,
+        o.option_key,
+        o.option_label,
+        o.option_text,
+        o.order_index AS option_order_index,
+        o.created_at AS option_created_at,
+        o.updated_at AS option_updated_at
+      FROM questions q
+      INNER JOIN domains d ON d.id = q.domain_id
+      LEFT JOIN options o ON o.question_id = q.id
+      WHERE q.assessment_version_id = $1
+      ORDER BY q.order_index ASC, q.id ASC, o.order_index ASC NULLS LAST, o.id ASC NULLS LAST
+      `,
+      [assessmentVersionId],
+    ),
+    db.query<AdminAssessmentSignalWeightRow>(
+      `
+      SELECT
+        osw.option_id,
+        osw.id AS option_signal_weight_id,
+        s.id AS signal_id,
+        s.signal_key,
+        s.label AS signal_label,
+        d.id AS signal_domain_id,
+        d.domain_key AS signal_domain_key,
+        d.label AS signal_domain_label,
+        osw.weight::text AS weight,
+        osw.created_at AS weight_created_at,
+        osw.updated_at AS weight_updated_at
+      FROM option_signal_weights osw
+      INNER JOIN options o ON o.id = osw.option_id
+      INNER JOIN questions q ON q.id = o.question_id
+      INNER JOIN signals s ON s.id = osw.signal_id
+      INNER JOIN domains d ON d.id = s.domain_id
+      WHERE q.assessment_version_id = $1
+        AND s.assessment_version_id = $1
+      ORDER BY osw.option_id ASC, d.order_index ASC, s.order_index ASC, s.id ASC
+      `,
+      [assessmentVersionId],
+    ),
+  ]);
+
+  const weightsByOptionId = new Map<string, AdminAssessmentDetailSignalWeight[]>();
+
+  for (const row of weightsResult.rows) {
+    const weight: AdminAssessmentDetailSignalWeight = {
+      optionSignalWeightId: row.option_signal_weight_id,
+      signalId: row.signal_id,
+      signalKey: row.signal_key,
+      signalLabel: row.signal_label,
+      signalDomainId: row.signal_domain_id,
+      signalDomainKey: row.signal_domain_key,
+      signalDomainLabel: row.signal_domain_label,
+      weight: row.weight,
+      createdAt: row.weight_created_at,
+      updatedAt: row.weight_updated_at,
+    };
+    const existing = weightsByOptionId.get(row.option_id);
+
+    if (existing) {
+      existing.push(weight);
+      continue;
+    }
+
+    weightsByOptionId.set(row.option_id, [weight]);
+  }
 
   const questions = new Map<string, {
     question: Omit<AdminAssessmentDetailQuestion, 'options'>;
@@ -356,6 +470,7 @@ async function loadQuestionsForVersion(
     };
 
     if (row.option_id && row.option_key && row.option_text && row.option_order_index !== null) {
+      const signalWeights = Object.freeze(weightsByOptionId.get(row.option_id) ?? []);
       questionEntry.options.push({
         optionId: row.option_id,
         optionKey: row.option_key,
@@ -364,6 +479,8 @@ async function loadQuestionsForVersion(
         orderIndex: row.option_order_index,
         createdAt: row.option_created_at ?? '',
         updatedAt: row.option_updated_at ?? '',
+        weightingStatus: signalWeights.length > 0 ? 'weighted' : 'unmapped',
+        signalWeights,
       });
     }
 
@@ -378,6 +495,47 @@ async function loadQuestionsForVersion(
           (left, right) => left.orderIndex - right.orderIndex || left.optionId.localeCompare(right.optionId),
         ),
       ),
+    })),
+  );
+}
+
+async function loadAvailableSignalsForVersion(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<readonly AdminAssessmentDetailAvailableSignal[]> {
+  const result = await db.query<AdminAssessmentAvailableSignalRow>(
+    `
+    SELECT
+      s.id AS signal_id,
+      s.signal_key,
+      s.label AS signal_label,
+      s.description AS signal_description,
+      s.order_index AS signal_order_index,
+      d.id AS domain_id,
+      d.domain_key,
+      d.label AS domain_label,
+      d.order_index AS domain_order_index
+    FROM signals s
+    INNER JOIN domains d
+      ON d.id = s.domain_id
+      AND d.assessment_version_id = s.assessment_version_id
+    WHERE s.assessment_version_id = $1
+    ORDER BY d.order_index ASC, s.order_index ASC, s.id ASC
+    `,
+    [assessmentVersionId],
+  );
+
+  return Object.freeze(
+    result.rows.map((row) => ({
+      signalId: row.signal_id,
+      signalKey: row.signal_key,
+      signalLabel: row.signal_label,
+      signalDescription: row.signal_description,
+      signalOrderIndex: row.signal_order_index,
+      domainId: row.domain_id,
+      domainKey: row.domain_key,
+      domainLabel: row.domain_label,
+      domainOrderIndex: row.domain_order_index,
     })),
   );
 }
@@ -481,6 +639,12 @@ export async function getAdminAssessmentDetailByKey(
   const authoredQuestions = latestDraftVersion
     ? await loadQuestionsForVersion(db, latestDraftVersion.assessmentVersionId)
     : Object.freeze([]);
+  const availableSignals = latestDraftVersion
+    ? await loadAvailableSignalsForVersion(db, latestDraftVersion.assessmentVersionId)
+    : Object.freeze([]);
+  const allOptions = authoredQuestions.flatMap((question) => question.options);
+  const weightedOptions = allOptions.filter((option) => option.signalWeights.length > 0).length;
+  const totalMappings = allOptions.reduce((sum, option) => sum + option.signalWeights.length, 0);
 
   return {
     assessmentId: firstRow.assessment_id,
@@ -495,5 +659,12 @@ export async function getAdminAssessmentDetailByKey(
     authoredDomains,
     questionDomains,
     authoredQuestions,
+    availableSignals,
+    weightingSummary: {
+      totalOptions: allOptions.length,
+      weightedOptions,
+      unmappedOptions: allOptions.length - weightedOptions,
+      totalMappings,
+    },
   };
 }

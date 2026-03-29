@@ -66,6 +66,30 @@ type DetailFixture = {
     option_created_at: string | null;
     option_updated_at: string | null;
   }>;
+  optionSignalWeights: Array<{
+    option_id: string;
+    option_signal_weight_id: string;
+    signal_id: string;
+    signal_key: string;
+    signal_label: string;
+    signal_domain_id: string;
+    signal_domain_key: string;
+    signal_domain_label: string;
+    weight: string;
+    weight_created_at: string;
+    weight_updated_at: string;
+  }>;
+  availableSignals: Array<{
+    signal_id: string;
+    signal_key: string;
+    signal_label: string;
+    signal_description: string | null;
+    signal_order_index: number;
+    domain_id: string;
+    domain_key: string;
+    domain_label: string;
+    domain_order_index: number;
+  }>;
 };
 
 function createFakeDb(fixture: DetailFixture): Queryable {
@@ -79,7 +103,7 @@ function createFakeDb(fixture: DetailFixture): Queryable {
         return { rows: fixture.signalGroupDomains as T[] };
       }
 
-      if (text.includes('FROM signals') && text.includes('WHERE assessment_version_id = $1')) {
+      if (text.includes('FROM signals') && text.includes('WHERE assessment_version_id = $1') && text.includes('signal_created_at')) {
         return { rows: fixture.signals as T[] };
       }
 
@@ -91,12 +115,20 @@ function createFakeDb(fixture: DetailFixture): Queryable {
         return { rows: fixture.questions as T[] };
       }
 
+      if (text.includes('FROM option_signal_weights osw')) {
+        return { rows: fixture.optionSignalWeights as T[] };
+      }
+
+      if (text.includes('FROM signals s') && text.includes('INNER JOIN domains d')) {
+        return { rows: fixture.availableSignals as T[] };
+      }
+
       return { rows: [] as T[] };
     },
   };
 }
 
-test('loads latest draft domains, question domains, and nested options for admin assessment detail', async () => {
+test('loads latest draft weighting data and coverage for admin assessment detail', async () => {
   const detail = await getAdminAssessmentDetailByKey(
     createFakeDb({
       baseRows: [
@@ -152,6 +184,16 @@ test('loads latest draft domains, question domains, and nested options for admin
           signal_label: 'Directive',
           signal_description: null,
           signal_order_index: 0,
+          signal_created_at: '2026-01-04T00:00:00.000Z',
+          signal_updated_at: '2026-01-05T00:00:00.000Z',
+        },
+        {
+          signal_id: 'signal-2',
+          domain_id: 'domain-signal-1',
+          signal_key: 'supportive',
+          signal_label: 'Supportive',
+          signal_description: null,
+          signal_order_index: 1,
           signal_created_at: '2026-01-04T00:00:00.000Z',
           signal_updated_at: '2026-01-05T00:00:00.000Z',
         },
@@ -211,24 +253,44 @@ test('loads latest draft domains, question domains, and nested options for admin
           option_created_at: '2026-01-04T00:00:00.000Z',
           option_updated_at: '2026-01-05T00:00:00.000Z',
         },
+      ],
+      optionSignalWeights: [
         {
-          question_id: 'question-2',
-          question_key: 'planning-rigour',
-          prompt: 'I prefer structured planning before action.',
-          question_order_index: 1,
-          question_created_at: '2026-01-04T00:00:00.000Z',
-          question_updated_at: '2026-01-05T00:00:00.000Z',
+          option_id: 'option-1',
+          option_signal_weight_id: 'weight-1',
+          signal_id: 'signal-1',
+          signal_key: 'directive',
+          signal_label: 'Directive',
+          signal_domain_id: 'domain-signal-1',
+          signal_domain_key: 'leadership',
+          signal_domain_label: 'Leadership',
+          weight: '1.2500',
+          weight_created_at: '2026-01-05T00:00:00.000Z',
+          weight_updated_at: '2026-01-05T00:00:00.000Z',
+        },
+      ],
+      availableSignals: [
+        {
+          signal_id: 'signal-1',
+          signal_key: 'directive',
+          signal_label: 'Directive',
+          signal_description: null,
+          signal_order_index: 0,
           domain_id: 'domain-signal-1',
           domain_key: 'leadership',
           domain_label: 'Leadership',
-          domain_type: 'SIGNAL_GROUP',
-          option_id: null,
-          option_key: null,
-          option_label: null,
-          option_text: null,
-          option_order_index: null,
-          option_created_at: null,
-          option_updated_at: null,
+          domain_order_index: 0,
+        },
+        {
+          signal_id: 'signal-2',
+          signal_key: 'supportive',
+          signal_label: 'Supportive',
+          signal_description: null,
+          signal_order_index: 1,
+          domain_id: 'domain-signal-1',
+          domain_key: 'leadership',
+          domain_label: 'Leadership',
+          domain_order_index: 0,
         },
       ],
     }),
@@ -238,11 +300,17 @@ test('loads latest draft domains, question domains, and nested options for admin
   assert.ok(detail);
   assert.equal(detail?.latestDraftVersion?.versionTag, '1.1.0');
   assert.equal(detail?.authoredDomains.length, 1);
-  assert.equal(detail?.authoredDomains[0]?.signals.length, 1);
   assert.equal(detail?.questionDomains.length, 2);
-  assert.equal(detail?.questionDomains[0]?.domainType, 'QUESTION_SECTION');
-  assert.equal(detail?.authoredQuestions.length, 2);
+  assert.equal(detail?.authoredQuestions.length, 1);
   assert.equal(detail?.authoredQuestions[0]?.options.length, 2);
-  assert.equal(detail?.authoredQuestions[0]?.options[0]?.optionKey, 'agree');
-  assert.equal(detail?.authoredQuestions[1]?.domainType, 'SIGNAL_GROUP');
+  assert.equal(detail?.authoredQuestions[0]?.options[0]?.weightingStatus, 'weighted');
+  assert.equal(detail?.authoredQuestions[0]?.options[0]?.signalWeights[0]?.weight, '1.2500');
+  assert.equal(detail?.authoredQuestions[0]?.options[1]?.weightingStatus, 'unmapped');
+  assert.equal(detail?.availableSignals.length, 2);
+  assert.deepEqual(detail?.weightingSummary, {
+    totalOptions: 2,
+    weightedOptions: 1,
+    unmappedOptions: 1,
+    totalMappings: 1,
+  });
 });

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { AdminDomainSignalAuthoring } from '@/components/admin/admin-domain-signal-authoring';
 import { AdminQuestionOptionAuthoring } from '@/components/admin/admin-question-option-authoring';
+import { AdminWeightingAuthoring } from '@/components/admin/admin-weighting-authoring';
 import {
   EmptyState,
   LabelPill,
@@ -38,7 +39,7 @@ export default async function AdminAssessmentDetailPlaceholderPage({
       <PageHeader
         eyebrow="Admin Workspace"
         title={assessment.title}
-        description="The base assessment object is now in place. Draft authoring on this page can add domains, signals, questions, and options directly against the latest draft version."
+        description="The base assessment object is now in place. Draft authoring on this page can add domains, signals, questions, options, and explicit option-to-signal weights directly against the latest draft version."
       />
 
       <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
@@ -56,7 +57,7 @@ export default async function AdminAssessmentDetailPlaceholderPage({
           </h2>
           <p className="max-w-2xl text-sm leading-7 text-white/68">
             {assessment.description ??
-              'This assessment is ready for structural authoring. Domains, signals, questions, options, and later weighting can all attach to the latest draft version surfaced here.'}
+              'This assessment is ready for structural authoring. Domains, signals, questions, options, and weighting all attach to the latest draft version surfaced here.'}
           </p>
         </div>
       </SurfaceCard>
@@ -75,9 +76,8 @@ export default async function AdminAssessmentDetailPlaceholderPage({
             Structural records are authored directly against the latest draft version
           </h2>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
-            This workspace now supports domain, signal, question, and option authoring on version{' '}
-            {assessment.latestDraftVersion?.versionTag ?? '1.0.0'}. Weight mappings and publish
-            controls remain separate later tasks.
+            This workspace now supports domain, signal, question, option, and weighting authoring on version{' '}
+            {assessment.latestDraftVersion?.versionTag ?? '1.0.0'}. Publish controls and final validation remain separate later tasks.
           </p>
         </div>
       </SurfaceCard>
@@ -96,11 +96,19 @@ export default async function AdminAssessmentDetailPlaceholderPage({
             domains={assessment.questionDomains}
             questions={assessment.authoredQuestions}
           />
+
+          <AdminWeightingAuthoring
+            assessmentKey={assessment.assessmentKey}
+            assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
+            availableSignals={assessment.availableSignals}
+            questions={assessment.authoredQuestions}
+            weightingSummary={assessment.weightingSummary}
+          />
         </>
       ) : (
         <EmptyState
           title="No draft version available"
-          description="Draft authoring is only available when a draft version exists for this assessment. Questions and options will not attach to a published version."
+          description="Draft authoring is only available when a draft version exists for this assessment. Questions, options, and weighting will not attach to a published version."
         />
       )}
     </PageFrame>
