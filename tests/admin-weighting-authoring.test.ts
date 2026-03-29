@@ -204,6 +204,40 @@ test('creates, updates, and deletes option signal weights inside the same draft 
   assert.equal(fake.state.weights[0]?.weight, '2.5000');
 });
 
+test('updates only the targeted option to signal mapping and leaves other questions untouched', async () => {
+  const fake = createFakeDb({
+    questions: [
+      { id: 'question-1', assessmentVersionId: 'version-1' },
+      { id: 'question-2', assessmentVersionId: 'version-1' },
+    ],
+    options: [
+      { id: 'option-1', questionId: 'question-1' },
+      { id: 'option-2', questionId: 'question-2' },
+    ],
+    signals: [{ id: 'signal-1', assessmentVersionId: 'version-1' }],
+    weights: [
+      { id: 'weight-1', optionId: 'option-1', signalId: 'signal-1', weight: '1.0000' },
+      { id: 'weight-2', optionId: 'option-2', signalId: 'signal-1', weight: '4.0000' },
+    ],
+  });
+
+  await updateOptionSignalWeightRecord({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    optionId: 'option-1',
+    optionSignalWeightId: 'weight-1',
+    values: {
+      signalId: 'signal-1',
+      weight: '3.7500',
+    },
+  });
+
+  assert.deepEqual(fake.state.weights, [
+    { id: 'weight-1', optionId: 'option-1', signalId: 'signal-1', weight: '3.7500' },
+    { id: 'weight-2', optionId: 'option-2', signalId: 'signal-1', weight: '4.0000' },
+  ]);
+});
+
 test('blocks duplicate mappings and cross-version signal leakage', async () => {
   const fake = createFakeDb({
     questions: [{ id: 'question-1', assessmentVersionId: 'version-1' }],
