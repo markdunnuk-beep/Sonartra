@@ -1,4 +1,5 @@
-import { EmptyState, PageFrame, PageHeader } from '@/components/shared/user-app-ui';
+import { AdminAssessmentCreateForm } from '@/components/admin/admin-assessment-create-form';
+import { PageFrame, PageHeader } from '@/components/shared/user-app-ui';
 
 export default function AdminAssessmentCreatePlaceholderPage() {
   return (
@@ -6,13 +7,10 @@ export default function AdminAssessmentCreatePlaceholderPage() {
       <PageHeader
         eyebrow="Admin Workspace"
         title="Create assessment"
-        description="This route is reserved for the assessment creation flow in Task 27. The catalogue CTA is wired here so the admin dashboard can expose the next step now."
+        description="Create a new assessment record and bootstrap its first draft version so later authoring tasks can attach structure without revisiting catalogue foundations."
       />
 
-      <EmptyState
-        title="Creation flow not implemented yet"
-        description="Task 27 can build the creation workflow on top of this protected admin route without changing the assessments dashboard."
-      />
+      <AdminAssessmentCreateForm />
     </PageFrame>
   );
 }
