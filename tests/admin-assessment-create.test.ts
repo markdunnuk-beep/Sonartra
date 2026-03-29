@@ -96,6 +96,21 @@ function buildFormData(values: {
   return formData;
 }
 
+async function withConsoleErrorCapture<T>(callback: () => Promise<T>): Promise<{ result: T; calls: unknown[][] }> {
+  const calls: unknown[][] = [];
+  const originalConsoleError = console.error;
+  console.error = (...args: unknown[]) => {
+    calls.push(args);
+  };
+
+  try {
+    const result = await callback();
+    return { result, calls };
+  } finally {
+    console.error = originalConsoleError;
+  }
+}
+
 test('creates a new assessment and initial draft version', async () => {
   const fake = createFakeDb();
 
@@ -224,6 +239,55 @@ test('create action returns structured validation state without touching the dat
   assert.equal(result.formError, null);
 });
 
+test('create action redirects after a successful create instead of returning a failure state', async () => {
+  const fake = createFakeDb();
+  const transactionLog: string[] = [];
+  const revalidatedPaths: string[] = [];
+
+  await assert.rejects(
+    () =>
+      createAssessmentActionWithDependencies(
+        initialAdminAssessmentCreateFormState,
+        buildFormData({
+          title: 'Leadership Signals',
+          assessmentKey: 'leadership-signals',
+          description: 'Leadership behaviour baseline.',
+        }),
+        {
+          getDbPool: () => ({
+            async connect() {
+              return {
+                async query<T>(text: string, params?: readonly unknown[]) {
+                  const normalized = text.replace(/\s+/g, ' ').trim();
+                  transactionLog.push(normalized);
+                  return fake.db.query<T>(text, params);
+                },
+                release() {},
+              };
+            },
+          }),
+          redirect(path: string): never {
+            throw new Error(`REDIRECT:${path}`);
+          },
+          revalidatePath(path: string): void {
+            revalidatedPaths.push(path);
+          },
+        },
+      ),
+    /REDIRECT:\/admin\/assessments\/leadership-signals/,
+  );
+
+  assert.equal(fake.state.assessments.length, 1);
+  assert.equal(fake.state.versions.length, 1);
+  assert.ok(transactionLog.some((entry) => entry === 'BEGIN'));
+  assert.ok(transactionLog.some((entry) => entry === 'COMMIT'));
+  assert.ok(!transactionLog.some((entry) => entry === 'ROLLBACK'));
+  assert.deepEqual(revalidatedPaths, [
+    '/admin/assessments',
+    '/admin/assessments/leadership-signals',
+  ]);
+});
+
 test('create action returns an inline field error for duplicate assessment keys', async () => {
   const fake = createFakeDb({
     assessments: [
@@ -270,4 +334,115 @@ test('create action returns an inline field error for duplicate assessment keys'
   assert.equal(result.formError, null);
   assert.ok(transactionLog.some((entry) => entry === 'BEGIN'));
   assert.ok(transactionLog.some((entry) => entry === 'ROLLBACK'));
+});
+
+test('create action returns an inline field error for database unique violations on assessment_key', async () => {
+  const { result, calls } = await withConsoleErrorCapture(() =>
+    createAssessmentActionWithDependencies(
+      initialAdminAssessmentCreateFormState,
+      buildFormData({
+        title: 'Leadership Signals',
+        assessmentKey: 'wplp80',
+        description: 'Duplicate key race.',
+      }),
+      {
+        getDbPool: () => ({
+          async connect() {
+            return {
+              async query<T>(text: string) {
+                if (text.trim() === 'BEGIN' || text.trim() === 'ROLLBACK') {
+                  return { rows: [] as T[] };
+                }
+
+                if (text.includes('FROM assessments') && text.includes('assessment_key = $1')) {
+                  return { rows: [] as T[] };
+                }
+
+                if (text.includes('INSERT INTO assessments')) {
+                  throw {
+                    code: '23505',
+                    constraint: 'assessments_assessment_key_key',
+                    detail: 'Key (assessment_key)=(wplp80) already exists.',
+                    table: 'assessments',
+                    column: 'assessment_key',
+                    message: 'duplicate key value violates unique constraint',
+                  };
+                }
+
+                return { rows: [] as T[] };
+              },
+              release() {},
+            };
+          },
+        }),
+        redirect(path: string): never {
+          throw new Error(`unexpected redirect to ${path}`);
+        },
+        revalidatePath(): void {},
+      },
+    ),
+  );
+
+  assert.equal(result.fieldErrors.assessmentKey, 'That assessment key is already in use.');
+  assert.equal(result.formError, null);
+  assert.equal(calls.length, 0);
+});
+
+test('create action returns a targeted form error for assessment version constraint failures', async () => {
+  const { result, calls } = await withConsoleErrorCapture(() =>
+    createAssessmentActionWithDependencies(
+      initialAdminAssessmentCreateFormState,
+      buildFormData({
+        title: 'Leadership Signals',
+        assessmentKey: 'leadership-signals',
+        description: 'Constraint mismatch.',
+      }),
+      {
+        getDbPool: () => ({
+          async connect() {
+            return {
+              async query<T>(text: string, params?: readonly unknown[]) {
+                if (text.trim() === 'BEGIN' || text.trim() === 'ROLLBACK') {
+                  return { rows: [] as T[] };
+                }
+
+                if (text.includes('FROM assessments') && text.includes('assessment_key = $1')) {
+                  return { rows: [] as T[] };
+                }
+
+                if (text.includes('INSERT INTO assessments')) {
+                  return {
+                    rows: ([{ id: 'assessment-1', assessment_key: params?.[0] as string }] as unknown) as T[],
+                  };
+                }
+
+                if (text.includes('INSERT INTO assessment_versions')) {
+                  throw {
+                    code: '23514',
+                    constraint: 'assessment_versions_lifecycle_status_check',
+                    table: 'assessment_versions',
+                    message: 'new row for relation "assessment_versions" violates check constraint',
+                  };
+                }
+
+                return { rows: [] as T[] };
+              },
+              release() {},
+            };
+          },
+        }),
+        redirect(path: string): never {
+          throw new Error(`unexpected redirect to ${path}`);
+        },
+        revalidatePath(): void {},
+      },
+    ),
+  );
+
+  assert.equal(
+    result.formError,
+    'The initial draft version could not be created because the database rejected the version lifecycle values.',
+  );
+  assert.deepEqual(result.fieldErrors, {});
+  assert.equal(calls.length, 1);
 });
