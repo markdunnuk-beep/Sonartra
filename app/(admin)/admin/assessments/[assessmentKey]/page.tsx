@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
-import { LabelPill, MetaItem, PageFrame, PageHeader, SurfaceCard } from '@/components/shared/user-app-ui';
+import { AdminDomainSignalAuthoring } from '@/components/admin/admin-domain-signal-authoring';
+import { EmptyState, LabelPill, MetaItem, PageFrame, PageHeader, SurfaceCard } from '@/components/shared/user-app-ui';
 import { getDbPool } from '@/lib/server/db';
 import { getAdminAssessmentDetailByKey } from '@/lib/server/admin-assessment-detail';
 
@@ -73,6 +74,19 @@ export default async function AdminAssessmentDetailPlaceholderPage({
           </p>
         </div>
       </SurfaceCard>
+
+      {assessment.latestDraftVersion ? (
+        <AdminDomainSignalAuthoring
+          assessmentKey={assessment.assessmentKey}
+          assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
+          domains={assessment.authoredDomains}
+        />
+      ) : (
+        <EmptyState
+          title="No draft version available"
+          description="Domain and signal authoring is only available when a draft version exists for this assessment."
+        />
+      )}
     </PageFrame>
   );
 }
