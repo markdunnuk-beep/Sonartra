@@ -23,6 +23,34 @@ type ActionContext = {
   signalId?: string;
 };
 
+export type InlineDomainLabelUpdateResult =
+  | {
+      ok: true;
+      record: {
+        domainId: string;
+        label: string;
+        domainKey: string;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+export type InlineSignalLabelUpdateResult =
+  | {
+      ok: true;
+      record: {
+        signalId: string;
+        label: string;
+        signalKey: string;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
 function normalizeFormValue(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -33,6 +61,10 @@ function normalizeKey(value: string): string {
 
 function authoringPath(assessmentKey: string): string {
   return `/admin/assessments/${assessmentKey}`;
+}
+
+function normalizeInlineText(value: string): string {
+  return value.trim();
 }
 
 async function getNextDomainOrderIndex(
@@ -261,6 +293,48 @@ export async function updateDomainRecord(params: {
   );
 }
 
+export async function updateDomainLabel(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  domainId: string;
+  label: string;
+}): Promise<{ domainId: string; label: string; domainKey: string }> {
+  const label = normalizeInlineText(params.label);
+
+  if (!params.assessmentVersionId || !params.domainId) {
+    throw new Error('DOMAIN_NOT_FOUND');
+  }
+
+  if (!label) {
+    throw new Error('DOMAIN_LABEL_REQUIRED');
+  }
+
+  const result = await params.db.query<{ id: string; label: string; domain_key: string }>(
+    `
+    UPDATE domains
+    SET
+      label = $3,
+      updated_at = NOW()
+    WHERE id = $1
+      AND assessment_version_id = $2
+      AND domain_type = 'SIGNAL_GROUP'
+    RETURNING id, label, domain_key
+    `,
+    [params.domainId, params.assessmentVersionId, label],
+  );
+
+  const updatedDomain = result.rows[0];
+  if (!updatedDomain) {
+    throw new Error('DOMAIN_NOT_FOUND');
+  }
+
+  return {
+    domainId: updatedDomain.id,
+    label: updatedDomain.label,
+    domainKey: updatedDomain.domain_key,
+  };
+}
+
 export async function deleteDomainRecord(params: {
   db: Queryable;
   assessmentVersionId: string;
@@ -413,6 +487,49 @@ export async function updateSignalRecord(params: {
       params.values.description || null,
     ],
   );
+}
+
+export async function updateSignalLabel(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  domainId: string;
+  signalId: string;
+  label: string;
+}): Promise<{ signalId: string; label: string; signalKey: string }> {
+  const label = normalizeInlineText(params.label);
+
+  if (!params.assessmentVersionId || !params.domainId || !params.signalId) {
+    throw new Error('SIGNAL_NOT_FOUND');
+  }
+
+  if (!label) {
+    throw new Error('SIGNAL_LABEL_REQUIRED');
+  }
+
+  const result = await params.db.query<{ id: string; label: string; signal_key: string }>(
+    `
+    UPDATE signals
+    SET
+      label = $4,
+      updated_at = NOW()
+    WHERE id = $1
+      AND assessment_version_id = $2
+      AND domain_id = $3
+    RETURNING id, label, signal_key
+    `,
+    [params.signalId, params.assessmentVersionId, params.domainId, label],
+  );
+
+  const updatedSignal = result.rows[0];
+  if (!updatedSignal) {
+    throw new Error('SIGNAL_NOT_FOUND');
+  }
+
+  return {
+    signalId: updatedSignal.id,
+    label: updatedSignal.label,
+    signalKey: updatedSignal.signal_key,
+  };
 }
 
 export async function deleteSignalRecord(params: {
@@ -661,5 +778,85 @@ export async function deleteSignalAction(
         signalId: context.signalId ?? '',
       }),
   });
+}
+
+export async function updateDomainLabelAction(params: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  domainId: string;
+  label: string;
+}): Promise<InlineDomainLabelUpdateResult> {
+  const pool = getDbPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const record = await updateDomainLabel({
+      db: client,
+      assessmentVersionId: params.assessmentVersionId,
+      domainId: params.domainId,
+      label: params.label,
+    });
+    await client.query('COMMIT');
+    revalidatePath(authoringPath(params.assessmentKey));
+    return { ok: true, record };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'DOMAIN_LABEL_REQUIRED') {
+        return { ok: false, error: 'Domain name is required.' };
+      }
+
+      if (error.message === 'DOMAIN_NOT_FOUND') {
+        return { ok: false, error: 'The selected domain is no longer available in this draft version.' };
+      }
+    }
+
+    return { ok: false, error: 'Domain name could not be saved. Try again.' };
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateSignalLabelAction(params: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  domainId: string;
+  signalId: string;
+  label: string;
+}): Promise<InlineSignalLabelUpdateResult> {
+  const pool = getDbPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const record = await updateSignalLabel({
+      db: client,
+      assessmentVersionId: params.assessmentVersionId,
+      domainId: params.domainId,
+      signalId: params.signalId,
+      label: params.label,
+    });
+    await client.query('COMMIT');
+    revalidatePath(authoringPath(params.assessmentKey));
+    return { ok: true, record };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'SIGNAL_LABEL_REQUIRED') {
+        return { ok: false, error: 'Signal name is required.' };
+      }
+
+      if (error.message === 'SIGNAL_NOT_FOUND') {
+        return { ok: false, error: 'The selected signal is no longer available in this draft version.' };
+      }
+    }
+
+    return { ok: false, error: 'Signal name could not be saved. Try again.' };
+  } finally {
+    client.release();
+  }
 }
 

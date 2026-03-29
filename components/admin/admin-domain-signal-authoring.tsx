@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -21,8 +21,10 @@ import {
   createSignalAction,
   deleteDomainAction,
   deleteSignalAction,
-  updateDomainAction,
-  updateSignalAction,
+  updateDomainLabelAction,
+  updateSignalLabelAction,
+  type InlineDomainLabelUpdateResult,
+  type InlineSignalLabelUpdateResult,
 } from '@/lib/server/admin-domain-signal-authoring';
 
 function normalizeState(state: AdminAuthoringFormState | null | undefined): AdminAuthoringFormState {
@@ -153,6 +155,195 @@ function InlineError({ message }: { message: string | null }) {
   return (
     <div className="rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
       {message}
+    </div>
+  );
+}
+
+function InlineTextEditor({
+  label,
+  value,
+  placeholder,
+  emptyLabel,
+  multiline = false,
+  requiredMessage,
+  onSave,
+}: Readonly<{
+  label: string;
+  value: string;
+  placeholder: string;
+  emptyLabel: string;
+  multiline?: boolean;
+  requiredMessage: string;
+  onSave: (nextValue: string) => Promise<{ ok: boolean; value?: string; error?: string }>;
+}>) {
+  const [currentValue, setCurrentValue] = useState(value);
+  const [draftValue, setDraftValue] = useState(value);
+  const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const ignoreBlurRef = useRef(false);
+
+  useEffect(() => {
+    setCurrentValue(value);
+    if (!isEditing) {
+      setDraftValue(value);
+    }
+  }, [value, isEditing]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    const field = multiline ? textAreaRef.current : inputRef.current;
+    field?.focus();
+    field?.select();
+  }, [isEditing]);
+
+  function startEditing() {
+    if (isPending) {
+      return;
+    }
+
+    setDraftValue(currentValue);
+    setError(null);
+    setIsEditing(true);
+  }
+
+  function cancelEditing() {
+    setDraftValue(currentValue);
+    setError(null);
+    setIsEditing(false);
+  }
+
+  function submit(nextRawValue: string) {
+    const trimmedValue = nextRawValue.trim();
+    const previousValue = currentValue;
+
+    if (!trimmedValue) {
+      setError(requiredMessage);
+      return;
+    }
+
+    if (trimmedValue === previousValue) {
+      setDraftValue(trimmedValue);
+      setError(null);
+      setIsEditing(false);
+      return;
+    }
+
+    setCurrentValue(trimmedValue);
+    setDraftValue(trimmedValue);
+    setError(null);
+    setIsEditing(false);
+
+    startTransition(async () => {
+      const result = await onSave(trimmedValue);
+
+      if (!result.ok) {
+        setCurrentValue(previousValue);
+        setDraftValue(previousValue);
+        setError(result.error ?? 'Changes could not be saved.');
+        return;
+      }
+
+      const confirmedValue = result.value ?? trimmedValue;
+      setCurrentValue(confirmedValue);
+      setDraftValue(confirmedValue);
+    });
+  }
+
+  const displayValue = currentValue.trim();
+
+  if (isEditing) {
+    const sharedClassName = cn(
+      'sonartra-focus-ring w-full rounded-[0.9rem] border bg-black/20 px-3 py-2 text-sm text-white placeholder:text-white/28',
+      multiline ? 'min-h-[96px] resize-y' : 'min-h-11',
+      error
+        ? 'border-[rgba(255,157,157,0.32)]'
+        : 'border-[rgba(142,162,255,0.32)] hover:border-[rgba(142,162,255,0.4)] focus:border-[rgba(142,162,255,0.48)]',
+    );
+    const sharedHandlers = {
+      disabled: isPending,
+      onBlur: () => {
+        if (ignoreBlurRef.current) {
+          ignoreBlurRef.current = false;
+          return;
+        }
+
+        submit(draftValue);
+      },
+      onChange: (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      ) => {
+        setDraftValue(event.currentTarget.value);
+        if (error) {
+          setError(null);
+        }
+      },
+      onKeyDown: (
+        event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+      ) => {
+        if (event.key === 'Escape') {
+          ignoreBlurRef.current = true;
+          event.preventDefault();
+          cancelEditing();
+          return;
+        }
+
+        if (event.key === 'Enter' && (!multiline || !event.shiftKey)) {
+          ignoreBlurRef.current = true;
+          event.preventDefault();
+          submit(draftValue);
+        }
+      },
+      placeholder,
+      value: draftValue,
+      'aria-label': label,
+    };
+
+    return (
+      <div className="space-y-2">
+        {multiline ? (
+          <textarea
+            {...sharedHandlers}
+            className={sharedClassName}
+            ref={textAreaRef}
+          />
+        ) : (
+          <input
+            {...sharedHandlers}
+            className={sharedClassName}
+            ref={inputRef}
+            type="text"
+          />
+        )}
+        {error ? <p className="text-xs text-[rgba(255,198,198,0.92)]">{error}</p> : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <button
+        className={cn(
+          'sonartra-focus-ring w-full rounded-[0.9rem] border border-dashed px-3 py-2 text-left transition',
+          'border-white/10 bg-black/10 hover:border-white/18 hover:bg-black/18',
+          isPending ? 'cursor-wait text-white/42' : 'text-white',
+          !displayValue ? 'text-white/38' : 'text-white',
+        )}
+        disabled={isPending}
+        onClick={startEditing}
+        type="button"
+      >
+        <span className="block text-[11px] uppercase tracking-[0.16em] text-white/42">{emptyLabel}</span>
+        <span className={cn('mt-1 block text-sm leading-6', !displayValue ? 'italic text-white/34' : 'text-white/88')}>
+          {displayValue || placeholder}
+        </span>
+      </button>
+      {error ? <p className="text-xs text-[rgba(255,198,198,0.92)]">{error}</p> : null}
     </div>
   );
 }
@@ -300,7 +491,7 @@ function CreateSignalForm({
   );
 }
 
-function EditDomainForm({
+function DomainLabelEditor({
   assessmentKey,
   assessmentVersionId,
   domain,
@@ -309,61 +500,26 @@ function EditDomainForm({
   assessmentVersionId: string;
   domain: AdminAssessmentDetailDomain;
 }) {
-  const [state, formAction] = useActionState(
-    updateDomainAction.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-      domainId: domain.domainId,
-    }),
-    {
-      ...initialAdminAuthoringFormState,
-      values: {
-        label: domain.label,
-        key: domain.domainKey,
-        description: domain.description ?? '',
-      },
-    },
-  );
-  const currentState = normalizeState(state);
-
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Field error={currentState.fieldErrors.label} hint="Domain display name." label="Name">
-          <TextInput
-            defaultValue={currentState.values.label}
-            error={currentState.fieldErrors.label}
-            name="label"
-            placeholder="Leadership style"
-          />
-        </Field>
-        <Field error={currentState.fieldErrors.key} hint="Stable key." label="Key">
-          <TextInput
-            defaultValue={currentState.values.key}
-            error={currentState.fieldErrors.key}
-            name="key"
-            placeholder="leadership-style"
-          />
-        </Field>
-      </div>
+    <InlineTextEditor
+      emptyLabel="Domain name"
+      label="Domain name"
+      onSave={async (nextValue) => {
+        const result: InlineDomainLabelUpdateResult = await updateDomainLabelAction({
+          assessmentKey,
+          assessmentVersionId,
+          domainId: domain.domainId,
+          label: nextValue,
+        });
 
-      <Field
-        error={currentState.fieldErrors.description}
-        hint="Optional domain description."
-        label="Description"
-      >
-        <TextArea
-          defaultValue={currentState.values.description}
-          error={currentState.fieldErrors.description}
-          name="description"
-          placeholder="Describe what this domain groups."
-        />
-      </Field>
-
-      <InlineError message={currentState.formError} />
-
-      <SubmitButton idleLabel="Save domain" pendingLabel="Saving..." />
-    </form>
+        return result.ok
+          ? { ok: true, value: result.record.label }
+          : { ok: false, error: result.error };
+      }}
+      placeholder="Enter domain name"
+      requiredMessage="Domain name is required."
+      value={domain.label}
+    />
   );
 }
 
@@ -394,7 +550,7 @@ function DeleteDomainForm({
   );
 }
 
-function EditSignalForm({
+function SignalLabelEditor({
   assessmentKey,
   assessmentVersionId,
   domainId,
@@ -405,26 +561,8 @@ function EditSignalForm({
   domainId: string;
   signal: AdminAssessmentDetailDomain['signals'][number];
 }) {
-  const [state, formAction] = useActionState(
-    updateSignalAction.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-      domainId,
-      signalId: signal.signalId,
-    }),
-    {
-      ...initialAdminAuthoringFormState,
-      values: {
-        label: signal.label,
-        key: signal.signalKey,
-        description: signal.description ?? '',
-      },
-    },
-  );
-  const currentState = normalizeState(state);
-
   return (
-    <form action={formAction} className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
+    <div className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
       <div className="flex flex-wrap items-center gap-2">
         <LabelPill>{signal.signalKey}</LabelPill>
         <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
@@ -432,42 +570,27 @@ function EditSignalForm({
         </LabelPill>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Field error={currentState.fieldErrors.label} hint="Signal display name." label="Name">
-          <TextInput
-            defaultValue={currentState.values.label}
-            error={currentState.fieldErrors.label}
-            name="label"
-            placeholder="Directive"
-          />
-        </Field>
-        <Field error={currentState.fieldErrors.key} hint="Stable key." label="Key">
-          <TextInput
-            defaultValue={currentState.values.key}
-            error={currentState.fieldErrors.key}
-            name="key"
-            placeholder="directive"
-          />
-        </Field>
-      </div>
+      <InlineTextEditor
+        emptyLabel="Signal name"
+        label="Signal name"
+        onSave={async (nextValue) => {
+          const result: InlineSignalLabelUpdateResult = await updateSignalLabelAction({
+            assessmentKey,
+            assessmentVersionId,
+            domainId,
+            signalId: signal.signalId,
+            label: nextValue,
+          });
 
-      <Field
-        error={currentState.fieldErrors.description}
-        hint="Optional signal description."
-        label="Description"
-      >
-        <TextArea
-          defaultValue={currentState.values.description}
-          error={currentState.fieldErrors.description}
-          name="description"
-          placeholder="Describe the signal."
-        />
-      </Field>
-
-      <InlineError message={currentState.formError} />
-
-      <SubmitButton idleLabel="Save signal" pendingLabel="Saving..." />
-    </form>
+          return result.ok
+            ? { ok: true, value: result.record.label }
+            : { ok: false, error: result.error };
+        }}
+        placeholder="Enter signal name"
+        requiredMessage="Signal name is required."
+        value={signal.label}
+      />
+    </div>
   );
 }
 
@@ -524,7 +647,7 @@ function DomainCard({
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_220px]">
-          <EditDomainForm
+          <DomainLabelEditor
             assessmentKey={assessmentKey}
             assessmentVersionId={assessmentVersionId}
             domain={domain}
@@ -562,7 +685,7 @@ function DomainCard({
             <div className="space-y-4">
               {domain.signals.map((signal) => (
                 <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]" key={signal.signalId}>
-                  <EditSignalForm
+                  <SignalLabelEditor
                     assessmentKey={assessmentKey}
                     assessmentVersionId={assessmentVersionId}
                     domainId={domain.domainId}

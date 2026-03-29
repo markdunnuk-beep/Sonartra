@@ -9,7 +9,9 @@ import {
   deleteOptionRecord,
   deleteQuestionRecord,
   updateOptionRecord,
+  updateOptionText,
   updateQuestionRecord,
+  updateQuestionText,
 } from '@/lib/server/admin-question-option-authoring';
 import { initialAdminBulkQuestionAuthoringFormState } from '@/lib/admin/admin-question-option-authoring';
 
@@ -215,6 +217,20 @@ function createFakeDb(
       return { rows: match ? ([{ id: match.id }] as unknown as T[]) : ([] as T[]) };
     }
 
+    if (text.includes('UPDATE questions') && text.includes('RETURNING id, prompt, question_key')) {
+      const [questionId, assessmentVersionId, prompt] = params as [string, string, string];
+      const match = state.questions.find(
+        (question) => question.id === questionId && question.assessmentVersionId === assessmentVersionId,
+      );
+      if (!match) {
+        return { rows: [] as T[] };
+      }
+      match.prompt = prompt;
+      return {
+        rows: ([{ id: match.id, prompt: match.prompt, question_key: match.questionKey }] as unknown) as T[],
+      };
+    }
+
     if (text.includes('UPDATE questions')) {
       const [questionId, assessmentVersionId, domainId, questionKey, prompt] = params as [
         string,
@@ -345,6 +361,20 @@ function createFakeDb(
         (option) => option.id === optionId && option.questionId === questionId,
       );
       return { rows: match ? ([{ id: match.id }] as unknown as T[]) : ([] as T[]) };
+    }
+
+    if (text.includes('UPDATE options') && text.includes('RETURNING id, option_text, option_key')) {
+      const [optionId, questionId, optionText] = params as [string, string, string];
+      const match = state.options.find(
+        (option) => option.id === optionId && option.questionId === questionId,
+      );
+      if (!match) {
+        return { rows: [] as T[] };
+      }
+      match.optionText = optionText;
+      return {
+        rows: ([{ id: match.id, option_text: match.optionText, option_key: match.optionKey }] as unknown) as T[],
+      };
     }
 
     if (text.includes('UPDATE options')) {
@@ -830,4 +860,149 @@ test('deleting an option removes only that option', async () => {
 
   assert.equal(fake.state.options.length, 1);
   assert.equal(fake.state.options[0]?.id, 'option-2');
+});
+
+test('updates question text inline without changing the question key', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section one',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing question',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const updated = await updateQuestionText({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    questionId: 'question-1',
+    prompt: '  Updated question prompt  ',
+  });
+
+  assert.equal(updated.prompt, 'Updated question prompt');
+  assert.equal(updated.questionKey, 'q01');
+  assert.equal(fake.state.questions[0]?.prompt, 'Updated question prompt');
+  assert.equal(fake.state.questions[0]?.questionKey, 'q01');
+});
+
+test('updates option text inline without changing the option key', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section one',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing question',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        assessmentVersionId: 'version-1',
+        questionId: 'question-1',
+        optionKey: 'q01_a',
+        optionLabel: 'A',
+        optionText: '',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  const updated = await updateOptionText({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    questionId: 'question-1',
+    optionId: 'option-1',
+    text: '  Strongly agree  ',
+  });
+
+  assert.equal(updated.optionText, 'Strongly agree');
+  assert.equal(updated.optionKey, 'q01_a');
+  assert.equal(fake.state.options[0]?.optionText, 'Strongly agree');
+  assert.equal(fake.state.options[0]?.optionKey, 'q01_a');
+});
+
+test('inline question and option text updates reject empty values', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section one',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing question',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        assessmentVersionId: 'version-1',
+        questionId: 'question-1',
+        optionKey: 'q01_a',
+        optionLabel: 'A',
+        optionText: '',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  await assert.rejects(
+    () =>
+      updateQuestionText({
+        db: fake.db,
+        assessmentVersionId: 'version-1',
+        questionId: 'question-1',
+        prompt: '   ',
+      }),
+    /QUESTION_PROMPT_REQUIRED/,
+  );
+
+  await assert.rejects(
+    () =>
+      updateOptionText({
+        db: fake.db,
+        assessmentVersionId: 'version-1',
+        questionId: 'question-1',
+        optionId: 'option-1',
+        text: '   ',
+      }),
+    /OPTION_TEXT_REQUIRED/,
+  );
 });

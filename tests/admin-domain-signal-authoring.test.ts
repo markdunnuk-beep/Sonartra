@@ -6,7 +6,9 @@ import {
   createSignalRecord,
   deleteDomainRecord,
   updateDomainRecord,
+  updateDomainLabel,
   updateSignalRecord,
+  updateSignalLabel,
 } from '@/lib/server/admin-domain-signal-authoring';
 
 type StoredDomain = {
@@ -85,6 +87,20 @@ function createFakeDb(seed?: {
             orderIndex: params?.[4] as number,
           });
           return { rows: [] as T[] };
+        }
+
+        if (text.includes('UPDATE domains') && text.includes('RETURNING id, label, domain_key')) {
+          const [domainId, assessmentVersionId, label] = params as [string, string, string];
+          const match = state.domains.find(
+            (domain) => domain.id === domainId && domain.assessmentVersionId === assessmentVersionId,
+          );
+          if (!match) {
+            return { rows: [] as T[] };
+          }
+          match.label = label;
+          return {
+            rows: ([{ id: match.id, label: match.label, domain_key: match.domainKey }] as unknown) as T[],
+          };
         }
 
         if (text.includes('UPDATE domains')) {
@@ -182,6 +198,28 @@ function createFakeDb(seed?: {
             orderIndex: params?.[5] as number,
           });
           return { rows: [] as T[] };
+        }
+
+        if (text.includes('UPDATE signals') && text.includes('RETURNING id, label, signal_key')) {
+          const [signalId, assessmentVersionId, domainId, label] = params as [
+            string,
+            string,
+            string,
+            string,
+          ];
+          const match = state.signals.find(
+            (signal) =>
+              signal.id === signalId &&
+              signal.assessmentVersionId === assessmentVersionId &&
+              signal.domainId === domainId,
+          );
+          if (!match) {
+            return { rows: [] as T[] };
+          }
+          match.label = label;
+          return {
+            rows: ([{ id: match.id, label: match.label, signal_key: match.signalKey }] as unknown) as T[],
+          };
         }
 
         if (text.includes('UPDATE signals')) {
@@ -335,4 +373,119 @@ test('deleting a domain removes its nested signals from the same draft version',
 
   assert.equal(fake.state.domains.length, 0);
   assert.equal(fake.state.signals.length, 0);
+});
+
+test('updates domain label inline without changing the domain key', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'style',
+        label: 'Style',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const updated = await updateDomainLabel({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    domainId: 'domain-1',
+    label: '  Leadership style  ',
+  });
+
+  assert.equal(updated.label, 'Leadership style');
+  assert.equal(updated.domainKey, 'style');
+  assert.equal(fake.state.domains[0]?.label, 'Leadership style');
+  assert.equal(fake.state.domains[0]?.domainKey, 'style');
+});
+
+test('updates signal label inline without changing the signal key', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'style',
+        label: 'Style',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        signalKey: 'style_directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const updated = await updateSignalLabel({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    domainId: 'domain-1',
+    signalId: 'signal-1',
+    label: '  Decisive  ',
+  });
+
+  assert.equal(updated.label, 'Decisive');
+  assert.equal(updated.signalKey, 'style_directive');
+  assert.equal(fake.state.signals[0]?.label, 'Decisive');
+  assert.equal(fake.state.signals[0]?.signalKey, 'style_directive');
+});
+
+test('inline domain and signal label updates reject empty values', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'style',
+        label: 'Style',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        signalKey: 'style_directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  await assert.rejects(
+    () =>
+      updateDomainLabel({
+        db: fake.db,
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        label: '   ',
+      }),
+    /DOMAIN_LABEL_REQUIRED/,
+  );
+
+  await assert.rejects(
+    () =>
+      updateSignalLabel({
+        db: fake.db,
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        signalId: 'signal-1',
+        label: '   ',
+      }),
+    /SIGNAL_LABEL_REQUIRED/,
+  );
 });

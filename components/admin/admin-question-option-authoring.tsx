@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -31,8 +31,10 @@ import {
   createQuestionAction,
   deleteOptionAction,
   deleteQuestionAction,
-  updateOptionAction,
-  updateQuestionAction,
+  updateOptionTextAction,
+  updateQuestionTextAction,
+  type InlineOptionTextUpdateResult,
+  type InlineQuestionTextUpdateResult,
 } from '@/lib/server/admin-question-option-authoring';
 
 function normalizeQuestionState(
@@ -274,6 +276,195 @@ function InlineError({ message }: { message: string | null }) {
   );
 }
 
+function InlineTextEditor({
+  label,
+  value,
+  placeholder,
+  emptyLabel,
+  multiline = false,
+  requiredMessage,
+  onSave,
+}: Readonly<{
+  label: string;
+  value: string;
+  placeholder: string;
+  emptyLabel: string;
+  multiline?: boolean;
+  requiredMessage: string;
+  onSave: (nextValue: string) => Promise<{ ok: boolean; value?: string; error?: string }>;
+}>) {
+  const [currentValue, setCurrentValue] = useState(value);
+  const [draftValue, setDraftValue] = useState(value);
+  const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const ignoreBlurRef = useRef(false);
+
+  useEffect(() => {
+    setCurrentValue(value);
+    if (!isEditing) {
+      setDraftValue(value);
+    }
+  }, [value, isEditing]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    const field = multiline ? textAreaRef.current : inputRef.current;
+    field?.focus();
+    field?.select();
+  }, [isEditing]);
+
+  function startEditing() {
+    if (isPending) {
+      return;
+    }
+
+    setDraftValue(currentValue);
+    setError(null);
+    setIsEditing(true);
+  }
+
+  function cancelEditing() {
+    setDraftValue(currentValue);
+    setError(null);
+    setIsEditing(false);
+  }
+
+  function submit(nextRawValue: string) {
+    const trimmedValue = nextRawValue.trim();
+    const previousValue = currentValue;
+
+    if (!trimmedValue) {
+      setError(requiredMessage);
+      return;
+    }
+
+    if (trimmedValue === previousValue) {
+      setDraftValue(trimmedValue);
+      setError(null);
+      setIsEditing(false);
+      return;
+    }
+
+    setCurrentValue(trimmedValue);
+    setDraftValue(trimmedValue);
+    setError(null);
+    setIsEditing(false);
+
+    startTransition(async () => {
+      const result = await onSave(trimmedValue);
+
+      if (!result.ok) {
+        setCurrentValue(previousValue);
+        setDraftValue(previousValue);
+        setError(result.error ?? 'Changes could not be saved.');
+        return;
+      }
+
+      const confirmedValue = result.value ?? trimmedValue;
+      setCurrentValue(confirmedValue);
+      setDraftValue(confirmedValue);
+    });
+  }
+
+  const displayValue = currentValue.trim();
+
+  if (isEditing) {
+    const sharedClassName = cn(
+      'sonartra-focus-ring w-full rounded-[0.9rem] border bg-black/20 px-3 py-2 text-sm text-white placeholder:text-white/28',
+      multiline ? 'min-h-[104px] resize-y' : 'min-h-11',
+      error
+        ? 'border-[rgba(255,157,157,0.32)]'
+        : 'border-[rgba(142,162,255,0.32)] hover:border-[rgba(142,162,255,0.4)] focus:border-[rgba(142,162,255,0.48)]',
+    );
+    const sharedHandlers = {
+      disabled: isPending,
+      onBlur: () => {
+        if (ignoreBlurRef.current) {
+          ignoreBlurRef.current = false;
+          return;
+        }
+
+        submit(draftValue);
+      },
+      onChange: (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      ) => {
+        setDraftValue(event.currentTarget.value);
+        if (error) {
+          setError(null);
+        }
+      },
+      onKeyDown: (
+        event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+      ) => {
+        if (event.key === 'Escape') {
+          ignoreBlurRef.current = true;
+          event.preventDefault();
+          cancelEditing();
+          return;
+        }
+
+        if (event.key === 'Enter' && (!multiline || !event.shiftKey)) {
+          ignoreBlurRef.current = true;
+          event.preventDefault();
+          submit(draftValue);
+        }
+      },
+      placeholder,
+      value: draftValue,
+      'aria-label': label,
+    };
+
+    return (
+      <div className="space-y-2">
+        {multiline ? (
+          <textarea
+            {...sharedHandlers}
+            className={sharedClassName}
+            ref={textAreaRef}
+          />
+        ) : (
+          <input
+            {...sharedHandlers}
+            className={sharedClassName}
+            ref={inputRef}
+            type="text"
+          />
+        )}
+        {error ? <p className="text-xs text-[rgba(255,198,198,0.92)]">{error}</p> : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <button
+        className={cn(
+          'sonartra-focus-ring w-full rounded-[0.9rem] border border-dashed px-3 py-2 text-left transition',
+          'border-white/10 bg-black/10 hover:border-white/18 hover:bg-black/18',
+          isPending ? 'cursor-wait text-white/42' : 'text-white',
+          !displayValue ? 'text-white/38' : 'text-white',
+        )}
+        disabled={isPending}
+        onClick={startEditing}
+        type="button"
+      >
+        <span className="block text-[11px] uppercase tracking-[0.16em] text-white/42">{emptyLabel}</span>
+        <span className={cn('mt-1 block text-sm leading-6', !displayValue ? 'italic text-white/34' : 'text-white/88')}>
+          {displayValue || placeholder}
+        </span>
+      </button>
+      {error ? <p className="text-xs text-[rgba(255,198,198,0.92)]">{error}</p> : null}
+    </div>
+  );
+}
+
 function formatDomainType(domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP'): string {
   return domainType === 'QUESTION_SECTION' ? 'Question section' : 'Domain';
 }
@@ -422,72 +613,36 @@ function CreateQuestionForm({
   );
 }
 
-function EditQuestionForm({
+function QuestionTextEditor({
   assessmentKey,
   assessmentVersionId,
-  domains,
   question,
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
-  domains: readonly AdminAssessmentDetailQuestionDomain[];
   question: AdminAssessmentDetailQuestion;
 }) {
-  const [state, formAction] = useActionState(
-    updateQuestionAction.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-      questionId: question.questionId,
-    }),
-    {
-      ...initialAdminQuestionAuthoringFormState,
-      values: {
-        prompt: question.prompt,
-        key: question.questionKey,
-        domainId: question.domainId,
-      },
-    },
-  );
-  const currentState = normalizeQuestionState(state);
-
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
-        <Field error={currentState.fieldErrors.prompt} hint="Question text presented to users." label="Prompt">
-          <TextArea
-            defaultValue={currentState.values.prompt}
-            error={currentState.fieldErrors.prompt}
-            minHeightClass="min-h-[132px]"
-            name="prompt"
-            placeholder="Describe the assessment question."
-          />
-        </Field>
-        <div className="space-y-4">
-          <Field error={currentState.fieldErrors.key} hint="Stable engine-facing key." label="Question key">
-            <TextInput
-              defaultValue={currentState.values.key}
-              error={currentState.fieldErrors.key}
-              name="key"
-              placeholder="decision-speed"
-            />
-          </Field>
-          <Field error={currentState.fieldErrors.domainId} hint="Version-scoped domain linkage." label="Question domain">
-            <SelectInput defaultValue={currentState.values.domainId} error={currentState.fieldErrors.domainId} name="domainId">
-              <option value="">Select a domain</option>
-              {domains.map((domain) => (
-                <option key={domain.domainId} value={domain.domainId}>
-                  {domain.label} ({formatDomainType(domain.domainType)})
-                </option>
-              ))}
-            </SelectInput>
-          </Field>
-        </div>
-      </div>
+    <InlineTextEditor
+      emptyLabel="Question text"
+      label="Question text"
+      multiline
+      onSave={async (nextValue) => {
+        const result: InlineQuestionTextUpdateResult = await updateQuestionTextAction({
+          assessmentKey,
+          assessmentVersionId,
+          questionId: question.questionId,
+          prompt: nextValue,
+        });
 
-      <InlineError message={currentState.formError} />
-
-      <SubmitButton idleLabel="Save question" pendingLabel="Saving..." />
-    </form>
+        return result.ok
+          ? { ok: true, value: result.record.prompt }
+          : { ok: false, error: result.error };
+      }}
+      placeholder="Enter question text"
+      requiredMessage="Question text is required."
+      value={question.prompt}
+    />
   );
 }
 
@@ -585,7 +740,7 @@ function CreateOptionForm({
   );
 }
 
-function EditOptionForm({
+function OptionTextEditor({
   assessmentKey,
   assessmentVersionId,
   questionId,
@@ -596,26 +751,8 @@ function EditOptionForm({
   questionId: string;
   option: AdminAssessmentDetailQuestion['options'][number];
 }) {
-  const [state, formAction] = useActionState(
-    updateOptionAction.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-      questionId,
-      optionId: option.optionId,
-    }),
-    {
-      ...initialAdminOptionAuthoringFormState,
-      values: {
-        key: option.optionKey,
-        label: option.optionLabel ?? '',
-        text: option.optionText,
-      },
-    },
-  );
-  const currentState = normalizeOptionState(state);
-
   return (
-    <form action={formAction} className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
+    <div className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
       <div className="flex flex-wrap items-center gap-2">
         <LabelPill>{option.optionKey}</LabelPill>
         <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
@@ -628,37 +765,27 @@ function EditOptionForm({
         ) : null}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[160px_160px_minmax(0,1fr)]">
-        <Field error={currentState.fieldErrors.key} hint="Stable option key." label="Option key">
-          <TextInput
-            defaultValue={currentState.values.key}
-            error={currentState.fieldErrors.key}
-            name="key"
-            placeholder="strongly-agree"
-          />
-        </Field>
-        <Field error={currentState.fieldErrors.label} hint="Optional short label." label="Label">
-          <TextInput
-            defaultValue={currentState.values.label}
-            error={currentState.fieldErrors.label}
-            name="label"
-            placeholder="A"
-          />
-        </Field>
-        <Field error={currentState.fieldErrors.text} hint="User-facing answer text." label="Option text">
-          <TextInput
-            defaultValue={currentState.values.text}
-            error={currentState.fieldErrors.text}
-            name="text"
-            placeholder="Strongly agree"
-          />
-        </Field>
-      </div>
+      <InlineTextEditor
+        emptyLabel="Option text"
+        label="Option text"
+        onSave={async (nextValue) => {
+          const result: InlineOptionTextUpdateResult = await updateOptionTextAction({
+            assessmentKey,
+            assessmentVersionId,
+            questionId,
+            optionId: option.optionId,
+            text: nextValue,
+          });
 
-      <InlineError message={currentState.formError} />
-
-      <SubmitButton idleLabel="Save option" pendingLabel="Saving..." />
-    </form>
+          return result.ok
+            ? { ok: true, value: result.record.optionText }
+            : { ok: false, error: result.error };
+        }}
+        placeholder="Enter option text"
+        requiredMessage="Option text is required."
+        value={option.optionText}
+      />
+    </div>
   );
 }
 
@@ -695,12 +822,10 @@ function DeleteOptionForm({
 function QuestionCard({
   assessmentKey,
   assessmentVersionId,
-  domains,
   question,
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
-  domains: readonly AdminAssessmentDetailQuestionDomain[];
   question: AdminAssessmentDetailQuestion;
 }) {
   return (
@@ -720,10 +845,9 @@ function QuestionCard({
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_220px]">
-          <EditQuestionForm
+          <QuestionTextEditor
             assessmentKey={assessmentKey}
             assessmentVersionId={assessmentVersionId}
-            domains={domains}
             question={question}
           />
           <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
@@ -760,7 +884,7 @@ function QuestionCard({
             <div className="space-y-4">
               {question.options.map((option) => (
                 <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]" key={option.optionId}>
-                  <EditOptionForm
+                  <OptionTextEditor
                     assessmentKey={assessmentKey}
                     assessmentVersionId={assessmentVersionId}
                     questionId={question.questionId}
@@ -839,7 +963,6 @@ export function AdminQuestionOptionAuthoring({
                 <QuestionCard
                   assessmentKey={assessmentKey}
                   assessmentVersionId={assessmentVersionId}
-                  domains={domains}
                   key={question.questionId}
                   question={question}
                 />

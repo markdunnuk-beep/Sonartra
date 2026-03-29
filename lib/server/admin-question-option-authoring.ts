@@ -37,6 +37,34 @@ type ActionContext = {
   optionId?: string;
 };
 
+export type InlineQuestionTextUpdateResult =
+  | {
+      ok: true;
+      record: {
+        questionId: string;
+        prompt: string;
+        questionKey: string;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+export type InlineOptionTextUpdateResult =
+  | {
+      ok: true;
+      record: {
+        optionId: string;
+        optionText: string;
+        optionKey: string;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
 type PostgresErrorLike = {
   code?: string;
   constraint?: string;
@@ -110,6 +138,10 @@ function normalizeKey(value: string): string {
 
 function authoringPath(assessmentKey: string): string {
   return `/admin/assessments/${assessmentKey}`;
+}
+
+function normalizeInlineText(value: string): string {
+  return value.trim();
 }
 
 function toPostgresErrorLike(error: unknown): PostgresErrorLike | null {
@@ -636,6 +668,47 @@ export async function updateQuestionRecord(params: {
   );
 }
 
+export async function updateQuestionText(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+  prompt: string;
+}): Promise<{ questionId: string; prompt: string; questionKey: string }> {
+  const prompt = normalizeInlineText(params.prompt);
+
+  if (!params.assessmentVersionId || !params.questionId) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  if (!prompt) {
+    throw new Error('QUESTION_PROMPT_REQUIRED');
+  }
+
+  const result = await params.db.query<{ id: string; prompt: string; question_key: string }>(
+    `
+    UPDATE questions
+    SET
+      prompt = $3,
+      updated_at = NOW()
+    WHERE id = $1
+      AND assessment_version_id = $2
+    RETURNING id, prompt, question_key
+    `,
+    [params.questionId, params.assessmentVersionId, prompt],
+  );
+
+  const updatedQuestion = result.rows[0];
+  if (!updatedQuestion) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  return {
+    questionId: updatedQuestion.id,
+    prompt: updatedQuestion.prompt,
+    questionKey: updatedQuestion.question_key,
+  };
+}
+
 export async function deleteQuestionRecord(params: {
   db: Queryable;
   assessmentVersionId: string;
@@ -776,6 +849,48 @@ export async function updateOptionRecord(params: {
       params.values.text,
     ],
   );
+}
+
+export async function updateOptionText(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+  optionId: string;
+  text: string;
+}): Promise<{ optionId: string; optionText: string; optionKey: string }> {
+  const text = normalizeInlineText(params.text);
+
+  if (!params.assessmentVersionId || !params.questionId || !params.optionId) {
+    throw new Error('OPTION_NOT_FOUND');
+  }
+
+  if (!text) {
+    throw new Error('OPTION_TEXT_REQUIRED');
+  }
+
+  const result = await params.db.query<{ id: string; option_text: string; option_key: string }>(
+    `
+    UPDATE options
+    SET
+      option_text = $3,
+      updated_at = NOW()
+    WHERE id = $1
+      AND question_id = $2
+    RETURNING id, option_text, option_key
+    `,
+    [params.optionId, params.questionId, text],
+  );
+
+  const updatedOption = result.rows[0];
+  if (!updatedOption) {
+    throw new Error('OPTION_NOT_FOUND');
+  }
+
+  return {
+    optionId: updatedOption.id,
+    optionText: updatedOption.option_text,
+    optionKey: updatedOption.option_key,
+  };
 }
 
 export async function deleteOptionRecord(params: {
@@ -1142,4 +1257,84 @@ export async function deleteOptionAction(
         optionId: context.optionId ?? '',
       }),
   });
+}
+
+export async function updateQuestionTextAction(params: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  questionId: string;
+  prompt: string;
+}): Promise<InlineQuestionTextUpdateResult> {
+  const pool = getDbPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const record = await updateQuestionText({
+      db: client,
+      assessmentVersionId: params.assessmentVersionId,
+      questionId: params.questionId,
+      prompt: params.prompt,
+    });
+    await client.query('COMMIT');
+    revalidatePath(authoringPath(params.assessmentKey));
+    return { ok: true, record };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'QUESTION_PROMPT_REQUIRED') {
+        return { ok: false, error: 'Question text is required.' };
+      }
+
+      if (error.message === 'QUESTION_NOT_FOUND') {
+        return { ok: false, error: 'The selected question is no longer available in this draft version.' };
+      }
+    }
+
+    return { ok: false, error: 'Question text could not be saved. Try again.' };
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateOptionTextAction(params: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  questionId: string;
+  optionId: string;
+  text: string;
+}): Promise<InlineOptionTextUpdateResult> {
+  const pool = getDbPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    const record = await updateOptionText({
+      db: client,
+      assessmentVersionId: params.assessmentVersionId,
+      questionId: params.questionId,
+      optionId: params.optionId,
+      text: params.text,
+    });
+    await client.query('COMMIT');
+    revalidatePath(authoringPath(params.assessmentKey));
+    return { ok: true, record };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'OPTION_TEXT_REQUIRED') {
+        return { ok: false, error: 'Option text is required.' };
+      }
+
+      if (error.message === 'OPTION_NOT_FOUND') {
+        return { ok: false, error: 'The selected option is no longer available on this question.' };
+      }
+    }
+
+    return { ok: false, error: 'Option text could not be saved. Try again.' };
+  } finally {
+    client.release();
+  }
 }
