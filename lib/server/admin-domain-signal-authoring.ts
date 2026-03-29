@@ -10,6 +10,7 @@ import {
   validateAdminAuthoringValues,
 } from '@/lib/admin/admin-domain-signal-authoring';
 import { getDbPool } from '@/lib/server/db';
+import { generateDomainKey, generateSignalKey } from '@/lib/utils/key-generator';
 
 type Queryable = {
   query<T>(text: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
@@ -67,6 +68,25 @@ async function getNextSignalOrderIndex(
   );
 
   return Number(result.rows[0]?.next_order_index ?? 0);
+}
+
+async function getDomainKey(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  domainId: string;
+}): Promise<string | null> {
+  const result = await params.db.query<{ domain_key: string }>(
+    `
+    SELECT domain_key
+    FROM domains
+    WHERE id = $1
+      AND assessment_version_id = $2
+      AND domain_type = 'SIGNAL_GROUP'
+    `,
+    [params.domainId, params.assessmentVersionId],
+  );
+
+  return result.rows[0]?.domain_key ?? null;
 }
 
 async function domainExists(params: {
@@ -154,11 +174,16 @@ export async function createDomainRecord(params: {
   assessmentVersionId: string;
   values: AdminAuthoringFormValues;
 }): Promise<void> {
+  const domainKey = generateDomainKey(params.values.label);
+  if (!domainKey) {
+    throw new Error('DOMAIN_KEY_INVALID');
+  }
+
   if (
     await duplicateDomainKeyExists({
       db: params.db,
       assessmentVersionId: params.assessmentVersionId,
-      domainKey: params.values.key,
+      domainKey,
     })
   ) {
     throw new Error('DOMAIN_KEY_EXISTS');
@@ -180,7 +205,7 @@ export async function createDomainRecord(params: {
     `,
     [
       params.assessmentVersionId,
-      params.values.key,
+      domainKey,
       params.values.label,
       params.values.description || null,
       orderIndex,
@@ -276,20 +301,25 @@ export async function createSignalRecord(params: {
   domainId: string;
   values: AdminAuthoringFormValues;
 }): Promise<void> {
-  const domainPresent = await domainExists({
+  const domainKey = await getDomainKey({
     db: params.db,
     assessmentVersionId: params.assessmentVersionId,
     domainId: params.domainId,
   });
-  if (!domainPresent) {
+  if (!domainKey) {
     throw new Error('DOMAIN_NOT_FOUND');
+  }
+
+  const signalKey = generateSignalKey(domainKey, params.values.label);
+  if (!signalKey) {
+    throw new Error('SIGNAL_KEY_INVALID');
   }
 
   if (
     await duplicateSignalKeyExists({
       db: params.db,
       assessmentVersionId: params.assessmentVersionId,
-      signalKey: params.values.key,
+      signalKey,
     })
   ) {
     throw new Error('SIGNAL_KEY_EXISTS');
@@ -317,7 +347,7 @@ export async function createSignalRecord(params: {
     [
       params.assessmentVersionId,
       params.domainId,
-      params.values.key,
+      signalKey,
       params.values.label,
       params.values.description || null,
       orderIndex,
@@ -457,6 +487,19 @@ async function runWriteAction(params: {
       };
     }
 
+    if (
+      error instanceof Error &&
+      (error.message === 'DOMAIN_KEY_INVALID' || error.message === 'SIGNAL_KEY_INVALID')
+    ) {
+      return {
+        formError: 'A deterministic key could not be generated from that name.',
+        fieldErrors: {
+          label: 'Use a name with letters or numbers so a stable key can be generated.',
+        },
+        values: params.values,
+      };
+    }
+
     return {
       formError: 'Changes could not be saved. Review the inputs and try again.',
       fieldErrors: {},
@@ -482,6 +525,7 @@ export async function createDomainAction(
 ): Promise<AdminAuthoringFormState> {
   const values = getValuesFromFormData(formData);
   const validation = validateAdminAuthoringValues(values);
+  delete validation.fieldErrors.key;
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }
@@ -507,6 +551,7 @@ export async function updateDomainAction(
 ): Promise<AdminAuthoringFormState> {
   const values = getValuesFromFormData(formData);
   const validation = validateAdminAuthoringValues(values);
+  delete validation.fieldErrors.key;
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }

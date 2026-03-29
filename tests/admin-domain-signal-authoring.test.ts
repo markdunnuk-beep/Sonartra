@@ -53,6 +53,16 @@ function createFakeDb(seed?: {
           return { rows: rows as T[] };
         }
 
+        if (text.includes('SELECT domain_key') && text.includes('FROM domains')) {
+          const [domainId, assessmentVersionId] = params as [string, string];
+          const match = state.domains.find(
+            (domain) => domain.id === domainId && domain.assessmentVersionId === assessmentVersionId,
+          );
+          return {
+            rows: match ? ([{ domain_key: match.domainKey }] as unknown as T[]) : ([] as T[]),
+          };
+        }
+
         if (text.includes('MAX(order_index)') && text.includes('FROM domains')) {
           const [assessmentVersionId] = params as [string];
           const next =
@@ -244,6 +254,8 @@ test('creates domains and signals with deterministic appended order indexes', as
 
   assert.equal(fake.state.domains[1]?.orderIndex, 1);
   assert.equal(fake.state.signals[1]?.orderIndex, 1);
+  assert.equal(fake.state.domains[1]?.domainKey, 'motivation');
+  assert.equal(fake.state.signals[1]?.signalKey, 'style_supportive');
 });
 
 test('updates domain and signal metadata in place', async () => {

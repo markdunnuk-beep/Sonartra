@@ -72,6 +72,7 @@ type QuestionRow = {
 
 type OptionRow = {
   option_id: string;
+  assessment_version_id: string;
   question_id: string;
   option_key: string;
   option_label: string | null;
@@ -405,6 +406,7 @@ async function loadSourceOptions(
       `
       SELECT
         o.id AS option_id,
+        q.assessment_version_id,
         o.question_id,
         o.option_key,
         o.option_label,
@@ -626,16 +628,18 @@ export async function createNextDraftAssessmentVersionRecords(params: {
       const result = await params.db.query<InsertedIdRow>(
         `
         INSERT INTO options (
+          assessment_version_id,
           question_id,
           option_key,
           option_label,
           option_text,
           order_index
         )
-        VALUES ($1, $2, $3, $4, $5)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id
         `,
         [
+          insertedDraft.id,
           questionIdMap.get(option.question_id) ?? '',
           option.option_key,
           option.option_label,

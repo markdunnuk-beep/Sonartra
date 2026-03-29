@@ -62,6 +62,7 @@ type StoredQuestion = {
 
 type StoredOption = {
   id: string;
+  assessmentVersionId: string;
   questionId: string;
   optionKey: string;
   optionLabel: string | null;
@@ -377,6 +378,7 @@ function createFakeDb(seed?: {
             .filter((option) => questionIds.has(option.questionId))
             .map((option) => ({
               option_id: option.id,
+              assessment_version_id: option.assessmentVersionId,
               question_id: option.questionId,
               option_key: option.optionKey,
               option_label: option.optionLabel,
@@ -390,11 +392,12 @@ function createFakeDb(seed?: {
           const id = nextId('option', state.options.length);
           state.options.push({
             id,
-            questionId: params?.[0] as string,
-            optionKey: params?.[1] as string,
-            optionLabel: (params?.[2] as string | null) ?? null,
-            optionText: params?.[3] as string,
-            orderIndex: params?.[4] as number,
+            assessmentVersionId: params?.[0] as string,
+            questionId: params?.[1] as string,
+            optionKey: params?.[2] as string,
+            optionLabel: (params?.[3] as string | null) ?? null,
+            optionText: params?.[4] as string,
+            orderIndex: params?.[5] as number,
           });
           return { rows: ([{ id }] as unknown) as T[] };
         }
@@ -516,6 +519,7 @@ test('publishes the selected draft and archives the previously published version
     options: [
       {
         id: 'option-1',
+        assessmentVersionId: 'version-2',
         questionId: 'question-1',
         optionKey: 'agree',
         optionLabel: 'A',
@@ -606,6 +610,7 @@ test('creates a new draft version by duplicating canonical authoring structure f
     options: [
       {
         id: 'option-1',
+        assessmentVersionId: 'version-1',
         questionId: 'question-1',
         optionKey: 'agree',
         optionLabel: 'A',
@@ -716,6 +721,7 @@ test('publish action revalidates dashboard and detail routes after success', asy
     options: [
       {
         id: 'option-1',
+        assessmentVersionId: 'version-1',
         questionId: 'question-1',
         optionKey: 'agree',
         optionLabel: 'A',
@@ -829,6 +835,7 @@ test('publish action returns an inline error when validation blocks readiness', 
     options: [
       {
         id: 'option-1',
+        assessmentVersionId: 'version-1',
         questionId: 'question-1',
         optionKey: 'agree',
         optionLabel: 'A',

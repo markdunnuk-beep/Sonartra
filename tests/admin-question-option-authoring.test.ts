@@ -30,6 +30,7 @@ type StoredQuestion = {
 
 type StoredOption = {
   id: string;
+  assessmentVersionId: string;
   questionId: string;
   optionKey: string;
   optionLabel: string | null;
@@ -140,12 +141,26 @@ function createFakeDb(seed?: {
           return { rows: [] as T[] };
         }
 
-        if (text.includes('FROM options') && text.includes('option_key = $2')) {
-          const [questionId, optionKey, excludedOptionId] = params as [string, string, string | null];
+        if (text.includes('SELECT order_index') && text.includes('FROM questions')) {
+          const [questionId, assessmentVersionId] = params as [string, string];
+          const match = state.questions.find(
+            (question) => question.id === questionId && question.assessmentVersionId === assessmentVersionId,
+          );
+          return {
+            rows: match ? ([{ order_index: match.orderIndex }] as unknown as T[]) : ([] as T[]),
+          };
+        }
+
+        if (text.includes('FROM options o') && text.includes('o.assessment_version_id = $1')) {
+          const [assessmentVersionId, optionKey, excludedOptionId] = params as [
+            string,
+            string,
+            string | null,
+          ];
           const rows = state.options
             .filter(
               (option) =>
-                option.questionId === questionId &&
+                option.assessmentVersionId === assessmentVersionId &&
                 option.optionKey === optionKey &&
                 (excludedOptionId === null || option.id !== excludedOptionId),
             )
@@ -168,11 +183,12 @@ function createFakeDb(seed?: {
         if (text.includes('INSERT INTO options')) {
           state.options.push({
             id: `option-${state.options.length + 1}`,
-            questionId: params?.[0] as string,
-            optionKey: params?.[1] as string,
-            optionLabel: (params?.[2] as string | null) ?? null,
-            optionText: params?.[3] as string,
-            orderIndex: params?.[4] as number,
+            assessmentVersionId: params?.[0] as string,
+            questionId: params?.[1] as string,
+            optionKey: params?.[2] as string,
+            optionLabel: (params?.[3] as string | null) ?? null,
+            optionText: params?.[4] as string,
+            orderIndex: params?.[5] as number,
           });
           return { rows: [] as T[] };
         }
@@ -236,6 +252,7 @@ test('creates questions and options with deterministic appended order indexes', 
     options: [
       {
         id: 'option-1',
+        assessmentVersionId: 'version-1',
         questionId: 'question-1',
         optionKey: 'agree',
         optionLabel: 'A',
@@ -268,6 +285,8 @@ test('creates questions and options with deterministic appended order indexes', 
 
   assert.equal(fake.state.questions[1]?.orderIndex, 1);
   assert.equal(fake.state.options[1]?.orderIndex, 1);
+  assert.equal(fake.state.questions[1]?.questionKey, 'q02');
+  assert.equal(fake.state.options[1]?.optionKey, 'q01_b');
 });
 
 test('updates question and option metadata in place', async () => {
@@ -303,6 +322,7 @@ test('updates question and option metadata in place', async () => {
     options: [
       {
         id: 'option-1',
+        assessmentVersionId: 'version-1',
         questionId: 'question-1',
         optionKey: 'agree',
         optionLabel: 'A',
@@ -366,6 +386,7 @@ test('deleting a question removes its nested options from the same draft version
     options: [
       {
         id: 'option-1',
+        assessmentVersionId: 'version-1',
         questionId: 'question-1',
         optionKey: 'agree',
         optionLabel: 'A',
@@ -410,6 +431,7 @@ test('deleting an option removes only that option', async () => {
     options: [
       {
         id: 'option-1',
+        assessmentVersionId: 'version-1',
         questionId: 'question-1',
         optionKey: 'agree',
         optionLabel: 'A',
@@ -418,6 +440,7 @@ test('deleting an option removes only that option', async () => {
       },
       {
         id: 'option-2',
+        assessmentVersionId: 'version-1',
         questionId: 'question-1',
         optionKey: 'disagree',
         optionLabel: 'B',

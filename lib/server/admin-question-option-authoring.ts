@@ -15,6 +15,7 @@ import {
   validateAdminQuestionAuthoringValues,
 } from '@/lib/admin/admin-question-option-authoring';
 import { getDbPool } from '@/lib/server/db';
+import { generateOptionKey, generateQuestionKey } from '@/lib/utils/key-generator';
 
 type Queryable = {
   query<T>(text: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
@@ -94,7 +95,8 @@ function isOptionKeyExistsError(error: unknown): boolean {
   return (
     candidate.constraint?.includes('option') === true ||
     candidate.message?.includes('option_key') === true ||
-    candidate.detail?.includes('(question_id, option_key)') === true
+    candidate.detail?.includes('(question_id, option_key)') === true ||
+    candidate.detail?.includes('(assessment_version_id, option_key)') === true
   );
 }
 
@@ -174,19 +176,19 @@ async function duplicateQuestionKeyExists(params: {
 
 async function duplicateOptionKeyExists(params: {
   db: Queryable;
-  questionId: string;
+  assessmentVersionId: string;
   optionKey: string;
   excludedOptionId?: string;
 }): Promise<boolean> {
   const result = await params.db.query<{ id: string }>(
     `
-    SELECT id
-    FROM options
-    WHERE question_id = $1
-      AND option_key = $2
-      AND ($3::uuid IS NULL OR id <> $3::uuid)
+    SELECT o.id
+    FROM options o
+    WHERE o.assessment_version_id = $1
+      AND o.option_key = $2
+      AND ($3::uuid IS NULL OR o.id <> $3::uuid)
     `,
-    [params.questionId, params.optionKey, params.excludedOptionId ?? null],
+    [params.assessmentVersionId, params.optionKey, params.excludedOptionId ?? null],
   );
 
   return result.rows.length > 0;
@@ -221,6 +223,25 @@ async function getNextOptionOrderIndex(db: Queryable, questionId: string): Promi
   return Number(result.rows[0]?.next_order_index ?? 0);
 }
 
+async function getQuestionOrderIndex(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+}): Promise<number | null> {
+  const result = await params.db.query<{ order_index: string | number }>(
+    `
+    SELECT order_index
+    FROM questions
+    WHERE id = $1
+      AND assessment_version_id = $2
+    `,
+    [params.questionId, params.assessmentVersionId],
+  );
+
+  const orderIndex = result.rows[0]?.order_index;
+  return orderIndex === undefined ? null : Number(orderIndex);
+}
+
 export async function createQuestionRecord(params: {
   db: Queryable;
   assessmentVersionId: string;
@@ -235,17 +256,18 @@ export async function createQuestionRecord(params: {
     throw new Error('DOMAIN_NOT_FOUND');
   }
 
+  const orderIndex = await getNextQuestionOrderIndex(params.db, params.assessmentVersionId);
+  const questionKey = generateQuestionKey(orderIndex + 1);
+
   if (
     await duplicateQuestionKeyExists({
       db: params.db,
       assessmentVersionId: params.assessmentVersionId,
-      questionKey: params.values.key,
+      questionKey,
     })
   ) {
     throw new Error('QUESTION_KEY_EXISTS');
   }
-
-  const orderIndex = await getNextQuestionOrderIndex(params.db, params.assessmentVersionId);
 
   await params.db.query(
     `
@@ -261,7 +283,7 @@ export async function createQuestionRecord(params: {
     [
       params.assessmentVersionId,
       params.values.domainId,
-      params.values.key,
+      questionKey,
       params.values.prompt,
       orderIndex,
     ],
@@ -363,32 +385,46 @@ export async function createOptionRecord(params: {
     throw new Error('QUESTION_NOT_FOUND');
   }
 
+  const questionOrderIndex = await getQuestionOrderIndex({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.questionId,
+  });
+  if (questionOrderIndex === null) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  const orderIndex = await getNextOptionOrderIndex(params.db, params.questionId);
+  const optionLetter =
+    params.values.label || String.fromCharCode('A'.charCodeAt(0) + orderIndex);
+  const optionKey = generateOptionKey(questionOrderIndex + 1, optionLetter);
+
   if (
     await duplicateOptionKeyExists({
       db: params.db,
-      questionId: params.questionId,
-      optionKey: params.values.key,
+      assessmentVersionId: params.assessmentVersionId,
+      optionKey,
     })
   ) {
     throw new Error('OPTION_KEY_EXISTS');
   }
 
-  const orderIndex = await getNextOptionOrderIndex(params.db, params.questionId);
-
   await params.db.query(
     `
     INSERT INTO options (
+      assessment_version_id,
       question_id,
       option_key,
       option_label,
       option_text,
       order_index
     )
-    VALUES ($1, $2, $3, $4, $5)
+    VALUES ($1, $2, $3, $4, $5, $6)
     `,
     [
+      params.assessmentVersionId,
       params.questionId,
-      params.values.key,
+      optionKey,
       params.values.label || null,
       params.values.text,
       orderIndex,
@@ -424,7 +460,7 @@ export async function updateOptionRecord(params: {
   if (
     await duplicateOptionKeyExists({
       db: params.db,
-      questionId: params.questionId,
+      assessmentVersionId: params.assessmentVersionId,
       optionKey: params.values.key,
       excludedOptionId: params.optionId,
     })
@@ -620,6 +656,7 @@ export async function createQuestionAction(
 ): Promise<AdminQuestionAuthoringFormState> {
   const values = getQuestionValuesFromFormData(formData);
   const validation = validateAdminQuestionAuthoringValues(values);
+  delete validation.fieldErrors.key;
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }
@@ -684,6 +721,7 @@ export async function createOptionAction(
 ): Promise<AdminOptionAuthoringFormState> {
   const values = getOptionValuesFromFormData(formData);
   const validation = validateAdminOptionAuthoringValues(values);
+  delete validation.fieldErrors.key;
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }
