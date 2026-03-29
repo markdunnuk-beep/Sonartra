@@ -1,7 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createAdminAssessmentRecords } from '@/lib/server/admin-assessment-create';
+import {
+  createAdminAssessmentRecords,
+  createAssessmentActionWithDependencies,
+  initialAdminAssessmentCreateFormState,
+  validateAdminAssessmentCreateValues,
+} from '@/lib/server/admin-assessment-create';
+import {
+  deriveAssessmentKeyFromTitle,
+  syncAssessmentKeyFromTitle,
+} from '@/lib/admin/assessment-key';
 
 type StoredAssessment = {
   id: string;
@@ -73,6 +82,18 @@ function createFakeDb(seed?: {
   };
 }
 
+function buildFormData(values: {
+  title?: string;
+  assessmentKey?: string;
+  description?: string;
+}) {
+  const formData = new FormData();
+  formData.set('title', values.title ?? '');
+  formData.set('assessmentKey', values.assessmentKey ?? '');
+  formData.set('description', values.description ?? '');
+  return formData;
+}
+
 test('creates a new assessment and initial draft version', async () => {
   const fake = createFakeDb();
 
@@ -122,4 +143,129 @@ test('rejects duplicate assessment keys before inserting', async () => {
 
   assert.equal(fake.state.assessments.length, 1);
   assert.equal(fake.state.versions.length, 0);
+});
+
+test('derives a deterministic assessment key from the title', () => {
+  assert.equal(deriveAssessmentKeyFromTitle('Leadership Signals'), 'leadership-signals');
+  assert.equal(
+    deriveAssessmentKeyFromTitle('  Leadership   Signals ++ North America  '),
+    'leadership-signals-north-america',
+  );
+});
+
+test('stops title-to-key syncing after the key is manually overridden', () => {
+  const autoKey = syncAssessmentKeyFromTitle({
+    title: 'Leadership Signals',
+    currentKey: '',
+    hasManualOverride: false,
+  });
+
+  const preservedKey = syncAssessmentKeyFromTitle({
+    title: 'Leadership Signals Revised',
+    currentKey: 'custom-signals',
+    hasManualOverride: true,
+  });
+
+  assert.equal(autoKey, 'leadership-signals');
+  assert.equal(preservedKey, 'custom-signals');
+});
+
+test('returns inline validation state for blank submit values', () => {
+  const result = validateAdminAssessmentCreateValues({
+    title: '',
+    assessmentKey: '',
+    description: '',
+  });
+
+  assert.deepEqual(result.fieldErrors, {
+    title: 'Assessment title is required.',
+    assessmentKey: 'Assessment key is required.',
+  });
+  assert.equal(result.formError, null);
+});
+
+test('returns inline validation state for invalid assessment key format', () => {
+  const result = validateAdminAssessmentCreateValues({
+    title: 'Leadership Signals',
+    assessmentKey: 'Leadership Signals',
+    description: '',
+  });
+
+  assert.equal(result.fieldErrors.assessmentKey, 'Use lowercase letters, numbers, and single hyphens only.');
+});
+
+test('create action returns structured validation state without touching the database for blank submit', async () => {
+  let connectCalls = 0;
+
+  const result = await createAssessmentActionWithDependencies(
+    initialAdminAssessmentCreateFormState,
+    buildFormData({}),
+    {
+      getDbPool: () => ({
+        async connect() {
+          connectCalls += 1;
+          throw new Error('connect should not be called for validation failures');
+        },
+      }),
+      redirect(path: string): never {
+        throw new Error(`unexpected redirect to ${path}`);
+      },
+      revalidatePath(): void {},
+    },
+  );
+
+  assert.equal(connectCalls, 0);
+  assert.deepEqual(result.fieldErrors, {
+    title: 'Assessment title is required.',
+    assessmentKey: 'Assessment key is required.',
+  });
+  assert.equal(result.formError, null);
+});
+
+test('create action returns an inline field error for duplicate assessment keys', async () => {
+  const fake = createFakeDb({
+    assessments: [
+      {
+        id: 'assessment-1',
+        assessmentKey: 'wplp80',
+        title: 'WPLP-80',
+        description: null,
+        isActive: true,
+      },
+    ],
+  });
+
+  const transactionLog: string[] = [];
+
+  const result = await createAssessmentActionWithDependencies(
+    initialAdminAssessmentCreateFormState,
+    buildFormData({
+      title: 'Leadership Signals',
+      assessmentKey: 'wplp80',
+      description: 'Duplicate key.',
+    }),
+    {
+      getDbPool: () => ({
+        async connect() {
+          return {
+            async query<T>(text: string, params?: readonly unknown[]) {
+              const normalized = text.replace(/\s+/g, ' ').trim();
+              transactionLog.push(normalized);
+              return fake.db.query<T>(text, params);
+            },
+            release() {},
+          };
+        },
+      }),
+      redirect(path: string): never {
+        throw new Error(`unexpected redirect to ${path}`);
+      },
+      revalidatePath(): void {},
+    },
+  );
+
+  assert.equal(result.fieldErrors.assessmentKey, 'That assessment key is already in use.');
+  assert.equal(result.formError, null);
+  assert.ok(transactionLog.some((entry) => entry === 'BEGIN'));
+  assert.ok(transactionLog.some((entry) => entry === 'ROLLBACK'));
 });

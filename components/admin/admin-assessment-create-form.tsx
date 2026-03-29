@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -15,6 +15,7 @@ import {
   initialAdminAssessmentCreateFormState,
   type AdminAssessmentCreateFormState,
 } from '@/lib/server/admin-assessment-create';
+import { syncAssessmentKeyFromTitle } from '@/lib/admin/assessment-key';
 
 function FieldShell({
   label,
@@ -41,53 +42,61 @@ function FieldShell({
 
 function TextInput({
   name,
-  defaultValue,
+  value,
   placeholder,
   error,
+  onChange,
 }: Readonly<{
   name: string;
-  defaultValue: string;
+  value: string;
   placeholder: string;
   error?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }>) {
   return (
     <input
+      aria-invalid={error ? true : undefined}
       className={cn(
         'sonartra-focus-ring min-h-12 w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
         error
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
-      defaultValue={defaultValue}
       name={name}
+      onChange={onChange}
       placeholder={placeholder}
       type="text"
+      value={value}
     />
   );
 }
 
 function TextArea({
   name,
-  defaultValue,
+  value,
   placeholder,
   error,
+  onChange,
 }: Readonly<{
   name: string;
-  defaultValue: string;
+  value: string;
   placeholder: string;
   error?: string;
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
 }>) {
   return (
     <textarea
+      aria-invalid={error ? true : undefined}
       className={cn(
         'sonartra-focus-ring min-h-[152px] w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
         error
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
-      defaultValue={defaultValue}
       name={name}
+      onChange={onChange}
       placeholder={placeholder}
+      value={value}
     />
   );
 }
@@ -125,6 +134,48 @@ export function AdminAssessmentCreateForm() {
         state?.values?.description ?? emptyAdminAssessmentCreateFormValues.description,
     },
   };
+  const [title, setTitle] = useState(safeState.values.title);
+  const [assessmentKey, setAssessmentKey] = useState(safeState.values.assessmentKey);
+  const [description, setDescription] = useState(safeState.values.description);
+  const [hasManualKeyOverride, setHasManualKeyOverride] = useState(
+    safeState.values.assessmentKey.length > 0 &&
+      safeState.values.assessmentKey !== syncAssessmentKeyFromTitle({
+        title: safeState.values.title,
+        currentKey: '',
+        hasManualOverride: false,
+      }),
+  );
+
+  useEffect(() => {
+    setTitle(safeState.values.title);
+    setAssessmentKey(safeState.values.assessmentKey);
+    setDescription(safeState.values.description);
+    setHasManualKeyOverride(
+      safeState.values.assessmentKey.length > 0 &&
+        safeState.values.assessmentKey !== syncAssessmentKeyFromTitle({
+          title: safeState.values.title,
+          currentKey: '',
+          hasManualOverride: false,
+        }),
+    );
+  }, [safeState.values.assessmentKey, safeState.values.description, safeState.values.title]);
+
+  function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const nextTitle = event.currentTarget.value;
+    setTitle(nextTitle);
+    setAssessmentKey((currentKey) =>
+      syncAssessmentKeyFromTitle({
+        title: nextTitle,
+        currentKey,
+        hasManualOverride: hasManualKeyOverride,
+      }),
+    );
+  }
+
+  function handleAssessmentKeyChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setHasManualKeyOverride(true);
+    setAssessmentKey(event.currentTarget.value);
+  }
 
   return (
     <div className="space-y-6">
@@ -150,10 +201,11 @@ export function AdminAssessmentCreateForm() {
               label="Assessment title"
             >
               <TextInput
-                defaultValue={safeState.values.title}
                 error={safeState.fieldErrors.title}
                 name="title"
+                onChange={handleTitleChange}
                 placeholder="Leadership Signals"
+                value={title}
               />
             </FieldShell>
 
@@ -163,10 +215,11 @@ export function AdminAssessmentCreateForm() {
               label="Assessment key"
             >
               <TextInput
-                defaultValue={safeState.values.assessmentKey}
                 error={safeState.fieldErrors.assessmentKey}
                 name="assessmentKey"
+                onChange={handleAssessmentKeyChange}
                 placeholder="leadership-signals"
+                value={assessmentKey}
               />
             </FieldShell>
           </div>
@@ -177,9 +230,10 @@ export function AdminAssessmentCreateForm() {
             label="Description"
           >
             <TextArea
-              defaultValue={safeState.values.description}
+              value={description}
               error={safeState.fieldErrors.description}
               name="description"
+              onChange={(event) => setDescription(event.currentTarget.value)}
               placeholder="A focused individual assessment for leadership behaviour and decision patterns."
             />
           </FieldShell>

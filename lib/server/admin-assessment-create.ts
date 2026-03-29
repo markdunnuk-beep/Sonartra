@@ -3,6 +3,11 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
+import {
+  ASSESSMENT_KEY_PATTERN,
+  MAX_ASSESSMENT_KEY_LENGTH,
+  normalizeAssessmentKeyInput,
+} from '@/lib/admin/assessment-key';
 import { getDbPool } from '@/lib/server/db';
 
 export type AdminAssessmentCreateFormValues = {
@@ -30,8 +35,21 @@ type Queryable = {
   query<T>(text: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
 };
 
+type TransactionClient = Queryable & {
+  release(): void;
+};
+
+type DbPoolLike = {
+  connect(): Promise<TransactionClient>;
+};
+
+type CreateAssessmentActionDependencies = {
+  getDbPool(): DbPoolLike;
+  redirect(path: string): never;
+  revalidatePath(path: string): void;
+};
+
 const INITIAL_VERSION_TAG = '1.0.0';
-const KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const emptyAdminAssessmentCreateFormValues: AdminAssessmentCreateFormValues = {
   title: '',
@@ -50,10 +68,12 @@ function normalizeFormValue(value: FormDataEntryValue | null): string {
 }
 
 function normalizeAssessmentKey(value: string): string {
-  return value.trim().toLowerCase();
+  return normalizeAssessmentKeyInput(value);
 }
 
-function validateInput(values: AdminAssessmentCreateFormValues): AdminAssessmentCreateFormState {
+export function validateAdminAssessmentCreateValues(
+  values: AdminAssessmentCreateFormValues,
+): AdminAssessmentCreateFormState {
   const fieldErrors: AdminAssessmentCreateFormState['fieldErrors'] = {};
 
   if (!values.title) {
@@ -62,11 +82,10 @@ function validateInput(values: AdminAssessmentCreateFormValues): AdminAssessment
 
   if (!values.assessmentKey) {
     fieldErrors.assessmentKey = 'Assessment key is required.';
-  } else if (!KEY_PATTERN.test(values.assessmentKey)) {
-    fieldErrors.assessmentKey =
-      'Use lowercase letters, numbers, and single hyphens only.';
-  } else if (values.assessmentKey.length > 64) {
-    fieldErrors.assessmentKey = 'Assessment key must be 64 characters or fewer.';
+  } else if (!ASSESSMENT_KEY_PATTERN.test(values.assessmentKey)) {
+    fieldErrors.assessmentKey = 'Use lowercase letters, numbers, and single hyphens only.';
+  } else if (values.assessmentKey.length > MAX_ASSESSMENT_KEY_LENGTH) {
+    fieldErrors.assessmentKey = `Assessment key must be ${MAX_ASSESSMENT_KEY_LENGTH} characters or fewer.`;
   }
 
   if (values.description.length > 600) {
@@ -78,6 +97,31 @@ function validateInput(values: AdminAssessmentCreateFormValues): AdminAssessment
     fieldErrors,
     values,
   };
+}
+
+function isAssessmentKeyExistsError(error: unknown): boolean {
+  if (error instanceof Error && error.message === 'ASSESSMENT_KEY_EXISTS') {
+    return true;
+  }
+
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const candidate = error as {
+    code?: string;
+    constraint?: string;
+    message?: string;
+  };
+
+  if (candidate.code !== '23505') {
+    return false;
+  }
+
+  return (
+    candidate.constraint?.includes('assessment') === true ||
+    candidate.message?.includes('assessment_key') === true
+  );
 }
 
 async function assessmentKeyExists(db: Queryable, assessmentKey: string): Promise<boolean> {
@@ -149,21 +193,33 @@ export async function createAssessmentAction(
   _previousState: AdminAssessmentCreateFormState,
   formData: FormData,
 ): Promise<AdminAssessmentCreateFormState> {
+  return createAssessmentActionWithDependencies(_previousState, formData);
+}
+
+export async function createAssessmentActionWithDependencies(
+  _previousState: AdminAssessmentCreateFormState,
+  formData: FormData,
+  dependencies: CreateAssessmentActionDependencies = {
+    getDbPool,
+    redirect,
+    revalidatePath,
+  },
+): Promise<AdminAssessmentCreateFormState> {
   const values: AdminAssessmentCreateFormValues = {
     title: normalizeFormValue(formData.get('title')),
     assessmentKey: normalizeAssessmentKey(normalizeFormValue(formData.get('assessmentKey'))),
     description: normalizeFormValue(formData.get('description')),
   };
 
-  const validation = validateInput(values);
+  const validation = validateAdminAssessmentCreateValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }
 
-  const pool = getDbPool();
-  const client = await pool.connect();
+  let client: TransactionClient | null = null;
 
   try {
+    client = await dependencies.getDbPool().connect();
     await client.query('BEGIN');
 
     const created = await createAdminAssessmentRecords({
@@ -173,14 +229,17 @@ export async function createAssessmentAction(
 
     await client.query('COMMIT');
 
-    revalidatePath('/admin/assessments');
-    revalidatePath(`/admin/assessments/${created.assessmentKey}`);
+    dependencies.revalidatePath('/admin/assessments');
+    dependencies.revalidatePath(`/admin/assessments/${created.assessmentKey}`);
 
-    redirect(`/admin/assessments/${created.assessmentKey}`);
+    dependencies.redirect(`/admin/assessments/${created.assessmentKey}`);
+    throw new Error('UNREACHABLE_REDIRECT_COMPLETED');
   } catch (error) {
-    await client.query('ROLLBACK');
+    if (client) {
+      await client.query('ROLLBACK').catch(() => undefined);
+    }
 
-    if (error instanceof Error && error.message === 'ASSESSMENT_KEY_EXISTS') {
+    if (isAssessmentKeyExistsError(error)) {
       return {
         formError: null,
         fieldErrors: {
@@ -197,6 +256,6 @@ export async function createAssessmentAction(
       values,
     };
   } finally {
-    client.release();
+    client?.release();
   }
 }
