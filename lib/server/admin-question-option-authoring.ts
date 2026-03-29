@@ -109,6 +109,40 @@ type InsertedOptionRow = {
   id: string;
 };
 
+type ScopedQuestionRow = {
+  id: string;
+  assessment_version_id: string;
+  domain_id: string;
+  prompt: string;
+  order_index: string | number;
+};
+
+type ScopedOptionRow = {
+  id: string;
+  assessment_version_id: string;
+  question_id: string;
+  option_label: string | null;
+  option_text: string;
+  order_index: string | number;
+};
+
+type ScopedOptionWeightRow = {
+  option_id: string;
+  signal_id: string;
+  weight: string;
+};
+
+type RekeyedQuestionRow = {
+  id: string;
+  order_index: string | number;
+};
+
+type RekeyedOptionRow = {
+  id: string;
+  option_label: string | null;
+  order_index: string | number;
+};
+
 type BulkInsertedQuestionRow = {
   id: string;
   assessment_version_id: string;
@@ -337,6 +371,167 @@ async function getQuestionOrderIndex(params: {
 
   const orderIndex = result.rows[0]?.order_index;
   return orderIndex === undefined ? null : Number(orderIndex);
+}
+
+async function getScopedQuestion(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+}): Promise<ScopedQuestionRow | null> {
+  const result = await params.db.query<ScopedQuestionRow>(
+    `
+    SELECT
+      id,
+      assessment_version_id,
+      domain_id,
+      prompt,
+      order_index
+    FROM questions
+    WHERE id = $1
+      AND assessment_version_id = $2
+    `,
+    [params.questionId, params.assessmentVersionId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function getQuestionOptions(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+}): Promise<readonly ScopedOptionRow[]> {
+  const result = await params.db.query<ScopedOptionRow>(
+    `
+    SELECT
+      o.id,
+      o.assessment_version_id,
+      o.question_id,
+      o.option_label,
+      o.option_text,
+      o.order_index
+    FROM options o
+    INNER JOIN questions q ON q.id = o.question_id
+    WHERE o.question_id = $1
+      AND o.assessment_version_id = $2
+      AND q.assessment_version_id = $2
+    ORDER BY o.order_index ASC, o.id ASC
+    `,
+    [params.questionId, params.assessmentVersionId],
+  );
+
+  return result.rows;
+}
+
+async function getOptionSignalWeightsForQuestion(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+}): Promise<readonly ScopedOptionWeightRow[]> {
+  const result = await params.db.query<ScopedOptionWeightRow>(
+    `
+    SELECT
+      osw.option_id,
+      osw.signal_id,
+      osw.weight::text AS weight
+    FROM option_signal_weights osw
+    INNER JOIN options o ON o.id = osw.option_id
+    INNER JOIN questions q ON q.id = o.question_id
+    INNER JOIN signals s ON s.id = osw.signal_id
+    WHERE q.id = $1
+      AND q.assessment_version_id = $2
+      AND o.assessment_version_id = $2
+      AND s.assessment_version_id = $2
+    ORDER BY o.order_index ASC, osw.id ASC
+    `,
+    [params.questionId, params.assessmentVersionId],
+  );
+
+  return result.rows;
+}
+
+function getCanonicalOptionLetter(optionOrderIndex: number): string {
+  const normalizedIndex = Math.max(0, optionOrderIndex - 1);
+  return String.fromCharCode('a'.charCodeAt(0) + normalizedIndex);
+}
+
+async function rekeyQuestionOptions(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+  questionIndex: number;
+}): Promise<void> {
+  const options = await params.db.query<RekeyedOptionRow>(
+    `
+    SELECT id, option_label, order_index
+    FROM options
+    WHERE question_id = $1
+      AND assessment_version_id = $2
+    ORDER BY order_index ASC, id ASC
+    `,
+    [params.questionId, params.assessmentVersionId],
+  );
+
+  for (const option of options.rows) {
+    const optionOrderIndex = Number(option.order_index);
+    const optionKey = generateOptionKey(
+      params.questionIndex,
+      getCanonicalOptionLetter(optionOrderIndex),
+    );
+
+    await params.db.query(
+      `
+      UPDATE options
+      SET
+        option_key = $3,
+        updated_at = NOW()
+      WHERE id = $1
+        AND question_id = $2
+      `,
+      [option.id, params.questionId, optionKey],
+    );
+  }
+}
+
+async function rekeyQuestionsFromOrderIndex(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  startingOrderIndex: number;
+}): Promise<void> {
+  const questions = await params.db.query<RekeyedQuestionRow>(
+    `
+    SELECT id, order_index
+    FROM questions
+    WHERE assessment_version_id = $1
+      AND order_index >= $2
+    ORDER BY order_index ASC, id ASC
+    `,
+    [params.assessmentVersionId, params.startingOrderIndex],
+  );
+
+  for (const question of questions.rows) {
+    const questionIndex = Number(question.order_index) + 1;
+    const questionKey = generateQuestionKey(questionIndex);
+
+    await params.db.query(
+      `
+      UPDATE questions
+      SET
+        question_key = $3,
+        updated_at = NOW()
+      WHERE id = $1
+        AND assessment_version_id = $2
+      `,
+      [question.id, params.assessmentVersionId, questionKey],
+    );
+
+    await rekeyQuestionOptions({
+      db: params.db,
+      assessmentVersionId: params.assessmentVersionId,
+      questionId: question.id,
+      questionIndex,
+    });
+  }
 }
 
 async function getDefaultBulkQuestionDomainId(
@@ -608,8 +803,158 @@ export async function createBulkQuestionRecords(params: {
           (left, right) => left.orderIndex - right.orderIndex || left.optionId.localeCompare(right.optionId),
         ),
       ),
-    })),
+      })),
   );
+}
+
+export async function duplicateQuestionRecord(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  sourceQuestionId: string;
+}): Promise<AdminCreatedQuestion> {
+  const sourceQuestion = await getScopedQuestion({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.sourceQuestionId,
+  });
+  if (!sourceQuestion) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  const sourceOptions = await getQuestionOptions({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.sourceQuestionId,
+  });
+  const sourceWeights = await getOptionSignalWeightsForQuestion({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.sourceQuestionId,
+  });
+
+  const duplicateOrderIndex = Number(sourceQuestion.order_index) + 1;
+
+  await params.db.query(
+    `
+    UPDATE questions
+    SET
+      order_index = order_index + 1,
+      updated_at = NOW()
+    WHERE assessment_version_id = $1
+      AND order_index > $2
+    `,
+    [params.assessmentVersionId, Number(sourceQuestion.order_index)],
+  );
+
+  const insertedQuestion = await params.db.query<InsertedQuestionRow>(
+    `
+    INSERT INTO questions (
+      assessment_version_id,
+      domain_id,
+      question_key,
+      prompt,
+      order_index
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id
+    `,
+    [
+      params.assessmentVersionId,
+      sourceQuestion.domain_id,
+      generateQuestionKey(duplicateOrderIndex + 1),
+      sourceQuestion.prompt,
+      duplicateOrderIndex,
+    ],
+  );
+
+  const duplicatedQuestionId = insertedQuestion.rows[0]?.id;
+  if (!duplicatedQuestionId) {
+    throw new Error('QUESTION_CREATE_FAILED');
+  }
+
+  const duplicatedOptions: AdminQuestionCreatedOption[] = [];
+  const optionIdMap = new Map<string, string>();
+
+  for (const sourceOption of sourceOptions) {
+    const optionOrderIndex = Number(sourceOption.order_index);
+    const duplicatedOption = await params.db.query<InsertedOptionRow>(
+      `
+      INSERT INTO options (
+        assessment_version_id,
+        question_id,
+        option_key,
+        option_label,
+        option_text,
+        order_index
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id
+      `,
+      [
+        params.assessmentVersionId,
+        duplicatedQuestionId,
+        generateOptionKey(duplicateOrderIndex + 1, getCanonicalOptionLetter(optionOrderIndex)),
+        sourceOption.option_label,
+        sourceOption.option_text,
+        optionOrderIndex,
+      ],
+    );
+
+    const duplicatedOptionId = duplicatedOption.rows[0]?.id;
+    if (!duplicatedOptionId) {
+      throw new Error('OPTION_CREATE_FAILED');
+    }
+
+    optionIdMap.set(sourceOption.id, duplicatedOptionId);
+    duplicatedOptions.push({
+      optionId: duplicatedOptionId,
+      assessmentVersionId: params.assessmentVersionId,
+      questionId: duplicatedQuestionId,
+      key: generateOptionKey(duplicateOrderIndex + 1, getCanonicalOptionLetter(optionOrderIndex)),
+      label: sourceOption.option_label ?? '',
+      text: sourceOption.option_text,
+      orderIndex: optionOrderIndex,
+    });
+  }
+
+  for (const sourceWeight of sourceWeights) {
+    const duplicatedOptionId = optionIdMap.get(sourceWeight.option_id);
+    if (!duplicatedOptionId) {
+      throw new Error('OPTION_NOT_FOUND');
+    }
+
+    await params.db.query(
+      `
+      INSERT INTO option_signal_weights (
+        option_id,
+        signal_id,
+        weight
+      )
+      VALUES ($1, $2, $3::numeric(12, 4))
+      `,
+      [duplicatedOptionId, sourceWeight.signal_id, sourceWeight.weight],
+    );
+  }
+
+  await rekeyQuestionsFromOrderIndex({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    startingOrderIndex: duplicateOrderIndex + 1,
+  });
+
+  return {
+    questionId: duplicatedQuestionId,
+    assessmentVersionId: params.assessmentVersionId,
+    domainId: sourceQuestion.domain_id,
+    key: generateQuestionKey(duplicateOrderIndex + 1),
+    prompt: sourceQuestion.prompt,
+    orderIndex: duplicateOrderIndex,
+    options: Object.freeze(
+      duplicatedOptions.sort(
+        (left, right) => left.orderIndex - right.orderIndex || left.optionId.localeCompare(right.optionId),
+      ),
+    ),
+  };
 }
 
 export async function updateQuestionRecord(params: {
@@ -1188,6 +1533,23 @@ export async function deleteQuestionAction(
         assessmentVersionId: context.assessmentVersionId,
         questionId: context.questionId ?? '',
       }).then(() => null),
+  });
+}
+
+export async function duplicateQuestionAction(
+  context: ActionContext,
+  _previousState: AdminQuestionAuthoringFormState,
+  _formData: FormData,
+): Promise<AdminQuestionAuthoringFormState> {
+  return runQuestionWriteAction({
+    assessmentKey: context.assessmentKey,
+    values: emptyAdminQuestionAuthoringFormValues,
+    action: (db) =>
+      duplicateQuestionRecord({
+        db,
+        assessmentVersionId: context.assessmentVersionId,
+        sourceQuestionId: context.questionId ?? '',
+      }),
   });
 }
 

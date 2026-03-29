@@ -29,6 +29,7 @@ import {
   createBulkQuestions,
   createOptionAction,
   createQuestionAction,
+  duplicateQuestionAction,
   deleteOptionAction,
   deleteQuestionAction,
   updateOptionTextAction,
@@ -660,6 +661,33 @@ function DeleteQuestionForm({
   );
 }
 
+function DuplicateQuestionForm({
+  assessmentKey,
+  assessmentVersionId,
+  questionId,
+}: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  questionId: string;
+}) {
+  const [state, formAction] = useActionState(
+    duplicateQuestionAction.bind(null, {
+      assessmentKey,
+      assessmentVersionId,
+      questionId,
+    }),
+    initialAdminQuestionAuthoringFormState,
+  );
+  const currentState = normalizeQuestionState(state);
+
+  return (
+    <form action={formAction} className="space-y-3">
+      <InlineError message={currentState.formError} />
+      <SubmitButton idleLabel="Duplicate question" pendingLabel="Duplicating..." variant="secondary" />
+    </form>
+  );
+}
+
 function CreateOptionForm({
   assessmentKey,
   assessmentVersionId,
@@ -841,17 +869,33 @@ function QuestionCard({
               assessmentVersionId={assessmentVersionId}
               question={question}
             />
-            <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-              <p className="sonartra-page-eyebrow">Delete question</p>
-              <p className="mt-2 text-sm leading-7 text-white/58">
-                This also removes its response options.
-              </p>
-              <div className="mt-4">
+            <div className="space-y-4">
+              <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+                <p className="sonartra-page-eyebrow">Duplicate question</p>
+                <p className="mt-2 text-sm leading-7 text-white/58">
+                  Copy this question, its response options, and scoring below this row.
+                </p>
+                <div className="mt-4">
+                  <DuplicateQuestionForm
+                    assessmentKey={assessmentKey}
+                    assessmentVersionId={assessmentVersionId}
+                    questionId={question.questionId}
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+                <p className="sonartra-page-eyebrow">Delete question</p>
+                <p className="mt-2 text-sm leading-7 text-white/58">
+                  This also removes its response options.
+                </p>
+                <div className="mt-4">
                 <DeleteQuestionForm
                   assessmentKey={assessmentKey}
                   assessmentVersionId={assessmentVersionId}
                   questionId={question.questionId}
                 />
+                </div>
               </div>
             </div>
           </div>

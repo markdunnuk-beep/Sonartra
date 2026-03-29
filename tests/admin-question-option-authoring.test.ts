@@ -8,6 +8,7 @@ import {
   createQuestionRecord,
   deleteOptionRecord,
   deleteQuestionRecord,
+  duplicateQuestionRecord,
   updateOptionRecord,
   updateOptionText,
   updateQuestionRecord,
@@ -47,6 +48,14 @@ type FakeState = {
   domains: StoredDomain[];
   questions: StoredQuestion[];
   options: StoredOption[];
+  optionSignalWeights: StoredOptionSignalWeight[];
+};
+
+type StoredOptionSignalWeight = {
+  id: string;
+  optionId: string;
+  signalId: string;
+  weight: string;
 };
 
 function cloneState(state: FakeState): FakeState {
@@ -54,6 +63,7 @@ function cloneState(state: FakeState): FakeState {
     domains: state.domains.map((domain) => ({ ...domain })),
     questions: state.questions.map((question) => ({ ...question })),
     options: state.options.map((option) => ({ ...option })),
+    optionSignalWeights: state.optionSignalWeights.map((weight) => ({ ...weight })),
   };
 }
 
@@ -62,15 +72,18 @@ function createFakeDb(
     domains?: StoredDomain[];
     questions?: StoredQuestion[];
     options?: StoredOption[];
+    optionSignalWeights?: StoredOptionSignalWeight[];
   },
   config?: {
     failOptionKey?: string;
+    failWeightInsertForOptionId?: string;
   },
 ) {
   const state: FakeState = {
     domains: [...(seed?.domains ?? [])],
     questions: [...(seed?.questions ?? [])],
     options: [...(seed?.options ?? [])],
+    optionSignalWeights: [...(seed?.optionSignalWeights ?? [])],
   };
 
   let transactionSnapshot: FakeState | null = null;
@@ -95,6 +108,7 @@ function createFakeDb(
         state.domains = transactionSnapshot.domains;
         state.questions = transactionSnapshot.questions;
         state.options = transactionSnapshot.options;
+        state.optionSignalWeights = transactionSnapshot.optionSignalWeights;
       }
       transactionSnapshot = null;
       return { rows: [] as T[] };
@@ -105,7 +119,13 @@ function createFakeDb(
       state.questions = state.questions.filter(
         (question) => !(question.id === questionId && question.assessmentVersionId === assessmentVersionId),
       );
+      const deletedOptionIds = state.options
+        .filter((option) => option.questionId === questionId)
+        .map((option) => option.id);
       state.options = state.options.filter((option) => option.questionId !== questionId);
+      state.optionSignalWeights = state.optionSignalWeights.filter(
+        (weight) => !deletedOptionIds.includes(weight.optionId),
+      );
       return { rows: [] as T[] };
     }
 
@@ -114,6 +134,7 @@ function createFakeDb(
       state.options = state.options.filter(
         (option) => !(option.id === optionId && option.questionId === questionId),
       );
+      state.optionSignalWeights = state.optionSignalWeights.filter((weight) => weight.optionId !== optionId);
       return { rows: [] as T[] };
     }
 
@@ -217,6 +238,24 @@ function createFakeDb(
       return { rows: match ? ([{ id: match.id }] as unknown as T[]) : ([] as T[]) };
     }
 
+    if (text.includes('SELECT') && text.includes('assessment_version_id') && text.includes('domain_id') && text.includes('prompt') && text.includes('FROM questions')) {
+      const [questionId, assessmentVersionId] = params as [string, string];
+      const match = state.questions.find(
+        (question) => question.id === questionId && question.assessmentVersionId === assessmentVersionId,
+      );
+      return {
+        rows: match
+          ? ([{
+              id: match.id,
+              assessment_version_id: match.assessmentVersionId,
+              domain_id: match.domainId,
+              prompt: match.prompt,
+              order_index: match.orderIndex,
+            }] as unknown as T[])
+          : ([] as T[]),
+      };
+    }
+
     if (text.includes('UPDATE questions') && text.includes('RETURNING id, prompt, question_key')) {
       const [questionId, assessmentVersionId, prompt] = params as [string, string, string];
       const match = state.questions.find(
@@ -229,6 +268,43 @@ function createFakeDb(
       return {
         rows: ([{ id: match.id, prompt: match.prompt, question_key: match.questionKey }] as unknown) as T[],
       };
+    }
+
+    if (text.includes('UPDATE questions') && text.includes('order_index = order_index + 1')) {
+      const [assessmentVersionId, sourceOrderIndex] = params as [string, number];
+      state.questions = state.questions.map((question) =>
+        question.assessmentVersionId === assessmentVersionId && question.orderIndex > sourceOrderIndex
+          ? { ...question, orderIndex: question.orderIndex + 1 }
+          : question,
+      );
+      return { rows: [] as T[] };
+    }
+
+    if (text.includes('SELECT id, order_index') && text.includes('FROM questions')) {
+      const [assessmentVersionId, startingOrderIndex] = params as [string, number];
+      const rows = state.questions
+        .filter(
+          (question) =>
+            question.assessmentVersionId === assessmentVersionId &&
+            question.orderIndex >= startingOrderIndex,
+        )
+        .sort((left, right) => left.orderIndex - right.orderIndex || left.id.localeCompare(right.id))
+        .map((question) => ({
+          id: question.id,
+          order_index: question.orderIndex,
+        }));
+      return { rows: rows as unknown as T[] };
+    }
+
+    if (text.includes('SET') && text.includes('question_key = $3') && text.includes('assessment_version_id = $2')) {
+      const [questionId, assessmentVersionId, questionKey] = params as [string, string, string];
+      const match = state.questions.find(
+        (question) => question.id === questionId && question.assessmentVersionId === assessmentVersionId,
+      );
+      if (match) {
+        match.questionKey = questionKey;
+      }
+      return { rows: [] as T[] };
     }
 
     if (text.includes('UPDATE questions')) {
@@ -342,6 +418,44 @@ function createFakeDb(
       return { rows: ([{ id }] as unknown) as T[] };
     }
 
+    if (text.includes('SELECT') && text.includes('o.assessment_version_id') && text.includes('o.question_id') && text.includes('o.option_label')) {
+      const [questionId, assessmentVersionId] = params as [string, string];
+      const rows = state.options
+        .filter(
+          (option) =>
+            option.questionId === questionId &&
+            option.assessmentVersionId === assessmentVersionId &&
+            state.questions.some(
+              (question) => question.id === option.questionId && question.assessmentVersionId === assessmentVersionId,
+            ),
+        )
+        .sort((left, right) => left.orderIndex - right.orderIndex || left.id.localeCompare(right.id))
+        .map((option) => ({
+          id: option.id,
+          assessment_version_id: option.assessmentVersionId,
+          question_id: option.questionId,
+          option_label: option.optionLabel,
+          option_text: option.optionText,
+          order_index: option.orderIndex,
+        }));
+      return { rows: rows as unknown as T[] };
+    }
+
+    if (text.includes('SELECT id, option_label, order_index') && text.includes('FROM options')) {
+      const [questionId, assessmentVersionId] = params as [string, string];
+      const rows = state.options
+        .filter(
+          (option) => option.questionId === questionId && option.assessmentVersionId === assessmentVersionId,
+        )
+        .sort((left, right) => left.orderIndex - right.orderIndex || left.id.localeCompare(right.id))
+        .map((option) => ({
+          id: option.id,
+          option_label: option.optionLabel,
+          order_index: option.orderIndex,
+        }));
+      return { rows: rows as unknown as T[] };
+    }
+
     if (text.includes('INSERT INTO options')) {
       state.options.push({
         id: nextId('option', state.options.length),
@@ -351,6 +465,45 @@ function createFakeDb(
         optionLabel: (params?.[3] as string | null) ?? null,
         optionText: params?.[4] as string,
         orderIndex: params?.[5] as number,
+      });
+      return { rows: [] as T[] };
+    }
+
+    if (text.includes('FROM option_signal_weights osw') && text.includes('INNER JOIN signals s ON s.id = osw.signal_id')) {
+      const [questionId, assessmentVersionId] = params as [string, string];
+      const rows = state.optionSignalWeights
+        .filter((weight) => {
+          const option = state.options.find((candidate) => candidate.id === weight.optionId);
+          const question = option
+            ? state.questions.find((candidate) => candidate.id === option.questionId)
+            : null;
+
+          return (
+            option !== undefined &&
+            option.assessmentVersionId === assessmentVersionId &&
+            question != null &&
+            question.id === questionId &&
+            question.assessmentVersionId === assessmentVersionId
+          );
+        })
+        .map((weight) => ({
+          option_id: weight.optionId,
+          signal_id: weight.signalId,
+          weight: weight.weight,
+        }));
+      return { rows: rows as unknown as T[] };
+    }
+
+    if (text.includes('INSERT INTO option_signal_weights')) {
+      const [optionId, signalId, weight] = params as [string, string, string];
+      if (config?.failWeightInsertForOptionId === optionId) {
+        throw new Error('WEIGHT_INSERT_FAILED');
+      }
+      state.optionSignalWeights.push({
+        id: nextId('weight', state.optionSignalWeights.length),
+        optionId,
+        signalId,
+        weight,
       });
       return { rows: [] as T[] };
     }
@@ -375,6 +528,22 @@ function createFakeDb(
       return {
         rows: ([{ id: match.id, option_text: match.optionText, option_key: match.optionKey }] as unknown) as T[],
       };
+    }
+
+    if (
+      text.includes('SET') &&
+      text.includes('option_key = $3') &&
+      text.includes('WHERE id = $1') &&
+      !text.includes('option_label = $4')
+    ) {
+      const [optionId, questionId, optionKey] = params as [string, string, string];
+      const match = state.options.find(
+        (option) => option.id === optionId && option.questionId === questionId,
+      );
+      if (match) {
+        match.optionKey = optionKey;
+      }
+      return { rows: [] as T[] };
     }
 
     if (text.includes('UPDATE options')) {
@@ -638,6 +807,281 @@ test('bulk action rolls back all created records when option insertion fails', a
   assert.equal(fake.state.questions.length, 1);
   assert.equal(fake.state.options.length, 1);
   assert.deepEqual(revalidatedPaths, []);
+});
+
+test('duplicates a question below the source and copies options and weights deterministically', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section one',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing question one',
+        orderIndex: 0,
+      },
+      {
+        id: 'question-2',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q02',
+        prompt: 'Duplicate me',
+        orderIndex: 1,
+      },
+      {
+        id: 'question-3',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q03',
+        prompt: 'Existing question three',
+        orderIndex: 2,
+      },
+      {
+        id: 'question-9',
+        assessmentVersionId: 'version-2',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Other version question',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        assessmentVersionId: 'version-1',
+        questionId: 'question-2',
+        optionKey: 'q02_a',
+        optionLabel: 'A',
+        optionText: 'Strongly agree',
+        orderIndex: 1,
+      },
+      {
+        id: 'option-2',
+        assessmentVersionId: 'version-1',
+        questionId: 'question-2',
+        optionKey: 'q02_b',
+        optionLabel: 'B',
+        optionText: 'Agree',
+        orderIndex: 2,
+      },
+      {
+        id: 'option-3',
+        assessmentVersionId: 'version-1',
+        questionId: 'question-3',
+        optionKey: 'q03_a',
+        optionLabel: 'A',
+        optionText: 'Downstream option',
+        orderIndex: 1,
+      },
+      {
+        id: 'option-9',
+        assessmentVersionId: 'version-2',
+        questionId: 'question-9',
+        optionKey: 'q01_a',
+        optionLabel: 'A',
+        optionText: 'Other version option',
+        orderIndex: 1,
+      },
+    ],
+    optionSignalWeights: [
+      {
+        id: 'weight-1',
+        optionId: 'option-1',
+        signalId: 'signal-1',
+        weight: '1.2500',
+      },
+      {
+        id: 'weight-2',
+        optionId: 'option-2',
+        signalId: 'signal-2',
+        weight: '-0.5000',
+      },
+      {
+        id: 'weight-9',
+        optionId: 'option-9',
+        signalId: 'signal-9',
+        weight: '2.0000',
+      },
+    ],
+  });
+
+  const duplicatedQuestion = await duplicateQuestionRecord({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    sourceQuestionId: 'question-2',
+  });
+
+  assert.equal(fake.state.questions.length, 5);
+  assert.deepEqual(
+    fake.state.questions
+      .filter((question) => question.assessmentVersionId === 'version-1')
+      .sort((left, right) => left.orderIndex - right.orderIndex || left.id.localeCompare(right.id))
+      .map((question) => ({
+        id: question.id,
+        key: question.questionKey,
+        prompt: question.prompt,
+        orderIndex: question.orderIndex,
+      })),
+    [
+      { id: 'question-1', key: 'q01', prompt: 'Existing question one', orderIndex: 0 },
+      { id: 'question-2', key: 'q02', prompt: 'Duplicate me', orderIndex: 1 },
+      { id: 'question-5', key: 'q03', prompt: 'Duplicate me', orderIndex: 2 },
+      { id: 'question-3', key: 'q04', prompt: 'Existing question three', orderIndex: 3 },
+    ],
+  );
+  assert.equal(duplicatedQuestion.questionId, 'question-5');
+  assert.equal(duplicatedQuestion.assessmentVersionId, 'version-1');
+  assert.equal(duplicatedQuestion.domainId, 'domain-1');
+  assert.equal(duplicatedQuestion.prompt, 'Duplicate me');
+  assert.equal(duplicatedQuestion.key, 'q03');
+
+  const duplicatedOptions = fake.state.options
+    .filter((option) => option.questionId === duplicatedQuestion.questionId)
+    .sort((left, right) => left.orderIndex - right.orderIndex || left.id.localeCompare(right.id));
+
+  assert.deepEqual(
+    duplicatedOptions.map((option) => ({
+      id: option.id,
+      key: option.optionKey,
+      label: option.optionLabel,
+      text: option.optionText,
+      orderIndex: option.orderIndex,
+    })),
+    [
+      { id: 'option-5', key: 'q03_a', label: 'A', text: 'Strongly agree', orderIndex: 1 },
+      { id: 'option-6', key: 'q03_b', label: 'B', text: 'Agree', orderIndex: 2 },
+    ],
+  );
+  assert.notEqual(duplicatedOptions[0]?.id, 'option-1');
+  assert.notEqual(duplicatedOptions[1]?.id, 'option-2');
+
+  const downstreamOption = fake.state.options.find((option) => option.id === 'option-3');
+  assert.equal(downstreamOption?.optionKey, 'q04_a');
+
+  const duplicatedWeights = fake.state.optionSignalWeights
+    .filter((weight) => duplicatedOptions.some((option) => option.id === weight.optionId))
+    .map((weight) => ({
+      optionId: weight.optionId,
+      signalId: weight.signalId,
+      weight: weight.weight,
+    }));
+
+  assert.deepEqual(duplicatedWeights, [
+    { optionId: 'option-5', signalId: 'signal-1', weight: '1.2500' },
+    { optionId: 'option-6', signalId: 'signal-2', weight: '-0.5000' },
+  ]);
+  assert.equal(
+    fake.state.optionSignalWeights.filter((weight) => weight.optionId === 'option-9').length,
+    1,
+  );
+});
+
+test('duplicate question rolls back when copied weight insertion fails', async () => {
+  const fake = createFakeDb(
+    {
+      domains: [
+        {
+          id: 'domain-1',
+          assessmentVersionId: 'version-1',
+          domainKey: 'section-one',
+          label: 'Section one',
+          domainType: 'QUESTION_SECTION',
+          orderIndex: 0,
+        },
+      ],
+      questions: [
+        {
+          id: 'question-1',
+          assessmentVersionId: 'version-1',
+          domainId: 'domain-1',
+          questionKey: 'q01',
+          prompt: 'Duplicate me',
+          orderIndex: 0,
+        },
+        {
+          id: 'question-2',
+          assessmentVersionId: 'version-1',
+          domainId: 'domain-1',
+          questionKey: 'q02',
+          prompt: 'After me',
+          orderIndex: 1,
+        },
+      ],
+      options: [
+        {
+          id: 'option-1',
+          assessmentVersionId: 'version-1',
+          questionId: 'question-1',
+          optionKey: 'q01_a',
+          optionLabel: 'A',
+          optionText: 'Agree',
+          orderIndex: 1,
+        },
+      ],
+      optionSignalWeights: [
+        {
+          id: 'weight-1',
+          optionId: 'option-1',
+          signalId: 'signal-1',
+          weight: '1.0000',
+        },
+      ],
+    },
+    {
+      failWeightInsertForOptionId: 'option-2',
+    },
+  );
+
+  await fake.client.query('BEGIN');
+  await assert.rejects(
+    () =>
+      duplicateQuestionRecord({
+        db: fake.client,
+        assessmentVersionId: 'version-1',
+        sourceQuestionId: 'question-1',
+      }),
+    /WEIGHT_INSERT_FAILED/,
+  );
+  await fake.client.query('ROLLBACK');
+
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({
+      id: question.id,
+      key: question.questionKey,
+      orderIndex: question.orderIndex,
+    })),
+    [
+      { id: 'question-1', key: 'q01', orderIndex: 0 },
+      { id: 'question-2', key: 'q02', orderIndex: 1 },
+    ],
+  );
+  assert.deepEqual(
+    fake.state.options.map((option) => ({
+      id: option.id,
+      questionId: option.questionId,
+      key: option.optionKey,
+    })),
+    [{ id: 'option-1', questionId: 'question-1', key: 'q01_a' }],
+  );
+  assert.deepEqual(
+    fake.state.optionSignalWeights.map((weight) => ({
+      id: weight.id,
+      optionId: weight.optionId,
+      signalId: weight.signalId,
+      weight: weight.weight,
+    })),
+    [{ id: 'weight-1', optionId: 'option-1', signalId: 'signal-1', weight: '1.0000' }],
+  );
 });
 
 test('creates additional options with deterministic appended order indexes', async () => {
