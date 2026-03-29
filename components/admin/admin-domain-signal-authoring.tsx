@@ -176,7 +176,6 @@ function InlineTextEditor({
   requiredMessage: string;
   onSave: (nextValue: string) => Promise<{ ok: boolean; value?: string; error?: string }>;
 }>) {
-  const [currentValue, setCurrentValue] = useState(value);
   const [draftValue, setDraftValue] = useState(value);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -186,13 +185,6 @@ function InlineTextEditor({
   const ignoreBlurRef = useRef(false);
 
   useEffect(() => {
-    setCurrentValue(value);
-    if (!isEditing) {
-      setDraftValue(value);
-    }
-  }, [value, isEditing]);
-
-  useEffect(() => {
     if (!isEditing) {
       return;
     }
@@ -200,27 +192,27 @@ function InlineTextEditor({
     const field = multiline ? textAreaRef.current : inputRef.current;
     field?.focus();
     field?.select();
-  }, [isEditing]);
+  }, [isEditing, multiline]);
 
   function startEditing() {
     if (isPending) {
       return;
     }
 
-    setDraftValue(currentValue);
+    setDraftValue(value);
     setError(null);
     setIsEditing(true);
   }
 
   function cancelEditing() {
-    setDraftValue(currentValue);
+    setDraftValue(value);
     setError(null);
     setIsEditing(false);
   }
 
   function submit(nextRawValue: string) {
     const trimmedValue = nextRawValue.trim();
-    const previousValue = currentValue;
+    const previousValue = value.trim();
 
     if (!trimmedValue) {
       setError(requiredMessage);
@@ -234,7 +226,6 @@ function InlineTextEditor({
       return;
     }
 
-    setCurrentValue(trimmedValue);
     setDraftValue(trimmedValue);
     setError(null);
     setIsEditing(false);
@@ -243,19 +234,16 @@ function InlineTextEditor({
       const result = await onSave(trimmedValue);
 
       if (!result.ok) {
-        setCurrentValue(previousValue);
         setDraftValue(previousValue);
         setError(result.error ?? 'Changes could not be saved.');
         return;
       }
 
-      const confirmedValue = result.value ?? trimmedValue;
-      setCurrentValue(confirmedValue);
-      setDraftValue(confirmedValue);
+      setDraftValue(result.value ?? trimmedValue);
     });
   }
 
-  const displayValue = currentValue.trim();
+  const displayValue = value.trim();
 
   if (isEditing) {
     const sharedClassName = cn(
@@ -628,10 +616,14 @@ function DomainCard({
   assessmentKey,
   assessmentVersionId,
   domain,
+  showDomainControls,
+  showSignals,
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
   domain: AdminAssessmentDetailDomain;
+  showDomainControls: boolean;
+  showSignals: boolean;
 }) {
   return (
     <SurfaceCard className="p-5 lg:p-6">
@@ -646,76 +638,95 @@ function DomainCard({
           </LabelPill>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_220px]">
-          <DomainLabelEditor
-            assessmentKey={assessmentKey}
-            assessmentVersionId={assessmentVersionId}
-            domain={domain}
-          />
-          <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-            <p className="sonartra-page-eyebrow">Delete domain</p>
-            <p className="mt-2 text-sm leading-7 text-white/58">
-              Removing a domain also removes its nested signals from this draft version.
-            </p>
-            <div className="mt-4">
-              <DeleteDomainForm
-                assessmentKey={assessmentKey}
-                assessmentVersionId={assessmentVersionId}
-                domainId={domain.domainId}
-              />
+        {showDomainControls ? (
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_220px]">
+            <DomainLabelEditor
+              assessmentKey={assessmentKey}
+              assessmentVersionId={assessmentVersionId}
+              domain={domain}
+            />
+            <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+              <p className="sonartra-page-eyebrow">Delete domain</p>
+              <p className="mt-2 text-sm leading-7 text-white/58">
+                Removing a domain also removes its nested signals from this draft version.
+              </p>
+              <div className="mt-4">
+                <DeleteDomainForm
+                  assessmentKey={assessmentKey}
+                  assessmentVersionId={assessmentVersionId}
+                  domainId={domain.domainId}
+                />
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="sonartra-page-eyebrow">Signals</p>
-            <p className="text-sm leading-7 text-white/58">
-              Signals are persisted in explicit order inside this domain.
+        ) : (
+          <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <p className="text-sm font-medium text-white">{domain.label}</p>
+            <p className="mt-2 text-sm leading-7 text-white/58">
+              Signals authored here remain attached to this draft-scoped domain only.
             </p>
           </div>
+        )}
 
-          {domain.signals.length === 0 ? (
-            <EmptyState
-              className="p-4"
-              description="Add the first signal to make this domain usable by later question and weighting authoring."
-              title="No signals yet"
-            />
-          ) : (
-            <div className="space-y-4">
-              {domain.signals.map((signal) => (
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]" key={signal.signalId}>
-                  <SignalLabelEditor
-                    assessmentKey={assessmentKey}
-                    assessmentVersionId={assessmentVersionId}
-                    domainId={domain.domainId}
-                    signal={signal}
-                  />
-                  <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-                    <p className="sonartra-page-eyebrow">Delete signal</p>
-                    <p className="mt-2 text-sm leading-7 text-white/58">
-                      Remove this signal from the current draft version.
-                    </p>
-                    <div className="mt-4">
-                      <DeleteSignalForm
-                        assessmentKey={assessmentKey}
-                        assessmentVersionId={assessmentVersionId}
-                        domainId={domain.domainId}
-                        signalId={signal.signalId}
-                      />
+        {showSignals ? (
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <p className="sonartra-page-eyebrow">Signals</p>
+              <p className="text-sm leading-7 text-white/58">
+                Signals are persisted in explicit order inside this domain.
+              </p>
+            </div>
+
+            {domain.signals.length === 0 ? (
+              <EmptyState
+                className="p-4"
+                description="Add the first signal to make this domain usable by later question and weighting authoring."
+                title="No signals yet"
+              />
+            ) : (
+              <div className="space-y-4">
+                {domain.signals.map((signal) => (
+                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]" key={signal.signalId}>
+                    <SignalLabelEditor
+                      assessmentKey={assessmentKey}
+                      assessmentVersionId={assessmentVersionId}
+                      domainId={domain.domainId}
+                      signal={signal}
+                    />
+                    <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+                      <p className="sonartra-page-eyebrow">Delete signal</p>
+                      <p className="mt-2 text-sm leading-7 text-white/58">
+                        Remove this signal from the current draft version.
+                      </p>
+                      <div className="mt-4">
+                        <DeleteSignalForm
+                          assessmentKey={assessmentKey}
+                          assessmentVersionId={assessmentVersionId}
+                          domainId={domain.domainId}
+                          signalId={signal.signalId}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          <CreateSignalForm
-            assessmentKey={assessmentKey}
-            assessmentVersionId={assessmentVersionId}
-            domainId={domain.domainId}
-          />
-        </div>
+            <CreateSignalForm
+              assessmentKey={assessmentKey}
+              assessmentVersionId={assessmentVersionId}
+              domainId={domain.domainId}
+            />
+          </div>
+        ) : (
+          <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <p className="sonartra-page-eyebrow">Signals</p>
+            <p className="mt-2 text-sm leading-7 text-white/58">
+              {domain.signals.length} signal{domain.signals.length === 1 ? '' : 's'} authored in this domain.
+              Use the Signals section to create, edit, and remove them.
+            </p>
+          </div>
+        )}
       </div>
     </SurfaceCard>
   );
@@ -725,28 +736,57 @@ export function AdminDomainSignalAuthoring({
   assessmentKey,
   assessmentVersionId,
   domains,
+  mode = 'all',
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
   domains: readonly AdminAssessmentDetailDomain[];
+  mode?: 'all' | 'domains' | 'signals';
 }) {
+  const showDomainControls = mode !== 'signals';
+  const showSignals = mode !== 'domains';
+
   return (
     <section className="sonartra-section">
       <SectionHeader
-        eyebrow="Domains And Signals"
-        title="Author the scoring structure for this draft"
-        description="Create signal-group domains and the signals they contain. Everything written here is version-scoped, ordered explicitly, and stored in the canonical engine tables."
+        eyebrow={
+          mode === 'domains'
+            ? 'Domains'
+            : mode === 'signals'
+              ? 'Signals'
+              : 'Domains And Signals'
+        }
+        title={
+          mode === 'domains'
+            ? 'Manage the scoring domains for this draft'
+            : mode === 'signals'
+              ? 'Manage the signals inside each domain'
+              : 'Author the scoring structure for this draft'
+        }
+        description={
+          mode === 'domains'
+            ? 'Create and edit signal-group domains only. Domain records remain version-scoped, explicitly ordered, and stored in the canonical engine tables.'
+            : mode === 'signals'
+              ? 'Create and edit signals inside the existing draft domains. Signal records remain version-scoped, explicitly ordered, and stored in the canonical engine tables.'
+              : 'Create signal-group domains and the signals they contain. Everything written here is version-scoped, ordered explicitly, and stored in the canonical engine tables.'
+        }
       />
 
-      <CreateDomainForm
-        assessmentKey={assessmentKey}
-        assessmentVersionId={assessmentVersionId}
-      />
+      {showDomainControls ? (
+        <CreateDomainForm
+          assessmentKey={assessmentKey}
+          assessmentVersionId={assessmentVersionId}
+        />
+      ) : null}
 
       {domains.length === 0 ? (
         <EmptyState
-          description="Create the first domain to start building the scoring structure for this draft version."
-          title="No domains authored yet"
+          description={
+            mode === 'signals'
+              ? 'Signals require at least one domain on the draft version. Create a domain first, then return here to author signals.'
+              : 'Create the first domain to start building the scoring structure for this draft version.'
+          }
+          title={mode === 'signals' ? 'No domains available for signals' : 'No domains authored yet'}
         />
       ) : (
         <div className="space-y-4">
@@ -756,6 +796,8 @@ export function AdminDomainSignalAuthoring({
               assessmentVersionId={assessmentVersionId}
               domain={domain}
               key={domain.domainId}
+              showDomainControls={showDomainControls}
+              showSignals={showSignals}
             />
           ))}
         </div>

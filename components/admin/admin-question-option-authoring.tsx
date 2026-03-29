@@ -293,7 +293,6 @@ function InlineTextEditor({
   requiredMessage: string;
   onSave: (nextValue: string) => Promise<{ ok: boolean; value?: string; error?: string }>;
 }>) {
-  const [currentValue, setCurrentValue] = useState(value);
   const [draftValue, setDraftValue] = useState(value);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -303,13 +302,6 @@ function InlineTextEditor({
   const ignoreBlurRef = useRef(false);
 
   useEffect(() => {
-    setCurrentValue(value);
-    if (!isEditing) {
-      setDraftValue(value);
-    }
-  }, [value, isEditing]);
-
-  useEffect(() => {
     if (!isEditing) {
       return;
     }
@@ -317,27 +309,27 @@ function InlineTextEditor({
     const field = multiline ? textAreaRef.current : inputRef.current;
     field?.focus();
     field?.select();
-  }, [isEditing]);
+  }, [isEditing, multiline]);
 
   function startEditing() {
     if (isPending) {
       return;
     }
 
-    setDraftValue(currentValue);
+    setDraftValue(value);
     setError(null);
     setIsEditing(true);
   }
 
   function cancelEditing() {
-    setDraftValue(currentValue);
+    setDraftValue(value);
     setError(null);
     setIsEditing(false);
   }
 
   function submit(nextRawValue: string) {
     const trimmedValue = nextRawValue.trim();
-    const previousValue = currentValue;
+    const previousValue = value.trim();
 
     if (!trimmedValue) {
       setError(requiredMessage);
@@ -351,7 +343,6 @@ function InlineTextEditor({
       return;
     }
 
-    setCurrentValue(trimmedValue);
     setDraftValue(trimmedValue);
     setError(null);
     setIsEditing(false);
@@ -360,19 +351,16 @@ function InlineTextEditor({
       const result = await onSave(trimmedValue);
 
       if (!result.ok) {
-        setCurrentValue(previousValue);
         setDraftValue(previousValue);
         setError(result.error ?? 'Changes could not be saved.');
         return;
       }
 
-      const confirmedValue = result.value ?? trimmedValue;
-      setCurrentValue(confirmedValue);
-      setDraftValue(confirmedValue);
+      setDraftValue(result.value ?? trimmedValue);
     });
   }
 
-  const displayValue = currentValue.trim();
+  const displayValue = value.trim();
 
   if (isEditing) {
     const sharedClassName = cn(
@@ -823,10 +811,14 @@ function QuestionCard({
   assessmentKey,
   assessmentVersionId,
   question,
+  showQuestionControls,
+  showResponseControls,
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
   question: AdminAssessmentDetailQuestion;
+  showQuestionControls: boolean;
+  showResponseControls: boolean;
 }) {
   return (
     <SurfaceCard className="p-5 lg:p-6">
@@ -844,77 +836,97 @@ function QuestionCard({
           </LabelPill>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_220px]">
-          <QuestionTextEditor
-            assessmentKey={assessmentKey}
-            assessmentVersionId={assessmentVersionId}
-            question={question}
-          />
-          <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-            <p className="sonartra-page-eyebrow">Delete question</p>
-            <p className="mt-2 text-sm leading-7 text-white/58">
-              Removing a question also removes its nested options from this draft version.
-            </p>
-            <div className="mt-4">
-              <DeleteQuestionForm
-                assessmentKey={assessmentKey}
-                assessmentVersionId={assessmentVersionId}
-                questionId={question.questionId}
-              />
+        {showQuestionControls ? (
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_220px]">
+            <QuestionTextEditor
+              assessmentKey={assessmentKey}
+              assessmentVersionId={assessmentVersionId}
+              question={question}
+            />
+            <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+              <p className="sonartra-page-eyebrow">Delete question</p>
+              <p className="mt-2 text-sm leading-7 text-white/58">
+                Removing a question also removes its nested options from this draft version.
+              </p>
+              <div className="mt-4">
+                <DeleteQuestionForm
+                  assessmentKey={assessmentKey}
+                  assessmentVersionId={assessmentVersionId}
+                  questionId={question.questionId}
+                />
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="sonartra-page-eyebrow">Options</p>
-            <p className="text-sm leading-7 text-white/58">
-              Options are persisted in explicit order under this question. Weighting is added in the
-              next task only.
+        ) : (
+          <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <p className="text-sm font-medium text-white">{question.prompt}</p>
+            <p className="mt-2 text-sm leading-7 text-white/58">
+              Response editing stays attached to this draft question only. Question-level duplication
+              actions can be introduced here later without changing the current authoring model.
             </p>
           </div>
+        )}
 
-          {question.options.length === 0 ? (
-            <EmptyState
-              className="p-4"
-              description="Add the first option so this question can be completed and later weighted."
-              title="No options yet"
-            />
-          ) : (
-            <div className="space-y-4">
-              {question.options.map((option) => (
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]" key={option.optionId}>
-                  <OptionTextEditor
-                    assessmentKey={assessmentKey}
-                    assessmentVersionId={assessmentVersionId}
-                    questionId={question.questionId}
-                    option={option}
-                  />
-                  <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-                    <p className="sonartra-page-eyebrow">Delete option</p>
-                    <p className="mt-2 text-sm leading-7 text-white/58">
-                      Remove this answer option from the current draft version.
-                    </p>
-                    <div className="mt-4">
-                      <DeleteOptionForm
-                        assessmentKey={assessmentKey}
-                        assessmentVersionId={assessmentVersionId}
-                        questionId={question.questionId}
-                        optionId={option.optionId}
-                      />
+        {showResponseControls ? (
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <p className="sonartra-page-eyebrow">Options</p>
+              <p className="text-sm leading-7 text-white/58">
+                Options are persisted in explicit order under this question. Weighting is added in the
+                next task only.
+              </p>
+            </div>
+
+            {question.options.length === 0 ? (
+              <EmptyState
+                className="p-4"
+                description="Add the first option so this question can be completed and later weighted."
+                title="No options yet"
+              />
+            ) : (
+              <div className="space-y-4">
+                {question.options.map((option) => (
+                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]" key={option.optionId}>
+                    <OptionTextEditor
+                      assessmentKey={assessmentKey}
+                      assessmentVersionId={assessmentVersionId}
+                      questionId={question.questionId}
+                      option={option}
+                    />
+                    <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+                      <p className="sonartra-page-eyebrow">Delete option</p>
+                      <p className="mt-2 text-sm leading-7 text-white/58">
+                        Remove this answer option from the current draft version.
+                      </p>
+                      <div className="mt-4">
+                        <DeleteOptionForm
+                          assessmentKey={assessmentKey}
+                          assessmentVersionId={assessmentVersionId}
+                          questionId={question.questionId}
+                          optionId={option.optionId}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          <CreateOptionForm
-            assessmentKey={assessmentKey}
-            assessmentVersionId={assessmentVersionId}
-            questionId={question.questionId}
-          />
-        </div>
+            <CreateOptionForm
+              assessmentKey={assessmentKey}
+              assessmentVersionId={assessmentVersionId}
+              questionId={question.questionId}
+            />
+          </div>
+        ) : (
+          <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <p className="sonartra-page-eyebrow">Responses</p>
+            <p className="mt-2 text-sm leading-7 text-white/58">
+              {question.options.length} option{question.options.length === 1 ? '' : 's'} authored for this
+              question. Use the Responses section to edit answer text and option sets.
+            </p>
+          </div>
+        )}
       </div>
     </SurfaceCard>
   );
@@ -925,18 +937,41 @@ export function AdminQuestionOptionAuthoring({
   assessmentVersionId,
   domains,
   questions,
+  mode = 'all',
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
   domains: readonly AdminAssessmentDetailQuestionDomain[];
   questions: readonly AdminAssessmentDetailQuestion[];
+  mode?: 'all' | 'questions' | 'responses';
 }) {
+  const showQuestionControls = mode !== 'responses';
+  const showResponseControls = mode !== 'questions';
+
   return (
     <section className="sonartra-section">
       <SectionHeader
-        eyebrow="Questions And Options"
-        title="Author the assessment flow for this draft"
-        description="Create ordered questions and the answer options they contain. Everything written here is version-scoped, explicitly ordered, and stored in the canonical engine tables used by the runtime."
+        eyebrow={
+          mode === 'questions'
+            ? 'Questions'
+            : mode === 'responses'
+              ? 'Responses'
+              : 'Questions And Options'
+        }
+        title={
+          mode === 'questions'
+            ? 'Author the assessment question flow for this draft'
+            : mode === 'responses'
+              ? 'Author the response options for each question'
+              : 'Author the assessment flow for this draft'
+        }
+        description={
+          mode === 'questions'
+            ? 'Create ordered questions, generate scaffolds in bulk, and edit prompts inline. Everything written here remains version-scoped and explicitly ordered in the canonical engine tables.'
+            : mode === 'responses'
+              ? 'Edit option text and manage per-question response sets only. Response rows remain version-scoped, explicitly ordered, and stored in the canonical engine tables used by the runtime.'
+              : 'Create ordered questions and the answer options they contain. Everything written here is version-scoped, explicitly ordered, and stored in the canonical engine tables used by the runtime.'
+        }
       />
 
       {domains.length === 0 ? (
@@ -946,16 +981,29 @@ export function AdminQuestionOptionAuthoring({
         />
       ) : (
         <>
-          <CreateQuestionForm
-            assessmentKey={assessmentKey}
-            assessmentVersionId={assessmentVersionId}
-            domains={domains}
-          />
+          {showQuestionControls ? (
+            <>
+              <BulkQuestionForm
+                assessmentKey={assessmentKey}
+                assessmentVersionId={assessmentVersionId}
+              />
+
+              <CreateQuestionForm
+                assessmentKey={assessmentKey}
+                assessmentVersionId={assessmentVersionId}
+                domains={domains}
+              />
+            </>
+          ) : null}
 
           {questions.length === 0 ? (
             <EmptyState
-              description="Create the first question to start building the ordered assessment flow for this draft version."
-              title="No questions authored yet"
+              description={
+                mode === 'responses'
+                  ? 'Questions must exist before response options can be edited. Add the draft question flow first, then return here for option authoring.'
+                  : 'Create the first question to start building the ordered assessment flow for this draft version.'
+              }
+              title={mode === 'responses' ? 'No questions available for responses' : 'No questions authored yet'}
             />
           ) : (
             <div className="space-y-4">
@@ -965,6 +1013,8 @@ export function AdminQuestionOptionAuthoring({
                   assessmentVersionId={assessmentVersionId}
                   key={question.questionId}
                   question={question}
+                  showQuestionControls={showQuestionControls}
+                  showResponseControls={showResponseControls}
                 />
               ))}
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -145,20 +145,6 @@ export function AdminAssessmentCreateForm() {
         hasManualOverride: false,
       }),
   );
-
-  useEffect(() => {
-    setTitle(safeState.values.title);
-    setAssessmentKey(safeState.values.assessmentKey);
-    setDescription(safeState.values.description);
-    setHasManualKeyOverride(
-      safeState.values.assessmentKey.length > 0 &&
-        safeState.values.assessmentKey !== syncAssessmentKeyFromTitle({
-          title: safeState.values.title,
-          currentKey: '',
-          hasManualOverride: false,
-        }),
-    );
-  }, [safeState.values.assessmentKey, safeState.values.description, safeState.values.title]);
 
   function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const nextTitle = event.currentTarget.value;
