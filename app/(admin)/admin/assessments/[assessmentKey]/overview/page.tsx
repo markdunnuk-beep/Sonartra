@@ -1,6 +1,5 @@
 'use client';
 
-import { AdminAssessmentPublishActions } from '@/components/admin/admin-assessment-publish-actions';
 import { useAdminAssessmentAuthoring } from '@/components/admin/admin-assessment-authoring-context';
 import { LabelPill, MetaItem, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
 
@@ -20,7 +19,7 @@ export default function AdminAssessmentOverviewPage() {
       <SectionHeader
         eyebrow="Overview"
         title="Overview"
-        description="See the assessment name, version status, and publish state."
+        description="See the assessment name, current version, and readiness at a glance."
       />
 
       <SurfaceCard className="p-5 lg:p-6">
@@ -44,10 +43,22 @@ export default function AdminAssessmentOverviewPage() {
       </SurfaceCard>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetaItem label="Draft version" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
-        <MetaItem label="Published version" value={assessment.publishedVersion?.versionTag ?? 'None'} />
-        <MetaItem label="Publish check" value={assessment.draftValidation.isPublishReady ? 'Ready' : 'Needs review'} />
-        <MetaItem label="Fix before publishing" value={String(assessment.draftValidation.blockingErrors.length)} />
+        <MetaItem label="Version label" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
+        <MetaItem
+          label="Status"
+          value={assessment.publishedVersion ? 'Published' : assessment.latestDraftVersion ? 'Draft' : 'Not started'}
+        />
+        <MetaItem
+          label="Publish check"
+          value={
+            assessment.draftValidation.status === 'no_draft'
+              ? 'No draft yet'
+              : assessment.draftValidation.isPublishReady
+                ? 'Ready'
+                : 'Needs review'
+          }
+        />
+        <MetaItem label="Current published" value={assessment.publishedVersion?.versionTag ?? 'None'} />
       </div>
 
       <SurfaceCard className="p-5 lg:p-6">
@@ -61,16 +72,10 @@ export default function AdminAssessmentOverviewPage() {
               ? `Draft ${assessment.draftValidation.draftVersionTag ?? assessment.latestDraftVersion?.versionTag ?? 'version'} is ready to publish.`
               : assessment.draftValidation.status === 'no_draft'
                 ? 'No draft yet.'
-                : 'Fix the remaining issues before publishing.'}
+                : `${assessment.draftValidation.blockingErrors.length} issue${assessment.draftValidation.blockingErrors.length === 1 ? '' : 's'} to fix before publishing. Review the full checks in Review.`}
           </p>
         </div>
       </SurfaceCard>
-
-      <AdminAssessmentPublishActions
-        assessmentKey={assessment.assessmentKey}
-        draftValidation={assessment.draftValidation}
-        latestDraftVersion={assessment.latestDraftVersion}
-      />
     </section>
   );
 }

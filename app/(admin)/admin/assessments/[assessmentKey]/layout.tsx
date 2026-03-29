@@ -44,36 +44,24 @@ export default async function AdminAssessmentAuthoringLayout({
                   ? `Editable draft ${assessment.latestDraftVersion.versionTag}`
                   : 'No editable draft'}
               </LabelPill>
-              <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
-                {assessment.publishedVersion
-                  ? `Published ${assessment.publishedVersion.versionTag}`
-                  : 'No published version'}
-              </LabelPill>
-              <LabelPill
-                className={
-                  assessment.draftValidation.isPublishReady
-                    ? 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]'
-                    : 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]'
-                }
-              >
-                {assessment.draftValidation.isPublishReady ? 'Ready to publish' : 'Needs review'}
-              </LabelPill>
             </div>
             <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.3rem]">
               Build assessment
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-white/68">
-              {assessment.description ??
-                'Work through each section, then review and publish.'}
+              {assessment.description ?? 'Work through each section, then finish in review.'}
             </p>
           </div>
         </SurfaceCard>
 
-        <div className="grid gap-4 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <MetaItem label="Assessment key" value={assessment.assessmentKey} />
-          <MetaItem label="Versions" value={String(assessment.versions.length)} />
-          <MetaItem label="Draft" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
-          <MetaItem label="Published" value={assessment.publishedVersion?.versionTag ?? 'None'} />
+          <MetaItem label="Current draft" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
+          <MetaItem label="Last updated" value={new Date(assessment.updatedAt).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })} />
         </div>
 
         <AdminAssessmentSectionNav assessmentKey={assessment.assessmentKey} />

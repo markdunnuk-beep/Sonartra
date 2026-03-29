@@ -12,7 +12,7 @@ const sections = [
   { slug: 'questions', label: 'Questions' },
   { slug: 'responses', label: 'Responses' },
   { slug: 'weights', label: 'Weights' },
-  { slug: 'review', label: 'Review & Publish' },
+  { slug: 'review', label: 'Review' },
 ] as const;
 
 export function AdminAssessmentSectionNav({
