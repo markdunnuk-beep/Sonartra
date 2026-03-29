@@ -103,15 +103,16 @@ function createFakeDb(seed?: {
         }
 
         if (text.includes('INSERT INTO questions')) {
+          const id = `question-${state.questions.length + 1}`;
           state.questions.push({
-            id: `question-${state.questions.length + 1}`,
+            id,
             assessmentVersionId: params?.[0] as string,
             domainId: params?.[1] as string,
             questionKey: params?.[2] as string,
             prompt: params?.[3] as string,
             orderIndex: params?.[4] as number,
           });
-          return { rows: [] as T[] };
+          return { rows: ([{ id }] as unknown) as T[] };
         }
 
         if (text.includes('SELECT id') && text.includes('FROM questions') && text.includes('WHERE id = $1')) {
@@ -181,8 +182,9 @@ function createFakeDb(seed?: {
         }
 
         if (text.includes('INSERT INTO options')) {
+          const id = `option-${state.options.length + 1}`;
           state.options.push({
-            id: `option-${state.options.length + 1}`,
+            id,
             assessmentVersionId: params?.[0] as string,
             questionId: params?.[1] as string,
             optionKey: params?.[2] as string,
@@ -190,7 +192,7 @@ function createFakeDb(seed?: {
             optionText: params?.[4] as string,
             orderIndex: params?.[5] as number,
           });
-          return { rows: [] as T[] };
+          return { rows: ([{ id }] as unknown) as T[] };
         }
 
         if (text.includes('SELECT id') && text.includes('FROM options') && text.includes('WHERE id = $1')) {
@@ -262,7 +264,7 @@ test('creates questions and options with deterministic appended order indexes', 
     ],
   });
 
-  await createQuestionRecord({
+  const createdQuestion = await createQuestionRecord({
     db: fake.db,
     assessmentVersionId: 'version-1',
     values: {
@@ -272,20 +274,100 @@ test('creates questions and options with deterministic appended order indexes', 
     },
   });
 
+  assert.equal(fake.state.questions[1]?.orderIndex, 1);
+  assert.equal(fake.state.questions[1]?.questionKey, 'q02');
+  assert.equal(fake.state.options.length, 5);
+  assert.equal(createdQuestion.key, 'q02');
+  assert.equal(createdQuestion.questionId, 'question-2');
+  assert.equal(createdQuestion.options.length, 4);
+  assert.deepEqual(
+    createdQuestion.options.map((option) => ({
+      assessmentVersionId: option.assessmentVersionId,
+      questionId: option.questionId,
+      optionKey: option.key,
+      optionLabel: option.label,
+      orderIndex: option.orderIndex,
+    })),
+    [
+      {
+        assessmentVersionId: 'version-1',
+        questionId: 'question-2',
+        optionKey: 'q02_a',
+        optionLabel: 'A',
+        orderIndex: 1,
+      },
+      {
+        assessmentVersionId: 'version-1',
+        questionId: 'question-2',
+        optionKey: 'q02_b',
+        optionLabel: 'B',
+        orderIndex: 2,
+      },
+      {
+        assessmentVersionId: 'version-1',
+        questionId: 'question-2',
+        optionKey: 'q02_c',
+        optionLabel: 'C',
+        orderIndex: 3,
+      },
+      {
+        assessmentVersionId: 'version-1',
+        questionId: 'question-2',
+        optionKey: 'q02_d',
+        optionLabel: 'D',
+        orderIndex: 4,
+      },
+    ],
+  );
+});
+
+test('creates additional options with deterministic appended order indexes', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section one',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing question',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        assessmentVersionId: 'version-1',
+        questionId: 'question-1',
+        optionKey: 'q01_a',
+        optionLabel: 'A',
+        optionText: '',
+        orderIndex: 1,
+      },
+    ],
+  });
+
   await createOptionRecord({
     db: fake.db,
     assessmentVersionId: 'version-1',
     questionId: 'question-1',
     values: {
-      key: 'disagree',
+      key: 'ignored',
       label: 'B',
       text: 'Disagree',
     },
   });
 
-  assert.equal(fake.state.questions[1]?.orderIndex, 1);
-  assert.equal(fake.state.options[1]?.orderIndex, 1);
-  assert.equal(fake.state.questions[1]?.questionKey, 'q02');
+  assert.equal(fake.state.options[1]?.orderIndex, 2);
   assert.equal(fake.state.options[1]?.optionKey, 'q01_b');
 });
 

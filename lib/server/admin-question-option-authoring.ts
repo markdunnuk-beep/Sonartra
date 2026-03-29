@@ -35,6 +35,26 @@ type PostgresErrorLike = {
   message?: string;
 };
 
+type AdminQuestionCreatedOption = {
+  optionId: string;
+  assessmentVersionId: string;
+  questionId: string;
+  key: string;
+  label: string;
+  text: string;
+  orderIndex: number;
+};
+
+type AdminCreatedQuestion = {
+  questionId: string;
+  assessmentVersionId: string;
+  domainId: string;
+  key: string;
+  prompt: string;
+  orderIndex: number;
+  options: readonly AdminQuestionCreatedOption[];
+};
+
 function normalizeFormValue(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -242,11 +262,36 @@ async function getQuestionOrderIndex(params: {
   return orderIndex === undefined ? null : Number(orderIndex);
 }
 
+type InsertedQuestionRow = {
+  id: string;
+};
+
+type InsertedOptionRow = {
+  id: string;
+};
+
+function buildDefaultCreatedOptions(params: {
+  assessmentVersionId: string;
+  questionId: string;
+  questionIndex: number;
+}): readonly Omit<AdminQuestionCreatedOption, 'optionId'>[] {
+  return Object.freeze(
+    ['A', 'B', 'C', 'D'].map((label, index) => ({
+      assessmentVersionId: params.assessmentVersionId,
+      questionId: params.questionId,
+      key: generateOptionKey(params.questionIndex, label.toLowerCase()),
+      label,
+      text: '',
+      orderIndex: index + 1,
+    })),
+  );
+}
+
 export async function createQuestionRecord(params: {
   db: Queryable;
   assessmentVersionId: string;
   values: AdminQuestionAuthoringFormValues;
-}): Promise<void> {
+}): Promise<AdminCreatedQuestion> {
   const domainPresent = await domainExists({
     db: params.db,
     assessmentVersionId: params.assessmentVersionId,
@@ -269,7 +314,7 @@ export async function createQuestionRecord(params: {
     throw new Error('QUESTION_KEY_EXISTS');
   }
 
-  await params.db.query(
+  const insertedQuestion = await params.db.query<InsertedQuestionRow>(
     `
     INSERT INTO questions (
       assessment_version_id,
@@ -288,6 +333,65 @@ export async function createQuestionRecord(params: {
       orderIndex,
     ],
   );
+
+  const questionId = insertedQuestion.rows[0]?.id;
+  if (!questionId) {
+    throw new Error('QUESTION_CREATE_FAILED');
+  }
+
+  const questionIndex = orderIndex + 1;
+  const defaultOptions = buildDefaultCreatedOptions({
+    assessmentVersionId: params.assessmentVersionId,
+    questionId,
+    questionIndex,
+  });
+
+  const createdOptions: AdminQuestionCreatedOption[] = [];
+
+  for (const option of defaultOptions) {
+    const insertedOption = await params.db.query<InsertedOptionRow>(
+      `
+      INSERT INTO options (
+        assessment_version_id,
+        question_id,
+        option_key,
+        option_label,
+        option_text,
+        order_index
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id
+      `,
+      [
+        option.assessmentVersionId,
+        option.questionId,
+        option.key,
+        option.label,
+        option.text,
+        option.orderIndex,
+      ],
+    );
+
+    const optionId = insertedOption.rows[0]?.id;
+    if (!optionId) {
+      throw new Error('OPTION_CREATE_FAILED');
+    }
+
+    createdOptions.push({
+      optionId,
+      ...option,
+    });
+  }
+
+  return {
+    questionId,
+    assessmentVersionId: params.assessmentVersionId,
+    domainId: params.values.domainId,
+    key: questionKey,
+    prompt: params.values.prompt,
+    orderIndex,
+    options: Object.freeze(createdOptions),
+  };
 }
 
 export async function updateQuestionRecord(params: {
@@ -542,19 +646,22 @@ function getOptionValuesFromFormData(formData: FormData): AdminOptionAuthoringFo
 async function runQuestionWriteAction(params: {
   assessmentKey: string;
   values: AdminQuestionAuthoringFormValues;
-  action: (db: Queryable) => Promise<void>;
+  action: (db: Queryable) => Promise<AdminCreatedQuestion | null>;
 }): Promise<AdminQuestionAuthoringFormState> {
   const pool = getDbPool();
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
-    await params.action(client);
+    const createdQuestion = await params.action(client);
     await client.query('COMMIT');
 
     revalidatePath(authoringPath(params.assessmentKey));
 
-    return initialAdminQuestionAuthoringFormState;
+    return {
+      ...initialAdminQuestionAuthoringFormState,
+      createdQuestion,
+    } as AdminQuestionAuthoringFormState;
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined);
 
@@ -581,14 +688,16 @@ async function runQuestionWriteAction(params: {
         formError: 'The selected question is no longer available in this draft version.',
         fieldErrors: {},
         values: params.values,
-      };
+        createdQuestion: null,
+      } as AdminQuestionAuthoringFormState;
     }
 
     return {
       formError: 'Question changes could not be saved. Review the inputs and try again.',
       fieldErrors: {},
       values: params.values,
-    };
+      createdQuestion: null,
+    } as AdminQuestionAuthoringFormState;
   } finally {
     client.release();
   }
@@ -693,7 +802,7 @@ export async function updateQuestionAction(
         assessmentVersionId: context.assessmentVersionId,
         questionId: context.questionId ?? '',
         values,
-      }),
+      }).then(() => null),
   });
 }
 
@@ -710,7 +819,7 @@ export async function deleteQuestionAction(
         db,
         assessmentVersionId: context.assessmentVersionId,
         questionId: context.questionId ?? '',
-      }),
+      }).then(() => null),
   });
 }
 
