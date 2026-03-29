@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 import {
   ButtonLink,
@@ -248,19 +248,20 @@ export function AdminAssessmentsDashboard({
       <PageHeader
         eyebrow="Admin Workspace"
         title="Assessments"
-        description="Scan the assessment catalogue, inspect version state, and identify what is published, drafted, or still incomplete before authoring workflows are added."
+        description="Scan the assessment catalogue, inspect version state, and identify what is live, drafted, or inactive before drilling into authoring and publish governance."
       />
 
       <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <LabelPill className="bg-white/[0.08] text-white/82">Task 26 foundation</LabelPill>
+            <LabelPill className="bg-white/[0.08] text-white/82">Version-aware catalogue</LabelPill>
             <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.45rem]">
-              Catalogue view for version visibility and publish-state scanning.
+              Catalogue view for version visibility, active publish state, and draft continuation.
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-white/68">
-              This dashboard stays read-only for now. It surfaces truthful schema-backed version
-              state so Task 27 can layer creation without revisiting catalogue structure.
+              This dashboard surfaces truthful schema-backed version state, including published and
+              draft context, so lifecycle actions on the detail route stay grounded in canonical
+              assessment version records only.
             </p>
           </div>
 
@@ -268,7 +269,7 @@ export function AdminAssessmentsDashboard({
             <ButtonLink href="/admin/assessments/create" variant="primary">
               Create assessment
             </ButtonLink>
-            <p className="text-sm text-white/54">Placeholder route ready for the next task.</p>
+            <p className="text-sm text-white/54">Create a new assessment and bootstrap its first draft version.</p>
           </div>
         </div>
       </SurfaceCard>
@@ -337,3 +338,6 @@ export function AdminAssessmentsDashboard({
     </PageFrame>
   );
 }
+
+
+

@@ -1,3 +1,4 @@
+﻿import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
 
 export type AdminAssessmentVersionStatus = 'draft' | 'published' | 'archived';
@@ -204,7 +205,7 @@ function mapAssessmentDashboardItem(
         return updatedAtComparison;
       }
 
-      return compareStringsDesc(left.versionTag, right.versionTag);
+      return compareAssessmentVersionTagsDesc(left.versionTag, right.versionTag);
     });
 
   const publishedVersion = versions.find((version) => version.status === 'published') ?? null;
@@ -325,3 +326,5 @@ export async function buildAdminAssessmentDashboardViewModel(
     assessments,
   };
 }
+
+

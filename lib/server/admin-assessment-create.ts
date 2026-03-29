@@ -1,9 +1,10 @@
-'use server';
+﻿'use server';
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { normalizeAssessmentKeyInput } from '@/lib/admin/assessment-key';
+import { INITIAL_ASSESSMENT_VERSION_TAG } from '@/lib/admin/admin-assessment-versioning';
 import {
   type AdminAssessmentCreateFormState,
   type AdminAssessmentCreateFormValues,
@@ -60,7 +61,6 @@ class CreateAssessmentPersistenceError extends Error {
   }
 }
 
-const INITIAL_VERSION_TAG = '1.0.0';
 const GENERIC_CREATE_ERROR_MESSAGE =
   'The assessment could not be created. Review the inputs and try again.';
 
@@ -199,7 +199,7 @@ function mapDatabaseFailureToFormState(
     return {
       formError:
         stage === 'insert_assessment_version'
-          ? `The initial draft version (${INITIAL_VERSION_TAG}) could not be created because a unique database constraint was violated.`
+          ? `The initial draft version (${INITIAL_ASSESSMENT_VERSION_TAG}) could not be created because a unique database constraint was violated.`
           : 'The assessment could not be created because a unique database constraint was violated.',
       fieldErrors: {},
       values,
@@ -302,7 +302,7 @@ export async function createAdminAssessmentRecords(params: {
       )
       VALUES ($1, $2, 'DRAFT', NULL, NULL)
       `,
-      [assessment.id, INITIAL_VERSION_TAG],
+      [assessment.id, INITIAL_ASSESSMENT_VERSION_TAG],
     );
   } catch (error) {
     throw new CreateAssessmentPersistenceError('insert_assessment_version', error);
@@ -401,3 +401,5 @@ export async function createAssessmentActionWithDependencies(
   dependencies.revalidatePath(`/admin/assessments/${created.assessmentKey}`);
   dependencies.redirect(`/admin/assessments/${created.assessmentKey}`);
 }
+
+

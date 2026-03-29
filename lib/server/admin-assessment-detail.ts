@@ -1,3 +1,4 @@
+﻿import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
 
 import type { AdminAssessmentVersionStatus } from '@/lib/server/admin-assessment-dashboard';
@@ -108,6 +109,7 @@ export type AdminAssessmentDetailViewModel = {
   createdAt: string;
   updatedAt: string;
   versions: readonly AdminAssessmentDetailVersion[];
+  publishedVersion: AdminAssessmentDetailVersion | null;
   latestDraftVersion: AdminAssessmentDetailVersion | null;
   authoredDomains: readonly AdminAssessmentDetailDomain[];
   questionDomains: readonly AdminAssessmentDetailQuestionDomain[];
@@ -627,8 +629,9 @@ export async function getAdminAssessmentDetailByKey(
         return updatedAtComparison;
       }
 
-      return compareStringsDesc(left.versionTag, right.versionTag);
+      return compareAssessmentVersionTagsDesc(left.versionTag, right.versionTag);
     });
+  const publishedVersion = versions.find((version) => version.status === 'published') ?? null;
   const latestDraftVersion = versions.find((version) => version.status === 'draft') ?? null;
   const authoredDomains = latestDraftVersion
     ? await loadAuthoringDomainsForVersion(db, latestDraftVersion.assessmentVersionId)
@@ -655,6 +658,7 @@ export async function getAdminAssessmentDetailByKey(
     createdAt: firstRow.assessment_created_at,
     updatedAt: firstRow.assessment_updated_at,
     versions: Object.freeze(versions),
+    publishedVersion,
     latestDraftVersion,
     authoredDomains,
     questionDomains,
@@ -668,3 +672,5 @@ export async function getAdminAssessmentDetailByKey(
     },
   };
 }
+
+

@@ -1,4 +1,4 @@
-const KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+﻿const KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MAX_KEY_LENGTH = 64;
 const MAX_DESCRIPTION_LENGTH = 600;
 
@@ -57,3 +57,4 @@ export function validateAdminAuthoringValues(
     values,
   };
 }
+

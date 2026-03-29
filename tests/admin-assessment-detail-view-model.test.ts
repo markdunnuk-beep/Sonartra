@@ -1,4 +1,4 @@
-import test from 'node:test';
+﻿import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { Queryable } from '@/lib/engine/repository-sql';
@@ -298,6 +298,7 @@ test('loads latest draft weighting data and coverage for admin assessment detail
   );
 
   assert.ok(detail);
+  assert.equal(detail?.publishedVersion?.versionTag, '1.0.0');
   assert.equal(detail?.latestDraftVersion?.versionTag, '1.1.0');
   assert.equal(detail?.authoredDomains.length, 1);
   assert.equal(detail?.questionDomains.length, 2);
@@ -314,3 +315,5 @@ test('loads latest draft weighting data and coverage for admin assessment detail
     totalMappings: 1,
   });
 });
+
+

@@ -1,0 +1,598 @@
+﻿import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import {
+  getNextAssessmentVersionTag,
+  incrementAssessmentVersionTag,
+  initialAdminAssessmentVersionActionState,
+} from '@/lib/admin/admin-assessment-versioning';
+import {
+  createDraftVersionActionWithDependencies,
+  createNextDraftAssessmentVersionRecords,
+  publishDraftAssessmentVersionRecords,
+  publishDraftVersionActionWithDependencies,
+} from '@/lib/server/admin-assessment-versioning';
+
+type StoredAssessment = {
+  id: string;
+  assessmentKey: string;
+};
+
+type StoredVersion = {
+  id: string;
+  assessmentId: string;
+  versionTag: string;
+  lifecycleStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  titleOverride: string | null;
+  descriptionOverride: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type StoredDomain = {
+  id: string;
+  assessmentVersionId: string;
+  domainKey: string;
+  label: string;
+  description: string | null;
+  domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP';
+  orderIndex: number;
+};
+
+type StoredSignal = {
+  id: string;
+  assessmentVersionId: string;
+  domainId: string;
+  signalKey: string;
+  label: string;
+  description: string | null;
+  orderIndex: number;
+  isOverlay: boolean;
+};
+
+type StoredQuestion = {
+  id: string;
+  assessmentVersionId: string;
+  domainId: string;
+  questionKey: string;
+  prompt: string;
+  orderIndex: number;
+};
+
+type StoredOption = {
+  id: string;
+  questionId: string;
+  optionKey: string;
+  optionLabel: string | null;
+  optionText: string;
+  orderIndex: number;
+};
+
+type StoredWeight = {
+  id: string;
+  optionId: string;
+  signalId: string;
+  weight: string;
+  sourceWeightKey: string | null;
+};
+
+function createFakeDb(seed?: {
+  assessments?: StoredAssessment[];
+  versions?: StoredVersion[];
+  domains?: StoredDomain[];
+  signals?: StoredSignal[];
+  questions?: StoredQuestion[];
+  options?: StoredOption[];
+  weights?: StoredWeight[];
+}) {
+  const state = {
+    assessments: [...(seed?.assessments ?? [])],
+    versions: [...(seed?.versions ?? [])],
+    domains: [...(seed?.domains ?? [])],
+    signals: [...(seed?.signals ?? [])],
+    questions: [...(seed?.questions ?? [])],
+    options: [...(seed?.options ?? [])],
+    weights: [...(seed?.weights ?? [])],
+  };
+
+  function nextId(prefix: string, length: number) {
+    return `${prefix}-${length + 1}`;
+  }
+
+  return {
+    db: {
+      async query<T>(text: string, params?: readonly unknown[]) {
+        if (text.includes('FROM assessments a') && text.includes('INNER JOIN assessment_versions av ON av.assessment_id = a.id')) {
+          const assessmentKey = params?.[0] as string;
+          const assessment = state.assessments.find((item) => item.assessmentKey === assessmentKey);
+          if (!assessment) {
+            return { rows: [] as T[] };
+          }
+
+          const rows = state.versions
+            .filter((version) => version.assessmentId === assessment.id)
+            .map((version) => ({
+              assessment_id: assessment.id,
+              assessment_version_id: version.id,
+              version_tag: version.versionTag,
+              lifecycle_status: version.lifecycleStatus,
+              title_override: version.titleOverride,
+              description_override: version.descriptionOverride,
+              published_at: version.publishedAt,
+              created_at: version.createdAt,
+              updated_at: version.updatedAt,
+            }));
+
+          return { rows: rows as T[] };
+        }
+
+        if (text.includes("UPDATE assessment_versions") && text.includes("lifecycle_status = 'ARCHIVED'")) {
+          const [assessmentId, excludedId] = params as [string, string];
+          for (const version of state.versions) {
+            if (version.assessmentId === assessmentId && version.lifecycleStatus === 'PUBLISHED' && version.id !== excludedId) {
+              version.lifecycleStatus = 'ARCHIVED';
+              version.updatedAt = '2026-03-29T10:00:00.000Z';
+            }
+          }
+          return { rows: [] as T[] };
+        }
+
+        if (text.includes("UPDATE assessment_versions") && text.includes("lifecycle_status = 'PUBLISHED'")) {
+          const [versionId, assessmentId] = params as [string, string];
+          const match = state.versions.find(
+            (version) => version.id === versionId && version.assessmentId === assessmentId && version.lifecycleStatus === 'DRAFT',
+          );
+          if (match) {
+            match.lifecycleStatus = 'PUBLISHED';
+            match.publishedAt = '2026-03-29T10:00:00.000Z';
+            match.updatedAt = '2026-03-29T10:00:00.000Z';
+            return { rows: ([{ id: match.id }] as unknown) as T[] };
+          }
+          return { rows: [] as T[] };
+        }
+
+        if (text.includes('INSERT INTO assessment_versions')) {
+          const versionId = nextId('version', state.versions.length);
+          state.versions.push({
+            id: versionId,
+            assessmentId: params?.[0] as string,
+            versionTag: params?.[1] as string,
+            lifecycleStatus: 'DRAFT',
+            titleOverride: (params?.[2] as string | null) ?? null,
+            descriptionOverride: (params?.[3] as string | null) ?? null,
+            publishedAt: null,
+            createdAt: '2026-03-29T10:00:00.000Z',
+            updatedAt: '2026-03-29T10:00:00.000Z',
+          });
+          return { rows: ([{ id: versionId }] as unknown) as T[] };
+        }
+
+        if (text.includes('FROM domains') && text.includes('WHERE assessment_version_id = $1')) {
+          const assessmentVersionId = params?.[0] as string;
+          const rows = state.domains
+            .filter((domain) => domain.assessmentVersionId === assessmentVersionId)
+            .map((domain) => ({
+              domain_id: domain.id,
+              domain_key: domain.domainKey,
+              label: domain.label,
+              description: domain.description,
+              domain_type: domain.domainType,
+              order_index: domain.orderIndex,
+            }));
+          return { rows: rows as T[] };
+        }
+
+        if (text.includes('INSERT INTO domains')) {
+          const id = nextId('domain', state.domains.length);
+          state.domains.push({
+            id,
+            assessmentVersionId: params?.[0] as string,
+            domainKey: params?.[1] as string,
+            label: params?.[2] as string,
+            description: (params?.[3] as string | null) ?? null,
+            domainType: params?.[4] as 'QUESTION_SECTION' | 'SIGNAL_GROUP',
+            orderIndex: params?.[5] as number,
+          });
+          return { rows: ([{ id }] as unknown) as T[] };
+        }
+
+        if (text.includes('FROM signals') && text.includes('WHERE assessment_version_id = $1')) {
+          const assessmentVersionId = params?.[0] as string;
+          const rows = state.signals
+            .filter((signal) => signal.assessmentVersionId === assessmentVersionId)
+            .map((signal) => ({
+              signal_id: signal.id,
+              domain_id: signal.domainId,
+              signal_key: signal.signalKey,
+              label: signal.label,
+              description: signal.description,
+              order_index: signal.orderIndex,
+              is_overlay: signal.isOverlay,
+            }));
+          return { rows: rows as T[] };
+        }
+
+        if (text.includes('INSERT INTO signals')) {
+          const id = nextId('signal', state.signals.length);
+          state.signals.push({
+            id,
+            assessmentVersionId: params?.[0] as string,
+            domainId: params?.[1] as string,
+            signalKey: params?.[2] as string,
+            label: params?.[3] as string,
+            description: (params?.[4] as string | null) ?? null,
+            orderIndex: params?.[5] as number,
+            isOverlay: params?.[6] as boolean,
+          });
+          return { rows: ([{ id }] as unknown) as T[] };
+        }
+
+        if (text.includes('FROM questions') && text.includes('WHERE assessment_version_id = $1')) {
+          const assessmentVersionId = params?.[0] as string;
+          const rows = state.questions
+            .filter((question) => question.assessmentVersionId === assessmentVersionId)
+            .map((question) => ({
+              question_id: question.id,
+              domain_id: question.domainId,
+              question_key: question.questionKey,
+              prompt: question.prompt,
+              order_index: question.orderIndex,
+            }));
+          return { rows: rows as T[] };
+        }
+
+        if (text.includes('INSERT INTO questions')) {
+          const id = nextId('question', state.questions.length);
+          state.questions.push({
+            id,
+            assessmentVersionId: params?.[0] as string,
+            domainId: params?.[1] as string,
+            questionKey: params?.[2] as string,
+            prompt: params?.[3] as string,
+            orderIndex: params?.[4] as number,
+          });
+          return { rows: ([{ id }] as unknown) as T[] };
+        }
+
+        if (text.includes('FROM options o') && text.includes('INNER JOIN questions q ON q.id = o.question_id')) {
+          const assessmentVersionId = params?.[0] as string;
+          const questionIds = new Set(
+            state.questions
+              .filter((question) => question.assessmentVersionId === assessmentVersionId)
+              .map((question) => question.id),
+          );
+          const rows = state.options
+            .filter((option) => questionIds.has(option.questionId))
+            .map((option) => ({
+              option_id: option.id,
+              question_id: option.questionId,
+              option_key: option.optionKey,
+              option_label: option.optionLabel,
+              option_text: option.optionText,
+              order_index: option.orderIndex,
+            }));
+          return { rows: rows as T[] };
+        }
+
+        if (text.includes('INSERT INTO options')) {
+          const id = nextId('option', state.options.length);
+          state.options.push({
+            id,
+            questionId: params?.[0] as string,
+            optionKey: params?.[1] as string,
+            optionLabel: (params?.[2] as string | null) ?? null,
+            optionText: params?.[3] as string,
+            orderIndex: params?.[4] as number,
+          });
+          return { rows: ([{ id }] as unknown) as T[] };
+        }
+
+        if (text.includes('FROM option_signal_weights osw')) {
+          const assessmentVersionId = params?.[0] as string;
+          const questionIds = new Set(
+            state.questions
+              .filter((question) => question.assessmentVersionId === assessmentVersionId)
+              .map((question) => question.id),
+          );
+          const optionIds = new Set(
+            state.options.filter((option) => questionIds.has(option.questionId)).map((option) => option.id),
+          );
+          const rows = state.weights
+            .filter((weight) => optionIds.has(weight.optionId))
+            .map((weight) => ({
+              option_signal_weight_id: weight.id,
+              option_id: weight.optionId,
+              signal_id: weight.signalId,
+              weight: weight.weight,
+              source_weight_key: weight.sourceWeightKey,
+            }));
+          return { rows: rows as T[] };
+        }
+
+        if (text.includes('INSERT INTO option_signal_weights')) {
+          state.weights.push({
+            id: nextId('weight', state.weights.length),
+            optionId: params?.[0] as string,
+            signalId: params?.[1] as string,
+            weight: params?.[2] as string,
+            sourceWeightKey: (params?.[3] as string | null) ?? null,
+          });
+          return { rows: [] as T[] };
+        }
+
+        return { rows: [] as T[] };
+      },
+    },
+    state,
+  };
+}
+
+test('increments assessment version tags deterministically', () => {
+  assert.equal(incrementAssessmentVersionTag('1.0.0'), '1.0.1');
+  assert.equal(getNextAssessmentVersionTag(['1.0.0', '1.0.9', '1.0.10']), '1.0.11');
+});
+
+test('publishes the selected draft and archives the previously published version', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [
+      {
+        id: 'version-1',
+        assessmentId: 'assessment-1',
+        versionTag: '1.0.0',
+        lifecycleStatus: 'PUBLISHED',
+        titleOverride: null,
+        descriptionOverride: null,
+        publishedAt: '2026-03-01T00:00:00.000Z',
+        createdAt: '2026-03-01T00:00:00.000Z',
+        updatedAt: '2026-03-01T00:00:00.000Z',
+      },
+      {
+        id: 'version-2',
+        assessmentId: 'assessment-1',
+        versionTag: '1.0.1',
+        lifecycleStatus: 'DRAFT',
+        titleOverride: null,
+        descriptionOverride: null,
+        publishedAt: null,
+        createdAt: '2026-03-02T00:00:00.000Z',
+        updatedAt: '2026-03-02T00:00:00.000Z',
+      },
+    ],
+  });
+
+  const result = await publishDraftAssessmentVersionRecords({
+    db: fake.db,
+    assessmentKey: 'wplp80',
+    draftVersionId: 'version-2',
+  });
+
+  assert.equal(result.publishedVersionTag, '1.0.1');
+  assert.equal(fake.state.versions.find((version) => version.id === 'version-1')?.lifecycleStatus, 'ARCHIVED');
+  assert.equal(fake.state.versions.find((version) => version.id === 'version-2')?.lifecycleStatus, 'PUBLISHED');
+});
+
+test('creates a new draft version by duplicating canonical authoring structure from the published version', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [
+      {
+        id: 'version-1',
+        assessmentId: 'assessment-1',
+        versionTag: '1.0.0',
+        lifecycleStatus: 'PUBLISHED',
+        titleOverride: 'Published title',
+        descriptionOverride: 'Published description',
+        publishedAt: '2026-03-01T00:00:00.000Z',
+        createdAt: '2026-03-01T00:00:00.000Z',
+        updatedAt: '2026-03-01T00:00:00.000Z',
+      },
+    ],
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section One',
+        description: null,
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'leadership',
+        label: 'Leadership',
+        description: null,
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-2',
+        signalKey: 'directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+        isOverlay: false,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'decision-speed',
+        prompt: 'I make decisions quickly when direction is clear.',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        questionId: 'question-1',
+        optionKey: 'agree',
+        optionLabel: 'A',
+        optionText: 'Agree',
+        orderIndex: 0,
+      },
+    ],
+    weights: [
+      {
+        id: 'weight-1',
+        optionId: 'option-1',
+        signalId: 'signal-1',
+        weight: '1.2500',
+        sourceWeightKey: '1|A',
+      },
+    ],
+  });
+
+  const result = await createNextDraftAssessmentVersionRecords({
+    db: fake.db,
+    assessmentKey: 'wplp80',
+  });
+
+  assert.equal(result.draftVersionTag, '1.0.1');
+  assert.equal(result.sourceVersionTag, '1.0.0');
+
+  const newVersion = fake.state.versions.find((version) => version.id === result.draftVersionId);
+  assert.equal(newVersion?.lifecycleStatus, 'DRAFT');
+  assert.equal(newVersion?.titleOverride, 'Published title');
+
+  const newDomains = fake.state.domains.filter((domain) => domain.assessmentVersionId === result.draftVersionId);
+  const newSignals = fake.state.signals.filter((signal) => signal.assessmentVersionId === result.draftVersionId);
+  const newQuestions = fake.state.questions.filter((question) => question.assessmentVersionId === result.draftVersionId);
+  const newQuestionIds = new Set(newQuestions.map((question) => question.id));
+  const newOptions = fake.state.options.filter((option) => newQuestionIds.has(option.questionId));
+  const newOptionIds = new Set(newOptions.map((option) => option.id));
+  const newSignalIds = new Set(newSignals.map((signal) => signal.id));
+  const newWeights = fake.state.weights.filter(
+    (weight) => newOptionIds.has(weight.optionId) && newSignalIds.has(weight.signalId),
+  );
+
+  assert.equal(newDomains.length, 2);
+  assert.equal(newSignals.length, 1);
+  assert.equal(newQuestions.length, 1);
+  assert.equal(newOptions.length, 1);
+  assert.equal(newWeights.length, 1);
+  assert.equal(newWeights[0]?.sourceWeightKey, '1|A');
+});
+
+test('publish action revalidates dashboard and detail routes after success', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [
+      {
+        id: 'version-1',
+        assessmentId: 'assessment-1',
+        versionTag: '1.0.0',
+        lifecycleStatus: 'DRAFT',
+        titleOverride: null,
+        descriptionOverride: null,
+        publishedAt: null,
+        createdAt: '2026-03-01T00:00:00.000Z',
+        updatedAt: '2026-03-01T00:00:00.000Z',
+      },
+    ],
+  });
+
+  const revalidatedPaths: string[] = [];
+
+  const result = await publishDraftVersionActionWithDependencies(
+    {
+      assessmentKey: 'wplp80',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminAssessmentVersionActionState,
+    new FormData(),
+    {
+      getDbPool: () => ({
+        async connect() {
+          return {
+            async query<T>(text: string, params?: readonly unknown[]) {
+              if (text.trim() === 'BEGIN' || text.trim() === 'COMMIT') {
+                return { rows: [] as T[] };
+              }
+              return fake.db.query<T>(text, params);
+            },
+            release() {},
+          };
+        },
+      }),
+      revalidatePath(path: string): void {
+        revalidatedPaths.push(path);
+      },
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.ok(result.formSuccess?.includes('1.0.0'));
+  assert.deepEqual(revalidatedPaths, ['/admin/assessments', '/admin/assessments/wplp80']);
+});
+
+test('create draft action returns an inline error when a draft already exists', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [
+      {
+        id: 'version-1',
+        assessmentId: 'assessment-1',
+        versionTag: '1.0.0',
+        lifecycleStatus: 'PUBLISHED',
+        titleOverride: null,
+        descriptionOverride: null,
+        publishedAt: '2026-03-01T00:00:00.000Z',
+        createdAt: '2026-03-01T00:00:00.000Z',
+        updatedAt: '2026-03-01T00:00:00.000Z',
+      },
+      {
+        id: 'version-2',
+        assessmentId: 'assessment-1',
+        versionTag: '1.0.1',
+        lifecycleStatus: 'DRAFT',
+        titleOverride: null,
+        descriptionOverride: null,
+        publishedAt: null,
+        createdAt: '2026-03-02T00:00:00.000Z',
+        updatedAt: '2026-03-02T00:00:00.000Z',
+      },
+    ],
+  });
+
+  const result = await createDraftVersionActionWithDependencies(
+    {
+      assessmentKey: 'wplp80',
+    },
+    initialAdminAssessmentVersionActionState,
+    new FormData(),
+    {
+      getDbPool: () => ({
+        async connect() {
+          return {
+            async query<T>(text: string, params?: readonly unknown[]) {
+              if (text.trim() === 'BEGIN' || text.trim() === 'ROLLBACK') {
+                return { rows: [] as T[] };
+              }
+              return fake.db.query<T>(text, params);
+            },
+            release() {},
+          };
+        },
+      }),
+      revalidatePath(): void {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'A draft version already exists. Continue authoring that draft instead of creating another one.',
+  );
+  assert.equal(result.formSuccess, null);
+});
+
+
