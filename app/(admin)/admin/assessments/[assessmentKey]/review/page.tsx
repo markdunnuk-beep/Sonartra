@@ -13,7 +13,7 @@ export default function AdminAssessmentReviewPage() {
       <SectionHeader
         eyebrow="Review"
         title="Review"
-        description="Validate the draft, publish it, manage versions, and handle destructive actions."
+        description="Check the draft before publishing."
       />
 
       <AdminAssessmentVersionGovernance

@@ -963,9 +963,9 @@ export function AdminQuestionOptionAuthoring({
         }
         description={
           mode === 'questions'
-            ? 'Add, edit, and generate questions.'
+            ? 'Create the questions used in the assessment.'
             : mode === 'responses'
-              ? 'Set and edit response options.'
+              ? 'Set the response options for each question.'
               : 'Add questions and set response options.'
         }
       />

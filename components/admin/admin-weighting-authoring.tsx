@@ -517,7 +517,7 @@ export function AdminWeightingAuthoring({
       <SectionHeader
         eyebrow="Response scoring"
         title="Set response scoring"
-        description="Set how each response affects signals."
+        description="Set how each response affects scoring."
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

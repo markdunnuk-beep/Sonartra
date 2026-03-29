@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { AdminAssessmentAuthoringProvider } from '@/components/admin/admin-assessment-authoring-context';
-import { AdminAssessmentSectionNav } from '@/components/admin/admin-assessment-section-nav';
+import { AdminAssessmentStepper } from '@/components/admin/admin-assessment-stepper';
 import {
   LabelPill,
   MetaItem,
@@ -64,7 +64,7 @@ export default async function AdminAssessmentAuthoringLayout({
           })} />
         </div>
 
-        <AdminAssessmentSectionNav assessmentKey={assessment.assessmentKey} />
+        <AdminAssessmentStepper />
 
         {children}
       </PageFrame>

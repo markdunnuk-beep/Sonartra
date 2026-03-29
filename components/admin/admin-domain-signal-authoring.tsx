@@ -764,10 +764,10 @@ export function AdminDomainSignalAuthoring({
         }
         description={
           mode === 'domains'
-            ? 'Add and edit domains.'
+            ? 'Add the main sections of the assessment.'
             : mode === 'signals'
-              ? 'Add and edit signals in each domain.'
-              : 'Add and edit domains and signals.'
+              ? 'Add the signals that sit inside each domain.'
+              : 'Set up the sections and signals for this assessment.'
         }
       />
 

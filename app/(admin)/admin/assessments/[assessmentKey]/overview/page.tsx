@@ -19,7 +19,7 @@ export default function AdminAssessmentOverviewPage() {
       <SectionHeader
         eyebrow="Overview"
         title="Overview"
-        description="See the assessment name, current version, and readiness at a glance."
+        description="Start here to review the draft and overall status."
       />
 
       <SurfaceCard className="p-5 lg:p-6">
