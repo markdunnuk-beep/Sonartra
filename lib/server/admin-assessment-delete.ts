@@ -3,17 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import type { AdminAssessmentDeleteActionState } from '@/lib/admin/admin-assessment-delete';
 import { getDbPool } from '@/lib/server/db';
-
-export type AdminAssessmentDeleteActionState = {
-  formError: string | null;
-  formSuccess: string | null;
-};
-
-export const initialAdminAssessmentDeleteActionState: AdminAssessmentDeleteActionState = {
-  formError: null,
-  formSuccess: null,
-};
 
 type Queryable = {
   query<T>(text: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;

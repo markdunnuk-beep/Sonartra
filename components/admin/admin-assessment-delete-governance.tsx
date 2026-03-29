@@ -10,10 +10,10 @@ import {
   cn,
 } from '@/components/shared/user-app-ui';
 import {
-  deleteAssessmentAction,
   initialAdminAssessmentDeleteActionState,
   type AdminAssessmentDeleteActionState,
-} from '@/lib/server/admin-assessment-delete';
+} from '@/lib/admin/admin-assessment-delete';
+import { deleteAssessmentAction } from '@/lib/server/admin-assessment-delete';
 
 function ActionNotice({
   state,

@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { initialAdminAssessmentDeleteActionState } from '@/lib/admin/admin-assessment-delete';
 import {
   deleteAssessmentActionWithDependencies,
   deleteAssessmentRecords,
-  initialAdminAssessmentDeleteActionState,
 } from '@/lib/server/admin-assessment-delete';
 
 type StoredAssessment = {
