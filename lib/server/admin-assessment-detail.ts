@@ -1,4 +1,4 @@
-﻿import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
+import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import {
   validateLatestDraftAssessmentVersion,
@@ -476,7 +476,7 @@ async function loadQuestionsForVersion(
       options: [],
     };
 
-    if (row.option_id && row.option_key && row.option_text && row.option_order_index !== null) {
+    if (row.option_id && row.option_key && row.option_text !== null && row.option_order_index !== null) {
       const signalWeights = Object.freeze(weightsByOptionId.get(row.option_id) ?? []);
       questionEntry.options.push({
         optionId: row.option_id,
@@ -682,5 +682,6 @@ export async function getAdminAssessmentDetailByKey(
     draftValidation,
   };
 }
+
 
 

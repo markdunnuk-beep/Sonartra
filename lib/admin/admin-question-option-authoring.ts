@@ -21,6 +21,18 @@ export type AdminQuestionAuthoringFormState = {
   values: AdminQuestionAuthoringFormValues;
 };
 
+export type AdminBulkQuestionAuthoringFormValues = {
+  count: string;
+};
+
+export type AdminBulkQuestionAuthoringFormState = {
+  formError: string | null;
+  fieldErrors: {
+    count?: string;
+  };
+  values: AdminBulkQuestionAuthoringFormValues;
+};
+
 export type AdminOptionAuthoringFormValues = {
   key: string;
   label: string;
@@ -47,6 +59,16 @@ export const initialAdminQuestionAuthoringFormState: AdminQuestionAuthoringFormS
   formError: null,
   fieldErrors: {},
   values: emptyAdminQuestionAuthoringFormValues,
+};
+
+export const emptyAdminBulkQuestionAuthoringFormValues: AdminBulkQuestionAuthoringFormValues = {
+  count: '80',
+};
+
+export const initialAdminBulkQuestionAuthoringFormState: AdminBulkQuestionAuthoringFormState = {
+  formError: null,
+  fieldErrors: {},
+  values: emptyAdminBulkQuestionAuthoringFormValues,
 };
 
 export const emptyAdminOptionAuthoringFormValues: AdminOptionAuthoringFormValues = {
@@ -82,6 +104,27 @@ export function validateAdminQuestionAuthoringValues(
 
   if (!values.domainId) {
     fieldErrors.domainId = 'Question domain is required.';
+  }
+
+  return {
+    formError: null,
+    fieldErrors,
+    values,
+  };
+}
+
+export function validateAdminBulkQuestionAuthoringValues(
+  values: AdminBulkQuestionAuthoringFormValues,
+): AdminBulkQuestionAuthoringFormState {
+  const fieldErrors: AdminBulkQuestionAuthoringFormState['fieldErrors'] = {};
+  const count = Number(values.count);
+
+  if (!values.count) {
+    fieldErrors.count = 'Question count is required.';
+  } else if (!Number.isInteger(count) || count < 1) {
+    fieldErrors.count = 'Enter a whole number greater than zero.';
+  } else if (count > 200) {
+    fieldErrors.count = 'Generate at most 200 questions at a time.';
   }
 
   return {

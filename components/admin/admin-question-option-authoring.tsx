@@ -11,10 +11,13 @@ import {
   cn,
 } from '@/components/shared/user-app-ui';
 import {
+  emptyAdminBulkQuestionAuthoringFormValues,
   emptyAdminOptionAuthoringFormValues,
   emptyAdminQuestionAuthoringFormValues,
+  initialAdminBulkQuestionAuthoringFormState,
   initialAdminOptionAuthoringFormState,
   initialAdminQuestionAuthoringFormState,
+  type AdminBulkQuestionAuthoringFormState,
   type AdminOptionAuthoringFormState,
   type AdminQuestionAuthoringFormState,
 } from '@/lib/admin/admin-question-option-authoring';
@@ -23,6 +26,7 @@ import type {
   AdminAssessmentDetailQuestionDomain,
 } from '@/lib/server/admin-assessment-detail';
 import {
+  createBulkQuestions,
   createOptionAction,
   createQuestionAction,
   deleteOptionAction,
@@ -42,6 +46,37 @@ function normalizeQuestionState(
       key: state?.values?.key ?? emptyAdminQuestionAuthoringFormValues.key,
       domainId: state?.values?.domainId ?? emptyAdminQuestionAuthoringFormValues.domainId,
     },
+  };
+}
+function normalizeBulkQuestionState(
+  state:
+    | (AdminBulkQuestionAuthoringFormState & {
+        createdQuestions?: readonly {
+          questionId: string;
+          domainId: string;
+          assessmentVersionId: string;
+          key: string;
+          prompt: string;
+          orderIndex: number;
+          options: readonly {
+            optionId: string;
+            key: string;
+            label: string;
+            text: string;
+            orderIndex: number;
+          }[];
+        }[];
+      })
+    | null
+    | undefined,
+) {
+  return {
+    formError: state?.formError ?? null,
+    fieldErrors: state?.fieldErrors ?? {},
+    values: {
+      count: state?.values?.count ?? emptyAdminBulkQuestionAuthoringFormValues.count,
+    },
+    createdQuestions: state?.createdQuestions ?? [],
   };
 }
 
@@ -105,6 +140,36 @@ function TextInput({
       name={name}
       placeholder={placeholder}
       type="text"
+    />
+  );
+}
+function NumberInput({
+  name,
+  defaultValue,
+  min,
+  max,
+  error,
+}: Readonly<{
+  name: string;
+  defaultValue: string;
+  min: number;
+  max: number;
+  error?: string;
+}>) {
+  return (
+    <input
+      className={cn(
+        'sonartra-focus-ring min-h-11 w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
+        error
+          ? 'border-[rgba(255,157,157,0.32)]'
+          : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
+      )}
+      defaultValue={defaultValue}
+      max={max}
+      min={min}
+      name={name}
+      step={1}
+      type="number"
     />
   );
 }
@@ -213,6 +278,70 @@ function formatDomainType(domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP'): stri
   return domainType === 'QUESTION_SECTION' ? 'Question section' : 'Domain';
 }
 
+function BulkQuestionForm({
+  assessmentKey,
+  assessmentVersionId,
+}: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+}) {
+  const [state, formAction] = useActionState(
+    createBulkQuestions.bind(null, {
+      assessmentKey,
+      assessmentVersionId,
+    }),
+    initialAdminBulkQuestionAuthoringFormState,
+  );
+  const currentState = normalizeBulkQuestionState(state);
+  return (
+    <SurfaceCard className="overflow-hidden p-5 lg:p-6">
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <p className="sonartra-page-eyebrow">Bulk generation</p>
+          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
+            Generate scaffolded questions in one pass
+          </h3>
+          <p className="max-w-2xl text-sm leading-7 text-white/62">
+            This creates sequential question records plus default A-D options using the same deterministic keying rules as single-question creation.
+          </p>
+        </div>
+        <form action={formAction} className="grid gap-4 lg:grid-cols-[220px_auto] lg:items-end">
+          <Field error={currentState.fieldErrors.count} hint="Create 1 to 200 questions in one transaction." label="Question count">
+            <NumberInput
+              defaultValue={currentState.values.count}
+              error={currentState.fieldErrors.count}
+              max={200}
+              min={1}
+              name="count"
+            />
+          </Field>
+          <div className="flex items-end">
+            <SubmitButton idleLabel="Generate Questions" pendingLabel="Generating..." />
+          </div>
+        </form>
+        <InlineError message={currentState.formError} />
+        {currentState.createdQuestions.length > 0 ? (
+          <div className="space-y-3 rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <p className="text-sm font-medium text-white">
+              Added {currentState.createdQuestions.length} question{currentState.createdQuestions.length === 1 ? '' : 's'} in this action.
+            </p>
+            <div className="space-y-2 text-sm text-white/62">
+              {currentState.createdQuestions.map((question) => (
+                <div className="flex flex-wrap items-center gap-2" key={question.questionId}>
+                  <LabelPill>{question.key}</LabelPill>
+                  <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+                    Question {question.orderIndex + 1}
+                  </LabelPill>
+                  <span>{question.options.map((option) => option.key).join(', ')}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </SurfaceCard>
+  );
+}
 function CreateQuestionForm({
   assessmentKey,
   assessmentVersionId,
@@ -722,3 +851,4 @@ export function AdminQuestionOptionAuthoring({
     </section>
   );
 }
+
