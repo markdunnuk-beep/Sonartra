@@ -2,26 +2,17 @@
 
 import { revalidatePath } from 'next/cache';
 
+import {
+  emptyAdminAuthoringFormValues,
+  initialAdminAuthoringFormState,
+  type AdminAuthoringFormState,
+  type AdminAuthoringFormValues,
+  validateAdminAuthoringValues,
+} from '@/lib/admin/admin-domain-signal-authoring';
 import { getDbPool } from '@/lib/server/db';
 
 type Queryable = {
   query<T>(text: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
-};
-
-export type AdminAuthoringFormValues = {
-  label: string;
-  key: string;
-  description: string;
-};
-
-export type AdminAuthoringFormState = {
-  formError: string | null;
-  fieldErrors: {
-    label?: string;
-    key?: string;
-    description?: string;
-  };
-  values: AdminAuthoringFormValues;
 };
 
 type ActionContext = {
@@ -31,52 +22,12 @@ type ActionContext = {
   signalId?: string;
 };
 
-const KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-export const emptyAdminAuthoringFormValues: AdminAuthoringFormValues = {
-  label: '',
-  key: '',
-  description: '',
-};
-
-export const initialAdminAuthoringFormState: AdminAuthoringFormState = {
-  formError: null,
-  fieldErrors: {},
-  values: emptyAdminAuthoringFormValues,
-};
-
 function normalizeFormValue(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
 function normalizeKey(value: string): string {
   return value.trim().toLowerCase();
-}
-
-function validateValues(values: AdminAuthoringFormValues): AdminAuthoringFormState {
-  const fieldErrors: AdminAuthoringFormState['fieldErrors'] = {};
-
-  if (!values.label) {
-    fieldErrors.label = 'Name is required.';
-  }
-
-  if (!values.key) {
-    fieldErrors.key = 'Key is required.';
-  } else if (!KEY_PATTERN.test(values.key)) {
-    fieldErrors.key = 'Use lowercase letters, numbers, and single hyphens only.';
-  } else if (values.key.length > 64) {
-    fieldErrors.key = 'Key must be 64 characters or fewer.';
-  }
-
-  if (values.description.length > 600) {
-    fieldErrors.description = 'Description must be 600 characters or fewer.';
-  }
-
-  return {
-    formError: null,
-    fieldErrors,
-    values,
-  };
 }
 
 function authoringPath(assessmentKey: string): string {
@@ -530,7 +481,7 @@ export async function createDomainAction(
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
   const values = getValuesFromFormData(formData);
-  const validation = validateValues(values);
+  const validation = validateAdminAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }
@@ -555,7 +506,7 @@ export async function updateDomainAction(
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
   const values = getValuesFromFormData(formData);
-  const validation = validateValues(values);
+  const validation = validateAdminAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }
@@ -600,7 +551,7 @@ export async function createSignalAction(
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
   const values = getValuesFromFormData(formData);
-  const validation = validateValues(values);
+  const validation = validateAdminAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }
@@ -626,7 +577,7 @@ export async function updateSignalAction(
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
   const values = getValuesFromFormData(formData);
-  const validation = validateValues(values);
+  const validation = validateAdminAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }

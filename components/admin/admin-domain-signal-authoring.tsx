@@ -10,17 +10,19 @@ import {
   SurfaceCard,
   cn,
 } from '@/components/shared/user-app-ui';
+import {
+  emptyAdminAuthoringFormValues,
+  initialAdminAuthoringFormState,
+  type AdminAuthoringFormState,
+} from '@/lib/admin/admin-domain-signal-authoring';
 import type { AdminAssessmentDetailDomain } from '@/lib/server/admin-assessment-detail';
 import {
   createDomainAction,
   createSignalAction,
   deleteDomainAction,
   deleteSignalAction,
-  emptyAdminAuthoringFormValues,
-  initialAdminAuthoringFormState,
   updateDomainAction,
   updateSignalAction,
-  type AdminAuthoringFormState,
 } from '@/lib/server/admin-domain-signal-authoring';
 
 function normalizeState(state: AdminAuthoringFormState | null | undefined): AdminAuthoringFormState {
