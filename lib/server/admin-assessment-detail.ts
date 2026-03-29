@@ -23,6 +23,38 @@ export type AdminAssessmentDetailDomain = {
   signals: readonly AdminAssessmentDetailSignal[];
 };
 
+export type AdminAssessmentDetailQuestionDomain = {
+  domainId: string;
+  domainKey: string;
+  label: string;
+  domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP';
+  orderIndex: number;
+};
+
+export type AdminAssessmentDetailOption = {
+  optionId: string;
+  optionKey: string;
+  optionLabel: string | null;
+  optionText: string;
+  orderIndex: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminAssessmentDetailQuestion = {
+  questionId: string;
+  questionKey: string;
+  prompt: string;
+  orderIndex: number;
+  domainId: string;
+  domainKey: string;
+  domainLabel: string;
+  domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP';
+  createdAt: string;
+  updatedAt: string;
+  options: readonly AdminAssessmentDetailOption[];
+};
+
 export type AdminAssessmentDetailVersion = {
   assessmentVersionId: string;
   versionTag: string;
@@ -44,6 +76,8 @@ export type AdminAssessmentDetailViewModel = {
   versions: readonly AdminAssessmentDetailVersion[];
   latestDraftVersion: AdminAssessmentDetailVersion | null;
   authoredDomains: readonly AdminAssessmentDetailDomain[];
+  questionDomains: readonly AdminAssessmentDetailQuestionDomain[];
+  authoredQuestions: readonly AdminAssessmentDetailQuestion[];
 };
 
 type AdminAssessmentDetailRow = {
@@ -73,6 +107,14 @@ type AdminAssessmentAuthoringDomainRow = {
   domain_updated_at: string;
 };
 
+type AdminAssessmentQuestionDomainRow = {
+  domain_id: string;
+  domain_key: string;
+  domain_label: string;
+  domain_type: 'QUESTION_SECTION' | 'SIGNAL_GROUP';
+  domain_order_index: number;
+};
+
 type AdminAssessmentAuthoringSignalRow = {
   signal_id: string;
   domain_id: string;
@@ -82,6 +124,26 @@ type AdminAssessmentAuthoringSignalRow = {
   signal_order_index: number;
   signal_created_at: string;
   signal_updated_at: string;
+};
+
+type AdminAssessmentQuestionRow = {
+  question_id: string;
+  question_key: string;
+  prompt: string;
+  question_order_index: number;
+  question_created_at: string;
+  question_updated_at: string;
+  domain_id: string;
+  domain_key: string;
+  domain_label: string;
+  domain_type: 'QUESTION_SECTION' | 'SIGNAL_GROUP';
+  option_id: string | null;
+  option_key: string | null;
+  option_label: string | null;
+  option_text: string | null;
+  option_order_index: number | null;
+  option_created_at: string | null;
+  option_updated_at: string | null;
 };
 
 function normalizeVersionStatus(
@@ -196,7 +258,124 @@ async function loadAuthoringDomainsForVersion(
       updatedAt: row.domain_updated_at,
       signals: Object.freeze(
         (signalsByDomainId.get(row.domain_id) ?? []).sort(
-          (left, right) => left.orderIndex - right.orderIndex || left.signalId.localeCompare(right.signalId),
+          (left, right) =>
+            left.orderIndex - right.orderIndex || left.signalId.localeCompare(right.signalId),
+        ),
+      ),
+    })),
+  );
+}
+
+async function loadQuestionDomainsForVersion(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<readonly AdminAssessmentDetailQuestionDomain[]> {
+  const result = await db.query<AdminAssessmentQuestionDomainRow>(
+    `
+    SELECT
+      id AS domain_id,
+      domain_key,
+      label AS domain_label,
+      domain_type,
+      order_index AS domain_order_index
+    FROM domains
+    WHERE assessment_version_id = $1
+    ORDER BY
+      CASE WHEN domain_type = 'QUESTION_SECTION' THEN 0 ELSE 1 END ASC,
+      order_index ASC,
+      id ASC
+    `,
+    [assessmentVersionId],
+  );
+
+  return Object.freeze(
+    result.rows.map((row) => ({
+      domainId: row.domain_id,
+      domainKey: row.domain_key,
+      label: row.domain_label,
+      domainType: row.domain_type,
+      orderIndex: row.domain_order_index,
+    })),
+  );
+}
+
+async function loadQuestionsForVersion(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<readonly AdminAssessmentDetailQuestion[]> {
+  const result = await db.query<AdminAssessmentQuestionRow>(
+    `
+    SELECT
+      q.id AS question_id,
+      q.question_key,
+      q.prompt,
+      q.order_index AS question_order_index,
+      q.created_at AS question_created_at,
+      q.updated_at AS question_updated_at,
+      d.id AS domain_id,
+      d.domain_key,
+      d.label AS domain_label,
+      d.domain_type,
+      o.id AS option_id,
+      o.option_key,
+      o.option_label,
+      o.option_text,
+      o.order_index AS option_order_index,
+      o.created_at AS option_created_at,
+      o.updated_at AS option_updated_at
+    FROM questions q
+    INNER JOIN domains d ON d.id = q.domain_id
+    LEFT JOIN options o ON o.question_id = q.id
+    WHERE q.assessment_version_id = $1
+    ORDER BY q.order_index ASC, q.id ASC, o.order_index ASC NULLS LAST, o.id ASC NULLS LAST
+    `,
+    [assessmentVersionId],
+  );
+
+  const questions = new Map<string, {
+    question: Omit<AdminAssessmentDetailQuestion, 'options'>;
+    options: AdminAssessmentDetailOption[];
+  }>();
+
+  for (const row of result.rows) {
+    const existing = questions.get(row.question_id);
+    const questionEntry = existing ?? {
+      question: {
+        questionId: row.question_id,
+        questionKey: row.question_key,
+        prompt: row.prompt,
+        orderIndex: row.question_order_index,
+        domainId: row.domain_id,
+        domainKey: row.domain_key,
+        domainLabel: row.domain_label,
+        domainType: row.domain_type,
+        createdAt: row.question_created_at,
+        updatedAt: row.question_updated_at,
+      },
+      options: [],
+    };
+
+    if (row.option_id && row.option_key && row.option_text && row.option_order_index !== null) {
+      questionEntry.options.push({
+        optionId: row.option_id,
+        optionKey: row.option_key,
+        optionLabel: row.option_label,
+        optionText: row.option_text,
+        orderIndex: row.option_order_index,
+        createdAt: row.option_created_at ?? '',
+        updatedAt: row.option_updated_at ?? '',
+      });
+    }
+
+    questions.set(row.question_id, questionEntry);
+  }
+
+  return Object.freeze(
+    [...questions.values()].map((entry) => ({
+      ...entry.question,
+      options: Object.freeze(
+        entry.options.sort(
+          (left, right) => left.orderIndex - right.orderIndex || left.optionId.localeCompare(right.optionId),
         ),
       ),
     })),
@@ -296,6 +475,12 @@ export async function getAdminAssessmentDetailByKey(
   const authoredDomains = latestDraftVersion
     ? await loadAuthoringDomainsForVersion(db, latestDraftVersion.assessmentVersionId)
     : Object.freeze([]);
+  const questionDomains = latestDraftVersion
+    ? await loadQuestionDomainsForVersion(db, latestDraftVersion.assessmentVersionId)
+    : Object.freeze([]);
+  const authoredQuestions = latestDraftVersion
+    ? await loadQuestionsForVersion(db, latestDraftVersion.assessmentVersionId)
+    : Object.freeze([]);
 
   return {
     assessmentId: firstRow.assessment_id,
@@ -308,5 +493,7 @@ export async function getAdminAssessmentDetailByKey(
     versions: Object.freeze(versions),
     latestDraftVersion,
     authoredDomains,
+    questionDomains,
+    authoredQuestions,
   };
 }

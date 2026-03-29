@@ -1,0 +1,745 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+
+import {
+  type AdminOptionAuthoringFormState,
+  type AdminOptionAuthoringFormValues,
+  type AdminQuestionAuthoringFormState,
+  type AdminQuestionAuthoringFormValues,
+  emptyAdminOptionAuthoringFormValues,
+  emptyAdminQuestionAuthoringFormValues,
+  initialAdminOptionAuthoringFormState,
+  initialAdminQuestionAuthoringFormState,
+  validateAdminOptionAuthoringValues,
+  validateAdminQuestionAuthoringValues,
+} from '@/lib/admin/admin-question-option-authoring';
+import { getDbPool } from '@/lib/server/db';
+
+type Queryable = {
+  query<T>(text: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
+};
+
+type ActionContext = {
+  assessmentKey: string;
+  assessmentVersionId: string;
+  questionId?: string;
+  optionId?: string;
+};
+
+type PostgresErrorLike = {
+  code?: string;
+  constraint?: string;
+  detail?: string;
+  message?: string;
+};
+
+function normalizeFormValue(value: FormDataEntryValue | null): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function normalizeKey(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function authoringPath(assessmentKey: string): string {
+  return `/admin/assessments/${assessmentKey}`;
+}
+
+function toPostgresErrorLike(error: unknown): PostgresErrorLike | null {
+  if (typeof error !== 'object' || error === null) {
+    return null;
+  }
+
+  const candidate = error as PostgresErrorLike;
+  if (
+    typeof candidate.code !== 'string' &&
+    typeof candidate.constraint !== 'string' &&
+    typeof candidate.detail !== 'string' &&
+    typeof candidate.message !== 'string'
+  ) {
+    return null;
+  }
+
+  return candidate;
+}
+
+function isQuestionKeyExistsError(error: unknown): boolean {
+  if (error instanceof Error && error.message === 'QUESTION_KEY_EXISTS') {
+    return true;
+  }
+
+  const candidate = toPostgresErrorLike(error);
+  if (!candidate || candidate.code !== '23505') {
+    return false;
+  }
+
+  return (
+    candidate.constraint?.includes('question') === true ||
+    candidate.message?.includes('question_key') === true ||
+    candidate.detail?.includes('(assessment_version_id, question_key)') === true
+  );
+}
+
+function isOptionKeyExistsError(error: unknown): boolean {
+  if (error instanceof Error && error.message === 'OPTION_KEY_EXISTS') {
+    return true;
+  }
+
+  const candidate = toPostgresErrorLike(error);
+  if (!candidate || candidate.code !== '23505') {
+    return false;
+  }
+
+  return (
+    candidate.constraint?.includes('option') === true ||
+    candidate.message?.includes('option_key') === true ||
+    candidate.detail?.includes('(question_id, option_key)') === true
+  );
+}
+
+async function domainExists(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  domainId: string;
+}): Promise<boolean> {
+  const result = await params.db.query<{ id: string }>(
+    `
+    SELECT id
+    FROM domains
+    WHERE id = $1
+      AND assessment_version_id = $2
+    `,
+    [params.domainId, params.assessmentVersionId],
+  );
+
+  return result.rows.length > 0;
+}
+
+async function questionExists(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+}): Promise<boolean> {
+  const result = await params.db.query<{ id: string }>(
+    `
+    SELECT id
+    FROM questions
+    WHERE id = $1
+      AND assessment_version_id = $2
+    `,
+    [params.questionId, params.assessmentVersionId],
+  );
+
+  return result.rows.length > 0;
+}
+
+async function optionExists(params: {
+  db: Queryable;
+  questionId: string;
+  optionId: string;
+}): Promise<boolean> {
+  const result = await params.db.query<{ id: string }>(
+    `
+    SELECT id
+    FROM options
+    WHERE id = $1
+      AND question_id = $2
+    `,
+    [params.optionId, params.questionId],
+  );
+
+  return result.rows.length > 0;
+}
+
+async function duplicateQuestionKeyExists(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionKey: string;
+  excludedQuestionId?: string;
+}): Promise<boolean> {
+  const result = await params.db.query<{ id: string }>(
+    `
+    SELECT id
+    FROM questions
+    WHERE assessment_version_id = $1
+      AND question_key = $2
+      AND ($3::uuid IS NULL OR id <> $3::uuid)
+    `,
+    [params.assessmentVersionId, params.questionKey, params.excludedQuestionId ?? null],
+  );
+
+  return result.rows.length > 0;
+}
+
+async function duplicateOptionKeyExists(params: {
+  db: Queryable;
+  questionId: string;
+  optionKey: string;
+  excludedOptionId?: string;
+}): Promise<boolean> {
+  const result = await params.db.query<{ id: string }>(
+    `
+    SELECT id
+    FROM options
+    WHERE question_id = $1
+      AND option_key = $2
+      AND ($3::uuid IS NULL OR id <> $3::uuid)
+    `,
+    [params.questionId, params.optionKey, params.excludedOptionId ?? null],
+  );
+
+  return result.rows.length > 0;
+}
+
+async function getNextQuestionOrderIndex(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<number> {
+  const result = await db.query<{ next_order_index: string | number }>(
+    `
+    SELECT COALESCE(MAX(order_index), -1) + 1 AS next_order_index
+    FROM questions
+    WHERE assessment_version_id = $1
+    `,
+    [assessmentVersionId],
+  );
+
+  return Number(result.rows[0]?.next_order_index ?? 0);
+}
+
+async function getNextOptionOrderIndex(db: Queryable, questionId: string): Promise<number> {
+  const result = await db.query<{ next_order_index: string | number }>(
+    `
+    SELECT COALESCE(MAX(order_index), -1) + 1 AS next_order_index
+    FROM options
+    WHERE question_id = $1
+    `,
+    [questionId],
+  );
+
+  return Number(result.rows[0]?.next_order_index ?? 0);
+}
+
+export async function createQuestionRecord(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  values: AdminQuestionAuthoringFormValues;
+}): Promise<void> {
+  const domainPresent = await domainExists({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    domainId: params.values.domainId,
+  });
+  if (!domainPresent) {
+    throw new Error('DOMAIN_NOT_FOUND');
+  }
+
+  if (
+    await duplicateQuestionKeyExists({
+      db: params.db,
+      assessmentVersionId: params.assessmentVersionId,
+      questionKey: params.values.key,
+    })
+  ) {
+    throw new Error('QUESTION_KEY_EXISTS');
+  }
+
+  const orderIndex = await getNextQuestionOrderIndex(params.db, params.assessmentVersionId);
+
+  await params.db.query(
+    `
+    INSERT INTO questions (
+      assessment_version_id,
+      domain_id,
+      question_key,
+      prompt,
+      order_index
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    `,
+    [
+      params.assessmentVersionId,
+      params.values.domainId,
+      params.values.key,
+      params.values.prompt,
+      orderIndex,
+    ],
+  );
+}
+
+export async function updateQuestionRecord(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+  values: AdminQuestionAuthoringFormValues;
+}): Promise<void> {
+  const questionPresent = await questionExists({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.questionId,
+  });
+  if (!questionPresent) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  const domainPresent = await domainExists({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    domainId: params.values.domainId,
+  });
+  if (!domainPresent) {
+    throw new Error('DOMAIN_NOT_FOUND');
+  }
+
+  if (
+    await duplicateQuestionKeyExists({
+      db: params.db,
+      assessmentVersionId: params.assessmentVersionId,
+      questionKey: params.values.key,
+      excludedQuestionId: params.questionId,
+    })
+  ) {
+    throw new Error('QUESTION_KEY_EXISTS');
+  }
+
+  await params.db.query(
+    `
+    UPDATE questions
+    SET
+      domain_id = $3,
+      question_key = $4,
+      prompt = $5,
+      updated_at = NOW()
+    WHERE id = $1
+      AND assessment_version_id = $2
+    `,
+    [
+      params.questionId,
+      params.assessmentVersionId,
+      params.values.domainId,
+      params.values.key,
+      params.values.prompt,
+    ],
+  );
+}
+
+export async function deleteQuestionRecord(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+}): Promise<void> {
+  const questionPresent = await questionExists({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.questionId,
+  });
+  if (!questionPresent) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  await params.db.query(
+    `
+    DELETE FROM questions
+    WHERE id = $1
+      AND assessment_version_id = $2
+    `,
+    [params.questionId, params.assessmentVersionId],
+  );
+}
+
+export async function createOptionRecord(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+  values: AdminOptionAuthoringFormValues;
+}): Promise<void> {
+  const questionPresent = await questionExists({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.questionId,
+  });
+  if (!questionPresent) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  if (
+    await duplicateOptionKeyExists({
+      db: params.db,
+      questionId: params.questionId,
+      optionKey: params.values.key,
+    })
+  ) {
+    throw new Error('OPTION_KEY_EXISTS');
+  }
+
+  const orderIndex = await getNextOptionOrderIndex(params.db, params.questionId);
+
+  await params.db.query(
+    `
+    INSERT INTO options (
+      question_id,
+      option_key,
+      option_label,
+      option_text,
+      order_index
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    `,
+    [
+      params.questionId,
+      params.values.key,
+      params.values.label || null,
+      params.values.text,
+      orderIndex,
+    ],
+  );
+}
+
+export async function updateOptionRecord(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+  optionId: string;
+  values: AdminOptionAuthoringFormValues;
+}): Promise<void> {
+  const questionPresent = await questionExists({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.questionId,
+  });
+  if (!questionPresent) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  const optionPresent = await optionExists({
+    db: params.db,
+    questionId: params.questionId,
+    optionId: params.optionId,
+  });
+  if (!optionPresent) {
+    throw new Error('OPTION_NOT_FOUND');
+  }
+
+  if (
+    await duplicateOptionKeyExists({
+      db: params.db,
+      questionId: params.questionId,
+      optionKey: params.values.key,
+      excludedOptionId: params.optionId,
+    })
+  ) {
+    throw new Error('OPTION_KEY_EXISTS');
+  }
+
+  await params.db.query(
+    `
+    UPDATE options
+    SET
+      option_key = $3,
+      option_label = $4,
+      option_text = $5,
+      updated_at = NOW()
+    WHERE id = $1
+      AND question_id = $2
+    `,
+    [
+      params.optionId,
+      params.questionId,
+      params.values.key,
+      params.values.label || null,
+      params.values.text,
+    ],
+  );
+}
+
+export async function deleteOptionRecord(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+  optionId: string;
+}): Promise<void> {
+  const questionPresent = await questionExists({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionId: params.questionId,
+  });
+  if (!questionPresent) {
+    throw new Error('QUESTION_NOT_FOUND');
+  }
+
+  const optionPresent = await optionExists({
+    db: params.db,
+    questionId: params.questionId,
+    optionId: params.optionId,
+  });
+  if (!optionPresent) {
+    throw new Error('OPTION_NOT_FOUND');
+  }
+
+  await params.db.query(
+    `
+    DELETE FROM options
+    WHERE id = $1
+      AND question_id = $2
+    `,
+    [params.optionId, params.questionId],
+  );
+}
+
+function getQuestionValuesFromFormData(formData: FormData): AdminQuestionAuthoringFormValues {
+  return {
+    prompt: normalizeFormValue(formData.get('prompt')),
+    key: normalizeKey(normalizeFormValue(formData.get('key'))),
+    domainId: normalizeFormValue(formData.get('domainId')),
+  };
+}
+
+function getOptionValuesFromFormData(formData: FormData): AdminOptionAuthoringFormValues {
+  return {
+    key: normalizeKey(normalizeFormValue(formData.get('key'))),
+    label: normalizeFormValue(formData.get('label')),
+    text: normalizeFormValue(formData.get('text')),
+  };
+}
+
+async function runQuestionWriteAction(params: {
+  assessmentKey: string;
+  values: AdminQuestionAuthoringFormValues;
+  action: (db: Queryable) => Promise<void>;
+}): Promise<AdminQuestionAuthoringFormState> {
+  const pool = getDbPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    await params.action(client);
+    await client.query('COMMIT');
+
+    revalidatePath(authoringPath(params.assessmentKey));
+
+    return initialAdminQuestionAuthoringFormState;
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (isQuestionKeyExistsError(error)) {
+      return {
+        formError: null,
+        fieldErrors: {
+          key: 'That question key already exists in this draft version.',
+        },
+        values: params.values,
+      };
+    }
+
+    if (error instanceof Error && error.message === 'DOMAIN_NOT_FOUND') {
+      return {
+        formError: 'The selected question domain is no longer available in this draft version.',
+        fieldErrors: {},
+        values: params.values,
+      };
+    }
+
+    if (error instanceof Error && error.message === 'QUESTION_NOT_FOUND') {
+      return {
+        formError: 'The selected question is no longer available in this draft version.',
+        fieldErrors: {},
+        values: params.values,
+      };
+    }
+
+    return {
+      formError: 'Question changes could not be saved. Review the inputs and try again.',
+      fieldErrors: {},
+      values: params.values,
+    };
+  } finally {
+    client.release();
+  }
+}
+
+async function runOptionWriteAction(params: {
+  assessmentKey: string;
+  values: AdminOptionAuthoringFormValues;
+  action: (db: Queryable) => Promise<void>;
+}): Promise<AdminOptionAuthoringFormState> {
+  const pool = getDbPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    await params.action(client);
+    await client.query('COMMIT');
+
+    revalidatePath(authoringPath(params.assessmentKey));
+
+    return initialAdminOptionAuthoringFormState;
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (isOptionKeyExistsError(error)) {
+      return {
+        formError: null,
+        fieldErrors: {
+          key: 'That option key already exists on this question.',
+        },
+        values: params.values,
+      };
+    }
+
+    if (error instanceof Error && error.message === 'QUESTION_NOT_FOUND') {
+      return {
+        formError: 'The selected question is no longer available in this draft version.',
+        fieldErrors: {},
+        values: params.values,
+      };
+    }
+
+    if (error instanceof Error && error.message === 'OPTION_NOT_FOUND') {
+      return {
+        formError: 'The selected option is no longer available on this question.',
+        fieldErrors: {},
+        values: params.values,
+      };
+    }
+
+    return {
+      formError: 'Option changes could not be saved. Review the inputs and try again.',
+      fieldErrors: {},
+      values: params.values,
+    };
+  } finally {
+    client.release();
+  }
+}
+
+export async function createQuestionAction(
+  context: ActionContext,
+  _previousState: AdminQuestionAuthoringFormState,
+  formData: FormData,
+): Promise<AdminQuestionAuthoringFormState> {
+  const values = getQuestionValuesFromFormData(formData);
+  const validation = validateAdminQuestionAuthoringValues(values);
+  if (Object.keys(validation.fieldErrors).length > 0) {
+    return validation;
+  }
+
+  return runQuestionWriteAction({
+    assessmentKey: context.assessmentKey,
+    values,
+    action: (db) =>
+      createQuestionRecord({
+        db,
+        assessmentVersionId: context.assessmentVersionId,
+        values,
+      }),
+  });
+}
+
+export async function updateQuestionAction(
+  context: ActionContext,
+  _previousState: AdminQuestionAuthoringFormState,
+  formData: FormData,
+): Promise<AdminQuestionAuthoringFormState> {
+  const values = getQuestionValuesFromFormData(formData);
+  const validation = validateAdminQuestionAuthoringValues(values);
+  if (Object.keys(validation.fieldErrors).length > 0) {
+    return validation;
+  }
+
+  return runQuestionWriteAction({
+    assessmentKey: context.assessmentKey,
+    values,
+    action: (db) =>
+      updateQuestionRecord({
+        db,
+        assessmentVersionId: context.assessmentVersionId,
+        questionId: context.questionId ?? '',
+        values,
+      }),
+  });
+}
+
+export async function deleteQuestionAction(
+  context: ActionContext,
+  _previousState: AdminQuestionAuthoringFormState,
+  _formData: FormData,
+): Promise<AdminQuestionAuthoringFormState> {
+  return runQuestionWriteAction({
+    assessmentKey: context.assessmentKey,
+    values: emptyAdminQuestionAuthoringFormValues,
+    action: (db) =>
+      deleteQuestionRecord({
+        db,
+        assessmentVersionId: context.assessmentVersionId,
+        questionId: context.questionId ?? '',
+      }),
+  });
+}
+
+export async function createOptionAction(
+  context: ActionContext,
+  _previousState: AdminOptionAuthoringFormState,
+  formData: FormData,
+): Promise<AdminOptionAuthoringFormState> {
+  const values = getOptionValuesFromFormData(formData);
+  const validation = validateAdminOptionAuthoringValues(values);
+  if (Object.keys(validation.fieldErrors).length > 0) {
+    return validation;
+  }
+
+  return runOptionWriteAction({
+    assessmentKey: context.assessmentKey,
+    values,
+    action: (db) =>
+      createOptionRecord({
+        db,
+        assessmentVersionId: context.assessmentVersionId,
+        questionId: context.questionId ?? '',
+        values,
+      }),
+  });
+}
+
+export async function updateOptionAction(
+  context: ActionContext,
+  _previousState: AdminOptionAuthoringFormState,
+  formData: FormData,
+): Promise<AdminOptionAuthoringFormState> {
+  const values = getOptionValuesFromFormData(formData);
+  const validation = validateAdminOptionAuthoringValues(values);
+  if (Object.keys(validation.fieldErrors).length > 0) {
+    return validation;
+  }
+
+  return runOptionWriteAction({
+    assessmentKey: context.assessmentKey,
+    values,
+    action: (db) =>
+      updateOptionRecord({
+        db,
+        assessmentVersionId: context.assessmentVersionId,
+        questionId: context.questionId ?? '',
+        optionId: context.optionId ?? '',
+        values,
+      }),
+  });
+}
+
+export async function deleteOptionAction(
+  context: ActionContext,
+  _previousState: AdminOptionAuthoringFormState,
+  _formData: FormData,
+): Promise<AdminOptionAuthoringFormState> {
+  return runOptionWriteAction({
+    assessmentKey: context.assessmentKey,
+    values: emptyAdminOptionAuthoringFormValues,
+    action: (db) =>
+      deleteOptionRecord({
+        db,
+        assessmentVersionId: context.assessmentVersionId,
+        questionId: context.questionId ?? '',
+        optionId: context.optionId ?? '',
+      }),
+  });
+}

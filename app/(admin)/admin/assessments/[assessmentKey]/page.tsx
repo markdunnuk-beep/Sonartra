@@ -1,9 +1,17 @@
 import { notFound } from 'next/navigation';
 
 import { AdminDomainSignalAuthoring } from '@/components/admin/admin-domain-signal-authoring';
-import { EmptyState, LabelPill, MetaItem, PageFrame, PageHeader, SurfaceCard } from '@/components/shared/user-app-ui';
-import { getDbPool } from '@/lib/server/db';
+import { AdminQuestionOptionAuthoring } from '@/components/admin/admin-question-option-authoring';
+import {
+  EmptyState,
+  LabelPill,
+  MetaItem,
+  PageFrame,
+  PageHeader,
+  SurfaceCard,
+} from '@/components/shared/user-app-ui';
 import { getAdminAssessmentDetailByKey } from '@/lib/server/admin-assessment-detail';
+import { getDbPool } from '@/lib/server/db';
 
 function formatDate(value: string): string {
   return new Date(value).toLocaleDateString('en-GB', {
@@ -30,7 +38,7 @@ export default async function AdminAssessmentDetailPlaceholderPage({
       <PageHeader
         eyebrow="Admin Workspace"
         title={assessment.title}
-        description="The base assessment object is now in place. Later tasks can attach domains, signals, questions, and weights to the draft version surfaced here."
+        description="The base assessment object is now in place. Draft authoring on this page can add domains, signals, questions, and options directly against the latest draft version."
       />
 
       <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
@@ -38,7 +46,9 @@ export default async function AdminAssessmentDetailPlaceholderPage({
           <div className="flex flex-wrap items-center gap-2">
             <LabelPill>{assessment.assessmentKey}</LabelPill>
             <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
-              {assessment.latestDraftVersion ? `Draft ${assessment.latestDraftVersion.versionTag}` : 'No draft yet'}
+              {assessment.latestDraftVersion
+                ? `Draft ${assessment.latestDraftVersion.versionTag}`
+                : 'No draft yet'}
             </LabelPill>
           </div>
           <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.3rem]">
@@ -46,7 +56,7 @@ export default async function AdminAssessmentDetailPlaceholderPage({
           </h2>
           <p className="max-w-2xl text-sm leading-7 text-white/68">
             {assessment.description ??
-              'This assessment is ready for the next authoring steps. No domain, signal, question, or option content has been added yet.'}
+              'This assessment is ready for structural authoring. Domains, signals, questions, options, and later weighting can all attach to the latest draft version surfaced here.'}
           </p>
         </div>
       </SurfaceCard>
@@ -54,37 +64,43 @@ export default async function AdminAssessmentDetailPlaceholderPage({
       <div className="grid gap-4 xl:grid-cols-4">
         <MetaItem label="Assessment key" value={assessment.assessmentKey} />
         <MetaItem label="Versions" value={String(assessment.versions.length)} />
-        <MetaItem
-          label="Latest draft"
-          value={assessment.latestDraftVersion?.versionTag ?? 'None'}
-        />
+        <MetaItem label="Latest draft" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
         <MetaItem label="Last updated" value={formatDate(assessment.updatedAt)} />
       </div>
 
       <SurfaceCard className="p-5 lg:p-6">
         <div className="space-y-3">
-          <p className="sonartra-page-eyebrow">Next authoring stage</p>
+          <p className="sonartra-page-eyebrow">Draft authoring status</p>
           <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-            Base records are ready for structural authoring
+            Structural records are authored directly against the latest draft version
           </h2>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Task 28 can attach the first draft domain and signal structure to version{' '}
-            {assessment.latestDraftVersion?.versionTag ?? '1.0.0'} without changing the creation
-            flow or catalogue routing.
+            This workspace now supports domain, signal, question, and option authoring on version{' '}
+            {assessment.latestDraftVersion?.versionTag ?? '1.0.0'}. Weight mappings and publish
+            controls remain separate later tasks.
           </p>
         </div>
       </SurfaceCard>
 
       {assessment.latestDraftVersion ? (
-        <AdminDomainSignalAuthoring
-          assessmentKey={assessment.assessmentKey}
-          assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
-          domains={assessment.authoredDomains}
-        />
+        <>
+          <AdminDomainSignalAuthoring
+            assessmentKey={assessment.assessmentKey}
+            assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
+            domains={assessment.authoredDomains}
+          />
+
+          <AdminQuestionOptionAuthoring
+            assessmentKey={assessment.assessmentKey}
+            assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
+            domains={assessment.questionDomains}
+            questions={assessment.authoredQuestions}
+          />
+        </>
       ) : (
         <EmptyState
           title="No draft version available"
-          description="Domain and signal authoring is only available when a draft version exists for this assessment."
+          description="Draft authoring is only available when a draft version exists for this assessment. Questions and options will not attach to a published version."
         />
       )}
     </PageFrame>
