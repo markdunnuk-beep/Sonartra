@@ -1,18 +1,14 @@
-import { EmptyState, PageFrame, PageHeader } from '@/components/shared/user-app-ui';
+import { AdminAssessmentsDashboard } from '@/components/admin/admin-assessments-dashboard';
+import { buildAdminAssessmentDashboardViewModel } from '@/lib/server/admin-assessment-dashboard';
+import { getDbPool } from '@/lib/server/db';
 
-export default function AdminAssessmentsPage() {
+export default async function AdminAssessmentsPage() {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(getDbPool());
+
   return (
-    <PageFrame className="space-y-8">
-      <PageHeader
-        eyebrow="Admin Workspace"
-        title="Assessments"
-        description="Assessment inventory and authoring controls will live here next. This stub confirms the protected shell, routing, and navigation state for the assessments module."
-      />
-
-      <EmptyState
-        title="Assessment authoring surface ready"
-        description="Task 26 can now add the assessments dashboard, version visibility, and publishing controls inside the shared admin layout."
-      />
-    </PageFrame>
+    <AdminAssessmentsDashboard
+      assessments={viewModel.assessments}
+      summary={viewModel.summary}
+    />
   );
 }
