@@ -520,8 +520,9 @@ function CreateDomainForm({
                 error={currentState.fieldErrors.label}
                 name="label"
                 onChange={(event) => {
+                  const nextLabel = event.currentTarget.value;
                   setDraftState((previousState) =>
-                    syncDomainKeyFromLabel(previousState, event.currentTarget.value),
+                    syncDomainKeyFromLabel(previousState, nextLabel),
                   );
                 }}
                 placeholder="Leadership style"
@@ -534,8 +535,9 @@ function CreateDomainForm({
                 error={currentState.fieldErrors.key}
                 name="key"
                 onChange={(event) => {
+                  const nextKey = event.currentTarget.value;
                   setDraftState((previousState) =>
-                    syncDomainKeyFromManualInput(previousState, event.currentTarget.value),
+                    syncDomainKeyFromManualInput(previousState, nextKey),
                   );
                 }}
                 pattern={DOMAIN_KEY_PATTERN.source}
