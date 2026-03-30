@@ -1,0 +1,321 @@
+Question	Option	Question	Response
+1	A	 When starting a new initiative, what do you focus on first?	Start immediately and refine as I go
+1	B	 When starting a new initiative, what do you focus on first?	Map out the plan in detail first
+1	C	 When starting a new initiative, what do you focus on first?	Speak to key stakeholders before acting
+1	D	 When starting a new initiative, what do you focus on first?	Wait for clarity and direction
+2	A	 How would you describe your natural pace at work?	High and intense
+2	B	 How would you describe your natural pace at work?	Consistent and steady
+2	C	 How would you describe your natural pace at work?	Calm and reflective
+2	D	 How would you describe your natural pace at work?	Variable depending on environment
+3	A	 When priorities shift suddenly, what is your instinct?	Adapt quickly
+3	B	 When priorities shift suddenly, what is your instinct?	Reassess methodically
+3	C	 When priorities shift suddenly, what is your instinct?	Check impact on others
+3	D	 When priorities shift suddenly, what is your instinct?	Feel unsettled
+4	A	 What type of work do you naturally gravitate towards?	Challenging and visible
+4	B	 What type of work do you naturally gravitate towards?	Structured and defined
+4	C	 What type of work do you naturally gravitate towards?	Collaborative
+4	D	 What type of work do you naturally gravitate towards?	Technical or analytical
+5	A	 When there is little clarity, what do you do first?	Move forward confidently
+5	B	 When there is little clarity, what do you do first?	Gather more data
+5	C	 When there is little clarity, what do you do first?	Seek reassurance
+5	D	 When there is little clarity, what do you do first?	Maintain stability
+6	A	 When working on something important, how do you handle detail?	Secondary to momentum
+6	B	 When working on something important, how do you handle detail?	Balanced
+6	C	 When working on something important, how do you handle detail?	Very high
+6	D	 When working on something important, how do you handle detail?	Delegated where possible
+7	A	 When receiving feedback, what is your immediate reaction?	Motivates me
+7	B	 When receiving feedback, what is your immediate reaction?	Helps refine performance
+7	C	 When receiving feedback, what is your immediate reaction?	Feels personal
+7	D	 When receiving feedback, what is your immediate reaction?	Must be logical to matter
+8	A	 When making decisions, what do you rely on most?	Fast
+8	B	 When making decisions, what do you rely on most?	Balanced
+8	C	 When making decisions, what do you rely on most?	Cautious
+8	D	 When making decisions, what do you rely on most?	Data-driven
+9	A	 In meetings, how do you usually contribute?	Direct the discussion
+9	B	 In meetings, how do you usually contribute?	Generate ideas
+9	C	 In meetings, how do you usually contribute?	Support others
+9	D	 In meetings, how do you usually contribute?	Question assumptions
+10	A	 How would others describe your communication style?	Direct and concise
+10	B	 How would others describe your communication style?	Persuasive and expressive
+10	C	 How would others describe your communication style?	Patient and empathetic
+10	D	 How would others describe your communication style?	Precise and factual
+11	A	 When leading a project, where does your focus go first?	Set aggressive goals
+11	B	 When leading a project, where does your focus go first?	Inspire enthusiasm
+11	C	 When leading a project, where does your focus go first?	Ensure everyone feels included
+11	D	 When leading a project, where does your focus go first?	Focus on systems and accuracy
+12	A	 Under tight time pressure, how do you operate?	Push harder
+12	B	 Under tight time pressure, how do you operate?	Motivate the team
+12	C	 Under tight time pressure, how do you operate?	Protect morale
+12	D	 Under tight time pressure, how do you operate?	Double-check details
+13	A	 What kind of environment helps you perform best?	In control
+13	B	 What kind of environment helps you perform best?	Influencing
+13	C	 What kind of environment helps you perform best?	Supporting
+13	D	 What kind of environment helps you perform best?	Analysing
+14	A	 How do others typically experience you at work?	Decisive
+14	B	 How do others typically experience you at work?	Charismatic
+14	C	 How do others typically experience you at work?	Reliable
+14	D	 How do others typically experience you at work?	Thoughtful
+15	A	 What frustrates you most in a working environment?	Slow decision-making
+15	B	 What frustrates you most in a working environment?	Lack of enthusiasm
+15	C	 What frustrates you most in a working environment?	Harsh conflict
+15	D	 What frustrates you most in a working environment?	Poor logic
+16	A	 What drives you to perform at your best?	Achievement
+16	B	 What drives you to perform at your best?	Influence
+16	C	 What drives you to perform at your best?	Stability
+16	D	 What drives you to perform at your best?	Mastery
+17	A	 Why does recognition matter to you, if it does?	It reflects success
+17	B	 Why does recognition matter to you, if it does?	It builds visibility
+17	C	 Why does recognition matter to you, if it does?	It strengthens relationships
+17	D	 Why does recognition matter to you, if it does?	It validates expertise
+18	A	 Given a choice, what kind of work would you choose more often?	Stretch targets
+18	B	 Given a choice, what kind of work would you choose more often?	Bigger network
+18	C	 Given a choice, what kind of work would you choose more often?	Job security
+18	D	 Given a choice, what kind of work would you choose more often?	Skill depth
+19	A	 If you had complete freedom, how would you choose to work?	Compete
+19	B	 If you had complete freedom, how would you choose to work?	Build
+19	C	 If you had complete freedom, how would you choose to work?	Protect
+19	D	 If you had complete freedom, how would you choose to work?	Optimise
+20	A	 How do you personally measure success?	Results
+20	B	 How do you personally measure success?	Impact
+20	C	 How do you personally measure success?	Harmony
+20	D	 How do you personally measure success?	Quality
+21	A	 What kind of work gives you energy?	Winning
+21	B	 What kind of work gives you energy?	Inspiring
+21	C	 What kind of work gives you energy?	Supporting
+21	D	 What kind of work gives you energy?	Solving
+22	A	 What causes you to disengage from work?	Goals are weak
+22	B	 What causes you to disengage from work?	Voice is ignored
+22	C	 What causes you to disengage from work?	Conflict escalates
+22	D	 What causes you to disengage from work?	Standards slip
+23	A	 What kind of leader do you respect most?	Take charge
+23	B	 What kind of leader do you respect most?	Set vision
+23	C	 What kind of leader do you respect most?	Develop people
+23	D	 What kind of leader do you respect most?	Provide clarity
+24	A	 When do you feel most valued at work?	Trusted with responsibility
+24	B	 When do you feel most valued at work?	Consulted
+24	C	 When do you feel most valued at work?	Included
+24	D	 When do you feel most valued at work?	Recognised for expertise
+25	A	 In a team, what role do you naturally take?	Lead
+25	B	 In a team, what role do you naturally take?	Connect
+25	C	 In a team, what role do you naturally take?	Stabilise
+25	D	 In a team, what role do you naturally take?	Specialise
+26	A	 Do you prefer working independently or with others?	Independently
+26	B	 Do you prefer working independently or with others?	Collaboratively
+26	C	 Do you prefer working independently or with others?	In predictable teams
+26	D	 Do you prefer working independently or with others?	With intellectual challenge
+27	A	 When you are left out of decisions, how do you respond?	Challenge
+27	B	 When you are left out of decisions, how do you respond?	Re-engage
+27	C	 When you are left out of decisions, how do you respond?	Withdraw
+27	D	 When you are left out of decisions, how do you respond?	Analyse
+28	A	 What do you actively look for in your work?	Authority
+28	B	 What do you actively look for in your work?	Influence
+28	C	 What do you actively look for in your work?	Belonging
+28	D	 What do you actively look for in your work?	Competence
+29	A	Think back to the last time you disagreed with a colleague. What approach did you take?	Compete
+29	B	Think back to the last time you disagreed with a colleague. What approach did you take?	Persuade
+29	C	Think back to the last time you disagreed with a colleague. What approach did you take?	Compromise
+29	D	Think back to the last time you disagreed with a colleague. What approach did you take?	Withdraw
+30	A	Recall a time you were challenged in front of others. How did you respond in the moment?	Stand firm
+30	B	Recall a time you were challenged in front of others. How did you respond in the moment?	Respond emotionally
+30	C	Recall a time you were challenged in front of others. How did you respond in the moment?	De-escalate
+30	D	Recall a time you were challenged in front of others. How did you respond in the moment?	Clarify facts
+31	A	When someone on your team last underperformed, what did you do first?	Address directly
+31	B	When someone on your team last underperformed, what did you do first?	Encourage
+31	C	When someone on your team last underperformed, what did you do first?	Support quietly
+31	D	When someone on your team last underperformed, what did you do first?	Review process
+32	A	Think of a situation where you chose not to engage in conflict. Why did you hold back?	Stakes are low
+32	B	Think of a situation where you chose not to engage in conflict. Why did you hold back?	Relationships matter
+32	C	Think of a situation where you chose not to engage in conflict. Why did you hold back?	It feels aggressive
+32	D	Think of a situation where you chose not to engage in conflict. Why did you hold back?	It lacks logic
+33	A	In a recent disagreement, what strength did you rely on most?	Courage
+33	B	In a recent disagreement, what strength did you rely on most?	Influence
+33	C	In a recent disagreement, what strength did you rely on most?	Empathy
+33	D	In a recent disagreement, what strength did you rely on most?	Objectivity
+34	A	Looking back, what is your most common mistake in conflict situations?	Over-dominance
+34	B	Looking back, what is your most common mistake in conflict situations?	Over-talking
+34	C	Looking back, what is your most common mistake in conflict situations?	Avoidance
+34	D	Looking back, what is your most common mistake in conflict situations?	Over-analysis
+35	A	Under sustained pressure, what behaviour do you tend to fall into over time?	Become controlling
+35	B	Under sustained pressure, what behaviour do you tend to fall into over time?	Become scattered
+35	C	Under sustained pressure, what behaviour do you tend to fall into over time?	Avoid difficult conversations
+35	D	Under sustained pressure, what behaviour do you tend to fall into over time?	Become overly critical
+36	A	When you last felt overwhelmed at work, what did you do first?	Take over
+36	B	When you last felt overwhelmed at work, what did you do first?	Talk more
+36	C	When you last felt overwhelmed at work, what did you do first?	Retreat
+36	D	When you last felt overwhelmed at work, what did you do first?	Analyse obsessively
+37	A	Think of a time when trust was broken. How did you respond?	React
+37	B	Think of a time when trust was broken. How did you respond?	Express frustration
+37	C	Think of a time when trust was broken. How did you respond?	Internalise
+37	D	Think of a time when trust was broken. How did you respond?	Distance emotionally
+38	A	How might someone who has worked closely with you describe you under pressure?	Intimidating
+38	B	How might someone who has worked closely with you describe you under pressure?	Dramatic
+38	C	How might someone who has worked closely with you describe you under pressure?	Passive
+38	D	How might someone who has worked closely with you describe you under pressure?	Detached
+39	A	Looking back, what blind spot shows up most often in your behaviour?	Impatience
+39	B	Looking back, what blind spot shows up most often in your behaviour?	Over-optimism
+39	C	Looking back, what blind spot shows up most often in your behaviour?	Avoidance
+39	D	Looking back, what blind spot shows up most often in your behaviour?	Perfectionism
+40	A	When you feel under threat or exposed, what is your instinctive reaction?	Fight
+40	B	When you feel under threat or exposed, what is your instinctive reaction?	Defend
+40	C	When you feel under threat or exposed, what is your instinctive reaction?	Freeze
+40	D	When you feel under threat or exposed, what is your instinctive reaction?	Overthink
+41	A	 How do you generally view risk?	Opportunity
+41	B	 How do you generally view risk?	Necessary
+41	C	 How do you generally view risk?	Manageable
+41	D	 How do you generally view risk?	Dangerous
+42	A	 What kind of decisions do you prefer to make?	Fast
+42	B	 What kind of decisions do you prefer to make?	Consensus-based
+42	C	 What kind of decisions do you prefer to make?	Safe
+42	D	 What kind of decisions do you prefer to make?	Evidence-based
+43	A	Think of a recent high-stakes decision. What did you prioritise most?	Act
+43	B	Think of a recent high-stakes decision. What did you prioritise most?	Influence
+43	C	Think of a recent high-stakes decision. What did you prioritise most?	Stabilise
+43	D	Think of a recent high-stakes decision. What did you prioritise most?	Model scenarios
+44	A	When you last had to make a judgement call, what did you trust most?	Instinct
+44	B	When you last had to make a judgement call, what did you trust most?	People
+44	C	When you last had to make a judgement call, what did you trust most?	Stability
+44	D	When you last had to make a judgement call, what did you trust most?	Data
+45	A	 What level of uncertainty are you comfortable with?	Volatility
+45	B	 What level of uncertainty are you comfortable with?	Change
+45	C	 What level of uncertainty are you comfortable with?	Routine
+45	D	 What level of uncertainty are you comfortable with?	Structure
+46	A	 What is the primary responsibility of a leader?	Deliver results
+46	B	 What is the primary responsibility of a leader?	Inspire
+46	C	 What is the primary responsibility of a leader?	Develop
+46	D	 What is the primary responsibility of a leader?	Design systems
+47	A	 How should poor performance be handled?	Raising standards
+47	B	 How should poor performance be handled?	Motivating
+47	C	 How should poor performance be handled?	Coaching
+47	D	 How should poor performance be handled?	Redesigning process
+48	A	 How do you naturally lead others?	Direction
+48	B	 How do you naturally lead others?	Energy
+48	C	 How do you naturally lead others?	Support
+48	D	 How do you naturally lead others?	Expertise
+49	A	 What is the role of authority in organisations?	Be asserted
+49	B	 What is the role of authority in organisations?	Be earned
+49	C	 What is the role of authority in organisations?	Be shared
+49	D	 What is the role of authority in organisations?	Be structured
+50	A	 When do you feel most confident leading?	In crisis
+50	B	 When do you feel most confident leading?	In growth
+50	C	 When do you feel most confident leading?	In stability
+50	D	 When do you feel most confident leading?	In complexity
+51	A	 What does an ideal working culture look like to you?	Competitive
+51	B	 What does an ideal working culture look like to you?	Innovative
+51	C	 What does an ideal working culture look like to you?	Collaborative
+51	D	 What does an ideal working culture look like to you?	Structured
+52	A	 How should success be measured in an organisation?	Profit
+52	B	 How should success be measured in an organisation?	Growth
+52	C	 How should success be measured in an organisation?	Engagement
+52	D	 How should success be measured in an organisation?	Efficiency
+53	A	 What should culture prioritise above all else?	Performance
+53	B	 What should culture prioritise above all else?	Creativity
+53	C	 What should culture prioritise above all else?	Belonging
+53	D	 What should culture prioritise above all else?	Consistency
+54	A	 How should accountability show up in a team?	High and visible
+54	B	 How should accountability show up in a team?	Inspiring
+54	C	 How should accountability show up in a team?	Fair
+54	D	 How should accountability show up in a team?	Measured
+55	A	 What kind of culture do you struggle in?	Slow
+55	B	 What kind of culture do you struggle in?	Conservative
+55	C	 What kind of culture do you struggle in?	Harsh
+55	D	 What kind of culture do you struggle in?	Chaotic
+56	A	 What type of role suits you best?	Commercial leadership
+56	B	 What type of role suits you best?	Business development
+56	C	 What type of role suits you best?	Operations management
+56	D	 What type of role suits you best?	Technical specialist
+57	A	 Where does your natural strength lie?	Driving change
+57	B	 Where does your natural strength lie?	Influencing
+57	C	 Where does your natural strength lie?	Maintaining
+57	D	 Where does your natural strength lie?	Analysing
+58	A	 In what kind of environment do you thrive?	Targets are aggressive
+58	B	 In what kind of environment do you thrive?	Relationships are key
+58	C	 In what kind of environment do you thrive?	Stability exists
+58	D	 In what kind of environment do you thrive?	Systems matter
+59	A	 What is the greatest value you bring to a company?	Momentum
+59	B	 What is the greatest value you bring to a company?	Engagement
+59	C	 What is the greatest value you bring to a company?	Reliability
+59	D	 What is the greatest value you bring to a company?	Precision
+60	A	Think of a time when progress stalled on something important. What did you do next?	Push harder and accelerate decisions
+60	B	Think of a time when progress stalled on something important. What did you do next?	Rally people and re-energise the group
+60	C	Think of a time when progress stalled on something important. What did you do next?	Maintain stability and reduce disruption
+60	D	Think of a time when progress stalled on something important. What did you do next?	Re-evaluate the system or assumptions
+61	A	When someone strongly challenged your idea recently, how did you respond?	Defend my position immediately
+61	B	When someone strongly challenged your idea recently, how did you respond?	Reframe the discussion to win support
+61	C	When someone strongly challenged your idea recently, how did you respond?	De-escalate and keep harmony
+61	D	When someone strongly challenged your idea recently, how did you respond?	Examine their reasoning carefully
+62	A	 In high-performing teams, what matters most to you?	Momentum and execution
+62	B	 In high-performing teams, what matters most to you?	Inspiration and energy
+62	C	 In high-performing teams, what matters most to you?	Trust and cohesion
+62	D	 In high-performing teams, what matters most to you?	Precision and expertise
+63	A	When a project you were involved in started to drift, what did you do?	Take direct control of the situation
+63	B	When a project you were involved in started to drift, what did you do?	Influence the team informally
+63	C	When a project you were involved in started to drift, what did you do?	Encourage collaboration
+63	D	When a project you were involved in started to drift, what did you do?	Improve the process or structure
+64	A	Think of a risky opportunity you evaluated recently. What did you focus on most?	Potential upside
+64	B	Think of a risky opportunity you evaluated recently. What did you focus on most?	Strategic narrative
+64	C	Think of a risky opportunity you evaluated recently. What did you focus on most?	Impact on people
+64	D	Think of a risky opportunity you evaluated recently. What did you focus on most?	Evidence and probability
+65	A	When someone disagreed with you privately, how did you handle it?	Expect alignment with my decision
+65	B	When someone disagreed with you privately, how did you handle it?	Try to win them over
+65	C	When someone disagreed with you privately, how did you handle it?	Explore their concerns
+65	D	When someone disagreed with you privately, how did you handle it?	Analyse the logic together
+66	A	 Why do organisations fail when they grow quickly?	Leadership loses control
+66	B	 Why do organisations fail when they grow quickly?	Vision becomes diluted
+66	C	 Why do organisations fail when they grow quickly?	Culture becomes fragmented
+66	D	 Why do organisations fail when they grow quickly?	Systems fail to scale
+67	A	In a recent emotionally charged situation, how did you behave?	Become more forceful
+67	B	In a recent emotionally charged situation, how did you behave?	Become more expressive
+67	C	In a recent emotionally charged situation, how did you behave?	Try to calm the situation
+67	D	In a recent emotionally charged situation, how did you behave?	Become more analytical
+68	A	Think of a difficult conversation you had. What did you prioritise?	Directness
+68	B	Think of a difficult conversation you had. What did you prioritise?	Influence
+68	C	Think of a difficult conversation you had. What did you prioritise?	Sensitivity
+68	D	Think of a difficult conversation you had. What did you prioritise?	Accuracy
+69	A	When a decision you made turned out to be wrong, what did you do next?	Correct course quickly
+69	B	When a decision you made turned out to be wrong, what did you do next?	Re-inspire commitment
+69	C	When a decision you made turned out to be wrong, what did you do next?	Maintain morale
+69	D	When a decision you made turned out to be wrong, what did you do next?	Investigate root causes
+70	A	When you joined a new team or organisation, what did you try to understand first?	Power and decision authority
+70	B	When you joined a new team or organisation, what did you try to understand first?	Informal influence networks
+70	C	When you joined a new team or organisation, what did you try to understand first?	Social dynamics and trust
+70	D	When you joined a new team or organisation, what did you try to understand first?	Systems and processes
+71	A	 When are you most effective as a leader?	Drive performance
+71	B	 When are you most effective as a leader?	Inspire confidence
+71	C	 When are you most effective as a leader?	Build stability
+71	D	 When are you most effective as a leader?	Provide expertise
+72	A	When you last faced competing priorities, how did you decide?	Choose the fastest path forward
+72	B	When you last faced competing priorities, how did you decide?	Align stakeholders first
+72	C	When you last faced competing priorities, how did you decide?	Seek consensus
+72	D	When you last faced competing priorities, how did you decide?	Analyse implications
+73	A	 What does uncertainty in an organisation usually indicate to you?	Opportunity
+73	B	 What does uncertainty in an organisation usually indicate to you?	Energy
+73	C	 What does uncertainty in an organisation usually indicate to you?	Instability
+73	D	 What does uncertainty in an organisation usually indicate to you?	Complexity
+74	A	 What is the most damaging behaviour a leader can display?	Indecision
+74	B	 What is the most damaging behaviour a leader can display?	Ego-driven leadership
+74	C	 What is the most damaging behaviour a leader can display?	Disconnection from people
+74	D	 What is the most damaging behaviour a leader can display?	Poor judgement
+75	A	When outcomes really mattered, how did you operate differently (if at all)?	Increase pressure
+75	B	When outcomes really mattered, how did you operate differently (if at all)?	Increase communication
+75	C	When outcomes really mattered, how did you operate differently (if at all)?	Increase support
+75	D	When outcomes really mattered, how did you operate differently (if at all)?	Increase analysis
+76	A	 What do the best organisations consistently get right?	Competitive
+76	B	 What do the best organisations consistently get right?	Inspired
+76	C	 What do the best organisations consistently get right?	Cohesive
+76	D	 What do the best organisations consistently get right?	Systematically effective
+77	A	 When data conflicts with your instinct, what do you do?	Trust instinct
+77	B	 When data conflicts with your instinct, what do you do?	Seek additional perspectives
+77	C	 When data conflicts with your instinct, what do you do?	Reflect carefully
+77	D	 When data conflicts with your instinct, what do you do?	Follow the evidence
+78	A	 When organisations go through change, what is your instinct?	Drive transformation quickly
+78	B	 When organisations go through change, what is your instinct?	Communicate the vision
+78	C	 When organisations go through change, what is your instinct?	Protect stability
+78	D	 When organisations go through change, what is your instinct?	Design the transition carefully
+79	A	 What kind of behaviour should organisations reward most?	Winning
+79	B	 What kind of behaviour should organisations reward most?	Visibility
+79	C	 What kind of behaviour should organisations reward most?	Loyalty
+79	D	 What kind of behaviour should organisations reward most?	Competence
+80	A	 When evaluating people, what do you value most?	Results delivered
+80	B	 When evaluating people, what do you value most?	Influence created
+80	C	 When evaluating people, what do you value most?	Relationships maintained
+80	D	 When evaluating people, what do you value most?	Quality of thinking
