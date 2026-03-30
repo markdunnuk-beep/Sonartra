@@ -35,6 +35,18 @@ export type AdminBulkQuestionAuthoringFormState = {
   values: AdminBulkQuestionAuthoringFormValues;
 };
 
+export type AdminBulkQuestionByDomainAuthoringFormValues = {
+  questionLines: string;
+};
+
+export type AdminBulkQuestionByDomainAuthoringFormState = {
+  formError: string | null;
+  fieldErrors: {
+    questionLines?: string;
+  };
+  values: AdminBulkQuestionByDomainAuthoringFormValues;
+};
+
 export type AdminOptionAuthoringFormValues = {
   key: string;
   label: string;
@@ -72,6 +84,16 @@ export const initialAdminBulkQuestionAuthoringFormState: AdminBulkQuestionAuthor
   formError: null,
   fieldErrors: {},
   values: emptyAdminBulkQuestionAuthoringFormValues,
+};
+
+export const emptyAdminBulkQuestionByDomainAuthoringFormValues: AdminBulkQuestionByDomainAuthoringFormValues = {
+  questionLines: '',
+};
+
+export const initialAdminBulkQuestionByDomainAuthoringFormState: AdminBulkQuestionByDomainAuthoringFormState = {
+  formError: null,
+  fieldErrors: {},
+  values: emptyAdminBulkQuestionByDomainAuthoringFormValues,
 };
 
 export const emptyAdminOptionAuthoringFormValues: AdminOptionAuthoringFormValues = {
@@ -127,6 +149,22 @@ export function validateAdminBulkQuestionAuthoringValues(
 
   if (!values.domainId) {
     fieldErrors.domainId = 'Question domain is required.';
+  }
+
+  return {
+    formError: null,
+    fieldErrors,
+    values,
+  };
+}
+
+export function validateAdminBulkQuestionByDomainAuthoringValues(
+  values: AdminBulkQuestionByDomainAuthoringFormValues,
+): AdminBulkQuestionByDomainAuthoringFormState {
+  const fieldErrors: AdminBulkQuestionByDomainAuthoringFormState['fieldErrors'] = {};
+
+  if (!values.questionLines) {
+    fieldErrors.questionLines = 'Paste at least one question.';
   }
 
   return {

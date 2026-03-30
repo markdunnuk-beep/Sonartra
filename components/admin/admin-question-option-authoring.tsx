@@ -12,12 +12,15 @@ import {
 } from '@/components/shared/user-app-ui';
 import {
   emptyAdminBulkQuestionAuthoringFormValues,
+  emptyAdminBulkQuestionByDomainAuthoringFormValues,
   emptyAdminOptionAuthoringFormValues,
   emptyAdminQuestionAuthoringFormValues,
   initialAdminBulkQuestionAuthoringFormState,
+  initialAdminBulkQuestionByDomainAuthoringFormState,
   initialAdminOptionAuthoringFormState,
   initialAdminQuestionAuthoringFormState,
   type AdminBulkQuestionAuthoringFormState,
+  type AdminBulkQuestionByDomainAuthoringFormState,
   type AdminOptionAuthoringFormState,
   type AdminQuestionAuthoringFormState,
 } from '@/lib/admin/admin-question-option-authoring';
@@ -27,6 +30,7 @@ import type {
 } from '@/lib/server/admin-assessment-detail';
 import {
   createBulkQuestions,
+  createBulkQuestionsByDomain,
   createOptionAction,
   createQuestionAction,
   duplicateQuestionAction,
@@ -80,6 +84,40 @@ function normalizeBulkQuestionState(
       questionLines:
         state?.values?.questionLines ?? emptyAdminBulkQuestionAuthoringFormValues.questionLines,
       domainId: state?.values?.domainId ?? emptyAdminBulkQuestionAuthoringFormValues.domainId,
+    },
+    createdQuestions: state?.createdQuestions ?? [],
+  };
+}
+
+function normalizeBulkQuestionByDomainState(
+  state:
+    | (AdminBulkQuestionByDomainAuthoringFormState & {
+        createdQuestions?: readonly {
+          questionId: string;
+          domainId: string;
+          assessmentVersionId: string;
+          key: string;
+          prompt: string;
+          orderIndex: number;
+          options: readonly {
+            optionId: string;
+            key: string;
+            label: string;
+            text: string;
+            orderIndex: number;
+          }[];
+        }[];
+      })
+    | null
+    | undefined,
+) {
+  return {
+    formError: state?.formError ?? null,
+    fieldErrors: state?.fieldErrors ?? {},
+    values: {
+      questionLines:
+        state?.values?.questionLines ??
+        emptyAdminBulkQuestionByDomainAuthoringFormValues.questionLines,
     },
     createdQuestions: state?.createdQuestions ?? [],
   };
@@ -593,6 +631,95 @@ function BulkQuestionForm({
     </SurfaceCard>
   );
 }
+function BulkQuestionByDomainForm({
+  assessmentKey,
+  assessmentVersionId,
+}: {
+  assessmentKey: string;
+  assessmentVersionId: string;
+}) {
+  const createBulkQuestionsByDomainFormAction = useMemo(
+    () =>
+      createBulkQuestionsByDomain.bind(null, {
+        assessmentKey,
+        assessmentVersionId,
+      }),
+    [assessmentKey, assessmentVersionId],
+  );
+  const [state, formAction] = useActionState(createBulkQuestionsByDomainFormAction, {
+    ...initialAdminBulkQuestionByDomainAuthoringFormState,
+  });
+  const currentState = normalizeBulkQuestionByDomainState(state);
+  const [questionLines, setQuestionLines] = useState(currentState.values.questionLines);
+
+  return (
+    <SurfaceCard className="overflow-hidden p-5 lg:p-6">
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <p className="sonartra-page-eyebrow">Bulk authoring</p>
+          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
+            Bulk paste questions by domain
+          </h3>
+          <p className="max-w-2xl text-sm leading-7 text-white/62">
+            Paste one question per line using: domain|question text. Domain can be either the
+            domain key or the exact domain name.
+          </p>
+        </div>
+        <form action={formAction} className="space-y-5">
+          <Field
+            error={currentState.fieldErrors.questionLines}
+            hint="Blank lines are ignored. Each non-empty row must include one exact domain token and one question."
+            label="Questions by domain"
+          >
+            <TextArea
+              error={currentState.fieldErrors.questionLines}
+              minHeightClass="min-h-[220px]"
+              name="questionLines"
+              onChange={(event) => {
+                const nextQuestionLines = event.currentTarget.value;
+                setQuestionLines(nextQuestionLines);
+              }}
+              placeholder={[
+                'operating-style|When starting a new initiative, what do you focus on first?',
+                'core-drivers|What tends to motivate your effort most?',
+                'Leadership Approach|How do you naturally guide others in uncertain situations?',
+              ].join('\n')}
+              value={questionLines}
+            />
+          </Field>
+
+          <InlineError message={currentState.formError} />
+
+          <div className="flex items-end justify-between gap-3">
+            <p className="text-xs uppercase tracking-[0.14em] text-white/40">
+              Each imported question gets the canonical A-D option scaffold.
+            </p>
+            <SubmitButton idleLabel="Import questions" pendingLabel="Importing..." />
+          </div>
+        </form>
+        {currentState.createdQuestions.length > 0 ? (
+          <div className="space-y-3 rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <p className="text-sm font-medium text-white">
+              Imported {currentState.createdQuestions.length} question{currentState.createdQuestions.length === 1 ? '' : 's'} in this action.
+            </p>
+            <div className="space-y-2 text-sm text-white/62">
+              {currentState.createdQuestions.map((question) => (
+                <div className="flex flex-wrap items-center gap-2" key={question.questionId}>
+                  <LabelPill>{question.key}</LabelPill>
+                  <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+                    Question {question.orderIndex + 1}
+                  </LabelPill>
+                  <span>{question.options.map((option) => option.key).join(', ')}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </SurfaceCard>
+  );
+}
+
 function CreateQuestionForm({
   assessmentKey,
   assessmentVersionId,
@@ -1098,6 +1225,11 @@ export function AdminQuestionOptionAuthoring({
                 assessmentKey={assessmentKey}
                 assessmentVersionId={assessmentVersionId}
                 domains={domains}
+              />
+
+              <BulkQuestionByDomainForm
+                assessmentKey={assessmentKey}
+                assessmentVersionId={assessmentVersionId}
               />
 
               <CreateQuestionForm

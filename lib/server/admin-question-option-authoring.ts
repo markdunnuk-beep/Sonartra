@@ -5,17 +5,22 @@ import { revalidatePath } from 'next/cache';
 import {
   type AdminBulkQuestionAuthoringFormState,
   type AdminBulkQuestionAuthoringFormValues,
+  type AdminBulkQuestionByDomainAuthoringFormState,
+  type AdminBulkQuestionByDomainAuthoringFormValues,
   type AdminOptionAuthoringFormState,
   type AdminOptionAuthoringFormValues,
   type AdminQuestionAuthoringFormState,
   type AdminQuestionAuthoringFormValues,
   emptyAdminBulkQuestionAuthoringFormValues,
+  emptyAdminBulkQuestionByDomainAuthoringFormValues,
   emptyAdminOptionAuthoringFormValues,
   emptyAdminQuestionAuthoringFormValues,
   initialAdminBulkQuestionAuthoringFormState,
+  initialAdminBulkQuestionByDomainAuthoringFormState,
   initialAdminOptionAuthoringFormState,
   initialAdminQuestionAuthoringFormState,
   validateAdminBulkQuestionAuthoringValues,
+  validateAdminBulkQuestionByDomainAuthoringValues,
   validateAdminOptionAuthoringValues,
   validateAdminQuestionAuthoringValues,
 } from '@/lib/admin/admin-question-option-authoring';
@@ -96,6 +101,10 @@ type BulkQuestionActionState = AdminBulkQuestionAuthoringFormState & {
   createdQuestions?: readonly AdminCreatedQuestion[];
 };
 
+type BulkQuestionByDomainActionState = AdminBulkQuestionByDomainAuthoringFormState & {
+  createdQuestions?: readonly AdminCreatedQuestion[];
+};
+
 type BulkQuestionActionDependencies = {
   connect(): Promise<TransactionClient>;
   revalidatePath(path: string): void;
@@ -162,6 +171,22 @@ type BulkInsertedOptionRow = {
   order_index: string | number;
 };
 
+type DomainResolutionRow = {
+  id: string;
+  domain_key: string;
+  label: string;
+};
+
+type ParsedBulkQuestionByDomainLine = {
+  lineNumber: number;
+  domainToken: string;
+  prompt: string;
+};
+
+type ResolvedBulkQuestionByDomainLine = ParsedBulkQuestionByDomainLine & {
+  domainId: string;
+};
+
 const MAX_BULK_QUESTION_IMPORT_COUNT = 200;
 
 function normalizeFormValue(value: FormDataEntryValue | null): string {
@@ -170,6 +195,10 @@ function normalizeFormValue(value: FormDataEntryValue | null): string {
 
 function normalizeKey(value: string): string {
   return value.trim().toLowerCase();
+}
+
+function normalizeTextAreaValue(value: FormDataEntryValue | null): string {
+  return typeof value === 'string' ? value : '';
 }
 
 function authoringPath(assessmentKey: string): string {
@@ -249,6 +278,101 @@ async function domainExists(params: {
   );
 
   return result.rows.length > 0;
+}
+
+async function getDomainsForAssessmentVersion(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+}): Promise<readonly DomainResolutionRow[]> {
+  const result = await params.db.query<DomainResolutionRow>(
+    `
+    SELECT id, domain_key, label
+    FROM domains
+    WHERE assessment_version_id = $1
+    ORDER BY order_index ASC, id ASC
+    `,
+    [params.assessmentVersionId],
+  );
+
+  return result.rows;
+}
+
+function parseBulkQuestionByDomainLines(questionLines: string): readonly ParsedBulkQuestionByDomainLine[] {
+  const parsedLines: ParsedBulkQuestionByDomainLine[] = [];
+  const rows = questionLines.split(/\r?\n/);
+
+  for (let index = 0; index < rows.length; index += 1) {
+    const rawLine = rows[index] ?? '';
+    const trimmedLine = rawLine.trim();
+    if (!trimmedLine) {
+      continue;
+    }
+
+    const firstPipeIndex = rawLine.indexOf('|');
+    const lastPipeIndex = rawLine.lastIndexOf('|');
+    const lineNumber = index + 1;
+
+    if (firstPipeIndex < 0 || firstPipeIndex !== lastPipeIndex) {
+      throw new Error(`BULK_IMPORT_LINE_${lineNumber}_INVALID_FORMAT`);
+    }
+
+    const domainToken = rawLine.slice(0, firstPipeIndex).trim();
+    const prompt = rawLine.slice(firstPipeIndex + 1).trim();
+
+    if (!domainToken) {
+      throw new Error(`BULK_IMPORT_LINE_${lineNumber}_DOMAIN_REQUIRED`);
+    }
+
+    if (!prompt) {
+      throw new Error(`BULK_IMPORT_LINE_${lineNumber}_QUESTION_REQUIRED`);
+    }
+
+    parsedLines.push({
+      lineNumber,
+      domainToken,
+      prompt,
+    });
+  }
+
+  return Object.freeze(parsedLines);
+}
+
+async function resolveBulkQuestionByDomainLines(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionLines: string;
+}): Promise<readonly ResolvedBulkQuestionByDomainLine[]> {
+  const parsedLines = parseBulkQuestionByDomainLines(params.questionLines);
+
+  if (parsedLines.length < 1) {
+    throw new Error('INVALID_BULK_IMPORT');
+  }
+
+  if (parsedLines.length > MAX_BULK_QUESTION_IMPORT_COUNT) {
+    throw new Error('BULK_IMPORT_LIMIT_EXCEEDED');
+  }
+
+  const domains = await getDomainsForAssessmentVersion({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+  });
+
+  const domainByKey = new Map(domains.map((domain) => [domain.domain_key, domain]));
+  const domainByLabel = new Map(domains.map((domain) => [domain.label, domain]));
+
+  const resolvedLines = parsedLines.map((line) => {
+    const resolvedDomain = domainByKey.get(line.domainToken) ?? domainByLabel.get(line.domainToken);
+    if (!resolvedDomain) {
+      throw new Error(`BULK_IMPORT_LINE_${line.lineNumber}_UNKNOWN_DOMAIN`);
+    }
+
+    return {
+      ...line,
+      domainId: resolvedDomain.id,
+    };
+  });
+
+  return Object.freeze(resolvedLines);
 }
 
 async function questionExists(params: {
@@ -695,6 +819,36 @@ export async function createBulkQuestionRecords(params: {
           prompt,
           key: '',
           domainId: params.domainId,
+        },
+      }),
+    );
+  }
+
+  return Object.freeze(createdQuestions);
+}
+
+export async function createBulkQuestionsByDomainRecord(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionLines: string;
+}): Promise<readonly AdminCreatedQuestion[]> {
+  const resolvedLines = await resolveBulkQuestionByDomainLines({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    questionLines: params.questionLines,
+  });
+
+  const createdQuestions: AdminCreatedQuestion[] = [];
+
+  for (const line of resolvedLines) {
+    createdQuestions.push(
+      await createQuestionRecord({
+        db: params.db,
+        assessmentVersionId: params.assessmentVersionId,
+        values: {
+          prompt: line.prompt,
+          key: '',
+          domainId: line.domainId,
         },
       }),
     );
@@ -1186,9 +1340,41 @@ function getOptionValuesFromFormData(formData: FormData): AdminOptionAuthoringFo
 
 function getBulkQuestionValuesFromFormData(formData: FormData): AdminBulkQuestionAuthoringFormValues {
   return {
-    questionLines: normalizeFormValue(formData.get('questionLines')),
+    questionLines: normalizeTextAreaValue(formData.get('questionLines')),
     domainId: normalizeFormValue(formData.get('domainId')),
   };
+}
+
+function getBulkQuestionByDomainValuesFromFormData(
+  formData: FormData,
+): AdminBulkQuestionByDomainAuthoringFormValues {
+  return {
+    questionLines: normalizeTextAreaValue(formData.get('questionLines')),
+  };
+}
+
+function formatBulkQuestionByDomainError(message: string): string | null {
+  const invalidFormatMatch = /^BULK_IMPORT_LINE_(\d+)_INVALID_FORMAT$/.exec(message);
+  if (invalidFormatMatch) {
+    return `Line ${invalidFormatMatch[1]} must use exactly one | separator in the format domain|question text.`;
+  }
+
+  const domainRequiredMatch = /^BULK_IMPORT_LINE_(\d+)_DOMAIN_REQUIRED$/.exec(message);
+  if (domainRequiredMatch) {
+    return `Line ${domainRequiredMatch[1]} must include a domain token before the | separator.`;
+  }
+
+  const questionRequiredMatch = /^BULK_IMPORT_LINE_(\d+)_QUESTION_REQUIRED$/.exec(message);
+  if (questionRequiredMatch) {
+    return `Line ${questionRequiredMatch[1]} must include question text after the | separator.`;
+  }
+
+  const unknownDomainMatch = /^BULK_IMPORT_LINE_(\d+)_UNKNOWN_DOMAIN$/.exec(message);
+  if (unknownDomainMatch) {
+    return `Line ${unknownDomainMatch[1]} uses a domain that does not exist in this assessment version.`;
+  }
+
+  return null;
 }
 
 function parseBulkQuestionPrompts(questionLines: string): readonly string[] {
@@ -1395,6 +1581,102 @@ export async function createBulkQuestions(
   formData: FormData,
 ): Promise<BulkQuestionActionState> {
   return createBulkQuestionsActionWithDependencies(context, previousState, formData, {
+    connect: () => getDbPool().connect(),
+    revalidatePath,
+  });
+}
+
+export async function createBulkQuestionsByDomainActionWithDependencies(
+  context: ActionContext,
+  _previousState: BulkQuestionByDomainActionState,
+  formData: FormData,
+  dependencies: BulkQuestionActionDependencies,
+): Promise<BulkQuestionByDomainActionState> {
+  const values = getBulkQuestionByDomainValuesFromFormData(formData);
+  const validation = validateAdminBulkQuestionByDomainAuthoringValues(values);
+  if (Object.keys(validation.fieldErrors).length > 0) {
+    return validation;
+  }
+
+  let parsedLines: readonly ParsedBulkQuestionByDomainLine[] = [];
+
+  try {
+    parsedLines = parseBulkQuestionByDomainLines(values.questionLines);
+  } catch (error) {
+    const formattedError = error instanceof Error ? formatBulkQuestionByDomainError(error.message) : null;
+    return {
+      formError: formattedError ?? 'Bulk question import by domain could not be saved. Try again.',
+      fieldErrors: {},
+      values,
+    };
+  }
+
+  if (parsedLines.length < 1) {
+    return {
+      formError: null,
+      fieldErrors: {
+        questionLines: 'Paste at least one question.',
+      },
+      values,
+    };
+  }
+
+  if (parsedLines.length > MAX_BULK_QUESTION_IMPORT_COUNT) {
+    return {
+      formError: null,
+      fieldErrors: {
+        questionLines: `Import at most ${MAX_BULK_QUESTION_IMPORT_COUNT} questions at a time.`,
+      },
+      values,
+    };
+  }
+
+  const client = await dependencies.connect();
+
+  try {
+    await client.query('BEGIN');
+    const createdQuestions = await createBulkQuestionsByDomainRecord({
+      db: client,
+      assessmentVersionId: context.assessmentVersionId,
+      questionLines: values.questionLines,
+    });
+    await client.query('COMMIT');
+
+    dependencies.revalidatePath(authoringPath(context.assessmentKey));
+
+    return {
+      ...initialAdminBulkQuestionByDomainAuthoringFormState,
+      values: emptyAdminBulkQuestionByDomainAuthoringFormValues,
+      createdQuestions,
+    };
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    const formattedError = error instanceof Error ? formatBulkQuestionByDomainError(error.message) : null;
+    if (formattedError) {
+      return {
+        formError: formattedError,
+        fieldErrors: {},
+        values,
+      };
+    }
+
+    return {
+      formError: 'Bulk question import by domain could not be saved. Try again.',
+      fieldErrors: {},
+      values,
+    };
+  } finally {
+    client.release();
+  }
+}
+
+export async function createBulkQuestionsByDomain(
+  context: ActionContext,
+  previousState: BulkQuestionByDomainActionState,
+  formData: FormData,
+): Promise<BulkQuestionByDomainActionState> {
+  return createBulkQuestionsByDomainActionWithDependencies(context, previousState, formData, {
     connect: () => getDbPool().connect(),
     revalidatePath,
   });

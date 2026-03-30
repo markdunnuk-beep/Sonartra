@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import {
   createBulkQuestionRecords,
   createBulkQuestionsActionWithDependencies,
+  createBulkQuestionsByDomainActionWithDependencies,
+  createBulkQuestionsByDomainRecord,
   createOptionRecord,
   createQuestionRecord,
   deleteOptionRecord,
@@ -14,7 +16,10 @@ import {
   updateQuestionRecord,
   updateQuestionText,
 } from '@/lib/server/admin-question-option-authoring';
-import { initialAdminBulkQuestionAuthoringFormState } from '@/lib/admin/admin-question-option-authoring';
+import {
+  initialAdminBulkQuestionAuthoringFormState,
+  initialAdminBulkQuestionByDomainAuthoringFormState,
+} from '@/lib/admin/admin-question-option-authoring';
 
 type StoredDomain = {
   id: string;
@@ -136,6 +141,19 @@ function createFakeDb(
       );
       state.optionSignalWeights = state.optionSignalWeights.filter((weight) => weight.optionId !== optionId);
       return { rows: [] as T[] };
+    }
+
+    if (text.includes('SELECT id, domain_key, label') && text.includes('FROM domains')) {
+      const [assessmentVersionId] = params as [string];
+      const rows = state.domains
+        .filter((domain) => domain.assessmentVersionId === assessmentVersionId)
+        .sort((left, right) => left.orderIndex - right.orderIndex || left.id.localeCompare(right.id))
+        .map((domain) => ({
+          id: domain.id,
+          domain_key: domain.domainKey,
+          label: domain.label,
+        }));
+      return { rows: rows as unknown as T[] };
     }
 
     if (text.includes('SELECT id') && text.includes('FROM domains') && text.includes('WHERE id = $1')) {
@@ -584,6 +602,12 @@ function buildBulkFormData(questionLines: string, domainId = 'domain-1') {
   const formData = new FormData();
   formData.set('questionLines', questionLines);
   formData.set('domainId', domainId);
+  return formData;
+}
+
+function buildBulkByDomainFormData(questionLines: string) {
+  const formData = new FormData();
+  formData.set('questionLines', questionLines);
   return formData;
 }
 
@@ -1136,6 +1160,363 @@ test('bulk action rejects stale domains instead of silently assigning Operating 
   assert.equal(result.formError, 'Select a valid question domain before importing questions.');
   assert.equal(fake.state.questions.length, 0);
   assert.equal(fake.state.options.length, 0);
+});
+
+test('multi-domain bulk import creates questions by exact domain key', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'core-drivers',
+        label: 'Core Drivers',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+      {
+        id: 'domain-3',
+        assessmentVersionId: 'version-1',
+        domainKey: 'leadership-approach',
+        label: 'Leadership Approach',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 2,
+      },
+    ],
+  });
+
+  const createdQuestions = await createBulkQuestionsByDomainRecord({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    questionLines: [
+      'operating-style|When starting a new initiative, what do you focus on first?',
+      'core-drivers|What tends to motivate your effort most?',
+      'leadership-approach|How do you naturally guide others in uncertain situations?',
+    ].join('\n'),
+  });
+
+  assert.equal(createdQuestions.length, 3);
+  assert.deepEqual(
+    createdQuestions.map((question) => ({
+      key: question.key,
+      domainId: question.domainId,
+      orderIndex: question.orderIndex,
+      optionKeys: question.options.map((option) => option.key),
+    })),
+    [
+      {
+        key: 'q01',
+        domainId: 'domain-1',
+        orderIndex: 0,
+        optionKeys: ['q01_a', 'q01_b', 'q01_c', 'q01_d'],
+      },
+      {
+        key: 'q02',
+        domainId: 'domain-2',
+        orderIndex: 1,
+        optionKeys: ['q02_a', 'q02_b', 'q02_c', 'q02_d'],
+      },
+      {
+        key: 'q03',
+        domainId: 'domain-3',
+        orderIndex: 2,
+        optionKeys: ['q03_a', 'q03_b', 'q03_c', 'q03_d'],
+      },
+    ],
+  );
+});
+
+test('multi-domain bulk import resolves exact domain names and ignores blank lines', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'core-drivers',
+        label: 'Core Drivers',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('  Operating Style | First question  \n\n Core Drivers|Second question\n   '),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.createdQuestions?.length, 2);
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({ prompt: question.prompt, domainId: question.domainId })),
+    [
+      { prompt: 'First question', domainId: 'domain-1' },
+      { prompt: 'Second question', domainId: 'domain-2' },
+    ],
+  );
+});
+
+test('multi-domain bulk import continues canonical keys and order after existing questions', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'core-drivers',
+        label: 'Core Drivers',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing one',
+        orderIndex: 0,
+      },
+      {
+        id: 'question-2',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-2',
+        questionKey: 'q02',
+        prompt: 'Existing two',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  const createdQuestions = await createBulkQuestionsByDomainRecord({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    questionLines: ['core-drivers|Third question', 'operating-style|Fourth question'].join('\n'),
+  });
+
+  assert.deepEqual(
+    createdQuestions.map((question) => ({ key: question.key, orderIndex: question.orderIndex, domainId: question.domainId })),
+    [
+      { key: 'q03', orderIndex: 2, domainId: 'domain-2' },
+      { key: 'q04', orderIndex: 3, domainId: 'domain-1' },
+    ],
+  );
+  assert.equal(fake.state.options.length, 8);
+});
+
+test('multi-domain bulk import fails with a line-specific format error', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating-style|First question\nmissing separator'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'Line 2 must use exactly one | separator in the format domain|question text.',
+  );
+  assert.equal(fake.state.questions.length, 0);
+  assert.equal(fake.state.options.length, 0);
+});
+
+test('multi-domain bulk import fails on unknown domains without inserting partial rows', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating-style|First question\ncore-drivers|Second question'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'Line 2 uses a domain that does not exist in this assessment version.',
+  );
+  assert.equal(fake.state.questions.length, 0);
+  assert.equal(fake.state.options.length, 0);
+});
+
+test('multi-domain bulk import fails on empty question text', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating-style|   '),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'Line 1 must include question text after the | separator.',
+  );
+  assert.equal(fake.state.questions.length, 0);
+});
+
+test('multi-domain bulk import is transactional when a later row is invalid', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'core-drivers',
+        label: 'Core Drivers',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating-style|First question\nunknown-domain|Second question\ncore-drivers|Third question'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'Line 2 uses a domain that does not exist in this assessment version.',
+  );
+  assert.deepEqual(fake.state.questions, []);
+  assert.deepEqual(fake.state.options, []);
+});
+
+test('multi-domain bulk action rejects batches over the safe maximum', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const lines = Array.from(
+    { length: 201 },
+    (_, index) => `operating-style|Question ${index + 1}`,
+  ).join('\n');
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData(lines),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.fieldErrors.questionLines, 'Import at most 200 questions at a time.');
+  assert.equal(fake.state.questions.length, 0);
 });
 
 test('duplicates a question below the source and copies options and weights deterministically', async () => {
