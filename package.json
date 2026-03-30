@@ -10,6 +10,7 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
+    "db:migrate": "tsx scripts/apply-db-migrations.ts",
     "convert:wplp80": "tsx scripts/convert-wplp80-excel-to-seeds.ts",
     "verify:wplp80": "tsx scripts/verify-wplp80-seeds.ts",
     "seed:wplp80": "tsx scripts/seed-wplp80.ts",

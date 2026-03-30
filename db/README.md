@@ -4,11 +4,16 @@
 
 Canonical schema migrations live in `db/migrations/`.
 
-Current baseline migration:
+Current migrations:
 
 - `202603260001_mvp_canonical_schema.sql`
+- `202603290001_option_version_key_scope.sql`
 
-Apply it with your Postgres migration workflow (for example, `psql` or your migration runner) before running Task 5 seed inserts.
+Apply them before running seed inserts or admin authoring writes:
+
+```bash
+npm run db:migrate
+```
 
 ## Seed data
 

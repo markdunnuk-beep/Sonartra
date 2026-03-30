@@ -747,6 +747,91 @@ test('bulk creation appends deterministic questions with default options', async
   assert.ok(createdQuestions.every((question) => question.options.every((option) => option.assessmentVersionId === 'version-1')));
 });
 
+test('bulk creation can generate 80 questions with four deterministic options each', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section one',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const createdQuestions = await createBulkQuestionRecords({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    count: 80,
+  });
+
+  assert.equal(createdQuestions.length, 80);
+  assert.equal(fake.state.questions.length, 80);
+  assert.equal(fake.state.options.length, 320);
+  assert.equal(createdQuestions[0]?.key, 'q01');
+  assert.equal(createdQuestions[79]?.key, 'q80');
+  assert.deepEqual(
+    createdQuestions[79]?.options.map((option) => option.key),
+    ['q80_a', 'q80_b', 'q80_c', 'q80_d'],
+  );
+  assert.equal(new Set(createdQuestions.map((question) => question.key)).size, 80);
+  assert.ok(createdQuestions.every((question) => question.options.length === 4));
+});
+
+test('bulk creation appends after existing questions without key or order collisions', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section one',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing question one',
+        orderIndex: 0,
+      },
+      {
+        id: 'question-2',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q02',
+        prompt: 'Existing question two',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  const createdQuestions = await createBulkQuestionRecords({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    count: 3,
+  });
+
+  assert.deepEqual(
+    createdQuestions.map((question) => ({
+      key: question.key,
+      orderIndex: question.orderIndex,
+    })),
+    [
+      { key: 'q03', orderIndex: 2 },
+      { key: 'q04', orderIndex: 3 },
+      { key: 'q05', orderIndex: 4 },
+    ],
+  );
+  assert.equal(new Set(fake.state.questions.map((question) => question.questionKey)).size, 5);
+});
+
 test('bulk action rolls back all created records when option insertion fails', async () => {
   const fake = createFakeDb(
     {
