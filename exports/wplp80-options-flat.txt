@@ -1,0 +1,320 @@
+wplp80_q01 A Start immediately and refine as I go
+wplp80_q01 B Map out the plan in detail first
+wplp80_q01 C Speak to key stakeholders before acting
+wplp80_q01 D Wait for clarity and direction
+wplp80_q02 A High and intense
+wplp80_q02 B Consistent and steady
+wplp80_q02 C Calm and reflective
+wplp80_q02 D Variable depending on environment
+wplp80_q03 A Adapt quickly
+wplp80_q03 B Reassess methodically
+wplp80_q03 C Check impact on others
+wplp80_q03 D Feel unsettled
+wplp80_q04 A Challenging and visible
+wplp80_q04 B Structured and defined
+wplp80_q04 C Collaborative
+wplp80_q04 D Technical or analytical
+wplp80_q05 A Move forward confidently
+wplp80_q05 B Gather more data
+wplp80_q05 C Seek reassurance
+wplp80_q05 D Maintain stability
+wplp80_q06 A Secondary to momentum
+wplp80_q06 B Balanced
+wplp80_q06 C Very high
+wplp80_q06 D Delegated where possible
+wplp80_q07 A Motivates me
+wplp80_q07 B Helps refine performance
+wplp80_q07 C Feels personal
+wplp80_q07 D Must be logical to matter
+wplp80_q08 A Fast
+wplp80_q08 B Balanced
+wplp80_q08 C Cautious
+wplp80_q08 D Data-driven
+wplp80_q09 A Direct the discussion
+wplp80_q09 B Generate ideas
+wplp80_q09 C Support others
+wplp80_q09 D Question assumptions
+wplp80_q10 A Direct and concise
+wplp80_q10 B Persuasive and expressive
+wplp80_q10 C Patient and empathetic
+wplp80_q10 D Precise and factual
+wplp80_q11 A Set aggressive goals
+wplp80_q11 B Inspire enthusiasm
+wplp80_q11 C Ensure everyone feels included
+wplp80_q11 D Focus on systems and accuracy
+wplp80_q12 A Push harder
+wplp80_q12 B Motivate the team
+wplp80_q12 C Protect morale
+wplp80_q12 D Double-check details
+wplp80_q13 A In control
+wplp80_q13 B Influencing
+wplp80_q13 C Supporting
+wplp80_q13 D Analysing
+wplp80_q14 A Decisive
+wplp80_q14 B Charismatic
+wplp80_q14 C Reliable
+wplp80_q14 D Thoughtful
+wplp80_q15 A Slow decision-making
+wplp80_q15 B Lack of enthusiasm
+wplp80_q15 C Harsh conflict
+wplp80_q15 D Poor logic
+wplp80_q16 A Achievement
+wplp80_q16 B Influence
+wplp80_q16 C Stability
+wplp80_q16 D Mastery
+wplp80_q17 A It reflects success
+wplp80_q17 B It builds visibility
+wplp80_q17 C It strengthens relationships
+wplp80_q17 D It validates expertise
+wplp80_q18 A Stretch targets
+wplp80_q18 B Bigger network
+wplp80_q18 C Job security
+wplp80_q18 D Skill depth
+wplp80_q19 A Compete
+wplp80_q19 B Build
+wplp80_q19 C Protect
+wplp80_q19 D Optimise
+wplp80_q20 A Results
+wplp80_q20 B Impact
+wplp80_q20 C Harmony
+wplp80_q20 D Quality
+wplp80_q21 A Winning
+wplp80_q21 B Inspiring
+wplp80_q21 C Supporting
+wplp80_q21 D Solving
+wplp80_q22 A Goals are weak
+wplp80_q22 B Voice is ignored
+wplp80_q22 C Conflict escalates
+wplp80_q22 D Standards slip
+wplp80_q23 A Take charge
+wplp80_q23 B Set vision
+wplp80_q23 C Develop people
+wplp80_q23 D Provide clarity
+wplp80_q24 A Trusted with responsibility
+wplp80_q24 B Consulted
+wplp80_q24 C Included
+wplp80_q24 D Recognised for expertise
+wplp80_q25 A Lead
+wplp80_q25 B Connect
+wplp80_q25 C Stabilise
+wplp80_q25 D Specialise
+wplp80_q26 A Independently
+wplp80_q26 B Collaboratively
+wplp80_q26 C In predictable teams
+wplp80_q26 D With intellectual challenge
+wplp80_q27 A Challenge
+wplp80_q27 B Re-engage
+wplp80_q27 C Withdraw
+wplp80_q27 D Analyse
+wplp80_q28 A Authority
+wplp80_q28 B Influence
+wplp80_q28 C Belonging
+wplp80_q28 D Competence
+wplp80_q29 A Compete
+wplp80_q29 B Persuade
+wplp80_q29 C Compromise
+wplp80_q29 D Withdraw
+wplp80_q30 A Stand firm
+wplp80_q30 B Respond emotionally
+wplp80_q30 C De-escalate
+wplp80_q30 D Clarify facts
+wplp80_q31 A Address directly
+wplp80_q31 B Encourage
+wplp80_q31 C Support quietly
+wplp80_q31 D Review process
+wplp80_q32 A Stakes are low
+wplp80_q32 B Relationships matter
+wplp80_q32 C It feels aggressive
+wplp80_q32 D It lacks logic
+wplp80_q33 A Courage
+wplp80_q33 B Influence
+wplp80_q33 C Empathy
+wplp80_q33 D Objectivity
+wplp80_q34 A Over-dominance
+wplp80_q34 B Over-talking
+wplp80_q34 C Avoidance
+wplp80_q34 D Over-analysis
+wplp80_q35 A Become controlling
+wplp80_q35 B Become scattered
+wplp80_q35 C Avoid difficult conversations
+wplp80_q35 D Become overly critical
+wplp80_q36 A Take over
+wplp80_q36 B Talk more
+wplp80_q36 C Retreat
+wplp80_q36 D Analyse obsessively
+wplp80_q37 A React
+wplp80_q37 B Express frustration
+wplp80_q37 C Internalise
+wplp80_q37 D Distance emotionally
+wplp80_q38 A Intimidating
+wplp80_q38 B Dramatic
+wplp80_q38 C Passive
+wplp80_q38 D Detached
+wplp80_q39 A Impatience
+wplp80_q39 B Over-optimism
+wplp80_q39 C Avoidance
+wplp80_q39 D Perfectionism
+wplp80_q40 A Fight
+wplp80_q40 B Defend
+wplp80_q40 C Freeze
+wplp80_q40 D Overthink
+wplp80_q41 A Opportunity
+wplp80_q41 B Necessary
+wplp80_q41 C Manageable
+wplp80_q41 D Dangerous
+wplp80_q42 A Fast
+wplp80_q42 B Consensus-based
+wplp80_q42 C Safe
+wplp80_q42 D Evidence-based
+wplp80_q43 A Act
+wplp80_q43 B Influence
+wplp80_q43 C Stabilise
+wplp80_q43 D Model scenarios
+wplp80_q44 A Instinct
+wplp80_q44 B People
+wplp80_q44 C Stability
+wplp80_q44 D Data
+wplp80_q45 A Volatility
+wplp80_q45 B Change
+wplp80_q45 C Routine
+wplp80_q45 D Structure
+wplp80_q46 A Deliver results
+wplp80_q46 B Inspire
+wplp80_q46 C Develop
+wplp80_q46 D Design systems
+wplp80_q47 A Raising standards
+wplp80_q47 B Motivating
+wplp80_q47 C Coaching
+wplp80_q47 D Redesigning process
+wplp80_q48 A Direction
+wplp80_q48 B Energy
+wplp80_q48 C Support
+wplp80_q48 D Expertise
+wplp80_q49 A Be asserted
+wplp80_q49 B Be earned
+wplp80_q49 C Be shared
+wplp80_q49 D Be structured
+wplp80_q50 A In crisis
+wplp80_q50 B In growth
+wplp80_q50 C In stability
+wplp80_q50 D In complexity
+wplp80_q51 A Competitive
+wplp80_q51 B Innovative
+wplp80_q51 C Collaborative
+wplp80_q51 D Structured
+wplp80_q52 A Profit
+wplp80_q52 B Growth
+wplp80_q52 C Engagement
+wplp80_q52 D Efficiency
+wplp80_q53 A Performance
+wplp80_q53 B Creativity
+wplp80_q53 C Belonging
+wplp80_q53 D Consistency
+wplp80_q54 A High and visible
+wplp80_q54 B Inspiring
+wplp80_q54 C Fair
+wplp80_q54 D Measured
+wplp80_q55 A Slow
+wplp80_q55 B Conservative
+wplp80_q55 C Harsh
+wplp80_q55 D Chaotic
+wplp80_q56 A Commercial leadership
+wplp80_q56 B Business development
+wplp80_q56 C Operations management
+wplp80_q56 D Technical specialist
+wplp80_q57 A Driving change
+wplp80_q57 B Influencing
+wplp80_q57 C Maintaining
+wplp80_q57 D Analysing
+wplp80_q58 A Targets are aggressive
+wplp80_q58 B Relationships are key
+wplp80_q58 C Stability exists
+wplp80_q58 D Systems matter
+wplp80_q59 A Momentum
+wplp80_q59 B Engagement
+wplp80_q59 C Reliability
+wplp80_q59 D Precision
+wplp80_q60 A Push harder and accelerate decisions
+wplp80_q60 B Rally people and re-energise the group
+wplp80_q60 C Maintain stability and reduce disruption
+wplp80_q60 D Re-evaluate the system or assumptions
+wplp80_q61 A Defend my position immediately
+wplp80_q61 B Reframe the discussion to win support
+wplp80_q61 C De-escalate and keep harmony
+wplp80_q61 D Examine their reasoning carefully
+wplp80_q62 A Momentum and execution
+wplp80_q62 B Inspiration and energy
+wplp80_q62 C Trust and cohesion
+wplp80_q62 D Precision and expertise
+wplp80_q63 A Take direct control of the situation
+wplp80_q63 B Influence the team informally
+wplp80_q63 C Encourage collaboration
+wplp80_q63 D Improve the process or structure
+wplp80_q64 A Potential upside
+wplp80_q64 B Strategic narrative
+wplp80_q64 C Impact on people
+wplp80_q64 D Evidence and probability
+wplp80_q65 A Expect alignment with my decision
+wplp80_q65 B Try to win them over
+wplp80_q65 C Explore their concerns
+wplp80_q65 D Analyse the logic together
+wplp80_q66 A Leadership loses control
+wplp80_q66 B Vision becomes diluted
+wplp80_q66 C Culture becomes fragmented
+wplp80_q66 D Systems fail to scale
+wplp80_q67 A Become more forceful
+wplp80_q67 B Become more expressive
+wplp80_q67 C Try to calm the situation
+wplp80_q67 D Become more analytical
+wplp80_q68 A Directness
+wplp80_q68 B Influence
+wplp80_q68 C Sensitivity
+wplp80_q68 D Accuracy
+wplp80_q69 A Correct course quickly
+wplp80_q69 B Re-inspire commitment
+wplp80_q69 C Maintain morale
+wplp80_q69 D Investigate root causes
+wplp80_q70 A Power and decision authority
+wplp80_q70 B Informal influence networks
+wplp80_q70 C Social dynamics and trust
+wplp80_q70 D Systems and processes
+wplp80_q71 A Drive performance
+wplp80_q71 B Inspire confidence
+wplp80_q71 C Build stability
+wplp80_q71 D Provide expertise
+wplp80_q72 A Choose the fastest path forward
+wplp80_q72 B Align stakeholders first
+wplp80_q72 C Seek consensus
+wplp80_q72 D Analyse implications
+wplp80_q73 A Opportunity
+wplp80_q73 B Energy
+wplp80_q73 C Instability
+wplp80_q73 D Complexity
+wplp80_q74 A Indecision
+wplp80_q74 B Ego-driven leadership
+wplp80_q74 C Disconnection from people
+wplp80_q74 D Poor judgement
+wplp80_q75 A Increase pressure
+wplp80_q75 B Increase communication
+wplp80_q75 C Increase support
+wplp80_q75 D Increase analysis
+wplp80_q76 A Competitive
+wplp80_q76 B Inspired
+wplp80_q76 C Cohesive
+wplp80_q76 D Systematically effective
+wplp80_q77 A Trust instinct
+wplp80_q77 B Seek additional perspectives
+wplp80_q77 C Reflect carefully
+wplp80_q77 D Follow the evidence
+wplp80_q78 A Drive transformation quickly
+wplp80_q78 B Communicate the vision
+wplp80_q78 C Protect stability
+wplp80_q78 D Design the transition carefully
+wplp80_q79 A Winning
+wplp80_q79 B Visibility
+wplp80_q79 C Loyalty
+wplp80_q79 D Competence
+wplp80_q80 A Results delivered
+wplp80_q80 B Influence created
+wplp80_q80 C Relationships maintained
+wplp80_q80 D Quality of thinking
