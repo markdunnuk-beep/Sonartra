@@ -464,25 +464,36 @@ function CreateDomainForm({
     }),
   );
   const [description, setDescription] = useState(currentState.values.description);
-  const serverStateSignature = [
-    currentState.values.label,
-    currentState.values.key,
-    currentState.values.description,
-    currentState.formError ?? '',
-    currentState.fieldErrors.label ?? '',
-    currentState.fieldErrors.key ?? '',
-    currentState.fieldErrors.description ?? '',
-  ].join('\u0000');
 
   useEffect(() => {
-    setDraftState(
-      createDomainKeyDraftState({
-        label: currentState.values.label,
-        key: currentState.values.key,
-      }),
-    );
-    setDescription(currentState.values.description);
-  }, [serverStateSignature, currentState.values.description, currentState.values.key, currentState.values.label]);
+    if (
+      currentState.formError ||
+      currentState.fieldErrors.label ||
+      currentState.fieldErrors.key ||
+      currentState.fieldErrors.description
+    ) {
+      return;
+    }
+
+    if (
+      currentState.values.label ||
+      currentState.values.key ||
+      currentState.values.description
+    ) {
+      return;
+    }
+
+    setDraftState(createDomainKeyDraftState({ label: '', key: '' }));
+    setDescription('');
+  }, [
+    currentState.fieldErrors.description,
+    currentState.fieldErrors.key,
+    currentState.fieldErrors.label,
+    currentState.formError,
+    currentState.values.description,
+    currentState.values.key,
+    currentState.values.label,
+  ]);
 
   return (
     <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">

@@ -29,3 +29,12 @@ test('non-submit inline editor controls stay explicit button elements', () => {
 
   assert.match(source, /onClick=\{startEditing\}[\s\S]*type="button"/);
 });
+
+test('create domain draft is not rehydrated from action state during typing', () => {
+  const source = readComponentSource();
+
+  assert.doesNotMatch(
+    source,
+    /setDraftState\(\s*createDomainKeyDraftState\(\{\s*label:\s*currentState\.values\.label,\s*key:\s*currentState\.values\.key,/,
+  );
+});
