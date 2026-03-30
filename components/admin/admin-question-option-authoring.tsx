@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -77,7 +77,8 @@ function normalizeBulkQuestionState(
     formError: state?.formError ?? null,
     fieldErrors: state?.fieldErrors ?? {},
     values: {
-      count: state?.values?.count ?? emptyAdminBulkQuestionAuthoringFormValues.count,
+      questionLines:
+        state?.values?.questionLines ?? emptyAdminBulkQuestionAuthoringFormValues.questionLines,
       domainId: state?.values?.domainId ?? emptyAdminBulkQuestionAuthoringFormValues.domainId,
     },
     createdQuestions: state?.createdQuestions ?? [],
@@ -181,15 +182,19 @@ function NumberInput({
 function TextArea({
   name,
   defaultValue,
+  value,
   placeholder,
   error,
   minHeightClass = 'min-h-[112px]',
+  onChange,
 }: Readonly<{
   name: string;
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
   placeholder: string;
   error?: string;
   minHeightClass?: string;
+  onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }>) {
   return (
     <textarea
@@ -200,8 +205,9 @@ function TextArea({
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
-      defaultValue={defaultValue}
       name={name}
+      {...(value !== undefined ? { value } : { defaultValue: defaultValue ?? '' })}
+      onChange={onChange}
       placeholder={placeholder}
     />
   );
@@ -210,13 +216,17 @@ function TextArea({
 function SelectInput({
   name,
   defaultValue,
+  value,
   error,
   children,
+  onChange,
 }: Readonly<{
   name: string;
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
   error?: string;
   children: React.ReactNode;
+  onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }>) {
   return (
     <select
@@ -226,8 +236,9 @@ function SelectInput({
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
-      defaultValue={defaultValue}
       name={name}
+      {...(value !== undefined ? { value } : { defaultValue: defaultValue ?? '' })}
+      onChange={onChange}
     >
       {children}
     </select>
@@ -468,65 +479,102 @@ function BulkQuestionForm({
   assessmentVersionId: string;
   domains: readonly AdminAssessmentDetailQuestionDomain[];
 }) {
-  const [state, formAction] = useActionState(
-    createBulkQuestions.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-    }),
-    {
-      ...initialAdminBulkQuestionAuthoringFormState,
-      values: {
-        ...initialAdminBulkQuestionAuthoringFormState.values,
-        domainId: domains[0]?.domainId ?? '',
-      },
-    },
+  const defaultDomainId = domains[0]?.domainId ?? '';
+  const createBulkQuestionsFormAction = useMemo(
+    () =>
+      createBulkQuestions.bind(null, {
+        assessmentKey,
+        assessmentVersionId,
+      }),
+    [assessmentKey, assessmentVersionId],
   );
+  const [state, formAction] = useActionState(createBulkQuestionsFormAction, {
+    ...initialAdminBulkQuestionAuthoringFormState,
+    values: {
+      ...initialAdminBulkQuestionAuthoringFormState.values,
+      domainId: defaultDomainId,
+    },
+  });
   const currentState = normalizeBulkQuestionState(state);
+  const [selectedDomainId, setSelectedDomainId] = useState(
+    currentState.values.domainId || defaultDomainId,
+  );
+  const [questionLines, setQuestionLines] = useState(
+    currentState.values.questionLines,
+  );
+
   return (
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Bulk generation</p>
+          <p className="sonartra-page-eyebrow">Bulk authoring</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Generate questions
+            Bulk paste questions
           </h3>
           <p className="max-w-2xl text-sm leading-7 text-white/62">
-            Create several questions at once with A-D options.
+            Paste one question per line. All questions will be assigned to the selected domain.
           </p>
         </div>
-        <form action={formAction} className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)_auto] lg:items-end">
-          <Field error={currentState.fieldErrors.count} hint="Choose how many to add." label="Question count">
-            <NumberInput
-              defaultValue={currentState.values.count}
-              error={currentState.fieldErrors.count}
-              max={200}
-              min={1}
-              name="count"
-            />
-          </Field>
-          <Field error={currentState.fieldErrors.domainId} hint="Choose the domain for all generated questions." label="Domain">
-            <SelectInput
-              defaultValue={currentState.values.domainId || domains[0]?.domainId || ''}
+        <form action={formAction} className="space-y-5">
+          <div className="grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
+            <Field
               error={currentState.fieldErrors.domainId}
-              name="domainId"
+              hint="Choose the domain for every imported question."
+              label="Domain"
             >
-              <option value="">Select a domain</option>
-              {domains.map((domain) => (
-                <option key={domain.domainId} value={domain.domainId}>
-                  {domain.label} ({formatDomainType(domain.domainType)})
-                </option>
-              ))}
-            </SelectInput>
-          </Field>
-          <div className="flex items-end">
-            <SubmitButton idleLabel="Generate questions" pendingLabel="Generating..." />
+              <SelectInput
+                error={currentState.fieldErrors.domainId}
+                name="domainId"
+                onChange={(event) => {
+                  const nextDomainId = event.currentTarget.value;
+                  setSelectedDomainId(nextDomainId);
+                }}
+                value={selectedDomainId}
+              >
+                <option value="">Select a domain</option>
+                {domains.map((domain) => (
+                  <option key={domain.domainId} value={domain.domainId}>
+                    {domain.label} ({formatDomainType(domain.domainType)})
+                  </option>
+                ))}
+              </SelectInput>
+            </Field>
+            <Field
+              error={currentState.fieldErrors.questionLines}
+              hint="One question per line. Blank lines are ignored."
+              label="Questions"
+            >
+              <TextArea
+                error={currentState.fieldErrors.questionLines}
+                minHeightClass="min-h-[220px]"
+                name="questionLines"
+                onChange={(event) => {
+                  const nextQuestionLines = event.currentTarget.value;
+                  setQuestionLines(nextQuestionLines);
+                }}
+                placeholder={[
+                  'When starting a new initiative, what do you focus on first?',
+                  'How do you usually approach a new process?',
+                  'What matters most when work becomes ambiguous?',
+                ].join('\n')}
+                value={questionLines}
+              />
+            </Field>
+          </div>
+
+          <InlineError message={currentState.formError} />
+
+          <div className="flex items-end justify-between gap-3">
+            <p className="text-xs uppercase tracking-[0.14em] text-white/40">
+              Each imported question gets the canonical A-D option scaffold.
+            </p>
+            <SubmitButton idleLabel="Import questions" pendingLabel="Importing..." />
           </div>
         </form>
-        <InlineError message={currentState.formError} />
         {currentState.createdQuestions.length > 0 ? (
           <div className="space-y-3 rounded-[1rem] border border-white/8 bg-black/10 p-4">
             <p className="text-sm font-medium text-white">
-              Added {currentState.createdQuestions.length} question{currentState.createdQuestions.length === 1 ? '' : 's'} in this action.
+              Imported {currentState.createdQuestions.length} question{currentState.createdQuestions.length === 1 ? '' : 's'} in this action.
             </p>
             <div className="space-y-2 text-sm text-white/62">
               {currentState.createdQuestions.map((question) => (

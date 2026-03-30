@@ -580,9 +580,9 @@ function createFakeDb(
   };
 }
 
-function buildBulkFormData(count: string, domainId = 'domain-1') {
+function buildBulkFormData(questionLines: string, domainId = 'domain-1') {
   const formData = new FormData();
-  formData.set('count', count);
+  formData.set('questionLines', questionLines);
   formData.set('domainId', domainId);
   return formData;
 }
@@ -689,7 +689,7 @@ test('creates questions and options with deterministic appended order indexes', 
   );
 });
 
-test('bulk creation appends deterministic questions with default options', async () => {
+test('bulk import creates three questions in pasted order with default options', async () => {
   const fake = createFakeDb({
     domains: [
       {
@@ -727,7 +727,11 @@ test('bulk creation appends deterministic questions with default options', async
   const createdQuestions = await createBulkQuestionRecords({
     db: fake.db,
     assessmentVersionId: 'version-1',
-    count: 3,
+    prompts: [
+      'When starting a new initiative, what do you focus on first?',
+      'How do you usually approach a new process?',
+      'What matters most when work becomes ambiguous?',
+    ],
     domainId: 'domain-1',
   });
 
@@ -735,18 +739,34 @@ test('bulk creation appends deterministic questions with default options', async
   assert.deepEqual(
     createdQuestions.map((question) => ({
       key: question.key,
+      prompt: question.prompt,
       orderIndex: question.orderIndex,
       domainId: question.domainId,
-      assessmentVersionId: question.assessmentVersionId,
     })),
     [
-      { key: 'q02', orderIndex: 1, domainId: 'domain-1', assessmentVersionId: 'version-1' },
-      { key: 'q03', orderIndex: 2, domainId: 'domain-1', assessmentVersionId: 'version-1' },
-      { key: 'q04', orderIndex: 3, domainId: 'domain-1', assessmentVersionId: 'version-1' },
+      {
+        key: 'q02',
+        prompt: 'When starting a new initiative, what do you focus on first?',
+        orderIndex: 1,
+        domainId: 'domain-1',
+      },
+      {
+        key: 'q03',
+        prompt: 'How do you usually approach a new process?',
+        orderIndex: 2,
+        domainId: 'domain-1',
+      },
+      {
+        key: 'q04',
+        prompt: 'What matters most when work becomes ambiguous?',
+        orderIndex: 3,
+        domainId: 'domain-1',
+      },
     ],
   );
   assert.equal(fake.state.questions.length, 4);
   assert.equal(fake.state.options.length, 13);
+  assert.ok(createdQuestions.every((question) => question.options.length === 4));
   assert.deepEqual(
     createdQuestions[0]?.options.map((option) => option.key),
     ['q02_a', 'q02_b', 'q02_c', 'q02_d'],
@@ -755,11 +775,9 @@ test('bulk creation appends deterministic questions with default options', async
     createdQuestions[2]?.options.map((option) => option.key),
     ['q04_a', 'q04_b', 'q04_c', 'q04_d'],
   );
-  assert.ok(createdQuestions.every((question) => question.options.length === 4));
-  assert.ok(createdQuestions.every((question) => question.options.every((option) => option.assessmentVersionId === 'version-1')));
 });
 
-test('bulk creation can generate 80 questions with four deterministic options each', async () => {
+test('bulk import trims lines and ignores blanks safely', async () => {
   const fake = createFakeDb({
     domains: [
       {
@@ -773,10 +791,46 @@ test('bulk creation can generate 80 questions with four deterministic options ea
     ],
   });
 
+  const result = await createBulkQuestionsActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionAuthoringFormState,
+    buildBulkFormData('  First question  \n\n Second question\n   \nThird question   '),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.createdQuestions?.length, 3);
+  assert.deepEqual(
+    fake.state.questions.map((question) => question.prompt),
+    ['First question', 'Second question', 'Third question'],
+  );
+});
+
+test('bulk import can create 80 questions with four deterministic options each', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section one',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const prompts = Array.from({ length: 80 }, (_, index) => `Question prompt ${index + 1}`);
   const createdQuestions = await createBulkQuestionRecords({
     db: fake.db,
     assessmentVersionId: 'version-1',
-    count: 80,
+    prompts,
     domainId: 'domain-1',
   });
 
@@ -793,7 +847,7 @@ test('bulk creation can generate 80 questions with four deterministic options ea
   assert.ok(createdQuestions.every((question) => question.options.length === 4));
 });
 
-test('bulk creation appends after existing questions without key or order collisions', async () => {
+test('bulk import appends after existing questions without key or order collisions', async () => {
   const fake = createFakeDb({
     domains: [
       {
@@ -828,7 +882,7 @@ test('bulk creation appends after existing questions without key or order collis
   const createdQuestions = await createBulkQuestionRecords({
     db: fake.db,
     assessmentVersionId: 'version-1',
-    count: 3,
+    prompts: ['Third question', 'Fourth question', 'Fifth question'],
     domainId: 'domain-1',
   });
 
@@ -893,7 +947,7 @@ test('bulk action rolls back all created records when option insertion fails', a
       assessmentVersionId: 'version-1',
     },
     initialAdminBulkQuestionAuthoringFormState,
-    buildBulkFormData('2'),
+    buildBulkFormData('First question\nSecond question'),
     {
       connect: async () => fake.client,
       revalidatePath(path: string): void {
@@ -902,13 +956,13 @@ test('bulk action rolls back all created records when option insertion fails', a
     },
   );
 
-  assert.equal(result.formError, 'Bulk question generation could not be saved. Try again.');
+  assert.equal(result.formError, 'Bulk question import could not be saved. Try again.');
   assert.equal(fake.state.questions.length, 1);
   assert.equal(fake.state.options.length, 1);
   assert.deepEqual(revalidatedPaths, []);
 });
 
-test('bulk creation persists the explicitly selected domain instead of defaulting to the first domain', async () => {
+test('bulk import persists the explicitly selected domain instead of defaulting to the first domain', async () => {
   const fake = createFakeDb({
     domains: [
       {
@@ -933,7 +987,7 @@ test('bulk creation persists the explicitly selected domain instead of defaultin
   const createdQuestions = await createBulkQuestionRecords({
     db: fake.db,
     assessmentVersionId: 'version-1',
-    count: 3,
+    prompts: ['Question one', 'Question two', 'Question three'],
     domainId: 'domain-2',
   });
 
@@ -975,7 +1029,7 @@ test('bulk action fails validation when no domain is supplied', async () => {
       assessmentVersionId: 'version-1',
     },
     initialAdminBulkQuestionAuthoringFormState,
-    buildBulkFormData('2', ''),
+    buildBulkFormData('Question one', ''),
     {
       connect: async () => fake.client,
       revalidatePath() {},
@@ -986,6 +1040,70 @@ test('bulk action fails validation when no domain is supplied', async () => {
   assert.equal(result.fieldErrors.domainId, 'Question domain is required.');
   assert.equal(fake.state.questions.length, 0);
   assert.equal(fake.state.options.length, 0);
+});
+
+test('bulk action fails validation when textarea is empty', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionAuthoringFormState,
+    buildBulkFormData(''),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.fieldErrors.questionLines, 'Paste at least one question.');
+  assert.equal(fake.state.questions.length, 0);
+});
+
+test('bulk action fails validation when textarea contains only blank lines', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionAuthoringFormState,
+    buildBulkFormData('   \n\n   '),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.fieldErrors.questionLines, 'Paste at least one question.');
+  assert.equal(fake.state.questions.length, 0);
 });
 
 test('bulk action rejects stale domains instead of silently assigning Operating Style', async () => {
@@ -1008,14 +1126,14 @@ test('bulk action rejects stale domains instead of silently assigning Operating 
       assessmentVersionId: 'version-1',
     },
     initialAdminBulkQuestionAuthoringFormState,
-    buildBulkFormData('2', 'domain-2'),
+    buildBulkFormData('Question one\nQuestion two', 'domain-2'),
     {
       connect: async () => fake.client,
       revalidatePath() {},
     },
   );
 
-  assert.equal(result.formError, 'Select a valid question domain before generating questions.');
+  assert.equal(result.formError, 'Select a valid question domain before importing questions.');
   assert.equal(fake.state.questions.length, 0);
   assert.equal(fake.state.options.length, 0);
 });

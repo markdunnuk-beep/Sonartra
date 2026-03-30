@@ -162,6 +162,8 @@ type BulkInsertedOptionRow = {
   order_index: string | number;
 };
 
+const MAX_BULK_QUESTION_IMPORT_COUNT = 200;
+
 function normalizeFormValue(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -662,11 +664,15 @@ export async function createQuestionRecord(params: {
 export async function createBulkQuestionRecords(params: {
   db: Queryable;
   assessmentVersionId: string;
-  count: number;
+  prompts: readonly string[];
   domainId: string;
 }): Promise<readonly AdminCreatedQuestion[]> {
-  if (!Number.isInteger(params.count) || params.count < 1) {
-    throw new Error('INVALID_BULK_COUNT');
+  if (params.prompts.length < 1) {
+    throw new Error('INVALID_BULK_IMPORT');
+  }
+
+  if (params.prompts.length > MAX_BULK_QUESTION_IMPORT_COUNT) {
+    throw new Error('BULK_IMPORT_LIMIT_EXCEEDED');
   }
 
   const domainPresent = await domainExists({
@@ -678,117 +684,23 @@ export async function createBulkQuestionRecords(params: {
     throw new Error('DOMAIN_NOT_FOUND');
   }
 
-  const startOrderIndex = await getNextQuestionOrderIndex(params.db, params.assessmentVersionId);
-  const questionValues: unknown[] = [];
-  const questionPlaceholders = Array.from({ length: params.count }, (_, offset) => {
-    const orderIndex = startOrderIndex + offset;
-    const base = offset * 5;
+  const createdQuestions: AdminCreatedQuestion[] = [];
 
-    questionValues.push(
-      params.assessmentVersionId,
-      params.domainId,
-      generateQuestionKey(orderIndex + 1),
-      '',
-      orderIndex,
+  for (const prompt of params.prompts) {
+    createdQuestions.push(
+      await createQuestionRecord({
+        db: params.db,
+        assessmentVersionId: params.assessmentVersionId,
+        values: {
+          prompt,
+          key: '',
+          domainId: params.domainId,
+        },
+      }),
     );
-
-    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`;
-  });
-
-  const insertedQuestions = await params.db.query<BulkInsertedQuestionRow>(
-    `
-    INSERT INTO questions (
-      assessment_version_id,
-      domain_id,
-      question_key,
-      prompt,
-      order_index
-    )
-    VALUES ${questionPlaceholders.join(', ')}
-    RETURNING id, assessment_version_id, domain_id, question_key, prompt, order_index
-    `,
-    questionValues,
-  );
-
-  const orderedQuestions = insertedQuestions.rows
-    .slice()
-    .sort(
-      (left, right) => Number(left.order_index) - Number(right.order_index) || left.id.localeCompare(right.id),
-    );
-
-  const optionValues: unknown[] = [];
-  const optionPlaceholders: string[] = [];
-
-  orderedQuestions.forEach((question, questionOffset) => {
-    buildDefaultCreatedOptions({
-      assessmentVersionId: question.assessment_version_id,
-      questionId: question.id,
-      questionIndex: Number(question.order_index) + 1,
-    }).forEach((option, optionOffset) => {
-      const base = (questionOffset * 4 + optionOffset) * 6;
-
-      optionValues.push(
-        option.assessmentVersionId,
-        option.questionId,
-        option.key,
-        option.label,
-        option.text,
-        option.orderIndex,
-      );
-
-      optionPlaceholders.push(
-        `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6})`,
-      );
-    });
-  });
-
-  const insertedOptions = await params.db.query<BulkInsertedOptionRow>(
-    `
-    INSERT INTO options (
-      assessment_version_id,
-      question_id,
-      option_key,
-      option_label,
-      option_text,
-      order_index
-    )
-    VALUES ${optionPlaceholders.join(', ')}
-    RETURNING id, assessment_version_id, question_id, option_key, option_label, option_text, order_index
-    `,
-    optionValues,
-  );
-
-  const optionsByQuestionId = new Map<string, AdminQuestionCreatedOption[]>();
-
-  for (const option of insertedOptions.rows) {
-    const questionOptions = optionsByQuestionId.get(option.question_id) ?? [];
-    questionOptions.push({
-      optionId: option.id,
-      assessmentVersionId: option.assessment_version_id,
-      questionId: option.question_id,
-      key: option.option_key,
-      label: option.option_label ?? '',
-      text: option.option_text,
-      orderIndex: Number(option.order_index),
-    });
-    optionsByQuestionId.set(option.question_id, questionOptions);
   }
 
-  return Object.freeze(
-    orderedQuestions.map((question) => ({
-      questionId: question.id,
-      assessmentVersionId: question.assessment_version_id,
-      domainId: question.domain_id,
-      key: question.question_key,
-      prompt: question.prompt,
-      orderIndex: Number(question.order_index),
-      options: Object.freeze(
-        (optionsByQuestionId.get(question.id) ?? []).sort(
-          (left, right) => left.orderIndex - right.orderIndex || left.optionId.localeCompare(right.optionId),
-        ),
-      ),
-      })),
-  );
+  return Object.freeze(createdQuestions);
 }
 
 export async function duplicateQuestionRecord(params: {
@@ -1274,9 +1186,16 @@ function getOptionValuesFromFormData(formData: FormData): AdminOptionAuthoringFo
 
 function getBulkQuestionValuesFromFormData(formData: FormData): AdminBulkQuestionAuthoringFormValues {
   return {
-    count: normalizeFormValue(formData.get('count')),
+    questionLines: normalizeFormValue(formData.get('questionLines')),
     domainId: normalizeFormValue(formData.get('domainId')),
   };
+}
+
+function parseBulkQuestionPrompts(questionLines: string): readonly string[] {
+  return questionLines
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
 }
 
 async function runQuestionWriteAction(params: {
@@ -1406,6 +1325,27 @@ export async function createBulkQuestionsActionWithDependencies(
     return validation;
   }
 
+  const prompts = parseBulkQuestionPrompts(values.questionLines);
+  if (prompts.length < 1) {
+    return {
+      formError: null,
+      fieldErrors: {
+        questionLines: 'Paste at least one question.',
+      },
+      values,
+    };
+  }
+
+  if (prompts.length > MAX_BULK_QUESTION_IMPORT_COUNT) {
+    return {
+      formError: null,
+      fieldErrors: {
+        questionLines: `Import at most ${MAX_BULK_QUESTION_IMPORT_COUNT} questions at a time.`,
+      },
+      values,
+    };
+  }
+
   const client = await dependencies.connect();
 
   try {
@@ -1413,7 +1353,7 @@ export async function createBulkQuestionsActionWithDependencies(
     const createdQuestions = await createBulkQuestionRecords({
       db: client,
       assessmentVersionId: context.assessmentVersionId,
-      count: Number(values.count),
+      prompts,
       domainId: values.domainId,
     });
     await client.query('COMMIT');
@@ -1422,7 +1362,10 @@ export async function createBulkQuestionsActionWithDependencies(
 
     return {
       ...initialAdminBulkQuestionAuthoringFormState,
-      values: emptyAdminBulkQuestionAuthoringFormValues,
+      values: {
+        ...emptyAdminBulkQuestionAuthoringFormValues,
+        domainId: values.domainId,
+      },
       createdQuestions,
     };
   } catch (error) {
@@ -1430,14 +1373,14 @@ export async function createBulkQuestionsActionWithDependencies(
 
     if (error instanceof Error && error.message === 'DOMAIN_NOT_FOUND') {
       return {
-        formError: 'Select a valid question domain before generating questions.',
+        formError: 'Select a valid question domain before importing questions.',
         fieldErrors: {},
         values,
       };
     }
 
     return {
-      formError: 'Bulk question generation could not be saved. Try again.',
+      formError: 'Bulk question import could not be saved. Try again.',
       fieldErrors: {},
       values,
     };

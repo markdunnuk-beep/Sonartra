@@ -22,14 +22,14 @@ export type AdminQuestionAuthoringFormState = {
 };
 
 export type AdminBulkQuestionAuthoringFormValues = {
-  count: string;
+  questionLines: string;
   domainId: string;
 };
 
 export type AdminBulkQuestionAuthoringFormState = {
   formError: string | null;
   fieldErrors: {
-    count?: string;
+    questionLines?: string;
     domainId?: string;
   };
   values: AdminBulkQuestionAuthoringFormValues;
@@ -64,7 +64,7 @@ export const initialAdminQuestionAuthoringFormState: AdminQuestionAuthoringFormS
 };
 
 export const emptyAdminBulkQuestionAuthoringFormValues: AdminBulkQuestionAuthoringFormValues = {
-  count: '80',
+  questionLines: '',
   domainId: '',
 };
 
@@ -120,14 +120,9 @@ export function validateAdminBulkQuestionAuthoringValues(
   values: AdminBulkQuestionAuthoringFormValues,
 ): AdminBulkQuestionAuthoringFormState {
   const fieldErrors: AdminBulkQuestionAuthoringFormState['fieldErrors'] = {};
-  const count = Number(values.count);
 
-  if (!values.count) {
-    fieldErrors.count = 'Question count is required.';
-  } else if (!Number.isInteger(count) || count < 1) {
-    fieldErrors.count = 'Enter a whole number greater than zero.';
-  } else if (count > 200) {
-    fieldErrors.count = 'Generate at most 200 questions at a time.';
+  if (!values.questionLines) {
+    fieldErrors.questionLines = 'Paste at least one question.';
   }
 
   if (!values.domainId) {
