@@ -415,6 +415,30 @@ test('creates domains and signals with deterministic appended order indexes', as
   assert.equal(fake.state.signals[1]?.signalKey, 'style_supportive');
 });
 
+test('createDomainRecord persists a manual domain key override for new domains', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'style',
+        label: 'Style',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  await createDomainRecord({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    values: { label: 'Core Drivers', key: 'core-drivers-v2', description: '' },
+  });
+
+  assert.equal(fake.state.domains[1]?.domainKey, 'core-drivers-v2');
+  assert.equal(fake.state.domains[1]?.label, 'Core Drivers');
+});
+
 test('updates domain and signal metadata in place', async () => {
   const fake = createFakeDb({
     domains: [

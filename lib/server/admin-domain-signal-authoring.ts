@@ -10,6 +10,7 @@ import {
   validateAdminAuthoringValues,
 } from '@/lib/admin/admin-domain-signal-authoring';
 import { getDbPool } from '@/lib/server/db';
+import { slugifyDomainKey } from '@/lib/utils/domain-key';
 import { generateDomainKey, generateSignalKey } from '@/lib/utils/key-generator';
 
 type Queryable = {
@@ -315,7 +316,7 @@ export async function createDomainRecord(params: {
   assessmentVersionId: string;
   values: AdminAuthoringFormValues;
 }): Promise<void> {
-  const domainKey = generateDomainKey(params.values.label);
+  const domainKey = slugifyDomainKey(params.values.key || params.values.label);
   if (!domainKey) {
     throw new Error('DOMAIN_KEY_INVALID');
   }
@@ -360,6 +361,11 @@ export async function updateDomainRecord(params: {
   domainId: string;
   values: AdminAuthoringFormValues;
 }): Promise<void> {
+  const domainKey = slugifyDomainKey(params.values.key);
+  if (!domainKey) {
+    throw new Error('DOMAIN_KEY_INVALID');
+  }
+
   const exists = await domainExists({
     db: params.db,
     assessmentVersionId: params.assessmentVersionId,
@@ -373,7 +379,7 @@ export async function updateDomainRecord(params: {
     await duplicateDomainKeyExists({
       db: params.db,
       assessmentVersionId: params.assessmentVersionId,
-      domainKey: params.values.key,
+      domainKey,
       excludedDomainId: params.domainId,
     })
   ) {
@@ -395,7 +401,7 @@ export async function updateDomainRecord(params: {
     [
       params.domainId,
       params.assessmentVersionId,
-      params.values.key,
+      domainKey,
       params.values.label,
       params.values.description || null,
     ],
@@ -901,9 +907,11 @@ export async function createDomainAction(
   _previousState: AdminAuthoringFormState,
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
-  const values = getValuesFromFormData(formData);
+  const values = {
+    ...getValuesFromFormData(formData),
+    key: slugifyDomainKey(normalizeFormValue(formData.get('key'))),
+  };
   const validation = validateAdminAuthoringValues(values);
-  delete validation.fieldErrors.key;
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }
@@ -927,9 +935,11 @@ export async function updateDomainAction(
   _previousState: AdminAuthoringFormState,
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
-  const values = getValuesFromFormData(formData);
+  const values = {
+    ...getValuesFromFormData(formData),
+    key: slugifyDomainKey(normalizeFormValue(formData.get('key'))),
+  };
   const validation = validateAdminAuthoringValues(values);
-  delete validation.fieldErrors.key;
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
   }

@@ -30,6 +30,12 @@ import {
   type InlineSignalKeyRegenerateResult,
   type InlineSignalLabelUpdateResult,
 } from '@/lib/server/admin-domain-signal-authoring';
+import {
+  DOMAIN_KEY_PATTERN,
+  createDomainKeyDraftState,
+  syncDomainKeyFromLabel,
+  syncDomainKeyFromManualInput,
+} from '@/lib/utils/domain-key';
 
 function normalizeState(state: AdminAuthoringFormState | null | undefined): AdminAuthoringFormState {
   return {
@@ -69,13 +75,23 @@ function Field({
 function TextInput({
   name,
   defaultValue,
+  value,
   placeholder,
   error,
+  onChange,
+  required,
+  pattern,
+  title,
 }: Readonly<{
   name: string;
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
   placeholder: string;
   error?: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  required?: boolean;
+  pattern?: string;
+  title?: string;
 }>) {
   return (
     <input
@@ -85,9 +101,13 @@ function TextInput({
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
-      defaultValue={defaultValue}
       name={name}
+      {...(value !== undefined ? { value } : { defaultValue: defaultValue ?? '' })}
+      onChange={onChange}
       placeholder={placeholder}
+      pattern={pattern}
+      required={required}
+      title={title}
       type="text"
     />
   );
@@ -96,13 +116,17 @@ function TextInput({
 function TextArea({
   name,
   defaultValue,
+  value,
   placeholder,
   error,
+  onChange,
 }: Readonly<{
   name: string;
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
   placeholder: string;
   error?: string;
+  onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }>) {
   return (
     <textarea
@@ -112,8 +136,9 @@ function TextArea({
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
-      defaultValue={defaultValue}
       name={name}
+      {...(value !== undefined ? { value } : { defaultValue: defaultValue ?? '' })}
+      onChange={onChange}
       placeholder={placeholder}
     />
   );
@@ -432,6 +457,23 @@ function CreateDomainForm({
     initialAdminAuthoringFormState,
   );
   const currentState = normalizeState(state);
+  const [draftState, setDraftState] = useState(() =>
+    createDomainKeyDraftState({
+      label: currentState.values.label,
+      key: currentState.values.key,
+    }),
+  );
+  const [description, setDescription] = useState(currentState.values.description);
+
+  useEffect(() => {
+    setDraftState(
+      createDomainKeyDraftState({
+        label: currentState.values.label,
+        key: currentState.values.key,
+      }),
+    );
+    setDescription(currentState.values.description);
+  }, [state, currentState.values.description, currentState.values.key, currentState.values.label]);
 
   return (
     <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
@@ -450,18 +492,32 @@ function CreateDomainForm({
           <div className="grid gap-5 lg:grid-cols-2">
             <Field error={currentState.fieldErrors.label} hint="Name this domain." label="Domain name">
               <TextInput
-                defaultValue={currentState.values.label}
                 error={currentState.fieldErrors.label}
                 name="label"
+                onChange={(event) => {
+                  setDraftState((previousState) =>
+                    syncDomainKeyFromLabel(previousState, event.currentTarget.value),
+                  );
+                }}
                 placeholder="Leadership style"
+                required
+                value={draftState.label}
               />
             </Field>
             <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Domain key">
               <TextInput
-                defaultValue={currentState.values.key}
                 error={currentState.fieldErrors.key}
                 name="key"
+                onChange={(event) => {
+                  setDraftState((previousState) =>
+                    syncDomainKeyFromManualInput(previousState, event.currentTarget.value),
+                  );
+                }}
+                pattern={DOMAIN_KEY_PATTERN.source}
                 placeholder="leadership-style"
+                required
+                title="Use lowercase letters, numbers, and single hyphens only."
+                value={draftState.key}
               />
             </Field>
           </div>
@@ -472,10 +528,13 @@ function CreateDomainForm({
             label="Description"
           >
             <TextArea
-              defaultValue={currentState.values.description}
               error={currentState.fieldErrors.description}
               name="description"
+              onChange={(event) => {
+                setDescription(event.currentTarget.value);
+              }}
               placeholder="Groups the signals used to interpret leadership tendencies."
+              value={description}
             />
           </Field>
 
