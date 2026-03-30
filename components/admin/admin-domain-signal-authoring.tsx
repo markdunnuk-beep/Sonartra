@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -449,11 +449,16 @@ function CreateDomainForm({
   assessmentKey: string;
   assessmentVersionId: string;
 }) {
+  const createDomainFormAction = useMemo(
+    () =>
+      createDomainAction.bind(null, {
+        assessmentKey,
+        assessmentVersionId,
+      }),
+    [assessmentKey, assessmentVersionId],
+  );
   const [state, formAction] = useActionState(
-    createDomainAction.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-    }),
+    createDomainFormAction,
     initialAdminAuthoringFormState,
   );
   const currentState = normalizeState(state);

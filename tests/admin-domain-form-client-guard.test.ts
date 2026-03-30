@@ -38,3 +38,11 @@ test('create domain draft is not rehydrated from action state during typing', ()
     /setDraftState\(\s*createDomainKeyDraftState\(\{\s*label:\s*currentState\.values\.label,\s*key:\s*currentState\.values\.key,/,
   );
 });
+
+test('create domain server action is memoized so typing does not replace the action identity', () => {
+  const source = readComponentSource();
+
+  assert.match(source, /const createDomainFormAction = useMemo\(/);
+  assert.match(source, /useActionState\(\s*createDomainFormAction,/);
+  assert.doesNotMatch(source, /useActionState\(\s*createDomainAction\.bind/);
+});
