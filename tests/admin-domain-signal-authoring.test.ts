@@ -412,7 +412,32 @@ test('creates domains and signals with deterministic appended order indexes', as
   assert.equal(fake.state.domains[1]?.orderIndex, 1);
   assert.equal(fake.state.signals[1]?.orderIndex, 1);
   assert.equal(fake.state.domains[1]?.domainKey, 'motivation');
-  assert.equal(fake.state.signals[1]?.signalKey, 'style_supportive');
+  assert.equal(fake.state.signals[1]?.signalKey, 'supportive');
+});
+
+test('createSignalRecord persists a manual signal key override for new signals', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'style',
+        label: 'Style',
+        description: null,
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  await createSignalRecord({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    domainId: 'domain-1',
+    values: { label: 'Directive', key: 'directive-v2', description: '' },
+  });
+
+  assert.equal(fake.state.signals[0]?.signalKey, 'directive-v2');
+  assert.equal(fake.state.signals[0]?.label, 'Directive');
 });
 
 test('createDomainRecord persists a manual domain key override for new domains', async () => {
@@ -476,11 +501,11 @@ test('updates domain and signal metadata in place', async () => {
     assessmentVersionId: 'version-1',
     domainId: 'domain-1',
     signalId: 'signal-1',
-    values: { label: 'Decisive', key: 'decisive', description: 'Updated signal' },
+    values: { label: 'Decisive', key: ' Decisive / Plus ', description: 'Updated signal' },
   });
 
   assert.equal(fake.state.domains[0]?.domainKey, 'leadership-style');
-  assert.equal(fake.state.signals[0]?.signalKey, 'decisive');
+  assert.equal(fake.state.signals[0]?.signalKey, 'decisive-plus');
 });
 
 test('deleting a domain removes its nested signals from the same draft version', async () => {

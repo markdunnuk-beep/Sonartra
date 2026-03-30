@@ -36,6 +36,12 @@ import {
   syncDomainKeyFromLabel,
   syncDomainKeyFromManualInput,
 } from '@/lib/utils/domain-key';
+import {
+  SIGNAL_KEY_PATTERN,
+  createSignalKeyDraftState,
+  syncSignalKeyFromManualInput,
+  syncSignalKeyFromName,
+} from '@/lib/utils/signal-key';
 
 function normalizeState(state: AdminAuthoringFormState | null | undefined): AdminAuthoringFormState {
   return {
@@ -583,15 +589,57 @@ function CreateSignalForm({
   assessmentVersionId: string;
   domainId: string;
 }) {
+  const createSignalFormAction = useMemo(
+    () =>
+      createSignalAction.bind(null, {
+        assessmentKey,
+        assessmentVersionId,
+        domainId,
+      }),
+    [assessmentKey, assessmentVersionId, domainId],
+  );
   const [state, formAction] = useActionState(
-    createSignalAction.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-      domainId,
-    }),
+    createSignalFormAction,
     initialAdminAuthoringFormState,
   );
   const currentState = normalizeState(state);
+  const [draftState, setDraftState] = useState(() =>
+    createSignalKeyDraftState({
+      label: currentState.values.label,
+      key: currentState.values.key,
+    }),
+  );
+  const [description, setDescription] = useState(currentState.values.description);
+
+  useEffect(() => {
+    if (
+      currentState.formError ||
+      currentState.fieldErrors.label ||
+      currentState.fieldErrors.key ||
+      currentState.fieldErrors.description
+    ) {
+      return;
+    }
+
+    if (
+      currentState.values.label ||
+      currentState.values.key ||
+      currentState.values.description
+    ) {
+      return;
+    }
+
+    setDraftState(createSignalKeyDraftState({ label: '', key: '' }));
+    setDescription('');
+  }, [
+    currentState.fieldErrors.description,
+    currentState.fieldErrors.key,
+    currentState.fieldErrors.label,
+    currentState.formError,
+    currentState.values.description,
+    currentState.values.key,
+    currentState.values.label,
+  ]);
 
   return (
     <SurfaceCard className="p-4">
@@ -607,18 +655,34 @@ function CreateSignalForm({
           <div className="grid gap-4 lg:grid-cols-2">
             <Field error={currentState.fieldErrors.label} hint="Name this signal." label="Name">
               <TextInput
-                defaultValue={currentState.values.label}
                 error={currentState.fieldErrors.label}
                 name="label"
+                onChange={(event) => {
+                  const nextName = event.currentTarget.value;
+                  setDraftState((previousState) =>
+                    syncSignalKeyFromName(previousState, nextName),
+                  );
+                }}
                 placeholder="Directive"
+                required
+                value={draftState.label}
               />
             </Field>
             <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Key">
               <TextInput
-                defaultValue={currentState.values.key}
                 error={currentState.fieldErrors.key}
                 name="key"
+                onChange={(event) => {
+                  const nextKey = event.currentTarget.value;
+                  setDraftState((previousState) =>
+                    syncSignalKeyFromManualInput(previousState, nextKey),
+                  );
+                }}
+                pattern={SIGNAL_KEY_PATTERN.source}
                 placeholder="directive"
+                required
+                title="Use lowercase letters, numbers, and single hyphens only."
+                value={draftState.key}
               />
             </Field>
           </div>
@@ -629,10 +693,13 @@ function CreateSignalForm({
             label="Description"
           >
             <TextArea
-              defaultValue={currentState.values.description}
               error={currentState.fieldErrors.description}
               name="description"
+              onChange={(event) => {
+                setDescription(event.currentTarget.value);
+              }}
               placeholder="Represents a clear, direct leadership tendency."
+              value={description}
             />
           </Field>
 

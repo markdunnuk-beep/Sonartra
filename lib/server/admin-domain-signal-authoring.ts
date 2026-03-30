@@ -11,6 +11,7 @@ import {
 } from '@/lib/admin/admin-domain-signal-authoring';
 import { getDbPool } from '@/lib/server/db';
 import { slugifyDomainKey } from '@/lib/utils/domain-key';
+import { slugifySignalKey } from '@/lib/utils/signal-key';
 import { generateDomainKey, generateSignalKey } from '@/lib/utils/key-generator';
 
 type Queryable = {
@@ -590,16 +591,16 @@ export async function createSignalRecord(params: {
   domainId: string;
   values: AdminAuthoringFormValues;
 }): Promise<void> {
-  const domainKey = await getDomainKey({
+  const domainExistsForVersion = await getDomainKey({
     db: params.db,
     assessmentVersionId: params.assessmentVersionId,
     domainId: params.domainId,
   });
-  if (!domainKey) {
+  if (!domainExistsForVersion) {
     throw new Error('DOMAIN_NOT_FOUND');
   }
 
-  const signalKey = generateSignalKey(domainKey, params.values.label);
+  const signalKey = slugifySignalKey(params.values.key);
   if (!signalKey) {
     throw new Error('SIGNAL_KEY_INVALID');
   }
@@ -651,6 +652,11 @@ export async function updateSignalRecord(params: {
   signalId: string;
   values: AdminAuthoringFormValues;
 }): Promise<void> {
+  const signalKey = slugifySignalKey(params.values.key);
+  if (!signalKey) {
+    throw new Error('SIGNAL_KEY_INVALID');
+  }
+
   const domainPresent = await domainExists({
     db: params.db,
     assessmentVersionId: params.assessmentVersionId,
@@ -674,7 +680,7 @@ export async function updateSignalRecord(params: {
     await duplicateSignalKeyExists({
       db: params.db,
       assessmentVersionId: params.assessmentVersionId,
-      signalKey: params.values.key,
+      signalKey,
       excludedSignalId: params.signalId,
     })
   ) {
@@ -697,7 +703,7 @@ export async function updateSignalRecord(params: {
       params.signalId,
       params.assessmentVersionId,
       params.domainId,
-      params.values.key,
+      signalKey,
       params.values.label,
       params.values.description || null,
     ],
@@ -983,7 +989,10 @@ export async function createSignalAction(
   _previousState: AdminAuthoringFormState,
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
-  const values = getValuesFromFormData(formData);
+  const values = {
+    ...getValuesFromFormData(formData),
+    key: slugifySignalKey(normalizeFormValue(formData.get('key'))),
+  };
   const validation = validateAdminAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
@@ -1009,7 +1018,10 @@ export async function updateSignalAction(
   _previousState: AdminAuthoringFormState,
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
-  const values = getValuesFromFormData(formData);
+  const values = {
+    ...getValuesFromFormData(formData),
+    key: slugifySignalKey(normalizeFormValue(formData.get('key'))),
+  };
   const validation = validateAdminAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;

@@ -53,6 +53,18 @@ test('create domain form change handlers stay local and avoid direct submit/navi
   assert.doesNotMatch(source, /redirect\(/);
 });
 
+test('create signal form change handlers snapshot event values and stay local-only', () => {
+  const source = readComponentSource();
+
+  assert.match(source, /const nextName = event\.currentTarget\.value/);
+  assert.match(source, /syncSignalKeyFromName\(previousState, nextName\)/);
+  assert.match(source, /const nextKey = event\.currentTarget\.value/);
+  assert.match(source, /syncSignalKeyFromManualInput\(previousState, nextKey\)/);
+  assert.doesNotMatch(source, /requestSubmit\(/);
+  assert.doesNotMatch(source, /router\.(refresh|push|replace)\(/);
+  assert.doesNotMatch(source, /redirect\(/);
+});
+
 test('non-submit inline editor controls stay explicit button elements', () => {
   const source = readComponentSource();
 
@@ -68,12 +80,29 @@ test('create domain draft is not rehydrated from action state during typing', ()
   );
 });
 
+test('create signal draft is not rehydrated from action state during typing', () => {
+  const source = readComponentSource();
+
+  assert.doesNotMatch(
+    source,
+    /setDraftState\(\s*createSignalKeyDraftState\(\{\s*label:\s*currentState\.values\.label,\s*key:\s*currentState\.values\.key,/,
+  );
+});
+
 test('create domain server action is memoized so typing does not replace the action identity', () => {
   const source = readComponentSource();
 
   assert.match(source, /const createDomainFormAction = useMemo\(/);
   assert.match(source, /useActionState\(\s*createDomainFormAction,/);
   assert.doesNotMatch(source, /useActionState\(\s*createDomainAction\.bind/);
+});
+
+test('create signal server action is memoized so typing does not replace the action identity', () => {
+  const source = readComponentSource();
+
+  assert.match(source, /const createSignalFormAction = useMemo\(/);
+  assert.match(source, /useActionState\(\s*createSignalFormAction,/);
+  assert.doesNotMatch(source, /useActionState\(\s*createSignalAction\.bind/);
 });
 
 test('admin domain authoring path does not use mutable draft values as React keys', () => {
