@@ -1,0 +1,399 @@
+1A Start quickly, then adjust as I learn
+1B Plan the full approach before starting
+1C Check with key people before moving
+1D Wait until direction is fully clear
+
+2A I work fast and keep urgency high
+2B I keep a steady, reliable pace
+2C I work calmly and think things through
+2D My pace shifts with the environment
+
+3A I pivot quickly and keep moving
+3B I pause to rework the plan
+3C I check who will be affected first
+3D I lose momentum until things settle
+
+4A High-stakes work with visible outcomes
+4B Work with clear structure and scope
+4C Work that depends on strong collaboration
+4D Technical work that needs deep analysis
+
+5A Pick a direction and move forward
+5B Gather more information before committing
+5C Check with others before deciding
+5D Hold the line until things stabilise
+
+6A I prioritise speed over fine detail
+6B I balance detail with delivery speed
+6C I go deep on details early
+6D I hand off detail work when possible
+
+7A I use it to improve quickly
+7B I turn it into a better plan
+7C I take it personally at first
+7D I need clear evidence to accept it
+
+8A Quick judgement from experience and pace
+8B Mix instinct, input, and available facts
+8C Slow down to avoid costly mistakes
+8D Evidence, patterns, and hard data
+
+9A Set direction and keep discussion focused
+9B Generate options and build momentum
+9C Support others and draw quieter voices in
+9D Test ideas by challenging assumptions
+
+10A Direct and concise
+10B Persuasive and expressive
+10C Patient and empathetic
+10D Precise and factual
+
+11A Set ambitious targets and clear ownership
+11B Build energy and commitment around the work
+11C Make sure everyone is heard and included
+11D Build a solid system with clear standards
+
+12A Raise intensity and push through bottlenecks
+12B Keep people motivated and moving together
+12C Protect morale so pressure stays manageable
+12D Slow down enough to avoid avoidable errors
+
+13A Clear authority and ownership boundaries
+13B Room to influence people and decisions
+13C Stable routines and dependable expectations
+13D Space for deep thinking and analysis
+
+14A Clear, decisive, and hard to sway
+14B Energetic, persuasive, and outward-facing
+14C Dependable, steady, and easy to trust
+14D Thoughtful, measured, and careful with words
+
+15A Endless delays and no clear decisions
+15B Flat energy and low personal ownership
+15C Tension that turns personal or hostile
+15D Decisions made without sound reasoning
+
+16A Hitting clear targets and seeing results
+16B Shaping decisions that others follow
+16C Having security and a predictable base
+16D Getting better at something difficult
+
+17A It shows the work led to results
+17B It raises my visibility for bigger opportunities
+17C It reinforces trust with people around me
+17D It confirms that my expertise is respected
+
+18A Work with stretch goals and clear stakes
+18B Work that expands my influence network
+18C Work that offers long-term security
+18D Work that builds deep specialist skills
+
+19A Compete hard and track where I stand
+19B Build new things and bring others in
+19C Protect what works and reduce risk
+19D Improve systems until they run better
+
+20A Goals achieved and outcomes delivered
+20B Positive impact on people and business
+20C Healthy relationships and low friction
+20D High standards met without shortcuts
+
+21A Work where winning is clearly visible
+21B Work where I can energise others
+21C Work where I can support the team
+21D Work where I can solve complex problems
+
+22A Weak goals with no real consequence
+22B My input is ignored repeatedly
+22C Conflict stays unresolved and keeps spreading
+22D Standards drop and nobody addresses it
+
+23A One who takes charge in tough moments
+23B One who sets a clear, compelling direction
+23C One who develops people with consistency
+23D One who brings clarity and sound judgement
+
+24A Given meaningful responsibility and trust
+24B Asked for input on important calls
+24C Included in conversations that affect me
+24D Recognised for depth of expertise
+
+25A Set direction and make key calls
+25B Connect people and keep momentum up
+25C Keep the team stable and coordinated
+25D Go deep as the subject specialist
+
+26A Mostly independently with clear ownership
+26B Closely with others through active collaboration
+26C With a stable team and clear norms
+26D With people who challenge my thinking
+
+27A Ask directly why I was excluded
+27B Re-enter quickly and rebuild alignment
+27C Step back and wait for a better moment
+27D Review what happened before responding
+
+28A Decision rights and real accountability
+28B Reach and influence across the business
+28C Belonging and mutual trust
+28D Mastery and strong capability growth
+
+29A Push for my position and try to win
+29B Make my case until they come around
+29C Look for middle ground we can both accept
+29D Step back to avoid making it worse
+
+30A Hold my ground and respond directly
+30B React quickly and show my frustration
+30C Lower the temperature before discussing details
+30D Slow down and clarify what is factual
+
+31A Address the issue directly with them
+31B Encourage them and reset expectations together
+31C Offer support privately before escalating
+31D Check whether process gaps caused the drop
+
+32A The issue did not justify a fight
+32B Preserving the relationship mattered more
+32C I worried it would become personal
+32D The argument was too weak to pursue
+
+33A Stayed direct even when it was uncomfortable
+33B Framed the message to gain buy-in
+33C Tried to understand their perspective first
+33D Kept to facts and separated emotion
+
+34A I push too hard to get my way
+34B I talk too much instead of listening
+34C I avoid it and hope it passes
+34D I overthink and respond too late
+
+35A I become controlling and less trusting
+35B I jump between issues and lose focus
+35C I avoid hard conversations for too long
+35D I become overly critical of others
+
+36A I took over tasks instead of delegating
+36B I talked it through with too many people
+36C I pulled back and reduced communication
+36D I kept analysing instead of deciding
+
+37A I reacted before I had the full picture
+37B I voiced frustration immediately and strongly
+37C I kept it to myself and stewed
+37D I stayed polite but became emotionally distant
+
+38A More intense and harder to approach
+38B More reactive and emotionally visible
+38C Quieter and slower to engage
+38D Detached and focused only on facts
+
+39A I rush people when progress feels slow
+39B I assume things will work out too easily
+39C I sidestep tension instead of addressing it
+39D I chase perfect instead of good enough
+
+40A Go on the offensive and push back hard
+40B Justify myself and protect my position
+40C Shut down and struggle to respond
+40D Overanalyse every possible downside
+
+41A A chance worth taking if upside is strong
+41B Necessary if the mission is worth it
+41C Fine when exposure is understood and managed
+41D A threat unless controls are in place
+
+42A Quick calls with limited delay
+42B Shared calls with key people aligned
+42C Low-risk calls with predictable outcomes
+42D Evidence-led calls with clear assumptions tested
+
+43A Move fast to keep options open
+43B Build alignment so execution holds
+43C Protect stability and avoid major disruption
+43D Compare scenarios before committing resources
+
+44A Pattern recognition and lived judgement
+44B Input from people I trust
+44C What keeps the system stable
+44D Data quality and decision evidence
+
+45A High uncertainty with big upside potential
+45B Frequent change with room to adapt
+45C Moderate uncertainty with clear guardrails
+45D Low uncertainty with strong structure
+
+46A Set direction and deliver measurable results
+46B Create belief people want to follow
+46C Grow people so the team gets stronger
+46D Build systems that scale reliably
+
+47A Set clear consequences and raise expectations
+47B Reconnect effort to purpose and momentum
+47C Coach directly and remove blockers
+47D Fix process issues driving the problem
+
+48A By setting direction and making decisions
+48B By creating energy and visible momentum
+48C By supporting people through pressure
+48D By bringing expertise to hard problems
+
+49A Authority should be used decisively when needed
+49B Authority should be earned through trust
+49C Authority should be shared where possible
+49D Authority should be clear in the structure
+
+50A In a crisis that needs fast calls
+50B In growth phases that need energy
+50C In steady periods that need consistency
+50D In complex situations needing careful judgement
+
+51A High-performance culture with clear accountability
+51B Creative culture that rewards experimentation
+51C Collaborative culture with strong trust
+51D Structured culture with clear standards
+
+52A Strong financial results and margin discipline
+52B Sustainable growth in capability and reach
+52C Healthy engagement and low team friction
+52D Operational efficiency and consistent delivery
+
+53A High standards and measurable performance
+53B Experimentation that leads to real learning
+53C Belonging, trust, and psychological safety
+53D Consistency in how work gets done
+
+54A Expectations are explicit and hard to ignore
+54B People own outcomes because purpose is clear
+54C Accountability is fair and applied evenly
+54D Progress is measured with clear metrics
+
+55A Slow cultures where decisions drag on
+55B Risk-averse cultures that reject new ideas
+55C Harsh cultures that normalise blame
+55D Chaotic cultures with no clear process
+
+56A Owning commercial outcomes across teams
+56B Building partnerships and opening opportunities
+56C Running operations with reliability and pace
+56D Solving specialist problems with deep expertise
+
+57A Driving change when momentum is needed
+57B Influencing people across functions and levels
+57C Keeping delivery stable during disruption
+57D Analysing complexity and finding clear patterns
+
+58A Stretch goals with clear accountability
+58B Strong relationships that move work forward
+58C Predictable environment with minimal surprises
+58D Clear systems that support quality execution
+
+59A Creating momentum when progress stalls
+59B Building engagement that lifts team effort
+59C Delivering reliably under pressure
+59D Bringing precision to important decisions
+
+60A Tightened priorities and pushed faster decisions
+60B Reframed the goal and re-energised people
+60C Stabilised workload and reduced extra disruption
+60D Reworked the plan and challenged assumptions
+
+61A Defended my view and argued my case
+61B Reframed it to build broader support
+61C Lowered tension so we could keep talking
+61D Tested their reasoning before responding
+
+62A Clear momentum and disciplined execution
+62B Shared energy and belief in the mission
+62C Trust, cohesion, and mutual support
+62D High standards and technical precision
+
+63A Stepped in directly and reset direction
+63B Influenced key people to regain traction
+63C Brought people together to re-align
+63D Tightened process and clarified decision points
+
+64A Potential upside if execution went well
+64B Whether the story would attract support
+64C Effects on people and team stability
+64D Evidence strength and probability of success
+
+65A Stated my decision and expected alignment
+65B Worked to win them over to my view
+65C Explored their concerns before deciding next
+65D Compared assumptions and logic together
+
+66A Decision rights get blurred and contested
+66B The original vision gets diluted over time
+66C Culture fractures across teams and layers
+66D Core systems fail under added scale
+
+67A Became more forceful to regain control
+67B Became more expressive and talked it through
+67C Focused on calming people before solving
+67D Shifted into analysis to avoid reacting
+
+68A Said the hard thing clearly and early
+68B Framed it to keep them engaged
+68C Protected the relationship while raising the issue
+68D Kept to facts and avoided exaggeration
+
+69A Owned it quickly and corrected course
+69B Rebuilt commitment so people stayed engaged
+69C Protected morale while we reset
+69D Investigated root causes before the next move
+
+70A Who makes the final calls here
+70B Who really shapes decisions informally
+70C How trust and relationships actually work
+70D How the core systems run
+
+71A When clear performance lift is needed
+71B When people need confidence and direction
+71C When the team needs steadiness and trust
+71D When problems require deep expert judgement
+
+72A Chose the fastest route to impact
+72B Aligned key stakeholders before committing
+72C Sought broad agreement before moving ahead
+72D Weighed downstream effects before deciding
+
+73A A window to move before others do
+73B A moment to rally people around change
+73C A warning sign that needs stabilising
+73D A complex problem to map carefully
+
+74A Avoiding decisions when clarity is needed
+74B Making it about ego over outcomes
+74C Losing touch with team reality
+74D Repeated poor judgement on key calls
+
+75A Increased pressure and tightened deadlines
+75B Increased communication and visibility
+75C Increased support and removed friction
+75D Increased analysis before major calls
+
+76A They compete hard and keep standards high
+76B They keep people inspired by clear purpose
+76C They stay cohesive when pressure rises
+76D They run strong systems consistently
+
+77A Back my instinct, then validate quickly
+77B Get more viewpoints before committing
+77C Pause and test where bias may exist
+77D Follow the evidence even if uncomfortable
+
+78A Push change fast and remove blockers
+78B Explain the vision until it lands
+78C Protect core stability during transition
+78D Design the transition step by step
+
+79A Behaviours that deliver wins consistently
+79B Behaviours that build influence and momentum
+79C Behaviours that strengthen trust and loyalty
+79D Behaviours that show strong competence
+
+80A Results delivered against clear goals
+80B Influence created across key stakeholders
+80C Relationships maintained under pressure
+80D Quality of thinking behind decisions
