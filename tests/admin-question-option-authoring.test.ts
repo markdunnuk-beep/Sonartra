@@ -580,9 +580,10 @@ function createFakeDb(
   };
 }
 
-function buildBulkFormData(count: string) {
+function buildBulkFormData(count: string, domainId = 'domain-1') {
   const formData = new FormData();
   formData.set('count', count);
+  formData.set('domainId', domainId);
   return formData;
 }
 
@@ -592,10 +593,18 @@ test('creates questions and options with deterministic appended order indexes', 
       {
         id: 'domain-1',
         assessmentVersionId: 'version-1',
-        domainKey: 'section-one',
-        label: 'Section one',
-        domainType: 'QUESTION_SECTION',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
         orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'core-drivers',
+        label: 'Core Drivers',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
       },
     ],
     questions: [
@@ -625,7 +634,7 @@ test('creates questions and options with deterministic appended order indexes', 
     db: fake.db,
     assessmentVersionId: 'version-1',
     values: {
-      domainId: 'domain-1',
+      domainId: 'domain-2',
       key: 'new-question',
       prompt: 'New question',
     },
@@ -633,9 +642,11 @@ test('creates questions and options with deterministic appended order indexes', 
 
   assert.equal(fake.state.questions[1]?.orderIndex, 1);
   assert.equal(fake.state.questions[1]?.questionKey, 'q02');
+  assert.equal(fake.state.questions[1]?.domainId, 'domain-2');
   assert.equal(fake.state.options.length, 5);
   assert.equal(createdQuestion.key, 'q02');
   assert.equal(createdQuestion.questionId, 'question-2');
+  assert.equal(createdQuestion.domainId, 'domain-2');
   assert.equal(createdQuestion.options.length, 4);
   assert.deepEqual(
     createdQuestion.options.map((option) => ({
@@ -717,6 +728,7 @@ test('bulk creation appends deterministic questions with default options', async
     db: fake.db,
     assessmentVersionId: 'version-1',
     count: 3,
+    domainId: 'domain-1',
   });
 
   assert.equal(createdQuestions.length, 3);
@@ -765,6 +777,7 @@ test('bulk creation can generate 80 questions with four deterministic options ea
     db: fake.db,
     assessmentVersionId: 'version-1',
     count: 80,
+    domainId: 'domain-1',
   });
 
   assert.equal(createdQuestions.length, 80);
@@ -816,6 +829,7 @@ test('bulk creation appends after existing questions without key or order collis
     db: fake.db,
     assessmentVersionId: 'version-1',
     count: 3,
+    domainId: 'domain-1',
   });
 
   assert.deepEqual(
@@ -892,6 +906,118 @@ test('bulk action rolls back all created records when option insertion fails', a
   assert.equal(fake.state.questions.length, 1);
   assert.equal(fake.state.options.length, 1);
   assert.deepEqual(revalidatedPaths, []);
+});
+
+test('bulk creation persists the explicitly selected domain instead of defaulting to the first domain', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'leadership-approach',
+        label: 'Leadership Approach',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  const createdQuestions = await createBulkQuestionRecords({
+    db: fake.db,
+    assessmentVersionId: 'version-1',
+    count: 3,
+    domainId: 'domain-2',
+  });
+
+  assert.deepEqual(
+    createdQuestions.map((question) => question.domainId),
+    ['domain-2', 'domain-2', 'domain-2'],
+  );
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({
+      key: question.questionKey,
+      domainId: question.domainId,
+      orderIndex: question.orderIndex,
+    })),
+    [
+      { key: 'q01', domainId: 'domain-2', orderIndex: 0 },
+      { key: 'q02', domainId: 'domain-2', orderIndex: 1 },
+      { key: 'q03', domainId: 'domain-2', orderIndex: 2 },
+    ],
+  );
+});
+
+test('bulk action fails validation when no domain is supplied', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionAuthoringFormState,
+    buildBulkFormData('2', ''),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.fieldErrors.domainId, 'Question domain is required.');
+  assert.equal(fake.state.questions.length, 0);
+  assert.equal(fake.state.options.length, 0);
+});
+
+test('bulk action rejects stale domains instead of silently assigning Operating Style', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionAuthoringFormState,
+    buildBulkFormData('2', 'domain-2'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, 'Select a valid question domain before generating questions.');
+  assert.equal(fake.state.questions.length, 0);
+  assert.equal(fake.state.options.length, 0);
 });
 
 test('duplicates a question below the source and copies options and weights deterministically', async () => {

@@ -534,27 +534,6 @@ async function rekeyQuestionsFromOrderIndex(params: {
   }
 }
 
-async function getDefaultBulkQuestionDomainId(
-  db: Queryable,
-  assessmentVersionId: string,
-): Promise<string | null> {
-  const result = await db.query<{ id: string }>(
-    `
-    SELECT id
-    FROM domains
-    WHERE assessment_version_id = $1
-    ORDER BY
-      CASE WHEN domain_type = 'QUESTION_SECTION' THEN 0 ELSE 1 END ASC,
-      order_index ASC,
-      id ASC
-    LIMIT 1
-    `,
-    [assessmentVersionId],
-  );
-
-  return result.rows[0]?.id ?? null;
-}
-
 function buildDefaultCreatedOptions(params: {
   assessmentVersionId: string;
   questionId: string;
@@ -684,13 +663,18 @@ export async function createBulkQuestionRecords(params: {
   db: Queryable;
   assessmentVersionId: string;
   count: number;
+  domainId: string;
 }): Promise<readonly AdminCreatedQuestion[]> {
   if (!Number.isInteger(params.count) || params.count < 1) {
     throw new Error('INVALID_BULK_COUNT');
   }
 
-  const domainId = await getDefaultBulkQuestionDomainId(params.db, params.assessmentVersionId);
-  if (!domainId) {
+  const domainPresent = await domainExists({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    domainId: params.domainId,
+  });
+  if (!domainPresent) {
     throw new Error('DOMAIN_NOT_FOUND');
   }
 
@@ -702,7 +686,7 @@ export async function createBulkQuestionRecords(params: {
 
     questionValues.push(
       params.assessmentVersionId,
-      domainId,
+      params.domainId,
       generateQuestionKey(orderIndex + 1),
       '',
       orderIndex,
@@ -1291,6 +1275,7 @@ function getOptionValuesFromFormData(formData: FormData): AdminOptionAuthoringFo
 function getBulkQuestionValuesFromFormData(formData: FormData): AdminBulkQuestionAuthoringFormValues {
   return {
     count: normalizeFormValue(formData.get('count')),
+    domainId: normalizeFormValue(formData.get('domainId')),
   };
 }
 
@@ -1429,6 +1414,7 @@ export async function createBulkQuestionsActionWithDependencies(
       db: client,
       assessmentVersionId: context.assessmentVersionId,
       count: Number(values.count),
+      domainId: values.domainId,
     });
     await client.query('COMMIT');
 
@@ -1444,7 +1430,7 @@ export async function createBulkQuestionsActionWithDependencies(
 
     if (error instanceof Error && error.message === 'DOMAIN_NOT_FOUND') {
       return {
-        formError: 'Create at least one domain in this draft before generating questions.',
+        formError: 'Select a valid question domain before generating questions.',
         fieldErrors: {},
         values,
       };

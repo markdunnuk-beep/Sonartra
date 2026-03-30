@@ -23,12 +23,14 @@ export type AdminQuestionAuthoringFormState = {
 
 export type AdminBulkQuestionAuthoringFormValues = {
   count: string;
+  domainId: string;
 };
 
 export type AdminBulkQuestionAuthoringFormState = {
   formError: string | null;
   fieldErrors: {
     count?: string;
+    domainId?: string;
   };
   values: AdminBulkQuestionAuthoringFormValues;
 };
@@ -63,6 +65,7 @@ export const initialAdminQuestionAuthoringFormState: AdminQuestionAuthoringFormS
 
 export const emptyAdminBulkQuestionAuthoringFormValues: AdminBulkQuestionAuthoringFormValues = {
   count: '80',
+  domainId: '',
 };
 
 export const initialAdminBulkQuestionAuthoringFormState: AdminBulkQuestionAuthoringFormState = {
@@ -125,6 +128,10 @@ export function validateAdminBulkQuestionAuthoringValues(
     fieldErrors.count = 'Enter a whole number greater than zero.';
   } else if (count > 200) {
     fieldErrors.count = 'Generate at most 200 questions at a time.';
+  }
+
+  if (!values.domainId) {
+    fieldErrors.domainId = 'Question domain is required.';
   }
 
   return {

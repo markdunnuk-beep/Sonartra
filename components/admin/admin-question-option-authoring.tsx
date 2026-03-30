@@ -78,6 +78,7 @@ function normalizeBulkQuestionState(
     fieldErrors: state?.fieldErrors ?? {},
     values: {
       count: state?.values?.count ?? emptyAdminBulkQuestionAuthoringFormValues.count,
+      domainId: state?.values?.domainId ?? emptyAdminBulkQuestionAuthoringFormValues.domainId,
     },
     createdQuestions: state?.createdQuestions ?? [],
   };
@@ -461,16 +462,24 @@ function formatDomainType(domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP'): stri
 function BulkQuestionForm({
   assessmentKey,
   assessmentVersionId,
+  domains,
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
+  domains: readonly AdminAssessmentDetailQuestionDomain[];
 }) {
   const [state, formAction] = useActionState(
     createBulkQuestions.bind(null, {
       assessmentKey,
       assessmentVersionId,
     }),
-    initialAdminBulkQuestionAuthoringFormState,
+    {
+      ...initialAdminBulkQuestionAuthoringFormState,
+      values: {
+        ...initialAdminBulkQuestionAuthoringFormState.values,
+        domainId: domains[0]?.domainId ?? '',
+      },
+    },
   );
   const currentState = normalizeBulkQuestionState(state);
   return (
@@ -485,7 +494,7 @@ function BulkQuestionForm({
             Create several questions at once with A-D options.
           </p>
         </div>
-        <form action={formAction} className="grid gap-4 lg:grid-cols-[220px_auto] lg:items-end">
+        <form action={formAction} className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)_auto] lg:items-end">
           <Field error={currentState.fieldErrors.count} hint="Choose how many to add." label="Question count">
             <NumberInput
               defaultValue={currentState.values.count}
@@ -494,6 +503,20 @@ function BulkQuestionForm({
               min={1}
               name="count"
             />
+          </Field>
+          <Field error={currentState.fieldErrors.domainId} hint="Choose the domain for all generated questions." label="Domain">
+            <SelectInput
+              defaultValue={currentState.values.domainId || domains[0]?.domainId || ''}
+              error={currentState.fieldErrors.domainId}
+              name="domainId"
+            >
+              <option value="">Select a domain</option>
+              {domains.map((domain) => (
+                <option key={domain.domainId} value={domain.domainId}>
+                  {domain.label} ({formatDomainType(domain.domainType)})
+                </option>
+              ))}
+            </SelectInput>
           </Field>
           <div className="flex items-end">
             <SubmitButton idleLabel="Generate questions" pendingLabel="Generating..." />
@@ -1026,6 +1049,7 @@ export function AdminQuestionOptionAuthoring({
               <BulkQuestionForm
                 assessmentKey={assessmentKey}
                 assessmentVersionId={assessmentVersionId}
+                domains={domains}
               />
 
               <CreateQuestionForm
