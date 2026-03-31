@@ -1,0 +1,321 @@
+question_number,option_label,domain,question_text,response_text,primary_signal,secondary_signal,assignment_method,score_margin,needs_review,notes
+1,A,Operating Style," When starting a new initiative, what do you focus on first?","Start quickly, then adjust as I learn",driver,,heuristic_assignment,4.0,False,heuristic_assignment
+1,B,Operating Style," When starting a new initiative, what do you focus on first?",Plan the full approach before starting,implementer,,heuristic_assignment,4.0,False,heuristic_assignment
+1,C,Operating Style," When starting a new initiative, what do you focus on first?",Check with key people before moving,influencer,,heuristic_assignment,10.0,False,heuristic_assignment
+1,D,Operating Style," When starting a new initiative, what do you focus on first?",Wait until direction is fully clear,analyst,,heuristic_assignment,2.0,False,heuristic_assignment
+2,A,Operating Style, How would you describe your natural pace at work?,I work fast and keep urgency high,driver,,heuristic_assignment,7.35,False,heuristic_assignment
+2,B,Operating Style, How would you describe your natural pace at work?,"I keep a steady, reliable pace",implementer,,heuristic_assignment,6.65,False,heuristic_assignment
+2,C,Operating Style, How would you describe your natural pace at work?,I work calmly and think things through,analyst,,heuristic_assignment,2.65,False,heuristic_assignment
+2,D,Operating Style, How would you describe your natural pace at work?,My pace shifts with the environment,influencer,,heuristic_assignment,1.35,True,heuristic_assignment; low-confidence or nuanced wording
+3,A,Operating Style," When priorities shift suddenly, what is your instinct?",I pivot quickly and keep moving,driver,,heuristic_assignment,10.0,False,heuristic_assignment
+3,B,Operating Style," When priorities shift suddenly, what is your instinct?",I pause to rework the plan,implementer,,heuristic_assignment,7.0,False,heuristic_assignment
+3,C,Operating Style," When priorities shift suddenly, what is your instinct?",I check who will be affected first,influencer,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+3,D,Operating Style," When priorities shift suddenly, what is your instinct?",I lose momentum until things settle,analyst,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+4,A,Operating Style, What type of work do you naturally gravitate towards?,High-stakes work with visible outcomes,driver,,heuristic_assignment,3.0,False,heuristic_assignment
+4,B,Operating Style, What type of work do you naturally gravitate towards?,Work with clear structure and scope,implementer,analyst,heuristic_assignment,3.0,False,heuristic_assignment; secondary=analyst
+4,C,Operating Style, What type of work do you naturally gravitate towards?,Work that depends on strong collaboration,influencer,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+4,D,Operating Style, What type of work do you naturally gravitate towards?,Technical work that needs deep analysis,analyst,,heuristic_assignment,4.0,False,heuristic_assignment
+5,A,Operating Style," When there is little clarity, what do you do first?",Pick a direction and move forward,driver,,heuristic_assignment,5.0,False,heuristic_assignment
+5,B,Operating Style," When there is little clarity, what do you do first?",Gather more information before committing,analyst,,heuristic_assignment,3.0,False,heuristic_assignment
+5,C,Operating Style," When there is little clarity, what do you do first?",Check with others before deciding,influencer,,heuristic_assignment,3.0,False,heuristic_assignment
+5,D,Operating Style," When there is little clarity, what do you do first?",Hold the line until things stabilise,implementer,,heuristic_assignment,6.0,False,heuristic_assignment
+6,A,Operating Style," When working on something important, how do you handle detail?",I prioritise speed over fine detail,driver,analyst,manual_override,5.4,False,manual_override; secondary=analyst
+6,B,Operating Style," When working on something important, how do you handle detail?",I balance detail with delivery speed,implementer,analyst,manual_override,2.4,False,manual_override; secondary=analyst
+6,C,Operating Style," When working on something important, how do you handle detail?",I go deep on details early,analyst,,manual_override,2.4,False,manual_override
+6,D,Operating Style," When working on something important, how do you handle detail?",I hand off detail work when possible,influencer,analyst,manual_override,5.4,False,manual_override; secondary=analyst
+7,A,Operating Style," When receiving feedback, what is your immediate reaction?",I use it to improve quickly,driver,,heuristic_assignment,4.35,False,heuristic_assignment
+7,B,Operating Style," When receiving feedback, what is your immediate reaction?",I turn it into a better plan,implementer,,heuristic_assignment,6.65,False,heuristic_assignment
+7,C,Operating Style," When receiving feedback, what is your immediate reaction?",I take it personally at first,influencer,,heuristic_assignment,0.35,True,heuristic_assignment; low-confidence or nuanced wording
+7,D,Operating Style," When receiving feedback, what is your immediate reaction?",I need clear evidence to accept it,analyst,,heuristic_assignment,6.65,False,heuristic_assignment
+8,A,Operating Style," When making decisions, what do you rely on most?",Quick judgement from experience and pace,driver,,manual_override,5.0,False,manual_override
+8,B,Operating Style," When making decisions, what do you rely on most?","Mix instinct, input, and available facts",implementer,,manual_override,5.0,False,manual_override
+8,C,Operating Style," When making decisions, what do you rely on most?",Slow down to avoid costly mistakes,influencer,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+8,D,Operating Style," When making decisions, what do you rely on most?","Evidence, patterns, and hard data",analyst,,manual_override,8.0,False,manual_override
+9,A,Operating Style," In meetings, how do you usually contribute?",Set direction and keep discussion focused,driver,,heuristic_assignment,4.0,False,heuristic_assignment
+9,B,Operating Style," In meetings, how do you usually contribute?",Generate options and build momentum,influencer,,heuristic_assignment,3.0,False,heuristic_assignment
+9,C,Operating Style," In meetings, how do you usually contribute?",Support others and draw quieter voices in,implementer,,heuristic_assignment,1.0,True,heuristic_assignment; low-confidence or nuanced wording
+9,D,Operating Style," In meetings, how do you usually contribute?",Test ideas by challenging assumptions,analyst,,heuristic_assignment,4.0,False,heuristic_assignment
+10,A,Operating Style, How would others describe your communication style?,Direct and concise,driver,,heuristic_assignment,1.0,True,heuristic_assignment; low-confidence or nuanced wording
+10,B,Operating Style, How would others describe your communication style?,Persuasive and expressive,influencer,,heuristic_assignment,8.0,False,heuristic_assignment
+10,C,Operating Style, How would others describe your communication style?,Patient and empathetic,implementer,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+10,D,Operating Style, How would others describe your communication style?,Precise and factual,analyst,,heuristic_assignment,1.0,True,heuristic_assignment; low-confidence or nuanced wording
+11,A,Leadership Approach," When leading a project, where does your focus go first?",Set ambitious targets and clear ownership,results,,heuristic_assignment,8.0,False,heuristic_assignment
+11,B,Leadership Approach," When leading a project, where does your focus go first?",Build energy and commitment around the work,vision,,heuristic_assignment,7.0,False,heuristic_assignment
+11,C,Leadership Approach," When leading a project, where does your focus go first?",Make sure everyone is heard and included,people,,heuristic_assignment,8.0,False,heuristic_assignment
+11,D,Leadership Approach," When leading a project, where does your focus go first?",Build a solid system with clear standards,process,,heuristic_assignment,11.0,False,heuristic_assignment
+12,A,Pressure Response," Under tight time pressure, how do you operate?",Raise intensity and push through bottlenecks,control,,heuristic_assignment,7.0,False,heuristic_assignment
+12,B,Pressure Response," Under tight time pressure, how do you operate?",Keep people motivated and moving together,scatter,,heuristic_assignment,3.0,False,heuristic_assignment
+12,C,Pressure Response," Under tight time pressure, how do you operate?",Protect morale so pressure stays manageable,withdrawal,,heuristic_assignment,8.0,False,heuristic_assignment
+12,D,Pressure Response," Under tight time pressure, how do you operate?",Slow down enough to avoid avoidable errors,critical,,heuristic_assignment,3.0,False,heuristic_assignment
+13,A,Environment Fit, What kind of environment helps you perform best?,Clear authority and ownership boundaries,competitive,,manual_override,8.0,False,manual_override
+13,B,Environment Fit, What kind of environment helps you perform best?,Room to influence people and decisions,creative,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+13,C,Environment Fit, What kind of environment helps you perform best?,Stable routines and dependable expectations,structured,,manual_override,7.0,False,manual_override
+13,D,Environment Fit, What kind of environment helps you perform best?,Space for deep thinking and analysis,collaborative,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+14,A,Operating Style, How do others typically experience you at work?,"Clear, decisive, and hard to sway",driver,analyst,manual_override,3.0,False,manual_override; secondary=analyst
+14,B,Operating Style, How do others typically experience you at work?,"Energetic, persuasive, and outward-facing",influencer,,manual_override,7.0,False,manual_override
+14,C,Operating Style, How do others typically experience you at work?,"Dependable, steady, and easy to trust",implementer,,manual_override,7.0,False,manual_override
+14,D,Operating Style, How do others typically experience you at work?,"Thoughtful, measured, and careful with words",analyst,,manual_override,4.0,False,manual_override
+15,A,Environment Fit, What frustrates you most in a working environment?,Endless delays and no clear decisions,competitive,,manual_override,3.0,False,manual_override
+15,B,Environment Fit, What frustrates you most in a working environment?,Flat energy and low personal ownership,creative,competitive,manual_override,4.0,False,manual_override; secondary=competitive
+15,C,Environment Fit, What frustrates you most in a working environment?,Tension that turns personal or hostile,collaborative,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+15,D,Environment Fit, What frustrates you most in a working environment?,Decisions made without sound reasoning,structured,,manual_override,3.0,False,manual_override
+16,A,Core Drivers, What drives you to perform at your best?,Hitting clear targets and seeing results,achievement,,heuristic_assignment,8.0,False,heuristic_assignment
+16,B,Core Drivers, What drives you to perform at your best?,Shaping decisions that others follow,influence,,heuristic_assignment,6.0,False,heuristic_assignment
+16,C,Core Drivers, What drives you to perform at your best?,Having security and a predictable base,stability,,heuristic_assignment,7.0,False,heuristic_assignment
+16,D,Core Drivers, What drives you to perform at your best?,Getting better at something difficult,mastery,,heuristic_assignment,3.0,False,heuristic_assignment
+17,A,Core Drivers," Why does recognition matter to you, if it does?",It shows the work led to results,achievement,,heuristic_assignment,7.0,False,heuristic_assignment
+17,B,Core Drivers," Why does recognition matter to you, if it does?",It raises my visibility for bigger opportunities,influence,,heuristic_assignment,6.0,False,heuristic_assignment
+17,C,Core Drivers," Why does recognition matter to you, if it does?",It reinforces trust with people around me,stability,,heuristic_assignment,4.0,False,heuristic_assignment
+17,D,Core Drivers," Why does recognition matter to you, if it does?",It confirms that my expertise is respected,mastery,,heuristic_assignment,4.0,False,heuristic_assignment
+18,A,Core Drivers," Given a choice, what kind of work would you choose more often?",Work with stretch goals and clear stakes,achievement,,heuristic_assignment,7.0,False,heuristic_assignment
+18,B,Core Drivers," Given a choice, what kind of work would you choose more often?",Work that expands my influence network,influence,,heuristic_assignment,5.0,False,heuristic_assignment
+18,C,Core Drivers," Given a choice, what kind of work would you choose more often?",Work that offers long-term security,stability,,heuristic_assignment,7.0,False,heuristic_assignment
+18,D,Core Drivers," Given a choice, what kind of work would you choose more often?",Work that builds deep specialist skills,mastery,,heuristic_assignment,4.0,False,heuristic_assignment
+19,A,Core Drivers," If you had complete freedom, how would you choose to work?",Compete hard and track where I stand,achievement,,heuristic_assignment,3.0,False,heuristic_assignment
+19,B,Core Drivers," If you had complete freedom, how would you choose to work?",Build new things and bring others in,influence,,heuristic_assignment,3.0,False,heuristic_assignment
+19,C,Core Drivers," If you had complete freedom, how would you choose to work?",Protect what works and reduce risk,stability,,heuristic_assignment,7.0,False,heuristic_assignment
+19,D,Core Drivers," If you had complete freedom, how would you choose to work?",Improve systems until they run better,mastery,,heuristic_assignment,4.0,False,heuristic_assignment
+20,A,Core Drivers, How do you personally measure success?,Goals achieved and outcomes delivered,achievement,,heuristic_assignment,8.0,False,heuristic_assignment
+20,B,Core Drivers, How do you personally measure success?,Positive impact on people and business,influence,,heuristic_assignment,4.0,False,heuristic_assignment
+20,C,Core Drivers, How do you personally measure success?,Healthy relationships and low friction,stability,,heuristic_assignment,8.0,False,heuristic_assignment
+20,D,Core Drivers, How do you personally measure success?,High standards met without shortcuts,mastery,,heuristic_assignment,7.0,False,heuristic_assignment
+21,A,Core Drivers, What kind of work gives you energy?,Work where winning is clearly visible,achievement,,manual_override,3.0,False,manual_override
+21,B,Core Drivers, What kind of work gives you energy?,Work where I can energise others,influence,,manual_override,3.0,False,manual_override
+21,C,Core Drivers, What kind of work gives you energy?,Work where I can support the team,stability,,manual_override,2.0,False,manual_override
+21,D,Core Drivers, What kind of work gives you energy?,Work where I can solve complex problems,mastery,,manual_override,3.0,False,manual_override
+22,A,Core Drivers, What causes you to disengage from work?,Weak goals with no real consequence,achievement,,manual_override,1.0,True,manual_override; low-confidence or nuanced wording
+22,B,Core Drivers, What causes you to disengage from work?,My input is ignored repeatedly,influence,,manual_override,3.0,False,manual_override
+22,C,Core Drivers, What causes you to disengage from work?,Conflict stays unresolved and keeps spreading,stability,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+22,D,Core Drivers, What causes you to disengage from work?,Standards drop and nobody addresses it,mastery,,manual_override,4.0,False,manual_override
+23,A,Leadership Approach, What kind of leader do you respect most?,One who takes charge in tough moments,results,,heuristic_assignment,3.0,False,heuristic_assignment
+23,B,Leadership Approach, What kind of leader do you respect most?,"One who sets a clear, compelling direction",vision,,heuristic_assignment,7.0,False,heuristic_assignment
+23,C,Leadership Approach, What kind of leader do you respect most?,One who develops people with consistency,people,,heuristic_assignment,4.0,False,heuristic_assignment
+23,D,Leadership Approach, What kind of leader do you respect most?,One who brings clarity and sound judgement,process,,heuristic_assignment,7.0,False,heuristic_assignment
+24,A,Core Drivers, When do you feel most valued at work?,Given meaningful responsibility and trust,stability,,manual_override,7.0,False,manual_override
+24,B,Core Drivers, When do you feel most valued at work?,Asked for input on important calls,influence,,manual_override,3.0,False,manual_override
+24,C,Core Drivers, When do you feel most valued at work?,Included in conversations that affect me,achievement,influence,manual_override,3.0,False,manual_override; secondary=influence
+24,D,Core Drivers, When do you feel most valued at work?,Recognised for depth of expertise,mastery,,manual_override,7.0,False,manual_override
+25,A,Leadership Approach," In a team, what role do you naturally take?",Set direction and make key calls,results,process,manual_override,3.0,False,manual_override; secondary=process
+25,B,Leadership Approach," In a team, what role do you naturally take?",Connect people and keep momentum up,vision,,manual_override,3.0,False,manual_override
+25,C,Leadership Approach," In a team, what role do you naturally take?",Keep the team stable and coordinated,people,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+25,D,Leadership Approach," In a team, what role do you naturally take?",Go deep as the subject specialist,process,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+26,A,Environment Fit, Do you prefer working independently or with others?,Mostly independently with clear ownership,competitive,,heuristic_assignment,4.7,False,heuristic_assignment
+26,B,Environment Fit, Do you prefer working independently or with others?,Closely with others through active collaboration,collaborative,,heuristic_assignment,6.3,False,heuristic_assignment
+26,C,Environment Fit, Do you prefer working independently or with others?,With a stable team and clear norms,structured,collaborative,heuristic_assignment,1.35,True,heuristic_assignment; secondary=collaborative; low-confidence or nuanced wording
+26,D,Environment Fit, Do you prefer working independently or with others?,With people who challenge my thinking,creative,,heuristic_assignment,2.95,False,heuristic_assignment
+27,A,Tension Response," When you are left out of decisions, how do you respond?",Ask directly why I was excluded,compete,,manual_override,4.0,False,manual_override
+27,B,Tension Response," When you are left out of decisions, how do you respond?",Re-enter quickly and rebuild alignment,collaborate,,manual_override,4.0,False,manual_override
+27,C,Tension Response," When you are left out of decisions, how do you respond?",Step back and wait for a better moment,avoidance,compromise,manual_override,5.0,False,manual_override; secondary=compromise
+27,D,Tension Response," When you are left out of decisions, how do you respond?",Review what happened before responding,compromise,,manual_override,6.0,False,manual_override
+28,A,Core Drivers, What do you actively look for in your work?,Decision rights and real accountability,achievement,,heuristic_assignment,10.0,False,heuristic_assignment
+28,B,Core Drivers, What do you actively look for in your work?,Reach and influence across the business,influence,,heuristic_assignment,4.0,False,heuristic_assignment
+28,C,Core Drivers, What do you actively look for in your work?,Belonging and mutual trust,stability,,heuristic_assignment,10.0,False,heuristic_assignment
+28,D,Core Drivers, What do you actively look for in your work?,Mastery and strong capability growth,mastery,,heuristic_assignment,6.0,False,heuristic_assignment
+29,A,Tension Response,Think back to the last time you disagreed with a colleague. What approach did you take?,Push for my position and try to win,compete,,heuristic_assignment,8.0,False,heuristic_assignment
+29,B,Tension Response,Think back to the last time you disagreed with a colleague. What approach did you take?,Make my case until they come around,collaborate,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+29,C,Tension Response,Think back to the last time you disagreed with a colleague. What approach did you take?,Look for middle ground we can both accept,compromise,,heuristic_assignment,11.0,False,heuristic_assignment
+29,D,Tension Response,Think back to the last time you disagreed with a colleague. What approach did you take?,Step back to avoid making it worse,avoidance,,heuristic_assignment,8.0,False,heuristic_assignment
+30,A,Tension Response,Recall a time you were challenged in front of others. How did you respond in the moment?,Hold my ground and respond directly,compete,,manual_override,8.0,False,manual_override
+30,B,Tension Response,Recall a time you were challenged in front of others. How did you respond in the moment?,React quickly and show my frustration,collaborate,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+30,C,Tension Response,Recall a time you were challenged in front of others. How did you respond in the moment?,Lower the temperature before discussing details,compromise,,manual_override,4.0,False,manual_override
+30,D,Tension Response,Recall a time you were challenged in front of others. How did you respond in the moment?,Slow down and clarify what is factual,avoidance,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+31,A,Leadership Approach,"When someone on your team last underperformed, what did you do first?",Address the issue directly with them,results,,heuristic_assignment,3.0,False,heuristic_assignment
+31,B,Leadership Approach,"When someone on your team last underperformed, what did you do first?",Encourage them and reset expectations together,vision,people,heuristic_assignment,3.0,False,heuristic_assignment; secondary=people
+31,C,Leadership Approach,"When someone on your team last underperformed, what did you do first?",Offer support privately before escalating,people,,heuristic_assignment,10.0,False,heuristic_assignment
+31,D,Leadership Approach,"When someone on your team last underperformed, what did you do first?",Check whether process gaps caused the drop,process,,heuristic_assignment,7.0,False,heuristic_assignment
+32,A,Tension Response,Think of a situation where you chose not to engage in conflict. Why did you hold back?,The issue did not justify a fight,compromise,compete,manual_override,1.0,True,manual_override; secondary=compete; low-confidence or nuanced wording
+32,B,Tension Response,Think of a situation where you chose not to engage in conflict. Why did you hold back?,Preserving the relationship mattered more,collaborate,,manual_override,2.6,False,manual_override
+32,C,Tension Response,Think of a situation where you chose not to engage in conflict. Why did you hold back?,I worried it would become personal,avoidance,,manual_override,4.4,False,manual_override
+32,D,Tension Response,Think of a situation where you chose not to engage in conflict. Why did you hold back?,The argument was too weak to pursue,compete,avoidance,manual_override,4.4,False,manual_override; secondary=avoidance
+33,A,Tension Response,"In a recent disagreement, what strength did you rely on most?",Stayed direct even when it was uncomfortable,compete,,manual_override,7.0,False,manual_override
+33,B,Tension Response,"In a recent disagreement, what strength did you rely on most?",Framed the message to gain buy-in,collaborate,,manual_override,7.0,False,manual_override
+33,C,Tension Response,"In a recent disagreement, what strength did you rely on most?",Tried to understand their perspective first,compromise,collaborate,manual_override,7.0,False,manual_override; secondary=collaborate
+33,D,Tension Response,"In a recent disagreement, what strength did you rely on most?",Kept to facts and separated emotion,avoidance,compromise,manual_override,4.0,False,manual_override; secondary=compromise
+34,A,Tension Response,"Looking back, what is your most common mistake in conflict situations?",I push too hard to get my way,compete,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+34,B,Tension Response,"Looking back, what is your most common mistake in conflict situations?",I talk too much instead of listening,collaborate,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+34,C,Tension Response,"Looking back, what is your most common mistake in conflict situations?",I avoid it and hope it passes,avoidance,,heuristic_assignment,4.0,False,heuristic_assignment
+34,D,Tension Response,"Looking back, what is your most common mistake in conflict situations?",I overthink and respond too late,compromise,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+35,A,Pressure Response,"Under sustained pressure, what behaviour do you tend to fall into over time?",I become controlling and less trusting,control,,heuristic_assignment,4.0,False,heuristic_assignment
+35,B,Pressure Response,"Under sustained pressure, what behaviour do you tend to fall into over time?",I jump between issues and lose focus,scatter,,heuristic_assignment,4.0,False,heuristic_assignment
+35,C,Pressure Response,"Under sustained pressure, what behaviour do you tend to fall into over time?",I avoid hard conversations for too long,withdrawal,,heuristic_assignment,4.0,False,heuristic_assignment
+35,D,Pressure Response,"Under sustained pressure, what behaviour do you tend to fall into over time?",I become overly critical of others,critical,,heuristic_assignment,4.0,False,heuristic_assignment
+36,A,Pressure Response,"When you last felt overwhelmed at work, what did you do first?",I took over tasks instead of delegating,control,,heuristic_assignment,3.0,False,heuristic_assignment
+36,B,Pressure Response,"When you last felt overwhelmed at work, what did you do first?",I talked it through with too many people,scatter,,heuristic_assignment,4.0,False,heuristic_assignment
+36,C,Pressure Response,"When you last felt overwhelmed at work, what did you do first?",I pulled back and reduced communication,withdrawal,,heuristic_assignment,7.0,False,heuristic_assignment
+36,D,Pressure Response,"When you last felt overwhelmed at work, what did you do first?",I kept analysing instead of deciding,critical,,heuristic_assignment,3.0,False,heuristic_assignment
+37,A,Tension Response,Think of a time when trust was broken. How did you respond?,I reacted before I had the full picture,compete,,manual_override,3.0,False,manual_override
+37,B,Tension Response,Think of a time when trust was broken. How did you respond?,I voiced frustration immediately and strongly,collaborate,compete,manual_override,3.0,False,manual_override; secondary=compete
+37,C,Tension Response,Think of a time when trust was broken. How did you respond?,I kept it to myself and stewed,compromise,avoidance,manual_override,6.0,False,manual_override; secondary=avoidance
+37,D,Tension Response,Think of a time when trust was broken. How did you respond?,I stayed polite but became emotionally distant,avoidance,,manual_override,4.0,False,manual_override
+38,A,Pressure Response,How might someone who has worked closely with you describe you under pressure?,More intense and harder to approach,control,,heuristic_assignment,4.0,False,heuristic_assignment
+38,B,Pressure Response,How might someone who has worked closely with you describe you under pressure?,More reactive and emotionally visible,scatter,,heuristic_assignment,8.0,False,heuristic_assignment
+38,C,Pressure Response,How might someone who has worked closely with you describe you under pressure?,Quieter and slower to engage,withdrawal,,heuristic_assignment,7.0,False,heuristic_assignment
+38,D,Pressure Response,How might someone who has worked closely with you describe you under pressure?,Detached and focused only on facts,critical,,heuristic_assignment,4.0,False,heuristic_assignment
+39,A,Pressure Response,"Looking back, what blind spot shows up most often in your behaviour?",I rush people when progress feels slow,control,,heuristic_assignment,4.0,False,heuristic_assignment
+39,B,Pressure Response,"Looking back, what blind spot shows up most often in your behaviour?",I assume things will work out too easily,scatter,,heuristic_assignment,3.0,False,heuristic_assignment
+39,C,Pressure Response,"Looking back, what blind spot shows up most often in your behaviour?",I sidestep tension instead of addressing it,withdrawal,,heuristic_assignment,3.0,False,heuristic_assignment
+39,D,Pressure Response,"Looking back, what blind spot shows up most often in your behaviour?",I chase perfect instead of good enough,critical,,heuristic_assignment,4.0,False,heuristic_assignment
+40,A,Pressure Response,"When you feel under threat or exposed, what is your instinctive reaction?",Go on the offensive and push back hard,control,,manual_override,8.0,False,manual_override
+40,B,Pressure Response,"When you feel under threat or exposed, what is your instinctive reaction?",Justify myself and protect my position,scatter,,manual_override,6.0,False,manual_override
+40,C,Pressure Response,"When you feel under threat or exposed, what is your instinctive reaction?",Shut down and struggle to respond,withdrawal,,manual_override,3.0,False,manual_override
+40,D,Pressure Response,"When you feel under threat or exposed, what is your instinctive reaction?",Overanalyse every possible downside,critical,,manual_override,7.0,False,manual_override
+41,A,Operating Style, How do you generally view risk?,A chance worth taking if upside is strong,driver,,heuristic_assignment,6.0,False,heuristic_assignment
+41,B,Operating Style, How do you generally view risk?,Necessary if the mission is worth it,influencer,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+41,C,Operating Style, How do you generally view risk?,Fine when exposure is understood and managed,implementer,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+41,D,Operating Style, How do you generally view risk?,A threat unless controls are in place,analyst,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+42,A,Operating Style, What kind of decisions do you prefer to make?,Quick calls with limited delay,driver,,heuristic_assignment,4.0,False,heuristic_assignment
+42,B,Operating Style, What kind of decisions do you prefer to make?,Shared calls with key people aligned,influencer,,heuristic_assignment,14.0,False,heuristic_assignment
+42,C,Operating Style, What kind of decisions do you prefer to make?,Low-risk calls with predictable outcomes,implementer,,heuristic_assignment,3.0,False,heuristic_assignment
+42,D,Operating Style, What kind of decisions do you prefer to make?,Evidence-led calls with clear assumptions tested,analyst,,heuristic_assignment,11.0,False,heuristic_assignment
+43,A,Operating Style,Think of a recent high-stakes decision. What did you prioritise most?,Move fast to keep options open,driver,,heuristic_assignment,5.05,False,heuristic_assignment
+43,B,Operating Style,Think of a recent high-stakes decision. What did you prioritise most?,Build alignment so execution holds,influencer,,heuristic_assignment,5.95,False,heuristic_assignment
+43,C,Operating Style,Think of a recent high-stakes decision. What did you prioritise most?,Protect stability and avoid major disruption,implementer,,heuristic_assignment,1.95,False,heuristic_assignment
+43,D,Operating Style,Think of a recent high-stakes decision. What did you prioritise most?,Compare scenarios before committing resources,analyst,,heuristic_assignment,1.95,False,heuristic_assignment
+44,A,Operating Style,"When you last had to make a judgement call, what did you trust most?",Pattern recognition and lived judgement,driver,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+44,B,Operating Style,"When you last had to make a judgement call, what did you trust most?",Input from people I trust,influencer,,heuristic_assignment,8.0,False,heuristic_assignment
+44,C,Operating Style,"When you last had to make a judgement call, what did you trust most?",What keeps the system stable,implementer,,heuristic_assignment,4.0,False,heuristic_assignment
+44,D,Operating Style,"When you last had to make a judgement call, what did you trust most?",Data quality and decision evidence,analyst,,heuristic_assignment,8.0,False,heuristic_assignment
+45,A,Operating Style, What level of uncertainty are you comfortable with?,High uncertainty with big upside potential,driver,,heuristic_assignment,3.0,False,heuristic_assignment
+45,B,Operating Style, What level of uncertainty are you comfortable with?,Frequent change with room to adapt,influencer,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+45,C,Operating Style, What level of uncertainty are you comfortable with?,Moderate uncertainty with clear guardrails,implementer,analyst,heuristic_assignment,0.0,True,heuristic_assignment; secondary=analyst; low-confidence or nuanced wording
+45,D,Operating Style, What level of uncertainty are you comfortable with?,Low uncertainty with strong structure,analyst,,heuristic_assignment,3.0,False,heuristic_assignment
+46,A,Leadership Approach, What is the primary responsibility of a leader?,Set direction and deliver measurable results,results,,heuristic_assignment,10.0,False,heuristic_assignment
+46,B,Leadership Approach, What is the primary responsibility of a leader?,Create belief people want to follow,vision,,heuristic_assignment,6.0,False,heuristic_assignment
+46,C,Leadership Approach, What is the primary responsibility of a leader?,Grow people so the team gets stronger,people,,heuristic_assignment,8.0,False,heuristic_assignment
+46,D,Leadership Approach, What is the primary responsibility of a leader?,Build systems that scale reliably,process,,heuristic_assignment,8.0,False,heuristic_assignment
+47,A,Leadership Approach, How should poor performance be handled?,Set clear consequences and raise expectations,results,,manual_override,1.4,True,manual_override; low-confidence or nuanced wording
+47,B,Leadership Approach, How should poor performance be handled?,Reconnect effort to purpose and momentum,vision,,manual_override,6.6,False,manual_override
+47,C,Leadership Approach, How should poor performance be handled?,Coach directly and remove blockers,people,,manual_override,1.4,True,manual_override; low-confidence or nuanced wording
+47,D,Leadership Approach, How should poor performance be handled?,Fix process issues driving the problem,process,,manual_override,2.6,False,manual_override
+48,A,Leadership Approach, How do you naturally lead others?,By setting direction and making decisions,results,,manual_override,1.0,True,manual_override; low-confidence or nuanced wording
+48,B,Leadership Approach, How do you naturally lead others?,By creating energy and visible momentum,vision,,manual_override,11.0,False,manual_override
+48,C,Leadership Approach, How do you naturally lead others?,By supporting people through pressure,people,,manual_override,2.0,False,manual_override
+48,D,Leadership Approach, How do you naturally lead others?,By bringing expertise to hard problems,process,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+49,A,Leadership Approach, What is the role of authority in organisations?,Authority should be used decisively when needed,results,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+49,B,Leadership Approach, What is the role of authority in organisations?,Authority should be earned through trust,vision,people,manual_override,4.0,False,manual_override; secondary=people
+49,C,Leadership Approach, What is the role of authority in organisations?,Authority should be shared where possible,people,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+49,D,Leadership Approach, What is the role of authority in organisations?,Authority should be clear in the structure,process,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+50,A,Leadership Approach, When do you feel most confident leading?,In a crisis that needs fast calls,results,,manual_override,7.0,False,manual_override
+50,B,Leadership Approach, When do you feel most confident leading?,In growth phases that need energy,vision,,manual_override,6.0,False,manual_override
+50,C,Leadership Approach, When do you feel most confident leading?,In steady periods that need consistency,people,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+50,D,Leadership Approach, When do you feel most confident leading?,In complex situations needing careful judgement,process,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+51,A,Environment Fit, What does an ideal working culture look like to you?,High-performance culture with clear accountability,competitive,,heuristic_assignment,11.0,False,heuristic_assignment
+51,B,Environment Fit, What does an ideal working culture look like to you?,Creative culture that rewards experimentation,creative,,heuristic_assignment,11.0,False,heuristic_assignment
+51,C,Environment Fit, What does an ideal working culture look like to you?,Collaborative culture with strong trust,collaborative,,heuristic_assignment,8.0,False,heuristic_assignment
+51,D,Environment Fit, What does an ideal working culture look like to you?,Structured culture with clear standards,structured,,heuristic_assignment,8.0,False,heuristic_assignment
+52,A,Environment Fit, How should success be measured in an organisation?,Strong financial results and margin discipline,competitive,,manual_override,7.0,False,manual_override
+52,B,Environment Fit, How should success be measured in an organisation?,Sustainable growth in capability and reach,creative,,manual_override,3.0,False,manual_override
+52,C,Environment Fit, How should success be measured in an organisation?,Healthy engagement and low team friction,collaborative,,manual_override,7.0,False,manual_override
+52,D,Environment Fit, How should success be measured in an organisation?,Operational efficiency and consistent delivery,structured,,manual_override,8.0,False,manual_override
+53,A,Environment Fit, What should culture prioritise above all else?,High standards and measurable performance,competitive,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+53,B,Environment Fit, What should culture prioritise above all else?,Experimentation that leads to real learning,creative,,manual_override,4.0,False,manual_override
+53,C,Environment Fit, What should culture prioritise above all else?,"Belonging, trust, and psychological safety",collaborative,,manual_override,4.0,False,manual_override
+53,D,Environment Fit, What should culture prioritise above all else?,Consistency in how work gets done,structured,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+54,A,Leadership Approach, How should accountability show up in a team?,Expectations are explicit and hard to ignore,results,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+54,B,Leadership Approach, How should accountability show up in a team?,People own outcomes because purpose is clear,vision,,manual_override,3.0,False,manual_override
+54,C,Leadership Approach, How should accountability show up in a team?,Accountability is fair and applied evenly,people,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+54,D,Leadership Approach, How should accountability show up in a team?,Progress is measured with clear metrics,process,,manual_override,7.0,False,manual_override
+55,A,Environment Fit, What kind of culture do you struggle in?,Slow cultures where decisions drag on,competitive,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+55,B,Environment Fit, What kind of culture do you struggle in?,Risk-averse cultures that reject new ideas,creative,,manual_override,4.0,False,manual_override
+55,C,Environment Fit, What kind of culture do you struggle in?,Harsh cultures that normalise blame,collaborative,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+55,D,Environment Fit, What kind of culture do you struggle in?,Chaotic cultures with no clear process,structured,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+56,A,Environment Fit, What type of role suits you best?,Owning commercial outcomes across teams,competitive,,manual_override,1.0,True,manual_override; low-confidence or nuanced wording
+56,B,Environment Fit, What type of role suits you best?,Building partnerships and opening opportunities,collaborative,,manual_override,4.0,False,manual_override
+56,C,Environment Fit, What type of role suits you best?,Running operations with reliability and pace,structured,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+56,D,Environment Fit, What type of role suits you best?,Solving specialist problems with deep expertise,creative,,manual_override,3.0,False,manual_override
+57,A,Operating Style, Where does your natural strength lie?,Driving change when momentum is needed,driver,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+57,B,Operating Style, Where does your natural strength lie?,Influencing people across functions and levels,influencer,,heuristic_assignment,7.0,False,heuristic_assignment
+57,C,Operating Style, Where does your natural strength lie?,Keeping delivery stable during disruption,implementer,,heuristic_assignment,4.0,False,heuristic_assignment
+57,D,Operating Style, Where does your natural strength lie?,Analysing complexity and finding clear patterns,analyst,,heuristic_assignment,3.0,False,heuristic_assignment
+58,A,Environment Fit, In what kind of environment do you thrive?,Stretch goals with clear accountability,competitive,,manual_override,11.0,False,manual_override
+58,B,Environment Fit, In what kind of environment do you thrive?,Strong relationships that move work forward,collaborative,,manual_override,1.0,True,manual_override; low-confidence or nuanced wording
+58,C,Environment Fit, In what kind of environment do you thrive?,Predictable environment with minimal surprises,structured,,manual_override,3.0,False,manual_override
+58,D,Environment Fit, In what kind of environment do you thrive?,Clear systems that support quality execution,creative,structured,manual_override,5.0,False,manual_override; secondary=structured
+59,A,Core Drivers, What is the greatest value you bring to a company?,Creating momentum when progress stalls,achievement,,heuristic_assignment,3.0,False,heuristic_assignment
+59,B,Core Drivers, What is the greatest value you bring to a company?,Building engagement that lifts team effort,influence,,heuristic_assignment,3.0,False,heuristic_assignment
+59,C,Core Drivers, What is the greatest value you bring to a company?,Delivering reliably under pressure,stability,,heuristic_assignment,3.0,False,heuristic_assignment
+59,D,Core Drivers, What is the greatest value you bring to a company?,Bringing precision to important decisions,mastery,,heuristic_assignment,4.0,False,heuristic_assignment
+60,A,Operating Style,Think of a time when progress stalled on something important. What did you do next?,Tightened priorities and pushed faster decisions,driver,,heuristic_assignment,6.0,False,heuristic_assignment
+60,B,Operating Style,Think of a time when progress stalled on something important. What did you do next?,Reframed the goal and re-energised people,influencer,,heuristic_assignment,7.0,False,heuristic_assignment
+60,C,Operating Style,Think of a time when progress stalled on something important. What did you do next?,Stabilised workload and reduced extra disruption,implementer,,heuristic_assignment,3.0,False,heuristic_assignment
+60,D,Operating Style,Think of a time when progress stalled on something important. What did you do next?,Reworked the plan and challenged assumptions,analyst,implementer,heuristic_assignment,0.0,True,heuristic_assignment; secondary=implementer; low-confidence or nuanced wording
+61,A,Tension Response,"When someone strongly challenged your idea recently, how did you respond?",Defended my view and argued my case,compete,,manual_override,4.0,False,manual_override
+61,B,Tension Response,"When someone strongly challenged your idea recently, how did you respond?",Reframed it to build broader support,collaborate,,manual_override,3.0,False,manual_override
+61,C,Tension Response,"When someone strongly challenged your idea recently, how did you respond?",Lowered tension so we could keep talking,compromise,collaborate,manual_override,4.0,False,manual_override; secondary=collaborate
+61,D,Tension Response,"When someone strongly challenged your idea recently, how did you respond?",Tested their reasoning before responding,avoidance,compromise,manual_override,3.0,False,manual_override; secondary=compromise
+62,A,Leadership Approach," In high-performing teams, what matters most to you?",Clear momentum and disciplined execution,results,vision,heuristic_assignment,2.0,False,heuristic_assignment; secondary=vision
+62,B,Leadership Approach," In high-performing teams, what matters most to you?",Shared energy and belief in the mission,vision,,heuristic_assignment,8.0,False,heuristic_assignment
+62,C,Leadership Approach," In high-performing teams, what matters most to you?","Trust, cohesion, and mutual support",people,,heuristic_assignment,14.0,False,heuristic_assignment
+62,D,Leadership Approach," In high-performing teams, what matters most to you?",High standards and technical precision,process,,heuristic_assignment,7.0,False,heuristic_assignment
+63,A,Operating Style,"When a project you were involved in started to drift, what did you do?",Stepped in directly and reset direction,driver,,manual_override,4.0,False,manual_override
+63,B,Operating Style,"When a project you were involved in started to drift, what did you do?",Influenced key people to regain traction,influencer,,manual_override,9.0,False,manual_override
+63,C,Operating Style,"When a project you were involved in started to drift, what did you do?",Brought people together to re-align,implementer,influencer,manual_override,8.0,False,manual_override; secondary=influencer
+63,D,Operating Style,"When a project you were involved in started to drift, what did you do?",Tightened process and clarified decision points,analyst,implementer,manual_override,4.0,False,manual_override; secondary=implementer
+64,A,Operating Style,Think of a risky opportunity you evaluated recently. What did you focus on most?,Potential upside if execution went well,driver,,heuristic_assignment,3.0,False,heuristic_assignment
+64,B,Operating Style,Think of a risky opportunity you evaluated recently. What did you focus on most?,Whether the story would attract support,influencer,,heuristic_assignment,1.0,True,heuristic_assignment; low-confidence or nuanced wording
+64,C,Operating Style,Think of a risky opportunity you evaluated recently. What did you focus on most?,Effects on people and team stability,implementer,influencer,heuristic_assignment,1.0,True,heuristic_assignment; secondary=influencer; low-confidence or nuanced wording
+64,D,Operating Style,Think of a risky opportunity you evaluated recently. What did you focus on most?,Evidence strength and probability of success,analyst,,heuristic_assignment,7.0,False,heuristic_assignment
+65,A,Tension Response,"When someone disagreed with you privately, how did you handle it?",Stated my decision and expected alignment,compete,,manual_override,2.0,False,manual_override
+65,B,Tension Response,"When someone disagreed with you privately, how did you handle it?",Worked to win them over to my view,collaborate,,manual_override,1.0,True,manual_override; low-confidence or nuanced wording
+65,C,Tension Response,"When someone disagreed with you privately, how did you handle it?",Explored their concerns before deciding next,compromise,,manual_override,3.0,False,manual_override
+65,D,Tension Response,"When someone disagreed with you privately, how did you handle it?",Compared assumptions and logic together,avoidance,collaborate,manual_override,4.0,False,manual_override; secondary=collaborate
+66,A,Leadership Approach, Why do organisations fail when they grow quickly?,Decision rights get blurred and contested,results,,heuristic_assignment,2.65,False,heuristic_assignment
+66,B,Leadership Approach, Why do organisations fail when they grow quickly?,The original vision gets diluted over time,vision,,heuristic_assignment,2.65,False,heuristic_assignment
+66,C,Leadership Approach, Why do organisations fail when they grow quickly?,Culture fractures across teams and layers,people,,heuristic_assignment,0.35,True,heuristic_assignment; low-confidence or nuanced wording
+66,D,Leadership Approach, Why do organisations fail when they grow quickly?,Core systems fail under added scale,process,,heuristic_assignment,1.65,True,heuristic_assignment; low-confidence or nuanced wording
+67,A,Pressure Response,"In a recent emotionally charged situation, how did you behave?",Became more forceful to regain control,control,,manual_override,7.0,False,manual_override
+67,B,Pressure Response,"In a recent emotionally charged situation, how did you behave?",Became more expressive and talked it through,scatter,,manual_override,3.0,False,manual_override
+67,C,Pressure Response,"In a recent emotionally charged situation, how did you behave?",Focused on calming people before solving,withdrawal,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+67,D,Pressure Response,"In a recent emotionally charged situation, how did you behave?",Shifted into analysis to avoid reacting,critical,,manual_override,2.0,False,manual_override
+68,A,Tension Response,Think of a difficult conversation you had. What did you prioritise?,Said the hard thing clearly and early,compete,,manual_override,3.0,False,manual_override
+68,B,Tension Response,Think of a difficult conversation you had. What did you prioritise?,Framed it to keep them engaged,compromise,collaborate,manual_override,3.0,False,manual_override; secondary=collaborate
+68,C,Tension Response,Think of a difficult conversation you had. What did you prioritise?,Protected the relationship while raising the issue,collaborate,compromise,manual_override,4.0,False,manual_override; secondary=compromise
+68,D,Tension Response,Think of a difficult conversation you had. What did you prioritise?,Kept to facts and avoided exaggeration,avoidance,compromise,manual_override,3.0,False,manual_override; secondary=compromise
+69,A,Pressure Response,"When a decision you made turned out to be wrong, what did you do next?",Owned it quickly and corrected course,control,,manual_override,3.0,False,manual_override
+69,B,Pressure Response,"When a decision you made turned out to be wrong, what did you do next?",Rebuilt commitment so people stayed engaged,scatter,,manual_override,3.0,False,manual_override
+69,C,Pressure Response,"When a decision you made turned out to be wrong, what did you do next?",Protected morale while we reset,withdrawal,,manual_override,4.0,False,manual_override
+69,D,Pressure Response,"When a decision you made turned out to be wrong, what did you do next?",Investigated root causes before the next move,critical,,manual_override,4.0,False,manual_override
+70,A,Environment Fit,"When you joined a new team or organisation, what did you try to understand first?",Who makes the final calls here,competitive,,heuristic_assignment,0.35,True,heuristic_assignment; low-confidence or nuanced wording
+70,B,Environment Fit,"When you joined a new team or organisation, what did you try to understand first?",Who really shapes decisions informally,creative,,heuristic_assignment,0.35,True,heuristic_assignment; low-confidence or nuanced wording
+70,C,Environment Fit,"When you joined a new team or organisation, what did you try to understand first?",How trust and relationships actually work,collaborative,,heuristic_assignment,8.35,False,heuristic_assignment
+70,D,Environment Fit,"When you joined a new team or organisation, what did you try to understand first?",How the core systems run,structured,,heuristic_assignment,3.65,False,heuristic_assignment
+71,A,Leadership Approach, When are you most effective as a leader?,When clear performance lift is needed,results,,manual_override,4.0,False,manual_override
+71,B,Leadership Approach, When are you most effective as a leader?,When people need confidence and direction,vision,people,manual_override,3.0,False,manual_override; secondary=people
+71,C,Leadership Approach, When are you most effective as a leader?,When the team needs steadiness and trust,people,,manual_override,4.0,False,manual_override
+71,D,Leadership Approach, When are you most effective as a leader?,When problems require deep expert judgement,process,,manual_override,3.0,False,manual_override
+72,A,Operating Style,"When you last faced competing priorities, how did you decide?",Chose the fastest route to impact,driver,,heuristic_assignment,3.0,False,heuristic_assignment
+72,B,Operating Style,"When you last faced competing priorities, how did you decide?",Aligned key stakeholders before committing,influencer,,heuristic_assignment,8.0,False,heuristic_assignment
+72,C,Operating Style,"When you last faced competing priorities, how did you decide?",Sought broad agreement before moving ahead,implementer,,heuristic_assignment,0.0,True,heuristic_assignment; low-confidence or nuanced wording
+72,D,Operating Style,"When you last faced competing priorities, how did you decide?",Weighed downstream effects before deciding,analyst,,heuristic_assignment,3.0,False,heuristic_assignment
+73,A,Operating Style, What does uncertainty in an organisation usually indicate to you?,A window to move before others do,driver,,heuristic_assignment,4.0,False,heuristic_assignment
+73,B,Operating Style, What does uncertainty in an organisation usually indicate to you?,A moment to rally people around change,influencer,,heuristic_assignment,7.0,False,heuristic_assignment
+73,C,Operating Style, What does uncertainty in an organisation usually indicate to you?,A warning sign that needs stabilising,implementer,,heuristic_assignment,3.0,False,heuristic_assignment
+73,D,Operating Style, What does uncertainty in an organisation usually indicate to you?,A complex problem to map carefully,analyst,,heuristic_assignment,4.0,False,heuristic_assignment
+74,A,Leadership Approach, What is the most damaging behaviour a leader can display?,Avoiding decisions when clarity is needed,results,process,manual_override,4.0,False,manual_override; secondary=process
+74,B,Leadership Approach, What is the most damaging behaviour a leader can display?,Making it about ego over outcomes,vision,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+74,C,Leadership Approach, What is the most damaging behaviour a leader can display?,Losing touch with team reality,people,,manual_override,3.0,False,manual_override
+74,D,Leadership Approach, What is the most damaging behaviour a leader can display?,Repeated poor judgement on key calls,process,results,manual_override,0.0,True,manual_override; secondary=results; low-confidence or nuanced wording
+75,A,Pressure Response,"When outcomes really mattered, how did you operate differently (if at all)?",Increased pressure and tightened deadlines,control,,heuristic_assignment,6.0,False,heuristic_assignment
+75,B,Pressure Response,"When outcomes really mattered, how did you operate differently (if at all)?",Increased communication and visibility,scatter,,heuristic_assignment,6.0,False,heuristic_assignment
+75,C,Pressure Response,"When outcomes really mattered, how did you operate differently (if at all)?",Increased support and removed friction,withdrawal,,heuristic_assignment,3.0,False,heuristic_assignment
+75,D,Pressure Response,"When outcomes really mattered, how did you operate differently (if at all)?",Increased analysis before major calls,critical,,heuristic_assignment,6.0,False,heuristic_assignment
+76,A,Environment Fit, What do the best organisations consistently get right?,They compete hard and keep standards high,competitive,,manual_override,1.65,False,manual_override
+76,B,Environment Fit, What do the best organisations consistently get right?,They keep people inspired by clear purpose,creative,,manual_override,3.65,False,manual_override
+76,C,Environment Fit, What do the best organisations consistently get right?,They stay cohesive when pressure rises,collaborative,,manual_override,0.35,True,manual_override; low-confidence or nuanced wording
+76,D,Environment Fit, What do the best organisations consistently get right?,They run strong systems consistently,structured,,manual_override,5.35,False,manual_override
+77,A,Operating Style," When data conflicts with your instinct, what do you do?","Back my instinct, then validate quickly",driver,,heuristic_assignment,6.65,False,heuristic_assignment
+77,B,Operating Style," When data conflicts with your instinct, what do you do?",Get more viewpoints before committing,influencer,,heuristic_assignment,0.35,True,heuristic_assignment; low-confidence or nuanced wording
+77,C,Operating Style," When data conflicts with your instinct, what do you do?",Pause and test where bias may exist,implementer,,heuristic_assignment,0.35,True,heuristic_assignment; low-confidence or nuanced wording
+77,D,Operating Style," When data conflicts with your instinct, what do you do?",Follow the evidence even if uncomfortable,analyst,,heuristic_assignment,7.35,False,heuristic_assignment
+78,A,Pressure Response," When organisations go through change, what is your instinct?",Push change fast and remove blockers,control,,heuristic_assignment,4.0,False,heuristic_assignment
+78,B,Pressure Response," When organisations go through change, what is your instinct?",Explain the vision until it lands,scatter,,heuristic_assignment,4.0,False,heuristic_assignment
+78,C,Pressure Response," When organisations go through change, what is your instinct?",Protect core stability during transition,withdrawal,,heuristic_assignment,4.0,False,heuristic_assignment
+78,D,Pressure Response," When organisations go through change, what is your instinct?",Design the transition step by step,critical,,heuristic_assignment,6.0,False,heuristic_assignment
+79,A,Environment Fit, What kind of behaviour should organisations reward most?,Behaviours that deliver wins consistently,competitive,,manual_override,2.0,False,manual_override
+79,B,Environment Fit, What kind of behaviour should organisations reward most?,Behaviours that build influence and momentum,creative,,manual_override,0.0,True,manual_override; low-confidence or nuanced wording
+79,C,Environment Fit, What kind of behaviour should organisations reward most?,Behaviours that strengthen trust and loyalty,collaborative,,manual_override,7.0,False,manual_override
+79,D,Environment Fit, What kind of behaviour should organisations reward most?,Behaviours that show strong competence,structured,creative,manual_override,4.0,False,manual_override; secondary=creative
+80,A,Core Drivers," When evaluating people, what do you value most?",Results delivered against clear goals,achievement,,heuristic_assignment,8.0,False,heuristic_assignment
+80,B,Core Drivers," When evaluating people, what do you value most?",Influence created across key stakeholders,influence,,heuristic_assignment,5.0,False,heuristic_assignment
+80,C,Core Drivers," When evaluating people, what do you value most?",Relationships maintained under pressure,stability,,heuristic_assignment,4.0,False,heuristic_assignment
+80,D,Core Drivers," When evaluating people, what do you value most?",Quality of thinking behind decisions,mastery,,heuristic_assignment,4.0,False,heuristic_assignment

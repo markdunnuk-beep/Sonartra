@@ -1,0 +1,321 @@
+question_number,option_label,domain,question_text,response_text,primary_signal,secondary_signal,needs_review,notes
+1,A,Operating Style,"When starting a new initiative, what do you focus on first?","Start quickly, then adjust as I learn",driver,,false,Primary driver via start quickly; quick.
+1,B,Operating Style,"When starting a new initiative, what do you focus on first?",Plan the full approach before starting,implementer,,false,Primary implementer via plan the full approach; plan.
+1,C,Operating Style,"When starting a new initiative, what do you focus on first?",Check with key people before moving,influencer,,false,Primary influencer via check with key people; people; people.
+1,D,Operating Style,"When starting a new initiative, what do you focus on first?",Wait until direction is fully clear,analyst,,false,Primary analyst via wait until direction is fully clear.
+2,A,Operating Style,How would you describe your natural pace at work?,I work fast and keep urgency high,driver,,false,Primary driver via keep urgency high; fast; fast.
+2,B,Operating Style,How would you describe your natural pace at work?,"I keep a steady, reliable pace",implementer,,false,"Primary implementer via steady, reliable pace; reliable pace; steady."
+2,C,Operating Style,How would you describe your natural pace at work?,I work calmly and think things through,analyst,,false,Primary analyst via work calmly and think things through.
+2,D,Operating Style,How would you describe your natural pace at work?,My pace shifts with the environment,implementer,driver,false,"Primary implementer, secondary driver via pace shifts with the environment."
+3,A,Operating Style,"When priorities shift suddenly, what is your instinct?",I pivot quickly and keep moving,driver,,false,Primary driver via pivot quickly; keep moving; quick.
+3,B,Operating Style,"When priorities shift suddenly, what is your instinct?",I pause to rework the plan,analyst,,false,Primary analyst via pause to rework the plan.
+3,C,Operating Style,"When priorities shift suddenly, what is your instinct?",I check who will be affected first,influencer,,false,Primary influencer via check who will be affected.
+3,D,Operating Style,"When priorities shift suddenly, what is your instinct?",I lose momentum until things settle,driver,,false,Primary driver via lose momentum.
+4,A,Operating Style,What type of work do you naturally gravitate towards?,High-stakes work with visible outcomes,driver,,false,Primary driver via high-stakes work; visible outcomes.
+4,B,Operating Style,What type of work do you naturally gravitate towards?,Work with clear structure and scope,implementer,,false,Primary implementer via work with clear structure; structure; struct.
+4,C,Operating Style,What type of work do you naturally gravitate towards?,Work that depends on strong collaboration,influencer,,false,Primary influencer via strong collaboration; collaboration; collabor.
+4,D,Operating Style,What type of work do you naturally gravitate towards?,Technical work that needs deep analysis,analyst,,false,Primary analyst via technical work that needs deep analysis; deep analysis; analysis.
+5,A,Operating Style,"When there is little clarity, what do you do first?",Pick a direction and move forward,driver,,false,Primary driver via pick a direction; move forward; direct.
+5,B,Operating Style,"When there is little clarity, what do you do first?",Gather more information before committing,analyst,,false,Primary analyst via gather more information; inform.
+5,C,Operating Style,"When there is little clarity, what do you do first?",Check with others before deciding,influencer,,false,Primary influencer via check with others; others; other.
+5,D,Operating Style,"When there is little clarity, what do you do first?",Hold the line until things stabilise,implementer,,false,Primary implementer via hold the line; stabilise; stabil.
+6,A,Operating Style,"When working on something important, how do you handle detail?",I prioritise speed over fine detail,driver,,false,Primary driver via prioritise speed; speed.
+6,B,Operating Style,"When working on something important, how do you handle detail?",I balance detail with delivery speed,implementer,,true,Three or more in-domain signals matched the wording.
+6,C,Operating Style,"When working on something important, how do you handle detail?",I go deep on details early,analyst,,false,Primary analyst via go deep on details early; details; detail.
+6,D,Operating Style,"When working on something important, how do you handle detail?",I hand off detail work when possible,analyst,,true,Primary assigned with limited evidence and no clear secondary signal.
+7,A,Operating Style,"When receiving feedback, what is your immediate reaction?",I use it to improve quickly,driver,,false,Primary driver via improve quickly; quick.
+7,B,Operating Style,"When receiving feedback, what is your immediate reaction?",I turn it into a better plan,implementer,,false,Primary implementer via turn it into a better plan; plan.
+7,C,Operating Style,"When receiving feedback, what is your immediate reaction?",I take it personally at first,influencer,,false,Primary influencer via take it personally at first.
+7,D,Operating Style,"When receiving feedback, what is your immediate reaction?",I need clear evidence to accept it,analyst,,false,Primary analyst via need clear evidence; evidence; evid.
+8,A,Operating Style,"When making decisions, what do you rely on most?",Quick judgement from experience and pace,driver,,false,Primary driver via quick judgement; quick; pace.
+8,B,Operating Style,"When making decisions, what do you rely on most?","Mix instinct, input, and available facts",implementer,,false,"Primary implementer via mix instinct, input, and available facts."
+8,C,Operating Style,"When making decisions, what do you rely on most?",Slow down to avoid costly mistakes,analyst,,false,Primary analyst via slow down to avoid costly mistakes; mistak.
+8,D,Operating Style,"When making decisions, what do you rely on most?","Evidence, patterns, and hard data",analyst,,false,"Primary analyst via evidence, patterns, and hard data; evidence; data."
+9,A,Operating Style,"In meetings, how do you usually contribute?",Set direction and keep discussion focused,driver,,false,Primary driver via set direction; direct.
+9,B,Operating Style,"In meetings, how do you usually contribute?",Generate options and build momentum,influencer,,false,Primary influencer via build momentum.
+9,C,Operating Style,"In meetings, how do you usually contribute?",Support others and draw quieter voices in,influencer,,false,Primary influencer via support others; draw quieter voices in; others.
+9,D,Operating Style,"In meetings, how do you usually contribute?",Test ideas by challenging assumptions,analyst,,false,Primary analyst via challenging assumptions.
+10,A,Operating Style,How would others describe your communication style?,Direct and concise,driver,,false,Primary driver via direct and concise; direct; direct.
+10,B,Operating Style,How would others describe your communication style?,Persuasive and expressive,influencer,,false,Primary influencer via persuasive and expressive; persuasive; expressive.
+10,C,Operating Style,How would others describe your communication style?,Patient and empathetic,implementer,,false,Primary implementer via patient and empathetic; patient; patient.
+10,D,Operating Style,How would others describe your communication style?,Precise and factual,analyst,,true,Primary assigned with limited evidence and no clear secondary signal.
+11,A,Leadership Approach,"When leading a project, where does your focus go first?",Set ambitious targets and clear ownership,results,,false,Primary results via ambitious targets; clear ownership; targets.
+11,B,Leadership Approach,"When leading a project, where does your focus go first?",Build energy and commitment around the work,vision,,false,Primary vision via build energy and commitment around the work; build energy and commitment; energy.
+11,C,Leadership Approach,"When leading a project, where does your focus go first?",Make sure everyone is heard and included,people,,false,Primary people via everyone is heard and included; make sure everyone is heard and included; heard and included.
+11,D,Leadership Approach,"When leading a project, where does your focus go first?",Build a solid system with clear standards,process,,false,Primary process via solid system with clear standards; clear standards; system.
+12,A,Pressure Response,"Under tight time pressure, how do you operate?",Raise intensity and push through bottlenecks,control,,false,Primary control via raise intensity and push; intensity; intens.
+12,B,Pressure Response,"Under tight time pressure, how do you operate?",Keep people motivated and moving together,scatter,,false,Primary scatter via keep people motivated and moving; moving; moving.
+12,C,Pressure Response,"Under tight time pressure, how do you operate?",Protect morale so pressure stays manageable,withdrawal,,false,Primary withdrawal via protect morale so pressure stays manageable; protect morale; manageable.
+12,D,Pressure Response,"Under tight time pressure, how do you operate?",Slow down enough to avoid avoidable errors,withdrawal,,true,Primary assigned with limited evidence and no clear secondary signal.
+13,A,Environment Fit,What kind of environment helps you perform best?,Clear authority and ownership boundaries,competitive,,false,Primary competitive via clear authority and ownership boundaries; authority; ownership.
+13,B,Environment Fit,What kind of environment helps you perform best?,Room to influence people and decisions,creative,competitive,false,"Primary creative, secondary competitive via room to influence people and decisions; influence; influ."
+13,C,Environment Fit,What kind of environment helps you perform best?,Stable routines and dependable expectations,collaborative,,false,Primary collaborative via stable routines and dependable expectations.
+13,D,Environment Fit,What kind of environment helps you perform best?,Space for deep thinking and analysis,structured,,false,Primary structured via space for deep thinking and analysis; deep thinking; analysis.
+14,A,Operating Style,How do others typically experience you at work?,"Clear, decisive, and hard to sway",driver,,true,Primary assigned with limited evidence and no clear secondary signal.
+14,B,Operating Style,How do others typically experience you at work?,"Energetic, persuasive, and outward-facing",influencer,,false,Primary influencer via persuasive; persua; energ.
+14,C,Operating Style,How do others typically experience you at work?,"Dependable, steady, and easy to trust",implementer,,true,Primary assigned with limited evidence and no clear secondary signal.
+14,D,Operating Style,How do others typically experience you at work?,"Thoughtful, measured, and careful with words",driver,analyst,false,"Primary driver, secondary analyst via measured and careful with words; thoughtful measured and careful with words."
+15,A,Environment Fit,What frustrates you most in a working environment?,Endless delays and no clear decisions,competitive,,false,Primary competitive via endless delays and no clear decisions; decisions; decis.
+15,B,Environment Fit,What frustrates you most in a working environment?,Flat energy and low personal ownership,competitive,,false,Primary competitive via flat energy and low personal ownership; ownership; owner.
+15,C,Environment Fit,What frustrates you most in a working environment?,Tension that turns personal or hostile,collaborative,,false,Primary collaborative via tension that turns personal or hostile; hostil.
+15,D,Environment Fit,What frustrates you most in a working environment?,Decisions made without sound reasoning,structured,competitive,false,"Primary structured, secondary competitive via decisions made without sound reasoning; reasoning; reason."
+16,A,Core Drivers,What drives you to perform at your best?,Hitting clear targets and seeing results,achievement,,false,Primary achievement via hitting clear targets; seeing results; results.
+16,B,Core Drivers,What drives you to perform at your best?,Shaping decisions that others follow,influence,,false,Primary influence via shaping decisions; others follow.
+16,C,Core Drivers,What drives you to perform at your best?,Having security and a predictable base,stability,,false,Primary stability via security and a predictable base; security; predictable.
+16,D,Core Drivers,What drives you to perform at your best?,Getting better at something difficult,mastery,,false,Primary mastery via getting better at something difficult; better; difficult.
+17,A,Core Drivers,"Why does recognition matter to you, if it does?",It shows the work led to results,achievement,,false,Primary achievement via work led to results; results; result.
+17,B,Core Drivers,"Why does recognition matter to you, if it does?",It raises my visibility for bigger opportunities,influence,,false,Primary influence via raises my visibility; bigger opportunities; visibility.
+17,C,Core Drivers,"Why does recognition matter to you, if it does?",It reinforces trust with people around me,stability,,false,Primary stability via reinforces trust; people around me; trust.
+17,D,Core Drivers,"Why does recognition matter to you, if it does?",It confirms that my expertise is respected,mastery,,false,Primary mastery via expertise is respected; expertise; expertise.
+18,A,Core Drivers,"Given a choice, what kind of work would you choose more often?",Work with stretch goals and clear stakes,achievement,,false,Primary achievement via stretch goals and clear stakes; stretch goals.
+18,B,Core Drivers,"Given a choice, what kind of work would you choose more often?",Work that expands my influence network,influence,,false,Primary influence via expands my influence network; influence; influ.
+18,C,Core Drivers,"Given a choice, what kind of work would you choose more often?",Work that offers long-term security,stability,,false,Primary stability via long-term security; security; security.
+18,D,Core Drivers,"Given a choice, what kind of work would you choose more often?",Work that builds deep specialist skills,mastery,,false,Primary mastery via builds deep specialist skills.
+19,A,Core Drivers,"If you had complete freedom, how would you choose to work?",Compete hard and track where I stand,achievement,,false,Primary achievement via compete hard and track where i stand.
+19,B,Core Drivers,"If you had complete freedom, how would you choose to work?",Build new things and bring others in,influence,,false,Primary influence via build new things and bring others in.
+19,C,Core Drivers,"If you had complete freedom, how would you choose to work?",Protect what works and reduce risk,stability,,false,Primary stability via protect what works and reduce risk.
+19,D,Core Drivers,"If you had complete freedom, how would you choose to work?",Improve systems until they run better,mastery,,false,Primary mastery via improve systems until they run better; better; better.
+20,A,Core Drivers,How do you personally measure success?,Goals achieved and outcomes delivered,achievement,,false,Primary achievement via goals achieved and outcomes delivered; achiev; outcome.
+20,B,Core Drivers,How do you personally measure success?,Positive impact on people and business,influence,,false,Primary influence via positive impact on people and business; impact; impact.
+20,C,Core Drivers,How do you personally measure success?,Healthy relationships and low friction,stability,,false,Primary stability via healthy relationships and low friction.
+20,D,Core Drivers,How do you personally measure success?,High standards met without shortcuts,achievement,mastery,true,"Top score tie across achievement, mastery. Primary and secondary were both strongly plausible."
+21,A,Core Drivers,What kind of work gives you energy?,Work where winning is clearly visible,achievement,,false,Primary achievement via work where winning is clearly visible; winning; win.
+21,B,Core Drivers,What kind of work gives you energy?,Work where I can energise others,influence,,false,Primary influence via work where i can energise others.
+21,C,Core Drivers,What kind of work gives you energy?,Work where I can support the team,stability,,false,Primary stability via work where i can support the team.
+21,D,Core Drivers,What kind of work gives you energy?,Work where I can solve complex problems,mastery,,false,Primary mastery via work where i can solve complex problems.
+22,A,Core Drivers,What causes you to disengage from work?,Weak goals with no real consequence,achievement,,true,No direct keyword match. Defaulted to achievement.
+22,B,Core Drivers,What causes you to disengage from work?,My input is ignored repeatedly,influence,,false,Primary influence via my input is ignored repeatedly.
+22,C,Core Drivers,What causes you to disengage from work?,Conflict stays unresolved and keeps spreading,stability,,false,Primary stability via conflict stays unresolved and keeps spreading.
+22,D,Core Drivers,What causes you to disengage from work?,Standards drop and nobody addresses it,mastery,,false,Primary mastery via standards drop and nobody addresses it.
+23,A,Leadership Approach,What kind of leader do you respect most?,One who takes charge in tough moments,results,,false,Primary results via takes charge.
+23,B,Leadership Approach,What kind of leader do you respect most?,"One who sets a clear, compelling direction",vision,,false,"Primary vision via clear, compelling direction; direction; direct."
+23,C,Leadership Approach,What kind of leader do you respect most?,One who develops people with consistency,people,process,false,"Primary people, secondary process via develops people with consistency; people; people."
+23,D,Leadership Approach,What kind of leader do you respect most?,One who brings clarity and sound judgement,process,,false,Primary process via clarity and sound judgement; clarit; judg.
+24,A,Core Drivers,When do you feel most valued at work?,Given meaningful responsibility and trust,achievement,stability,false,"Primary achievement, secondary stability via meaningful responsibility and trust."
+24,B,Core Drivers,When do you feel most valued at work?,Asked for input on important calls,influence,,false,Primary influence via asked for input on important calls.
+24,C,Core Drivers,When do you feel most valued at work?,Included in conversations that affect me,stability,,false,Primary stability via included in conversations that affect me.
+24,D,Core Drivers,When do you feel most valued at work?,Recognised for depth of expertise,mastery,,false,Primary mastery via recognised for depth of expertise; expertise; expertise.
+25,A,Leadership Approach,"In a team, what role do you naturally take?",Set direction and make key calls,results,vision,false,"Primary results, secondary vision via set direction and make key calls."
+25,B,Leadership Approach,"In a team, what role do you naturally take?",Connect people and keep momentum up,vision,people,false,"Primary vision, secondary people via connect people and keep momentum up."
+25,C,Leadership Approach,"In a team, what role do you naturally take?",Keep the team stable and coordinated,people,,false,Primary people via keep the team stable and coordinated; team.
+25,D,Leadership Approach,"In a team, what role do you naturally take?",Go deep as the subject specialist,process,,false,Primary process via go deep as the subject specialist.
+26,A,Environment Fit,Do you prefer working independently or with others?,Mostly independently with clear ownership,competitive,,false,Primary competitive via mostly independently with clear ownership; ownership; owner.
+26,B,Environment Fit,Do you prefer working independently or with others?,Closely with others through active collaboration,collaborative,,false,Primary collaborative via closely with others through active collaboration; collabor.
+26,C,Environment Fit,Do you prefer working independently or with others?,With a stable team and clear norms,structured,collaborative,false,"Primary structured, secondary collaborative via with a stable team and clear norms."
+26,D,Environment Fit,Do you prefer working independently or with others?,With people who challenge my thinking,competitive,creative,false,"Primary competitive, secondary creative via challenge; challenge; challeng."
+27,A,Tension Response,"When you are left out of decisions, how do you respond?",Ask directly why I was excluded,compete,,false,Primary compete via ask directly; ask directly why i was excluded; directly.
+27,B,Tension Response,"When you are left out of decisions, how do you respond?",Re-enter quickly and rebuild alignment,collaborate,,false,Primary collaborate via re-enter quickly and rebuild alignment; align.
+27,C,Tension Response,"When you are left out of decisions, how do you respond?",Step back and wait for a better moment,avoidance,,false,Primary avoidance via step back; step back and wait for a better moment; step back.
+27,D,Tension Response,"When you are left out of decisions, how do you respond?",Review what happened before responding,avoidance,,false,Primary avoidance via review what happened before responding.
+28,A,Core Drivers,What do you actively look for in your work?,Decision rights and real accountability,achievement,,true,No direct keyword match. Defaulted to achievement.
+28,B,Core Drivers,What do you actively look for in your work?,Reach and influence across the business,influence,,false,Primary influence via reach and influence across the business; influence; influ.
+28,C,Core Drivers,What do you actively look for in your work?,Belonging and mutual trust,stability,,false,Primary stability via belonging and mutual trust; trust; trust.
+28,D,Core Drivers,What do you actively look for in your work?,Mastery and strong capability growth,mastery,,false,Primary mastery via mastery and strong capability growth; mastery; master.
+29,A,Tension Response,Think back to the last time you disagreed with a colleague. What approach did you take?,Push for my position and try to win,compete,,false,Primary compete via push for my position and try to win; push; win.
+29,B,Tension Response,Think back to the last time you disagreed with a colleague. What approach did you take?,Make my case until they come around,compete,,true,No direct keyword match. Defaulted to compete.
+29,C,Tension Response,Think back to the last time you disagreed with a colleague. What approach did you take?,Look for middle ground we can both accept,compromise,,false,Primary compromise via look for middle ground; look for middle ground we can both accept; middle ground.
+29,D,Tension Response,Think back to the last time you disagreed with a colleague. What approach did you take?,Step back to avoid making it worse,avoidance,,false,Primary avoidance via step back; step back to avoid making it worse; step back.
+30,A,Tension Response,Recall a time you were challenged in front of others. How did you respond in the moment?,Hold my ground and respond directly,compete,,false,Primary compete via hold my ground and respond directly; directly; ground.
+30,B,Tension Response,Recall a time you were challenged in front of others. How did you respond in the moment?,React quickly and show my frustration,compete,,true,No direct keyword match. Defaulted to compete.
+30,C,Tension Response,Recall a time you were challenged in front of others. How did you respond in the moment?,Lower the temperature before discussing details,collaborate,,false,Primary collaborate via lower the temperature before discussing details; discuss.
+30,D,Tension Response,Recall a time you were challenged in front of others. How did you respond in the moment?,Slow down and clarify what is factual,avoidance,,false,Primary avoidance via slow down and clarify what is factual.
+31,A,Leadership Approach,"When someone on your team last underperformed, what did you do first?",Address the issue directly with them,results,,false,Primary results via address the issue directly with them.
+31,B,Leadership Approach,"When someone on your team last underperformed, what did you do first?",Encourage them and reset expectations together,vision,,false,Primary vision via encourage them and reset expectations together.
+31,C,Leadership Approach,"When someone on your team last underperformed, what did you do first?",Offer support privately before escalating,people,,false,Primary people via offer support privately before escalating; support; support.
+31,D,Leadership Approach,"When someone on your team last underperformed, what did you do first?",Check whether process gaps caused the drop,process,,false,Primary process via check whether process gaps caused the drop; process; process.
+32,A,Tension Response,Think of a situation where you chose not to engage in conflict. Why did you hold back?,The issue did not justify a fight,compete,,false,Primary compete via the issue did not justify a fight.
+32,B,Tension Response,Think of a situation where you chose not to engage in conflict. Why did you hold back?,Preserving the relationship mattered more,compromise,,false,Primary compromise via preserving the relationship mattered more.
+32,C,Tension Response,Think of a situation where you chose not to engage in conflict. Why did you hold back?,I worried it would become personal,avoidance,,false,Primary avoidance via i worried it would become personal.
+32,D,Tension Response,Think of a situation where you chose not to engage in conflict. Why did you hold back?,The argument was too weak to pursue,avoidance,,false,Primary avoidance via the argument was too weak to pursue.
+33,A,Tension Response,"In a recent disagreement, what strength did you rely on most?",Stayed direct even when it was uncomfortable,compete,,false,Primary compete via stayed direct even when it was uncomfortable; direct.
+33,B,Tension Response,"In a recent disagreement, what strength did you rely on most?",Framed the message to gain buy-in,collaborate,,false,Primary collaborate via framed the message to gain buy-in.
+33,C,Tension Response,"In a recent disagreement, what strength did you rely on most?",Tried to understand their perspective first,collaborate,,false,Primary collaborate via tried to understand their perspective first.
+33,D,Tension Response,"In a recent disagreement, what strength did you rely on most?",Kept to facts and separated emotion,avoidance,,false,Primary avoidance via kept to facts and separated emotion.
+34,A,Tension Response,"Looking back, what is your most common mistake in conflict situations?",I push too hard to get my way,compete,,true,Primary assigned with limited evidence and no clear secondary signal.
+34,B,Tension Response,"Looking back, what is your most common mistake in conflict situations?",I talk too much instead of listening,collaborate,,true,Primary assigned with limited evidence and no clear secondary signal.
+34,C,Tension Response,"Looking back, what is your most common mistake in conflict situations?",I avoid it and hope it passes,avoidance,,false,Primary avoidance via i avoid it and hope it passes; avoid; avoid.
+34,D,Tension Response,"Looking back, what is your most common mistake in conflict situations?",I overthink and respond too late,avoidance,,false,Primary avoidance via i overthink and respond too late.
+35,A,Pressure Response,"Under sustained pressure, what behaviour do you tend to fall into over time?",I become controlling and less trusting,control,,false,Primary control via become controlling; controlling; control.
+35,B,Pressure Response,"Under sustained pressure, what behaviour do you tend to fall into over time?",I jump between issues and lose focus,scatter,,false,Primary scatter via jump between issues; lose focus; jump.
+35,C,Pressure Response,"Under sustained pressure, what behaviour do you tend to fall into over time?",I avoid hard conversations for too long,withdrawal,,false,Primary withdrawal via avoid hard conversations; avoid.
+35,D,Pressure Response,"Under sustained pressure, what behaviour do you tend to fall into over time?",I become overly critical of others,critical,,false,Primary critical via overly critical; critical; critic.
+36,A,Pressure Response,"When you last felt overwhelmed at work, what did you do first?",I took over tasks instead of delegating,control,,false,Primary control via i took over tasks instead of delegating.
+36,B,Pressure Response,"When you last felt overwhelmed at work, what did you do first?",I talked it through with too many people,scatter,,false,Primary scatter via i talked it through with too many people.
+36,C,Pressure Response,"When you last felt overwhelmed at work, what did you do first?",I pulled back and reduced communication,withdrawal,,false,Primary withdrawal via i pulled back and reduced communication; pull.
+36,D,Pressure Response,"When you last felt overwhelmed at work, what did you do first?",I kept analysing instead of deciding,critical,,false,Primary critical via i kept analysing instead of deciding; analys.
+37,A,Tension Response,Think of a time when trust was broken. How did you respond?,I reacted before I had the full picture,compete,,false,Primary compete via i reacted before i had the full picture.
+37,B,Tension Response,Think of a time when trust was broken. How did you respond?,I voiced frustration immediately and strongly,compete,,false,Primary compete via i voiced frustration immediately and strongly.
+37,C,Tension Response,Think of a time when trust was broken. How did you respond?,I kept it to myself and stewed,avoidance,,false,Primary avoidance via i kept it to myself and stewed.
+37,D,Tension Response,Think of a time when trust was broken. How did you respond?,I stayed polite but became emotionally distant,avoidance,,false,Primary avoidance via i stayed polite but became emotionally distant.
+38,A,Pressure Response,How might someone who has worked closely with you describe you under pressure?,More intense and harder to approach,control,,false,Primary control via more intense and harder to approach; intens.
+38,B,Pressure Response,How might someone who has worked closely with you describe you under pressure?,More reactive and emotionally visible,scatter,,false,Primary scatter via more reactive and emotionally visible.
+38,C,Pressure Response,How might someone who has worked closely with you describe you under pressure?,Quieter and slower to engage,withdrawal,,false,Primary withdrawal via quieter and slower to engage; quiet.
+38,D,Pressure Response,How might someone who has worked closely with you describe you under pressure?,Detached and focused only on facts,critical,,false,Primary critical via detached and focused only on facts.
+39,A,Pressure Response,"Looking back, what blind spot shows up most often in your behaviour?",I rush people when progress feels slow,control,,false,Primary control via i rush people when progress feels slow.
+39,B,Pressure Response,"Looking back, what blind spot shows up most often in your behaviour?",I assume things will work out too easily,scatter,,false,Primary scatter via i assume things will work out too easily.
+39,C,Pressure Response,"Looking back, what blind spot shows up most often in your behaviour?",I sidestep tension instead of addressing it,withdrawal,,false,Primary withdrawal via i sidestep tension instead of addressing it.
+39,D,Pressure Response,"Looking back, what blind spot shows up most often in your behaviour?",I chase perfect instead of good enough,critical,,false,Primary critical via i chase perfect instead of good enough.
+40,A,Pressure Response,"When you feel under threat or exposed, what is your instinctive reaction?",Go on the offensive and push back hard,control,,false,Primary control via go on the offensive and push back hard; push.
+40,B,Pressure Response,"When you feel under threat or exposed, what is your instinctive reaction?",Justify myself and protect my position,control,,false,Primary control via justify myself and protect my position.
+40,C,Pressure Response,"When you feel under threat or exposed, what is your instinctive reaction?",Shut down and struggle to respond,withdrawal,,false,Primary withdrawal via shut down and struggle to respond; shut down.
+40,D,Pressure Response,"When you feel under threat or exposed, what is your instinctive reaction?",Overanalyse every possible downside,critical,,false,Primary critical via overanalyse every possible downside.
+41,A,Operating Style,How do you generally view risk?,A chance worth taking if upside is strong,driver,,false,Primary driver via a chance worth taking if upside is strong.
+41,B,Operating Style,How do you generally view risk?,Necessary if the mission is worth it,influencer,,false,Primary influencer via necessary if the mission is worth it.
+41,C,Operating Style,How do you generally view risk?,Fine when exposure is understood and managed,implementer,,false,Primary implementer via fine when exposure is understood and managed.
+41,D,Operating Style,How do you generally view risk?,A threat unless controls are in place,analyst,,false,Primary analyst via a threat unless controls are in place.
+42,A,Operating Style,What kind of decisions do you prefer to make?,Quick calls with limited delay,driver,,false,Primary driver via quick calls with limited delay; quick; quick.
+42,B,Operating Style,What kind of decisions do you prefer to make?,Shared calls with key people aligned,influencer,,false,Primary influencer via shared calls with key people aligned; people; people.
+42,C,Operating Style,What kind of decisions do you prefer to make?,Low-risk calls with predictable outcomes,implementer,,false,Primary implementer via low-risk calls with predictable outcomes.
+42,D,Operating Style,What kind of decisions do you prefer to make?,Evidence-led calls with clear assumptions tested,analyst,,false,Primary analyst via evidence-led calls with clear assumptions tested; evidence; evid.
+43,A,Operating Style,Think of a recent high-stakes decision. What did you prioritise most?,Move fast to keep options open,driver,,false,Primary driver via move fast to keep options open; fast; fast.
+43,B,Operating Style,Think of a recent high-stakes decision. What did you prioritise most?,Build alignment so execution holds,influencer,,false,Primary influencer via build alignment so execution holds.
+43,C,Operating Style,Think of a recent high-stakes decision. What did you prioritise most?,Protect stability and avoid major disruption,implementer,,false,Primary implementer via protect stability and avoid major disruption; stabil.
+43,D,Operating Style,Think of a recent high-stakes decision. What did you prioritise most?,Compare scenarios before committing resources,analyst,,false,Primary analyst via compare scenarios before committing resources.
+44,A,Operating Style,"When you last had to make a judgement call, what did you trust most?",Pattern recognition and lived judgement,driver,,false,Primary driver via pattern recognition and lived judgement.
+44,B,Operating Style,"When you last had to make a judgement call, what did you trust most?",Input from people I trust,influencer,,false,Primary influencer via input from people i trust; people; people.
+44,C,Operating Style,"When you last had to make a judgement call, what did you trust most?",What keeps the system stable,implementer,,false,Primary implementer via what keeps the system stable.
+44,D,Operating Style,"When you last had to make a judgement call, what did you trust most?",Data quality and decision evidence,analyst,,false,Primary analyst via data quality and decision evidence; evidence; data.
+45,A,Operating Style,What level of uncertainty are you comfortable with?,High uncertainty with big upside potential,driver,,false,Primary driver via high uncertainty with big upside potential.
+45,B,Operating Style,What level of uncertainty are you comfortable with?,Frequent change with room to adapt,influencer,,false,Primary influencer via frequent change with room to adapt.
+45,C,Operating Style,What level of uncertainty are you comfortable with?,Moderate uncertainty with clear guardrails,implementer,,false,Primary implementer via moderate uncertainty with clear guardrails.
+45,D,Operating Style,What level of uncertainty are you comfortable with?,Low uncertainty with strong structure,analyst,implementer,false,"Primary analyst, secondary implementer via low uncertainty with strong structure."
+46,A,Leadership Approach,What is the primary responsibility of a leader?,Set direction and deliver measurable results,results,,false,Primary results via set direction and deliver measurable results; results; deliver.
+46,B,Leadership Approach,What is the primary responsibility of a leader?,Create belief people want to follow,vision,people,false,"Primary vision, secondary people via create belief people want to follow."
+46,C,Leadership Approach,What is the primary responsibility of a leader?,Grow people so the team gets stronger,people,,false,Primary people via grow people so the team gets stronger; people; people.
+46,D,Leadership Approach,What is the primary responsibility of a leader?,Build systems that scale reliably,process,,false,Primary process via build systems that scale reliably; systems; system.
+47,A,Leadership Approach,How should poor performance be handled?,Set clear consequences and raise expectations,results,,false,Primary results via set clear consequences and raise expectations.
+47,B,Leadership Approach,How should poor performance be handled?,Reconnect effort to purpose and momentum,vision,,false,Primary vision via reconnect effort to purpose and momentum.
+47,C,Leadership Approach,How should poor performance be handled?,Coach directly and remove blockers,people,,false,Primary people via coach directly and remove blockers; coach.
+47,D,Leadership Approach,How should poor performance be handled?,Fix process issues driving the problem,process,,false,Primary process via fix process issues driving the problem; process; process.
+48,A,Leadership Approach,How do you naturally lead others?,By setting direction and making decisions,results,vision,false,"Primary results, secondary vision via setting direction and making decisions."
+48,B,Leadership Approach,How do you naturally lead others?,By creating energy and visible momentum,vision,,false,Primary vision via creating energy and visible momentum; energy.
+48,C,Leadership Approach,How do you naturally lead others?,By supporting people through pressure,people,,false,Primary people via supporting people through pressure; people; people.
+48,D,Leadership Approach,How do you naturally lead others?,By bringing expertise to hard problems,process,,false,Primary process via bringing expertise to hard problems.
+49,A,Leadership Approach,What is the role of authority in organisations?,Authority should be used decisively when needed,results,,false,Primary results via authority should be used decisively when needed.
+49,B,Leadership Approach,What is the role of authority in organisations?,Authority should be earned through trust,vision,,false,Primary vision via authority should be earned through trust.
+49,C,Leadership Approach,What is the role of authority in organisations?,Authority should be shared where possible,people,,false,Primary people via authority should be shared where possible.
+49,D,Leadership Approach,What is the role of authority in organisations?,Authority should be clear in the structure,process,,false,Primary process via authority should be clear in the structure; structure; structure.
+50,A,Leadership Approach,When do you feel most confident leading?,In a crisis that needs fast calls,results,,false,Primary results via in a crisis that needs fast calls.
+50,B,Leadership Approach,When do you feel most confident leading?,In growth phases that need energy,vision,,false,Primary vision via in growth phases that need energy; energy.
+50,C,Leadership Approach,When do you feel most confident leading?,In steady periods that need consistency,process,people,false,"Primary process, secondary people via consistency; consistency; consist."
+50,D,Leadership Approach,When do you feel most confident leading?,In complex situations needing careful judgement,process,,false,Primary process via in complex situations needing careful judgement; judg.
+51,A,Environment Fit,What does an ideal working culture look like to you?,High-performance culture with clear accountability,competitive,,false,Primary competitive via performance; performance; perform.
+51,B,Environment Fit,What does an ideal working culture look like to you?,Creative culture that rewards experimentation,creative,,false,Primary creative via experimentation; creative; creativ.
+51,C,Environment Fit,What does an ideal working culture look like to you?,Collaborative culture with strong trust,collaborative,,true,Primary assigned with limited evidence and no clear secondary signal.
+51,D,Environment Fit,What does an ideal working culture look like to you?,Structured culture with clear standards,competitive,,true,No direct keyword match. Defaulted to competitive.
+52,A,Environment Fit,How should success be measured in an organisation?,Strong financial results and margin discipline,competitive,,true,No direct keyword match. Defaulted to competitive.
+52,B,Environment Fit,How should success be measured in an organisation?,Sustainable growth in capability and reach,competitive,,true,No direct keyword match. Defaulted to competitive.
+52,C,Environment Fit,How should success be measured in an organisation?,Healthy engagement and low team friction,collaborative,,true,Primary assigned with limited evidence and no clear secondary signal.
+52,D,Environment Fit,How should success be measured in an organisation?,Operational efficiency and consistent delivery,competitive,,true,No direct keyword match. Defaulted to competitive.
+53,A,Environment Fit,What should culture prioritise above all else?,High standards and measurable performance,competitive,,false,Primary competitive via performance; performance; perform.
+53,B,Environment Fit,What should culture prioritise above all else?,Experimentation that leads to real learning,creative,,false,Primary creative via experimentation; experi.
+53,C,Environment Fit,What should culture prioritise above all else?,"Belonging, trust, and psychological safety",collaborative,,true,Primary assigned with limited evidence and no clear secondary signal.
+53,D,Environment Fit,What should culture prioritise above all else?,Consistency in how work gets done,competitive,,true,No direct keyword match. Defaulted to competitive.
+54,A,Leadership Approach,How should accountability show up in a team?,Expectations are explicit and hard to ignore,results,,false,Primary results via expectations are explicit and hard to ignore.
+54,B,Leadership Approach,How should accountability show up in a team?,People own outcomes because purpose is clear,results,vision,true,Three or more in-domain signals matched the wording.
+54,C,Leadership Approach,How should accountability show up in a team?,Accountability is fair and applied evenly,results,people,false,"Primary results, secondary people via accountability; accountability; account."
+54,D,Leadership Approach,How should accountability show up in a team?,Progress is measured with clear metrics,results,,false,Primary results via progress is measured with clear metrics.
+55,A,Environment Fit,What kind of culture do you struggle in?,Slow cultures where decisions drag on,competitive,,true,Primary assigned with limited evidence and no clear secondary signal.
+55,B,Environment Fit,What kind of culture do you struggle in?,Risk-averse cultures that reject new ideas,creative,,false,Primary creative via new ideas; ideas; idea.
+55,C,Environment Fit,What kind of culture do you struggle in?,Harsh cultures that normalise blame,competitive,,true,No direct keyword match. Defaulted to competitive.
+55,D,Environment Fit,What kind of culture do you struggle in?,Chaotic cultures with no clear process,structured,,true,Primary assigned with limited evidence and no clear secondary signal.
+56,A,Environment Fit,What type of role suits you best?,Owning commercial outcomes across teams,collaborative,,true,Primary assigned with limited evidence and no clear secondary signal.
+56,B,Environment Fit,What type of role suits you best?,Building partnerships and opening opportunities,competitive,,true,No direct keyword match. Defaulted to competitive.
+56,C,Environment Fit,What type of role suits you best?,Running operations with reliability and pace,competitive,,false,Primary competitive via pace; pace.
+56,D,Environment Fit,What type of role suits you best?,Solving specialist problems with deep expertise,competitive,,true,No direct keyword match. Defaulted to competitive.
+57,A,Operating Style,Where does your natural strength lie?,Driving change when momentum is needed,driver,,true,No direct keyword match. Defaulted to driver.
+57,B,Operating Style,Where does your natural strength lie?,Influencing people across functions and levels,influencer,,true,Primary assigned with limited evidence and no clear secondary signal.
+57,C,Operating Style,Where does your natural strength lie?,Keeping delivery stable during disruption,driver,,true,No direct keyword match. Defaulted to driver.
+57,D,Operating Style,Where does your natural strength lie?,Analysing complexity and finding clear patterns,analyst,,true,Primary assigned with limited evidence and no clear secondary signal.
+58,A,Environment Fit,In what kind of environment do you thrive?,Stretch goals with clear accountability,competitive,,true,Primary assigned with limited evidence and no clear secondary signal.
+58,B,Environment Fit,In what kind of environment do you thrive?,Strong relationships that move work forward,collaborative,,true,Primary assigned with limited evidence and no clear secondary signal.
+58,C,Environment Fit,In what kind of environment do you thrive?,Predictable environment with minimal surprises,structured,,true,Primary assigned with limited evidence and no clear secondary signal.
+58,D,Environment Fit,In what kind of environment do you thrive?,Clear systems that support quality execution,collaborative,,false,Primary collaborative via support; support; support.
+59,A,Core Drivers,What is the greatest value you bring to a company?,Creating momentum when progress stalls,achievement,,false,Primary achievement via creating momentum when progress stalls; progress; progress.
+59,B,Core Drivers,What is the greatest value you bring to a company?,Building engagement that lifts team effort,influence,,false,Primary influence via building engagement that lifts team effort.
+59,C,Core Drivers,What is the greatest value you bring to a company?,Delivering reliably under pressure,stability,,false,Primary stability via delivering reliably under pressure; reliab.
+59,D,Core Drivers,What is the greatest value you bring to a company?,Bringing precision to important decisions,mastery,,false,Primary mastery via bringing precision to important decisions.
+60,A,Operating Style,Think of a time when progress stalled on something important. What did you do next?,Tightened priorities and pushed faster decisions,driver,,true,Primary assigned with limited evidence and no clear secondary signal.
+60,B,Operating Style,Think of a time when progress stalled on something important. What did you do next?,Reframed the goal and re-energised people,influencer,,false,Primary influencer via people; people; energ.
+60,C,Operating Style,Think of a time when progress stalled on something important. What did you do next?,Stabilised workload and reduced extra disruption,implementer,,true,Primary assigned with limited evidence and no clear secondary signal.
+60,D,Operating Style,Think of a time when progress stalled on something important. What did you do next?,Reworked the plan and challenged assumptions,implementer,,true,Primary assigned with limited evidence and no clear secondary signal.
+61,A,Tension Response,"When someone strongly challenged your idea recently, how did you respond?",Defended my view and argued my case,compete,,false,Primary compete via defended my view and argued my case.
+61,B,Tension Response,"When someone strongly challenged your idea recently, how did you respond?",Reframed it to build broader support,collaborate,,false,Primary collaborate via reframed it to build broader support.
+61,C,Tension Response,"When someone strongly challenged your idea recently, how did you respond?",Lowered tension so we could keep talking,compromise,,false,Primary compromise via lowered tension so we could keep talking.
+61,D,Tension Response,"When someone strongly challenged your idea recently, how did you respond?",Tested their reasoning before responding,avoidance,,false,Primary avoidance via tested their reasoning before responding.
+62,A,Leadership Approach,"In high-performing teams, what matters most to you?",Clear momentum and disciplined execution,results,,false,Primary results via clear momentum and disciplined execution; execut.
+62,B,Leadership Approach,"In high-performing teams, what matters most to you?",Shared energy and belief in the mission,vision,,false,Primary vision via shared energy and belief in the mission; energy.
+62,C,Leadership Approach,"In high-performing teams, what matters most to you?","Trust, cohesion, and mutual support",people,,false,"Primary people via trust, cohesion, and mutual support; support; support."
+62,D,Leadership Approach,"In high-performing teams, what matters most to you?",High standards and technical precision,process,,false,Primary process via high standards and technical precision; standards; standard.
+63,A,Operating Style,"When a project you were involved in started to drift, what did you do?",Stepped in directly and reset direction,driver,,true,Primary assigned with limited evidence and no clear secondary signal.
+63,B,Operating Style,"When a project you were involved in started to drift, what did you do?",Influenced key people to regain traction,influencer,,true,Primary assigned with limited evidence and no clear secondary signal.
+63,C,Operating Style,"When a project you were involved in started to drift, what did you do?",Brought people together to re-align,influencer,,true,Primary assigned with limited evidence and no clear secondary signal.
+63,D,Operating Style,"When a project you were involved in started to drift, what did you do?",Tightened process and clarified decision points,driver,,true,Primary assigned with limited evidence and no clear secondary signal.
+64,A,Operating Style,Think of a risky opportunity you evaluated recently. What did you focus on most?,Potential upside if execution went well,driver,,true,No direct keyword match. Defaulted to driver.
+64,B,Operating Style,Think of a risky opportunity you evaluated recently. What did you focus on most?,Whether the story would attract support,driver,,true,No direct keyword match. Defaulted to driver.
+64,C,Operating Style,Think of a risky opportunity you evaluated recently. What did you focus on most?,Effects on people and team stability,influencer,,true,Primary assigned with limited evidence and no clear secondary signal.
+64,D,Operating Style,Think of a risky opportunity you evaluated recently. What did you focus on most?,Evidence strength and probability of success,analyst,,true,Primary assigned with limited evidence and no clear secondary signal.
+65,A,Tension Response,"When someone disagreed with you privately, how did you handle it?",Stated my decision and expected alignment,compete,,false,Primary compete via stated my decision and expected alignment.
+65,B,Tension Response,"When someone disagreed with you privately, how did you handle it?",Worked to win them over to my view,collaborate,compete,false,"Primary collaborate, secondary compete via worked to win them over to my view."
+65,C,Tension Response,"When someone disagreed with you privately, how did you handle it?",Explored their concerns before deciding next,collaborate,,false,Primary collaborate via explored their concerns before deciding next.
+65,D,Tension Response,"When someone disagreed with you privately, how did you handle it?",Compared assumptions and logic together,avoidance,collaborate,false,"Primary avoidance, secondary collaborate via compared assumptions and logic together."
+66,A,Leadership Approach,Why do organisations fail when they grow quickly?,Decision rights get blurred and contested,results,,true,No direct keyword match. Defaulted to results.
+66,B,Leadership Approach,Why do organisations fail when they grow quickly?,The original vision gets diluted over time,vision,,false,Primary vision via the original vision gets diluted over time; vision; vision.
+66,C,Leadership Approach,Why do organisations fail when they grow quickly?,Culture fractures across teams and layers,people,,false,Primary people via culture fractures across teams and layers; team.
+66,D,Leadership Approach,Why do organisations fail when they grow quickly?,Core systems fail under added scale,process,,false,Primary process via core systems fail under added scale; systems; system.
+67,A,Pressure Response,"In a recent emotionally charged situation, how did you behave?",Became more forceful to regain control,control,,true,Primary assigned with limited evidence and no clear secondary signal.
+67,B,Pressure Response,"In a recent emotionally charged situation, how did you behave?",Became more expressive and talked it through,control,,true,No direct keyword match. Defaulted to control.
+67,C,Pressure Response,"In a recent emotionally charged situation, how did you behave?",Focused on calming people before solving,control,,true,No direct keyword match. Defaulted to control.
+67,D,Pressure Response,"In a recent emotionally charged situation, how did you behave?",Shifted into analysis to avoid reacting,critical,,true,Primary assigned with limited evidence and no clear secondary signal.
+68,A,Tension Response,Think of a difficult conversation you had. What did you prioritise?,Said the hard thing clearly and early,compete,,false,Primary compete via said the hard thing clearly and early.
+68,B,Tension Response,Think of a difficult conversation you had. What did you prioritise?,Framed it to keep them engaged,collaborate,,false,Primary collaborate via framed it to keep them engaged.
+68,C,Tension Response,Think of a difficult conversation you had. What did you prioritise?,Protected the relationship while raising the issue,compromise,,false,Primary compromise via protected the relationship while raising the issue.
+68,D,Tension Response,Think of a difficult conversation you had. What did you prioritise?,Kept to facts and avoided exaggeration,avoidance,,false,Primary avoidance via kept to facts and avoided exaggeration; avoid.
+69,A,Pressure Response,"When a decision you made turned out to be wrong, what did you do next?",Owned it quickly and corrected course,control,,true,No direct keyword match. Defaulted to control.
+69,B,Pressure Response,"When a decision you made turned out to be wrong, what did you do next?",Rebuilt commitment so people stayed engaged,control,,true,No direct keyword match. Defaulted to control.
+69,C,Pressure Response,"When a decision you made turned out to be wrong, what did you do next?",Protected morale while we reset,control,,true,No direct keyword match. Defaulted to control.
+69,D,Pressure Response,"When a decision you made turned out to be wrong, what did you do next?",Investigated root causes before the next move,control,,true,No direct keyword match. Defaulted to control.
+70,A,Environment Fit,"When you joined a new team or organisation, what did you try to understand first?",Who makes the final calls here,competitive,,true,No direct keyword match. Defaulted to competitive.
+70,B,Environment Fit,"When you joined a new team or organisation, what did you try to understand first?",Who really shapes decisions informally,competitive,,true,Primary assigned with limited evidence and no clear secondary signal.
+70,C,Environment Fit,"When you joined a new team or organisation, what did you try to understand first?",How trust and relationships actually work,collaborative,,true,Primary assigned with limited evidence and no clear secondary signal.
+70,D,Environment Fit,"When you joined a new team or organisation, what did you try to understand first?",How the core systems run,competitive,,true,No direct keyword match. Defaulted to competitive.
+71,A,Leadership Approach,When are you most effective as a leader?,When clear performance lift is needed,results,,false,Primary results via when clear performance lift is needed; perform.
+71,B,Leadership Approach,When are you most effective as a leader?,When people need confidence and direction,vision,people,false,"Primary vision, secondary people via when people need confidence and direction; direction; direct."
+71,C,Leadership Approach,When are you most effective as a leader?,When the team needs steadiness and trust,people,,false,Primary people via when the team needs steadiness and trust; team.
+71,D,Leadership Approach,When are you most effective as a leader?,When problems require deep expert judgement,process,,false,Primary process via when problems require deep expert judgement; judg.
+72,A,Operating Style,"When you last faced competing priorities, how did you decide?",Chose the fastest route to impact,driver,,true,Primary assigned with limited evidence and no clear secondary signal.
+72,B,Operating Style,"When you last faced competing priorities, how did you decide?",Aligned key stakeholders before committing,driver,,true,No direct keyword match. Defaulted to driver.
+72,C,Operating Style,"When you last faced competing priorities, how did you decide?",Sought broad agreement before moving ahead,driver,,true,Primary assigned with limited evidence and no clear secondary signal.
+72,D,Operating Style,"When you last faced competing priorities, how did you decide?",Weighed downstream effects before deciding,driver,,true,No direct keyword match. Defaulted to driver.
+73,A,Operating Style,What does uncertainty in an organisation usually indicate to you?,A window to move before others do,influencer,,true,Primary assigned with limited evidence and no clear secondary signal.
+73,B,Operating Style,What does uncertainty in an organisation usually indicate to you?,A moment to rally people around change,influencer,,true,Primary assigned with limited evidence and no clear secondary signal.
+73,C,Operating Style,What does uncertainty in an organisation usually indicate to you?,A warning sign that needs stabilising,implementer,,true,Primary assigned with limited evidence and no clear secondary signal.
+73,D,Operating Style,What does uncertainty in an organisation usually indicate to you?,A complex problem to map carefully,driver,,true,No direct keyword match. Defaulted to driver.
+74,A,Leadership Approach,What is the most damaging behaviour a leader can display?,Avoiding decisions when clarity is needed,results,,false,Primary results via avoiding decisions when clarity is needed.
+74,B,Leadership Approach,What is the most damaging behaviour a leader can display?,Making it about ego over outcomes,results,vision,false,"Primary results, secondary vision via outcomes; outcomes; outcome."
+74,C,Leadership Approach,What is the most damaging behaviour a leader can display?,Losing touch with team reality,people,,false,Primary people via losing touch with team reality; team.
+74,D,Leadership Approach,What is the most damaging behaviour a leader can display?,Repeated poor judgement on key calls,process,,false,Primary process via repeated poor judgement on key calls; judg.
+75,A,Pressure Response,"When outcomes really mattered, how did you operate differently (if at all)?",Increased pressure and tightened deadlines,control,,true,Primary assigned with limited evidence and no clear secondary signal.
+75,B,Pressure Response,"When outcomes really mattered, how did you operate differently (if at all)?",Increased communication and visibility,control,,true,No direct keyword match. Defaulted to control.
+75,C,Pressure Response,"When outcomes really mattered, how did you operate differently (if at all)?",Increased support and removed friction,control,,true,No direct keyword match. Defaulted to control.
+75,D,Pressure Response,"When outcomes really mattered, how did you operate differently (if at all)?",Increased analysis before major calls,critical,,true,Primary assigned with limited evidence and no clear secondary signal.
+76,A,Environment Fit,What do the best organisations consistently get right?,They compete hard and keep standards high,competitive,,true,Primary assigned with limited evidence and no clear secondary signal.
+76,B,Environment Fit,What do the best organisations consistently get right?,They keep people inspired by clear purpose,competitive,,true,No direct keyword match. Defaulted to competitive.
+76,C,Environment Fit,What do the best organisations consistently get right?,They stay cohesive when pressure rises,competitive,,true,No direct keyword match. Defaulted to competitive.
+76,D,Environment Fit,What do the best organisations consistently get right?,They run strong systems consistently,competitive,,true,No direct keyword match. Defaulted to competitive.
+77,A,Operating Style,"When data conflicts with your instinct, what do you do?","Back my instinct, then validate quickly",driver,,true,Primary assigned with limited evidence and no clear secondary signal.
+77,B,Operating Style,"When data conflicts with your instinct, what do you do?",Get more viewpoints before committing,driver,,true,No direct keyword match. Defaulted to driver.
+77,C,Operating Style,"When data conflicts with your instinct, what do you do?",Pause and test where bias may exist,driver,,true,No direct keyword match. Defaulted to driver.
+77,D,Operating Style,"When data conflicts with your instinct, what do you do?",Follow the evidence even if uncomfortable,analyst,,true,Primary assigned with limited evidence and no clear secondary signal.
+78,A,Pressure Response,"When organisations go through change, what is your instinct?",Push change fast and remove blockers,control,,true,Primary assigned with limited evidence and no clear secondary signal.
+78,B,Pressure Response,"When organisations go through change, what is your instinct?",Explain the vision until it lands,control,,true,No direct keyword match. Defaulted to control.
+78,C,Pressure Response,"When organisations go through change, what is your instinct?",Protect core stability during transition,control,,true,No direct keyword match. Defaulted to control.
+78,D,Pressure Response,"When organisations go through change, what is your instinct?",Design the transition step by step,control,,true,No direct keyword match. Defaulted to control.
+79,A,Environment Fit,What kind of behaviour should organisations reward most?,Behaviours that deliver wins consistently,competitive,,true,No direct keyword match. Defaulted to competitive.
+79,B,Environment Fit,What kind of behaviour should organisations reward most?,Behaviours that build influence and momentum,creative,,true,Primary assigned with limited evidence and no clear secondary signal.
+79,C,Environment Fit,What kind of behaviour should organisations reward most?,Behaviours that strengthen trust and loyalty,competitive,,true,No direct keyword match. Defaulted to competitive.
+79,D,Environment Fit,What kind of behaviour should organisations reward most?,Behaviours that show strong competence,competitive,,true,Primary assigned with limited evidence and no clear secondary signal.
+80,A,Core Drivers,"When evaluating people, what do you value most?",Results delivered against clear goals,achievement,,false,Primary achievement via results delivered against clear goals; results; result.
+80,B,Core Drivers,"When evaluating people, what do you value most?",Influence created across key stakeholders,influence,,false,Primary influence via influence created across key stakeholders; influence; influ.
+80,C,Core Drivers,"When evaluating people, what do you value most?",Relationships maintained under pressure,stability,,false,Primary stability via relationships maintained under pressure.
+80,D,Core Drivers,"When evaluating people, what do you value most?",Quality of thinking behind decisions,mastery,,false,Primary mastery via quality of thinking behind decisions; quality; quality.
