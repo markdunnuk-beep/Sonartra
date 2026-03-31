@@ -15,6 +15,7 @@ import type {
   AdminAssessmentDetailWeightingSummary,
 } from '@/lib/server/admin-assessment-detail';
 
+import { AdminBulkWeightImport } from '@/components/admin/admin-bulk-weight-import';
 import { AdminWeightGrid, buildAdminWeightGridModel } from '@/components/admin/admin-weight-grid';
 
 function SummaryCard({
@@ -109,12 +110,14 @@ function QuestionMeta({
 export function AdminWeightingAuthoring({
   assessmentKey,
   assessmentVersionId,
+  isEditableAssessmentVersion,
   questions,
   availableSignals,
   weightingSummary,
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
+  isEditableAssessmentVersion: boolean;
   questions: readonly AdminAssessmentDetailQuestion[];
   availableSignals: readonly AdminAssessmentDetailAvailableSignal[];
   weightingSummary: AdminAssessmentDetailWeightingSummary;
@@ -140,6 +143,11 @@ export function AdminWeightingAuthoring({
         <SummaryCard label="Scored responses" value={String(weightingSummary.weightedOptions)} />
         <SummaryCard label="Unscored responses" value={String(weightingSummary.unmappedOptions)} />
       </div>
+
+      <AdminBulkWeightImport
+        assessmentVersionId={assessmentVersionId}
+        isEditableAssessmentVersion={isEditableAssessmentVersion}
+      />
 
       {questions.length === 0 ? (
         <EmptyState
