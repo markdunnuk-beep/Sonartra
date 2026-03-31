@@ -2,6 +2,8 @@ export const BULK_OPTION_LABEL_ORDER = ['A', 'B', 'C', 'D'] as const;
 
 const ALLOWED_OPTION_LABELS = new Set(BULK_OPTION_LABEL_ORDER);
 
+type BulkOptionLabel = (typeof BULK_OPTION_LABEL_ORDER)[number];
+
 export type BulkOptionParseErrorCode =
   | 'INVALID_COLUMN_COUNT'
   | 'EMPTY_QUESTION_NUMBER'
@@ -15,7 +17,7 @@ export type ParsedBulkOptionRow = {
   rawLine: string;
   questionNumberRaw: string;
   questionNumber: number;
-  optionLabel: 'A' | 'B' | 'C' | 'D';
+  optionLabel: BulkOptionLabel;
   optionText: string;
 };
 
@@ -81,6 +83,62 @@ export type BulkOptionImportPreviewResult = {
   questionGroups: ValidatedBulkOptionQuestionGroup[];
   groupErrors: BulkOptionGroupValidationError[];
   warnings: BulkOptionGroupValidationWarning[];
+};
+
+export type BulkOptionImportPlanErrorCode =
+  | 'ASSESSMENT_VERSION_NOT_FOUND'
+  | 'ASSESSMENT_VERSION_NOT_EDITABLE'
+  | 'QUESTION_NUMBER_NOT_FOUND'
+  | 'DUPLICATE_QUESTION_NUMBER_IN_ASSESSMENT'
+  | 'QUESTION_SET_EMPTY'
+  | 'IMPORT_HAS_NO_VALID_GROUPS';
+
+export type BulkOptionImportTargetAssessmentVersion = {
+  assessmentVersionId: string;
+  assessmentKey: string;
+  lifecycleStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+};
+
+export type BulkOptionImportTargetQuestion = {
+  questionId: string;
+  questionNumber: number;
+  questionKey: string;
+  existingOptionIds: string[];
+};
+
+export type PlannedBulkOptionReplacement = {
+  label: ParsedBulkOptionRow['optionLabel'];
+  text: string;
+  order: number;
+};
+
+export type PlannedBulkOptionQuestionImport = {
+  questionId: string;
+  questionNumber: number;
+  questionKey: string;
+  existingOptionIds: string[];
+  replacementOptions: PlannedBulkOptionReplacement[];
+};
+
+export type BulkOptionImportPlanError = {
+  questionNumber: number | null;
+  code: BulkOptionImportPlanErrorCode;
+  message: string;
+};
+
+export type BulkOptionImportPlanSummary = {
+  assessmentVersionId: string | null;
+  questionGroupCount: number;
+  questionsMatched: number;
+  optionsToInsert: number;
+  existingOptionsToDelete: number;
+};
+
+export type BulkOptionImportPlanResult = {
+  success: boolean;
+  plannedQuestions: PlannedBulkOptionQuestionImport[];
+  errors: BulkOptionImportPlanError[];
+  summary: BulkOptionImportPlanSummary;
 };
 
 type ParseLineSuccess = {
@@ -206,11 +264,11 @@ export function parseLine(rawLine: string, lineNumber: number): ParseLineResult 
 
 export function normalizeOptionLabel(value: string): ParsedBulkOptionRow['optionLabel'] | null {
   const normalizedValue = value.trim().toUpperCase();
-  if (!ALLOWED_OPTION_LABELS.has(normalizedValue)) {
+  if (!isBulkOptionLabel(normalizedValue)) {
     return null;
   }
 
-  return normalizedValue as ParsedBulkOptionRow['optionLabel'];
+  return normalizedValue;
 }
 
 export function parseQuestionNumber(value: string): number | null {
@@ -267,6 +325,109 @@ export function buildBulkOptionImportPreview(input: string): BulkOptionImportPre
     questionGroups: groupValidation.questionGroups,
     groupErrors: groupValidation.errors,
     warnings: groupValidation.warnings,
+  };
+}
+
+export function buildBulkOptionImportPlan(params: {
+  assessmentVersion: BulkOptionImportTargetAssessmentVersion | null;
+  questions: readonly BulkOptionImportTargetQuestion[];
+  validatedQuestionGroups: readonly ValidatedBulkOptionQuestionGroup[];
+}): BulkOptionImportPlanResult {
+  const errors: BulkOptionImportPlanError[] = [];
+  const plannedQuestions: PlannedBulkOptionQuestionImport[] = [];
+  const validQuestionGroups = params.validatedQuestionGroups
+    .filter((group) => group.isComplete)
+    .sort((left, right) => left.questionNumber - right.questionNumber);
+
+  if (!params.assessmentVersion) {
+    errors.push({
+      questionNumber: null,
+      code: 'ASSESSMENT_VERSION_NOT_FOUND',
+      message: 'The selected assessment version could not be found.',
+    });
+  } else if (params.assessmentVersion.lifecycleStatus !== 'DRAFT') {
+    errors.push({
+      questionNumber: null,
+      code: 'ASSESSMENT_VERSION_NOT_EDITABLE',
+      message: 'Bulk option import is allowed only for draft assessment versions.',
+    });
+  }
+
+  if (params.questions.length === 0) {
+    errors.push({
+      questionNumber: null,
+      code: 'QUESTION_SET_EMPTY',
+      message: 'The selected assessment version does not contain any questions.',
+    });
+  }
+
+  if (validQuestionGroups.length === 0) {
+    errors.push({
+      questionNumber: null,
+      code: 'IMPORT_HAS_NO_VALID_GROUPS',
+      message: 'No valid complete question groups are available to import.',
+    });
+  }
+
+  const questionNumbersToQuestions = new Map<number, BulkOptionImportTargetQuestion[]>();
+  for (const question of params.questions) {
+    const existingQuestions = questionNumbersToQuestions.get(question.questionNumber);
+    if (existingQuestions) {
+      existingQuestions.push(question);
+      continue;
+    }
+
+    questionNumbersToQuestions.set(question.questionNumber, [question]);
+  }
+
+  const duplicateQuestionNumbers = [...questionNumbersToQuestions.entries()]
+    .filter(([, questions]) => questions.length > 1)
+    .map(([questionNumber]) => questionNumber)
+    .sort((left, right) => left - right);
+
+  for (const questionNumber of duplicateQuestionNumbers) {
+    errors.push({
+      questionNumber,
+      code: 'DUPLICATE_QUESTION_NUMBER_IN_ASSESSMENT',
+      message: `Question number ${questionNumber} is duplicated in the target assessment version.`,
+    });
+  }
+
+  if (duplicateQuestionNumbers.length === 0) {
+    for (const questionGroup of validQuestionGroups) {
+      const matchedQuestion = questionNumbersToQuestions.get(questionGroup.questionNumber)?.[0] ?? null;
+      if (!matchedQuestion) {
+        errors.push({
+          questionNumber: questionGroup.questionNumber,
+          code: 'QUESTION_NUMBER_NOT_FOUND',
+          message: `Question number ${questionGroup.questionNumber} does not exist in the target assessment version.`,
+        });
+        continue;
+      }
+
+      plannedQuestions.push({
+        questionId: matchedQuestion.questionId,
+        questionNumber: matchedQuestion.questionNumber,
+        questionKey: matchedQuestion.questionKey,
+        existingOptionIds: [...matchedQuestion.existingOptionIds],
+        replacementOptions: BULK_OPTION_LABEL_ORDER.map((label, index) => ({
+          label,
+          text: questionGroup.options.find((option) => option.optionLabel === label)?.optionText ?? '',
+          order: index + 1,
+        })),
+      });
+    }
+  }
+
+  return {
+    success: errors.length === 0,
+    plannedQuestions,
+    errors: sortPlanErrors(errors),
+    summary: buildPlanSummary(
+      params.assessmentVersion?.assessmentVersionId ?? null,
+      validQuestionGroups.length,
+      plannedQuestions,
+    ),
   };
 }
 
@@ -452,4 +613,36 @@ function getLabelOrderIndex(label: ParsedBulkOptionRow['optionLabel']): number {
 
 function sortLineNumbers(lineNumbers: number[]): number[] {
   return [...lineNumbers].sort((left, right) => left - right);
+}
+
+function isBulkOptionLabel(value: string): value is BulkOptionLabel {
+  return ALLOWED_OPTION_LABELS.has(value as BulkOptionLabel);
+}
+
+function buildPlanSummary(
+  assessmentVersionId: string | null,
+  questionGroupCount: number,
+  plannedQuestions: readonly PlannedBulkOptionQuestionImport[],
+): BulkOptionImportPlanSummary {
+  return {
+    assessmentVersionId,
+    questionGroupCount,
+    questionsMatched: plannedQuestions.length,
+    optionsToInsert: plannedQuestions.reduce(
+      (count, question) => count + question.replacementOptions.length,
+      0,
+    ),
+    existingOptionsToDelete: plannedQuestions.reduce(
+      (count, question) => count + question.existingOptionIds.length,
+      0,
+    ),
+  };
+}
+
+function sortPlanErrors(errors: readonly BulkOptionImportPlanError[]): BulkOptionImportPlanError[] {
+  return [...errors].sort((left, right) => {
+    const leftQuestionNumber = left.questionNumber ?? -1;
+    const rightQuestionNumber = right.questionNumber ?? -1;
+    return leftQuestionNumber - rightQuestionNumber || left.code.localeCompare(right.code);
+  });
 }
