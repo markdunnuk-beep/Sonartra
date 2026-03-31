@@ -97,6 +97,85 @@ export type BulkWeightImportPreviewResult = {
   warnings: BulkWeightGroupValidationWarning[];
 };
 
+export type BulkWeightImportPlanErrorCode =
+  | 'ASSESSMENT_VERSION_NOT_FOUND'
+  | 'ASSESSMENT_VERSION_NOT_EDITABLE'
+  | 'QUESTION_NUMBER_NOT_FOUND'
+  | 'DUPLICATE_QUESTION_NUMBER_IN_ASSESSMENT'
+  | 'OPTION_LABEL_NOT_FOUND'
+  | 'DUPLICATE_OPTION_LABEL_FOR_QUESTION'
+  | 'SIGNAL_KEY_NOT_FOUND'
+  | 'DUPLICATE_SIGNAL_KEY_IN_ASSESSMENT'
+  | 'QUESTION_SET_EMPTY'
+  | 'SIGNAL_SET_EMPTY'
+  | 'IMPORT_HAS_NO_VALID_GROUPS';
+
+export type BulkWeightImportTargetAssessmentVersion = {
+  assessmentVersionId: string;
+  assessmentKey: string;
+  lifecycleStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+};
+
+export type BulkWeightImportTargetQuestion = {
+  questionId: string;
+  questionNumber: number;
+  questionKey: string;
+};
+
+export type BulkWeightImportTargetOption = {
+  optionId: string;
+  questionId: string;
+  questionNumber: number;
+  optionLabel: BulkWeightLabel;
+  optionKey: string;
+  existingWeightRowIds: string[];
+};
+
+export type BulkWeightImportTargetSignal = {
+  signalId: string;
+  signalKey: string;
+};
+
+export type PlannedBulkWeightReplacement = {
+  signalId: string;
+  signalKey: string;
+  weight: number;
+};
+
+export type PlannedBulkWeightGroupImport = {
+  questionId: string;
+  questionNumber: number;
+  optionId: string;
+  optionLabel: BulkWeightLabel;
+  optionKey: string;
+  existingWeightRowIds: string[];
+  replacementWeights: PlannedBulkWeightReplacement[];
+};
+
+export type BulkWeightImportPlanError = {
+  questionNumber: number | null;
+  optionLabel: BulkWeightLabel | null;
+  signalKey?: string;
+  code: BulkWeightImportPlanErrorCode;
+  message: string;
+};
+
+export type BulkWeightImportPlanSummary = {
+  assessmentVersionId: string | null;
+  optionGroupCount: number;
+  questionCountMatched: number;
+  optionGroupCountMatched: number;
+  weightsToInsert: number;
+  existingWeightsToDelete: number;
+};
+
+export type BulkWeightImportPlanResult = {
+  success: boolean;
+  plannedOptionGroups: PlannedBulkWeightGroupImport[];
+  errors: BulkWeightImportPlanError[];
+  summary: BulkWeightImportPlanSummary;
+};
+
 type ParseLineSuccess = {
   record: ParsedBulkWeightRow;
 };
@@ -174,6 +253,226 @@ export function buildBulkWeightImportPreview(input: string): BulkWeightImportPre
     weightGroups: groupValidation.weightGroups,
     groupErrors: groupValidation.errors,
     warnings: groupValidation.warnings,
+  };
+}
+
+export function buildBulkWeightImportPlan(params: {
+  assessmentVersion: BulkWeightImportTargetAssessmentVersion | null;
+  questions: readonly BulkWeightImportTargetQuestion[];
+  options: readonly BulkWeightImportTargetOption[];
+  signals: readonly BulkWeightImportTargetSignal[];
+  validatedWeightGroups: readonly ValidatedBulkWeightGroup[];
+}): BulkWeightImportPlanResult {
+  const errors: BulkWeightImportPlanError[] = [];
+  const plannedOptionGroups: PlannedBulkWeightGroupImport[] = [];
+  const validWeightGroups = sortBulkWeightGroups(
+    params.validatedWeightGroups.filter((group) => !group.isEmpty),
+  );
+
+  if (!params.assessmentVersion) {
+    errors.push({
+      questionNumber: null,
+      optionLabel: null,
+      code: 'ASSESSMENT_VERSION_NOT_FOUND',
+      message: 'The selected assessment version could not be found.',
+    });
+  } else if (params.assessmentVersion.lifecycleStatus !== 'DRAFT') {
+    errors.push({
+      questionNumber: null,
+      optionLabel: null,
+      code: 'ASSESSMENT_VERSION_NOT_EDITABLE',
+      message: 'Bulk weight import is allowed only for draft assessment versions.',
+    });
+  }
+
+  if (params.questions.length === 0) {
+    errors.push({
+      questionNumber: null,
+      optionLabel: null,
+      code: 'QUESTION_SET_EMPTY',
+      message: 'The selected assessment version does not contain any questions.',
+    });
+  }
+
+  if (params.signals.length === 0) {
+    errors.push({
+      questionNumber: null,
+      optionLabel: null,
+      code: 'SIGNAL_SET_EMPTY',
+      message: 'The selected assessment version does not contain any signals.',
+    });
+  }
+
+  if (validWeightGroups.length === 0) {
+    errors.push({
+      questionNumber: null,
+      optionLabel: null,
+      code: 'IMPORT_HAS_NO_VALID_GROUPS',
+      message: 'No valid weight groups are available to import.',
+    });
+  }
+
+  const questionsByNumber = new Map<number, BulkWeightImportTargetQuestion[]>();
+  for (const question of params.questions) {
+    const existing = questionsByNumber.get(question.questionNumber);
+    if (existing) {
+      existing.push(question);
+      continue;
+    }
+
+    questionsByNumber.set(question.questionNumber, [question]);
+  }
+
+  const duplicateQuestionNumbers = [...questionsByNumber.entries()]
+    .filter(([, questions]) => questions.length > 1)
+    .map(([questionNumber]) => questionNumber)
+    .sort((left, right) => left - right);
+
+  for (const questionNumber of duplicateQuestionNumbers) {
+    errors.push({
+      questionNumber,
+      optionLabel: null,
+      code: 'DUPLICATE_QUESTION_NUMBER_IN_ASSESSMENT',
+      message: `Question number ${questionNumber} is duplicated in the target assessment version.`,
+    });
+  }
+
+  const signalsByKey = new Map<string, BulkWeightImportTargetSignal[]>();
+  for (const signal of params.signals) {
+    const existing = signalsByKey.get(signal.signalKey);
+    if (existing) {
+      existing.push(signal);
+      continue;
+    }
+
+    signalsByKey.set(signal.signalKey, [signal]);
+  }
+
+  const duplicateSignalKeys = [...signalsByKey.entries()]
+    .filter(([, signals]) => signals.length > 1)
+    .map(([signalKey]) => signalKey)
+    .sort((left, right) => left.localeCompare(right));
+
+  for (const signalKey of duplicateSignalKeys) {
+    errors.push({
+      questionNumber: null,
+      optionLabel: null,
+      signalKey,
+      code: 'DUPLICATE_SIGNAL_KEY_IN_ASSESSMENT',
+      message: `Signal key ${signalKey} is duplicated in the target assessment version.`,
+    });
+  }
+
+  const optionsByQuestionIdAndLabel = new Map<string, BulkWeightImportTargetOption[]>();
+  for (const option of params.options) {
+    const key = buildBulkWeightGroupKey(option.questionNumber, option.optionLabel);
+    const existing = optionsByQuestionIdAndLabel.get(key);
+    if (existing) {
+      existing.push(option);
+      continue;
+    }
+
+    optionsByQuestionIdAndLabel.set(key, [option]);
+  }
+
+  const duplicateOptionEntries = [...optionsByQuestionIdAndLabel.entries()]
+    .filter(([, options]) => options.length > 1)
+    .map(([groupKey]) => parseWeightGroupKey(groupKey))
+    .sort(
+      (left, right) =>
+        left.questionNumber - right.questionNumber ||
+        getLabelOrderIndex(left.optionLabel) - getLabelOrderIndex(right.optionLabel),
+    );
+
+  for (const duplicateOption of duplicateOptionEntries) {
+    errors.push({
+      questionNumber: duplicateOption.questionNumber,
+      optionLabel: duplicateOption.optionLabel,
+      code: 'DUPLICATE_OPTION_LABEL_FOR_QUESTION',
+      message: `Question ${duplicateOption.questionNumber} contains duplicate option label ${duplicateOption.optionLabel} in the target assessment version.`,
+    });
+  }
+
+  if (
+    duplicateQuestionNumbers.length === 0 &&
+    duplicateSignalKeys.length === 0 &&
+    duplicateOptionEntries.length === 0
+  ) {
+    for (const weightGroup of validWeightGroups) {
+      const matchedQuestion = questionsByNumber.get(weightGroup.questionNumber)?.[0] ?? null;
+      if (!matchedQuestion) {
+        errors.push({
+          questionNumber: weightGroup.questionNumber,
+          optionLabel: weightGroup.optionLabel,
+          code: 'QUESTION_NUMBER_NOT_FOUND',
+          message: `Question number ${weightGroup.questionNumber} does not exist in the target assessment version.`,
+        });
+        continue;
+      }
+
+      const matchedOption =
+        optionsByQuestionIdAndLabel.get(
+          buildBulkWeightGroupKey(weightGroup.questionNumber, weightGroup.optionLabel),
+        )?.[0] ?? null;
+      if (!matchedOption) {
+        errors.push({
+          questionNumber: weightGroup.questionNumber,
+          optionLabel: weightGroup.optionLabel,
+          code: 'OPTION_LABEL_NOT_FOUND',
+          message: `Question ${weightGroup.questionNumber} does not contain option label ${weightGroup.optionLabel} in the target assessment version.`,
+        });
+        continue;
+      }
+
+      const replacementWeights: PlannedBulkWeightReplacement[] = [];
+      let groupHasMissingSignal = false;
+
+      for (const weightRow of weightGroup.weights) {
+        const matchedSignal = signalsByKey.get(weightRow.signalKey)?.[0] ?? null;
+        if (!matchedSignal) {
+          errors.push({
+            questionNumber: weightGroup.questionNumber,
+            optionLabel: weightGroup.optionLabel,
+            signalKey: weightRow.signalKey,
+            code: 'SIGNAL_KEY_NOT_FOUND',
+            message: `Signal key ${weightRow.signalKey} does not exist in the target assessment version.`,
+          });
+          groupHasMissingSignal = true;
+          continue;
+        }
+
+        replacementWeights.push({
+          signalId: matchedSignal.signalId,
+          signalKey: matchedSignal.signalKey,
+          weight: weightRow.weight,
+        });
+      }
+
+      if (groupHasMissingSignal) {
+        continue;
+      }
+
+      plannedOptionGroups.push({
+        questionId: matchedQuestion.questionId,
+        questionNumber: matchedQuestion.questionNumber,
+        optionId: matchedOption.optionId,
+        optionLabel: matchedOption.optionLabel,
+        optionKey: matchedOption.optionKey,
+        existingWeightRowIds: [...matchedOption.existingWeightRowIds],
+        replacementWeights,
+      });
+    }
+  }
+
+  return {
+    success: errors.length === 0,
+    plannedOptionGroups,
+    errors: sortPlanErrors(errors),
+    summary: buildWeightPlanSummary(
+      params.assessmentVersion?.assessmentVersionId ?? null,
+      validWeightGroups.length,
+      plannedOptionGroups,
+    ),
   };
 }
 
@@ -533,4 +832,41 @@ function getLabelOrderIndex(label: BulkWeightLabel): number {
 
 function sortLineNumbers(lineNumbers: number[]): number[] {
   return [...lineNumbers].sort((left, right) => left - right);
+}
+
+function buildWeightPlanSummary(
+  assessmentVersionId: string | null,
+  optionGroupCount: number,
+  plannedOptionGroups: readonly PlannedBulkWeightGroupImport[],
+): BulkWeightImportPlanSummary {
+  return {
+    assessmentVersionId,
+    optionGroupCount,
+    questionCountMatched: new Set(plannedOptionGroups.map((group) => group.questionId)).size,
+    optionGroupCountMatched: plannedOptionGroups.length,
+    weightsToInsert: plannedOptionGroups.reduce(
+      (count, group) => count + group.replacementWeights.length,
+      0,
+    ),
+    existingWeightsToDelete: plannedOptionGroups.reduce(
+      (count, group) => count + group.existingWeightRowIds.length,
+      0,
+    ),
+  };
+}
+
+function sortPlanErrors(errors: readonly BulkWeightImportPlanError[]): BulkWeightImportPlanError[] {
+  return [...errors].sort((left, right) => {
+    const leftQuestionNumber = left.questionNumber ?? -1;
+    const rightQuestionNumber = right.questionNumber ?? -1;
+    const leftOptionOrder = left.optionLabel ? getLabelOrderIndex(left.optionLabel) : -1;
+    const rightOptionOrder = right.optionLabel ? getLabelOrderIndex(right.optionLabel) : -1;
+
+    return (
+      leftQuestionNumber - rightQuestionNumber ||
+      leftOptionOrder - rightOptionOrder ||
+      left.code.localeCompare(right.code) ||
+      (left.signalKey ?? '').localeCompare(right.signalKey ?? '')
+    );
+  });
 }
