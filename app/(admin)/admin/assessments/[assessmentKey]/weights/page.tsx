@@ -20,9 +20,7 @@ export default function AdminAssessmentWeightsPage() {
     <AdminWeightingAuthoring
       assessmentKey={assessment.assessmentKey}
       assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
-      isEditableAssessmentVersion={
-        assessment.latestDraftVersion.lifecycleStatus === 'DRAFT'
-      }
+      isEditableAssessmentVersion={Boolean(assessment.latestDraftVersion)}
       availableSignals={assessment.availableSignals}
       questions={assessment.authoredQuestions}
       weightingSummary={assessment.weightingSummary}
