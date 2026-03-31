@@ -8,7 +8,10 @@ import {
   type ParsedBulkOptionRow,
   validateBulkOptionGroups,
 } from '@/lib/admin/bulk-option-import';
-import { importBulkOptionsForAssessmentVersionWithDependencies } from '@/lib/server/admin-bulk-option-import';
+import {
+  importBulkOptionsForAssessmentVersionWithDependencies,
+  previewBulkOptionsForAssessmentVersionWithDependencies,
+} from '@/lib/server/admin-bulk-option-import';
 
 type StoredAssessment = {
   id: string;
@@ -407,6 +410,61 @@ test('preserves A-D option ordering in replacement plan', () => {
   );
 });
 
+test('preview returns grouped question plan for a valid draft payload', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'signals' }],
+    versions: [{ id: 'version-1', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+    questions: [{ id: 'question-1', assessmentVersionId: 'version-1', questionKey: 'q01', orderIndex: 0 }],
+    options: [
+      { id: 'option-1', assessmentVersionId: 'version-1', questionId: 'question-1', optionKey: 'q01_a', optionLabel: 'A', optionText: 'Old A', orderIndex: 1 },
+      { id: 'option-2', assessmentVersionId: 'version-1', questionId: 'question-1', optionKey: 'q01_b', optionLabel: 'B', optionText: 'Old B', orderIndex: 2 },
+    ],
+  });
+
+  const result = await previewBulkOptionsForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-1',
+      rawInput: ['1|A|New A', '1|B|New B', '1|C|New C', '1|D|New D'].join('\n'),
+    },
+    {
+      db: fake.client,
+    },
+  );
+
+  assert.equal(result.success, true);
+  assert.equal(result.canImport, true);
+  assert.equal(result.summary.questionGroupCount, 1);
+  assert.equal(result.summary.questionsMatched, 1);
+  assert.equal(result.summary.optionsInserted, 4);
+  assert.equal(result.summary.existingOptionsDeleted, 2);
+  assert.deepEqual(
+    result.plannedQuestions[0]?.replacementOptions.map((option) => option.label),
+    ['A', 'B', 'C', 'D'],
+  );
+});
+
+test('preview returns planner errors and disables import for non-draft versions', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'signals' }],
+    versions: [{ id: 'version-1', assessmentId: 'assessment-1', lifecycleStatus: 'PUBLISHED' }],
+    questions: [{ id: 'question-1', assessmentVersionId: 'version-1', questionKey: 'q01', orderIndex: 0 }],
+  });
+
+  const result = await previewBulkOptionsForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-1',
+      rawInput: ['1|A|A', '1|B|B', '1|C|C', '1|D|D'].join('\n'),
+    },
+    {
+      db: fake.client,
+    },
+  );
+
+  assert.equal(result.success, false);
+  assert.equal(result.canImport, false);
+  assert.equal(result.planErrors[0]?.code, 'ASSESSMENT_VERSION_NOT_EDITABLE');
+});
+
 test('replaces existing options for one question in one transaction', async () => {
   const fake = createFakeDb({
     assessments: [{ id: 'assessment-1', assessmentKey: 'signals' }],
@@ -646,6 +704,7 @@ test('returns correct summary counts after successful import', async () => {
   assert.equal(result.success, true);
   assert.deepEqual(result.summary, {
     assessmentVersionId: 'version-1',
+    questionGroupCount: 2,
     questionsMatched: 2,
     questionsImported: 2,
     optionsInserted: 8,

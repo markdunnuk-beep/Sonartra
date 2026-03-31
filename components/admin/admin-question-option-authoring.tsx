@@ -10,6 +10,7 @@ import {
   SurfaceCard,
   cn,
 } from '@/components/shared/user-app-ui';
+import { AdminBulkOptionImport } from '@/components/admin/admin-bulk-option-import';
 import {
   emptyAdminBulkQuestionAuthoringFormValues,
   emptyAdminBulkQuestionByDomainAuthoringFormValues,
@@ -1238,6 +1239,13 @@ export function AdminQuestionOptionAuthoring({
                 domains={domains}
               />
             </>
+          ) : null}
+
+          {showResponseControls ? (
+            <AdminBulkOptionImport
+              assessmentVersionId={assessmentVersionId}
+              isEditableAssessmentVersion
+            />
           ) : null}
 
           {questions.length === 0 ? (

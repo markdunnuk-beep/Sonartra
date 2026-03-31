@@ -29,6 +29,10 @@ type BulkOptionImportDependencies = {
   revalidatePath(path: string): void;
 };
 
+type BulkOptionImportPreviewDependencies = {
+  db: Queryable;
+};
+
 type AssessmentVersionRow = {
   assessment_key: string;
   assessment_version_id: string;
@@ -68,18 +72,121 @@ export type BulkOptionImportExecutionSummary = {
   existingOptionsDeleted: number;
 };
 
-export type BulkOptionImportExecutionResult = {
+export type BulkOptionImportPreviewSummary = {
+  assessmentVersionId: string | null;
+  questionGroupCount: number;
+  questionsMatched: number;
+  questionsImported: number;
+  optionsInserted: number;
+  existingOptionsDeleted: number;
+};
+
+export type BulkOptionImportPreviewResult = {
   success: boolean;
+  canImport: boolean;
   parseErrors: BulkOptionParseError[];
   groupErrors: BulkOptionGroupValidationError[];
   planErrors: BulkOptionImportPlanError[];
   warnings: BulkOptionGroupValidationWarning[];
-  summary: BulkOptionImportExecutionSummary;
+  questionGroups: ReturnType<typeof buildBulkOptionImportPreview>['questionGroups'];
+  plannedQuestions: readonly PlannedBulkOptionQuestionImport[];
+  summary: BulkOptionImportPreviewSummary;
+  executionError: string | null;
+};
+
+export type BulkOptionImportExecutionResult = {
+  success: boolean;
+  canImport: boolean;
+  parseErrors: BulkOptionParseError[];
+  groupErrors: BulkOptionGroupValidationError[];
+  planErrors: BulkOptionImportPlanError[];
+  warnings: BulkOptionGroupValidationWarning[];
+  questionGroups: ReturnType<typeof buildBulkOptionImportPreview>['questionGroups'];
+  plannedQuestions: readonly PlannedBulkOptionQuestionImport[];
+  summary: BulkOptionImportExecutionSummary & {
+    questionGroupCount: number;
+  };
   importedQuestionCount: number;
   importedOptionCount: number;
   skippedQuestionCount: number;
   executionError: string | null;
 };
+
+function authoringPath(assessmentKey: string): string {
+  return `/admin/assessments/${assessmentKey}`;
+}
+
+function responsesAuthoringPath(assessmentKey: string): string {
+  return `${authoringPath(assessmentKey)}/responses`;
+}
+
+export async function previewBulkOptionsForAssessmentVersion(
+  command: BulkOptionImportCommand,
+): Promise<BulkOptionImportPreviewResult> {
+  return previewBulkOptionsForAssessmentVersionWithDependencies(command, {
+    db: getDbPool(),
+  });
+}
+
+export async function previewBulkOptionsForAssessmentVersionWithDependencies(
+  command: BulkOptionImportCommand,
+  dependencies: BulkOptionImportPreviewDependencies,
+): Promise<BulkOptionImportPreviewResult> {
+  const preview = buildBulkOptionImportPreview(command.rawInput);
+
+  if (preview.parseErrors.length > 0 || preview.groupErrors.length > 0) {
+    return buildPreviewResult({
+      success: false,
+      canImport: false,
+      parseErrors: preview.parseErrors,
+      groupErrors: preview.groupErrors,
+      planErrors: [],
+      warnings: preview.warnings,
+      questionGroups: preview.questionGroups,
+      plannedQuestions: [],
+      summary: {
+        assessmentVersionId: command.assessmentVersionId,
+        questionGroupCount: preview.questionGroups.length,
+        questionsMatched: 0,
+        questionsImported: 0,
+        optionsInserted: 0,
+        existingOptionsDeleted: 0,
+      },
+      executionError: null,
+    });
+  }
+
+  const assessmentVersion = await loadAssessmentVersionForImport(
+    dependencies.db,
+    command.assessmentVersionId,
+  );
+  const questions = await loadTargetQuestionsForImport(dependencies.db, command.assessmentVersionId);
+  const plan = buildBulkOptionImportPlan({
+    assessmentVersion,
+    questions,
+    validatedQuestionGroups: preview.questionGroups,
+  });
+
+  return buildPreviewResult({
+    success: plan.success,
+    canImport: plan.success,
+    parseErrors: preview.parseErrors,
+    groupErrors: preview.groupErrors,
+    planErrors: plan.errors,
+    warnings: preview.warnings,
+    questionGroups: preview.questionGroups,
+    plannedQuestions: plan.plannedQuestions,
+    summary: {
+      assessmentVersionId: plan.summary.assessmentVersionId,
+      questionGroupCount: plan.summary.questionGroupCount,
+      questionsMatched: plan.summary.questionsMatched,
+      questionsImported: 0,
+      optionsInserted: plan.summary.optionsToInsert,
+      existingOptionsDeleted: plan.summary.existingOptionsToDelete,
+    },
+    executionError: null,
+  });
+}
 
 export async function importBulkOptionsForAssessmentVersion(
   command: BulkOptionImportCommand,
@@ -103,6 +210,9 @@ export async function importBulkOptionsForAssessmentVersionWithDependencies(
       groupErrors: preview.groupErrors,
       planErrors: [],
       warnings: preview.warnings,
+      questionGroups: preview.questionGroups,
+      plannedQuestions: [],
+      questionGroupCount: preview.questionGroups.length,
       questionsMatched: 0,
       executionError: null,
     });
@@ -130,6 +240,9 @@ export async function importBulkOptionsForAssessmentVersionWithDependencies(
         groupErrors: preview.groupErrors,
         planErrors: plan.errors,
         warnings: preview.warnings,
+        questionGroups: preview.questionGroups,
+        plannedQuestions: plan.plannedQuestions,
+        questionGroupCount: plan.summary.questionGroupCount,
         questionsMatched: plan.summary.questionsMatched,
         executionError: null,
       });
@@ -144,15 +257,22 @@ export async function importBulkOptionsForAssessmentVersionWithDependencies(
     await client.query('COMMIT');
 
     dependencies.revalidatePath('/admin/assessments');
-    dependencies.revalidatePath(`/admin/assessments/${assessmentVersion.assessmentKey}`);
+    dependencies.revalidatePath(authoringPath(assessmentVersion.assessmentKey));
+    dependencies.revalidatePath(responsesAuthoringPath(assessmentVersion.assessmentKey));
 
     return {
       success: true,
+      canImport: false,
       parseErrors: [],
       groupErrors: [],
       planErrors: [],
       warnings: preview.warnings,
-      summary: executionSummary,
+      questionGroups: preview.questionGroups,
+      plannedQuestions: plan.plannedQuestions,
+      summary: {
+        ...executionSummary,
+        questionGroupCount: plan.summary.questionGroupCount,
+      },
       importedQuestionCount: executionSummary.questionsImported,
       importedOptionCount: executionSummary.optionsInserted,
       skippedQuestionCount: 0,
@@ -169,6 +289,9 @@ export async function importBulkOptionsForAssessmentVersionWithDependencies(
       groupErrors: preview.groupErrors,
       planErrors: [],
       warnings: preview.warnings,
+      questionGroups: preview.questionGroups,
+      plannedQuestions: [],
+      questionGroupCount: preview.questionGroups.length,
       questionsMatched: 0,
       executionError: 'Bulk option import could not be saved. Try again.',
     });
@@ -323,17 +446,24 @@ function buildFailedExecutionResult(params: {
   groupErrors: BulkOptionGroupValidationError[];
   planErrors: BulkOptionImportPlanError[];
   warnings: BulkOptionGroupValidationWarning[];
+  questionGroups: ReturnType<typeof buildBulkOptionImportPreview>['questionGroups'];
+  plannedQuestions: readonly PlannedBulkOptionQuestionImport[];
+  questionGroupCount: number;
   questionsMatched: number;
   executionError: string | null;
 }): BulkOptionImportExecutionResult {
   return {
     success: false,
+    canImport: false,
     parseErrors: params.parseErrors,
     groupErrors: params.groupErrors,
     planErrors: params.planErrors,
     warnings: params.warnings,
+    questionGroups: params.questionGroups,
+    plannedQuestions: params.plannedQuestions,
     summary: {
       assessmentVersionId: params.assessmentVersionId,
+      questionGroupCount: params.questionGroupCount,
       questionsMatched: params.questionsMatched,
       questionsImported: 0,
       optionsInserted: 0,
@@ -344,4 +474,10 @@ function buildFailedExecutionResult(params: {
     skippedQuestionCount: params.questionsMatched,
     executionError: params.executionError,
   };
+}
+
+function buildPreviewResult(
+  result: BulkOptionImportPreviewResult,
+): BulkOptionImportPreviewResult {
+  return result;
 }
