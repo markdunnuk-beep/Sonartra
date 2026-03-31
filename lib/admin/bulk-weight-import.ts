@@ -41,6 +41,62 @@ export type BulkWeightParseResult = {
   errors: BulkWeightParseError[];
 };
 
+export type BulkWeightGroupValidationErrorCode =
+  | 'DUPLICATE_SIGNAL_KEY'
+  | 'EMPTY_WEIGHT_GROUP';
+
+export type BulkWeightGroupValidationWarningCode =
+  | 'ZERO_ONLY_WEIGHT_GROUP'
+  | 'NEGATIVE_ONLY_WEIGHT_GROUP';
+
+export type ValidatedBulkWeightPreviewRow = Pick<
+  ParsedBulkWeightRow,
+  'lineNumber' | 'signalKey' | 'weight'
+>;
+
+export type ValidatedBulkWeightGroup = {
+  questionNumber: number;
+  optionLabel: BulkWeightLabel;
+  groupKey: string;
+  weights: ValidatedBulkWeightPreviewRow[];
+  weightCount: number;
+  isEmpty: boolean;
+  allZero: boolean;
+  allNegative: boolean;
+};
+
+export type BulkWeightGroupValidationError = {
+  questionNumber: number;
+  optionLabel: BulkWeightLabel;
+  code: BulkWeightGroupValidationErrorCode;
+  message: string;
+  lineNumbers: number[];
+};
+
+export type BulkWeightGroupValidationWarning = {
+  questionNumber: number;
+  optionLabel: BulkWeightLabel;
+  code: BulkWeightGroupValidationWarningCode;
+  message: string;
+  lineNumbers: number[];
+};
+
+export type BulkWeightGroupValidationResult = {
+  success: boolean;
+  weightGroups: ValidatedBulkWeightGroup[];
+  errors: BulkWeightGroupValidationError[];
+  warnings: BulkWeightGroupValidationWarning[];
+};
+
+export type BulkWeightImportPreviewResult = {
+  success: boolean;
+  records: ParsedBulkWeightRow[];
+  parseErrors: BulkWeightParseError[];
+  weightGroups: ValidatedBulkWeightGroup[];
+  groupErrors: BulkWeightGroupValidationError[];
+  warnings: BulkWeightGroupValidationWarning[];
+};
+
 type ParseLineSuccess = {
   record: ParsedBulkWeightRow;
 };
@@ -75,6 +131,49 @@ export function parseBulkWeightImport(input: string): BulkWeightParseResult {
     success: errors.length === 0,
     records,
     errors,
+  };
+}
+
+export function validateBulkWeightGroups(
+  records: ParsedBulkWeightRow[],
+): BulkWeightGroupValidationResult {
+  const groupedRows = groupBulkWeightRows(records);
+  const groupKeys = [...groupedRows.keys()].sort(compareWeightGroupKeys);
+  const weightGroups: ValidatedBulkWeightGroup[] = [];
+  const errors: BulkWeightGroupValidationError[] = [];
+  const warnings: BulkWeightGroupValidationWarning[] = [];
+
+  for (const groupKey of groupKeys) {
+    const rows = groupedRows.get(groupKey) ?? [];
+    const validation = validateBulkWeightGroup(rows);
+
+    weightGroups.push(validation.weightGroup);
+    errors.push(...validation.errors);
+    warnings.push(...validation.warnings);
+  }
+
+  errors.sort(compareGroupedIssues);
+  warnings.sort(compareGroupedIssues);
+
+  return {
+    success: errors.length === 0,
+    weightGroups,
+    errors,
+    warnings,
+  };
+}
+
+export function buildBulkWeightImportPreview(input: string): BulkWeightImportPreviewResult {
+  const parsedResult = parseBulkWeightImport(input);
+  const groupValidation = validateBulkWeightGroups(parsedResult.records);
+
+  return {
+    success: parsedResult.errors.length === 0 && groupValidation.errors.length === 0,
+    records: parsedResult.records,
+    parseErrors: parsedResult.errors,
+    weightGroups: groupValidation.weightGroups,
+    groupErrors: groupValidation.errors,
+    warnings: groupValidation.warnings,
   };
 }
 
@@ -232,6 +331,141 @@ export function parseBulkWeightValue(value: string): number | null {
   return parsedValue;
 }
 
+export function groupBulkWeightRows(
+  records: ParsedBulkWeightRow[],
+): Map<string, ParsedBulkWeightRow[]> {
+  const groupedRows = new Map<string, ParsedBulkWeightRow[]>();
+
+  for (const record of records) {
+    const groupKey = buildBulkWeightGroupKey(record.questionNumber, record.optionLabel);
+    const existingRows = groupedRows.get(groupKey);
+    if (existingRows) {
+      existingRows.push(record);
+      continue;
+    }
+
+    groupedRows.set(groupKey, [record]);
+  }
+
+  return groupedRows;
+}
+
+export function buildBulkWeightGroupKey(questionNumber: number, optionLabel: BulkWeightLabel): string {
+  return `${questionNumber}|${optionLabel}`;
+}
+
+type WeightGroupValidation = {
+  weightGroup: ValidatedBulkWeightGroup;
+  errors: BulkWeightGroupValidationError[];
+  warnings: BulkWeightGroupValidationWarning[];
+};
+
+export function validateBulkWeightGroup(rows: ParsedBulkWeightRow[]): WeightGroupValidation {
+  const firstRow = rows[0];
+  const questionNumber = firstRow?.questionNumber ?? 0;
+  const optionLabel = firstRow?.optionLabel ?? 'A';
+  const sortedRows = sortWeightRowsWithinGroup(rows);
+  const lineNumbers = sortLineNumbers(rows.map((row) => row.lineNumber));
+  const duplicateSignalKeys = findDuplicateSignalKeys(rows);
+  const isEmpty = rows.length === 0;
+  const allZero = rows.length > 0 && rows.every((row) => Object.is(row.weight, 0));
+  const allNegative = rows.length > 0 && rows.every((row) => row.weight < 0);
+  const errors: BulkWeightGroupValidationError[] = [];
+  const warnings: BulkWeightGroupValidationWarning[] = [];
+
+  if (isEmpty) {
+    errors.push({
+      questionNumber,
+      optionLabel,
+      code: 'EMPTY_WEIGHT_GROUP',
+      message: `Question ${questionNumber} option ${optionLabel} does not contain any weight rows.`,
+      lineNumbers: [],
+    });
+  }
+
+  if (duplicateSignalKeys.length > 0) {
+    const duplicateLineNumbers = duplicateSignalKeys.flatMap((signalKey) =>
+      rows.filter((row) => row.signalKey === signalKey).map((row) => row.lineNumber),
+    );
+    errors.push({
+      questionNumber,
+      optionLabel,
+      code: 'DUPLICATE_SIGNAL_KEY',
+      message: `Question ${questionNumber} option ${optionLabel} contains duplicate signal keys: ${duplicateSignalKeys.join(', ')}.`,
+      lineNumbers: sortLineNumbers(duplicateLineNumbers),
+    });
+  }
+
+  if (allZero) {
+    warnings.push({
+      questionNumber,
+      optionLabel,
+      code: 'ZERO_ONLY_WEIGHT_GROUP',
+      message: `Question ${questionNumber} option ${optionLabel} contains only zero weights.`,
+      lineNumbers,
+    });
+  }
+
+  if (allNegative) {
+    warnings.push({
+      questionNumber,
+      optionLabel,
+      code: 'NEGATIVE_ONLY_WEIGHT_GROUP',
+      message: `Question ${questionNumber} option ${optionLabel} contains only negative weights.`,
+      lineNumbers,
+    });
+  }
+
+  return {
+    weightGroup: {
+      questionNumber,
+      optionLabel,
+      groupKey: buildBulkWeightGroupKey(questionNumber, optionLabel),
+      weights: sortedRows.map((row) => ({
+        lineNumber: row.lineNumber,
+        signalKey: row.signalKey,
+        weight: row.weight,
+      })),
+      weightCount: rows.length,
+      isEmpty,
+      allZero,
+      allNegative,
+    },
+    errors,
+    warnings,
+  };
+}
+
+export function findDuplicateSignalKeys(rows: ParsedBulkWeightRow[]): string[] {
+  const signalKeyCounts = new Map<string, number>();
+
+  for (const row of rows) {
+    signalKeyCounts.set(row.signalKey, (signalKeyCounts.get(row.signalKey) ?? 0) + 1);
+  }
+
+  return [...signalKeyCounts.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([signalKey]) => signalKey)
+    .sort((left, right) => left.localeCompare(right));
+}
+
+export function sortBulkWeightGroups(
+  groups: ValidatedBulkWeightGroup[],
+): ValidatedBulkWeightGroup[] {
+  return [...groups].sort(
+    (left, right) =>
+      left.questionNumber - right.questionNumber ||
+      getLabelOrderIndex(left.optionLabel) - getLabelOrderIndex(right.optionLabel),
+  );
+}
+
+export function sortWeightRowsWithinGroup(rows: ParsedBulkWeightRow[]): ParsedBulkWeightRow[] {
+  return [...rows].sort(
+    (left, right) =>
+      left.signalKey.localeCompare(right.signalKey) || left.lineNumber - right.lineNumber,
+  );
+}
+
 function parseQuestionNumber(value: string): number | null {
   const normalizedValue = value.trim();
   if (!/^\d+$/.test(normalizedValue)) {
@@ -262,4 +496,41 @@ function createParseError(
 
 function isBulkWeightLabel(value: string): value is BulkWeightLabel {
   return ALLOWED_OPTION_LABELS.has(value as BulkWeightLabel);
+}
+
+function compareGroupedIssues(
+  left: { questionNumber: number; optionLabel: BulkWeightLabel; code: string },
+  right: { questionNumber: number; optionLabel: BulkWeightLabel; code: string },
+): number {
+  return (
+    left.questionNumber - right.questionNumber ||
+    getLabelOrderIndex(left.optionLabel) - getLabelOrderIndex(right.optionLabel) ||
+    left.code.localeCompare(right.code)
+  );
+}
+
+function compareWeightGroupKeys(left: string, right: string): number {
+  const leftParts = parseWeightGroupKey(left);
+  const rightParts = parseWeightGroupKey(right);
+
+  return (
+    leftParts.questionNumber - rightParts.questionNumber ||
+    getLabelOrderIndex(leftParts.optionLabel) - getLabelOrderIndex(rightParts.optionLabel)
+  );
+}
+
+function parseWeightGroupKey(value: string): { questionNumber: number; optionLabel: BulkWeightLabel } {
+  const [questionNumberValue, optionLabelValue] = value.split('|');
+  return {
+    questionNumber: Number.parseInt(questionNumberValue ?? '0', 10),
+    optionLabel: normalizeBulkWeightOptionLabel(optionLabelValue ?? 'A') ?? 'A',
+  };
+}
+
+function getLabelOrderIndex(label: BulkWeightLabel): number {
+  return BULK_WEIGHT_OPTION_LABEL_ORDER.indexOf(label);
+}
+
+function sortLineNumbers(lineNumbers: number[]): number[] {
+  return [...lineNumbers].sort((left, right) => left - right);
 }
