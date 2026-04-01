@@ -167,6 +167,19 @@ test('result detail hero is narrative-first and no longer leads with derived sig
   assert.doesNotMatch(source, /heroPrimarySignalChips/);
 });
 
+test('result detail page keeps personalisation prep outside UI prose generation', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /import \{ getRequestUserId \} from '@\/lib\/server\/request-user';/);
+  assert.doesNotMatch(source, /getRequestUserContext/);
+  assert.doesNotMatch(source, /userEmail/);
+  assert.doesNotMatch(source, /displayName/);
+  assert.doesNotMatch(source, /fullName/);
+  assert.doesNotMatch(source, /firstName/);
+  assert.doesNotMatch(source, /, you tend to/);
+  assert.doesNotMatch(source, /, your natural style is/);
+});
+
 test('result detail action section uses a report-style three-column layout without analytic badge treatment', () => {
   const source = readFileSync(pagePath, 'utf8');
 
