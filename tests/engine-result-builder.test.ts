@@ -244,7 +244,7 @@ test('interpretation boundary receives language bundle context even when unused'
         },
       },
       pairs: {
-        style_analyst_style_driver: {
+        analyst_driver: {
           summary: 'Unused pair summary',
         },
       },
@@ -254,7 +254,7 @@ test('interpretation boundary receives language bundle context even when unused'
         },
       },
       overview: {
-        style_analyst_style_driver: {
+        analyst_driver: {
           headline: 'Unused overview headline',
         },
       },
@@ -617,6 +617,181 @@ test('overview summary classification is deterministic for concentrated profiles
 
   assert.equal(payload.overviewSummary.headline, 'A clear operating preference is coming through');
   assert.match(payload.overviewSummary.narrative, /dependable way to approach work/i);
+});
+
+test('overview summary uses pair language summary when the resolved canonical pair has one', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 46,
+      domainPercentage: 46,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 4,
+      percentage: 33,
+      domainPercentage: 33,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-mastery',
+      signalKey: 'mot_mastery',
+      title: 'Mastery',
+      domainId: 'domain-mot',
+      domainKey: 'signal_mot',
+      rawTotal: 2,
+      percentage: 21,
+      domainPercentage: 21,
+      rank: 3,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {
+          analyst_driver: {
+            summary: 'Pair-language overview for the dominant analyst-driver combination.',
+          },
+        },
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.ok(isCanonicalResultPayload(payload));
+  assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
+  assert.equal(
+    payload.overviewSummary.narrative,
+    'Pair-language overview for the dominant analyst-driver combination.',
+  );
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+});
+
+test('overview summary falls back unchanged when pair language summary is missing', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 46,
+      domainPercentage: 46,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 4,
+      percentage: 33,
+      domainPercentage: 33,
+      rank: 2,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {
+          analyst_driver: {
+            strength: 'Present but not used for overview.',
+          },
+        },
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
+});
+
+test('overview pair-language lookup is canonical even when the top two signals resolve in reverse lexical order', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 44,
+          domainPercentage: 44,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-analyst',
+          signalKey: 'style_analyst',
+          title: 'Analyst',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 4,
+          percentage: 39,
+          domainPercentage: 39,
+          rank: 2,
+        }),
+      ]),
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {
+          analyst_driver: {
+            summary: 'Canonical pair summary.',
+          },
+        },
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.overviewSummary.narrative, 'Canonical pair summary.');
 });
 
 test('overview summary uses top-signal interpretation when a mapped signal leads', () => {
@@ -1004,5 +1179,52 @@ test('repeated runs with the same normalized input are byte-stable', () => {
   const first = buildCanonicalResultPayload({ normalizedResult });
   const second = buildCanonicalResultPayload({ normalizedResult });
 
+  assert.equal(JSON.stringify(first), JSON.stringify(second));
+});
+
+test('repeated runs with pair-language overview summary remain byte-stable', () => {
+  const normalizedResult = buildNormalizedResultFixture({
+    signalScores: Object.freeze([
+      buildNormalizedSignal({
+        signalId: 'signal-support',
+        signalKey: 'support_drive',
+        title: 'Support Drive',
+        domainId: 'domain-signals',
+        domainKey: 'signals',
+        rawTotal: 4,
+        percentage: 57,
+        domainPercentage: 57,
+        rank: 1,
+      }),
+      buildNormalizedSignal({
+        signalId: 'signal-core',
+        signalKey: 'core_focus',
+        title: 'Core Focus',
+        domainId: 'domain-signals',
+        domainKey: 'signals',
+        rawTotal: 3,
+        percentage: 43,
+        domainPercentage: 43,
+        rank: 2,
+      }),
+    ]),
+    domainSummaries: Object.freeze([]),
+    topSignalId: 'signal-support',
+    languageBundle: {
+      signals: {},
+      pairs: {
+        drive_focus: {
+          summary: 'Consistent custom overview.',
+        },
+      },
+      domains: {},
+      overview: {},
+    },
+  });
+
+  const first = buildCanonicalResultPayload({ normalizedResult });
+  const second = buildCanonicalResultPayload({ normalizedResult });
+
+  assert.equal(first.overviewSummary.narrative, 'Consistent custom overview.');
   assert.equal(JSON.stringify(first), JSON.stringify(second));
 });

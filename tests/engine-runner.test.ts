@@ -355,6 +355,67 @@ test('engine path loads language bundle for a valid assessment version and leave
   assert.match(payload.overviewSummary.narrative, /dependable way to approach work/i);
 });
 
+test('engine path uses pair-language summary for overview narrative only when available', async () => {
+  const definition = buildDefinition();
+  const repository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return {
+        signals: {},
+        pairs: {
+          drive_focus: {
+            summary: 'Custom pair-language overview from the assessment version.',
+          },
+        },
+        domains: {},
+        overview: {},
+      };
+    },
+  };
+
+  const baselineRepository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return createEmptyLanguageBundle();
+    },
+  };
+
+  const baseline = await runAssessmentEngine({
+    repository: baselineRepository,
+    assessmentVersionId: 'version-1',
+    responses: buildResponses({
+      'question-1': 'option-2',
+      'question-2': 'option-3',
+    }),
+  });
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    responses: buildResponses({
+      'question-1': 'option-2',
+      'question-2': 'option-3',
+    }),
+  });
+
+  assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
+  assert.equal(payload.overviewSummary.narrative, 'Custom pair-language overview from the assessment version.');
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+});
+
 test('empty language bundle is handled safely and result generation still succeeds', async () => {
   const definition = buildDefinition();
   const repository: AssessmentDefinitionRepository = {

@@ -5,6 +5,7 @@ import type {
   ResultInterpretationContext,
   ResultOverviewSummary,
 } from '@/lib/engine/types';
+import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 
 const CONCENTRATED_TOP_SIGNAL_THRESHOLD = 45;
 const BALANCED_TOP_TWO_GAP_THRESHOLD = 8;
@@ -387,9 +388,41 @@ function getUniqueSignals(signalScores: readonly NormalizedSignalScore[], count:
   return unique;
 }
 
+function getSignalPairLookupToken(signalKey: string): string {
+  const segments = signalKey.split('_').filter((segment) => segment.length > 0);
+  return segments[segments.length - 1] ?? signalKey;
+}
+
+function resolvePairLanguageSummary(
+  signalScores: readonly NormalizedSignalScore[],
+  context?: ResultInterpretationContext,
+): string | null {
+  if (!context) {
+    return null;
+  }
+
+  const rankedSignals = getTopSignalsInRankOrder(signalScores);
+  const topSignal = rankedSignals[0];
+  const secondSignal = rankedSignals[1];
+
+  if (!topSignal || !secondSignal) {
+    return null;
+  }
+
+  const canonicalPair = canonicalizeSignalPairKey(
+    `${getSignalPairLookupToken(topSignal.signalKey)}_${getSignalPairLookupToken(secondSignal.signalKey)}`,
+  );
+  if (!canonicalPair.success) {
+    return null;
+  }
+
+  const summary = context.languageBundle.pairs[canonicalPair.canonicalSignalPair]?.summary?.trim();
+  return summary ? summary : null;
+}
+
 export function buildOverviewSummary(
   normalizedResult: NormalizedResult,
-  _context?: ResultInterpretationContext,
+  context?: ResultInterpretationContext,
 ): ResultOverviewSummary {
   const rankedSignals = getTopSignalsInRankOrder(normalizedResult.signalScores);
   const topSignal = rankedSignals[0];
@@ -403,6 +436,7 @@ export function buildOverviewSummary(
   }
 
   const topTemplate = getSignalTemplate(topSignal.signalKey);
+  const pairLanguageSummary = resolvePairLanguageSummary(rankedSignals, context);
   const distribution = classifyDistribution(rankedSignals);
   let supportSentence = topTemplate.impact;
 
@@ -418,7 +452,7 @@ export function buildOverviewSummary(
 
   return {
     headline: topTemplate.headline,
-    narrative: `${topTemplate.hero} ${supportSentence}`,
+    narrative: pairLanguageSummary ?? `${topTemplate.hero} ${supportSentence}`,
   };
 }
 
