@@ -1,5 +1,8 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
-import { getAdminAssessmentDetailByKey, type AdminAssessmentDetailVersion } from '@/lib/server/admin-assessment-detail';
+import {
+  getAdminAssessmentDetailByKey,
+  type AdminAssessmentDetailVersion,
+} from '@/lib/server/admin-assessment-detail';
 import { getAssessmentVersionLanguageBundle } from '@/lib/server/assessment-version-language';
 
 export type AdminAssessmentLanguageDatasetSummary = {
@@ -16,7 +19,7 @@ export type AdminAssessmentLanguageDatasetCounts = {
 export type AdminAssessmentLanguageActiveVersion = {
   assessmentVersionId: string;
   versionTag: string;
-  status: 'draft' | 'published';
+  status: 'draft' | 'published' | 'archived';
 };
 
 export type AdminAssessmentLanguageStepViewModel = {
