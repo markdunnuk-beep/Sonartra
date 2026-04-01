@@ -8,6 +8,7 @@ import type {
   AssessmentResultSignalViewModel,
 } from '@/lib/server/result-read-model-types';
 import { getDbPool } from '@/lib/server/db';
+import { getResultDetailDomains } from '@/lib/server/result-detail-domain-view';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import { AssessmentResultNotFoundError } from '@/lib/server/result-read-model-types';
@@ -20,66 +21,6 @@ type ResultDetailPageProps = {
 
 const PROMINENT_SIGNAL_LIMIT = 5;
 const VISIBLE_ACTION_LIMIT = 3;
-const INTELLIGENCE_DOMAIN_ORDER = [
-  'signal_style',
-  'signal_mot',
-  'signal_lead',
-  'signal_conflict',
-  'signal_culture',
-  'signal_stress',
-] as const;
-
-const INTELLIGENCE_DOMAIN_CONFIG: Record<
-  (typeof INTELLIGENCE_DOMAIN_ORDER)[number],
-  {
-    title: string;
-    eyebrow: string;
-    summaryLabel: string;
-    fallback: string;
-  }
-> = {
-  signal_style: {
-    title: 'Behaviour Style',
-    eyebrow: 'How you tend to show up',
-    summaryLabel: 'How you operate',
-    fallback:
-      'This area shows the clearest working style that tends to shape your day-to-day approach.',
-  },
-  signal_mot: {
-    title: 'Motivators',
-    eyebrow: 'What tends to energise you',
-    summaryLabel: 'What keeps you engaged',
-    fallback: 'This area shows the conditions and outcomes most likely to keep your energy steady.',
-  },
-  signal_lead: {
-    title: 'Leadership',
-    eyebrow: 'How you tend to lead',
-    summaryLabel: 'How your leadership shows up',
-    fallback:
-      'This area shows the form of direction and support you are most likely to bring when others look to you.',
-  },
-  signal_conflict: {
-    title: 'Conflict',
-    eyebrow: 'How you tend to handle tension',
-    summaryLabel: 'How you respond when tensions rise',
-    fallback:
-      'This area shows the conflict response you are most likely to rely on when the situation becomes difficult.',
-  },
-  signal_culture: {
-    title: 'Culture',
-    eyebrow: 'Where you are likely to work best',
-    summaryLabel: 'What kind of environment fits best',
-    fallback:
-      'This area shows the kind of environment where your strengths are more likely to come through cleanly.',
-  },
-  signal_stress: {
-    title: 'Stress',
-    eyebrow: 'How pressure may change your pattern',
-    summaryLabel: 'What to notice under pressure',
-    fallback:
-      'This area shows the pressure pattern most worth noticing early so it does not take over.',
-  },
-};
 
 function formatResultTimestamp(value: string | null): {
   date: string;
@@ -118,11 +59,6 @@ function formatDomainLabel(value: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
-}
-
-function getUserFacingDomainTitle(domainKey: string): string {
-  const config = INTELLIGENCE_DOMAIN_CONFIG[domainKey as keyof typeof INTELLIGENCE_DOMAIN_CONFIG];
-  return config?.title ?? formatDomainLabel(domainKey);
 }
 
 function getHeroNarrative(result: AssessmentResultDetailViewModel): string {
@@ -269,20 +205,6 @@ function getDomainDetailsCtaLabel(domain: AssessmentResultDomainViewModel): stri
   return 'Explore this area in more detail';
 }
 
-function getIntelligenceDomains(
-  result: AssessmentResultDetailViewModel,
-): readonly AssessmentResultDomainViewModel[] {
-  const domainByKey = new Map(
-    result.domainSummaries
-      .filter((domain) => domain.domainSource === 'signal_group')
-      .map((domain) => [domain.domainKey, domain] as const),
-  );
-
-  return INTELLIGENCE_DOMAIN_ORDER.map((domainKey) => domainByKey.get(domainKey)).filter(
-    (domain): domain is AssessmentResultDomainViewModel => Boolean(domain),
-  );
-}
-
 function getHeroPrimarySignalChips(
   domains: readonly AssessmentResultDomainViewModel[],
 ): readonly string[] {
@@ -350,26 +272,19 @@ function ActionList({
 }
 
 function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
-  const config = INTELLIGENCE_DOMAIN_CONFIG[
-    domain.domainKey as keyof typeof INTELLIGENCE_DOMAIN_CONFIG
-  ] ?? {
-    title: domain.domainTitle,
-    eyebrow: 'Domain',
-    summaryLabel: 'Pattern',
-    fallback: 'A persisted domain summary is available for this area.',
-  };
   const visibleSignals = domain.signalScores.slice(0, 2);
   const hiddenSignals = domain.signalScores.slice(2);
   const interpretation = getPersistedDomainInterpretation(domain);
   const detailsCtaLabel = getDomainDetailsCtaLabel(domain);
+  const title = domain.domainTitle.trim() || formatDomainLabel(domain.domainKey);
 
   return (
     <SurfaceCard className="p-7 md:p-8">
       <div className="space-y-7">
         <div className="space-y-3">
-          <SectionEyebrow>{config.eyebrow}</SectionEyebrow>
+          <SectionEyebrow>Domain Summary</SectionEyebrow>
           <h3 className="text-[1.8rem] font-semibold tracking-[-0.03em] text-white">
-            {config.title}
+            {title}
           </h3>
         </div>
 
@@ -460,8 +375,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   }
 
   const { leadSignal } = getVisibleSignals(result);
-  const intelligenceDomains = getIntelligenceDomains(result);
-  const heroPrimarySignalChips = getHeroPrimarySignalChips(intelligenceDomains);
+  const resultDomains = getResultDetailDomains(result);
+  const heroPrimarySignalChips = getHeroPrimarySignalChips(resultDomains);
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   const secondaryHeroSignal = getSecondaryHeroSignal(result);
   const heroHeading = getHeroHeading(result, secondaryHeroSignal);
@@ -503,7 +418,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             ))}
             {heroPrimarySignalChips.length === 0 && leadSignal ? (
               <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/45">
-                {getUserFacingDomainTitle(leadSignal.domainKey)}
+                {formatDomainLabel(leadSignal.domainKey)}
               </span>
             ) : null}
           </div>
@@ -522,15 +437,20 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
       <section className="space-y-6">
         <SectionHeader
-          eyebrow="Six Intelligence Areas"
+          eyebrow={`${resultDomains.length} Domain${resultDomains.length === 1 ? '' : 's'}`}
           title="The main reading journey"
-          description="The six core areas show how the strongest patterns come through across the parts of work that matter most."
+          description="These persisted domain summaries are rendered directly from the canonical result payload in stored order."
         />
 
         <div className="space-y-6">
-          {intelligenceDomains.map((domain) => (
+          {resultDomains.map((domain) => (
             <DomainCard key={domain.domainId} domain={domain} />
           ))}
+          {resultDomains.length === 0 ? (
+            <SurfaceCard className="p-6 text-sm text-white/55">
+              No persisted domain summaries are available for this result.
+            </SurfaceCard>
+          ) : null}
         </div>
       </section>
 
