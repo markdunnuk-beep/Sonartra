@@ -393,14 +393,9 @@ function getSignalPairLookupToken(signalKey: string): string {
   return segments[segments.length - 1] ?? signalKey;
 }
 
-function resolvePairLanguageSummary(
+function resolveCanonicalOverviewPatternKey(
   signalScores: readonly NormalizedSignalScore[],
-  context?: ResultInterpretationContext,
 ): string | null {
-  if (!context) {
-    return null;
-  }
-
   const rankedSignals = getTopSignalsInRankOrder(signalScores);
   const topSignal = rankedSignals[0];
   const secondSignal = rankedSignals[1];
@@ -412,12 +407,41 @@ function resolvePairLanguageSummary(
   const canonicalPair = canonicalizeSignalPairKey(
     `${getSignalPairLookupToken(topSignal.signalKey)}_${getSignalPairLookupToken(secondSignal.signalKey)}`,
   );
-  if (!canonicalPair.success) {
+  return canonicalPair.success ? canonicalPair.canonicalSignalPair : null;
+}
+
+function resolvePairLanguageSummary(
+  signalScores: readonly NormalizedSignalScore[],
+  context?: ResultInterpretationContext,
+): string | null {
+  if (!context) {
     return null;
   }
 
-  const summary = context.languageBundle.pairs[canonicalPair.canonicalSignalPair]?.summary?.trim();
+  const canonicalPatternKey = resolveCanonicalOverviewPatternKey(signalScores);
+  if (!canonicalPatternKey) {
+    return null;
+  }
+
+  const summary = context.languageBundle.pairs[canonicalPatternKey]?.summary?.trim();
   return summary ? summary : null;
+}
+
+function resolveOverviewTemplateHeadline(
+  signalScores: readonly NormalizedSignalScore[],
+  context?: ResultInterpretationContext,
+): string | null {
+  if (!context) {
+    return null;
+  }
+
+  const canonicalPatternKey = resolveCanonicalOverviewPatternKey(signalScores);
+  if (!canonicalPatternKey) {
+    return null;
+  }
+
+  const headline = context.languageBundle.overview[canonicalPatternKey]?.headline?.trim();
+  return headline ? headline : null;
 }
 
 function resolveSignalLanguageSection(
@@ -445,6 +469,7 @@ export function buildOverviewSummary(
   }
 
   const topTemplate = getSignalTemplate(topSignal.signalKey);
+  const overviewTemplateHeadline = resolveOverviewTemplateHeadline(rankedSignals, context);
   const pairLanguageSummary = resolvePairLanguageSummary(rankedSignals, context);
   const distribution = classifyDistribution(rankedSignals);
   let supportSentence = topTemplate.impact;
@@ -460,7 +485,7 @@ export function buildOverviewSummary(
   }
 
   return {
-    headline: topTemplate.headline,
+    headline: overviewTemplateHeadline ?? topTemplate.headline,
     narrative: pairLanguageSummary ?? `${topTemplate.hero} ${supportSentence}`,
   };
 }

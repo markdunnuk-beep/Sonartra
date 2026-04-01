@@ -416,6 +416,71 @@ test('engine path uses pair-language summary for overview narrative only when av
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
+test('engine path uses overview template headline for overview headline only when available', async () => {
+  const definition = buildDefinition();
+  const repository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return {
+        signals: {},
+        pairs: {
+          drive_focus: {
+            summary: 'Custom pair-language overview from the assessment version.',
+          },
+        },
+        domains: {},
+        overview: {
+          drive_focus: {
+            headline: 'Custom overview headline from the assessment version.',
+          },
+        },
+      };
+    },
+  };
+
+  const baselineRepository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return createEmptyLanguageBundle();
+    },
+  };
+
+  const responses = buildResponses({
+    'question-1': 'option-2',
+    'question-2': 'option-3',
+  });
+
+  const baseline = await runAssessmentEngine({
+    repository: baselineRepository,
+    assessmentVersionId: 'version-1',
+    responses,
+  });
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    responses,
+  });
+
+  assert.equal(payload.overviewSummary.headline, 'Custom overview headline from the assessment version.');
+  assert.equal(payload.overviewSummary.narrative, 'Custom pair-language overview from the assessment version.');
+  assert.notEqual(payload.overviewSummary.headline, baseline.overviewSummary.headline);
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+});
+
 test('engine path uses signal-language sections for strengths watchouts and development only when available', async () => {
   const definition = buildDefinition();
   const repository: AssessmentDefinitionRepository = {

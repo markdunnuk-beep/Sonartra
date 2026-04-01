@@ -860,6 +860,85 @@ test('overview summary uses pair language summary when the resolved canonical pa
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
+test('overview summary uses overview template headline when the resolved canonical pattern has one', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 46,
+      domainPercentage: 46,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 4,
+      percentage: 33,
+      domainPercentage: 33,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-mastery',
+      signalKey: 'mot_mastery',
+      title: 'Mastery',
+      domainId: 'domain-mot',
+      domainKey: 'signal_mot',
+      rawTotal: 2,
+      percentage: 21,
+      domainPercentage: 21,
+      rank: 3,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {
+          analyst_driver: {
+            summary: 'Pair-language overview for the dominant analyst-driver combination.',
+          },
+        },
+        domains: {},
+        overview: {
+          analyst_driver: {
+            headline: 'Assessment-authored overview headline.',
+          },
+        },
+      },
+    }),
+  });
+
+  assert.ok(isCanonicalResultPayload(payload));
+  assert.equal(payload.overviewSummary.headline, 'Assessment-authored overview headline.');
+  assert.equal(
+    payload.overviewSummary.narrative,
+    'Pair-language overview for the dominant analyst-driver combination.',
+  );
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+});
+
 test('overview summary falls back unchanged when pair language summary is missing', () => {
   const signals = Object.freeze([
     buildNormalizedSignal({
@@ -915,6 +994,73 @@ test('overview summary falls back unchanged when pair language summary is missin
   assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
 });
 
+test('overview summary headline falls back unchanged when overview template headline is missing', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 46,
+      domainPercentage: 46,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 4,
+      percentage: 33,
+      domainPercentage: 33,
+      rank: 2,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {
+          analyst_driver: {
+            summary: 'Pair-language overview for the dominant analyst-driver combination.',
+          },
+        },
+        domains: {},
+        overview: {
+          analyst_driver: {
+            summary: 'Present but not used for headline.',
+          },
+        },
+      },
+    }),
+  });
+
+  assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
+  assert.equal(
+    payload.overviewSummary.narrative,
+    'Pair-language overview for the dominant analyst-driver combination.',
+  );
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+});
+
 test('overview pair-language lookup is canonical even when the top two signals resolve in reverse lexical order', () => {
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture({
@@ -958,6 +1104,51 @@ test('overview pair-language lookup is canonical even when the top two signals r
   });
 
   assert.equal(payload.overviewSummary.narrative, 'Canonical pair summary.');
+});
+
+test('overview template headline lookup is canonical even when the top two signals resolve in reverse lexical order', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 44,
+          domainPercentage: 44,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-analyst',
+          signalKey: 'style_analyst',
+          title: 'Analyst',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 4,
+          percentage: 39,
+          domainPercentage: 39,
+          rank: 2,
+        }),
+      ]),
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {},
+        domains: {},
+        overview: {
+          analyst_driver: {
+            headline: 'Canonical overview headline.',
+          },
+        },
+      },
+    }),
+  });
+
+  assert.equal(payload.overviewSummary.headline, 'Canonical overview headline.');
 });
 
 test('overview summary uses top-signal interpretation when a mapped signal leads', () => {
@@ -1692,6 +1883,58 @@ test('repeated runs with pair-language overview summary remain byte-stable', () 
   const first = buildCanonicalResultPayload({ normalizedResult });
   const second = buildCanonicalResultPayload({ normalizedResult });
 
+  assert.equal(first.overviewSummary.narrative, 'Consistent custom overview.');
+  assert.equal(JSON.stringify(first), JSON.stringify(second));
+});
+
+test('repeated runs with overview template headline remain byte-stable', () => {
+  const normalizedResult = buildNormalizedResultFixture({
+    signalScores: Object.freeze([
+      buildNormalizedSignal({
+        signalId: 'signal-support',
+        signalKey: 'support_drive',
+        title: 'Support Drive',
+        domainId: 'domain-signals',
+        domainKey: 'signals',
+        rawTotal: 4,
+        percentage: 57,
+        domainPercentage: 57,
+        rank: 1,
+      }),
+      buildNormalizedSignal({
+        signalId: 'signal-core',
+        signalKey: 'core_focus',
+        title: 'Core Focus',
+        domainId: 'domain-signals',
+        domainKey: 'signals',
+        rawTotal: 3,
+        percentage: 43,
+        domainPercentage: 43,
+        rank: 2,
+      }),
+    ]),
+    domainSummaries: Object.freeze([]),
+    topSignalId: 'signal-support',
+    languageBundle: {
+      signals: {},
+      pairs: {
+        drive_focus: {
+          summary: 'Consistent custom overview.',
+        },
+      },
+      domains: {},
+      overview: {
+        drive_focus: {
+          headline: 'Consistent custom overview headline.',
+        },
+      },
+    },
+  });
+
+  const first = buildCanonicalResultPayload({ normalizedResult });
+  const second = buildCanonicalResultPayload({ normalizedResult });
+
+  assert.equal(first.overviewSummary.headline, 'Consistent custom overview headline.');
   assert.equal(first.overviewSummary.narrative, 'Consistent custom overview.');
   assert.equal(JSON.stringify(first), JSON.stringify(second));
 });
