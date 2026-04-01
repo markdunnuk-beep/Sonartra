@@ -393,7 +393,7 @@ test('language step view model returns null for a missing assessment and empty v
   });
 });
 
-test('language step component renders the signal language panel, placeholder sections, and count summaries', () => {
+test('language step component renders the signal and pair language panels, placeholder sections, and count summaries', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentLanguageStep
       viewModel={{
@@ -427,12 +427,14 @@ test('language step component renders the signal language panel, placeholder sec
   assert.match(markup, /Signal Language/);
   assert.match(markup, /Signal Language import/);
   assert.match(markup, /Pair Language/);
+  assert.match(markup, /Pair Language import/);
   assert.match(markup, /Domain Language/);
   assert.match(markup, /Development \/ Pressure \/ Environment/);
   assert.match(markup, /Overview Templates/);
   assert.match(markup, /signal_key \| section \| content/);
   assert.match(markup, /Import replaces all existing Signal Language rows for this assessment version\./);
   assert.match(markup, /signal_pair \| section \| content/);
+  assert.match(markup, /Import replaces all existing Pair Language rows for this assessment version\./);
   assert.match(markup, /domain_key \| section \| content/);
   assert.match(markup, /pattern_key \| section \| content/);
   assert.match(markup, /2 entries/);

@@ -5,15 +5,11 @@ import {
   SectionHeader,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
+import { AdminPairLanguageImport } from '@/components/admin/admin-pair-language-import';
 import { AdminSignalLanguageImport } from '@/components/admin/admin-signal-language-import';
 import type { AdminAssessmentLanguageStepViewModel } from '@/lib/server/admin-assessment-language-step';
 
 const PLACEHOLDER_SECTIONS = [
-  {
-    title: 'Pair Language',
-    hint: 'signal_pair | section | content',
-    description: 'Structured bulk import for signal-pair summaries and watchouts will follow this panel pattern.',
-  },
   {
     title: 'Domain Language',
     hint: 'domain_key | section | content',
@@ -83,6 +79,12 @@ export function AdminAssessmentLanguageStep({
       <AdminSignalLanguageImport
         assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
         existingSignalLanguageRowCount={viewModel.counts.signals.entryCount}
+        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+      />
+
+      <AdminPairLanguageImport
+        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+        existingPairLanguageRowCount={viewModel.counts.pairs.entryCount}
         isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
       />
 
