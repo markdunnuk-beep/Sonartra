@@ -5,33 +5,29 @@ import {
   SectionHeader,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
+import { AdminSignalLanguageImport } from '@/components/admin/admin-signal-language-import';
 import type { AdminAssessmentLanguageStepViewModel } from '@/lib/server/admin-assessment-language-step';
 
-const LANGUAGE_SECTIONS = [
-  {
-    title: 'Signal Language',
-    hint: 'signal_key | section | content',
-    description: 'Structured bulk import for per-signal narrative sections will live here.',
-  },
+const PLACEHOLDER_SECTIONS = [
   {
     title: 'Pair Language',
     hint: 'signal_pair | section | content',
-    description: 'Structured bulk import for signal-pair summaries and watchouts will live here.',
+    description: 'Structured bulk import for signal-pair summaries and watchouts will follow this panel pattern.',
   },
   {
     title: 'Domain Language',
     hint: 'domain_key | section | content',
-    description: 'Structured bulk import for domain-level narrative sections will live here.',
+    description: 'Structured bulk import for domain-level narrative sections will follow this panel pattern.',
   },
   {
     title: 'Development / Pressure / Environment',
     hint: 'key | section | content',
-    description: 'Structured bulk import for development, pressure, and environment datasets will live here.',
+    description: 'Structured bulk import for development, pressure, and environment datasets will be added next.',
   },
   {
     title: 'Overview Templates',
     hint: 'pattern_key | section | content',
-    description: 'Structured bulk import for overview template patterns will live here.',
+    description: 'Structured bulk import for overview template patterns will be added after signal language.',
   },
 ] as const;
 
@@ -84,6 +80,12 @@ export function AdminAssessmentLanguageStep({
         </p>
       </SurfaceCard>
 
+      <AdminSignalLanguageImport
+        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+        existingSignalLanguageRowCount={viewModel.counts.signals.entryCount}
+        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+      />
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
         <MetaItem label="Pairs" value={formatEntryCount(viewModel.counts.pairs.entryCount)} />
@@ -92,7 +94,7 @@ export function AdminAssessmentLanguageStep({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        {LANGUAGE_SECTIONS.map((section) => (
+        {PLACEHOLDER_SECTIONS.map((section) => (
           <SurfaceCard className="space-y-3 p-5 lg:p-6" key={section.title}>
             <div className="space-y-2">
               <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">{section.title}</h3>
