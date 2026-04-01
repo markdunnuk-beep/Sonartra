@@ -945,6 +945,78 @@ test('strengths are generated deterministically from top-ranked signals', () => 
   assert.doesNotMatch(payload.strengths[0]?.detail ?? '', /\d+%/);
 });
 
+test('signal language strength overrides fallback strength text when present', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 50,
+      domainPercentage: 50,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-results',
+      signalKey: 'lead_results',
+      title: 'Results',
+      domainId: 'domain-lead',
+      domainKey: 'signal_lead',
+      rawTotal: 3,
+      percentage: 30,
+      domainPercentage: 30,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-achievement',
+      signalKey: 'mot_achievement',
+      title: 'Achievement',
+      domainId: 'domain-mot',
+      domainKey: 'signal_mot',
+      rawTotal: 2,
+      percentage: 20,
+      domainPercentage: 20,
+      rank: 3,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {
+          style_driver: {
+            strength: 'Assessment-owned strength language for the Driver signal.',
+          },
+        },
+        pairs: {},
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.strengths.length, baseline.strengths.length);
+  assert.equal(payload.strengths[0]?.detail, 'Assessment-owned strength language for the Driver signal.');
+  assert.equal(payload.strengths[0]?.title, baseline.strengths[0]?.title);
+  assert.equal(payload.overviewSummary.narrative, baseline.overviewSummary.narrative);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+});
+
 test('watchouts are generated deterministically from overuse, pressure rules, and lower-access signals', () => {
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture({
@@ -994,6 +1066,79 @@ test('watchouts are generated deterministically from overuse, pressure rules, an
   assert.match(payload.watchouts[1]?.detail ?? '', /over-control/i);
   assert.doesNotMatch(payload.watchouts[0]?.detail ?? '', /undefined|null/i);
   assert.equal(payload.watchouts[2]?.title, 'Limited use of avoidance');
+});
+
+test('signal language watchout overrides signal-led watchout text when present', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 42,
+      domainPercentage: 42,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-control',
+      signalKey: 'stress_control',
+      title: 'Control',
+      domainId: 'domain-stress',
+      domainKey: 'signal_stress',
+      rawTotal: 4,
+      percentage: 33,
+      domainPercentage: 33,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-avoid',
+      signalKey: 'conflict_avoid',
+      title: 'Avoid',
+      domainId: 'domain-conflict',
+      domainKey: 'signal_conflict',
+      rawTotal: 1,
+      percentage: 10,
+      domainPercentage: 10,
+      rank: 3,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {
+          style_driver: {
+            watchout: 'Assessment-owned watchout language for the Driver signal.',
+          },
+        },
+        pairs: {},
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.watchouts.length, baseline.watchouts.length);
+  assert.equal(payload.watchouts[0]?.detail, 'Assessment-owned watchout language for the Driver signal.');
+  assert.equal(payload.watchouts[1]?.detail, baseline.watchouts[1]?.detail);
+  assert.equal(payload.watchouts[2]?.detail, baseline.watchouts[2]?.detail);
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
 });
 
 test('development focus is generated deterministically from lower-ranked signals', () => {
@@ -1055,6 +1200,162 @@ test('development focus is generated deterministically from lower-ranked signals
   assert.match(payload.developmentFocus[0]?.detail ?? '', /concise evidence checks/i);
   assert.match(payload.developmentFocus[0]?.detail ?? '', /sharper calls/i);
   assert.equal(payload.developmentFocus[1]?.signalId, 'signal-people');
+});
+
+test('signal language development overrides fallback development text when present', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 55,
+      domainPercentage: 55,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-collaborate',
+      signalKey: 'conflict_collaborate',
+      title: 'Collaborate',
+      domainId: 'domain-conflict',
+      domainKey: 'signal_conflict',
+      rawTotal: 3,
+      percentage: 29,
+      domainPercentage: 29,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-evidence',
+      signalKey: 'decision_evidence',
+      title: 'Evidence',
+      domainId: 'domain-decision',
+      domainKey: 'signal_decision',
+      rawTotal: 1,
+      percentage: 10,
+      domainPercentage: 10,
+      rank: 3,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-people',
+      signalKey: 'lead_people',
+      title: 'People',
+      domainId: 'domain-lead',
+      domainKey: 'signal_lead',
+      rawTotal: 1,
+      percentage: 6,
+      domainPercentage: 6,
+      rank: 4,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {
+          decision_evidence: {
+            development: 'Assessment-owned development language for evidence-led judgement.',
+          },
+        },
+        pairs: {},
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.developmentFocus.length, baseline.developmentFocus.length);
+  assert.equal(
+    payload.developmentFocus[0]?.detail,
+    'Assessment-owned development language for evidence-led judgement.',
+  );
+  assert.equal(payload.developmentFocus[1]?.detail, baseline.developmentFocus[1]?.detail);
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
+});
+
+test('signal language fallback remains unchanged when required entries are missing', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 42,
+      domainPercentage: 42,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-control',
+      signalKey: 'stress_control',
+      title: 'Control',
+      domainId: 'domain-stress',
+      domainKey: 'signal_stress',
+      rawTotal: 4,
+      percentage: 33,
+      domainPercentage: 33,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-avoid',
+      signalKey: 'conflict_avoid',
+      title: 'Avoid',
+      domainId: 'domain-conflict',
+      domainKey: 'signal_conflict',
+      rawTotal: 1,
+      percentage: 10,
+      domainPercentage: 10,
+      rank: 3,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {
+          style_driver: {
+            summary: 'Present but irrelevant for this task.',
+          },
+        },
+        pairs: {},
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
 test('zero-mass behavior remains explicit and still builds successfully', () => {
@@ -1226,5 +1527,80 @@ test('repeated runs with pair-language overview summary remain byte-stable', () 
   const second = buildCanonicalResultPayload({ normalizedResult });
 
   assert.equal(first.overviewSummary.narrative, 'Consistent custom overview.');
+  assert.equal(JSON.stringify(first), JSON.stringify(second));
+});
+
+test('repeated runs with signal-language sections remain byte-stable', () => {
+  const normalizedResult = buildNormalizedResultFixture({
+    signalScores: Object.freeze([
+      buildNormalizedSignal({
+        signalId: 'signal-driver',
+        signalKey: 'style_driver',
+        title: 'Driver',
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        rawTotal: 5,
+        percentage: 42,
+        domainPercentage: 42,
+        rank: 1,
+      }),
+      buildNormalizedSignal({
+        signalId: 'signal-control',
+        signalKey: 'stress_control',
+        title: 'Control',
+        domainId: 'domain-stress',
+        domainKey: 'signal_stress',
+        rawTotal: 4,
+        percentage: 33,
+        domainPercentage: 33,
+        rank: 2,
+      }),
+      buildNormalizedSignal({
+        signalId: 'signal-evidence',
+        signalKey: 'decision_evidence',
+        title: 'Evidence',
+        domainId: 'domain-decision',
+        domainKey: 'signal_decision',
+        rawTotal: 1,
+        percentage: 14,
+        domainPercentage: 14,
+        rank: 3,
+      }),
+      buildNormalizedSignal({
+        signalId: 'signal-avoid',
+        signalKey: 'conflict_avoid',
+        title: 'Avoid',
+        domainId: 'domain-conflict',
+        domainKey: 'signal_conflict',
+        rawTotal: 1,
+        percentage: 11,
+        domainPercentage: 11,
+        rank: 4,
+      }),
+    ]),
+    domainSummaries: Object.freeze([]),
+    topSignalId: 'signal-driver',
+    languageBundle: {
+      signals: {
+        style_driver: {
+          strength: 'Stable custom strength.',
+          watchout: 'Stable custom watchout.',
+        },
+        decision_evidence: {
+          development: 'Stable custom development.',
+        },
+      },
+      pairs: {},
+      domains: {},
+      overview: {},
+    },
+  });
+
+  const first = buildCanonicalResultPayload({ normalizedResult });
+  const second = buildCanonicalResultPayload({ normalizedResult });
+
+  assert.equal(first.strengths[0]?.detail, 'Stable custom strength.');
+  assert.equal(first.watchouts[0]?.detail, 'Stable custom watchout.');
+  assert.equal(first.developmentFocus[0]?.detail, 'Stable custom development.');
   assert.equal(JSON.stringify(first), JSON.stringify(second));
 });

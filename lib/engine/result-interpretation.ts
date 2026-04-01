@@ -420,6 +420,15 @@ function resolvePairLanguageSummary(
   return summary ? summary : null;
 }
 
+function resolveSignalLanguageSection(
+  signalKey: string,
+  section: 'strength' | 'watchout' | 'development',
+  context?: ResultInterpretationContext,
+): string | null {
+  const content = context?.languageBundle.signals[signalKey]?.[section]?.trim();
+  return content ? content : null;
+}
+
 export function buildOverviewSummary(
   normalizedResult: NormalizedResult,
   context?: ResultInterpretationContext,
@@ -458,14 +467,16 @@ export function buildOverviewSummary(
 
 export function buildStrengths(
   normalizedResult: NormalizedResult,
-  _context?: ResultInterpretationContext,
+  context?: ResultInterpretationContext,
 ): readonly ResultBulletItem[] {
   return Object.freeze(
     getUniqueSignals(getTopSignalsInRankOrder(normalizedResult.signalScores), MAX_STRENGTH_COUNT).map((signalScore) =>
       makeBulletItem({
         key: `strength_${signalScore.signalKey}`,
         title: getActionFocusSignalLabel(signalScore),
-        detail: getSignalTemplate(signalScore.signalKey).strength,
+        detail:
+          resolveSignalLanguageSection(signalScore.signalKey, 'strength', context) ??
+          getSignalTemplate(signalScore.signalKey).strength,
         signalId: signalScore.signalId,
       }),
     ),
@@ -474,7 +485,7 @@ export function buildStrengths(
 
 export function buildWatchouts(
   normalizedResult: NormalizedResult,
-  _context?: ResultInterpretationContext,
+  context?: ResultInterpretationContext,
 ): readonly ResultBulletItem[] {
   const rankedSignals = getTopSignalsInRankOrder(normalizedResult.signalScores);
   const topSignal = rankedSignals[0];
@@ -487,7 +498,9 @@ export function buildWatchouts(
       makeBulletItem({
         key: `watchout_overuse_${topSignal.signalKey}`,
         title: `Over-reliance on ${getWatchoutLabel(topSignal)}`,
-        detail: getSignalTemplate(topSignal.signalKey).watchout,
+        detail:
+          resolveSignalLanguageSection(topSignal.signalKey, 'watchout', context) ??
+          getSignalTemplate(topSignal.signalKey).watchout,
         signalId: topSignal.signalId,
       }),
     );
@@ -514,7 +527,9 @@ export function buildWatchouts(
       makeBulletItem({
         key: `watchout_low_${lowestSignal.signalKey}`,
         title: `Limited use of ${getLowAccessLabel(lowestSignal)}`,
-        detail: getSignalTemplate(lowestSignal.signalKey).lowSignalRisk,
+        detail:
+          resolveSignalLanguageSection(lowestSignal.signalKey, 'watchout', context) ??
+          getSignalTemplate(lowestSignal.signalKey).lowSignalRisk,
         signalId: lowestSignal.signalId,
       }),
     );
@@ -525,7 +540,7 @@ export function buildWatchouts(
 
 export function buildDevelopmentFocus(
   normalizedResult: NormalizedResult,
-  _context?: ResultInterpretationContext,
+  context?: ResultInterpretationContext,
 ): readonly ResultBulletItem[] {
   const lowestSignals = [...getTopSignalsInRankOrder(normalizedResult.signalScores)]
     .reverse()
@@ -539,7 +554,9 @@ export function buildDevelopmentFocus(
       makeBulletItem({
         key: `development_${signalScore.signalKey}`,
         title: getActionFocusSignalLabel(signalScore),
-        detail: getSignalTemplate(signalScore.signalKey).development,
+        detail:
+          resolveSignalLanguageSection(signalScore.signalKey, 'development', context) ??
+          getSignalTemplate(signalScore.signalKey).development,
         signalId: signalScore.signalId,
       }),
     ),
