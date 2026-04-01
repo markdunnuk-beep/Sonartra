@@ -25,6 +25,7 @@ type AssessmentRow = {
 
 type LanguageFixture = {
   baseRows: AssessmentRow[];
+  throwMissingLanguageTables?: boolean;
   signals?: Array<{
     id: string;
     assessmentVersionId: string;
@@ -154,6 +155,14 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_signals')) {
+        if (fixture.throwMissingLanguageTables) {
+          const error = new Error('relation "assessment_version_language_signals" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: (fixture.signals ?? [])
@@ -171,6 +180,14 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_pairs')) {
+        if (fixture.throwMissingLanguageTables) {
+          const error = new Error('relation "assessment_version_language_pairs" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: (fixture.pairs ?? [])
@@ -188,6 +205,14 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_domains')) {
+        if (fixture.throwMissingLanguageTables) {
+          const error = new Error('relation "assessment_version_language_domains" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: (fixture.domains ?? [])
@@ -205,6 +230,14 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_overview')) {
+        if (fixture.throwMissingLanguageTables) {
+          const error = new Error('relation "assessment_version_language_overview" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: (fixture.overview ?? [])
@@ -413,6 +446,8 @@ test('language step component renders the signal and pair language panels, place
             status: 'draft',
           },
         ],
+        languageSchemaStatus: 'available',
+        languageSchemaMessage: null,
         counts: {
           signals: { entryCount: 2 },
           pairs: { entryCount: 1 },
@@ -452,6 +487,8 @@ test('language step component shows a safe empty state when no usable version co
         assessmentDescription: 'Flagship assessment',
         activeVersion: null,
         availableVersions: [],
+        languageSchemaStatus: 'available',
+        languageSchemaMessage: null,
         counts: {
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
@@ -464,4 +501,64 @@ test('language step component shows a safe empty state when no usable version co
 
   assert.match(markup, /No version context available/);
   assert.match(markup, /Create a draft or publish a version before adding structured language datasets\./);
+});
+
+test('language step view model degrades safely when language tables are unavailable at runtime', async () => {
+  const viewModel = await getAdminAssessmentLanguageStepViewModel(
+    createFakeDb({
+      baseRows: [buildAssessmentRow()],
+      throwMissingLanguageTables: true,
+    }),
+    'wplp80',
+  );
+
+  assert.ok(viewModel);
+  assert.equal(viewModel?.activeVersion?.assessmentVersionId, 'version-draft');
+  assert.equal(viewModel?.languageSchemaStatus, 'unavailable');
+  assert.match(viewModel?.languageSchemaMessage ?? '', /Language datasets are unavailable/);
+  assert.deepEqual(viewModel?.counts, {
+    signals: { entryCount: 0 },
+    pairs: { entryCount: 0 },
+    domains: { entryCount: 0 },
+    overview: { entryCount: 0 },
+  });
+});
+
+test('language step component shows a safe schema-unavailable state instead of rendering live panels', () => {
+  const markup = renderToStaticMarkup(
+    <AdminAssessmentLanguageStep
+      viewModel={{
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        assessmentDescription: 'Flagship assessment',
+        activeVersion: {
+          assessmentVersionId: 'version-draft',
+          versionTag: '1.1.0',
+          status: 'draft',
+        },
+        availableVersions: [
+          {
+            assessmentVersionId: 'version-draft',
+            versionTag: '1.1.0',
+            status: 'draft',
+          },
+        ],
+        languageSchemaStatus: 'unavailable',
+        languageSchemaMessage:
+          'Language datasets are unavailable for this environment. Apply the assessment version language migration before using this step.',
+        counts: {
+          signals: { entryCount: 0 },
+          pairs: { entryCount: 0 },
+          domains: { entryCount: 0 },
+          overview: { entryCount: 0 },
+        },
+      }}
+    />,
+  );
+
+  assert.match(markup, /Language datasets unavailable/);
+  assert.match(markup, /Apply the assessment version language migration before using this step\./);
+  assert.doesNotMatch(markup, /Signal Language import/);
+  assert.doesNotMatch(markup, /Pair Language import/);
 });

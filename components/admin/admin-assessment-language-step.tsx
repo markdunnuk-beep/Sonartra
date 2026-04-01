@@ -55,6 +55,34 @@ export function AdminAssessmentLanguageStep({
     );
   }
 
+  if (viewModel.languageSchemaStatus === 'unavailable') {
+    return (
+      <section className="space-y-8">
+        <SectionHeader
+          eyebrow="Language"
+          title="Language"
+          description="Manage the structured language datasets that will drive deterministic assessment outputs."
+        />
+
+        <SurfaceCard className="space-y-4 p-5 lg:p-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <LabelPill>{viewModel.assessmentKey}</LabelPill>
+            <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+              {getVersionSummary(viewModel)}
+            </LabelPill>
+          </div>
+          <EmptyState
+            title="Language datasets unavailable"
+            description={
+              viewModel.languageSchemaMessage ??
+              'Language datasets are unavailable for this environment.'
+            }
+          />
+        </SurfaceCard>
+      </section>
+    );
+  }
+
   return (
     <section className="space-y-8">
       <SectionHeader

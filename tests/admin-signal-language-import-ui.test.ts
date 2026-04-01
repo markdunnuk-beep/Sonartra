@@ -39,6 +39,6 @@ test('language step renders the live signal language import panel and keeps the 
   const source = readSource(languageStepPath);
 
   assert.match(source, /<AdminSignalLanguageImport/);
-  assert.match(source, /Pair Language/);
+  assert.match(source, /<AdminPairLanguageImport/);
   assert.doesNotMatch(source, /Structured bulk import for per-signal narrative sections will live here/);
 });
