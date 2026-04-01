@@ -165,3 +165,15 @@ test('result detail hero is narrative-first and no longer leads with derived sig
   assert.doesNotMatch(source, /In practice:/);
   assert.doesNotMatch(source, /heroPrimarySignalChips/);
 });
+
+test('result detail action section uses a report-style three-column layout without analytic badge treatment', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /title="Interpretation to hold onto"/);
+  assert.match(source, /className="grid gap-5 xl:grid-cols-3"/);
+  assert.match(source, /<ActionList title="Strengths" items=\{result\.strengths\} tone="positive" \/>/);
+  assert.match(source, /<ActionList title="Watchouts" items=\{result\.watchouts\} tone="warning" \/>/);
+  assert.match(source, /<ActionList title="Development Focus" items=\{result\.developmentFocus\} tone="neutral" \/>/);
+  assert.doesNotMatch(source, /inline-flex rounded-full px-2\.5 py-1 text-\[11px\] font-medium/);
+  assert.doesNotMatch(source, /Practical synthesis/);
+});

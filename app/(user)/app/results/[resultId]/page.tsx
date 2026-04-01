@@ -165,50 +165,61 @@ function ActionList({
   tone: 'positive' | 'warning' | 'neutral';
 }) {
   const { visible, overflow } = getVisibleItems(items);
-  const accentClass =
+  const toneClass =
     tone === 'positive'
-      ? 'bg-emerald-400/12 text-emerald-200 ring-1 ring-emerald-400/20'
+      ? 'border-emerald-300/18 bg-emerald-300/[0.04]'
       : tone === 'warning'
-        ? 'bg-amber-400/12 text-amber-100 ring-1 ring-amber-400/20'
-        : 'bg-white/8 text-white/78 ring-1 ring-white/10';
+        ? 'border-amber-300/18 bg-amber-300/[0.04]'
+        : 'border-white/10 bg-white/[0.025]';
 
   return (
-    <SurfaceCard className="p-5">
-      <SectionEyebrow>{title}</SectionEyebrow>
-      <ul className="mt-4 space-y-3">
+    <SurfaceCard className="rounded-[1.7rem] p-6 md:p-7">
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <SectionEyebrow>{title}</SectionEyebrow>
+          <div className="border-white/8 max-w-3xl border-t pt-4">
+            <p className="text-[1.35rem] font-semibold tracking-[-0.03em] text-white">{title}</p>
+          </div>
+        </div>
+
+        <ul className="space-y-3">
         {visible.length > 0 ? (
           visible.map((item) => (
-            <li key={item.key} className="rounded-2xl bg-black/20 p-4">
-              <p
-                className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${accentClass}`}
-              >
-                {item.title}
-              </p>
-              <p className="text-white/72 mt-3 text-sm leading-6">{item.detail}</p>
+            <li
+              key={item.key}
+              className={`rounded-[1.35rem] border px-5 py-5 ${toneClass}`}
+            >
+              <div className="space-y-3">
+                <p className="text-[0.92rem] font-semibold tracking-[-0.01em] text-white/88">
+                  {item.title}
+                </p>
+                <p className="text-[0.98rem] leading-7 text-white/66">{item.detail}</p>
+              </div>
             </li>
           ))
         ) : (
-          <li className="rounded-2xl border border-dashed border-white/10 p-4 text-sm text-white/45">
+          <li className="rounded-[1.35rem] border border-dashed border-white/10 px-5 py-5 text-sm leading-7 text-white/45">
             No items available in this section.
           </li>
         )}
-      </ul>
+        </ul>
 
-      {overflow.length > 0 ? (
-        <details className="border-white/8 bg-black/14 mt-4 rounded-[1.15rem] border p-4">
-          <summary className="text-white/72 cursor-pointer list-none text-sm font-medium marker:hidden">
-            Show {overflow.length} more
-          </summary>
-          <ul className="mt-4 space-y-3">
-            {overflow.map((item) => (
-              <li key={item.key} className="rounded-2xl bg-white/[0.03] p-4">
-                <p className="text-white/88 text-sm font-medium">{item.title}</p>
-                <p className="mt-2 text-sm leading-6 text-white/60">{item.detail}</p>
-              </li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
+        {overflow.length > 0 ? (
+          <details className="border-white/8 rounded-[1.25rem] border bg-black/10 px-5 py-4">
+            <summary className="cursor-pointer list-none text-sm font-medium text-white/64 marker:hidden">
+              Show {overflow.length} more
+            </summary>
+            <ul className="mt-4 space-y-3">
+              {overflow.map((item) => (
+                <li key={item.key} className="rounded-[1.15rem] border border-white/8 bg-white/[0.02] px-4 py-4">
+                  <p className="text-sm font-medium text-white/84">{item.title}</p>
+                  <p className="mt-2 text-sm leading-7 text-white/58">{item.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+      </div>
     </SurfaceCard>
   );
 }
@@ -392,16 +403,18 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </div>
       </section>
 
-      <section className="space-y-5">
+      <section className="space-y-6">
         <SectionHeader
           eyebrow="Action Focus"
-          title="Practical synthesis"
-          description="Practical strengths to build on, risks to manage, and areas worth strengthening. These stay concise on purpose."
+          title="Interpretation to hold onto"
+          description="These sections are rendered directly from the persisted result payload and are designed to be read quickly, then revisited as needed."
         />
 
-        <ActionList title="Strengths" items={result.strengths} tone="positive" />
-        <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
-        <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
+        <div className="grid gap-5 xl:grid-cols-3">
+          <ActionList title="Strengths" items={result.strengths} tone="positive" />
+          <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
+          <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
+        </div>
       </section>
     </PageFrame>
   );
