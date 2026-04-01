@@ -47,10 +47,6 @@ function formatResultTimestamp(value: string | null): {
   };
 }
 
-function formatPercent(value: number): string {
-  return `${value}%`;
-}
-
 function formatDomainLabel(value: string): string {
   return value
     .split('_')
@@ -230,65 +226,64 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
   const interpretation = getPersistedDomainInterpretation(domain);
   const detailsCtaLabel = getDomainDetailsCtaLabel(domain);
   const title = domain.domainTitle.trim() || formatDomainLabel(domain.domainKey);
+  const primarySignal = visibleSignals[0] ?? null;
+  const secondarySignal = visibleSignals[1] ?? null;
 
   return (
-    <SurfaceCard className="p-7 md:p-8">
-      <div className="space-y-7">
-        <div className="space-y-3">
-          <SectionEyebrow>Domain Summary</SectionEyebrow>
-          <h3 className="text-[1.8rem] font-semibold tracking-[-0.03em] text-white">
-            {title}
-          </h3>
+    <SurfaceCard className="rounded-[1.8rem] p-7 md:p-8">
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <SectionEyebrow>Domain</SectionEyebrow>
+          <div className="border-white/8 space-y-4 border-t pt-5">
+            <div className="space-y-3">
+              <h3 className="text-[1.7rem] font-semibold tracking-[-0.035em] text-white md:text-[2rem]">
+                {title}
+              </h3>
+              <p className="max-w-3xl text-[1rem] leading-8 text-white/68">{interpretation.summary}</p>
+            </div>
+
+            {interpretation.support ? (
+              <p className="max-w-3xl text-sm leading-7 text-white/50">{interpretation.support}</p>
+            ) : null}
+            {interpretation.tension ? (
+              <p className="max-w-3xl text-sm leading-7 text-white/42">{interpretation.tension}</p>
+            ) : null}
+          </div>
         </div>
 
-        {visibleSignals.length > 0 ? (
-          <div className="space-y-3">
-            {visibleSignals.map((signal, index) => (
-              <div
-                key={signal.signalId}
-                className="border-white/8 bg-black/18 rounded-[1.25rem] border px-5 py-4"
-              >
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="space-y-2">
-                    <p className="text-white/42 text-[11px] uppercase tracking-[0.18em]">
-                      {index === 0 ? 'Primary signal' : 'Secondary signal'}
-                    </p>
-                    <p className="text-lg font-semibold text-white">{signal.signalTitle}</p>
-                  </div>
-                  <p className="text-white/68 text-base font-medium">
-                    {formatPercent(signal.domainPercentage)}
-                  </p>
-                </div>
+        {primarySignal ? (
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+            <div className="rounded-[1.25rem] border border-white/8 bg-white/[0.025] px-5 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
+                Primary signal
+              </p>
+              <p className="mt-3 text-base font-semibold text-white/88">{primarySignal.signalTitle}</p>
+            </div>
+            {secondarySignal ? (
+              <div className="rounded-[1.25rem] border border-white/8 bg-black/10 px-5 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/36">
+                  Secondary signal
+                </p>
+                <p className="mt-3 text-base font-semibold text-white/78">{secondarySignal.signalTitle}</p>
               </div>
-            ))}
+            ) : null}
           </div>
         ) : null}
 
-        <div className="border-white/8 space-y-3 border-t pt-6">
-          <p className="text-white/64 max-w-3xl text-[15px] leading-8">{interpretation.summary}</p>
-          {interpretation.support ? (
-            <p className="max-w-3xl text-sm leading-7 text-white/50">{interpretation.support}</p>
-          ) : null}
-          {interpretation.tension ? (
-            <p className="text-white/42 max-w-3xl text-sm leading-7">{interpretation.tension}</p>
-          ) : null}
-        </div>
-
         {hiddenSignals.length > 0 ? (
-          <details className="border-white/8 bg-black/14 rounded-[1.25rem] border px-5 py-4">
-            <summary className="text-white/72 cursor-pointer list-none text-sm font-medium marker:hidden">
+          <details className="rounded-[1.25rem] border border-white/8 bg-black/10 px-5 py-4">
+            <summary className="cursor-pointer list-none text-sm font-medium text-white/64 marker:hidden">
               {detailsCtaLabel}
             </summary>
             <div className="mt-4 space-y-3">
               {hiddenSignals.map((signal) => (
                 <div
                   key={signal.signalId}
-                  className="rounded-[1rem] bg-white/[0.03] px-4 py-3 text-sm"
+                  className="rounded-[1rem] border border-white/8 bg-white/[0.02] px-4 py-3 text-sm"
                 >
-                  <p className="text-white/82 font-medium">{signal.signalTitle}</p>
-                  <p className="mt-1 text-xs text-white/45">
-                    {formatPercent(signal.domainPercentage)} supporting signal
-                    {signal.isOverlay ? ' | overlay' : ''}
+                  <p className="font-medium text-white/82">{signal.signalTitle}</p>
+                  <p className="mt-1 text-xs text-white/42">
+                    Supporting signal{signal.isOverlay ? ' | overlay' : ''}
                   </p>
                 </div>
               ))}
@@ -297,7 +292,7 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
         ) : null}
 
         {visibleSignals.length === 0 ? (
-          <p className="rounded-[1.25rem] border border-dashed border-white/10 p-4 text-sm text-white/45">
+          <p className="rounded-[1.25rem] border border-dashed border-white/10 px-5 py-4 text-sm leading-7 text-white/45">
             No persisted domain signals are available for this area.
           </p>
         ) : null}
@@ -387,11 +382,11 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
       <section className="space-y-6">
         <SectionHeader
           eyebrow={`${resultDomains.length} Domain${resultDomains.length === 1 ? '' : 's'}`}
-          title="The main reading journey"
-          description="These persisted domain summaries are rendered directly from the canonical result payload in stored order."
+          title="Domain reading"
+          description="Each domain section is rendered directly from the persisted payload, with interpretation summary first and supporting signal context kept visually quiet."
         />
 
-        <div className="space-y-6">
+        <div className="grid gap-6 2xl:grid-cols-2">
           {resultDomains.map((domain) => (
             <DomainCard key={domain.domainId} domain={domain} />
           ))}

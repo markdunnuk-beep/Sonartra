@@ -177,3 +177,16 @@ test('result detail action section uses a report-style three-column layout witho
   assert.doesNotMatch(source, /inline-flex rounded-full px-2\.5 py-1 text-\[11px\] font-medium/);
   assert.doesNotMatch(source, /Practical synthesis/);
 });
+
+test('result detail domain section is summary-first and no longer emphasizes percentages', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /title="Domain reading"/);
+  assert.match(source, /className="grid gap-6 2xl:grid-cols-2"/);
+  assert.match(source, /<SectionEyebrow>Domain<\/SectionEyebrow>/);
+  assert.match(source, /const primarySignal = visibleSignals\[0\] \?\? null/);
+  assert.match(source, /<p className="max-w-3xl text-\[1rem\] leading-8 text-white\/68">\{interpretation\.summary\}<\/p>/);
+  assert.doesNotMatch(source, /formatPercent\(signal\.domainPercentage\)/);
+  assert.doesNotMatch(source, /Primary signal' : 'Secondary signal'/);
+  assert.doesNotMatch(source, /The main reading journey/);
+});
