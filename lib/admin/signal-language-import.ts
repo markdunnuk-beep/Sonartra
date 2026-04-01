@@ -59,7 +59,7 @@ export type SignalLanguagePreviewGroup = {
 
 export type SignalLanguageValidationResult = {
   success: boolean;
-  errors: SignalLanguageValidationError[];
+  errors: readonly SignalLanguageValidationError[];
   validRows: readonly ParsedSignalLanguageRow[];
 };
 
