@@ -151,7 +151,8 @@ test('result detail page no longer contains fixed WPLP intelligence domain order
   assert.doesNotMatch(source, /INTELLIGENCE_DOMAIN_CONFIG/);
   assert.doesNotMatch(source, /Six Intelligence Areas/);
   assert.match(source, /getResultDetailDomains\(result\)/);
-  assert.match(source, /resultDomains\.map\(\(domain\) =>/);
+  assert.match(source, /<DomainSection domains=\{resultDomains\} \/>/);
+  assert.match(source, /domains\.map\(\(domain\) =>/);
 });
 
 test('result detail hero is narrative-first and no longer leads with derived signal interpretation copy', () => {
@@ -182,17 +183,22 @@ test('result detail domain section is summary-first and no longer emphasizes per
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /title="Domain reading"/);
-  assert.match(source, /className="grid gap-5 lg:gap-6 2xl:grid-cols-2"/);
+  assert.match(source, /<DomainSection domains=\{resultDomains\} \/>/);
+  assert.match(source, /function DomainChapter\(\{ domain \}: \{ domain: AssessmentResultDomainViewModel \}\)/);
   assert.match(source, /<SectionEyebrow>Domain<\/SectionEyebrow>/);
   assert.match(source, /const primarySignal = visibleSignals\[0\] \?\? null/);
   assert.match(source, /const signalContext = getDomainSignalContext\(primarySignal, secondarySignal\)/);
-  assert.match(source, /<p className="max-w-\[38rem\] text-\[0\.98rem\] leading-8 text-white\/66 md:text-\[1rem\]">/);
+  assert.match(source, /mx-auto max-w-\[58rem\] space-y-12 md:space-y-14/);
+  assert.match(source, /border-white\/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10/);
+  assert.match(source, /max-w-\[44rem\] text-\[1rem\] leading-8 text-white\/68 md:text-\[1\.05rem\] md:leading-9/);
   assert.doesNotMatch(source, /formatPercent\(signal\.domainPercentage\)/);
   assert.doesNotMatch(source, /See why .* leads here/);
   assert.doesNotMatch(source, /Primary signal/);
   assert.doesNotMatch(source, /Secondary signal/);
+  assert.doesNotMatch(source, /2xl:grid-cols-2/);
+  assert.doesNotMatch(source, /rounded-\[1\.8rem\] p-6 sm:p-7 md:p-8/);
   assert.match(source, /Additional signal context/);
-  assert.match(source, /Also present in this area/);
+  assert.match(source, /also appears in this area/);
   assert.doesNotMatch(source, /The main reading journey/);
 });
 
@@ -219,5 +225,6 @@ test('result detail page uses tightened responsive spacing and reading widths fo
   assert.match(source, /max-w-\[72ch\]/);
   assert.match(source, /px-6 py-7 sm:px-7 sm:py-8 md:px-10 md:py-12/);
   assert.match(source, /className="space-y-7"/);
-  assert.match(source, /rounded-\[1\.25rem\] border border-white\/8 bg-white\/\[0\.025\] px-5 py-4 text-\[0\.96rem\] leading-7 text-white\/62/);
+  assert.match(source, /md:grid-cols-\[minmax\(0,12rem\)_minmax\(0,1fr\)\]/);
+  assert.match(source, /max-w-\[40rem\] text-\[0\.92rem\] leading-7 text-white\/50/);
 });

@@ -225,7 +225,7 @@ function ActionList({
   );
 }
 
-function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
+function DomainChapter({ domain }: { domain: AssessmentResultDomainViewModel }) {
   const visibleSignals = domain.signalScores.slice(0, 2);
   const hiddenSignals = domain.signalScores.slice(2);
   const interpretation = getPersistedDomainInterpretation(domain);
@@ -235,63 +235,82 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
   const signalContext = getDomainSignalContext(primarySignal, secondarySignal);
 
   return (
-    <SurfaceCard className="rounded-[1.8rem] p-6 sm:p-7 md:p-8">
-      <div className="space-y-7">
-        <div className="space-y-4">
+    <article className="border-white/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10">
+      <div className="grid gap-4 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:gap-8">
+        <div className="space-y-3">
           <SectionEyebrow>Domain</SectionEyebrow>
-          <div className="border-white/8 space-y-4 border-t pt-5">
-            <div className="space-y-3">
-              <h3 className="text-[1.55rem] font-semibold tracking-[-0.035em] text-white md:text-[1.9rem]">
-                {title}
-              </h3>
-              <p className="max-w-[38rem] text-[0.98rem] leading-8 text-white/66 md:text-[1rem]">
-                {interpretation.summary}
-              </p>
-            </div>
-
-            {interpretation.support ? (
-              <p className="max-w-[36rem] text-sm leading-7 text-white/50">{interpretation.support}</p>
-            ) : null}
-            {interpretation.tension ? (
-              <p className="max-w-[36rem] text-sm leading-7 text-white/42">{interpretation.tension}</p>
-            ) : null}
-          </div>
+          <h3 className="max-w-[14ch] text-[1.55rem] font-semibold tracking-[-0.035em] text-white md:text-[1.9rem]">
+            {title}
+          </h3>
         </div>
 
-        {signalContext ? (
-          <p className="rounded-[1.25rem] border border-white/8 bg-white/[0.025] px-5 py-4 text-[0.96rem] leading-7 text-white/62">
-            {signalContext}
+        <div className="space-y-4 md:space-y-5">
+          <p className="max-w-[44rem] text-[1rem] leading-8 text-white/68 md:text-[1.05rem] md:leading-9">
+            {interpretation.summary}
           </p>
-        ) : null}
 
-        {hiddenSignals.length > 0 ? (
-          <details className="rounded-[1.25rem] border border-white/8 bg-black/10 px-5 py-4">
-            <summary className="cursor-pointer list-none text-sm font-medium text-white/64 marker:hidden">
-              Additional signal context
-            </summary>
-            <div className="mt-4 space-y-3">
-              {hiddenSignals.map((signal) => (
-                <div
-                  key={signal.signalId}
-                  className="rounded-[1rem] border border-white/8 bg-white/[0.02] px-4 py-3 text-sm"
-                >
-                  <p className="font-medium text-white/82">{signal.signalTitle}</p>
-                  <p className="mt-1 text-xs text-white/42">
-                    Also present in this area{signal.isOverlay ? ' as an overlay' : ''}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </details>
-        ) : null}
+          {interpretation.support ? (
+            <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/52">{interpretation.support}</p>
+          ) : null}
+          {interpretation.tension ? (
+            <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/44">{interpretation.tension}</p>
+          ) : null}
 
-        {visibleSignals.length === 0 ? (
-          <p className="rounded-[1.25rem] border border-dashed border-white/10 px-5 py-4 text-sm leading-7 text-white/45">
-            No persisted domain signals are available for this area.
-          </p>
-        ) : null}
+          {signalContext ? (
+            <p className="max-w-[40rem] text-[0.92rem] leading-7 text-white/50">
+              {signalContext}
+            </p>
+          ) : null}
+
+          {hiddenSignals.length > 0 ? (
+            <details className="max-w-[40rem] pt-1">
+              <summary className="cursor-pointer list-none text-[0.92rem] font-medium text-white/58 marker:hidden">
+                Additional signal context
+              </summary>
+              <div className="mt-3 space-y-3 border-l border-white/8 pl-4">
+                {hiddenSignals.map((signal) => (
+                  <div key={signal.signalId} className="text-sm leading-7 text-white/52">
+                    <span className="font-medium text-white/76">{signal.signalTitle}</span>
+                    <span className="text-white/40">
+                      {' '}
+                      also appears in this area{signal.isOverlay ? ' as an overlay' : ''}.
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ) : null}
+
+          {visibleSignals.length === 0 ? (
+            <p className="max-w-[40rem] text-sm leading-7 text-white/45">
+              No persisted domain signals are available for this area.
+            </p>
+          ) : null}
+        </div>
       </div>
-    </SurfaceCard>
+    </article>
+  );
+}
+
+function DomainSection({
+  domains,
+}: {
+  domains: readonly AssessmentResultDomainViewModel[];
+}) {
+  if (domains.length === 0) {
+    return (
+      <SurfaceCard className="p-6 text-sm text-white/55">
+        No persisted domain summaries are available for this result.
+      </SurfaceCard>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-[58rem] space-y-12 md:space-y-14">
+      {domains.map((domain) => (
+        <DomainChapter key={domain.domainId} domain={domain} />
+      ))}
+    </div>
   );
 }
 
@@ -376,19 +395,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <SectionHeader
           eyebrow={`${resultDomains.length} Domain${resultDomains.length === 1 ? '' : 's'}`}
           title="Domain reading"
-          description="Each domain section is rendered directly from the persisted payload, with interpretation summary first and supporting signal context kept visually quiet."
+          description="These chapters follow the persisted payload order so the domain reading can be taken in as one calm report body, with signal context kept quiet and secondary."
         />
 
-        <div className="grid gap-5 lg:gap-6 2xl:grid-cols-2">
-          {resultDomains.map((domain) => (
-            <DomainCard key={domain.domainId} domain={domain} />
-          ))}
-          {resultDomains.length === 0 ? (
-            <SurfaceCard className="p-6 text-sm text-white/55">
-              No persisted domain summaries are available for this result.
-            </SurfaceCard>
-          ) : null}
-        </div>
+        <DomainSection domains={resultDomains} />
       </section>
     </PageFrame>
   );
