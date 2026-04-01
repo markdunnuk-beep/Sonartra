@@ -44,6 +44,22 @@ No alternate result format tables are introduced. No runtime Excel/JSON parsing 
 - Results enforce one canonical payload contract per attempt via `UNIQUE (attempt_id)`.
 - `results` check constraint enforces payload presence when `readiness_status = 'READY'`.
 
+## Premium language tables
+
+The premium language persistence layer is version-scoped and assessment-owned.
+
+- `assessment_version_language_signals`: signal language blocks with sections `summary`, `strength`, `watchout`, `development`.
+- `assessment_version_language_pairs`: signal-pair language blocks with sections `summary`, `strength`, `watchout`.
+- `assessment_version_language_domains`: domain language blocks with sections `summary`, `focus`, `pressure`, `environment`.
+- `assessment_version_language_overview`: overview language blocks with sections `headline`, `summary`, `strengths`, `watchouts`, `development`.
+
+Each language table:
+
+- is owned by `assessment_version_id`
+- rejects blank `content` via `CHECK (btrim(content) <> '')`
+- enforces deterministic uniqueness on `(assessment_version_id, key, section)`
+- avoids any global language store outside an assessment version
+
 ## WPLP-80 fidelity choice
 
 WPLP-80 contains both question sections and scoring signal groups. The `domains.domain_type` field preserves both cleanly without parallel schemas.
@@ -51,5 +67,6 @@ WPLP-80 contains both question sections and scoring signal groups. The `domains.
 ## Migration location
 
 - `db/migrations/202603260001_mvp_canonical_schema.sql`
+- `db/migrations/202604010001_assessment_version_language_tables.sql`
 
 Run this migration before Task 5 seeding.

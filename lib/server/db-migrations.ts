@@ -177,6 +177,49 @@ export async function reconcileKnownMigrations(params: {
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);
       }
+
+      continue;
+    }
+
+    if (migration.filename === '202604010001_assessment_version_language_tables.sql') {
+      const languageTablesExist: boolean[] = [];
+      for (const tableName of [
+        'assessment_version_language_signals',
+        'assessment_version_language_pairs',
+        'assessment_version_language_domains',
+        'assessment_version_language_overview',
+      ]) {
+        languageTablesExist.push(await tableExists(params.db, tableName));
+      }
+
+      const hasSignalsVersionIndex = await indexExists(
+        params.db,
+        'assessment_version_language_signals_version_idx',
+      );
+      const hasPairsVersionIndex = await indexExists(
+        params.db,
+        'assessment_version_language_pairs_version_idx',
+      );
+      const hasDomainsVersionIndex = await indexExists(
+        params.db,
+        'assessment_version_language_domains_version_idx',
+      );
+      const hasOverviewVersionIndex = await indexExists(
+        params.db,
+        'assessment_version_language_overview_version_idx',
+      );
+
+      if (
+        languageTablesExist.every(Boolean)
+        && hasSignalsVersionIndex
+        && hasPairsVersionIndex
+        && hasDomainsVersionIndex
+        && hasOverviewVersionIndex
+      ) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
     }
   }
 

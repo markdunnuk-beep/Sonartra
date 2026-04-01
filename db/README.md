@@ -8,6 +8,7 @@ Current migrations:
 
 - `202603260001_mvp_canonical_schema.sql`
 - `202603290001_option_version_key_scope.sql`
+- `202604010001_assessment_version_language_tables.sql`
 
 Apply them before running seed inserts or admin authoring writes:
 
