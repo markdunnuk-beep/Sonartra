@@ -170,7 +170,7 @@ test('result detail action section uses a report-style three-column layout witho
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /title="Interpretation to hold onto"/);
-  assert.match(source, /className="grid gap-5 xl:grid-cols-3"/);
+  assert.match(source, /className="grid gap-5 lg:gap-6 xl:grid-cols-3"/);
   assert.match(source, /<ActionList title="Strengths" items=\{result\.strengths\} tone="positive" \/>/);
   assert.match(source, /<ActionList title="Watchouts" items=\{result\.watchouts\} tone="warning" \/>/);
   assert.match(source, /<ActionList title="Development Focus" items=\{result\.developmentFocus\} tone="neutral" \/>/);
@@ -182,10 +182,10 @@ test('result detail domain section is summary-first and no longer emphasizes per
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /title="Domain reading"/);
-  assert.match(source, /className="grid gap-6 2xl:grid-cols-2"/);
+  assert.match(source, /className="grid gap-5 lg:gap-6 2xl:grid-cols-2"/);
   assert.match(source, /<SectionEyebrow>Domain<\/SectionEyebrow>/);
   assert.match(source, /const primarySignal = visibleSignals\[0\] \?\? null/);
-  assert.match(source, /<p className="max-w-3xl text-\[1rem\] leading-8 text-white\/68">\{interpretation\.summary\}<\/p>/);
+  assert.match(source, /<p className="max-w-\[38rem\] text-\[0\.98rem\] leading-8 text-white\/66 md:text-\[1rem\]">/);
   assert.doesNotMatch(source, /formatPercent\(signal\.domainPercentage\)/);
   assert.doesNotMatch(source, /Primary signal' : 'Secondary signal'/);
   assert.doesNotMatch(source, /The main reading journey/);
@@ -204,4 +204,15 @@ test('result detail page removes the separate status bar and keeps the reading o
   assert.ok(actionIndex >= 0);
   assert.ok(domainIndex >= 0);
   assert.ok(actionIndex < domainIndex);
+});
+
+test('result detail page uses tightened responsive spacing and reading widths for the final polish pass', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
+  assert.match(source, /max-w-\[16ch\]/);
+  assert.match(source, /max-w-\[72ch\]/);
+  assert.match(source, /px-6 py-7 sm:px-7 sm:py-8 md:px-10 md:py-12/);
+  assert.match(source, /className="space-y-7"/);
+  assert.match(source, /md:grid-cols-\[minmax\(0,1\.25fr\)_minmax\(0,1fr\)\]/);
 });

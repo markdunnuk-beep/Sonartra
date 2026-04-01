@@ -169,39 +169,39 @@ function ActionList({
         : 'border-white/10 bg-white/[0.025]';
 
   return (
-    <SurfaceCard className="rounded-[1.7rem] p-6 md:p-7">
-      <div className="space-y-6">
+    <SurfaceCard className="rounded-[1.7rem] p-6 sm:p-7 md:p-8">
+      <div className="space-y-7">
         <div className="space-y-3">
           <SectionEyebrow>{title}</SectionEyebrow>
           <div className="border-white/8 max-w-3xl border-t pt-4">
-            <p className="text-[1.35rem] font-semibold tracking-[-0.03em] text-white">{title}</p>
+            <p className="text-[1.28rem] font-semibold tracking-[-0.03em] text-white md:text-[1.35rem]">{title}</p>
           </div>
         </div>
 
         <ul className="space-y-3">
-        {visible.length > 0 ? (
-          visible.map((item) => (
-            <li
-              key={item.key}
-              className={`rounded-[1.35rem] border px-5 py-5 ${toneClass}`}
-            >
-              <div className="space-y-3">
-                <p className="text-[0.92rem] font-semibold tracking-[-0.01em] text-white/88">
-                  {item.title}
-                </p>
-                <p className="text-[0.98rem] leading-7 text-white/66">{item.detail}</p>
-              </div>
+          {visible.length > 0 ? (
+            visible.map((item) => (
+              <li
+                key={item.key}
+                className={`rounded-[1.35rem] border px-5 py-5 sm:px-6 ${toneClass}`}
+              >
+                <div className="space-y-3">
+                  <p className="text-[0.92rem] font-semibold tracking-[-0.01em] text-white/88">
+                    {item.title}
+                  </p>
+                  <p className="max-w-[34rem] text-[0.98rem] leading-7 text-white/66">{item.detail}</p>
+                </div>
+              </li>
+            ))
+          ) : (
+            <li className="rounded-[1.35rem] border border-dashed border-white/10 px-5 py-5 text-sm leading-7 text-white/45">
+              No items available in this section.
             </li>
-          ))
-        ) : (
-          <li className="rounded-[1.35rem] border border-dashed border-white/10 px-5 py-5 text-sm leading-7 text-white/45">
-            No items available in this section.
-          </li>
-        )}
+          )}
         </ul>
 
         {overflow.length > 0 ? (
-          <details className="border-white/8 rounded-[1.25rem] border bg-black/10 px-5 py-4">
+          <details className="border-white/8 rounded-[1.25rem] border bg-black/10 px-5 py-4 sm:px-6">
             <summary className="cursor-pointer list-none text-sm font-medium text-white/64 marker:hidden">
               Show {overflow.length} more
             </summary>
@@ -209,7 +209,7 @@ function ActionList({
               {overflow.map((item) => (
                 <li key={item.key} className="rounded-[1.15rem] border border-white/8 bg-white/[0.02] px-4 py-4">
                   <p className="text-sm font-medium text-white/84">{item.title}</p>
-                  <p className="mt-2 text-sm leading-7 text-white/58">{item.detail}</p>
+                  <p className="mt-2 max-w-[34rem] text-sm leading-7 text-white/58">{item.detail}</p>
                 </li>
               ))}
             </ul>
@@ -230,41 +230,43 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
   const secondarySignal = visibleSignals[1] ?? null;
 
   return (
-    <SurfaceCard className="rounded-[1.8rem] p-7 md:p-8">
-      <div className="space-y-8">
+    <SurfaceCard className="rounded-[1.8rem] p-6 sm:p-7 md:p-8">
+      <div className="space-y-7">
         <div className="space-y-4">
           <SectionEyebrow>Domain</SectionEyebrow>
           <div className="border-white/8 space-y-4 border-t pt-5">
             <div className="space-y-3">
-              <h3 className="text-[1.7rem] font-semibold tracking-[-0.035em] text-white md:text-[2rem]">
+              <h3 className="text-[1.55rem] font-semibold tracking-[-0.035em] text-white md:text-[1.9rem]">
                 {title}
               </h3>
-              <p className="max-w-3xl text-[1rem] leading-8 text-white/68">{interpretation.summary}</p>
+              <p className="max-w-[38rem] text-[0.98rem] leading-8 text-white/66 md:text-[1rem]">
+                {interpretation.summary}
+              </p>
             </div>
 
             {interpretation.support ? (
-              <p className="max-w-3xl text-sm leading-7 text-white/50">{interpretation.support}</p>
+              <p className="max-w-[36rem] text-sm leading-7 text-white/50">{interpretation.support}</p>
             ) : null}
             {interpretation.tension ? (
-              <p className="max-w-3xl text-sm leading-7 text-white/42">{interpretation.tension}</p>
+              <p className="max-w-[36rem] text-sm leading-7 text-white/42">{interpretation.tension}</p>
             ) : null}
           </div>
         </div>
 
         {primarySignal ? (
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
             <div className="rounded-[1.25rem] border border-white/8 bg-white/[0.025] px-5 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
                 Primary signal
               </p>
-              <p className="mt-3 text-base font-semibold text-white/88">{primarySignal.signalTitle}</p>
+              <p className="mt-3 text-[0.98rem] font-semibold text-white/86">{primarySignal.signalTitle}</p>
             </div>
             {secondarySignal ? (
               <div className="rounded-[1.25rem] border border-white/8 bg-black/10 px-5 py-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/36">
                   Secondary signal
                 </p>
-                <p className="mt-3 text-base font-semibold text-white/78">{secondarySignal.signalTitle}</p>
+                <p className="mt-3 text-[0.98rem] font-semibold text-white/76">{secondarySignal.signalTitle}</p>
               </div>
             ) : null}
           </div>
@@ -328,13 +330,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const heroSupport = getHeroSupport(result);
 
   return (
-    <PageFrame className="space-y-10">
+    <PageFrame className="space-y-12 md:space-y-14">
       <SurfaceCard
         accent
-        className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.16),transparent_32%),linear-gradient(180deg,rgba(16,26,44,0.92),rgba(9,15,28,0.98))] px-7 py-8 md:px-10 md:py-12"
+        className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.16),transparent_32%),linear-gradient(180deg,rgba(16,26,44,0.92),rgba(9,15,28,0.98))] px-6 py-7 sm:px-7 sm:py-8 md:px-10 md:py-12"
       >
-        <div className="space-y-8">
-          <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
+        <div className="space-y-7 md:space-y-8">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
             <SectionEyebrow>Overview</SectionEyebrow>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
             <span>{result.assessmentTitle}</span>
@@ -346,16 +348,16 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             <span>{completionTimestamp.date}</span>
           </div>
 
-          <div className="space-y-6">
-            <h1 className="max-w-4xl text-[2.9rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white md:text-[4.4rem]">
+          <div className="space-y-5 md:space-y-6">
+            <h1 className="max-w-[16ch] text-[2.45rem] font-semibold leading-[1.03] tracking-[-0.045em] text-white sm:text-[2.9rem] md:text-[4.15rem]">
               {heroHeading}
             </h1>
-            <div className="max-w-3xl space-y-4">
-              <p className="text-[1.05rem] leading-8 text-white/76 md:text-[1.2rem] md:leading-9">
+            <div className="max-w-[72ch] space-y-4">
+              <p className="text-[1rem] leading-8 text-white/74 sm:text-[1.05rem] md:text-[1.16rem] md:leading-9">
                 {heroSupport.narrative}
               </p>
               {heroSupport.support ? (
-                <p className="max-w-2xl text-[0.98rem] leading-8 text-white/52">
+                <p className="max-w-[62ch] text-[0.96rem] leading-8 text-white/50">
                   {heroSupport.support}
                 </p>
               ) : null}
@@ -364,28 +366,28 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </div>
       </SurfaceCard>
 
-      <section className="space-y-6">
+      <section className="space-y-7">
         <SectionHeader
           eyebrow="Action Focus"
           title="Interpretation to hold onto"
           description="These sections are rendered directly from the persisted result payload and are designed to be read quickly, then revisited as needed."
         />
 
-        <div className="grid gap-5 xl:grid-cols-3">
+        <div className="grid gap-5 lg:gap-6 xl:grid-cols-3">
           <ActionList title="Strengths" items={result.strengths} tone="positive" />
           <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
           <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section className="space-y-7">
         <SectionHeader
           eyebrow={`${resultDomains.length} Domain${resultDomains.length === 1 ? '' : 's'}`}
           title="Domain reading"
           description="Each domain section is rendered directly from the persisted payload, with interpretation summary first and supporting signal context kept visually quiet."
         />
 
-        <div className="grid gap-6 2xl:grid-cols-2">
+        <div className="grid gap-5 lg:gap-6 2xl:grid-cols-2">
           {resultDomains.map((domain) => (
             <DomainCard key={domain.domainId} domain={domain} />
           ))}
