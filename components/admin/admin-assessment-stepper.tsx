@@ -13,6 +13,7 @@ const builderSteps = [
   { slug: 'questions', label: 'Questions' },
   { slug: 'responses', label: 'Responses' },
   { slug: 'weights', label: 'Weights' },
+  { slug: 'language', label: 'Language' },
   { slug: 'review', label: 'Review' },
 ] as const;
 
@@ -31,6 +32,7 @@ function getActiveStepSlug(pathname: string, assessmentKey: string): (typeof bui
     case 'questions':
     case 'responses':
     case 'weights':
+    case 'language':
     case 'review':
       return slug;
     default:
@@ -63,6 +65,8 @@ function getStepStatus(
         : 'incomplete';
     case 'weights':
       return assessment.weightingSummary.totalMappings > 0 ? 'complete' : 'incomplete';
+    case 'language':
+      return 'incomplete';
     case 'review':
       return assessment.draftValidation.isPublishReady ? 'complete' : 'incomplete';
   }
