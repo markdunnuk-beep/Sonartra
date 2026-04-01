@@ -337,11 +337,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
-      <SurfaceCard
-        accent
-        className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.16),transparent_32%),linear-gradient(180deg,rgba(16,26,44,0.92),rgba(9,15,28,0.98))] px-6 py-7 sm:px-7 sm:py-8 md:px-10 md:py-12"
-      >
-        <div className="space-y-7 md:space-y-8">
+      <section className="overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.11),transparent_38%),linear-gradient(180deg,rgba(16,26,44,0.72),rgba(9,15,28,0.88))] px-7 py-8 sm:px-8 sm:py-9 md:px-12 md:py-12 lg:px-14">
+        <div className="max-w-[82rem] space-y-7 md:space-y-9">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
             <SectionEyebrow>Overview</SectionEyebrow>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
@@ -354,23 +351,23 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             <span>{completionTimestamp.date}</span>
           </div>
 
-          <div className="space-y-5 md:space-y-6">
-            <h1 className="max-w-[16ch] text-[2.45rem] font-semibold leading-[1.03] tracking-[-0.045em] text-white sm:text-[2.9rem] md:text-[4.15rem]">
+          <div className="space-y-6 md:space-y-7">
+            <h1 className="max-w-[20ch] text-[2.45rem] font-semibold leading-[1.03] tracking-[-0.045em] text-white sm:text-[3rem] md:text-[4.2rem]">
               {heroHeading}
             </h1>
-            <div className="max-w-[72ch] space-y-4">
+            <div className="max-w-[76ch] space-y-4">
               <p className="text-[1rem] leading-8 text-white/74 sm:text-[1.05rem] md:text-[1.16rem] md:leading-9">
                 {heroSupport.narrative}
               </p>
               {heroSupport.support ? (
-                <p className="max-w-[62ch] text-[0.96rem] leading-8 text-white/50">
+                <p className="max-w-[68ch] text-[0.96rem] leading-8 text-white/50">
                   {heroSupport.support}
                 </p>
               ) : null}
             </div>
           </div>
         </div>
-      </SurfaceCard>
+      </section>
 
       <section className="space-y-7">
         <SectionHeader

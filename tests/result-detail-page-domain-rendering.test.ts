@@ -245,11 +245,15 @@ test('result detail page uses tightened responsive spacing and reading widths fo
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
-  assert.match(source, /max-w-\[16ch\]/);
-  assert.match(source, /max-w-\[72ch\]/);
-  assert.match(source, /px-6 py-7 sm:px-7 sm:py-8 md:px-10 md:py-12/);
+  assert.match(source, /<section className="overflow-hidden rounded-\[1\.5rem\] bg-\[radial-gradient\(circle_at_top_left,rgba\(118,147,255,0\.11\),transparent_38%\),linear-gradient\(180deg,rgba\(16,26,44,0\.72\),rgba\(9,15,28,0\.88\)\)\] px-7 py-8 sm:px-8 sm:py-9 md:px-12 md:py-12 lg:px-14">/);
+  assert.match(source, /max-w-\[82rem\] space-y-7 md:space-y-9/);
+  assert.match(source, /max-w-\[20ch\]/);
+  assert.match(source, /max-w-\[76ch\]/);
+  assert.match(source, /max-w-\[68ch\]/);
   assert.match(source, /className="space-y-7"/);
   assert.match(source, /md:grid-cols-\[minmax\(0,12rem\)_minmax\(0,1fr\)\]/);
   assert.match(source, /max-w-\[40rem\] text-\[0\.92rem\] leading-7 text-white\/50/);
   assert.match(source, /text-\[1\.32rem\] font-semibold tracking-\[-0\.03em\] text-white md:text-\[1\.45rem\]/);
+  assert.doesNotMatch(source, /<SurfaceCard\s+accent/);
+  assert.doesNotMatch(source, /rounded-\[2rem\] bg-\[radial-gradient\(circle_at_top_left,rgba\(118,147,255,0\.16\),transparent_32%\),linear-gradient\(180deg,rgba\(16,26,44,0\.92\),rgba\(9,15,28,0\.98\)\)\] px-6 py-7 sm:px-7 sm:py-8 md:px-10 md:py-12/);
 });
