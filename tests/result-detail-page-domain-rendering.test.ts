@@ -172,6 +172,7 @@ test('result detail action section uses a report-style three-column layout witho
 
   assert.match(source, /title="Interpretation to hold onto"/);
   assert.match(source, /className="grid gap-5 lg:gap-6 xl:grid-cols-3"/);
+  assert.match(source, /Across the rest of the report, this pattern shows up in a few consistent ways: where it adds value, where it can create friction, and where attention may be useful\./);
   assert.match(source, /<ActionList title="Strengths" items=\{result\.strengths\} tone="positive" \/>/);
   assert.match(source, /<ActionList title="Watchouts" items=\{result\.watchouts\} tone="warning" \/>/);
   assert.match(source, /<ActionList title="Development Focus" items=\{result\.developmentFocus\} tone="neutral" \/>/);
@@ -183,6 +184,7 @@ test('result detail domain section is summary-first and no longer emphasizes per
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /title="Domain reading"/);
+  assert.match(source, /The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report\./);
   assert.match(source, /<DomainSection domains=\{resultDomains\} \/>/);
   assert.match(source, /function DomainChapter\(\{ domain \}: \{ domain: AssessmentResultDomainViewModel \}\)/);
   assert.match(source, /<SectionEyebrow>Domain<\/SectionEyebrow>/);
@@ -200,6 +202,8 @@ test('result detail domain section is summary-first and no longer emphasizes per
   assert.match(source, /Additional signal context/);
   assert.match(source, /also appears in this area/);
   assert.doesNotMatch(source, /The main reading journey/);
+  assert.doesNotMatch(source, /These sections are rendered directly from the persisted result payload/);
+  assert.doesNotMatch(source, /These chapters follow the persisted payload order/);
 });
 
 test('result detail page removes the separate status bar and keeps the reading order narrative then actions then domains', () => {

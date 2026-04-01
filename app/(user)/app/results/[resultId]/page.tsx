@@ -381,7 +381,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <SectionHeader
           eyebrow="Action Focus"
           title="Interpretation to hold onto"
-          description="These sections are rendered directly from the persisted result payload and are designed to be read quickly, then revisited as needed."
+          description="Across the rest of the report, this pattern shows up in a few consistent ways: where it adds value, where it can create friction, and where attention may be useful."
         />
 
         <div className="grid gap-5 lg:gap-6 xl:grid-cols-3">
@@ -395,7 +395,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <SectionHeader
           eyebrow={`${resultDomains.length} Domain${resultDomains.length === 1 ? '' : 's'}`}
           title="Domain reading"
-          description="These chapters follow the persisted payload order so the domain reading can be taken in as one calm report body, with signal context kept quiet and secondary."
+          description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
         />
 
         <DomainSection domains={resultDomains} />
