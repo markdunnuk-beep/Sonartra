@@ -1,8 +1,10 @@
 import type {
   CanonicalResultPayload,
+  EngineLanguageBundle,
   NormalizedDomainSummary,
   NormalizedResult,
   NormalizedSignalScore,
+  ResultInterpretationContext,
   ResultDomainSummary,
   ResultDiagnostics,
   ResultMetadata,
@@ -20,9 +22,20 @@ import {
 } from '@/lib/engine/result-interpretation';
 
 export type CanonicalResultBuilderInput = NormalizedResult & {
+  assessmentVersionId: string;
   metadata: ResultMetadata;
   scoringDiagnostics: ScoreDiagnostics;
+  languageBundle: EngineLanguageBundle;
 };
+
+export function createResultInterpretationContext(
+  input: Pick<CanonicalResultBuilderInput, 'assessmentVersionId' | 'languageBundle'>,
+): ResultInterpretationContext {
+  return {
+    assessmentVersionId: input.assessmentVersionId,
+    languageBundle: input.languageBundle,
+  };
+}
 
 function getTopSignalsInRankOrder(signalScores: readonly NormalizedSignalScore[]): readonly NormalizedSignalScore[] {
   return [...signalScores].sort((left, right) => {
@@ -153,7 +166,10 @@ function assertDomainSignalOrdering(domainSummary: ResultDomainSummary): void {
   }
 }
 
-export function buildDomainSummaries(normalizedResult: NormalizedResult): readonly ResultDomainSummary[] {
+export function buildDomainSummaries(
+  normalizedResult: NormalizedResult,
+  interpretationContext: ResultInterpretationContext,
+): readonly ResultDomainSummary[] {
   const domainSummaries = normalizedResult.domainSummaries.map((domainSummary) => {
     const sortedSignalScores = Object.freeze(sortDomainSignalsForDisplay(domainSummary.signalScores));
     const rankedSignalIds = Object.freeze(sortedSignalScores.map((signalScore) => signalScore.signalId));
@@ -164,7 +180,7 @@ export function buildDomainSummaries(normalizedResult: NormalizedResult): readon
     };
     const persistedDomainSummary = {
       ...canonicalDomainSummary,
-      interpretation: buildDomainInterpretation(canonicalDomainSummary),
+      interpretation: buildDomainInterpretation(canonicalDomainSummary, interpretationContext),
     } satisfies ResultDomainSummary;
 
     assertDomainSignalOrdering(persistedDomainSummary);
@@ -212,7 +228,8 @@ export function buildPayload(params: {
   const topSignal = buildTopSignal(params.normalizedResult);
   const rankedSignals = buildRankedSignals(params.normalizedResult);
   const normalizedScores = buildNormalizedScores(params.normalizedResult);
-  const domainSummaries = buildDomainSummaries(params.normalizedResult);
+  const interpretationContext = createResultInterpretationContext(params.normalizedResult);
+  const domainSummaries = buildDomainSummaries(params.normalizedResult, interpretationContext);
 
   return Object.freeze({
     metadata: params.normalizedResult.metadata,
@@ -220,10 +237,10 @@ export function buildPayload(params: {
     rankedSignals,
     normalizedScores,
     domainSummaries,
-    overviewSummary: buildOverviewSummary(params.normalizedResult),
-    strengths: buildStrengths(params.normalizedResult),
-    watchouts: buildWatchouts(params.normalizedResult),
-    developmentFocus: buildDevelopmentFocus(params.normalizedResult),
+    overviewSummary: buildOverviewSummary(params.normalizedResult, interpretationContext),
+    strengths: buildStrengths(params.normalizedResult, interpretationContext),
+    watchouts: buildWatchouts(params.normalizedResult, interpretationContext),
+    developmentFocus: buildDevelopmentFocus(params.normalizedResult, interpretationContext),
     diagnostics: buildDiagnostics({
       normalizedResult: params.normalizedResult,
       scoringDiagnostics: params.normalizedResult.scoringDiagnostics,

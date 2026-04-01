@@ -4,6 +4,7 @@ import type {
   DomainInterpretationOutput,
   NormalizedDomainSummary,
   NormalizedSignalScore,
+  ResultInterpretationContext,
   SentenceFragmentCategory,
   SignalIntensityBand,
   SignalKey,
@@ -638,6 +639,7 @@ function buildGenericInterpretation(domainSummary: NormalizedDomainSummary): Dom
 
 export function buildDomainInterpretation(
   domainSummary: NormalizedDomainSummary,
+  _context?: ResultInterpretationContext,
 ): DomainInterpretationOutput | null {
   if (domainSummary.domainSource !== 'signal_group') {
     return null;

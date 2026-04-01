@@ -2,6 +2,7 @@ import type {
   NormalizedResult,
   NormalizedSignalScore,
   ResultBulletItem,
+  ResultInterpretationContext,
   ResultOverviewSummary,
 } from '@/lib/engine/types';
 
@@ -386,7 +387,10 @@ function getUniqueSignals(signalScores: readonly NormalizedSignalScore[], count:
   return unique;
 }
 
-export function buildOverviewSummary(normalizedResult: NormalizedResult): ResultOverviewSummary {
+export function buildOverviewSummary(
+  normalizedResult: NormalizedResult,
+  _context?: ResultInterpretationContext,
+): ResultOverviewSummary {
   const rankedSignals = getTopSignalsInRankOrder(normalizedResult.signalScores);
   const topSignal = rankedSignals[0];
   const secondSignal = rankedSignals[1];
@@ -418,7 +422,10 @@ export function buildOverviewSummary(normalizedResult: NormalizedResult): Result
   };
 }
 
-export function buildStrengths(normalizedResult: NormalizedResult): readonly ResultBulletItem[] {
+export function buildStrengths(
+  normalizedResult: NormalizedResult,
+  _context?: ResultInterpretationContext,
+): readonly ResultBulletItem[] {
   return Object.freeze(
     getUniqueSignals(getTopSignalsInRankOrder(normalizedResult.signalScores), MAX_STRENGTH_COUNT).map((signalScore) =>
       makeBulletItem({
@@ -431,7 +438,10 @@ export function buildStrengths(normalizedResult: NormalizedResult): readonly Res
   );
 }
 
-export function buildWatchouts(normalizedResult: NormalizedResult): readonly ResultBulletItem[] {
+export function buildWatchouts(
+  normalizedResult: NormalizedResult,
+  _context?: ResultInterpretationContext,
+): readonly ResultBulletItem[] {
   const rankedSignals = getTopSignalsInRankOrder(normalizedResult.signalScores);
   const topSignal = rankedSignals[0];
   const lowestSignal = rankedSignals[rankedSignals.length - 1];
@@ -479,7 +489,10 @@ export function buildWatchouts(normalizedResult: NormalizedResult): readonly Res
   return Object.freeze(bullets.slice(0, MAX_WATCHOUT_COUNT));
 }
 
-export function buildDevelopmentFocus(normalizedResult: NormalizedResult): readonly ResultBulletItem[] {
+export function buildDevelopmentFocus(
+  normalizedResult: NormalizedResult,
+  _context?: ResultInterpretationContext,
+): readonly ResultBulletItem[] {
   const lowestSignals = [...getTopSignalsInRankOrder(normalizedResult.signalScores)]
     .reverse()
     .filter((signalScore, index, values) => values.findIndex((candidate) => candidate.signalId === signalScore.signalId) === index)

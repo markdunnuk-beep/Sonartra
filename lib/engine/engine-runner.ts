@@ -76,6 +76,7 @@ export async function runAssessmentEngine(
   params: RunAssessmentEngineParams,
 ): Promise<CanonicalResultPayload> {
   const definition = await loadDefinition(params);
+  const languageBundle = await params.repository.getAssessmentVersionLanguageBundle(definition.version.id);
   const executionModel = loadRuntimeExecutionModel(definition);
   const scoreResult = scoreAssessmentResponses({
     executionModel,
@@ -85,6 +86,7 @@ export async function runAssessmentEngine(
 
   return buildCanonicalResultPayload({
     normalizedResult: {
+      assessmentVersionId: definition.version.id,
       ...normalizedResult,
       metadata: {
         assessmentKey: definition.assessment.key,
@@ -92,6 +94,7 @@ export async function runAssessmentEngine(
         attemptId: params.responses.attemptId,
       },
       scoringDiagnostics: scoreResult.diagnostics,
+      languageBundle,
     },
   });
 }

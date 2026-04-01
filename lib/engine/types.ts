@@ -1,3 +1,5 @@
+import type { AssessmentVersionLanguageBundle } from '@/lib/server/assessment-version-language-types';
+
 /**
  * Engine core shared types (Task 6).
  *
@@ -335,6 +337,13 @@ export type NormalizedResult = {
   domainSummaries: readonly NormalizedDomainSummary[];
   topSignalId: SignalId | null;
   diagnostics: NormalizationDiagnostics;
+};
+
+export type EngineLanguageBundle = AssessmentVersionLanguageBundle;
+
+export type ResultInterpretationContext = {
+  assessmentVersionId: AssessmentVersionId;
+  languageBundle: EngineLanguageBundle;
 };
 
 /* ----------------------------------

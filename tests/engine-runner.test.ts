@@ -5,7 +5,16 @@ import { runAssessmentEngine, EngineNotFoundError } from '@/lib/engine/engine-ru
 import type { AssessmentDefinitionRepository } from '@/lib/engine/repository';
 import { ScoringError } from '@/lib/engine/scoring';
 import { isCanonicalResultPayload } from '@/lib/engine/result-contract';
-import type { RuntimeAssessmentDefinition, RuntimeResponseSet } from '@/lib/engine/types';
+import type { EngineLanguageBundle, RuntimeAssessmentDefinition, RuntimeResponseSet } from '@/lib/engine/types';
+
+function createEmptyLanguageBundle(): EngineLanguageBundle {
+  return {
+    signals: {},
+    pairs: {},
+    domains: {},
+    overview: {},
+  };
+}
 
 function buildDefinition(): RuntimeAssessmentDefinition {
   return {
@@ -202,6 +211,7 @@ function createRepositoryFixture(definition: RuntimeAssessmentDefinition | null)
   calls: {
     published: number;
     version: number;
+    language: number;
     lastVersionParams: {
       assessmentVersionId?: string;
       assessmentKey?: string;
@@ -212,6 +222,7 @@ function createRepositoryFixture(definition: RuntimeAssessmentDefinition | null)
   const calls = {
     published: 0,
     version: 0,
+    language: 0,
     lastVersionParams: null as {
       assessmentVersionId?: string;
       assessmentKey?: string;
@@ -229,6 +240,10 @@ function createRepositoryFixture(definition: RuntimeAssessmentDefinition | null)
         calls.version += 1;
         calls.lastVersionParams = params;
         return definition;
+      },
+      async getAssessmentVersionLanguageBundle() {
+        calls.language += 1;
+        return createEmptyLanguageBundle();
       },
     },
     calls,
@@ -263,6 +278,7 @@ test('published assessment path loads by assessment key', async () => {
 
   assert.equal(calls.published, 1);
   assert.equal(calls.version, 0);
+  assert.equal(calls.language, 1);
 });
 
 test('version path loads by explicit version key', async () => {
@@ -277,6 +293,7 @@ test('version path loads by explicit version key', async () => {
 
   assert.equal(calls.published, 0);
   assert.equal(calls.version, 1);
+  assert.equal(calls.language, 1);
   assert.deepEqual(calls.lastVersionParams, {
     assessmentKey: 'wplp80',
     version: '1.0.0',
@@ -295,10 +312,72 @@ test('assessment version path loads by explicit assessmentVersionId', async () =
 
   assert.equal(calls.published, 0);
   assert.equal(calls.version, 1);
+  assert.equal(calls.language, 1);
   assert.deepEqual(calls.lastVersionParams, {
     assessmentVersionId: 'version-1',
   });
   assert.equal(payload.metadata.version, '1.0.0');
+});
+
+test('engine path loads language bundle for a valid assessment version and leaves output unchanged', async () => {
+  const definition = buildDefinition();
+  let loadedAssessmentVersionId: string | null = null;
+  const repository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle(assessmentVersionId) {
+      loadedAssessmentVersionId = assessmentVersionId;
+      return {
+        signals: {
+          core_focus: {
+            summary: 'Unused summary',
+          },
+        },
+        pairs: {},
+        domains: {},
+        overview: {},
+      };
+    },
+  };
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    responses: buildResponses({ 'question-1': 'option-1' }),
+  });
+
+  assert.equal(loadedAssessmentVersionId, 'version-1');
+  assert.equal(payload.overviewSummary.headline, 'A clear operating preference is coming through');
+  assert.match(payload.overviewSummary.narrative, /dependable way to approach work/i);
+});
+
+test('empty language bundle is handled safely and result generation still succeeds', async () => {
+  const definition = buildDefinition();
+  const repository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return createEmptyLanguageBundle();
+    },
+  };
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    responses: buildResponses({}),
+  });
+
+  assert.ok(isCanonicalResultPayload(payload));
+  assert.equal(payload.diagnostics.zeroMass, true);
+  assert.equal(payload.topSignal?.signalId, 'signal-core');
 });
 
 test('same input produces identical payload output', async () => {

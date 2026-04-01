@@ -40,6 +40,7 @@ export type AssessmentCompletionExecuteEngine = (params: {
       assessmentKey?: string;
       version?: string;
     }): Promise<unknown>;
+    getAssessmentVersionLanguageBundle(assessmentVersionId: string): Promise<unknown>;
   };
   assessmentVersionId?: string;
   assessmentKey?: string;

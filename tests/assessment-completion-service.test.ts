@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { Queryable } from '@/lib/engine/repository-sql';
-import type { CanonicalResultPayload, RuntimeAssessmentDefinition } from '@/lib/engine/types';
+import type { CanonicalResultPayload, EngineLanguageBundle, RuntimeAssessmentDefinition } from '@/lib/engine/types';
 import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
 import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
 import {
@@ -105,6 +105,15 @@ function buildDefinition(params?: {
         ],
       },
     ],
+  };
+}
+
+function createEmptyLanguageBundle(): EngineLanguageBundle {
+  return {
+    signals: {},
+    pairs: {},
+    domains: {},
+    overview: {},
   };
 }
 
@@ -269,6 +278,7 @@ function createRepository() {
   return {
     async getPublishedAssessmentDefinitionByKey() { return buildDefinition(); },
     async getAssessmentDefinitionByVersion() { return buildDefinition(); },
+    async getAssessmentVersionLanguageBundle() { return createEmptyLanguageBundle(); },
   };
 }
 
@@ -340,6 +350,8 @@ test('failed prior result retry reruns and response loading respects final-answe
 test('completion resolves the runtime definition by the attempt assessmentVersionId', async () => {
   let publishedCalls = 0;
   let versionCalls = 0;
+  let languageCalls = 0;
+  let capturedLanguageVersionId: string | null = null;
   let capturedParams:
     | {
         assessmentVersionId?: string;
@@ -392,6 +404,11 @@ test('completion resolves the runtime definition by the attempt assessmentVersio
           versionTag: '2.0.0',
         });
       },
+      async getAssessmentVersionLanguageBundle(assessmentVersionId) {
+        languageCalls += 1;
+        capturedLanguageVersionId = assessmentVersionId;
+        return createEmptyLanguageBundle();
+      },
     },
   });
 
@@ -403,7 +420,9 @@ test('completion resolves the runtime definition by the attempt assessmentVersio
   assert.equal(result.resultStatus, 'ready');
   assert.equal(publishedCalls, 0);
   assert.equal(versionCalls, 1);
+  assert.equal(languageCalls, 1);
   assert.deepEqual(capturedParams, { assessmentVersionId: 'version-2' });
+  assert.equal(capturedLanguageVersionId, 'version-2');
 });
 
 test('engine failure and persistence failure are explicit and do not pretend success', async () => {

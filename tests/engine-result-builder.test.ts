@@ -3,8 +3,21 @@ import assert from 'node:assert/strict';
 
 import { isCanonicalResultPayload } from '@/lib/engine/result-contract';
 import { buildCanonicalResultPayload } from '@/lib/engine/result-builder';
+import {
+  buildDomainSummaries,
+  createResultInterpretationContext,
+} from '@/lib/engine/result-builder-helpers';
 import type { CanonicalResultBuilderInput } from '@/lib/engine/result-builder';
-import type { NormalizedDomainSummary, NormalizedSignalScore } from '@/lib/engine/types';
+import type { EngineLanguageBundle, NormalizedDomainSummary, NormalizedSignalScore } from '@/lib/engine/types';
+
+function createEmptyLanguageBundle(): EngineLanguageBundle {
+  return {
+    signals: {},
+    pairs: {},
+    domains: {},
+    overview: {},
+  };
+}
 
 function buildNormalizedSignal(params: {
   signalId: string;
@@ -75,6 +88,7 @@ function buildNormalizedResultFixture(overrides?: {
   scoringWarnings?: readonly string[];
   answeredQuestions?: number;
   totalQuestions?: number;
+  languageBundle?: EngineLanguageBundle;
 }): CanonicalResultBuilderInput {
   const signalScores =
     overrides?.signalScores ??
@@ -143,6 +157,7 @@ function buildNormalizedResultFixture(overrides?: {
   const totalQuestions = overrides?.totalQuestions ?? 4;
 
   return {
+    assessmentVersionId: 'version-1',
     metadata: {
       assessmentKey: 'wplp80',
       version: '1.0.0',
@@ -161,6 +176,7 @@ function buildNormalizedResultFixture(overrides?: {
       warnings: overrides?.scoringWarnings ?? Object.freeze(['incomplete_response_set']),
       generatedAt: '2026-01-01T00:01:00.000Z',
     },
+    languageBundle: overrides?.languageBundle ?? createEmptyLanguageBundle(),
     signalScores,
     domainSummaries,
     topSignalId: overrides?.topSignalId ?? signalScores[0]?.signalId ?? null,
@@ -184,6 +200,74 @@ function buildNormalizedResultFixture(overrides?: {
     },
   };
 }
+
+test('interpretation boundary receives language bundle context even when unused', () => {
+  const normalizedResult = buildNormalizedResultFixture({
+    domainSummaries: Object.freeze([
+      buildDomainSummary({
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        title: 'Behaviour Style',
+        rawTotal: 8,
+        percentage: 100,
+        signalScores: Object.freeze([
+          buildNormalizedSignal({
+            signalId: 'signal-driver',
+            signalKey: 'style_driver',
+            title: 'Driver',
+            domainId: 'domain-style',
+            domainKey: 'signal_style',
+            rawTotal: 5,
+            percentage: 39,
+            domainPercentage: 39,
+            rank: 1,
+          }),
+          buildNormalizedSignal({
+            signalId: 'signal-analyst',
+            signalKey: 'style_analyst',
+            title: 'Analyst',
+            domainId: 'domain-style',
+            domainKey: 'signal_style',
+            rawTotal: 3,
+            percentage: 24,
+            domainPercentage: 24,
+            rank: 2,
+          }),
+        ]),
+        answeredQuestionCount: 8,
+      }),
+    ]),
+    languageBundle: {
+      signals: {
+        style_driver: {
+          summary: 'Unused custom summary',
+        },
+      },
+      pairs: {
+        style_analyst_style_driver: {
+          summary: 'Unused pair summary',
+        },
+      },
+      domains: {
+        signal_style: {
+          summary: 'Unused domain summary',
+        },
+      },
+      overview: {
+        style_analyst_style_driver: {
+          headline: 'Unused overview headline',
+        },
+      },
+    },
+  });
+
+  const context = createResultInterpretationContext(normalizedResult);
+  const domainSummaries = buildDomainSummaries(normalizedResult, context);
+
+  assert.deepEqual(context.languageBundle, normalizedResult.languageBundle);
+  assert.equal(context.assessmentVersionId, 'version-1');
+  assert.equal(domainSummaries[0]?.interpretation?.diagnostics?.ruleKey, 'style_driver_analyst');
+});
 
 test('minimal valid payload construction returns a complete canonical result payload', () => {
   const payload = buildCanonicalResultPayload({

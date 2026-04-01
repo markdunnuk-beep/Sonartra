@@ -1,5 +1,6 @@
 import type {
   AssessmentKey,
+  EngineLanguageBundle,
   AssessmentVersionId,
   AssessmentVersionTag,
   RuntimeAssessmentDefinition,
@@ -13,6 +14,7 @@ import {
   type Queryable,
 } from '@/lib/engine/repository-sql';
 import { assembleRuntimeAssessmentDefinition } from '@/lib/engine/repository-mappers';
+import { getAssessmentVersionLanguageBundle } from '@/lib/server/assessment-version-language';
 
 export type AssessmentDefinitionRepository = {
   getPublishedAssessmentDefinitionByKey(
@@ -23,6 +25,9 @@ export type AssessmentDefinitionRepository = {
     assessmentKey?: AssessmentKey;
     version?: AssessmentVersionTag;
   }): Promise<RuntimeAssessmentDefinition | null>;
+  getAssessmentVersionLanguageBundle(
+    assessmentVersionId: AssessmentVersionId,
+  ): Promise<EngineLanguageBundle>;
 };
 
 export type AssessmentDefinitionRepositoryDeps = {
@@ -85,6 +90,10 @@ export function createAssessmentDefinitionRepository(
       }
 
       return assembleRuntimeAssessmentDefinition(graph);
+    },
+
+    async getAssessmentVersionLanguageBundle(assessmentVersionId) {
+      return getAssessmentVersionLanguageBundle(deps.db, assessmentVersionId);
     },
   };
 }
