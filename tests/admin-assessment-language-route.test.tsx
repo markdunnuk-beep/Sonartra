@@ -464,12 +464,14 @@ test('language step component renders the signal and pair language panels, place
   assert.match(markup, /Pair Language/);
   assert.match(markup, /Pair Language import/);
   assert.match(markup, /Domain Language/);
+  assert.match(markup, /Domain Language import/);
   assert.match(markup, /Development \/ Pressure \/ Environment/);
   assert.match(markup, /Overview Templates/);
   assert.match(markup, /signal_key \| section \| content/);
   assert.match(markup, /Import replaces all existing Signal Language rows for this assessment version\./);
   assert.match(markup, /signal_pair \| section \| content/);
   assert.match(markup, /Import replaces all existing Pair Language rows for this assessment version\./);
+  assert.match(markup, /Import replaces all existing Domain Language rows for this assessment version\./);
   assert.match(markup, /domain_key \| section \| content/);
   assert.match(markup, /pattern_key \| section \| content/);
   assert.match(markup, /2 entries/);
@@ -561,4 +563,5 @@ test('language step component shows a safe schema-unavailable state instead of r
   assert.match(markup, /Apply the assessment version language migration before using this step\./);
   assert.doesNotMatch(markup, /Signal Language import/);
   assert.doesNotMatch(markup, /Pair Language import/);
+  assert.doesNotMatch(markup, /Domain Language import/);
 });

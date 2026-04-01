@@ -1,3 +1,4 @@
+import { AdminDomainLanguageImport } from '@/components/admin/admin-domain-language-import';
 import {
   EmptyState,
   LabelPill,
@@ -5,16 +6,11 @@ import {
   SectionHeader,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
-import { AdminPairLanguageImport } from '@/components/admin/admin-pair-language-import';
 import { AdminSignalLanguageImport } from '@/components/admin/admin-signal-language-import';
+import { AdminPairLanguageImport } from '@/components/admin/admin-pair-language-import';
 import type { AdminAssessmentLanguageStepViewModel } from '@/lib/server/admin-assessment-language-step';
 
 const PLACEHOLDER_SECTIONS = [
-  {
-    title: 'Domain Language',
-    hint: 'domain_key | section | content',
-    description: 'Structured bulk import for domain-level narrative sections will follow this panel pattern.',
-  },
   {
     title: 'Development / Pressure / Environment',
     hint: 'key | section | content',
@@ -113,6 +109,12 @@ export function AdminAssessmentLanguageStep({
       <AdminPairLanguageImport
         assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
         existingPairLanguageRowCount={viewModel.counts.pairs.entryCount}
+        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+      />
+
+      <AdminDomainLanguageImport
+        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+        existingDomainLanguageRowCount={viewModel.counts.domains.entryCount}
         isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
       />
 
