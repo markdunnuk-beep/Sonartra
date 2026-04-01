@@ -159,69 +159,64 @@ function getDomainSignalContext(
 function ActionList({
   title,
   items,
-  tone,
 }: {
   title: string;
   items: AssessmentResultDetailViewModel['strengths'];
-  tone: 'positive' | 'warning' | 'neutral';
 }) {
   const { visible, overflow } = getVisibleItems(items);
-  const toneClass =
-    tone === 'positive'
-      ? 'border-emerald-300/18 bg-emerald-300/[0.04]'
-      : tone === 'warning'
-        ? 'border-amber-300/18 bg-amber-300/[0.04]'
-        : 'border-white/10 bg-white/[0.025]';
 
   return (
-    <SurfaceCard className="rounded-[1.7rem] p-6 sm:p-7 md:p-8">
-      <div className="space-y-7">
-        <div className="space-y-3">
-          <SectionEyebrow>{title}</SectionEyebrow>
-          <div className="border-white/8 max-w-3xl border-t pt-4">
-            <p className="text-[1.28rem] font-semibold tracking-[-0.03em] text-white md:text-[1.35rem]">{title}</p>
-          </div>
-        </div>
-
-        <ul className="space-y-3">
-          {visible.length > 0 ? (
-            visible.map((item) => (
-              <li
-                key={item.key}
-                className={`rounded-[1.35rem] border px-5 py-5 sm:px-6 ${toneClass}`}
-              >
-                <div className="space-y-3">
-                  <p className="text-[0.92rem] font-semibold tracking-[-0.01em] text-white/88">
-                    {item.title}
-                  </p>
-                  <p className="max-w-[34rem] text-[0.98rem] leading-7 text-white/66">{item.detail}</p>
-                </div>
-              </li>
-            ))
-          ) : (
-            <li className="rounded-[1.35rem] border border-dashed border-white/10 px-5 py-5 text-sm leading-7 text-white/45">
-              No items available in this section.
-            </li>
-          )}
-        </ul>
-
-        {overflow.length > 0 ? (
-          <details className="border-white/8 rounded-[1.25rem] border bg-black/10 px-5 py-4 sm:px-6">
-            <summary className="cursor-pointer list-none text-sm font-medium text-white/64 marker:hidden">
-              Show {overflow.length} more
-            </summary>
-            <ul className="mt-4 space-y-3">
-              {overflow.map((item) => (
-                <li key={item.key} className="rounded-[1.15rem] border border-white/8 bg-white/[0.02] px-4 py-4">
-                  <p className="text-sm font-medium text-white/84">{item.title}</p>
-                  <p className="mt-2 max-w-[34rem] text-sm leading-7 text-white/58">{item.detail}</p>
-                </li>
-              ))}
-            </ul>
-          </details>
-        ) : null}
+    <article className="border-white/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10">
+      <div className="space-y-3">
+        <SectionEyebrow>{title}</SectionEyebrow>
+        <h3 className="text-[1.32rem] font-semibold tracking-[-0.03em] text-white md:text-[1.45rem]">{title}</h3>
       </div>
-    </SurfaceCard>
+
+      <ul className="space-y-5">
+        {visible.length > 0 ? (
+          visible.map((item) => (
+            <li key={item.key} className="space-y-2">
+              <p className="text-[0.96rem] font-semibold tracking-[-0.01em] text-white/86">
+                {item.title}
+              </p>
+              <p className="max-w-[42rem] text-[0.98rem] leading-8 text-white/64">{item.detail}</p>
+            </li>
+          ))
+        ) : (
+          <li className="text-sm leading-7 text-white/45">No items available in this section.</li>
+        )}
+      </ul>
+
+      {overflow.length > 0 ? (
+        <details className="max-w-[42rem] pt-1">
+          <summary className="cursor-pointer list-none text-[0.92rem] font-medium text-white/58 marker:hidden">
+            Show {overflow.length} more
+          </summary>
+          <ul className="mt-3 space-y-4 border-l border-white/8 pl-4">
+            {overflow.map((item) => (
+              <li key={item.key} className="space-y-2">
+                <p className="text-sm font-medium text-white/82">{item.title}</p>
+                <p className="text-sm leading-7 text-white/56">{item.detail}</p>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </article>
+  );
+}
+
+function ActionSection({
+  result,
+}: {
+  result: AssessmentResultDetailViewModel;
+}) {
+  return (
+    <div className="mx-auto max-w-[58rem] space-y-12 md:space-y-14">
+      <ActionList title="Strengths" items={result.strengths} />
+      <ActionList title="Watchouts" items={result.watchouts} />
+      <ActionList title="Development Focus" items={result.developmentFocus} />
+    </div>
   );
 }
 
@@ -384,11 +379,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           description="Across the rest of the report, this pattern shows up in a few consistent ways: where it adds value, where it can create friction, and where attention may be useful."
         />
 
-        <div className="grid gap-5 lg:gap-6 xl:grid-cols-3">
-          <ActionList title="Strengths" items={result.strengths} tone="positive" />
-          <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
-          <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
-        </div>
+        <ActionSection result={result} />
       </section>
 
       <section className="space-y-7">

@@ -180,15 +180,22 @@ test('result detail page keeps personalisation prep outside UI prose generation'
   assert.doesNotMatch(source, /, your natural style is/);
 });
 
-test('result detail action section uses a report-style three-column layout without analytic badge treatment', () => {
+test('result detail action section uses a report-style text-led sequence without panel chrome', () => {
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /title="Interpretation to hold onto"/);
-  assert.match(source, /className="grid gap-5 lg:gap-6 xl:grid-cols-3"/);
+  assert.match(source, /<ActionSection result=\{result\} \/>/);
+  assert.match(source, /function ActionSection\(/);
   assert.match(source, /Across the rest of the report, this pattern shows up in a few consistent ways: where it adds value, where it can create friction, and where attention may be useful\./);
-  assert.match(source, /<ActionList title="Strengths" items=\{result\.strengths\} tone="positive" \/>/);
-  assert.match(source, /<ActionList title="Watchouts" items=\{result\.watchouts\} tone="warning" \/>/);
-  assert.match(source, /<ActionList title="Development Focus" items=\{result\.developmentFocus\} tone="neutral" \/>/);
+  assert.match(source, /<ActionList title="Strengths" items=\{result\.strengths\} \/>/);
+  assert.match(source, /<ActionList title="Watchouts" items=\{result\.watchouts\} \/>/);
+  assert.match(source, /<ActionList title="Development Focus" items=\{result\.developmentFocus\} \/>/);
+  assert.match(source, /mx-auto max-w-\[58rem\] space-y-12 md:space-y-14/);
+  assert.match(source, /border-white\/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10/);
+  assert.match(source, /max-w-\[42rem\] text-\[0\.98rem\] leading-8 text-white\/64/);
+  assert.doesNotMatch(source, /xl:grid-cols-3/);
+  assert.doesNotMatch(source, /rounded-\[1\.7rem\] p-6 sm:p-7 md:p-8/);
+  assert.doesNotMatch(source, /rounded-\[1\.35rem\] border px-5 py-5 sm:px-6/);
   assert.doesNotMatch(source, /inline-flex rounded-full px-2\.5 py-1 text-\[11px\] font-medium/);
   assert.doesNotMatch(source, /Practical synthesis/);
 });
@@ -244,4 +251,5 @@ test('result detail page uses tightened responsive spacing and reading widths fo
   assert.match(source, /className="space-y-7"/);
   assert.match(source, /md:grid-cols-\[minmax\(0,12rem\)_minmax\(0,1fr\)\]/);
   assert.match(source, /max-w-\[40rem\] text-\[0\.92rem\] leading-7 text-white\/50/);
+  assert.match(source, /text-\[1\.32rem\] font-semibold tracking-\[-0\.03em\] text-white md:text-\[1\.45rem\]/);
 });
