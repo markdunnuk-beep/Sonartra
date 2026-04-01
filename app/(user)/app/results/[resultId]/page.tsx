@@ -141,14 +141,19 @@ function getPersistedDomainInterpretation(domain: AssessmentResultDomainViewMode
   };
 }
 
-function getDomainDetailsCtaLabel(domain: AssessmentResultDomainViewModel): string {
-  const primarySignalTitle = domain.signalScores[0]?.signalTitle ?? null;
-
-  if (primarySignalTitle) {
-    return `See why ${primarySignalTitle} leads here`;
+function getDomainSignalContext(
+  primarySignal: AssessmentResultDomainViewModel['signalScores'][number] | null,
+  secondarySignal: AssessmentResultDomainViewModel['signalScores'][number] | null,
+): string | null {
+  if (primarySignal && secondarySignal) {
+    return `${primarySignal.signalTitle} is most evident in this area, with ${secondarySignal.signalTitle} also shaping the picture.`;
   }
 
-  return 'Explore this area in more detail';
+  if (primarySignal) {
+    return `${primarySignal.signalTitle} is the clearest signal in this area.`;
+  }
+
+  return null;
 }
 
 function ActionList({
@@ -224,10 +229,10 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
   const visibleSignals = domain.signalScores.slice(0, 2);
   const hiddenSignals = domain.signalScores.slice(2);
   const interpretation = getPersistedDomainInterpretation(domain);
-  const detailsCtaLabel = getDomainDetailsCtaLabel(domain);
   const title = domain.domainTitle.trim() || formatDomainLabel(domain.domainKey);
   const primarySignal = visibleSignals[0] ?? null;
   const secondarySignal = visibleSignals[1] ?? null;
+  const signalContext = getDomainSignalContext(primarySignal, secondarySignal);
 
   return (
     <SurfaceCard className="rounded-[1.8rem] p-6 sm:p-7 md:p-8">
@@ -253,29 +258,16 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
           </div>
         </div>
 
-        {primarySignal ? (
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-            <div className="rounded-[1.25rem] border border-white/8 bg-white/[0.025] px-5 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                Primary signal
-              </p>
-              <p className="mt-3 text-[0.98rem] font-semibold text-white/86">{primarySignal.signalTitle}</p>
-            </div>
-            {secondarySignal ? (
-              <div className="rounded-[1.25rem] border border-white/8 bg-black/10 px-5 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/36">
-                  Secondary signal
-                </p>
-                <p className="mt-3 text-[0.98rem] font-semibold text-white/76">{secondarySignal.signalTitle}</p>
-              </div>
-            ) : null}
-          </div>
+        {signalContext ? (
+          <p className="rounded-[1.25rem] border border-white/8 bg-white/[0.025] px-5 py-4 text-[0.96rem] leading-7 text-white/62">
+            {signalContext}
+          </p>
         ) : null}
 
         {hiddenSignals.length > 0 ? (
           <details className="rounded-[1.25rem] border border-white/8 bg-black/10 px-5 py-4">
             <summary className="cursor-pointer list-none text-sm font-medium text-white/64 marker:hidden">
-              {detailsCtaLabel}
+              Additional signal context
             </summary>
             <div className="mt-4 space-y-3">
               {hiddenSignals.map((signal) => (
@@ -285,7 +277,7 @@ function DomainCard({ domain }: { domain: AssessmentResultDomainViewModel }) {
                 >
                   <p className="font-medium text-white/82">{signal.signalTitle}</p>
                   <p className="mt-1 text-xs text-white/42">
-                    Supporting signal{signal.isOverlay ? ' | overlay' : ''}
+                    Also present in this area{signal.isOverlay ? ' as an overlay' : ''}
                   </p>
                 </div>
               ))}
