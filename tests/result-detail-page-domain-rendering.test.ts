@@ -153,3 +153,15 @@ test('result detail page no longer contains fixed WPLP intelligence domain order
   assert.match(source, /getResultDetailDomains\(result\)/);
   assert.match(source, /resultDomains\.map\(\(domain\) =>/);
 });
+
+test('result detail hero is narrative-first and no longer leads with derived signal interpretation copy', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /const heroHeading = getHeroHeading\(result\)/);
+  assert.match(source, /const heroSupport = getHeroSupport\(result\)/);
+  assert.match(source, /\{heroHeading\}/);
+  assert.match(source, /\{heroSupport\.narrative\}/);
+  assert.doesNotMatch(source, /const combinedInterpretation = getCombinedInterpretation/);
+  assert.doesNotMatch(source, /In practice:/);
+  assert.doesNotMatch(source, /heroPrimarySignalChips/);
+});

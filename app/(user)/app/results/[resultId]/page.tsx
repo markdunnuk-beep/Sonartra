@@ -5,7 +5,6 @@ import { PageFrame, SectionHeader, StatusPill, SurfaceCard } from '@/components/
 import type {
   AssessmentResultDetailViewModel,
   AssessmentResultDomainViewModel,
-  AssessmentResultSignalViewModel,
 } from '@/lib/server/result-read-model-types';
 import { getDbPool } from '@/lib/server/db';
 import { getResultDetailDomains } from '@/lib/server/result-detail-domain-view';
@@ -19,7 +18,6 @@ type ResultDetailPageProps = {
   }>;
 };
 
-const PROMINENT_SIGNAL_LIMIT = 5;
 const VISIBLE_ACTION_LIMIT = 3;
 
 function formatResultTimestamp(value: string | null): {
@@ -74,10 +72,6 @@ function getHeroNarrative(result: AssessmentResultDetailViewModel): string {
   return 'This result is ready to review.';
 }
 
-function getSignalTitle(signal: AssessmentResultSignalViewModel): string {
-  return 'title' in signal ? signal.title : signal.signalTitle;
-}
-
 function splitNarrative(value: string): readonly string[] {
   return value
     .split(/(?<=[.!?])\s+/)
@@ -85,24 +79,12 @@ function splitNarrative(value: string): readonly string[] {
     .filter(Boolean);
 }
 
-function getSecondaryHeroSignal(
-  result: AssessmentResultDetailViewModel,
-): AssessmentResultSignalViewModel | null {
-  const primarySignalId = result.topSignal?.signalId ?? result.rankedSignals[0]?.signalId ?? null;
-  return result.rankedSignals.find((signal) => signal.signalId !== primarySignalId) ?? null;
-}
-
 function getHeroHeading(
   result: AssessmentResultDetailViewModel,
-  secondarySignal: AssessmentResultSignalViewModel | null,
 ): string {
   const headline = result.overviewSummary.headline?.trim();
   if (headline) {
     return headline;
-  }
-
-  if (result.topSignal && secondarySignal) {
-    return `${result.topSignal.title} with ${getSignalTitle(secondarySignal)}`;
   }
 
   if (result.topSignal) {
@@ -110,21 +92,6 @@ function getHeroHeading(
   }
 
   return 'Overall pattern';
-}
-
-function getCombinedInterpretation(
-  result: AssessmentResultDetailViewModel,
-  secondarySignal: AssessmentResultSignalViewModel | null,
-): string {
-  if (result.topSignal && secondarySignal) {
-    return `${result.topSignal.title} leads, with ${getSignalTitle(secondarySignal)} shaping how that pattern comes through day to day.`;
-  }
-
-  if (result.topSignal) {
-    return `${result.topSignal.title} is the clearest pattern in this result.`;
-  }
-
-  return 'This result shows a clear overall pattern ready for review.';
 }
 
 function getHeroSupport(result: AssessmentResultDetailViewModel): {
@@ -136,23 +103,6 @@ function getHeroSupport(result: AssessmentResultDetailViewModel): {
   return {
     narrative: narrative ?? 'This result is ready to review.',
     support: support ?? null,
-  };
-}
-
-function getVisibleSignals(result: AssessmentResultDetailViewModel): {
-  leadSignal: AssessmentResultSignalViewModel | null;
-  prominentSignals: readonly AssessmentResultSignalViewModel[];
-  secondarySignals: readonly AssessmentResultSignalViewModel[];
-} {
-  const leadSignal = result.rankedSignals[0] ?? null;
-  const remainingSignals = result.rankedSignals.slice(1);
-  const prominentSignals = remainingSignals.slice(0, PROMINENT_SIGNAL_LIMIT - 1);
-  const secondarySignals = remainingSignals.slice(PROMINENT_SIGNAL_LIMIT - 1);
-
-  return {
-    leadSignal,
-    prominentSignals,
-    secondarySignals,
   };
 }
 
@@ -203,14 +153,6 @@ function getDomainDetailsCtaLabel(domain: AssessmentResultDomainViewModel): stri
   }
 
   return 'Explore this area in more detail';
-}
-
-function getHeroPrimarySignalChips(
-  domains: readonly AssessmentResultDomainViewModel[],
-): readonly string[] {
-  return domains
-    .map((domain) => domain.signalScores[0]?.signalTitle ?? null)
-    .filter((signalTitle): signalTitle is string => Boolean(signalTitle));
 }
 
 function ActionList({
@@ -374,13 +316,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     throw error;
   }
 
-  const { leadSignal } = getVisibleSignals(result);
   const resultDomains = getResultDetailDomains(result);
-  const heroPrimarySignalChips = getHeroPrimarySignalChips(resultDomains);
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
-  const secondaryHeroSignal = getSecondaryHeroSignal(result);
-  const heroHeading = getHeroHeading(result, secondaryHeroSignal);
-  const combinedInterpretation = getCombinedInterpretation(result, secondaryHeroSignal);
+  const heroHeading = getHeroHeading(result);
   const heroSupport = getHeroSupport(result);
 
   return (
@@ -404,34 +342,34 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </div>
       </SurfaceCard>
 
-      <SurfaceCard accent className="overflow-hidden p-7 md:p-9">
-        <div className="space-y-5">
-          <SectionEyebrow>Overall Pattern</SectionEyebrow>
-          <div className="flex flex-wrap gap-3">
-            {heroPrimarySignalChips.map((chip) => (
-              <span
-                key={chip}
-                className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/45"
-              >
-                {chip}
-              </span>
-            ))}
-            {heroPrimarySignalChips.length === 0 && leadSignal ? (
-              <span className="inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white/45">
-                {formatDomainLabel(leadSignal.domainKey)}
-              </span>
-            ) : null}
+      <SurfaceCard
+        accent
+        className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.16),transparent_32%),linear-gradient(180deg,rgba(16,26,44,0.92),rgba(9,15,28,0.98))] px-7 py-8 md:px-10 md:py-12"
+      >
+        <div className="space-y-8">
+          <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
+            <SectionEyebrow>Overview</SectionEyebrow>
+            <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
+            <span>{result.metadata.assessmentKey}</span>
+            <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
+            <span>{completionTimestamp.date}</span>
           </div>
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
-            {heroHeading}
-          </h1>
-          <p className="text-white/72 max-w-3xl text-lg leading-8">{combinedInterpretation}</p>
-          <p className="text-white/52 max-w-3xl text-sm leading-8">
-            In practice: {heroSupport.narrative}
-          </p>
-          {heroSupport.support ? (
-            <p className="text-white/42 max-w-3xl text-sm leading-7">{heroSupport.support}</p>
-          ) : null}
+
+          <div className="space-y-6">
+            <h1 className="max-w-4xl text-[2.9rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white md:text-[4.4rem]">
+              {heroHeading}
+            </h1>
+            <div className="max-w-3xl space-y-4">
+              <p className="text-[1.05rem] leading-8 text-white/76 md:text-[1.2rem] md:leading-9">
+                {heroSupport.narrative}
+              </p>
+              {heroSupport.support ? (
+                <p className="max-w-2xl text-[0.98rem] leading-8 text-white/52">
+                  {heroSupport.support}
+                </p>
+              ) : null}
+            </div>
+          </div>
         </div>
       </SurfaceCard>
 
