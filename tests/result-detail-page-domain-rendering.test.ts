@@ -190,3 +190,18 @@ test('result detail domain section is summary-first and no longer emphasizes per
   assert.doesNotMatch(source, /Primary signal' : 'Secondary signal'/);
   assert.doesNotMatch(source, /The main reading journey/);
 });
+
+test('result detail page removes the separate status bar and keeps the reading order narrative then actions then domains', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.doesNotMatch(source, /StatusPill/);
+  assert.doesNotMatch(source, /<SurfaceCard className="rounded-\[1\.6rem\] px-5 py-4">/);
+  assert.match(source, /<span>\{result\.assessmentTitle\}<\/span>/);
+
+  const actionIndex = source.indexOf('title="Interpretation to hold onto"');
+  const domainIndex = source.indexOf('title="Domain reading"');
+
+  assert.ok(actionIndex >= 0);
+  assert.ok(domainIndex >= 0);
+  assert.ok(actionIndex < domainIndex);
+});

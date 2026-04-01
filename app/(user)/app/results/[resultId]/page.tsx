@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { PageFrame, SectionHeader, StatusPill, SurfaceCard } from '@/components/shared/user-app-ui';
+import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
 import type {
   AssessmentResultDetailViewModel,
   AssessmentResultDomainViewModel,
@@ -329,25 +329,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-10">
-      <SurfaceCard className="rounded-[1.6rem] px-5 py-4">
-        <div className="flex flex-col gap-2 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span>{result.assessmentTitle}</span>
-            <span className="hidden text-white/20 md:inline">/</span>
-            <span>Version {result.version}</span>
-            <span className="hidden text-white/20 md:inline">/</span>
-            <span>{completionTimestamp.date}</span>
-            {completionTimestamp.time ? (
-              <>
-                <span className="hidden text-white/20 md:inline">/</span>
-                <span>{completionTimestamp.time}</span>
-              </>
-            ) : null}
-          </div>
-          <StatusPill status="ready" label="Ready" />
-        </div>
-      </SurfaceCard>
-
       <SurfaceCard
         accent
         className="overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.16),transparent_32%),linear-gradient(180deg,rgba(16,26,44,0.92),rgba(9,15,28,0.98))] px-7 py-8 md:px-10 md:py-12"
@@ -356,7 +337,11 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
             <SectionEyebrow>Overview</SectionEyebrow>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
+            <span>{result.assessmentTitle}</span>
+            <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
             <span>{result.metadata.assessmentKey}</span>
+            <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
+            <span>v{result.version}</span>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
             <span>{completionTimestamp.date}</span>
           </div>
@@ -381,6 +366,20 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
       <section className="space-y-6">
         <SectionHeader
+          eyebrow="Action Focus"
+          title="Interpretation to hold onto"
+          description="These sections are rendered directly from the persisted result payload and are designed to be read quickly, then revisited as needed."
+        />
+
+        <div className="grid gap-5 xl:grid-cols-3">
+          <ActionList title="Strengths" items={result.strengths} tone="positive" />
+          <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
+          <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <SectionHeader
           eyebrow={`${resultDomains.length} Domain${resultDomains.length === 1 ? '' : 's'}`}
           title="Domain reading"
           description="Each domain section is rendered directly from the persisted payload, with interpretation summary first and supporting signal context kept visually quiet."
@@ -395,20 +394,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               No persisted domain summaries are available for this result.
             </SurfaceCard>
           ) : null}
-        </div>
-      </section>
-
-      <section className="space-y-6">
-        <SectionHeader
-          eyebrow="Action Focus"
-          title="Interpretation to hold onto"
-          description="These sections are rendered directly from the persisted result payload and are designed to be read quickly, then revisited as needed."
-        />
-
-        <div className="grid gap-5 xl:grid-cols-3">
-          <ActionList title="Strengths" items={result.strengths} tone="positive" />
-          <ActionList title="Watchouts" items={result.watchouts} tone="warning" />
-          <ActionList title="Development Focus" items={result.developmentFocus} tone="neutral" />
         </div>
       </section>
     </PageFrame>
