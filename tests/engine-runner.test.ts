@@ -482,6 +482,77 @@ test('engine path uses signal-language sections for strengths watchouts and deve
   assert.equal(payload.developmentFocus.length, baseline.developmentFocus.length);
 });
 
+test('engine path uses domain-language summary for domain summaries only when available', async () => {
+  const definition = buildDefinition();
+  const repository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return {
+        signals: {},
+        pairs: {},
+        domains: {
+          signals: {
+            summary: 'Custom domain summary for the Signals domain.',
+          },
+        },
+        overview: {},
+      };
+    },
+  };
+
+  const baselineRepository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return createEmptyLanguageBundle();
+    },
+  };
+
+  const responses = buildResponses({
+    'question-1': 'option-2',
+    'question-2': 'option-3',
+  });
+
+  const baseline = await runAssessmentEngine({
+    repository: baselineRepository,
+    assessmentVersionId: 'version-1',
+    responses,
+  });
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    responses,
+  });
+
+  const payloadSignalsDomain = payload.domainSummaries.find((domain) => domain.domainKey === 'signals');
+  const baselineSignalsDomain = baseline.domainSummaries.find((domain) => domain.domainKey === 'signals');
+
+  assert.equal(payloadSignalsDomain?.interpretation?.summary, 'Custom domain summary for the Signals domain.');
+  assert.equal(
+    payloadSignalsDomain?.interpretation?.supportingLine,
+    baselineSignalsDomain?.interpretation?.supportingLine,
+  );
+  assert.equal(
+    payloadSignalsDomain?.interpretation?.tensionClause,
+    baselineSignalsDomain?.interpretation?.tensionClause,
+  );
+  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.equal(payload.domainSummaries.length, baseline.domainSummaries.length);
+});
+
 test('empty language bundle is handled safely and result generation still succeeds', async () => {
   const definition = buildDefinition();
   const repository: AssessmentDefinitionRepository = {

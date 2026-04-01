@@ -613,6 +613,14 @@ function buildPairwiseSummary(context: DomainInterpretationContext): {
   };
 }
 
+function resolveDomainLanguageSummary(
+  domainKey: string,
+  interpretationContext?: ResultInterpretationContext,
+): string | null {
+  const summary = interpretationContext?.languageBundle.domains[domainKey]?.summary?.trim();
+  return summary ? summary : null;
+}
+
 function buildGenericInterpretation(domainSummary: NormalizedDomainSummary): DomainInterpretationOutput | null {
   const context = buildContext(domainSummary);
   const summary = buildFallbackSummary(context);
@@ -639,7 +647,7 @@ function buildGenericInterpretation(domainSummary: NormalizedDomainSummary): Dom
 
 export function buildDomainInterpretation(
   domainSummary: NormalizedDomainSummary,
-  _context?: ResultInterpretationContext,
+  interpretationContext?: ResultInterpretationContext,
 ): DomainInterpretationOutput | null {
   if (domainSummary.domainSource !== 'signal_group') {
     return null;
@@ -674,7 +682,15 @@ export function buildDomainInterpretation(
   }
 
   if (!isCoreDomain) {
-    return buildGenericInterpretation(domainSummary);
+    const interpretation = buildGenericInterpretation(domainSummary);
+    if (!interpretation) {
+      return interpretation;
+    }
+
+    return {
+      ...interpretation,
+      summary: resolveDomainLanguageSummary(domainSummary.domainKey, interpretationContext) ?? interpretation.summary,
+    };
   }
 
   const pairwise = buildPairwiseSummary(context);
@@ -685,7 +701,7 @@ export function buildDomainInterpretation(
     primaryPercent: context.primarySignal.domainPercentage,
     secondarySignalKey: context.secondarySignal?.signalKey ?? null,
     secondaryPercent: context.secondarySignal?.domainPercentage ?? null,
-    summary: pairwise.summary,
+    summary: resolveDomainLanguageSummary(domainSummary.domainKey, interpretationContext) ?? pairwise.summary,
     supportingLine: pairwise.supportingLine,
     tensionClause: pairwise.tensionClause,
     diagnostics: {

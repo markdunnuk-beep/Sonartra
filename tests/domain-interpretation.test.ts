@@ -5,7 +5,7 @@ import {
   buildDomainInterpretation,
   resolveSignalIntensityBand,
 } from '@/lib/engine/domain-interpretation';
-import type { NormalizedDomainSummary, NormalizedSignalScore } from '@/lib/engine/types';
+import type { EngineLanguageBundle, NormalizedDomainSummary, NormalizedSignalScore } from '@/lib/engine/types';
 
 function buildSignal(params: {
   signalId: string;
@@ -52,6 +52,15 @@ function buildDomainSummary(params: {
     signalCount: params.signalScores.length,
     answeredQuestionCount: 8,
     rankedSignalIds: Object.freeze(params.signalScores.map((signal) => signal.signalId)),
+  };
+}
+
+function createEmptyLanguageBundle(): EngineLanguageBundle {
+  return {
+    signals: {},
+    pairs: {},
+    domains: {},
+    overview: {},
   };
 }
 
@@ -417,4 +426,106 @@ test('representative fixtures produce stable, differentiated domain copy', () =>
   assert.match(outputs[2]?.summary ?? '', /pressure|focus|strain/i);
   assert.match(outputs[1]?.tensionClause ?? '', /process|pressure|standards/i);
   assert.match(outputs[2]?.tensionClause ?? '', /scrutiny rises|concentration falls|prioritise calmly/i);
+});
+
+test('domain language summary overrides fallback domain summary text when present', () => {
+  const domainSummary = buildDomainSummary({
+    domainId: 'domain-style',
+    domainKey: 'signal_style',
+    title: 'Behaviour Style',
+    signalScores: Object.freeze([
+      buildSignal({
+        signalId: 'signal-driver',
+        signalKey: 'style_driver',
+        title: 'Driver',
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        domainPercentage: 39,
+        rank: 1,
+      }),
+      buildSignal({
+        signalId: 'signal-analyst',
+        signalKey: 'style_analyst',
+        title: 'Analyst',
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        domainPercentage: 24,
+        rank: 2,
+      }),
+    ]),
+  });
+
+  const baseline = buildDomainInterpretation(domainSummary, {
+    assessmentVersionId: 'version-1',
+    languageBundle: createEmptyLanguageBundle(),
+  });
+
+  const interpretation = buildDomainInterpretation(domainSummary, {
+    assessmentVersionId: 'version-1',
+    languageBundle: {
+      signals: {},
+      pairs: {},
+      domains: {
+        signal_style: {
+          summary: 'Assessment-owned domain summary for behaviour style.',
+        },
+      },
+      overview: {},
+    },
+  });
+
+  assert.ok(interpretation);
+  assert.equal(interpretation?.summary, 'Assessment-owned domain summary for behaviour style.');
+  assert.equal(interpretation?.supportingLine, baseline?.supportingLine);
+  assert.equal(interpretation?.tensionClause, baseline?.tensionClause);
+  assert.deepEqual(interpretation?.diagnostics, baseline?.diagnostics);
+});
+
+test('domain summary falls back unchanged when domain language summary is missing', () => {
+  const domainSummary = buildDomainSummary({
+    domainId: 'domain-style',
+    domainKey: 'signal_style',
+    title: 'Behaviour Style',
+    signalScores: Object.freeze([
+      buildSignal({
+        signalId: 'signal-driver',
+        signalKey: 'style_driver',
+        title: 'Driver',
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        domainPercentage: 39,
+        rank: 1,
+      }),
+      buildSignal({
+        signalId: 'signal-analyst',
+        signalKey: 'style_analyst',
+        title: 'Analyst',
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        domainPercentage: 24,
+        rank: 2,
+      }),
+    ]),
+  });
+
+  const baseline = buildDomainInterpretation(domainSummary, {
+    assessmentVersionId: 'version-1',
+    languageBundle: createEmptyLanguageBundle(),
+  });
+
+  const interpretation = buildDomainInterpretation(domainSummary, {
+    assessmentVersionId: 'version-1',
+    languageBundle: {
+      signals: {},
+      pairs: {},
+      domains: {
+        signal_style: {
+          focus: 'Present but out of scope.',
+        },
+      },
+      overview: {},
+    },
+  });
+
+  assert.deepEqual(interpretation, baseline);
 });

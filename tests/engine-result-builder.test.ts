@@ -456,6 +456,172 @@ test('domain summaries persist signal scores in canonical display order and alig
   assert.ok((domain?.interpretation?.primaryPercent ?? 0) >= (domain?.interpretation?.secondaryPercent ?? 0));
 });
 
+test('domain language summary overrides persisted domain interpretation summary only', () => {
+  const domainSignals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 39,
+      domainPercentage: 39,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 3,
+      percentage: 24,
+      domainPercentage: 24,
+      rank: 2,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: domainSignals,
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: domainSignals,
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: domainSignals,
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: domainSignals,
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {},
+        domains: {
+          signal_style: {
+            summary: 'Assessment-owned domain summary for Behaviour Style.',
+          },
+        },
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.domainSummaries[0]?.interpretation?.summary, 'Assessment-owned domain summary for Behaviour Style.');
+  assert.equal(
+    payload.domainSummaries[0]?.interpretation?.supportingLine,
+    baseline.domainSummaries[0]?.interpretation?.supportingLine,
+  );
+  assert.equal(
+    payload.domainSummaries[0]?.interpretation?.tensionClause,
+    baseline.domainSummaries[0]?.interpretation?.tensionClause,
+  );
+  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+});
+
+test('domain summary fallback remains unchanged when domain language summary is missing', () => {
+  const domainSignals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 39,
+      domainPercentage: 39,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 3,
+      percentage: 24,
+      domainPercentage: 24,
+      rank: 2,
+    }),
+  ]);
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: domainSignals,
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: domainSignals,
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: domainSignals,
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: domainSignals,
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {},
+        domains: {
+          signal_style: {
+            environment: 'Present but out of scope.',
+          },
+        },
+        overview: {},
+      },
+    }),
+  });
+
+  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
+  assert.deepEqual(payload.strengths, baseline.strengths);
+  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+});
+
 test('domain ordering tie handling is deterministic in persisted payloads', () => {
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture({
@@ -1602,5 +1768,64 @@ test('repeated runs with signal-language sections remain byte-stable', () => {
   assert.equal(first.strengths[0]?.detail, 'Stable custom strength.');
   assert.equal(first.watchouts[0]?.detail, 'Stable custom watchout.');
   assert.equal(first.developmentFocus[0]?.detail, 'Stable custom development.');
+  assert.equal(JSON.stringify(first), JSON.stringify(second));
+});
+
+test('repeated runs with domain-language summaries remain byte-stable', () => {
+  const domainSignals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-driver',
+      signalKey: 'style_driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 5,
+      percentage: 39,
+      domainPercentage: 39,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-analyst',
+      signalKey: 'style_analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'signal_style',
+      rawTotal: 3,
+      percentage: 24,
+      domainPercentage: 24,
+      rank: 2,
+    }),
+  ]);
+
+  const normalizedResult = buildNormalizedResultFixture({
+    signalScores: domainSignals,
+    domainSummaries: Object.freeze([
+      buildDomainSummary({
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        title: 'Behaviour Style',
+        rawTotal: 8,
+        percentage: 100,
+        signalScores: domainSignals,
+        answeredQuestionCount: 8,
+      }),
+    ]),
+    topSignalId: 'signal-driver',
+    languageBundle: {
+      signals: {},
+      pairs: {},
+      domains: {
+        signal_style: {
+          summary: 'Stable custom domain summary.',
+        },
+      },
+      overview: {},
+    },
+  });
+
+  const first = buildCanonicalResultPayload({ normalizedResult });
+  const second = buildCanonicalResultPayload({ normalizedResult });
+
+  assert.equal(first.domainSummaries[0]?.interpretation?.summary, 'Stable custom domain summary.');
   assert.equal(JSON.stringify(first), JSON.stringify(second));
 });
