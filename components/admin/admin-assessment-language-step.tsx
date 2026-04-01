@@ -1,4 +1,5 @@
 import { AdminDomainLanguageImport } from '@/components/admin/admin-domain-language-import';
+import { AdminOverviewLanguageImport } from '@/components/admin/admin-overview-language-import';
 import {
   EmptyState,
   LabelPill,
@@ -15,11 +16,6 @@ const PLACEHOLDER_SECTIONS = [
     title: 'Development / Pressure / Environment',
     hint: 'key | section | content',
     description: 'Structured bulk import for development, pressure, and environment datasets will be added next.',
-  },
-  {
-    title: 'Overview Templates',
-    hint: 'pattern_key | section | content',
-    description: 'Structured bulk import for overview template patterns will be added after signal language.',
   },
 ] as const;
 
@@ -115,6 +111,12 @@ export function AdminAssessmentLanguageStep({
       <AdminDomainLanguageImport
         assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
         existingDomainLanguageRowCount={viewModel.counts.domains.entryCount}
+        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+      />
+
+      <AdminOverviewLanguageImport
+        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+        existingOverviewLanguageRowCount={viewModel.counts.overview.entryCount}
         isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
       />
 

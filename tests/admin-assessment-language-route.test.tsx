@@ -426,7 +426,7 @@ test('language step view model returns null for a missing assessment and empty v
   });
 });
 
-test('language step component renders the signal and pair language panels, placeholder sections, and count summaries', () => {
+test('language step component renders the signal, pair, domain, and overview language panels with count summaries', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentLanguageStep
       viewModel={{
@@ -465,14 +465,16 @@ test('language step component renders the signal and pair language panels, place
   assert.match(markup, /Pair Language import/);
   assert.match(markup, /Domain Language/);
   assert.match(markup, /Domain Language import/);
-  assert.match(markup, /Development \/ Pressure \/ Environment/);
   assert.match(markup, /Overview Templates/);
+  assert.match(markup, /Overview Templates import/);
+  assert.match(markup, /Development \/ Pressure \/ Environment/);
   assert.match(markup, /signal_key \| section \| content/);
   assert.match(markup, /Import replaces all existing Signal Language rows for this assessment version\./);
   assert.match(markup, /signal_pair \| section \| content/);
   assert.match(markup, /Import replaces all existing Pair Language rows for this assessment version\./);
   assert.match(markup, /Import replaces all existing Domain Language rows for this assessment version\./);
   assert.match(markup, /domain_key \| section \| content/);
+  assert.match(markup, /Import replaces all existing Overview Template rows for this assessment version\./);
   assert.match(markup, /pattern_key \| section \| content/);
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
@@ -564,4 +566,5 @@ test('language step component shows a safe schema-unavailable state instead of r
   assert.doesNotMatch(markup, /Signal Language import/);
   assert.doesNotMatch(markup, /Pair Language import/);
   assert.doesNotMatch(markup, /Domain Language import/);
+  assert.doesNotMatch(markup, /Overview Templates import/);
 });
