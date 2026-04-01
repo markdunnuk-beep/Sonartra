@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import type { Queryable } from '@/lib/engine/repository-sql';
 import type { CanonicalResultPayload, EngineLanguageBundle, RuntimeAssessmentDefinition } from '@/lib/engine/types';
+import { CANONICAL_RESULT_PAYLOAD_FIELDS, isCanonicalResultPayload } from '@/lib/engine/result-contract';
 import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
 import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
 import {
@@ -282,6 +283,21 @@ function createRepository() {
   };
 }
 
+async function loadPersistedResultPayload(db: Queryable, attemptId: string): Promise<CanonicalResultPayload | null> {
+  const result = await db.query<{
+    canonical_result_payload: CanonicalResultPayload | null;
+    has_canonical_result_payload: boolean;
+  }>(
+    `SELECT canonical_result_payload,
+            canonical_result_payload IS NOT NULL AS has_canonical_result_payload
+       FROM results
+      WHERE attempt_id = $1`,
+    [attemptId],
+  );
+
+  return result.rows[0]?.has_canonical_result_payload ? (result.rows[0]?.canonical_result_payload ?? null) : null;
+}
+
 test('successful completion path persists ready result and aligns lifecycle', async () => {
   const db = createFakeDb();
   let engineCalls = 0;
@@ -423,6 +439,85 @@ test('completion resolves the runtime definition by the attempt assessmentVersio
   assert.equal(languageCalls, 1);
   assert.deepEqual(capturedParams, { assessmentVersionId: 'version-2' });
   assert.equal(capturedLanguageVersionId, 'version-2');
+});
+
+test('completion path persists the canonical payload unchanged through the real engine with a full language bundle', async () => {
+  const db = createFakeDb({
+    attempts: [{
+      attemptId: 'attempt-2',
+      userId: 'user-1',
+      assessmentId: 'assessment-1',
+      assessmentVersionId: 'version-1',
+      assessmentKey: 'wplp80',
+      versionTag: '1.0.0',
+      lifecycleStatus: 'IN_PROGRESS',
+      startedAt: '2026-01-01T00:00:01.000Z',
+      submittedAt: null,
+      completedAt: null,
+      lastActivityAt: '2026-01-01T00:00:05.000Z',
+      createdAt: '2026-01-01T00:00:01.000Z',
+      updatedAt: '2026-01-01T00:00:05.000Z',
+    }],
+    responses: [
+      {
+        responseId: 'response-1',
+        attemptId: 'attempt-2',
+        questionId: 'question-1',
+        selectedOptionId: 'option-2',
+        respondedAt: '2026-01-01T00:00:03.000Z',
+        updatedAt: '2026-01-01T00:00:03.000Z',
+      },
+    ],
+  });
+
+  const service = createAssessmentCompletionService({
+    db,
+    repository: {
+      async getPublishedAssessmentDefinitionByKey() {
+        return buildDefinition();
+      },
+      async getAssessmentDefinitionByVersion() {
+        return buildDefinition();
+      },
+      async getAssessmentVersionLanguageBundle() {
+        return {
+          signals: {
+            role_executor: {
+              strength: 'Persisted strength language.',
+            },
+          },
+          pairs: {
+            executor_focus: {
+              summary: 'Persisted pair-language narrative.',
+            },
+          },
+          domains: {
+            signals: {
+              summary: 'Persisted domain summary.',
+            },
+          },
+          overview: {
+            executor_focus: {
+              headline: 'Persisted overview headline.',
+            },
+          },
+        };
+      },
+    },
+  });
+
+  const completion = await service.completeAssessmentAttempt({ attemptId: 'attempt-2', userId: 'user-1' });
+  const payload = await loadPersistedResultPayload(db, 'attempt-2');
+
+  assert.equal(completion.resultStatus, 'ready');
+  assert.ok(payload);
+  assert.ok(isCanonicalResultPayload(payload));
+  assert.deepEqual(Object.keys(payload ?? {}), [...CANONICAL_RESULT_PAYLOAD_FIELDS]);
+  assert.equal(payload?.overviewSummary.headline, 'Persisted overview headline.');
+  assert.equal(payload?.overviewSummary.narrative, 'Persisted pair-language narrative.');
+  assert.equal(payload?.domainSummaries[1]?.interpretation?.summary, 'Persisted domain summary.');
+  assert.equal(payload?.strengths[0]?.detail, 'Persisted strength language.');
+  assert.equal(payload?.metadata.attemptId, 'attempt-2');
 });
 
 test('engine failure and persistence failure are explicit and do not pretend success', async () => {

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { runAssessmentEngine, EngineNotFoundError } from '@/lib/engine/engine-runner';
 import type { AssessmentDefinitionRepository } from '@/lib/engine/repository';
 import { ScoringError } from '@/lib/engine/scoring';
-import { isCanonicalResultPayload } from '@/lib/engine/result-contract';
+import { CANONICAL_RESULT_PAYLOAD_FIELDS, isCanonicalResultPayload } from '@/lib/engine/result-contract';
 import type { EngineLanguageBundle, RuntimeAssessmentDefinition, RuntimeResponseSet } from '@/lib/engine/types';
 
 function createEmptyLanguageBundle(): EngineLanguageBundle {
@@ -248,6 +248,35 @@ function createRepositoryFixture(definition: RuntimeAssessmentDefinition | null)
     },
     calls,
   };
+}
+
+function createRepositoryWithLanguageBundle(
+  definition: RuntimeAssessmentDefinition,
+  languageBundle: EngineLanguageBundle,
+): AssessmentDefinitionRepository {
+  return {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return languageBundle;
+    },
+  };
+}
+
+function assertCanonicalPayloadShape(payload: Record<string, unknown>): void {
+  assert.deepEqual(Object.keys(payload), [...CANONICAL_RESULT_PAYLOAD_FIELDS]);
+  assert.deepEqual(Object.keys(payload.overviewSummary as Record<string, unknown>), ['headline', 'narrative']);
+  assert.ok(Array.isArray(payload.strengths));
+  assert.ok(Array.isArray(payload.watchouts));
+  assert.ok(Array.isArray(payload.developmentFocus));
+  assert.ok(Array.isArray(payload.domainSummaries));
+  assert.ok(Array.isArray(payload.rankedSignals));
+  assert.ok(Array.isArray(payload.normalizedScores));
+  assert.equal(typeof payload.diagnostics, 'object');
 }
 
 test('full end-to-end execution returns a canonical result payload', async () => {
@@ -616,6 +645,221 @@ test('engine path uses domain-language summary for domain summaries only when av
   assert.deepEqual(payload.watchouts, baseline.watchouts);
   assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
   assert.equal(payload.domainSummaries.length, baseline.domainSummaries.length);
+});
+
+test('engine language regression matrix preserves the canonical payload contract and section scope', async () => {
+  const definition = buildDefinition();
+  const responses = buildResponses({
+    'question-1': 'option-2',
+    'question-2': 'option-3',
+  });
+  const baseline = await runAssessmentEngine({
+    repository: createRepositoryWithLanguageBundle(definition, createEmptyLanguageBundle()),
+    assessmentVersionId: 'version-1',
+    responses,
+  });
+
+  const scenarios = [
+    {
+      name: 'no language rows at all',
+      languageBundle: createEmptyLanguageBundle(),
+      expected: {
+        headline: baseline.overviewSummary.headline,
+        narrative: baseline.overviewSummary.narrative,
+        strength: baseline.strengths[0]?.detail,
+        watchout: baseline.watchouts[0]?.detail,
+        development: baseline.developmentFocus[0]?.detail,
+        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+      },
+    },
+    {
+      name: 'pair language only',
+      languageBundle: {
+        signals: {},
+        pairs: {
+          drive_focus: {
+            summary: 'Pair-only overview narrative.',
+          },
+        },
+        domains: {},
+        overview: {},
+      },
+      expected: {
+        headline: baseline.overviewSummary.headline,
+        narrative: 'Pair-only overview narrative.',
+        strength: baseline.strengths[0]?.detail,
+        watchout: baseline.watchouts[0]?.detail,
+        development: baseline.developmentFocus[0]?.detail,
+        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+      },
+    },
+    {
+      name: 'signal language only',
+      languageBundle: {
+        signals: {
+          support_drive: {
+            strength: 'Signal-only strength.',
+            watchout: 'Signal-only watchout.',
+          },
+          role_executor: {
+            development: 'Signal-only development.',
+          },
+        },
+        pairs: {},
+        domains: {},
+        overview: {},
+      },
+      expected: {
+        headline: baseline.overviewSummary.headline,
+        narrative: baseline.overviewSummary.narrative,
+        strength: 'Signal-only strength.',
+        watchout: 'Signal-only watchout.',
+        development: 'Signal-only development.',
+        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+      },
+    },
+    {
+      name: 'domain language only',
+      languageBundle: {
+        signals: {},
+        pairs: {},
+        domains: {
+          signals: {
+            summary: 'Domain-only summary.',
+          },
+        },
+        overview: {},
+      },
+      expected: {
+        headline: baseline.overviewSummary.headline,
+        narrative: baseline.overviewSummary.narrative,
+        strength: baseline.strengths[0]?.detail,
+        watchout: baseline.watchouts[0]?.detail,
+        development: baseline.developmentFocus[0]?.detail,
+        domainSummary: 'Domain-only summary.',
+      },
+    },
+    {
+      name: 'overview headline only',
+      languageBundle: {
+        signals: {},
+        pairs: {},
+        domains: {},
+        overview: {
+          drive_focus: {
+            headline: 'Overview-headline-only.',
+          },
+        },
+      },
+      expected: {
+        headline: 'Overview-headline-only.',
+        narrative: baseline.overviewSummary.narrative,
+        strength: baseline.strengths[0]?.detail,
+        watchout: baseline.watchouts[0]?.detail,
+        development: baseline.developmentFocus[0]?.detail,
+        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+      },
+    },
+    {
+      name: 'mixed partial language rows',
+      languageBundle: {
+        signals: {
+          support_drive: {
+            strength: 'Mixed strength.',
+          },
+        },
+        pairs: {
+          drive_focus: {
+            summary: 'Mixed narrative.',
+          },
+        },
+        domains: {},
+        overview: {
+          drive_focus: {
+            headline: 'Mixed headline.',
+          },
+        },
+      },
+      expected: {
+        headline: 'Mixed headline.',
+        narrative: 'Mixed narrative.',
+        strength: 'Mixed strength.',
+        watchout: baseline.watchouts[0]?.detail,
+        development: baseline.developmentFocus[0]?.detail,
+        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+      },
+    },
+    {
+      name: 'full language bundle present',
+      languageBundle: {
+        signals: {
+          support_drive: {
+            strength: 'Full strength.',
+            watchout: 'Full watchout.',
+          },
+          role_executor: {
+            development: 'Full development.',
+          },
+        },
+        pairs: {
+          drive_focus: {
+            summary: 'Full narrative.',
+          },
+        },
+        domains: {
+          signals: {
+            summary: 'Full domain summary.',
+          },
+        },
+        overview: {
+          drive_focus: {
+            headline: 'Full headline.',
+          },
+        },
+      },
+      expected: {
+        headline: 'Full headline.',
+        narrative: 'Full narrative.',
+        strength: 'Full strength.',
+        watchout: 'Full watchout.',
+        development: 'Full development.',
+        domainSummary: 'Full domain summary.',
+      },
+    },
+  ] as const;
+
+  for (const scenario of scenarios) {
+    const payload = await runAssessmentEngine({
+      repository: createRepositoryWithLanguageBundle(definition, scenario.languageBundle),
+      assessmentVersionId: 'version-1',
+      responses,
+    });
+
+    assert.ok(isCanonicalResultPayload(payload), scenario.name);
+    assertCanonicalPayloadShape(payload as unknown as Record<string, unknown>);
+    assert.equal(payload.overviewSummary.headline, scenario.expected.headline, `${scenario.name} headline`);
+    assert.equal(payload.overviewSummary.narrative, scenario.expected.narrative, `${scenario.name} narrative`);
+    assert.equal(payload.strengths[0]?.detail, scenario.expected.strength, `${scenario.name} strength`);
+    assert.equal(payload.watchouts[0]?.detail, scenario.expected.watchout, `${scenario.name} watchout`);
+    assert.equal(payload.developmentFocus[0]?.detail, scenario.expected.development, `${scenario.name} development`);
+    assert.equal(
+      payload.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+      scenario.expected.domainSummary,
+      `${scenario.name} domain summary`,
+    );
+    assert.deepEqual(payload.rankedSignals, baseline.rankedSignals, `${scenario.name} ranked signals`);
+    assert.deepEqual(payload.normalizedScores, baseline.normalizedScores, `${scenario.name} normalized scores`);
+    assert.deepEqual(payload.topSignal, baseline.topSignal, `${scenario.name} top signal`);
+    assert.equal(payload.diagnostics.readinessStatus, baseline.diagnostics.readinessStatus, `${scenario.name} readiness`);
+    assert.deepEqual(payload.diagnostics.scoring, baseline.diagnostics.scoring, `${scenario.name} scoring diagnostics`);
+    assert.deepEqual(
+      payload.diagnostics.normalization,
+      baseline.diagnostics.normalization,
+      `${scenario.name} normalization diagnostics`,
+    );
+    assert.notEqual(payload.overviewSummary.headline.trim(), '', `${scenario.name} non-empty headline`);
+    assert.notEqual(payload.overviewSummary.narrative.trim(), '', `${scenario.name} non-empty narrative`);
+  }
 });
 
 test('empty language bundle is handled safely and result generation still succeeds', async () => {
