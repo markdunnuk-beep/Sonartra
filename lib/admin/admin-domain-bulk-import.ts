@@ -22,7 +22,7 @@ export type AdminDomainBulkImportState = {
   didImport: boolean;
   accepted: readonly PlannedDomainBulkImportAcceptedRow[];
   rejected: readonly PlannedDomainBulkImportRejectedRow[];
-  created: readonly DomainBulkImportExecutionResult['created'];
+  created: ReadonlyArray<DomainBulkImportExecutionResult['created'][number]>;
   summary: AdminDomainBulkImportSummary;
   executionError: string | null;
   formError: string | null;
