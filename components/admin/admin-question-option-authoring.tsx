@@ -12,6 +12,12 @@ import {
 } from '@/components/shared/user-app-ui';
 import { AdminBulkOptionImport } from '@/components/admin/admin-bulk-option-import';
 import {
+  buildBulkQuestionByDomainPreview,
+  buildBulkQuestionPreview,
+  QUESTION_PREVIEW_ACCEPTED_LIMIT,
+  type QuestionBulkPreviewResult,
+} from '@/lib/admin/question-bulk-import-preview';
+import {
   emptyAdminBulkQuestionAuthoringFormValues,
   emptyAdminBulkQuestionByDomainAuthoringFormValues,
   emptyAdminOptionAuthoringFormValues,
@@ -42,6 +48,62 @@ import {
   type InlineOptionTextUpdateResult,
   type InlineQuestionTextUpdateResult,
 } from '@/lib/server/admin-question-option-authoring';
+
+function ActionButton({
+  children,
+  disabled,
+  onClick,
+  variant = 'secondary',
+}: Readonly<{
+  children: string;
+  disabled: boolean;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary';
+}>) {
+  return (
+    <button
+      className={cn(
+        'sonartra-button sonartra-focus-ring',
+        variant === 'primary' ? 'sonartra-button-primary' : 'sonartra-button-secondary',
+        disabled && 'cursor-not-allowed border-white/8 bg-white/[0.05] text-white/42',
+      )}
+      disabled={disabled}
+      onClick={onClick}
+      type={onClick ? 'button' : 'submit'}
+    >
+      {children}
+    </button>
+  );
+}
+
+function BulkImportActions({
+  canImport,
+  canPreview,
+  isPreviewPending,
+  onPreview,
+}: Readonly<{
+  canImport: boolean;
+  canPreview: boolean;
+  isPreviewPending: boolean;
+  onPreview: () => void;
+}>) {
+  const { pending } = useFormStatus();
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <ActionButton
+        disabled={pending || isPreviewPending || !canPreview}
+        onClick={onPreview}
+        variant="secondary"
+      >
+        {isPreviewPending ? 'Previewing...' : 'Preview'}
+      </ActionButton>
+      <ActionButton disabled={pending || !canImport} variant="primary">
+        {pending ? 'Importing...' : 'Import questions'}
+      </ActionButton>
+    </div>
+  );
+}
 
 function normalizeQuestionState(
   state: AdminQuestionAuthoringFormState | null | undefined,
@@ -328,6 +390,128 @@ function InlineError({ message }: { message: string | null }) {
   );
 }
 
+function InlineBanner({
+  tone,
+  children,
+}: Readonly<{
+  tone: 'danger' | 'warning' | 'success' | 'neutral';
+  children: React.ReactNode;
+}>) {
+  const toneClass =
+    tone === 'danger'
+      ? 'border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] text-[rgba(255,216,216,0.94)]'
+      : tone === 'warning'
+        ? 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'
+        : tone === 'success'
+          ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
+          : 'border-white/10 bg-black/10 text-white/72';
+
+  return <div className={cn('rounded-[1rem] border px-4 py-3 text-sm', toneClass)}>{children}</div>;
+}
+
+function SectionBlock({
+  title,
+  children,
+}: Readonly<{
+  title: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <section className="space-y-3">
+      <h4 className="text-sm font-semibold uppercase tracking-[0.14em] text-white/56">{title}</h4>
+      {children}
+    </section>
+  );
+}
+
+function PreviewSummaryGrid({ result }: Readonly<{ result: QuestionBulkPreviewResult }>) {
+  return (
+    <div className="grid gap-3 md:grid-cols-3">
+      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Questions parsed</p>
+        <p className="mt-2 text-lg font-semibold text-white">{result.rowCount}</p>
+      </div>
+      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Valid</p>
+        <p className="mt-2 text-lg font-semibold text-white">{result.acceptedCount}</p>
+      </div>
+      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Issues</p>
+        <p className="mt-2 text-lg font-semibold text-white">{result.rejectedCount}</p>
+      </div>
+    </div>
+  );
+}
+
+function BulkQuestionPreviewPanel({
+  result,
+  showDomain,
+}: Readonly<{
+  result: QuestionBulkPreviewResult;
+  showDomain: boolean;
+}>) {
+  const acceptedPreview = result.accepted.slice(0, QUESTION_PREVIEW_ACCEPTED_LIMIT);
+
+  return (
+    <div className="space-y-5">
+      <SectionBlock title="Summary">
+        <PreviewSummaryGrid result={result} />
+      </SectionBlock>
+
+      {result.accepted.length === 0 ? (
+        <InlineBanner tone="warning">
+          No valid rows were found to import. Fix the issues below, then preview again.
+        </InlineBanner>
+      ) : null}
+
+      {result.accepted.length > 0 ? (
+        <SectionBlock title="Accepted preview">
+          <div className="space-y-3">
+            {acceptedPreview.map((row) => (
+              <div
+                className="rounded-[1rem] border border-white/8 bg-black/10 p-4"
+                key={`${row.lineNumber}-${row.domainId}-${row.prompt}`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+                    Line {row.lineNumber}
+                  </LabelPill>
+                  {showDomain ? (
+                    <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+                      {row.domainKey}
+                    </LabelPill>
+                  ) : null}
+                </div>
+                <p className="mt-3 text-sm leading-6 text-white/86">{row.prompt}</p>
+                {showDomain ? (
+                  <p className="mt-2 text-sm text-white/52">{row.domainLabel}</p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          {result.accepted.length > QUESTION_PREVIEW_ACCEPTED_LIMIT ? (
+            <InlineBanner tone="neutral">
+              Showing the first {QUESTION_PREVIEW_ACCEPTED_LIMIT} valid rows. Import will still include all valid questions.
+            </InlineBanner>
+          ) : null}
+        </SectionBlock>
+      ) : null}
+
+      {result.rejected.length > 0 ? (
+        <SectionBlock title="Issues">
+          <div className="space-y-2">
+            {result.rejected.map((row, index) => (
+              <InlineBanner key={`${row.lineNumber ?? 'global'}-${index}`} tone="danger">
+                {row.lineNumber === null ? row.message : `Line ${row.lineNumber}: ${row.message}`}
+              </InlineBanner>
+            ))}
+          </div>
+        </SectionBlock>
+      ) : null}
+    </div>
+  );
+}
+
 function InlineTextEditor({
   label,
   value,
@@ -541,6 +725,25 @@ function BulkQuestionForm({
   const [questionLines, setQuestionLines] = useState(
     currentState.values.questionLines,
   );
+  const [previewResult, setPreviewResult] = useState<QuestionBulkPreviewResult | null>(null);
+  const [isPreviewPending, startPreviewTransition] = useTransition();
+
+  useEffect(() => {
+    if (currentState.createdQuestions.length < 1) {
+      return;
+    }
+
+    setQuestionLines('');
+    setPreviewResult(null);
+  }, [currentState.createdQuestions.length]);
+
+  const canPreview =
+    questionLines.trim().length > 0 &&
+    selectedDomainId.length > 0;
+  const canImport =
+    previewResult !== null &&
+    previewResult.rawInput === questionLines &&
+    previewResult.acceptedCount > 0;
 
   return (
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
@@ -567,6 +770,7 @@ function BulkQuestionForm({
                 onChange={(event) => {
                   const nextDomainId = event.currentTarget.value;
                   setSelectedDomainId(nextDomainId);
+                  setPreviewResult(null);
                 }}
                 value={selectedDomainId}
               >
@@ -590,6 +794,7 @@ function BulkQuestionForm({
                 onChange={(event) => {
                   const nextQuestionLines = event.currentTarget.value;
                   setQuestionLines(nextQuestionLines);
+                  setPreviewResult(null);
                 }}
                 placeholder={[
                   'When starting a new initiative, what do you focus on first?',
@@ -603,13 +808,45 @@ function BulkQuestionForm({
 
           <InlineError message={currentState.formError} />
 
+          {!canPreview && questionLines.trim().length > 0 && !selectedDomainId ? (
+            <InlineBanner tone="warning">
+              Select a domain before previewing or importing questions.
+            </InlineBanner>
+          ) : null}
+
+          {previewResult && previewResult.rawInput !== questionLines ? (
+            <InlineBanner tone="warning">
+              The pasted rows changed after the last preview. Preview again before importing.
+            </InlineBanner>
+          ) : null}
+
           <div className="flex items-end justify-between gap-3">
             <p className="text-xs uppercase tracking-[0.14em] text-white/40">
               Each imported question gets the canonical A-D option scaffold.
             </p>
-            <SubmitButton idleLabel="Import questions" pendingLabel="Importing..." />
+            <BulkImportActions
+              canImport={canImport}
+              canPreview={canPreview}
+              isPreviewPending={isPreviewPending}
+              onPreview={() => {
+                startPreviewTransition(() => {
+                  setPreviewResult(
+                    buildBulkQuestionPreview({
+                      rawInput: questionLines,
+                      selectedDomainId,
+                      domains: domains.map((domain) => ({
+                        domainId: domain.domainId,
+                        domainKey: domain.domainKey,
+                        label: domain.label,
+                      })),
+                    }),
+                  );
+                });
+              }}
+            />
           </div>
         </form>
+        {previewResult ? <BulkQuestionPreviewPanel result={previewResult} showDomain={false} /> : null}
         {currentState.createdQuestions.length > 0 ? (
           <div className="space-y-3 rounded-[1rem] border border-white/8 bg-black/10 p-4">
             <p className="text-sm font-medium text-white">
@@ -635,9 +872,11 @@ function BulkQuestionForm({
 function BulkQuestionByDomainForm({
   assessmentKey,
   assessmentVersionId,
+  domains,
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
+  domains: readonly AdminAssessmentDetailQuestionDomain[];
 }) {
   const createBulkQuestionsByDomainFormAction = useMemo(
     () =>
@@ -652,6 +891,23 @@ function BulkQuestionByDomainForm({
   });
   const currentState = normalizeBulkQuestionByDomainState(state);
   const [questionLines, setQuestionLines] = useState(currentState.values.questionLines);
+  const [previewResult, setPreviewResult] = useState<QuestionBulkPreviewResult | null>(null);
+  const [isPreviewPending, startPreviewTransition] = useTransition();
+
+  useEffect(() => {
+    if (currentState.createdQuestions.length < 1) {
+      return;
+    }
+
+    setQuestionLines('');
+    setPreviewResult(null);
+  }, [currentState.createdQuestions.length]);
+
+  const canPreview = questionLines.trim().length > 0;
+  const canImport =
+    previewResult !== null &&
+    previewResult.rawInput === questionLines &&
+    previewResult.acceptedCount > 0;
 
   return (
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
@@ -679,6 +935,7 @@ function BulkQuestionByDomainForm({
               onChange={(event) => {
                 const nextQuestionLines = event.currentTarget.value;
                 setQuestionLines(nextQuestionLines);
+                setPreviewResult(null);
               }}
               placeholder={[
                 'operating-style|When starting a new initiative, what do you focus on first?',
@@ -691,13 +948,38 @@ function BulkQuestionByDomainForm({
 
           <InlineError message={currentState.formError} />
 
+          {previewResult && previewResult.rawInput !== questionLines ? (
+            <InlineBanner tone="warning">
+              The pasted rows changed after the last preview. Preview again before importing.
+            </InlineBanner>
+          ) : null}
+
           <div className="flex items-end justify-between gap-3">
             <p className="text-xs uppercase tracking-[0.14em] text-white/40">
               Each imported question gets the canonical A-D option scaffold.
             </p>
-            <SubmitButton idleLabel="Import questions" pendingLabel="Importing..." />
+            <BulkImportActions
+              canImport={canImport}
+              canPreview={canPreview}
+              isPreviewPending={isPreviewPending}
+              onPreview={() => {
+                startPreviewTransition(() => {
+                  setPreviewResult(
+                    buildBulkQuestionByDomainPreview({
+                      rawInput: questionLines,
+                      domains: domains.map((domain) => ({
+                        domainId: domain.domainId,
+                        domainKey: domain.domainKey,
+                        label: domain.label,
+                      })),
+                    }),
+                  );
+                });
+              }}
+            />
           </div>
         </form>
+        {previewResult ? <BulkQuestionPreviewPanel result={previewResult} showDomain /> : null}
         {currentState.createdQuestions.length > 0 ? (
           <div className="space-y-3 rounded-[1rem] border border-white/8 bg-black/10 p-4">
             <p className="text-sm font-medium text-white">
@@ -1231,6 +1513,7 @@ export function AdminQuestionOptionAuthoring({
               <BulkQuestionByDomainForm
                 assessmentKey={assessmentKey}
                 assessmentVersionId={assessmentVersionId}
+                domains={domains}
               />
 
               <CreateQuestionForm
