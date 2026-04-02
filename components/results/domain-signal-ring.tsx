@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+
 import { cn } from '@/components/shared/user-app-ui';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 
@@ -12,6 +16,31 @@ const INNER_RADIUS = 46;
 const OUTER_RADIUS_MIN = 78;
 const OUTER_RADIUS_RANGE = 30;
 const SEGMENT_GAP_DEGREES = 3;
+const MIN_VISIBLE_DISPLAY_STRENGTH = 0.2;
+
+const DOMAIN_SIGNAL_RING_CSS = `
+@keyframes domain-signal-ring-enter {
+  from {
+    transform: scale(var(--ring-entry-scale, 0.86));
+    opacity: 0.58;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .domain-signal-ring-segment {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .domain-signal-ring-button {
+    transition: none !important;
+  }
+}
+`;
 
 function polarToCartesian(radius: number, angleDegrees: number): Point {
   const angleRadians = ((angleDegrees - 90) * Math.PI) / 180;
@@ -97,52 +126,196 @@ function buildSegmentPath(params: {
   });
 }
 
-function SignalLegend({
+function getEntryScale(displayStrength: number): number {
+  const baselineRadius = OUTER_RADIUS_MIN + OUTER_RADIUS_RANGE * MIN_VISIBLE_DISPLAY_STRENGTH;
+  const fullRadius = OUTER_RADIUS_MIN + OUTER_RADIUS_RANGE * displayStrength;
+
+  return Number((baselineRadius / fullRadius).toFixed(4));
+}
+
+function getSignalState(params: {
+  signalKey: string;
+  selectedSignalKey: string | null;
+  highlightedSignalKey: string | null;
+}): 'selected' | 'highlighted' | 'idle' {
+  if (params.highlightedSignalKey === params.signalKey) {
+    return 'highlighted';
+  }
+
+  if (params.selectedSignalKey === params.signalKey) {
+    return 'selected';
+  }
+
+  return 'idle';
+}
+
+function getSignalByKey(
+  domain: DomainSignalRingViewModel,
+  signalKey: string | null | undefined,
+): DomainSignalRingViewModel['signals'][number] | null {
+  if (!signalKey) {
+    return null;
+  }
+
+  return domain.signals.find((signal) => signal.signalKey === signalKey) ?? null;
+}
+
+export function getDomainSignalRingInitialSelectedSignalKey(
+  domain: DomainSignalRingViewModel,
+  requestedSignalKey?: string | null,
+): string | null {
+  if (requestedSignalKey && getSignalByKey(domain, requestedSignalKey)) {
+    return requestedSignalKey;
+  }
+
+  if (domain.topSignalKey && getSignalByKey(domain, domain.topSignalKey)) {
+    return domain.topSignalKey;
+  }
+
+  return domain.signals[0]?.signalKey ?? null;
+}
+
+export function selectDomainSignalRingSignal(
+  domain: DomainSignalRingViewModel,
+  currentSignalKey: string | null,
+  requestedSignalKey: string,
+): string | null {
+  if (!getSignalByKey(domain, requestedSignalKey)) {
+    return currentSignalKey;
+  }
+
+  return requestedSignalKey;
+}
+
+export function activateDomainSignalRingSignalByKeyboard(params: {
+  domain: DomainSignalRingViewModel;
+  currentSignalKey: string | null;
+  requestedSignalKey: string;
+  key: string;
+}): string | null {
+  if (params.key !== 'Enter' && params.key !== ' ' && params.key !== 'Spacebar') {
+    return params.currentSignalKey;
+  }
+
+  return selectDomainSignalRingSignal(params.domain, params.currentSignalKey, params.requestedSignalKey);
+}
+
+export function resolveDomainSignalRingActiveSignal(params: {
+  domain: DomainSignalRingViewModel;
+  selectedSignalKey: string | null;
+  highlightedSignalKey: string | null;
+}): DomainSignalRingViewModel['signals'][number] | null {
+  return (
+    getSignalByKey(params.domain, params.highlightedSignalKey)
+    ?? getSignalByKey(params.domain, params.selectedSignalKey)
+    ?? getSignalByKey(params.domain, getDomainSignalRingInitialSelectedSignalKey(params.domain))
+  );
+}
+
+function SignalLegendButton({
   signal,
   index,
+  signalState,
+  isSelected,
+  onSelect,
+  onHighlight,
+  onClearHighlight,
 }: Readonly<{
   signal: DomainSignalRingViewModel['signals'][number];
   index: number;
+  signalState: 'selected' | 'highlighted' | 'idle';
+  isSelected: boolean;
+  onSelect: (signalKey: string) => void;
+  onHighlight: (signalKey: string) => void;
+  onClearHighlight: (signalKey: string) => void;
 }>) {
   const tone = getSignalTone(signal);
 
   return (
-    <li
-      className={cn(
-        'flex items-start justify-between gap-4 rounded-[1.1rem] border px-4 py-3',
-        signal.isTopSignal
-          ? 'border-white/18 bg-white/[0.075]'
-          : signal.isSecondSignal
-            ? 'border-[#8eb1ff]/20 bg-[#8eb1ff]/[0.06]'
-            : 'border-white/8 bg-white/[0.035]',
-      )}
-      data-signal-index={index}
-      data-signal-emphasis={signal.isTopSignal ? 'top' : signal.isSecondSignal ? 'second' : 'base'}
-      data-signal-key={signal.signalKey}
-    >
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="text-[0.97rem] font-medium tracking-[-0.02em] text-white/88">{signal.signalLabel}</span>
-          {tone.markerLabel ? (
+    <li data-signal-index={index} data-signal-key={signal.signalKey} data-signal-emphasis={signal.isTopSignal ? 'top' : signal.isSecondSignal ? 'second' : 'base'}>
+      <button
+        type="button"
+        className={cn(
+          'domain-signal-ring-button flex w-full items-start justify-between gap-4 rounded-[1.1rem] border px-4 py-3 text-left transition duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
+          signalState === 'selected'
+            ? 'border-white/18 bg-white/[0.085] shadow-[0_14px_36px_rgba(4,10,24,0.22)]'
+            : signalState === 'highlighted'
+              ? 'border-[#b7cbff]/28 bg-[#8eb1ff]/[0.08] shadow-[0_10px_26px_rgba(10,20,42,0.2)]'
+              : signal.isTopSignal
+                ? 'border-white/14 bg-white/[0.065] hover:border-white/22 hover:bg-white/[0.08]'
+                : signal.isSecondSignal
+                  ? 'border-[#8eb1ff]/18 bg-[#8eb1ff]/[0.055] hover:border-[#8eb1ff]/28 hover:bg-[#8eb1ff]/[0.08]'
+                  : 'border-white/8 bg-white/[0.035] hover:border-white/14 hover:bg-white/[0.05]',
+        )}
+        aria-pressed={isSelected}
+        aria-label={`${signal.signalLabel}, ${formatPercent(signal.scorePercent)}${signal.isTopSignal ? ', top signal' : signal.isSecondSignal ? ', second signal' : ''}`}
+        data-signal-state={signalState}
+        onClick={() => onSelect(signal.signalKey)}
+        onFocus={() => onHighlight(signal.signalKey)}
+        onBlur={() => onClearHighlight(signal.signalKey)}
+        onMouseEnter={() => onHighlight(signal.signalKey)}
+        onMouseLeave={() => onClearHighlight(signal.signalKey)}
+        onKeyDown={(event) => {
+          const nextSelection = activateDomainSignalRingSignalByKeyboard({
+            domain: {
+              domainKey: '',
+              domainLabel: '',
+              domainSummary: null,
+              signals: [signal],
+              signalCount: 1,
+              topSignalKey: signal.signalKey,
+              maxSignalPercent: signal.scorePercent,
+              minSignalPercent: signal.scorePercent,
+            },
+            currentSignalKey: isSelected ? signal.signalKey : null,
+            requestedSignalKey: signal.signalKey,
+            key: event.key,
+          });
+
+          if (nextSelection === signal.signalKey) {
+            event.preventDefault();
+            onSelect(signal.signalKey);
+          }
+        }}
+      >
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
             <span
               className={cn(
-                'inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em]',
-                tone.markerClassName,
+                'text-[0.97rem] font-medium tracking-[-0.02em]',
+                signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : 'text-white/88',
               )}
             >
-              {tone.markerLabel}
+              {signal.signalLabel}
             </span>
-          ) : null}
+            {tone.markerLabel ? (
+              <span
+                className={cn(
+                  'inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em]',
+                  tone.markerClassName,
+                )}
+              >
+                {tone.markerLabel}
+              </span>
+            ) : null}
+          </div>
+          <p className="text-[0.82rem] leading-6 text-white/48">
+            Authored position {index + 1}
+            {signal.rankWithinDomain ? `, rank ${signal.rankWithinDomain}` : ''}
+          </p>
         </div>
-        <p className="text-[0.82rem] leading-6 text-white/48">
-          Authored position {index + 1}
-          {signal.rankWithinDomain ? `, rank ${signal.rankWithinDomain}` : ''}
-        </p>
-      </div>
-      <div className="text-right">
-        <p className="text-[1rem] font-semibold tracking-[-0.02em] text-white/86">{formatPercent(signal.scorePercent)}</p>
-        <p className="text-[0.75rem] uppercase tracking-[0.18em] text-white/38">Strength</p>
-      </div>
+        <div className="text-right">
+          <p
+            className={cn(
+              'text-[1rem] font-semibold tracking-[-0.02em]',
+              signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : 'text-white/86',
+            )}
+          >
+            {formatPercent(signal.scorePercent)}
+          </p>
+          <p className="text-[0.75rem] uppercase tracking-[0.18em] text-white/38">Strength</p>
+        </div>
+      </button>
     </li>
   );
 }
@@ -150,11 +323,21 @@ function SignalLegend({
 export function DomainSignalRing({
   domain,
   className,
+  initialSelectedSignalKey,
 }: Readonly<{
   domain: DomainSignalRingViewModel;
   className?: string;
+  initialSelectedSignalKey?: string | null;
 }>) {
   const signals = domain.signals;
+  const initialSelection = getDomainSignalRingInitialSelectedSignalKey(domain, initialSelectedSignalKey);
+  const [selectedSignalKey, setSelectedSignalKey] = useState<string | null>(initialSelection);
+  const [highlightedSignalKey, setHighlightedSignalKey] = useState<string | null>(null);
+  const activeSignal = resolveDomainSignalRingActiveSignal({
+    domain,
+    selectedSignalKey,
+    highlightedSignalKey,
+  });
 
   return (
     <section
@@ -164,7 +347,11 @@ export function DomainSignalRing({
       )}
       aria-label={`${domain.domainLabel} signal ring`}
       data-domain-key={domain.domainKey}
+      data-selected-signal-key={selectedSignalKey ?? ''}
+      data-active-signal-key={activeSignal?.signalKey ?? ''}
     >
+      <style>{DOMAIN_SIGNAL_RING_CSS}</style>
+
       <div className="space-y-6">
         <div className="space-y-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">Domain Ring</p>
@@ -200,6 +387,15 @@ export function DomainSignalRing({
               {signals.length > 0 ? (
                 signals.map((signal, index) => {
                   const tone = getSignalTone(signal);
+                  const signalState = getSignalState({
+                    signalKey: signal.signalKey,
+                    selectedSignalKey,
+                    highlightedSignalKey,
+                  });
+                  const entryScale = getEntryScale(signal.displayStrength);
+                  const scaleMultiplier = signalState === 'selected' ? 1.035 : signalState === 'highlighted' ? 1.02 : 1;
+                  const brightness = signalState === 'selected' ? 1.18 : signalState === 'highlighted' ? 1.08 : 1;
+                  const opacityMultiplier = signalState === 'selected' ? 1 : signalState === 'highlighted' ? 1 : 0.96;
 
                   return (
                     <path
@@ -209,13 +405,59 @@ export function DomainSignalRing({
                         index,
                         displayStrength: signal.displayStrength,
                       })}
-                      className={tone.segmentClassName}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${signal.signalLabel}, ${formatPercent(signal.scorePercent)}${signal.isTopSignal ? ', top signal' : signal.isSecondSignal ? ', second signal' : ''}`}
+                      aria-pressed={selectedSignalKey === signal.signalKey}
+                      className={cn(
+                        'domain-signal-ring-segment cursor-pointer origin-center transition duration-200 ease-out focus:outline-none',
+                        tone.segmentClassName,
+                      )}
                       strokeWidth="1.5"
                       fillRule="evenodd"
-                      opacity={tone.segmentOpacity}
+                      opacity={Math.min(1, tone.segmentOpacity * opacityMultiplier)}
                       data-segment-index={index}
                       data-segment-key={signal.signalKey}
                       data-segment-emphasis={signal.isTopSignal ? 'top' : signal.isSecondSignal ? 'second' : 'base'}
+                      data-segment-state={signalState}
+                      style={{
+                        transformBox: 'fill-box',
+                        transformOrigin: `${VIEWBOX_CENTER}px ${VIEWBOX_CENTER}px`,
+                        transform: `scale(${scaleMultiplier})`,
+                        filter: signalState === 'selected'
+                          ? 'drop-shadow(0 0 12px rgba(225,235,255,0.24)) brightness(1.18)'
+                          : signalState === 'highlighted'
+                            ? 'drop-shadow(0 0 9px rgba(157,186,255,0.18)) brightness(1.08)'
+                            : `brightness(${brightness})`,
+                        ['--ring-entry-scale' as string]: String(entryScale),
+                        animation: 'domain-signal-ring-enter 440ms cubic-bezier(0.22, 1, 0.36, 1) both',
+                        animationDelay: `${index * 45}ms`,
+                      }}
+                      onClick={() => {
+                        setSelectedSignalKey((currentSignalKey) =>
+                          selectDomainSignalRingSignal(domain, currentSignalKey, signal.signalKey));
+                      }}
+                      onFocus={() => setHighlightedSignalKey(signal.signalKey)}
+                      onBlur={() => setHighlightedSignalKey((currentSignalKey) =>
+                        currentSignalKey === signal.signalKey ? null : currentSignalKey)}
+                      onMouseEnter={() => setHighlightedSignalKey(signal.signalKey)}
+                      onMouseLeave={() => setHighlightedSignalKey((currentSignalKey) =>
+                        currentSignalKey === signal.signalKey ? null : currentSignalKey)}
+                      onKeyDown={(event) => {
+                        const nextSelection = activateDomainSignalRingSignalByKeyboard({
+                          domain,
+                          currentSignalKey: selectedSignalKey,
+                          requestedSignalKey: signal.signalKey,
+                          key: event.key,
+                        });
+
+                        if (nextSelection !== selectedSignalKey) {
+                          event.preventDefault();
+                          setSelectedSignalKey(nextSelection);
+                        } else if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+                          event.preventDefault();
+                        }
+                      }}
                     />
                   );
                 })
@@ -248,6 +490,37 @@ export function DomainSignalRing({
               </g>
             </svg>
 
+            <div
+              className="w-full rounded-[1.1rem] border border-white/10 bg-white/[0.03] px-4 py-3"
+              aria-live="polite"
+              data-active-detail-key={activeSignal?.signalKey ?? ''}
+            >
+              {activeSignal ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[0.96rem] font-semibold tracking-[-0.02em] text-white">{activeSignal.signalLabel}</p>
+                      {activeSignal.isTopSignal ? (
+                        <span className="inline-flex rounded-full border border-white/22 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
+                          Top
+                        </span>
+                      ) : activeSignal.isSecondSignal ? (
+                        <span className="inline-flex rounded-full border border-[#8eb1ff]/35 bg-[#8eb1ff]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d9e5ff]">
+                          2nd
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="text-[1rem] font-semibold tracking-[-0.03em] text-white/88">{formatPercent(activeSignal.scorePercent)}</p>
+                  </div>
+                  <p className="text-[0.78rem] leading-6 text-white/46">
+                    Active signal detail is available through hover, focus, or selection. Tap or press Enter/Space to keep a signal active.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-[0.82rem] leading-6 text-white/46">No active signal is available for this domain yet.</p>
+              )}
+            </div>
+
             <p className="text-center text-[0.78rem] leading-6 text-white/42">
               Equal-angle segments preserve authored order. Radial depth indicates relative signal strength.
             </p>
@@ -261,9 +534,30 @@ export function DomainSignalRing({
 
             {signals.length > 0 ? (
               <ol className="space-y-3">
-                {signals.map((signal, index) => (
-                  <SignalLegend key={signal.signalKey} signal={signal} index={index} />
-                ))}
+                {signals.map((signal, index) => {
+                  const signalState = getSignalState({
+                    signalKey: signal.signalKey,
+                    selectedSignalKey,
+                    highlightedSignalKey,
+                  });
+
+                  return (
+                    <SignalLegendButton
+                      key={signal.signalKey}
+                      signal={signal}
+                      index={index}
+                      signalState={signalState}
+                      isSelected={selectedSignalKey === signal.signalKey}
+                      onSelect={(signalKey) => {
+                        setSelectedSignalKey((currentSignalKey) =>
+                          selectDomainSignalRingSignal(domain, currentSignalKey, signalKey));
+                      }}
+                      onHighlight={(signalKey) => setHighlightedSignalKey(signalKey)}
+                      onClearHighlight={(signalKey) => setHighlightedSignalKey((currentSignalKey) =>
+                        currentSignalKey === signalKey ? null : currentSignalKey)}
+                    />
+                  );
+                })}
               </ol>
             ) : (
               <div className="rounded-[1.1rem] border border-dashed border-white/10 bg-white/[0.03] px-4 py-5 text-[0.92rem] leading-7 text-white/48">

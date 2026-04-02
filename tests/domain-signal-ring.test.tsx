@@ -2,7 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { DomainSignalRing } from '@/components/results/domain-signal-ring';
+import {
+  activateDomainSignalRingSignalByKeyboard,
+  DomainSignalRing,
+  getDomainSignalRingInitialSelectedSignalKey,
+  resolveDomainSignalRingActiveSignal,
+  selectDomainSignalRingSignal,
+} from '@/components/results/domain-signal-ring';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 
 function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSignalRingViewModel {
@@ -52,6 +58,7 @@ test('domain signal ring renders the domain label from props', () => {
 
   assert.match(markup, /Adaptive Patterns/);
   assert.match(markup, /A calm editorial summary for the domain\./);
+  assert.match(markup, /domain-signal-ring-enter/);
 });
 
 test('domain signal ring renders the correct number of signal segments from input length', () => {
@@ -62,7 +69,9 @@ test('domain signal ring renders the correct number of signal segments from inpu
 });
 
 test('domain signal ring preserves authored signal order in the rendered listing', () => {
-  const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
+  const markup = renderToStaticMarkup(
+    <DomainSignalRing domain={buildDomain()} initialSelectedSignalKey="signal_c" />,
+  );
   const signalBIndex = markup.indexOf('Signal B');
   const signalAIndex = markup.indexOf('Signal A');
   const signalCIndex = markup.indexOf('Signal C');
@@ -85,8 +94,20 @@ test('domain signal ring applies top and second emphasis hooks for segments and 
   assert.match(markup, /data-signal-emphasis="top"/);
   assert.match(markup, /data-signal-key="signal_c"/);
   assert.match(markup, /data-signal-emphasis="second"/);
+  assert.match(markup, /data-segment-state="selected"/);
+  assert.match(markup, /aria-pressed="true"/);
   assert.match(markup, />Top</);
   assert.match(markup, />2nd</);
+});
+
+test('domain signal ring renders the active detail treatment for the selected signal', () => {
+  const markup = renderToStaticMarkup(
+    <DomainSignalRing domain={buildDomain()} initialSelectedSignalKey="signal_c" />,
+  );
+
+  assert.match(markup, /data-active-detail-key="signal_c"/);
+  assert.match(markup, /Signal C/);
+  assert.match(markup, /72%/);
 });
 
 test('domain signal ring handles empty signals without crashing', () => {
@@ -169,4 +190,65 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
 
   assert.equal(segmentCount, 5);
   assert.match(markup, /aria-label="Adaptive Patterns ring with 5 signals"/);
+});
+
+test('domain signal ring selection helper keeps the requested signal selected', () => {
+  const domain = buildDomain();
+
+  assert.equal(getDomainSignalRingInitialSelectedSignalKey(domain), 'signal_a');
+  assert.equal(selectDomainSignalRingSignal(domain, 'signal_a', 'signal_c'), 'signal_c');
+  assert.equal(selectDomainSignalRingSignal(domain, 'signal_c', 'signal_c'), 'signal_c');
+});
+
+test('domain signal ring keyboard helper activates signals on enter and space only', () => {
+  const domain = buildDomain();
+
+  assert.equal(
+    activateDomainSignalRingSignalByKeyboard({
+      domain,
+      currentSignalKey: 'signal_a',
+      requestedSignalKey: 'signal_b',
+      key: 'Enter',
+    }),
+    'signal_b',
+  );
+  assert.equal(
+    activateDomainSignalRingSignalByKeyboard({
+      domain,
+      currentSignalKey: 'signal_a',
+      requestedSignalKey: 'signal_c',
+      key: ' ',
+    }),
+    'signal_c',
+  );
+  assert.equal(
+    activateDomainSignalRingSignalByKeyboard({
+      domain,
+      currentSignalKey: 'signal_a',
+      requestedSignalKey: 'signal_c',
+      key: 'Escape',
+    }),
+    'signal_a',
+  );
+});
+
+test('domain signal ring active signal resolver prefers highlighted then selected state', () => {
+  const domain = buildDomain();
+
+  assert.equal(
+    resolveDomainSignalRingActiveSignal({
+      domain,
+      selectedSignalKey: 'signal_a',
+      highlightedSignalKey: 'signal_c',
+    })?.signalKey,
+    'signal_c',
+  );
+  assert.equal(
+    resolveDomainSignalRingActiveSignal({
+      domain,
+      selectedSignalKey: 'signal_a',
+      highlightedSignalKey: null,
+    })?.signalKey,
+    'signal_a',
+  );
 });
