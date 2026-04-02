@@ -1,9 +1,5 @@
+import type { SignalBulkImportExecutionSummary } from '@/lib/server/admin-signal-bulk-import';
 import type {
-  SignalBulkImportExecutionResult,
-  SignalBulkImportExecutionSummary,
-} from '@/lib/server/admin-signal-bulk-import';
-import type {
-  PlannedSignalBulkImportAcceptedDomainGroup,
   PlannedSignalBulkImportAcceptedRow,
   PlannedSignalBulkImportRejectedRow,
 } from '@/lib/server/admin-signal-bulk-import-plan';
@@ -18,14 +14,10 @@ export type AdminSignalBulkImportState = {
   lastAction: 'idle' | 'preview' | 'import';
   hasSubmitted: boolean;
   success: boolean;
-  ok: boolean;
   canImport: boolean;
   didImport: boolean;
   accepted: readonly PlannedSignalBulkImportAcceptedRow[];
-  acceptedByDomain: readonly PlannedSignalBulkImportAcceptedDomainGroup[];
   rejected: readonly PlannedSignalBulkImportRejectedRow[];
-  created: ReadonlyArray<SignalBulkImportExecutionResult['created'][number]>;
-  createdByDomain: ReadonlyArray<SignalBulkImportExecutionResult['createdByDomain'][number]>;
   summary: AdminSignalBulkImportSummary;
   executionError: string | null;
   formError: string | null;
@@ -36,14 +28,10 @@ export const initialAdminSignalBulkImportState: AdminSignalBulkImportState = {
   lastAction: 'idle',
   hasSubmitted: false,
   success: false,
-  ok: false,
   canImport: false,
   didImport: false,
   accepted: [],
-  acceptedByDomain: [],
   rejected: [],
-  created: [],
-  createdByDomain: [],
   summary: {
     assessmentVersionId: '',
     lifecycleStatus: 'ARCHIVED',

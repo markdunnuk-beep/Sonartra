@@ -163,6 +163,9 @@ export function AdminBulkSignalImport({
 
   const isInputEmpty = rawInput.trim().length === 0;
   const isBusy = isPreviewPending || isImportPending;
+  const hasAuthoredDomains = domains.length > 0;
+  const existingSignalCount = domains.reduce((count, domain) => count + domain.signals.length, 0);
+  const hasExistingSignals = existingSignalCount > 0;
   const isPreviewCurrent =
     resultState.lastAction === 'preview' &&
     resultState.rawInput === rawInput &&
@@ -171,6 +174,7 @@ export function AdminBulkSignalImport({
     !isInputEmpty &&
     !isBusy &&
     isEditableAssessmentVersion &&
+    hasAuthoredDomains &&
     resultState.canImport &&
     isPreviewCurrent;
   const acceptedPreviewGroups = buildAcceptedPreviewGroups(domains, resultState.accepted);
@@ -195,7 +199,7 @@ export function AdminBulkSignalImport({
     startImportTransition(async () => {
       const nextState = await importAction({ rawInput });
       if (nextState.success && nextState.didImport) {
-        const importedDomainCount = nextState.createdByDomain.length;
+        const importedDomainCount = Object.keys(nextState.summary.perDomainCreateCounts).length;
         setSuccessMessage(
           `${nextState.summary.importedCount} signal${nextState.summary.importedCount === 1 ? '' : 's'} imported across ${importedDomainCount} domain${importedDomainCount === 1 ? '' : 's'}.`,
         );
@@ -220,12 +224,12 @@ export function AdminBulkSignalImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Bulk Import Signals</p>
+          <p className="sonartra-page-eyebrow">Bulk import</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Bulk Import Signals
+            Bulk import signals
           </h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Paste one signal per line to create signals across all authored domains in one pass.
+            Paste one signal per line to add signals across the authored domains in one pass.
           </p>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
             Accepted formats: <code>domain|label</code>, <code>domain|label|description</code>, or{' '}
@@ -238,14 +242,26 @@ export function AdminBulkSignalImport({
 
         {!isEditableAssessmentVersion ? (
           <InlineBanner tone="warning">
-            Signal bulk import is only available for draft assessment versions.
+            Bulk import is available only for draft assessment versions.
+          </InlineBanner>
+        ) : null}
+
+        {!hasAuthoredDomains ? (
+          <InlineBanner tone="warning">
+            Add at least one domain before previewing signal imports.
+          </InlineBanner>
+        ) : null}
+
+        {hasExistingSignals ? (
+          <InlineBanner tone="warning">
+            This will append new signals within each matched domain. Existing signals stay in place.
           </InlineBanner>
         ) : null}
 
         {successMessage ? <InlineBanner tone="success">{successMessage}</InlineBanner> : null}
 
         <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Paste format</p>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Accepted format</p>
           <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
             {SIGNAL_IMPORT_FORMAT_EXAMPLE}
           </pre>
@@ -259,7 +275,7 @@ export function AdminBulkSignalImport({
               'sonartra-focus-ring min-h-[240px] w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
               'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
             )}
-            disabled={!isEditableAssessmentVersion}
+            disabled={!isEditableAssessmentVersion || !hasAuthoredDomains}
             onChange={(event) => {
               const nextRawInput = event.currentTarget.value;
               setRawInput(nextRawInput);
@@ -272,13 +288,13 @@ export function AdminBulkSignalImport({
 
         {!isInputEmpty && resultState.lastAction === 'preview' && resultState.rawInput !== rawInput ? (
           <InlineBanner tone="warning">
-            The textarea changed after the last preview. Preview again before importing.
+            The pasted rows changed after the last preview. Preview again before importing.
           </InlineBanner>
         ) : null}
 
         <div className="flex flex-wrap items-center gap-3">
           <ActionButton
-            disabled={isInputEmpty || isBusy || !isEditableAssessmentVersion}
+            disabled={isInputEmpty || isBusy || !isEditableAssessmentVersion || !hasAuthoredDomains}
             onClick={handlePreview}
             variant="secondary"
           >
@@ -300,6 +316,12 @@ export function AdminBulkSignalImport({
             <SectionBlock title="Summary">
               <SummaryGrid state={resultState} />
             </SectionBlock>
+
+            {resultState.lastAction === 'preview' && resultState.accepted.length === 0 ? (
+              <InlineBanner tone="warning">
+                No valid rows were found to import. Fix the rejected rows and preview again.
+              </InlineBanner>
+            ) : null}
 
             {acceptedPreviewGroups.length > 0 ? (
               <SectionBlock title="Accepted preview">
@@ -369,7 +391,7 @@ export function AdminBulkSignalImport({
             {resultState.lastAction === 'import' && !resultState.didImport && !resultState.executionError ? (
               <SectionBlock title="Import result">
                 <InlineBanner tone="neutral">
-                  Import did not run because the current preview contains blocking issues.
+                  Import is blocked right now. Review the preview messages, then preview again after fixing the rows.
                 </InlineBanner>
               </SectionBlock>
             ) : null}

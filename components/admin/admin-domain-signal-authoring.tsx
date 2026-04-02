@@ -1030,6 +1030,7 @@ export function AdminDomainSignalAuthoring({
       {mode === 'domains' ? (
         <AdminBulkDomainImport
           assessmentVersionId={assessmentVersionId}
+          existingDomainCount={domains.length}
           isEditableAssessmentVersion
         />
       ) : null}

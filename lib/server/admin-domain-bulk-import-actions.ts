@@ -9,6 +9,7 @@ import {
   initialAdminDomainBulkImportState,
   type AdminDomainBulkImportState,
 } from '@/lib/admin/admin-domain-bulk-import';
+import { countNonEmptyBulkImportRows } from '@/lib/admin/admin-bulk-import-shared';
 
 type DomainBulkImportActionContext = {
   assessmentVersionId: string;
@@ -59,7 +60,7 @@ function buildEmptyInputState(
     rawInput,
     lastAction,
     hasSubmitted: true,
-    formError: 'Paste one or more domain rows before continuing.',
+    formError: 'Paste at least one domain row, then preview the import.',
   };
 }
 
@@ -73,25 +74,16 @@ function toState(
     lastAction,
     hasSubmitted: true,
     success: result.ok && (lastAction === 'preview' ? true : result.didImport),
-    ok: result.ok,
     canImport: result.canImport,
     didImport: result.didImport,
     accepted: result.accepted,
     rejected: result.rejected,
-    created: result.created,
     summary: {
       ...result.summary,
-      rowCount: countNonEmptyRows(rawInput),
+      rowCount: countNonEmptyBulkImportRows(rawInput),
       acceptedCount: result.accepted.length,
     },
     executionError: result.executionError,
     formError: null,
   };
-}
-
-function countNonEmptyRows(rawInput: string): number {
-  return rawInput
-    .split(/\r?\n/)
-    .filter((line) => line.trim().length > 0)
-    .length;
 }

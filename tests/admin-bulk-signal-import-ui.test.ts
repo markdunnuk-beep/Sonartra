@@ -53,6 +53,14 @@ test('bulk signal import panel groups accepted preview rows using authored domai
   assert.match(source, /acceptedByDomainId\.get\(domain\.domainId\) \?\? \[\]/);
 });
 
+test('bulk signal import panel shows domain-required and append guidance for operator clarity', () => {
+  const source = readSource(bulkComponentPath);
+
+  assert.match(source, /Add at least one domain before previewing signal imports\./);
+  assert.match(source, /This will append new signals within each matched domain/);
+  assert.match(source, /No valid rows were found to import\. Fix the rejected rows and preview again\./);
+});
+
 test('signal authoring renders the bulk panel only in signals mode above the manual signal cards', () => {
   const source = readSource(authoringComponentPath);
 

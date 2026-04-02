@@ -1,7 +1,4 @@
-import type {
-  DomainBulkImportExecutionResult,
-  DomainBulkImportExecutionSummary,
-} from '@/lib/server/admin-domain-bulk-import';
+import type { DomainBulkImportExecutionSummary } from '@/lib/server/admin-domain-bulk-import';
 import type {
   PlannedDomainBulkImportAcceptedRow,
   PlannedDomainBulkImportRejectedRow,
@@ -17,12 +14,10 @@ export type AdminDomainBulkImportState = {
   lastAction: 'idle' | 'preview' | 'import';
   hasSubmitted: boolean;
   success: boolean;
-  ok: boolean;
   canImport: boolean;
   didImport: boolean;
   accepted: readonly PlannedDomainBulkImportAcceptedRow[];
   rejected: readonly PlannedDomainBulkImportRejectedRow[];
-  created: ReadonlyArray<DomainBulkImportExecutionResult['created'][number]>;
   summary: AdminDomainBulkImportSummary;
   executionError: string | null;
   formError: string | null;
@@ -33,12 +28,10 @@ export const initialAdminDomainBulkImportState: AdminDomainBulkImportState = {
   lastAction: 'idle',
   hasSubmitted: false,
   success: false,
-  ok: false,
   canImport: false,
   didImport: false,
   accepted: [],
   rejected: [],
-  created: [],
   summary: {
     assessmentVersionId: '',
     lifecycleStatus: 'ARCHIVED',

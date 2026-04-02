@@ -87,7 +87,7 @@ function SummaryGrid({ state }: Readonly<{ state: AdminDomainBulkImportState }>)
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
       <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Pasted rows</p>
+        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Parsed rows</p>
         <p className="mt-2 text-lg font-semibold text-white">{state.summary.rowCount}</p>
       </div>
       <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
@@ -109,9 +109,11 @@ function SummaryGrid({ state }: Readonly<{ state: AdminDomainBulkImportState }>)
 export function AdminBulkDomainImport({
   assessmentVersionId,
   isEditableAssessmentVersion,
+  existingDomainCount,
 }: Readonly<{
   assessmentVersionId: string;
   isEditableAssessmentVersion: boolean;
+  existingDomainCount: number;
 }>) {
   const router = useRouter();
   const previewAction = useMemo(
@@ -132,6 +134,7 @@ export function AdminBulkDomainImport({
 
   const isInputEmpty = rawInput.trim().length === 0;
   const isBusy = isPreviewPending || isImportPending;
+  const hasExistingDomains = existingDomainCount > 0;
   const isPreviewCurrent =
     resultState.lastAction === 'preview' &&
     resultState.rawInput === rawInput &&
@@ -187,12 +190,12 @@ export function AdminBulkDomainImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Bulk Import Domains</p>
+          <p className="sonartra-page-eyebrow">Bulk import</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Bulk Import Domains
+            Bulk import domains
           </h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Paste one domain per line to create the full domain set for this draft version.
+            Paste one domain per line to add domains to this assessment version.
           </p>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
             Accepted formats: <code>label</code>, <code>label|description</code>, or <code>label|key|description</code>.
@@ -201,14 +204,20 @@ export function AdminBulkDomainImport({
 
         {!isEditableAssessmentVersion ? (
           <InlineBanner tone="warning">
-            Domain bulk import is only available for draft assessment versions.
+            Bulk import is available only for draft assessment versions.
+          </InlineBanner>
+        ) : null}
+
+        {hasExistingDomains ? (
+          <InlineBanner tone="warning">
+            This will append new domains after the existing set. Existing domains stay in place.
           </InlineBanner>
         ) : null}
 
         {successMessage ? <InlineBanner tone="success">{successMessage}</InlineBanner> : null}
 
         <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Paste format</p>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Accepted format</p>
           <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
             {DOMAIN_IMPORT_FORMAT_EXAMPLE}
           </pre>
@@ -235,7 +244,7 @@ export function AdminBulkDomainImport({
 
         {!isInputEmpty && resultState.lastAction === 'preview' && resultState.rawInput !== rawInput ? (
           <InlineBanner tone="warning">
-            The textarea changed after the last preview. Preview again before importing.
+            The pasted rows changed after the last preview. Preview again before importing.
           </InlineBanner>
         ) : null}
 
@@ -264,8 +273,14 @@ export function AdminBulkDomainImport({
               <SummaryGrid state={resultState} />
             </SectionBlock>
 
+            {resultState.lastAction === 'preview' && resultState.accepted.length === 0 ? (
+              <InlineBanner tone="warning">
+                No valid rows were found to import. Fix the rejected rows and preview again.
+              </InlineBanner>
+            ) : null}
+
             {resultState.accepted.length > 0 ? (
-              <SectionBlock title="Accepted rows">
+              <SectionBlock title="Accepted preview">
                 <div className="space-y-3">
                   {resultState.accepted.map((row) => (
                     <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4" key={`${row.sourceLineNumber}-${row.domainKey}`}>
@@ -282,7 +297,9 @@ export function AdminBulkDomainImport({
                         <p className="text-sm text-white/64">{row.domainKey}</p>
                         {row.description ? (
                           <p className="text-sm leading-6 text-white/76">{row.description}</p>
-                        ) : null}
+                        ) : (
+                          <p className="text-sm leading-6 text-white/42">No description provided.</p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -307,7 +324,7 @@ export function AdminBulkDomainImport({
             {resultState.lastAction === 'import' && !resultState.didImport && !resultState.executionError ? (
               <SectionBlock title="Import result">
                 <InlineBanner tone="neutral">
-                  Import did not run because the current preview contains blocking issues.
+                  Import is blocked right now. Review the preview messages, then preview again after fixing the rows.
                 </InlineBanner>
               </SectionBlock>
             ) : null}
