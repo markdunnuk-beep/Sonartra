@@ -6,6 +6,13 @@ import {
   getNextAssessmentVersionTag,
   type AdminAssessmentVersionActionState,
 } from '@/lib/admin/admin-assessment-versioning';
+import { runFullDiagnostics } from '@/lib/engine/engine-diagnostics';
+import { normalizeScoreResult } from '@/lib/engine/normalization';
+import { createAssessmentDefinitionRepository } from '@/lib/engine/repository';
+import { buildCanonicalResultPayload } from '@/lib/engine/result-builder';
+import { loadRuntimeExecutionModel } from '@/lib/engine/runtime-loader';
+import { scoreAssessmentResponses } from '@/lib/engine/scoring';
+import type { EngineLanguageBundle, RuntimeAssessmentDefinition, RuntimeResponseSet } from '@/lib/engine/types';
 import { validateLatestDraftAssessmentVersion } from '@/lib/server/admin-assessment-validation';
 import { getDbPool } from '@/lib/server/db';
 
@@ -94,6 +101,7 @@ type InsertedIdRow = {
 
 type PublishDraftResult = {
   publishedVersionTag: string;
+  diagnosticWarnings: readonly string[];
 };
 
 type CreateDraftVersionResult = {
@@ -130,6 +138,18 @@ class AssessmentVersioningPersistenceError extends Error {
   }
 }
 
+class DraftVersionPublishDiagnosticsError extends Error {
+  readonly errorMessages: readonly string[];
+  readonly warningMessages: readonly string[];
+
+  constructor(errorMessages: readonly string[], warningMessages: readonly string[]) {
+    super('DRAFT_VERSION_ENGINE_DIAGNOSTICS_FAILED');
+    this.name = 'DraftVersionPublishDiagnosticsError';
+    this.errorMessages = errorMessages;
+    this.warningMessages = warningMessages;
+  }
+}
+
 function assessmentPath(assessmentKey: string): string {
   return `/admin/assessments/${assessmentKey}`;
 }
@@ -149,6 +169,131 @@ function unwrapVersioningError(error: unknown): {
     cause: error,
     stage: null,
   };
+}
+
+function createEmptyLanguageBundle(): EngineLanguageBundle {
+  return {
+    signals: {},
+    pairs: {},
+    domains: {},
+    overview: {},
+  };
+}
+
+function isLanguageSchemaUnavailable(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return message.includes('assessment_version_language_') && message.includes('does not exist');
+}
+
+function createDiagnosticsResponse(definition: RuntimeAssessmentDefinition): RuntimeResponseSet {
+  return {
+    attemptId: `diagnostic-${definition.version.id}`,
+    assessmentKey: definition.assessment.key,
+    versionTag: definition.version.versionTag,
+    status: 'submitted',
+    responsesByQuestionId: {},
+    submittedAt: '1970-01-01T00:00:00.000Z',
+  };
+}
+
+function dedupeMessages(messages: readonly string[]): readonly string[] {
+  return Object.freeze([...new Set(messages)]);
+}
+
+async function runDraftVersionDiagnostics(params: {
+  db: Queryable;
+  draftVersionId: string;
+}): Promise<{
+  errorMessages: readonly string[];
+  warningMessages: readonly string[];
+}> {
+  const repository = createAssessmentDefinitionRepository({ db: params.db });
+  const definition = await repository.getAssessmentDefinitionByVersion({
+    assessmentVersionId: params.draftVersionId,
+  });
+
+  if (!definition) {
+    return {
+      errorMessages: Object.freeze([
+        'The draft runtime definition could not be loaded for engine diagnostics.',
+      ]),
+      warningMessages: Object.freeze([]),
+    };
+  }
+
+  let languageBundle = createEmptyLanguageBundle();
+  const preflightWarnings: string[] = [];
+
+  try {
+    languageBundle = await repository.getAssessmentVersionLanguageBundle(params.draftVersionId);
+  } catch (error) {
+    if (!isLanguageSchemaUnavailable(error)) {
+      throw error;
+    }
+
+    preflightWarnings.push(
+      'Language datasets are unavailable in this environment. Diagnostics ran with fallback language only.',
+    );
+  }
+
+  let runtimeModel;
+  try {
+    runtimeModel = loadRuntimeExecutionModel(definition);
+  } catch (error) {
+    return {
+      errorMessages: Object.freeze([
+        error instanceof Error ? error.message : 'Runtime execution model validation failed.',
+      ]),
+      warningMessages: Object.freeze(preflightWarnings),
+    };
+  }
+
+  try {
+    const responses = createDiagnosticsResponse(definition);
+    const scoreResult = scoreAssessmentResponses({
+      executionModel: runtimeModel,
+      responses,
+    });
+    const normalizedResult = normalizeScoreResult({ scoreResult });
+    const payload = buildCanonicalResultPayload({
+      normalizedResult: {
+        assessmentVersionId: definition.version.id,
+        ...normalizedResult,
+        metadata: {
+          assessmentKey: definition.assessment.key,
+          version: definition.version.versionTag,
+          attemptId: responses.attemptId,
+        },
+        scoringDiagnostics: scoreResult.diagnostics,
+        languageBundle,
+      },
+    });
+    const diagnostics = runFullDiagnostics({
+      runtimeModel,
+      languageConfig: languageBundle,
+      normalizationScores: payload.normalizedScores,
+      result: payload,
+    });
+
+    return {
+      errorMessages: dedupeMessages(diagnostics.errors.map((issue) => issue.message)),
+      warningMessages: dedupeMessages([
+        ...preflightWarnings,
+        ...diagnostics.warnings.map((issue) => issue.message),
+      ]),
+    };
+  } catch (error) {
+    return {
+      errorMessages: Object.freeze([
+        error instanceof Error ? error.message : 'Engine diagnostics failed during scoring or payload generation.',
+      ]),
+      warningMessages: Object.freeze(preflightWarnings),
+    };
+  }
 }
 
 async function loadAssessmentVersionsForKey(
@@ -187,41 +332,56 @@ function mapVersioningErrorToState(error: unknown): AdminAssessmentVersionAction
     return null;
   }
 
+  if (error instanceof DraftVersionPublishDiagnosticsError) {
+    return {
+      formError: 'The current draft failed engine diagnostics. Resolve the blocking engine issues before publishing.',
+      formSuccess: null,
+      formWarnings: error.warningMessages,
+    };
+  }
+
   switch (error.message) {
     case 'ASSESSMENT_NOT_FOUND':
       return {
         formError: 'This assessment could not be found anymore.',
         formSuccess: null,
+        formWarnings: Object.freeze([]),
       };
     case 'DRAFT_VERSION_NOT_FOUND':
       return {
         formError: 'No editable draft version is currently available to publish.',
         formSuccess: null,
+        formWarnings: Object.freeze([]),
       };
     case 'DRAFT_VERSION_REQUIRED':
       return {
         formError: 'The selected version is no longer an editable draft.',
         formSuccess: null,
+        formWarnings: Object.freeze([]),
       };
     case 'DRAFT_VERSION_NOT_PUBLISH_READY':
       return {
         formError: 'The current draft is not publish-ready yet. Resolve the blocking validation issues before publishing.',
         formSuccess: null,
+        formWarnings: Object.freeze([]),
       };
     case 'DRAFT_VERSION_ALREADY_EXISTS':
       return {
         formError: 'A draft version already exists. Continue authoring that draft instead of creating another one.',
         formSuccess: null,
+        formWarnings: Object.freeze([]),
       };
     case 'SOURCE_VERSION_NOT_FOUND':
       return {
         formError: 'A source version could not be found for draft duplication.',
         formSuccess: null,
+        formWarnings: Object.freeze([]),
       };
     case 'INVALID_ASSESSMENT_VERSION_TAG':
       return {
         formError: 'Existing version tags are not in the expected x.y.z format, so a deterministic next draft version cannot be created.',
         formSuccess: null,
+        formWarnings: Object.freeze([]),
       };
     default:
       return null;
@@ -265,6 +425,14 @@ export async function publishDraftAssessmentVersionRecords(params: {
   const validation = await validateLatestDraftAssessmentVersion(params.db, params.assessmentKey);
   if (!validation.isPublishReady || validation.draftVersionId !== draft.assessment_version_id) {
     throw new Error('DRAFT_VERSION_NOT_PUBLISH_READY');
+  }
+
+  const diagnostics = await runDraftVersionDiagnostics({
+    db: params.db,
+    draftVersionId: draft.assessment_version_id,
+  });
+  if (diagnostics.errorMessages.length > 0) {
+    throw new DraftVersionPublishDiagnosticsError(diagnostics.errorMessages, diagnostics.warningMessages);
   }
 
   try {
@@ -313,6 +481,7 @@ export async function publishDraftAssessmentVersionRecords(params: {
 
   return {
     publishedVersionTag: draft.version_tag,
+    diagnosticWarnings: diagnostics.warningMessages,
   };
 }
 
@@ -712,6 +881,7 @@ export async function publishDraftVersionActionWithDependencies(
     return {
       formError: 'No editable draft version is currently available to publish.',
       formSuccess: null,
+      formWarnings: Object.freeze([]),
     };
   }
 
@@ -734,6 +904,7 @@ export async function publishDraftVersionActionWithDependencies(
     return {
       formError: null,
       formSuccess: `Draft ${published.publishedVersionTag} is now the active published version.`,
+      formWarnings: published.diagnosticWarnings,
     };
   } catch (error) {
     if (client) {
@@ -756,6 +927,7 @@ export async function publishDraftVersionActionWithDependencies(
     return {
       formError: 'The draft could not be published. Try again after refreshing the page.',
       formSuccess: null,
+      formWarnings: Object.freeze([]),
     };
   } finally {
     client?.release();
@@ -797,6 +969,7 @@ export async function createDraftVersionActionWithDependencies(
     return {
       formError: null,
       formSuccess: `Draft ${created.draftVersionTag} was created from version ${created.sourceVersionTag}.`,
+      formWarnings: Object.freeze([]),
     };
   } catch (error) {
     if (client) {
@@ -819,6 +992,7 @@ export async function createDraftVersionActionWithDependencies(
     return {
       formError: 'A new draft version could not be created. Try again after refreshing the page.',
       formSuccess: null,
+      formWarnings: Object.freeze([]),
     };
   } finally {
     client?.release();

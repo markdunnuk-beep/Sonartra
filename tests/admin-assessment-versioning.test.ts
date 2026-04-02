@@ -16,6 +16,8 @@ import {
 type StoredAssessment = {
   id: string;
   assessmentKey: string;
+  title?: string;
+  description?: string | null;
 };
 
 type StoredVersion = {
@@ -104,6 +106,72 @@ function createFakeDb(seed?: {
   return {
     db: {
       async query<T>(text: string, params?: readonly unknown[]) {
+        if (text.includes('FROM assessments') && text.includes('WHERE assessment_key = $1')) {
+          const assessmentKey = params?.[0] as string;
+          const assessment = state.assessments.find((item) => item.assessmentKey === assessmentKey);
+          return {
+            rows: (assessment
+              ? [{
+                  id: assessment.id,
+                  assessment_key: assessment.assessmentKey,
+                  title: assessment.title ?? assessment.assessmentKey.toUpperCase(),
+                  description: assessment.description ?? null,
+                  created_at: '2026-03-01T00:00:00.000Z',
+                  updated_at: '2026-03-01T00:00:00.000Z',
+                }]
+              : []) as T[],
+          };
+        }
+
+        if (text.includes('FROM assessment_versions') && text.includes('WHERE id = $1')) {
+          const versionId = params?.[0] as string;
+          const version = state.versions.find((item) => item.id === versionId);
+          return {
+            rows: (version
+              ? [{
+                  id: version.id,
+                  assessment_id: version.assessmentId,
+                  version: version.versionTag,
+                  lifecycle_status: version.lifecycleStatus,
+                  published_at: version.publishedAt,
+                  created_at: version.createdAt,
+                  updated_at: version.updatedAt,
+                }]
+              : []) as T[],
+          };
+        }
+
+        if (text.includes('row_to_json(a.*) AS a') && text.includes('row_to_json(av.*) AS v')) {
+          const versionId = params?.[0] as string;
+          const version = state.versions.find((item) => item.id === versionId);
+          const assessment = version
+            ? state.assessments.find((item) => item.id === version.assessmentId) ?? null
+            : null;
+          return {
+            rows: (version && assessment
+              ? [{
+                  a: {
+                    id: assessment.id,
+                    assessment_key: assessment.assessmentKey,
+                    title: assessment.title ?? assessment.assessmentKey.toUpperCase(),
+                    description: assessment.description ?? null,
+                    created_at: '2026-03-01T00:00:00.000Z',
+                    updated_at: '2026-03-01T00:00:00.000Z',
+                  },
+                  v: {
+                    id: version.id,
+                    assessment_id: version.assessmentId,
+                    version: version.versionTag,
+                    lifecycle_status: version.lifecycleStatus,
+                    published_at: version.publishedAt,
+                    created_at: version.createdAt,
+                    updated_at: version.updatedAt,
+                  },
+                }]
+              : []) as T[],
+          };
+        }
+
         if (text.includes('FROM assessments a') && text.includes('INNER JOIN assessment_versions av ON av.assessment_id = a.id')) {
           const assessmentKey = params?.[0] as string;
           const assessment = state.assessments.find((item) => item.assessmentKey === assessmentKey);
@@ -285,12 +353,16 @@ function createFakeDb(seed?: {
           const rows = state.domains
             .filter((domain) => domain.assessmentVersionId === assessmentVersionId)
             .map((domain) => ({
+              id: domain.id,
+              assessment_version_id: domain.assessmentVersionId,
               domain_id: domain.id,
               domain_key: domain.domainKey,
               label: domain.label,
               description: domain.description,
               domain_type: domain.domainType,
               order_index: domain.orderIndex,
+              created_at: '2026-03-01T00:00:00.000Z',
+              updated_at: '2026-03-01T00:00:00.000Z',
             }));
           return { rows: rows as T[] };
         }
@@ -314,6 +386,8 @@ function createFakeDb(seed?: {
           const rows = state.signals
             .filter((signal) => signal.assessmentVersionId === assessmentVersionId)
             .map((signal) => ({
+              id: signal.id,
+              assessment_version_id: signal.assessmentVersionId,
               signal_id: signal.id,
               domain_id: signal.domainId,
               signal_key: signal.signalKey,
@@ -321,6 +395,8 @@ function createFakeDb(seed?: {
               description: signal.description,
               order_index: signal.orderIndex,
               is_overlay: signal.isOverlay,
+              created_at: '2026-03-01T00:00:00.000Z',
+              updated_at: '2026-03-01T00:00:00.000Z',
             }));
           return { rows: rows as T[] };
         }
@@ -345,11 +421,15 @@ function createFakeDb(seed?: {
           const rows = state.questions
             .filter((question) => question.assessmentVersionId === assessmentVersionId)
             .map((question) => ({
+              id: question.id,
+              assessment_version_id: question.assessmentVersionId,
               question_id: question.id,
               domain_id: question.domainId,
               question_key: question.questionKey,
               prompt: question.prompt,
               order_index: question.orderIndex,
+              created_at: '2026-03-01T00:00:00.000Z',
+              updated_at: '2026-03-01T00:00:00.000Z',
             }));
           return { rows: rows as T[] };
         }
@@ -377,6 +457,7 @@ function createFakeDb(seed?: {
           const rows = state.options
             .filter((option) => questionIds.has(option.questionId))
             .map((option) => ({
+              id: option.id,
               option_id: option.id,
               assessment_version_id: option.assessmentVersionId,
               question_id: option.questionId,
@@ -384,6 +465,8 @@ function createFakeDb(seed?: {
               option_label: option.optionLabel,
               option_text: option.optionText,
               order_index: option.orderIndex,
+              created_at: '2026-03-01T00:00:00.000Z',
+              updated_at: '2026-03-01T00:00:00.000Z',
             }));
           return { rows: rows as T[] };
         }
@@ -416,10 +499,13 @@ function createFakeDb(seed?: {
             .filter((weight) => optionIds.has(weight.optionId))
             .map((weight) => ({
               option_signal_weight_id: weight.id,
+              id: weight.id,
               option_id: weight.optionId,
               signal_id: weight.signalId,
               weight: weight.weight,
               source_weight_key: weight.sourceWeightKey,
+              created_at: '2026-03-01T00:00:00.000Z',
+              updated_at: '2026-03-01T00:00:00.000Z',
             }));
           return { rows: rows as T[] };
         }
@@ -771,6 +857,7 @@ test('publish action revalidates dashboard and detail routes after success', asy
 
   assert.equal(result.formError, null);
   assert.ok(result.formSuccess?.includes('1.0.0'));
+  assert.ok(result.formWarnings.length > 0);
   assert.deepEqual(revalidatedPaths, ['/admin/assessments', '/admin/assessments/wplp80']);
 });
 
@@ -875,6 +962,130 @@ test('publish action returns an inline error when validation blocks readiness', 
     'The current draft is not publish-ready yet. Resolve the blocking validation issues before publishing.',
   );
   assert.equal(result.formSuccess, null);
+  assert.deepEqual(result.formWarnings, []);
+  assert.equal(fake.state.versions[0]?.lifecycleStatus, 'DRAFT');
+});
+
+test('publish action blocks when engine diagnostics detect runtime integrity errors', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [
+      {
+        id: 'version-1',
+        assessmentId: 'assessment-1',
+        versionTag: '1.0.0',
+        lifecycleStatus: 'DRAFT',
+        titleOverride: null,
+        descriptionOverride: null,
+        publishedAt: null,
+        createdAt: '2026-03-01T00:00:00.000Z',
+        updatedAt: '2026-03-01T00:00:00.000Z',
+      },
+    ],
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'section-one',
+        label: 'Section One',
+        description: null,
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'leadership',
+        label: 'Leadership',
+        description: null,
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 1,
+      },
+      {
+        id: 'domain-unused',
+        assessmentVersionId: 'version-1',
+        domainKey: 'unused',
+        label: 'Unused',
+        description: null,
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 2,
+      },
+    ],
+    signals: [
+      {
+        id: 'signal-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-2',
+        signalKey: 'directive',
+        label: 'Directive',
+        description: null,
+        orderIndex: 0,
+        isOverlay: false,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'decision-speed',
+        prompt: 'I make decisions quickly when direction is clear.',
+        orderIndex: 0,
+      },
+    ],
+    options: [
+      {
+        id: 'option-1',
+        assessmentVersionId: 'version-1',
+        questionId: 'question-1',
+        optionKey: 'agree',
+        optionLabel: 'A',
+        optionText: 'Agree',
+        orderIndex: 0,
+      },
+    ],
+    weights: [
+      {
+        id: 'weight-1',
+        optionId: 'option-1',
+        signalId: 'signal-1',
+        weight: '1.0000',
+        sourceWeightKey: '1|A',
+      },
+    ],
+  });
+
+  const result = await publishDraftVersionActionWithDependencies(
+    {
+      assessmentKey: 'wplp80',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminAssessmentVersionActionState,
+    new FormData(),
+    {
+      getDbPool: () => ({
+        async connect() {
+          return {
+            async query<T>(text: string, params?: readonly unknown[]) {
+              if (text.trim() === 'BEGIN' || text.trim() === 'ROLLBACK') {
+                return { rows: [] as T[] };
+              }
+              return fake.db.query<T>(text, params);
+            },
+            release() {},
+          };
+        },
+      }),
+      revalidatePath(): void {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'The current draft failed engine diagnostics. Resolve the blocking engine issues before publishing.',
+  );
+  assert.equal(result.formSuccess, null);
+  assert.deepEqual(result.formWarnings, []);
   assert.equal(fake.state.versions[0]?.lifecycleStatus, 'DRAFT');
 });
 
@@ -936,6 +1147,7 @@ test('create draft action returns an inline error when a draft already exists', 
     'A draft version already exists. Continue authoring that draft instead of creating another one.',
   );
   assert.equal(result.formSuccess, null);
+  assert.deepEqual(result.formWarnings, []);
 });
 
 

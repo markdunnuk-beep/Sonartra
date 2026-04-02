@@ -22,23 +22,32 @@ function ActionNotice({
 }: Readonly<{
   state: AdminAssessmentVersionActionState;
 }>) {
-  if (state.formError) {
-    return (
-      <div className="rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
-        {state.formError}
-      </div>
-    );
-  }
+  return (
+    <div className="space-y-3">
+      {state.formError ? (
+        <div className="rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
+          {state.formError}
+        </div>
+      ) : null}
 
-  if (state.formSuccess) {
-    return (
-      <div className="rounded-[1rem] border border-[rgba(116,209,177,0.22)] bg-[rgba(20,80,57,0.22)] px-4 py-3 text-sm text-[rgba(214,246,233,0.9)]">
-        {state.formSuccess}
-      </div>
-    );
-  }
+      {state.formSuccess ? (
+        <div className="rounded-[1rem] border border-[rgba(116,209,177,0.22)] bg-[rgba(20,80,57,0.22)] px-4 py-3 text-sm text-[rgba(214,246,233,0.9)]">
+          {state.formSuccess}
+        </div>
+      ) : null}
 
-  return null;
+      {state.formWarnings.length > 0 ? (
+        <div className="rounded-[1rem] border border-[rgba(255,184,107,0.22)] bg-[rgba(78,53,18,0.22)] px-4 py-3 text-sm text-[rgba(255,227,187,0.9)]">
+          <p className="font-medium text-[rgba(255,237,205,0.96)]">Warnings</p>
+          <div className="mt-2 space-y-2">
+            {state.formWarnings.map((warning) => (
+              <p key={warning}>{warning}</p>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function SubmitButton({

@@ -1,3 +1,4 @@
+import { runFullDiagnostics } from '@/lib/engine/engine-diagnostics';
 import { buildCanonicalResultPayload } from '@/lib/engine/result-builder';
 import type { AssessmentDefinitionRepository } from '@/lib/engine/repository';
 import { loadRuntimeExecutionModel } from '@/lib/engine/runtime-loader';
@@ -84,7 +85,7 @@ export async function runAssessmentEngine(
   });
   const normalizedResult = normalizeScoreResult({ scoreResult });
 
-  return buildCanonicalResultPayload({
+  const payload = buildCanonicalResultPayload({
     normalizedResult: {
       assessmentVersionId: definition.version.id,
       ...normalizedResult,
@@ -97,4 +98,24 @@ export async function runAssessmentEngine(
       languageBundle,
     },
   });
+
+  if (process.env.NODE_ENV === 'development') {
+    const diagnostics = runFullDiagnostics({
+      runtimeModel: executionModel,
+      languageConfig: languageBundle,
+      normalizationScores: payload.normalizedScores,
+      result: payload,
+    });
+
+    if (diagnostics.issues.length > 0) {
+      console.warn('[engine-diagnostics]', {
+        assessmentVersionId: definition.version.id,
+        attemptId: params.responses.attemptId,
+        errors: diagnostics.errors,
+        warnings: diagnostics.warnings,
+      });
+    }
+  }
+
+  return payload;
 }

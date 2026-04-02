@@ -5,11 +5,13 @@ const VERSION_PATTERN = /^(\d+)\.(\d+)\.(\d+)$/;
 export type AdminAssessmentVersionActionState = {
   formError: string | null;
   formSuccess: string | null;
+  formWarnings: readonly string[];
 };
 
 export const initialAdminAssessmentVersionActionState: AdminAssessmentVersionActionState = {
   formError: null,
   formSuccess: null,
+  formWarnings: Object.freeze([]),
 };
 
 export type ParsedAssessmentVersionTag = {
