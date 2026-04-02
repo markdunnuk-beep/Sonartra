@@ -76,6 +76,14 @@ function formatPercent(value: number | null): string {
   return value === null ? 'N/A' : `${Math.round(value)}%`;
 }
 
+function getSignalDetailCopy(signal: DomainSignalRingViewModel['signals'][number]): string {
+  if (signal.signalDescriptor) {
+    return `${signal.signalLabel} - ${signal.signalDescriptor}`;
+  }
+
+  return 'A fuller descriptor is not available for this signal yet.';
+}
+
 function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
   segmentClassName: string;
   markerLabel: string | null;
@@ -248,11 +256,15 @@ function SignalLegendButton({
   const tone = getSignalTone(signal);
 
   return (
-    <li data-signal-index={index} data-signal-key={signal.signalKey} data-signal-emphasis={signal.isTopSignal ? 'top' : signal.isSecondSignal ? 'second' : 'base'}>
+    <li
+      data-signal-index={index}
+      data-signal-key={signal.signalKey}
+      data-signal-emphasis={signal.isTopSignal ? 'top' : signal.isSecondSignal ? 'second' : 'base'}
+    >
       <button
         type="button"
         className={cn(
-          'domain-signal-ring-button flex w-full items-start justify-between gap-4 rounded-[1.1rem] border px-4 py-3 text-left transition duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
+          'domain-signal-ring-button flex w-full items-start justify-between gap-3 rounded-[1.1rem] border px-3.5 py-3 text-left transition duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220] sm:gap-4 sm:px-4',
           signalState === 'selected'
             ? 'border-white/18 bg-white/[0.085] shadow-[0_14px_36px_rgba(4,10,24,0.22)]'
             : signalState === 'highlighted'
@@ -294,8 +306,8 @@ function SignalLegendButton({
           }
         }}
       >
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
             <span
               aria-hidden="true"
               className={cn(
@@ -318,7 +330,7 @@ function SignalLegendButton({
             />
             <span
               className={cn(
-                'text-[0.97rem] font-medium tracking-[-0.02em]',
+                'min-w-0 flex-1 text-[0.95rem] font-medium leading-6 tracking-[-0.02em] sm:text-[0.97rem]',
                 signalState === 'selected' || signalState === 'highlighted'
                   ? 'text-white'
                   : tone.labelClassName,
@@ -339,10 +351,10 @@ function SignalLegendButton({
             ) : null}
           </div>
         </div>
-        <div className="text-right">
+        <div className="shrink-0 pt-0.5 text-right">
           <p
             className={cn(
-              'text-[1rem] font-semibold tracking-[-0.02em]',
+              'text-[0.97rem] font-semibold tracking-[-0.02em] sm:text-[1rem]',
               signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : tone.valueClassName,
             )}
           >
@@ -396,13 +408,13 @@ export function DomainSignalRing({
           </div>
         </div>
 
-        <div className="grid gap-5 md:gap-6 lg:grid-cols-[minmax(0,16.5rem)_minmax(0,1fr)] lg:items-start">
-          <div className="mx-auto flex w-full max-w-[16.5rem] flex-col items-center gap-3.5 sm:max-w-[17rem] md:max-w-[18rem] md:gap-4">
+        <div className="grid gap-5 md:gap-6 xl:grid-cols-[minmax(0,16.25rem)_minmax(0,1fr)] xl:items-start">
+          <div className="mx-auto flex w-full max-w-[16.75rem] flex-col items-center gap-3.5 sm:max-w-[17.25rem] md:max-w-[18rem] md:gap-4">
             <svg
               viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
               role="img"
               aria-label={`${domain.domainLabel} ring with ${signals.length} signals`}
-              className="h-auto w-full max-w-[14.25rem] sm:max-w-[15rem] md:max-w-[15.5rem]"
+              className="h-auto w-full max-w-[14rem] sm:max-w-[14.75rem] md:max-w-[15.25rem]"
             >
               <circle
                 cx={VIEWBOX_CENTER}
@@ -530,17 +542,17 @@ export function DomainSignalRing({
 
             <div
               className={cn(
-                'w-full rounded-[1.1rem] border px-3.5 py-3 sm:px-4',
+                'w-full rounded-[1.1rem] border px-3.5 py-3.5 sm:px-4',
                 activeSignal ? getSignalTone(activeSignal).detailAccentClassName : 'border-white/10 bg-white/[0.03]',
               )}
               aria-live="polite"
               data-active-detail-key={activeSignal?.signalKey ?? ''}
             >
               {activeSignal ? (
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2.5">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <p className="truncate text-[0.93rem] font-semibold tracking-[-0.02em] text-white sm:text-[0.96rem]">{activeSignal.signalLabel}</p>
+                <div className="space-y-2.5">
+                  <div className="flex flex-wrap items-start justify-between gap-2.5">
+                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
+                      <p className="min-w-0 flex-1 text-[0.93rem] font-semibold leading-6 tracking-[-0.02em] text-white sm:text-[0.96rem]">{activeSignal.signalLabel}</p>
                       {activeSignal.isTopSignal ? (
                         <span className="inline-flex rounded-full border border-white/22 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
                           Top
@@ -551,12 +563,10 @@ export function DomainSignalRing({
                         </span>
                       ) : null}
                     </div>
-                    <p className="text-[0.96rem] font-semibold tracking-[-0.03em] text-white/88 sm:text-[1rem]">{formatPercent(activeSignal.withinDomainPercent)}</p>
+                    <p className="shrink-0 pt-0.5 text-[0.96rem] font-semibold tracking-[-0.03em] text-white/88 sm:text-[1rem]">{formatPercent(activeSignal.withinDomainPercent)}</p>
                   </div>
-                  <p className="text-[0.88rem] leading-6 text-white/64 sm:text-[0.9rem]">
-                    {activeSignal.signalDescriptor
-                      ? `${activeSignal.signalLabel} - ${activeSignal.signalDescriptor}`
-                      : 'This signal is active in this area.'}
+                  <p className="text-[0.86rem] leading-6 text-white/64 sm:text-[0.9rem]">
+                    {getSignalDetailCopy(activeSignal)}
                   </p>
                 </div>
               ) : (
@@ -565,7 +575,7 @@ export function DomainSignalRing({
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {signals.length > 0 ? (
               <ol className="space-y-3">
                 {signals.map((signal, index) => {

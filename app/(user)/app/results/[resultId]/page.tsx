@@ -282,12 +282,12 @@ function DomainChapter({
           {ringModel ? (
             <DomainSignalRing
               domain={ringModel}
-              className="max-w-[42rem] border-white/8 bg-[linear-gradient(180deg,rgba(12,19,33,0.68),rgba(8,12,24,0.9))] p-4 sm:p-5 md:max-w-[44rem]"
+              className="max-w-[43rem] border-white/8 bg-[linear-gradient(180deg,rgba(12,19,33,0.68),rgba(8,12,24,0.9))] p-4 sm:p-5 md:max-w-[45rem] md:p-6"
             />
           ) : null}
 
           {signalContext ? (
-            <p className="max-w-[40rem] text-[0.92rem] leading-7 text-white/50">
+            <p className="max-w-[41rem] pt-1 text-[0.92rem] leading-7 text-white/50">
               {signalContext}
             </p>
           ) : null}

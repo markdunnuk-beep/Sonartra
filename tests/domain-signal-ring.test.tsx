@@ -62,7 +62,8 @@ test('domain signal ring renders the domain label from props', () => {
   assert.match(markup, /Adaptive Patterns/);
   assert.match(markup, /A calm editorial summary for the domain\./);
   assert.match(markup, /domain-signal-ring-enter/);
-  assert.match(markup, /max-w-\[14\.25rem\]/);
+  assert.match(markup, /max-w-\[14rem\] sm:max-w-\[14\.75rem\] md:max-w-\[15\.25rem\]/);
+  assert.match(markup, /xl:grid-cols-\[minmax\(0,16\.25rem\)_minmax\(0,1fr\)\]/);
   assert.doesNotMatch(markup, /Domain Ring/);
 });
 
@@ -143,7 +144,15 @@ test('domain signal ring falls back to a generic active detail line when no desc
     />,
   );
 
-  assert.match(markup, /This signal is active in this area\./);
+  assert.match(markup, /A fuller descriptor is not available for this signal yet\./);
+});
+
+test('domain signal ring keeps signal labels and badges wrap-safe for narrow layouts', () => {
+  const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
+
+  assert.match(markup, /flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1\.5/);
+  assert.match(markup, /min-w-0 flex-1 text-\[0\.95rem\] font-medium leading-6 tracking-\[-0\.02em\] sm:text-\[0\.97rem\]/);
+  assert.match(markup, /rounded-\[1\.1rem\] border px-3\.5 py-3\.5 sm:px-4/);
 });
 
 test('domain signal ring handles empty signals without crashing', () => {
