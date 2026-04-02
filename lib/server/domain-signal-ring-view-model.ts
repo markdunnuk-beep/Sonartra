@@ -12,6 +12,7 @@ export type DomainSignalRingEntryViewModel = {
   signalKey: string;
   signalLabel: string;
   scorePercent: number | null;
+  displayStrength: number;
   rankWithinDomain: number | null;
   isTopSignal: boolean;
   isSecondSignal: boolean;
@@ -108,6 +109,7 @@ function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknow
     signalKey: getSignalKey(signal, index),
     signalLabel: getSignalLabel(signal, index),
     scorePercent: getDisplayPercent(signal),
+    displayStrength: computeSignalDisplayStrength(getDisplayPercent(signal)).displayStrength,
     rankWithinDomain: ranksByIndex.get(index) ?? null,
     isTopSignal: index === topSignalIndex,
     isSecondSignal: index === secondSignalIndex,

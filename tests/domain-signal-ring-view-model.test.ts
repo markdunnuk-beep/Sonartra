@@ -135,6 +135,7 @@ test('domain signal ring mapper preserves authored signal order while deriving t
   assert.equal(rings[0]?.signals[2]?.isSecondSignal, true);
   assert.equal(rings[0]?.topSignalKey, 'first_by_score');
   assert.equal(rings[0]?.domainSummary, 'Custom summary.');
+  assert.equal(rings[0]?.signals[1]?.displayStrength, 0.84);
 });
 
 test('domain signal ring mapper handles equal scores deterministically by authored order', () => {
@@ -236,8 +237,10 @@ test('domain signal ring mapper handles missing and partial signal score data sa
   });
 
   assert.equal(rings[0]?.signals[0]?.scorePercent, null);
+  assert.equal(rings[0]?.signals[0]?.displayStrength, 0.2);
   assert.equal(rings[0]?.signals[0]?.rankWithinDomain, null);
   assert.equal(rings[0]?.signals[1]?.scorePercent, 55);
+  assert.equal(rings[0]?.signals[1]?.displayStrength, 0.64);
   assert.equal(rings[0]?.signals[1]?.isTopSignal, true);
   assert.deepEqual(rings[1]?.signals, []);
   assert.equal(rings[1]?.signalCount, 0);
