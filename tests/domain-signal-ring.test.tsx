@@ -107,12 +107,15 @@ test('domain signal ring bars reflect within-domain percentages through css widt
   const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
 
   assert.match(markup, /data-bar-fill="signal_b"/);
+  assert.match(markup, /data-bar-width="22%"/);
   assert.match(markup, /style="width:22%;/);
   assert.match(markup, /--signal-bar-target-width:22%/);
   assert.match(markup, /data-bar-fill="signal_a"/);
+  assert.match(markup, /data-bar-width="44%"/);
   assert.match(markup, /style="width:44%;/);
   assert.match(markup, /--signal-bar-target-width:44%/);
   assert.match(markup, /data-bar-fill="signal_c"/);
+  assert.match(markup, /data-bar-width="34%"/);
   assert.match(markup, /style="width:34%;/);
   assert.match(markup, /--signal-bar-target-width:34%/);
 });
@@ -163,7 +166,17 @@ test('domain signal ring falls back to a generic active detail line when no desc
     />,
   );
 
-  assert.match(markup, /A fuller descriptor is not available for this signal yet\./);
+  assert.match(markup, /A short descriptor is not available for this signal yet\./);
+});
+
+test('domain signal ring keeps the bar stack ahead of the active detail panel in markup', () => {
+  const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
+  const firstBarIndex = markup.indexOf('data-bar-fill="signal_b"');
+  const activeDetailIndex = markup.indexOf('data-active-detail-key="signal_a"');
+
+  assert.ok(firstBarIndex >= 0);
+  assert.ok(activeDetailIndex >= 0);
+  assert.ok(firstBarIndex < activeDetailIndex);
 });
 
 test('domain signal ring keeps signal labels and badges wrap-safe for narrow layouts', () => {

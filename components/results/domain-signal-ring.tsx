@@ -30,12 +30,20 @@ function formatPercent(value: number | null): string {
   return value === null ? 'N/A' : `${Math.round(value)}%`;
 }
 
+function getSignalBarWidth(value: number | null): string {
+  if (value === null) {
+    return '0%';
+  }
+
+  return `${Math.min(100, Math.max(0, value))}%`;
+}
+
 function getSignalDetailCopy(signal: DomainSignalRingViewModel['signals'][number]): string {
   if (signal.signalDescriptor) {
     return `${signal.signalLabel} - ${signal.signalDescriptor}`;
   }
 
-  return 'A fuller descriptor is not available for this signal yet.';
+  return 'A short descriptor is not available for this signal yet.';
 }
 
 function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
@@ -179,9 +187,7 @@ function SignalBarRow({
   onClearHighlight: (signalKey: string) => void;
 }>) {
   const tone = getSignalTone(signal);
-  const barWidth = signal.withinDomainPercent === null
-    ? '0%'
-    : `${Math.min(100, Math.max(0, signal.withinDomainPercent))}%`;
+  const barWidth = getSignalBarWidth(signal.withinDomainPercent);
   const isHighlighted = signalState === 'highlighted';
   const isSelectedState = signalState === 'selected';
 
@@ -293,6 +299,7 @@ function SignalBarRow({
                       : 'opacity-78',
             )}
             data-bar-fill={signal.signalKey}
+            data-bar-width={barWidth}
             style={{
               width: barWidth,
               ['--signal-bar-target-width' as string]: barWidth,
@@ -346,6 +353,41 @@ export function DomainSignalRing({
           ) : null}
         </div>
 
+        <div className="space-y-3.5">
+          {signals.length > 0 ? (
+            <ol className="space-y-3">
+              {signals.map((signal, index) => {
+                const signalState = getSignalState({
+                  signalKey: signal.signalKey,
+                  selectedSignalKey,
+                  highlightedSignalKey,
+                });
+
+                return (
+                  <SignalBarRow
+                    key={signal.signalKey}
+                    signal={signal}
+                    index={index}
+                    signalState={signalState}
+                    isSelected={selectedSignalKey === signal.signalKey}
+                    onSelect={(signalKey) => {
+                      setSelectedSignalKey((currentSignalKey) =>
+                        selectDomainSignalRingSignal(domain, currentSignalKey, signalKey));
+                    }}
+                    onHighlight={(signalKey) => setHighlightedSignalKey(signalKey)}
+                    onClearHighlight={(signalKey) => setHighlightedSignalKey((currentSignalKey) =>
+                      currentSignalKey === signalKey ? null : currentSignalKey)}
+                  />
+                );
+              })}
+            </ol>
+          ) : (
+            <div className="rounded-[1.1rem] border border-dashed border-white/10 bg-white/[0.03] px-4 py-5 text-[0.92rem] leading-7 text-white/48">
+              No signal balance is available for this area yet.
+            </div>
+          )}
+        </div>
+
         {activeSignal ? (
           <div
             className={cn(
@@ -389,41 +431,6 @@ export function DomainSignalRing({
             <p className="text-[0.82rem] leading-6 text-white/46">No signal reading is available for this area yet.</p>
           </div>
         )}
-
-        <div className="space-y-3.5">
-          {signals.length > 0 ? (
-            <ol className="space-y-3">
-              {signals.map((signal, index) => {
-                const signalState = getSignalState({
-                  signalKey: signal.signalKey,
-                  selectedSignalKey,
-                  highlightedSignalKey,
-                });
-
-                return (
-                  <SignalBarRow
-                    key={signal.signalKey}
-                    signal={signal}
-                    index={index}
-                    signalState={signalState}
-                    isSelected={selectedSignalKey === signal.signalKey}
-                    onSelect={(signalKey) => {
-                      setSelectedSignalKey((currentSignalKey) =>
-                        selectDomainSignalRingSignal(domain, currentSignalKey, signalKey));
-                    }}
-                    onHighlight={(signalKey) => setHighlightedSignalKey(signalKey)}
-                    onClearHighlight={(signalKey) => setHighlightedSignalKey((currentSignalKey) =>
-                      currentSignalKey === signalKey ? null : currentSignalKey)}
-                  />
-                );
-              })}
-            </ol>
-          ) : (
-            <div className="rounded-[1.1rem] border border-dashed border-white/10 bg-white/[0.03] px-4 py-5 text-[0.92rem] leading-7 text-white/48">
-              No signal balance is available for this area yet.
-            </div>
-          )}
-        </div>
       </div>
     </section>
   );
