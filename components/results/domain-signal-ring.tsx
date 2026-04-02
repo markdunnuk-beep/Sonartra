@@ -356,20 +356,20 @@ export function DomainSignalRing({
         <div className="space-y-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">Domain Ring</p>
           <div className="space-y-2">
-            <h3 className="text-[1.42rem] font-semibold tracking-[-0.04em] text-white">{domain.domainLabel}</h3>
+            <h3 className="text-[1.2rem] font-semibold tracking-[-0.04em] text-white sm:text-[1.32rem]">{domain.domainLabel}</h3>
             {domain.domainSummary ? (
-              <p className="max-w-[34rem] text-[0.95rem] leading-7 text-white/60">{domain.domainSummary}</p>
+              <p className="max-w-[32rem] text-[0.92rem] leading-7 text-white/60 sm:text-[0.95rem]">{domain.domainSummary}</p>
             ) : null}
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:items-start">
-          <div className="mx-auto flex w-full max-w-[18rem] flex-col items-center gap-4">
+        <div className="grid gap-5 md:gap-6 lg:grid-cols-[minmax(0,16.5rem)_minmax(0,1fr)] lg:items-start">
+          <div className="mx-auto flex w-full max-w-[16.5rem] flex-col items-center gap-3.5 sm:max-w-[17rem] md:max-w-[18rem] md:gap-4">
             <svg
               viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
               role="img"
               aria-label={`${domain.domainLabel} ring with ${signals.length} signals`}
-              className="h-auto w-full max-w-[15.5rem]"
+              className="h-auto w-full max-w-[14.25rem] sm:max-w-[15rem] md:max-w-[15.5rem]"
             >
               <circle
                 cx={VIEWBOX_CENTER}
@@ -491,15 +491,15 @@ export function DomainSignalRing({
             </svg>
 
             <div
-              className="w-full rounded-[1.1rem] border border-white/10 bg-white/[0.03] px-4 py-3"
+              className="w-full rounded-[1.1rem] border border-white/10 bg-white/[0.03] px-3.5 py-3 sm:px-4"
               aria-live="polite"
               data-active-detail-key={activeSignal?.signalKey ?? ''}
             >
               {activeSignal ? (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[0.96rem] font-semibold tracking-[-0.02em] text-white">{activeSignal.signalLabel}</p>
+                  <div className="flex flex-wrap items-center justify-between gap-2.5">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <p className="truncate text-[0.93rem] font-semibold tracking-[-0.02em] text-white sm:text-[0.96rem]">{activeSignal.signalLabel}</p>
                       {activeSignal.isTopSignal ? (
                         <span className="inline-flex rounded-full border border-white/22 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
                           Top
@@ -510,9 +510,9 @@ export function DomainSignalRing({
                         </span>
                       ) : null}
                     </div>
-                    <p className="text-[1rem] font-semibold tracking-[-0.03em] text-white/88">{formatPercent(activeSignal.scorePercent)}</p>
+                    <p className="text-[0.96rem] font-semibold tracking-[-0.03em] text-white/88 sm:text-[1rem]">{formatPercent(activeSignal.scorePercent)}</p>
                   </div>
-                  <p className="text-[0.78rem] leading-6 text-white/46">
+                  <p className="text-[0.76rem] leading-6 text-white/46 sm:text-[0.78rem]">
                     Active signal detail is available through hover, focus, or selection. Tap or press Enter/Space to keep a signal active.
                   </p>
                 </div>
@@ -521,7 +521,7 @@ export function DomainSignalRing({
               )}
             </div>
 
-            <p className="text-center text-[0.78rem] leading-6 text-white/42">
+            <p className="text-center text-[0.76rem] leading-6 text-white/42 sm:text-[0.78rem]">
               Equal-angle segments preserve authored order. Radial depth indicates relative signal strength.
             </p>
           </div>

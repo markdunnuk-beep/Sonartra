@@ -138,10 +138,29 @@ function getPersistedDomainInterpretation(domain: AssessmentResultDomainViewMode
   }
 
   return {
-    summary: 'Interpretation is not available in this persisted result.',
+    summary: 'A domain reading is not available for this area yet.',
     support: null,
     tension: null,
   };
+}
+
+function buildResultDetailDomainItems(params: {
+  domains: readonly AssessmentResultDomainViewModel[];
+  ringModels: readonly DomainSignalRingViewModel[];
+}): readonly {
+  domain: AssessmentResultDomainViewModel;
+  ringModel: DomainSignalRingViewModel | null;
+}[] {
+  const ringModelsByDomainKey = new Map(
+    params.ringModels.map((ringModel) => [ringModel.domainKey, ringModel]),
+  );
+
+  // Persisted domain order is still the rendering contract. Matching by key hardens the adapter
+  // without introducing a second domain definition source in the UI layer.
+  return params.domains.map((domain, index) => ({
+    domain,
+    ringModel: ringModelsByDomainKey.get(domain.domainKey) ?? params.ringModels[index] ?? null,
+  }));
 }
 
 function getDomainSignalContext(
@@ -263,7 +282,7 @@ function DomainChapter({
           {ringModel ? (
             <DomainSignalRing
               domain={ringModel}
-              className="max-w-[46rem] border-white/8 bg-[linear-gradient(180deg,rgba(12,19,33,0.68),rgba(8,12,24,0.9))] p-5 sm:p-6"
+              className="max-w-[42rem] border-white/8 bg-[linear-gradient(180deg,rgba(12,19,33,0.68),rgba(8,12,24,0.9))] p-4 sm:p-5 md:max-w-[44rem]"
             />
           ) : null}
 
@@ -353,10 +372,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const domainRingModels = buildDomainSignalRingViewModel({
     domainSummaries: resultDomains,
   });
-  const resultDomainItems = resultDomains.map((domain, index) => ({
-    domain,
-    ringModel: domainRingModels[index] ?? null,
-  }));
+  const resultDomainItems = buildResultDetailDomainItems({
+    domains: resultDomains,
+    ringModels: domainRingModels,
+  });
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   const heroHeading = getHeroHeading(result);
   const heroSupport = getHeroSupport(result);

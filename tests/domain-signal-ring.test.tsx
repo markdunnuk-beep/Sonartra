@@ -59,6 +59,7 @@ test('domain signal ring renders the domain label from props', () => {
   assert.match(markup, /Adaptive Patterns/);
   assert.match(markup, /A calm editorial summary for the domain\./);
   assert.match(markup, /domain-signal-ring-enter/);
+  assert.match(markup, /max-w-\[14\.25rem\]/);
 });
 
 test('domain signal ring renders the correct number of signal segments from input length', () => {
@@ -108,6 +109,7 @@ test('domain signal ring renders the active detail treatment for the selected si
   assert.match(markup, /data-active-detail-key="signal_c"/);
   assert.match(markup, /Signal C/);
   assert.match(markup, /72%/);
+  assert.match(markup, /Tap or press Enter\/Space to keep a signal active\./);
 });
 
 test('domain signal ring handles empty signals without crashing', () => {

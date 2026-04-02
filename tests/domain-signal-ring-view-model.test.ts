@@ -247,6 +247,23 @@ test('domain signal ring mapper handles missing and partial signal score data sa
   assert.equal(rings[1]?.topSignalKey, null);
 });
 
+test('domain signal ring mapper supplies calm generic fallbacks for missing domain and signal labels', () => {
+  const rings = buildDomainSignalRingViewModel({
+    domainSummaries: Object.freeze([
+      {
+        signalScores: Object.freeze([
+          {
+            normalizedValue: 42,
+          },
+        ]),
+      } as never,
+    ]),
+  });
+
+  assert.equal(rings[0]?.domainLabel, 'Domain 1');
+  assert.equal(rings[0]?.signals[0]?.signalLabel, 'Signal 1');
+});
+
 test('domain signal ring mapper does not depend on Sonartra-specific labels and supports non-standard signal counts', () => {
   const rings = buildDomainSignalRingViewModel(
     buildPayload(

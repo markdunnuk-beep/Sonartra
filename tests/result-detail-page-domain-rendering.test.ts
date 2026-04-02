@@ -219,7 +219,9 @@ test('result detail page no longer contains fixed WPLP intelligence domain order
   assert.doesNotMatch(source, /Six Intelligence Areas/);
   assert.match(source, /getResultDetailDomains\(result\)/);
   assert.match(source, /buildDomainSignalRingViewModel\(\{/);
-  assert.match(source, /const resultDomainItems = resultDomains\.map\(\(domain, index\) => \(\{/);
+  assert.match(source, /function buildResultDetailDomainItems\(/);
+  assert.match(source, /ringModelsByDomainKey/);
+  assert.match(source, /ringModelsByDomainKey\.get\(domain\.domainKey\) \?\? params\.ringModels\[index\] \?\? null/);
   assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
   assert.match(source, /domainItems\.map\(\(\{ domain, ringModel \}\) =>/);
 });
@@ -303,6 +305,7 @@ test('result detail domain chapters keep rendering stable even when a persisted 
 
   assert.match(source, /ringModel \? \(/);
   assert.match(source, /No persisted domain signals are available for this area\./);
+  assert.match(source, /A domain reading is not available for this area yet\./);
   assert.doesNotMatch(source, /throw new Error\(.+ring/i);
 });
 
@@ -333,6 +336,7 @@ test('result detail page uses tightened responsive spacing and reading widths fo
   assert.match(source, /className="space-y-7"/);
   assert.match(source, /md:grid-cols-\[minmax\(0,12rem\)_minmax\(0,1fr\)\]/);
   assert.match(source, /max-w-\[40rem\] text-\[0\.92rem\] leading-7 text-white\/50/);
+  assert.match(source, /max-w-\[42rem\] border-white\/8 bg-\[linear-gradient\(180deg,rgba\(12,19,33,0\.68\),rgba\(8,12,24,0\.9\)\)\] p-4 sm:p-5 md:max-w-\[44rem\]/);
   assert.match(source, /text-\[1\.32rem\] font-semibold tracking-\[-0\.03em\] text-white md:text-\[1\.45rem\]/);
   assert.doesNotMatch(source, /<SurfaceCard\s+accent/);
   assert.doesNotMatch(source, /rounded-\[2rem\] bg-\[radial-gradient\(circle_at_top_left,rgba\(118,147,255,0\.16\),transparent_32%\),linear-gradient\(180deg,rgba\(16,26,44,0\.92\),rgba\(9,15,28,0\.98\)\)\] px-6 py-7 sm:px-7 sm:py-8 md:px-10 md:py-12/);
