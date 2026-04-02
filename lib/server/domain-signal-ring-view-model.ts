@@ -11,7 +11,7 @@ export type DomainSignalRingDisplayStrength = {
 export type DomainSignalRingEntryViewModel = {
   signalKey: string;
   signalLabel: string;
-  scorePercent: number | null;
+  withinDomainPercent: number | null;
   displayStrength: number;
   rankWithinDomain: number | null;
   isTopSignal: boolean;
@@ -25,22 +25,27 @@ export type DomainSignalRingViewModel = {
   signals: readonly DomainSignalRingEntryViewModel[];
   signalCount: number;
   topSignalKey: string | null;
-  maxSignalPercent: number | null;
-  minSignalPercent: number | null;
+  maxWithinDomainPercent: number | null;
+  minWithinDomainPercent: number | null;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function getDisplayPercent(signal: unknown): number | null {
+function getSignalRankingValue(signal: unknown): number | null {
   if (!isRecord(signal)) {
     return null;
   }
 
-  const percentage = signal.percentage;
-  if (typeof percentage === 'number' && Number.isFinite(percentage)) {
-    return percentage;
+  const domainPercentage = signal.domainPercentage;
+  if (typeof domainPercentage === 'number' && Number.isFinite(domainPercentage)) {
+    return domainPercentage;
+  }
+
+  const rawTotal = signal.rawTotal;
+  if (typeof rawTotal === 'number' && Number.isFinite(rawTotal)) {
+    return rawTotal;
   }
 
   const normalizedValue = signal.normalizedValue;
@@ -48,7 +53,40 @@ function getDisplayPercent(signal: unknown): number | null {
     return normalizedValue;
   }
 
+  const percentage = signal.percentage;
+  if (typeof percentage === 'number' && Number.isFinite(percentage)) {
+    return percentage;
+  }
+
   return null;
+}
+
+function getWithinDomainBasisValue(signal: unknown): number {
+  if (!isRecord(signal)) {
+    return 0;
+  }
+
+  const domainPercentage = signal.domainPercentage;
+  if (typeof domainPercentage === 'number' && Number.isFinite(domainPercentage) && domainPercentage > 0) {
+    return domainPercentage;
+  }
+
+  const rawTotal = signal.rawTotal;
+  if (typeof rawTotal === 'number' && Number.isFinite(rawTotal) && rawTotal > 0) {
+    return rawTotal;
+  }
+
+  const normalizedValue = signal.normalizedValue;
+  if (typeof normalizedValue === 'number' && Number.isFinite(normalizedValue) && normalizedValue > 0) {
+    return normalizedValue;
+  }
+
+  const percentage = signal.percentage;
+  if (typeof percentage === 'number' && Number.isFinite(percentage) && percentage > 0) {
+    return percentage;
+  }
+
+  return 0;
 }
 
 function getSignalKey(signal: unknown, index: number): string {
@@ -87,29 +125,64 @@ function rankSignals(signalScores: readonly unknown[]): ReadonlyMap<number, numb
   const ranked = signalScores
     .map((signal, index) => ({
       index,
-      scorePercent: getDisplayPercent(signal),
+      scoreValue: getSignalRankingValue(signal),
     }))
-    .filter((signal): signal is { index: number; scorePercent: number } => signal.scorePercent !== null)
-    .sort((left, right) => right.scorePercent - left.scorePercent || left.index - right.index);
+    .filter((signal): signal is { index: number; scoreValue: number } => signal.scoreValue !== null)
+    .sort((left, right) => right.scoreValue - left.scoreValue || left.index - right.index);
 
   return new Map(ranked.map((signal, index) => [signal.index, index + 1]));
+}
+
+function normalizeWithinDomainPercents(signalScores: readonly unknown[]): readonly (number | null)[] {
+  const basisValues = signalScores.map((signal) => getWithinDomainBasisValue(signal));
+  const total = basisValues.reduce((sum, value) => sum + value, 0);
+
+  if (!(total > 0)) {
+    return Object.freeze(signalScores.map(() => null));
+  }
+
+  const entries = basisValues.map((value, index) => {
+    const exactPercent = (value / total) * 100;
+    const basePercent = Math.floor(exactPercent);
+
+    return {
+      index,
+      basePercent,
+      remainder: exactPercent - basePercent,
+    };
+  });
+
+  let remaining = 100 - entries.reduce((sum, entry) => sum + entry.basePercent, 0);
+  entries.sort((left, right) => right.remainder - left.remainder || left.index - right.index);
+
+  for (let index = 0; index < entries.length && remaining > 0; index += 1) {
+    entries[index]!.basePercent += 1;
+    remaining -= 1;
+  }
+
+  const normalized = Array<number | null>(signalScores.length).fill(null);
+  for (const entry of entries) {
+    normalized[entry.index] = entry.basePercent;
+  }
+
+  return Object.freeze(normalized);
 }
 
 function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknown>, domainIndex: number): DomainSignalRingViewModel {
   const signalScores = Array.isArray(domain.signalScores) ? domain.signalScores : [];
   const ranksByIndex = rankSignals(signalScores);
+  const withinDomainPercents = normalizeWithinDomainPercents(signalScores);
   const rankedEntries = [...ranksByIndex.entries()].sort((left, right) => left[1] - right[1]);
   const topSignalIndex = rankedEntries[0]?.[0] ?? null;
   const secondSignalIndex = rankedEntries[1]?.[0] ?? null;
-  const numericPercents = signalScores
-    .map((signal) => getDisplayPercent(signal))
+  const numericPercents = withinDomainPercents
     .filter((percent): percent is number => percent !== null);
 
   const signals = signalScores.map((signal, index) => ({
     signalKey: getSignalKey(signal, index),
     signalLabel: getSignalLabel(signal, index),
-    scorePercent: getDisplayPercent(signal),
-    displayStrength: computeSignalDisplayStrength(getDisplayPercent(signal)).displayStrength,
+    withinDomainPercent: withinDomainPercents[index] ?? null,
+    displayStrength: computeSignalDisplayStrength(withinDomainPercents[index] ?? null).displayStrength,
     rankWithinDomain: ranksByIndex.get(index) ?? null,
     isTopSignal: index === topSignalIndex,
     isSecondSignal: index === secondSignalIndex,
@@ -128,8 +201,8 @@ function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknow
     signals: Object.freeze(signals),
     signalCount: signals.length,
     topSignalKey: topSignalIndex === null ? null : signals[topSignalIndex]?.signalKey ?? null,
-    maxSignalPercent: numericPercents.length > 0 ? Math.max(...numericPercents) : null,
-    minSignalPercent: numericPercents.length > 0 ? Math.min(...numericPercents) : null,
+    maxWithinDomainPercent: numericPercents.length > 0 ? Math.max(...numericPercents) : null,
+    minWithinDomainPercent: numericPercents.length > 0 ? Math.min(...numericPercents) : null,
   };
 }
 

@@ -248,7 +248,7 @@ function SignalLegendButton({
                   : 'border-white/8 bg-white/[0.035] hover:border-white/14 hover:bg-white/[0.05]',
         )}
         aria-pressed={isSelected}
-        aria-label={`${signal.signalLabel}, ${formatPercent(signal.scorePercent)}${signal.isTopSignal ? ', top signal' : signal.isSecondSignal ? ', second signal' : ''}`}
+        aria-label={`${signal.signalLabel}, ${formatPercent(signal.withinDomainPercent)}${signal.isTopSignal ? ', top signal' : signal.isSecondSignal ? ', second signal' : ''}`}
         data-signal-state={signalState}
         onClick={() => onSelect(signal.signalKey)}
         onFocus={() => onHighlight(signal.signalKey)}
@@ -264,8 +264,8 @@ function SignalLegendButton({
               signals: [signal],
               signalCount: 1,
               topSignalKey: signal.signalKey,
-              maxSignalPercent: signal.scorePercent,
-              minSignalPercent: signal.scorePercent,
+              maxWithinDomainPercent: signal.withinDomainPercent,
+              minWithinDomainPercent: signal.withinDomainPercent,
             },
             currentSignalKey: isSelected ? signal.signalKey : null,
             requestedSignalKey: signal.signalKey,
@@ -311,7 +311,7 @@ function SignalLegendButton({
               signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : 'text-white/86',
             )}
           >
-            {formatPercent(signal.scorePercent)}
+            {formatPercent(signal.withinDomainPercent)}
           </p>
           <p className="text-[0.75rem] uppercase tracking-[0.18em] text-white/38">Strength</p>
         </div>
@@ -407,7 +407,7 @@ export function DomainSignalRing({
                       })}
                       role="button"
                       tabIndex={0}
-                      aria-label={`${signal.signalLabel}, ${formatPercent(signal.scorePercent)}${signal.isTopSignal ? ', top signal' : signal.isSecondSignal ? ', second signal' : ''}`}
+                      aria-label={`${signal.signalLabel}, ${formatPercent(signal.withinDomainPercent)}${signal.isTopSignal ? ', top signal' : signal.isSecondSignal ? ', second signal' : ''}`}
                       aria-pressed={selectedSignalKey === signal.signalKey}
                       className={cn(
                         'domain-signal-ring-segment cursor-pointer origin-center transition duration-200 ease-out focus:outline-none',
@@ -510,7 +510,7 @@ export function DomainSignalRing({
                         </span>
                       ) : null}
                     </div>
-                    <p className="text-[0.96rem] font-semibold tracking-[-0.03em] text-white/88 sm:text-[1rem]">{formatPercent(activeSignal.scorePercent)}</p>
+                    <p className="text-[0.96rem] font-semibold tracking-[-0.03em] text-white/88 sm:text-[1rem]">{formatPercent(activeSignal.withinDomainPercent)}</p>
                   </div>
                   <p className="text-[0.76rem] leading-6 text-white/46 sm:text-[0.78rem]">
                     Active signal detail is available through hover, focus, or selection. Tap or press Enter/Space to keep a signal active.

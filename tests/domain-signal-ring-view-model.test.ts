@@ -131,11 +131,102 @@ test('domain signal ring mapper preserves authored signal order while deriving t
     'first_by_score',
     'third_by_score',
   ]);
+  assert.deepEqual(rings[0]?.signals.map((signal) => signal.withinDomainPercent), [22, 45, 33]);
   assert.equal(rings[0]?.signals[1]?.isTopSignal, true);
   assert.equal(rings[0]?.signals[2]?.isSecondSignal, true);
   assert.equal(rings[0]?.topSignalKey, 'first_by_score');
   assert.equal(rings[0]?.domainSummary, 'Custom summary.');
-  assert.equal(rings[0]?.signals[1]?.displayStrength, 0.84);
+  assert.equal(rings[0]?.signals[1]?.displayStrength, 0.56);
+});
+
+test('domain signal ring mapper computes within-domain percentages that sum to 100', () => {
+  const rings = buildDomainSignalRingViewModel(
+    buildPayload(
+      Object.freeze([
+        {
+          domainId: 'domain-1',
+          domainKey: 'balanced_domain',
+          domainTitle: 'Balanced Domain',
+          domainSource: 'signal_group',
+          rawTotal: 20,
+          normalizedValue: 100,
+          percentage: 100,
+          signalScores: Object.freeze([
+            {
+              signalId: 'signal-1',
+              signalKey: 'alpha',
+              signalTitle: 'Alpha',
+              domainId: 'domain-1',
+              domainKey: 'balanced_domain',
+              domainSource: 'signal_group',
+              isOverlay: false,
+              overlayType: 'none',
+              rawTotal: 4,
+              normalizedValue: 90,
+              percentage: 90,
+              domainPercentage: 90,
+              rank: 1,
+            },
+            {
+              signalId: 'signal-2',
+              signalKey: 'beta',
+              signalTitle: 'Beta',
+              domainId: 'domain-1',
+              domainKey: 'balanced_domain',
+              domainSource: 'signal_group',
+              isOverlay: false,
+              overlayType: 'none',
+              rawTotal: 3,
+              normalizedValue: 70,
+              percentage: 70,
+              domainPercentage: 70,
+              rank: 2,
+            },
+            {
+              signalId: 'signal-3',
+              signalKey: 'gamma',
+              signalTitle: 'Gamma',
+              domainId: 'domain-1',
+              domainKey: 'balanced_domain',
+              domainSource: 'signal_group',
+              isOverlay: false,
+              overlayType: 'none',
+              rawTotal: 2,
+              normalizedValue: 50,
+              percentage: 50,
+              domainPercentage: 50,
+              rank: 3,
+            },
+            {
+              signalId: 'signal-4',
+              signalKey: 'delta',
+              signalTitle: 'Delta',
+              domainId: 'domain-1',
+              domainKey: 'balanced_domain',
+              domainSource: 'signal_group',
+              isOverlay: false,
+              overlayType: 'none',
+              rawTotal: 1,
+              normalizedValue: 30,
+              percentage: 30,
+              domainPercentage: 30,
+              rank: 4,
+            },
+          ]),
+          signalCount: 4,
+          answeredQuestionCount: 1,
+          rankedSignalIds: Object.freeze(['signal-1', 'signal-2', 'signal-3', 'signal-4']),
+          interpretation: null,
+        },
+      ]),
+    ),
+  );
+
+  const percentSum = rings[0]?.signals.reduce((sum, signal) => sum + (signal.withinDomainPercent ?? 0), 0);
+
+  assert.equal(percentSum, 100);
+  assert.equal(rings[0]?.maxWithinDomainPercent, 38);
+  assert.equal(rings[0]?.minWithinDomainPercent, 12);
 });
 
 test('domain signal ring mapper handles equal scores deterministically by authored order', () => {
@@ -236,15 +327,49 @@ test('domain signal ring mapper handles missing and partial signal score data sa
     ]),
   });
 
-  assert.equal(rings[0]?.signals[0]?.scorePercent, null);
+  assert.equal(rings[0]?.signals[0]?.withinDomainPercent, 0);
   assert.equal(rings[0]?.signals[0]?.displayStrength, 0.2);
   assert.equal(rings[0]?.signals[0]?.rankWithinDomain, null);
-  assert.equal(rings[0]?.signals[1]?.scorePercent, 55);
-  assert.equal(rings[0]?.signals[1]?.displayStrength, 0.64);
+  assert.equal(rings[0]?.signals[1]?.withinDomainPercent, 100);
+  assert.equal(rings[0]?.signals[1]?.displayStrength, 1);
   assert.equal(rings[0]?.signals[1]?.isTopSignal, true);
   assert.deepEqual(rings[1]?.signals, []);
   assert.equal(rings[1]?.signalCount, 0);
   assert.equal(rings[1]?.topSignalKey, null);
+});
+
+test('domain signal ring mapper handles zero-total domain data safely', () => {
+  const rings = buildDomainSignalRingViewModel({
+    domainSummaries: Object.freeze([
+      {
+        domainKey: 'zero_total',
+        domainTitle: 'Zero Total',
+        signalScores: Object.freeze([
+          {
+            signalKey: 'first',
+            signalTitle: 'First',
+            rawTotal: 0,
+            normalizedValue: 0,
+            percentage: 0,
+            domainPercentage: 0,
+          },
+          {
+            signalKey: 'second',
+            signalTitle: 'Second',
+            rawTotal: 0,
+            normalizedValue: 0,
+            percentage: 0,
+            domainPercentage: 0,
+          },
+        ]),
+      } as never,
+    ]),
+  });
+
+  assert.deepEqual(rings[0]?.signals.map((signal) => signal.withinDomainPercent), [null, null]);
+  assert.deepEqual(rings[0]?.signals.map((signal) => signal.displayStrength), [0.2, 0.2]);
+  assert.equal(rings[0]?.maxWithinDomainPercent, null);
+  assert.equal(rings[0]?.minWithinDomainPercent, null);
 });
 
 test('domain signal ring mapper supplies calm generic fallbacks for missing domain and signal labels', () => {
@@ -365,8 +490,8 @@ test('domain signal ring mapper does not depend on Sonartra-specific labels and 
   assert.equal(rings[0]?.domainKey, 'orbital_patterns');
   assert.equal(rings[0]?.domainLabel, 'Orbital Patterns');
   assert.equal(rings[0]?.signalCount, 5);
-  assert.equal(rings[0]?.maxSignalPercent, 90);
-  assert.equal(rings[0]?.minSignalPercent, 10);
+  assert.equal(rings[0]?.maxWithinDomainPercent, 36);
+  assert.equal(rings[0]?.minWithinDomainPercent, 4);
 });
 
 test('display strength helper clamps and scales persisted scores without engine recalculation', () => {

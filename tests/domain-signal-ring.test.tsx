@@ -20,7 +20,7 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
       {
         signalKey: 'signal_b',
         signalLabel: 'Signal B',
-        scorePercent: 44,
+        withinDomainPercent: 22,
         displayStrength: 0.552,
         rankWithinDomain: 3,
         isTopSignal: false,
@@ -29,7 +29,7 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
       {
         signalKey: 'signal_a',
         signalLabel: 'Signal A',
-        scorePercent: 88,
+        withinDomainPercent: 44,
         displayStrength: 0.904,
         rankWithinDomain: 1,
         isTopSignal: true,
@@ -38,7 +38,7 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
       {
         signalKey: 'signal_c',
         signalLabel: 'Signal C',
-        scorePercent: 72,
+        withinDomainPercent: 34,
         displayStrength: 0.776,
         rankWithinDomain: 2,
         isTopSignal: false,
@@ -47,8 +47,8 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
     ]),
     signalCount: 3,
     topSignalKey: 'signal_a',
-    maxSignalPercent: 88,
-    minSignalPercent: 44,
+    maxWithinDomainPercent: 44,
+    minWithinDomainPercent: 22,
     ...overrides,
   };
 }
@@ -108,7 +108,7 @@ test('domain signal ring renders the active detail treatment for the selected si
 
   assert.match(markup, /data-active-detail-key="signal_c"/);
   assert.match(markup, /Signal C/);
-  assert.match(markup, /72%/);
+  assert.match(markup, /34%/);
   assert.match(markup, /Tap or press Enter\/Space to keep a signal active\./);
 });
 
@@ -119,8 +119,8 @@ test('domain signal ring handles empty signals without crashing', () => {
         signals: Object.freeze([]),
         signalCount: 0,
         topSignalKey: null,
-        maxSignalPercent: null,
-        minSignalPercent: null,
+        maxWithinDomainPercent: null,
+        minWithinDomainPercent: null,
       })}
     />,
   );
@@ -137,7 +137,7 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'northbound',
             signalLabel: 'Northbound',
-            scorePercent: 92,
+            withinDomainPercent: 36,
             displayStrength: 0.936,
             rankWithinDomain: 1,
             isTopSignal: true,
@@ -146,7 +146,7 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'eastbound',
             signalLabel: 'Eastbound',
-            scorePercent: 77,
+            withinDomainPercent: 28,
             displayStrength: 0.816,
             rankWithinDomain: 2,
             isTopSignal: false,
@@ -155,7 +155,7 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'southbound',
             signalLabel: 'Southbound',
-            scorePercent: 55,
+            withinDomainPercent: 18,
             displayStrength: 0.64,
             rankWithinDomain: 3,
             isTopSignal: false,
@@ -164,7 +164,7 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'westbound',
             signalLabel: 'Westbound',
-            scorePercent: 38,
+            withinDomainPercent: 11,
             displayStrength: 0.504,
             rankWithinDomain: 4,
             isTopSignal: false,
@@ -173,7 +173,7 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'zenith',
             signalLabel: 'Zenith',
-            scorePercent: 21,
+            withinDomainPercent: 7,
             displayStrength: 0.368,
             rankWithinDomain: 5,
             isTopSignal: false,
@@ -182,8 +182,8 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
         ]),
         signalCount: 5,
         topSignalKey: 'northbound',
-        maxSignalPercent: 92,
-        minSignalPercent: 21,
+        maxWithinDomainPercent: 36,
+        minWithinDomainPercent: 7,
       })}
     />,
   );
