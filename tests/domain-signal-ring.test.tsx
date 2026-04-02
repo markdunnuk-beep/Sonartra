@@ -60,6 +60,7 @@ test('domain signal ring renders the domain label from props', () => {
   assert.match(markup, /A calm editorial summary for the domain\./);
   assert.match(markup, /domain-signal-ring-enter/);
   assert.match(markup, /max-w-\[14\.25rem\]/);
+  assert.doesNotMatch(markup, /Domain Ring/);
 });
 
 test('domain signal ring renders the correct number of signal segments from input length', () => {
@@ -109,7 +110,7 @@ test('domain signal ring renders the active detail treatment for the selected si
   assert.match(markup, /data-active-detail-key="signal_c"/);
   assert.match(markup, /Signal C/);
   assert.match(markup, /34%/);
-  assert.match(markup, /Tap or press Enter\/Space to keep a signal active\./);
+  assert.doesNotMatch(markup, /Tap or press Enter\/Space to keep a signal active\./);
 });
 
 test('domain signal ring handles empty signals without crashing', () => {
@@ -125,8 +126,21 @@ test('domain signal ring handles empty signals without crashing', () => {
     />,
   );
 
-  assert.match(markup, /No persisted signals are available for this domain yet\./);
+  assert.match(markup, /No signal balance is available for this area yet\./);
   assert.doesNotMatch(markup, /data-segment-index="/);
+});
+
+test('domain signal ring removes internal helper labels while keeping signal percentages visible', () => {
+  const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
+
+  assert.match(markup, /22%/);
+  assert.match(markup, /44%/);
+  assert.match(markup, /34%/);
+  assert.doesNotMatch(markup, /Authored position/);
+  assert.doesNotMatch(markup, /rank 1/);
+  assert.doesNotMatch(markup, /Strength/);
+  assert.doesNotMatch(markup, /Equal-angle segments preserve authored order/);
+  assert.doesNotMatch(markup, />Signals</);
 });
 
 test('domain signal ring handles non-4 signal counts without crashing', () => {

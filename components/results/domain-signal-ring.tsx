@@ -299,10 +299,6 @@ function SignalLegendButton({
               </span>
             ) : null}
           </div>
-          <p className="text-[0.82rem] leading-6 text-white/48">
-            Authored position {index + 1}
-            {signal.rankWithinDomain ? `, rank ${signal.rankWithinDomain}` : ''}
-          </p>
         </div>
         <div className="text-right">
           <p
@@ -313,7 +309,6 @@ function SignalLegendButton({
           >
             {formatPercent(signal.withinDomainPercent)}
           </p>
-          <p className="text-[0.75rem] uppercase tracking-[0.18em] text-white/38">Strength</p>
         </div>
       </button>
     </li>
@@ -354,7 +349,6 @@ export function DomainSignalRing({
 
       <div className="space-y-6">
         <div className="space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">Domain Ring</p>
           <div className="space-y-2">
             <h3 className="text-[1.2rem] font-semibold tracking-[-0.04em] text-white sm:text-[1.32rem]">{domain.domainLabel}</h3>
             {domain.domainSummary ? (
@@ -512,26 +506,14 @@ export function DomainSignalRing({
                     </div>
                     <p className="text-[0.96rem] font-semibold tracking-[-0.03em] text-white/88 sm:text-[1rem]">{formatPercent(activeSignal.withinDomainPercent)}</p>
                   </div>
-                  <p className="text-[0.76rem] leading-6 text-white/46 sm:text-[0.78rem]">
-                    Active signal detail is available through hover, focus, or selection. Tap or press Enter/Space to keep a signal active.
-                  </p>
                 </div>
               ) : (
-                <p className="text-[0.82rem] leading-6 text-white/46">No active signal is available for this domain yet.</p>
+                <p className="text-[0.82rem] leading-6 text-white/46">No signal reading is available for this area yet.</p>
               )}
             </div>
-
-            <p className="text-center text-[0.76rem] leading-6 text-white/42 sm:text-[0.78rem]">
-              Equal-angle segments preserve authored order. Radial depth indicates relative signal strength.
-            </p>
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">Signals</p>
-              <p className="text-[0.78rem] text-white/40">{domain.signalCount} total</p>
-            </div>
-
             {signals.length > 0 ? (
               <ol className="space-y-3">
                 {signals.map((signal, index) => {
@@ -561,7 +543,7 @@ export function DomainSignalRing({
               </ol>
             ) : (
               <div className="rounded-[1.1rem] border border-dashed border-white/10 bg-white/[0.03] px-4 py-5 text-[0.92rem] leading-7 text-white/48">
-                No persisted signals are available for this domain yet.
+                No signal balance is available for this area yet.
               </div>
             )}
           </div>
