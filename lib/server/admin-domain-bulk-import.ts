@@ -99,6 +99,32 @@ export async function executeDomainBulkImport(
   });
 }
 
+export async function previewDomainBulkImport(
+  command: DomainBulkImportCommand,
+): Promise<DomainBulkImportExecutionResult> {
+  return previewDomainBulkImportWithDependencies(command, {
+    db: getDbPool(),
+  });
+}
+
+export async function previewDomainBulkImportWithDependencies(
+  command: DomainBulkImportCommand,
+  dependencies: { db: Queryable },
+): Promise<DomainBulkImportExecutionResult> {
+  const preview = await buildDomainImportPreview(dependencies.db, command);
+  return buildExecutionResult({
+    assessmentVersionId: command.assessmentVersionId,
+    lifecycleStatus: preview.assessmentVersion?.lifecycleStatus ?? 'ARCHIVED',
+    canImport: preview.plan.canImport,
+    didImport: false,
+    created: [],
+    accepted: preview.plan.accepted,
+    rejected: preview.plan.rejected,
+    basedOn: preview.plan.summary.basedOn,
+    executionError: null,
+  });
+}
+
 export async function executeDomainBulkImportWithDependencies(
   command: DomainBulkImportCommand,
   dependencies: DomainBulkImportDependencies,
