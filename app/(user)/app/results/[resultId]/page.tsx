@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
+import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
+import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
+import { buildDomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 import type {
   AssessmentResultDetailViewModel,
   AssessmentResultDomainViewModel,
@@ -220,7 +223,13 @@ function ActionSection({
   );
 }
 
-function DomainChapter({ domain }: { domain: AssessmentResultDomainViewModel }) {
+function DomainChapter({
+  domain,
+  ringModel,
+}: {
+  domain: AssessmentResultDomainViewModel;
+  ringModel: DomainSignalRingViewModel | null;
+}) {
   const visibleSignals = domain.signalScores.slice(0, 2);
   const hiddenSignals = domain.signalScores.slice(2);
   const interpretation = getPersistedDomainInterpretation(domain);
@@ -249,6 +258,13 @@ function DomainChapter({ domain }: { domain: AssessmentResultDomainViewModel }) 
           ) : null}
           {interpretation.tension ? (
             <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/44">{interpretation.tension}</p>
+          ) : null}
+
+          {ringModel ? (
+            <DomainSignalRing
+              domain={ringModel}
+              className="max-w-[46rem] border-white/8 bg-[linear-gradient(180deg,rgba(12,19,33,0.68),rgba(8,12,24,0.9))] p-5 sm:p-6"
+            />
           ) : null}
 
           {signalContext ? (
@@ -288,11 +304,14 @@ function DomainChapter({ domain }: { domain: AssessmentResultDomainViewModel }) 
 }
 
 function DomainSection({
-  domains,
+  domainItems,
 }: {
-  domains: readonly AssessmentResultDomainViewModel[];
+  domainItems: readonly {
+    domain: AssessmentResultDomainViewModel;
+    ringModel: DomainSignalRingViewModel | null;
+  }[];
 }) {
-  if (domains.length === 0) {
+  if (domainItems.length === 0) {
     return (
       <SurfaceCard className="p-6 text-sm text-white/55">
         No persisted domain summaries are available for this result.
@@ -302,8 +321,8 @@ function DomainSection({
 
   return (
     <div className="mx-auto max-w-[58rem] space-y-12 md:space-y-14">
-      {domains.map((domain) => (
-        <DomainChapter key={domain.domainId} domain={domain} />
+      {domainItems.map(({ domain, ringModel }) => (
+        <DomainChapter key={domain.domainId} domain={domain} ringModel={ringModel} />
       ))}
     </div>
   );
@@ -331,6 +350,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   }
 
   const resultDomains = getResultDetailDomains(result);
+  const domainRingModels = buildDomainSignalRingViewModel({
+    domainSummaries: resultDomains,
+  });
+  const resultDomainItems = resultDomains.map((domain, index) => ({
+    domain,
+    ringModel: domainRingModels[index] ?? null,
+  }));
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   const heroHeading = getHeroHeading(result);
   const heroSupport = getHeroSupport(result);
@@ -386,7 +412,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
         />
 
-        <DomainSection domains={resultDomains} />
+        <DomainSection domainItems={resultDomainItems} />
       </section>
     </PageFrame>
   );

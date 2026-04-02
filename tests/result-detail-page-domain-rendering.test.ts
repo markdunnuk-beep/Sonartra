@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { buildDomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 import type { AssessmentResultDetailViewModel } from '@/lib/server/result-read-model-types';
 import { getResultDetailDomains } from '@/lib/server/result-detail-domain-view';
 
@@ -144,6 +145,72 @@ test('result detail domains tolerate an empty persisted collection', () => {
   assert.deepEqual(getResultDetailDomains(result), []);
 });
 
+test('result detail domain ring mapper preserves canonical payload order for arbitrary persisted domains', () => {
+  const result = buildResultDetail(
+    Object.freeze([
+      {
+        domainId: 'domain-z',
+        domainKey: 'zeta_custom',
+        domainTitle: 'Zeta Custom',
+        domainSource: 'signal_group',
+        rawTotal: 9,
+        normalizedValue: 45,
+        percentage: 45,
+        signalScores: Object.freeze([
+          {
+            signalId: 'signal-z-1',
+            signalKey: 'horizon',
+            signalTitle: 'Horizon',
+            domainId: 'domain-z',
+            domainKey: 'zeta_custom',
+            domainSource: 'signal_group' as const,
+            isOverlay: false,
+            overlayType: 'none' as const,
+            rawTotal: 8,
+            normalizedValue: 80,
+            percentage: 80,
+            domainPercentage: 80,
+            rank: 1,
+          },
+        ]),
+        signalCount: 1,
+        answeredQuestionCount: 3,
+        rankedSignalIds: Object.freeze(['signal-z-1']),
+        interpretation: {
+          domainKey: 'zeta_custom',
+          primarySignalKey: 'horizon',
+          primaryPercent: 80,
+          secondarySignalKey: null,
+          secondaryPercent: null,
+          summary: 'Zeta summary.',
+        },
+      },
+      {
+        domainId: 'domain-a',
+        domainKey: 'adaptive_focus',
+        domainTitle: 'Adaptive Focus',
+        domainSource: 'signal_group',
+        rawTotal: 11,
+        normalizedValue: 55,
+        percentage: 55,
+        signalScores: Object.freeze([]),
+        signalCount: 0,
+        answeredQuestionCount: 3,
+        rankedSignalIds: Object.freeze([]),
+        interpretation: null,
+      },
+    ]),
+  );
+
+  const ringModels = buildDomainSignalRingViewModel({
+    domainSummaries: getResultDetailDomains(result),
+  });
+
+  assert.deepEqual(ringModels.map((domain) => domain.domainKey), ['zeta_custom', 'adaptive_focus']);
+  assert.deepEqual(ringModels[0]?.signals.map((signal) => signal.signalKey), ['horizon']);
+  assert.deepEqual(ringModels[1]?.signals, []);
+});
+
 test('result detail page no longer contains fixed WPLP intelligence domain ordering', () => {
   const source = readFileSync(pagePath, 'utf8');
 
@@ -151,8 +218,10 @@ test('result detail page no longer contains fixed WPLP intelligence domain order
   assert.doesNotMatch(source, /INTELLIGENCE_DOMAIN_CONFIG/);
   assert.doesNotMatch(source, /Six Intelligence Areas/);
   assert.match(source, /getResultDetailDomains\(result\)/);
-  assert.match(source, /<DomainSection domains=\{resultDomains\} \/>/);
-  assert.match(source, /domains\.map\(\(domain\) =>/);
+  assert.match(source, /buildDomainSignalRingViewModel\(\{/);
+  assert.match(source, /const resultDomainItems = resultDomains\.map\(\(domain, index\) => \(\{/);
+  assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
+  assert.match(source, /domainItems\.map\(\(\{ domain, ringModel \}\) =>/);
 });
 
 test('result detail hero is narrative-first and no longer leads with derived signal interpretation copy', () => {
@@ -205,11 +274,14 @@ test('result detail domain section is summary-first and no longer emphasizes per
 
   assert.match(source, /title="Domain reading"/);
   assert.match(source, /The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report\./);
-  assert.match(source, /<DomainSection domains=\{resultDomains\} \/>/);
-  assert.match(source, /function DomainChapter\(\{ domain \}: \{ domain: AssessmentResultDomainViewModel \}\)/);
+  assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
+  assert.match(source, /function DomainChapter\(\{/);
+  assert.match(source, /ringModel: DomainSignalRingViewModel \| null;/);
   assert.match(source, /<SectionEyebrow>Domain<\/SectionEyebrow>/);
   assert.match(source, /const primarySignal = visibleSignals\[0\] \?\? null/);
   assert.match(source, /const signalContext = getDomainSignalContext\(primarySignal, secondarySignal\)/);
+  assert.match(source, /<DomainSignalRing/);
+  assert.match(source, /domain=\{ringModel\}/);
   assert.match(source, /mx-auto max-w-\[58rem\] space-y-12 md:space-y-14/);
   assert.match(source, /border-white\/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10/);
   assert.match(source, /max-w-\[44rem\] text-\[1rem\] leading-8 text-white\/68 md:text-\[1\.05rem\] md:leading-9/);
@@ -224,6 +296,14 @@ test('result detail domain section is summary-first and no longer emphasizes per
   assert.doesNotMatch(source, /The main reading journey/);
   assert.doesNotMatch(source, /These sections are rendered directly from the persisted result payload/);
   assert.doesNotMatch(source, /These chapters follow the persisted payload order/);
+});
+
+test('result detail domain chapters keep rendering stable even when a persisted domain has no ring signals', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /ringModel \? \(/);
+  assert.match(source, /No persisted domain signals are available for this area\./);
+  assert.doesNotMatch(source, /throw new Error\(.+ring/i);
 });
 
 test('result detail page removes the separate status bar and keeps the reading order narrative then actions then domains', () => {
