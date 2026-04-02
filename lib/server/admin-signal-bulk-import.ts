@@ -127,6 +127,28 @@ export async function executeSignalBulkImport(
   });
 }
 
+export async function previewSignalBulkImport(
+  command: SignalBulkImportCommand,
+): Promise<SignalBulkImportExecutionResult> {
+  const db = getDbPool();
+  const preview = await buildSignalImportPreview(db, command);
+
+  return buildExecutionResult({
+    assessmentVersionId: command.assessmentVersionId,
+    lifecycleStatus: preview.assessmentVersion?.lifecycleStatus ?? 'ARCHIVED',
+    canImport: preview.plan.canImport,
+    didImport: false,
+    created: [],
+    createdByDomain: [],
+    accepted: preview.plan.accepted,
+    acceptedByDomain: preview.plan.acceptedByDomain,
+    rejected: preview.plan.rejected,
+    basedOn: preview.plan.summary.basedOn,
+    perDomainCreateCounts: preview.plan.summary.perDomainCreateCounts,
+    executionError: null,
+  });
+}
+
 export async function executeSignalBulkImportWithDependencies(
   command: SignalBulkImportCommand,
   dependencies: SignalBulkImportDependencies,

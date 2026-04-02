@@ -10,6 +10,7 @@ import {
   SurfaceCard,
   cn,
 } from '@/components/shared/user-app-ui';
+import { AdminBulkSignalImport } from '@/components/admin/admin-bulk-signal-import';
 import { AdminBulkDomainImport } from '@/components/admin/admin-bulk-domain-import';
 import {
   emptyAdminAuthoringFormValues,
@@ -1029,6 +1030,14 @@ export function AdminDomainSignalAuthoring({
       {mode === 'domains' ? (
         <AdminBulkDomainImport
           assessmentVersionId={assessmentVersionId}
+          isEditableAssessmentVersion
+        />
+      ) : null}
+
+      {mode === 'signals' ? (
+        <AdminBulkSignalImport
+          assessmentVersionId={assessmentVersionId}
+          domains={domains}
           isEditableAssessmentVersion
         />
       ) : null}
