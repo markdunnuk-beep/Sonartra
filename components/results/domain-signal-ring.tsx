@@ -5,6 +5,27 @@ import { useState } from 'react';
 import { cn } from '@/components/shared/user-app-ui';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 
+const DOMAIN_SIGNAL_RING_CSS = `
+@keyframes domain-signal-bar-enter {
+  from {
+    width: 0;
+    opacity: 0.42;
+  }
+  to {
+    width: var(--signal-bar-target-width, 0%);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .domain-signal-ring-button,
+  .domain-signal-bar-fill {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+`;
+
 function formatPercent(value: number | null): string {
   return value === null ? 'N/A' : `${Math.round(value)}%`;
 }
@@ -161,6 +182,8 @@ function SignalBarRow({
   const barWidth = signal.withinDomainPercent === null
     ? '0%'
     : `${Math.min(100, Math.max(0, signal.withinDomainPercent))}%`;
+  const isHighlighted = signalState === 'highlighted';
+  const isSelectedState = signalState === 'selected';
 
   return (
     <li
@@ -171,16 +194,17 @@ function SignalBarRow({
       <button
         type="button"
         className={cn(
-          'domain-signal-ring-button flex w-full flex-col gap-3 rounded-[1.1rem] border px-4 py-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
-          signalState === 'selected'
-            ? 'border-white/18 bg-white/[0.085] shadow-[0_14px_36px_rgba(4,10,24,0.22)]'
-            : signalState === 'highlighted'
-              ? 'border-[#b7cbff]/28 bg-[#8eb1ff]/[0.08] shadow-[0_10px_26px_rgba(10,20,42,0.2)]'
+          'domain-signal-ring-button flex w-full flex-col gap-3 rounded-[1.1rem] border px-4 py-4 text-left transition duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
+          isSelectedState
+            ? 'border-white/18 bg-white/[0.09] shadow-[0_16px_38px_rgba(4,10,24,0.24)]'
+            : isHighlighted
+              ? 'border-[#b7cbff]/28 bg-[#8eb1ff]/[0.08] shadow-[0_12px_28px_rgba(10,20,42,0.22)]'
               : tone.rowClassName,
         )}
         aria-pressed={isSelected}
         aria-label={`${signal.signalLabel}, ${formatPercent(signal.withinDomainPercent)}${signal.isTopSignal ? ', top signal' : signal.isSecondSignal ? ', second signal' : ''}`}
         data-signal-state={signalState}
+        data-bar-state={signalState}
         onClick={() => onSelect(signal.signalKey)}
         onFocus={() => onHighlight(signal.signalKey)}
         onBlur={() => onClearHighlight(signal.signalKey)}
@@ -215,7 +239,7 @@ function SignalBarRow({
               <span
                 className={cn(
                   'min-w-0 flex-1 text-[0.97rem] font-medium leading-6 tracking-[-0.02em]',
-                  signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : tone.labelClassName,
+                  isSelectedState || isHighlighted ? 'text-white' : tone.labelClassName,
                   signal.isTopSignal ? 'font-semibold' : null,
                 )}
               >
@@ -238,7 +262,7 @@ function SignalBarRow({
             <p
               className={cn(
                 'text-[0.97rem] font-semibold tracking-[-0.02em] sm:text-[1rem]',
-                signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : tone.valueClassName,
+                isSelectedState || isHighlighted ? 'text-white' : tone.valueClassName,
               )}
             >
               {formatPercent(signal.withinDomainPercent)}
@@ -247,18 +271,34 @@ function SignalBarRow({
         </div>
 
         <div
-          className="h-3 w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.08)]"
+          className={cn(
+            'w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.08)] transition duration-200 ease-out',
+            isSelectedState ? 'h-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]' : isHighlighted ? 'h-[0.92rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.08)]' : 'h-3',
+          )}
           aria-hidden="true"
           data-bar-track="true"
         >
           <div
             className={cn(
-              'h-full rounded-full',
+              'domain-signal-bar-fill h-full rounded-full transition duration-200 ease-out',
               tone.fillClassName,
-              signalState === 'selected' ? 'opacity-100' : signalState === 'highlighted' ? 'opacity-95' : undefined,
+              isSelectedState
+                ? 'opacity-100 shadow-[0_0_18px_rgba(228,237,255,0.28)] brightness-[1.06]'
+                : isHighlighted
+                  ? 'opacity-100 shadow-[0_0_14px_rgba(157,186,255,0.2)] brightness-[1.03]'
+                  : signal.isTopSignal
+                    ? 'opacity-100'
+                    : signal.isSecondSignal
+                      ? 'opacity-92'
+                      : 'opacity-78',
             )}
             data-bar-fill={signal.signalKey}
-            style={{ width: barWidth }}
+            style={{
+              width: barWidth,
+              ['--signal-bar-target-width' as string]: barWidth,
+              animation: 'domain-signal-bar-enter 560ms cubic-bezier(0.22, 1, 0.36, 1) both',
+              animationDelay: `${index * 55}ms`,
+            }}
           />
         </div>
       </button>
@@ -296,6 +336,8 @@ export function DomainSignalRing({
       data-selected-signal-key={selectedSignalKey ?? ''}
       data-active-signal-key={activeSignal?.signalKey ?? ''}
     >
+      <style>{DOMAIN_SIGNAL_RING_CSS}</style>
+
       <div className="space-y-6">
         <div className="space-y-2">
           <h3 className="text-[1.2rem] font-semibold tracking-[-0.04em] text-white sm:text-[1.32rem]">{domain.domainLabel}</h3>

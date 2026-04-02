@@ -62,6 +62,7 @@ test('domain signal ring renders the domain label from props', () => {
   assert.match(markup, /Adaptive Patterns/);
   assert.match(markup, /A calm editorial summary for the domain\./);
   assert.match(markup, /aria-label="Adaptive Patterns signal bars"/);
+  assert.match(markup, /domain-signal-bar-enter/);
   assert.match(markup, /data-bar-track="true"/);
   assert.doesNotMatch(markup, /Domain Ring/);
 });
@@ -96,6 +97,7 @@ test('domain signal ring applies top and second emphasis hooks for bars and labe
   assert.match(markup, /data-signal-key="signal_c"/);
   assert.match(markup, /data-signal-emphasis="second"/);
   assert.match(markup, /data-signal-state="selected"/);
+  assert.match(markup, /data-bar-state="selected"/);
   assert.match(markup, /aria-pressed="true"/);
   assert.match(markup, />Top</);
   assert.match(markup, />2nd</);
@@ -105,11 +107,24 @@ test('domain signal ring bars reflect within-domain percentages through css widt
   const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
 
   assert.match(markup, /data-bar-fill="signal_b"/);
-  assert.match(markup, /style="width:22%"/);
+  assert.match(markup, /style="width:22%;/);
+  assert.match(markup, /--signal-bar-target-width:22%/);
   assert.match(markup, /data-bar-fill="signal_a"/);
-  assert.match(markup, /style="width:44%"/);
+  assert.match(markup, /style="width:44%;/);
+  assert.match(markup, /--signal-bar-target-width:44%/);
   assert.match(markup, /data-bar-fill="signal_c"/);
-  assert.match(markup, /style="width:34%"/);
+  assert.match(markup, /style="width:34%;/);
+  assert.match(markup, /--signal-bar-target-width:34%/);
+});
+
+test('domain signal ring exposes distinct entry and interaction hooks without distorting width', () => {
+  const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
+
+  assert.match(markup, /domain-signal-bar-fill h-full rounded-full transition duration-200 ease-out/);
+  assert.match(markup, /animation:domain-signal-bar-enter 560ms cubic-bezier\(0\.22, 1, 0\.36, 1\) both/);
+  assert.match(markup, /animation-delay:0ms/);
+  assert.match(markup, /animation-delay:55ms/);
+  assert.match(markup, /animation-delay:110ms/);
 });
 
 test('domain signal ring renders the active detail treatment for the selected signal', () => {
@@ -156,7 +171,23 @@ test('domain signal ring keeps signal labels and badges wrap-safe for narrow lay
 
   assert.match(markup, /flex w-full flex-col gap-3 rounded-\[1\.1rem\] border px-4 py-4 text-left/);
   assert.match(markup, /flex min-w-0 items-start justify-between gap-4/);
-  assert.match(markup, /h-3 w-full overflow-hidden rounded-full/);
+  assert.match(markup, /w-full overflow-hidden rounded-full bg-\[rgba\(255,255,255,0\.08\)\] transition duration-200 ease-out/);
+});
+
+test('domain signal ring distinguishes highlighted and selected bar states in markup hooks', () => {
+  const domain = buildDomain();
+
+  assert.equal(
+    resolveDomainSignalRingActiveSignal({
+      domain,
+      selectedSignalKey: 'signal_a',
+      highlightedSignalKey: 'signal_b',
+    })?.signalKey,
+    'signal_b',
+  );
+
+  const selectedMarkup = renderToStaticMarkup(<DomainSignalRing domain={domain} />);
+  assert.match(selectedMarkup, /data-signal-key="signal_a"[\s\S]*data-bar-state="selected"/);
 });
 
 test('domain signal ring handles empty signals without crashing', () => {
