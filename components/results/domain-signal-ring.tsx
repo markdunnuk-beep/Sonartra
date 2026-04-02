@@ -81,6 +81,10 @@ function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
   markerLabel: string | null;
   markerClassName: string;
   segmentOpacity: number;
+  segmentStrokeWidth: number;
+  labelClassName: string;
+  valueClassName: string;
+  detailAccentClassName: string;
 } {
   if (signal.isTopSignal) {
     return {
@@ -88,6 +92,10 @@ function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
       markerLabel: 'Top',
       markerClassName: 'border-white/25 bg-white/12 text-white',
       segmentOpacity: 1,
+      segmentStrokeWidth: 2.6,
+      labelClassName: 'text-white',
+      valueClassName: 'text-white',
+      detailAccentClassName: 'border-white/16 bg-white/[0.06]',
     };
   }
 
@@ -97,6 +105,10 @@ function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
       markerLabel: '2nd',
       markerClassName: 'border-[#8eb1ff]/35 bg-[#8eb1ff]/10 text-[#d9e5ff]',
       segmentOpacity: 0.92,
+      segmentStrokeWidth: 2.1,
+      labelClassName: 'text-white/92',
+      valueClassName: 'text-white/90',
+      detailAccentClassName: 'border-[#8eb1ff]/18 bg-[#8eb1ff]/[0.05]',
     };
   }
 
@@ -105,6 +117,10 @@ function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
     markerLabel: null,
     markerClassName: 'border-white/10 bg-white/5 text-white/58',
     segmentOpacity: 0.78,
+    segmentStrokeWidth: 1.55,
+    labelClassName: 'text-white/84',
+    valueClassName: 'text-white/82',
+    detailAccentClassName: 'border-white/10 bg-white/[0.03]',
   };
 }
 
@@ -242,9 +258,9 @@ function SignalLegendButton({
             : signalState === 'highlighted'
               ? 'border-[#b7cbff]/28 bg-[#8eb1ff]/[0.08] shadow-[0_10px_26px_rgba(10,20,42,0.2)]'
               : signal.isTopSignal
-                ? 'border-white/14 bg-white/[0.065] hover:border-white/22 hover:bg-white/[0.08]'
+                ? 'border-white/16 bg-white/[0.07] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] hover:border-white/24 hover:bg-white/[0.085]'
                 : signal.isSecondSignal
-                  ? 'border-[#8eb1ff]/18 bg-[#8eb1ff]/[0.055] hover:border-[#8eb1ff]/28 hover:bg-[#8eb1ff]/[0.08]'
+                  ? 'border-[#8eb1ff]/20 bg-[#8eb1ff]/[0.06] shadow-[inset_0_1px_0_rgba(180,206,255,0.06)] hover:border-[#8eb1ff]/28 hover:bg-[#8eb1ff]/[0.08]'
                   : 'border-white/8 bg-white/[0.035] hover:border-white/14 hover:bg-white/[0.05]',
         )}
         aria-pressed={isSelected}
@@ -281,9 +297,32 @@ function SignalLegendButton({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span
+              aria-hidden="true"
+              className={cn(
+                'h-8 w-1 rounded-full transition duration-200 ease-out',
+                signal.isTopSignal
+                  ? 'bg-white/80'
+                  : signal.isSecondSignal
+                    ? 'bg-[#b4cbff]/70'
+                    : 'bg-white/18',
+                signalState === 'selected'
+                  ? 'opacity-100'
+                  : signalState === 'highlighted'
+                    ? 'opacity-85'
+                    : signal.isTopSignal
+                      ? 'opacity-90'
+                      : signal.isSecondSignal
+                        ? 'opacity-70'
+                        : 'opacity-45',
+              )}
+            />
+            <span
               className={cn(
                 'text-[0.97rem] font-medium tracking-[-0.02em]',
-                signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : 'text-white/88',
+                signalState === 'selected' || signalState === 'highlighted'
+                  ? 'text-white'
+                  : tone.labelClassName,
+                signal.isTopSignal ? 'font-semibold' : signal.isSecondSignal ? 'font-medium' : null,
               )}
             >
               {signal.signalLabel}
@@ -304,7 +343,7 @@ function SignalLegendButton({
           <p
             className={cn(
               'text-[1rem] font-semibold tracking-[-0.02em]',
-              signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : 'text-white/86',
+              signalState === 'selected' || signalState === 'highlighted' ? 'text-white' : tone.valueClassName,
             )}
           >
             {formatPercent(signal.withinDomainPercent)}
@@ -387,7 +426,12 @@ export function DomainSignalRing({
                     highlightedSignalKey,
                   });
                   const entryScale = getEntryScale(signal.displayStrength);
-                  const scaleMultiplier = signalState === 'selected' ? 1.035 : signalState === 'highlighted' ? 1.02 : 1;
+                  const idleScaleMultiplier = signal.isTopSignal ? 1.008 : signal.isSecondSignal ? 1.004 : 1;
+                  const scaleMultiplier = signalState === 'selected'
+                    ? 1.038
+                    : signalState === 'highlighted'
+                      ? 1.024
+                      : idleScaleMultiplier;
                   const brightness = signalState === 'selected' ? 1.18 : signalState === 'highlighted' ? 1.08 : 1;
                   const opacityMultiplier = signalState === 'selected' ? 1 : signalState === 'highlighted' ? 1 : 0.96;
 
@@ -407,7 +451,7 @@ export function DomainSignalRing({
                         'domain-signal-ring-segment cursor-pointer origin-center transition duration-200 ease-out focus:outline-none',
                         tone.segmentClassName,
                       )}
-                      strokeWidth="1.5"
+                      strokeWidth={tone.segmentStrokeWidth}
                       fillRule="evenodd"
                       opacity={Math.min(1, tone.segmentOpacity * opacityMultiplier)}
                       data-segment-index={index}
@@ -485,7 +529,10 @@ export function DomainSignalRing({
             </svg>
 
             <div
-              className="w-full rounded-[1.1rem] border border-white/10 bg-white/[0.03] px-3.5 py-3 sm:px-4"
+              className={cn(
+                'w-full rounded-[1.1rem] border px-3.5 py-3 sm:px-4',
+                activeSignal ? getSignalTone(activeSignal).detailAccentClassName : 'border-white/10 bg-white/[0.03]',
+              )}
               aria-live="polite"
               data-active-detail-key={activeSignal?.signalKey ?? ''}
             >
@@ -506,6 +553,11 @@ export function DomainSignalRing({
                     </div>
                     <p className="text-[0.96rem] font-semibold tracking-[-0.03em] text-white/88 sm:text-[1rem]">{formatPercent(activeSignal.withinDomainPercent)}</p>
                   </div>
+                  <p className="text-[0.88rem] leading-6 text-white/64 sm:text-[0.9rem]">
+                    {activeSignal.signalDescriptor
+                      ? `${activeSignal.signalLabel} - ${activeSignal.signalDescriptor}`
+                      : 'This signal is active in this area.'}
+                  </p>
                 </div>
               ) : (
                 <p className="text-[0.82rem] leading-6 text-white/46">No signal reading is available for this area yet.</p>

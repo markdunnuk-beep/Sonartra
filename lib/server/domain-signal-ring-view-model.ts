@@ -1,4 +1,5 @@
 import type { ResultDomainSummary } from '@/lib/engine/types';
+import { resolveDomainSignalDescriptor } from '@/lib/server/domain-signal-descriptor';
 
 type DomainSummarySource = {
   domainSummaries?: readonly unknown[];
@@ -11,6 +12,7 @@ export type DomainSignalRingDisplayStrength = {
 export type DomainSignalRingEntryViewModel = {
   signalKey: string;
   signalLabel: string;
+  signalDescriptor: string | null;
   withinDomainPercent: number | null;
   displayStrength: number;
   rankWithinDomain: number | null;
@@ -181,6 +183,7 @@ function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknow
   const signals = signalScores.map((signal, index) => ({
     signalKey: getSignalKey(signal, index),
     signalLabel: getSignalLabel(signal, index),
+    signalDescriptor: resolveDomainSignalDescriptor(isRecord(signal) ? signal : null),
     withinDomainPercent: withinDomainPercents[index] ?? null,
     displayStrength: computeSignalDisplayStrength(withinDomainPercents[index] ?? null).displayStrength,
     rankWithinDomain: ranksByIndex.get(index) ?? null,

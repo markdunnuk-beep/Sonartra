@@ -131,6 +131,11 @@ test('domain signal ring mapper preserves authored signal order while deriving t
     'first_by_score',
     'third_by_score',
   ]);
+  assert.deepEqual(rings[0]?.signals.map((signal) => signal.signalDescriptor), [
+    null,
+    null,
+    null,
+  ]);
   assert.deepEqual(rings[0]?.signals.map((signal) => signal.withinDomainPercent), [22, 45, 33]);
   assert.equal(rings[0]?.signals[1]?.isTopSignal, true);
   assert.equal(rings[0]?.signals[2]?.isSecondSignal, true);
@@ -332,6 +337,7 @@ test('domain signal ring mapper handles missing and partial signal score data sa
   assert.equal(rings[0]?.signals[0]?.rankWithinDomain, null);
   assert.equal(rings[0]?.signals[1]?.withinDomainPercent, 100);
   assert.equal(rings[0]?.signals[1]?.displayStrength, 1);
+  assert.equal(rings[0]?.signals[1]?.signalDescriptor, null);
   assert.equal(rings[0]?.signals[1]?.isTopSignal, true);
   assert.deepEqual(rings[1]?.signals, []);
   assert.equal(rings[1]?.signalCount, 0);
@@ -387,6 +393,54 @@ test('domain signal ring mapper supplies calm generic fallbacks for missing doma
 
   assert.equal(rings[0]?.domainLabel, 'Domain 1');
   assert.equal(rings[0]?.signals[0]?.signalLabel, 'Signal 1');
+  assert.equal(rings[0]?.signals[0]?.signalDescriptor, null);
+});
+
+test('domain signal ring mapper prefers assessment-supplied signal descriptions when available', () => {
+  const rings = buildDomainSignalRingViewModel({
+    domainSummaries: Object.freeze([
+      {
+        domainKey: 'signal_style',
+        domainTitle: 'Working Style',
+        signalScores: Object.freeze([
+          {
+            signalKey: 'style_driver',
+            signalTitle: 'Driver',
+            signalDescription: 'Assessment-owned driver descriptor.',
+            normalizedValue: 60,
+          },
+        ]),
+      } as never,
+    ]),
+  });
+
+  assert.equal(rings[0]?.signals[0]?.signalDescriptor, 'Assessment-owned driver descriptor.');
+});
+
+test('domain signal ring mapper falls back to isolated Sonartra descriptors when payload descriptions are absent', () => {
+  const rings = buildDomainSignalRingViewModel({
+    domainSummaries: Object.freeze([
+      {
+        domainKey: 'signal_style',
+        domainTitle: 'Working Style',
+        signalScores: Object.freeze([
+          {
+            signalKey: 'style_driver',
+            signalTitle: 'Driver',
+            normalizedValue: 60,
+          },
+          {
+            signalKey: 'unknown_signal',
+            signalTitle: 'Unknown Signal',
+            normalizedValue: 40,
+          },
+        ]),
+      } as never,
+    ]),
+  });
+
+  assert.equal(rings[0]?.signals[0]?.signalDescriptor, 'Drives action and momentum');
+  assert.equal(rings[0]?.signals[1]?.signalDescriptor, null);
 });
 
 test('domain signal ring mapper does not depend on Sonartra-specific labels and supports non-standard signal counts', () => {
