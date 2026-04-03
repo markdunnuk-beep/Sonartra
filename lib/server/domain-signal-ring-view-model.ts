@@ -1,7 +1,9 @@
 import type { ResultDomainSummary } from '@/lib/engine/types';
+import type { CanonicalResultPayload } from '@/lib/engine/types';
 
 type DomainSummarySource = {
   domainSummaries?: readonly unknown[];
+  domains?: readonly CanonicalResultPayload['domains'][number][];
 } | null | undefined;
 
 export type DomainSignalRingDisplayStrength = {
@@ -27,6 +29,8 @@ export type DomainSignalRingViewModel = {
   maxWithinDomainPercent: number | null;
   minWithinDomainPercent: number | null;
 };
+
+type CanonicalDomainChapter = CanonicalResultPayload['domains'][number];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -194,10 +198,46 @@ function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknow
   };
 }
 
+function mapCanonicalDomainSignalRing(
+  domain: CanonicalDomainChapter,
+): DomainSignalRingViewModel {
+  const signals = domain.signals.map((signal) => ({
+    signalKey: signal.signalKey,
+    signalLabel: signal.signalLabel,
+    withinDomainPercent: signal.withinDomainPercent,
+    displayStrength: computeSignalDisplayStrength(signal.withinDomainPercent).displayStrength,
+    rankWithinDomain: signal.rank,
+    isTopSignal: signal.isPrimary,
+    isSecondSignal: signal.isSecondary,
+  }));
+
+  const numericPercents = signals
+    .map((signal) => signal.withinDomainPercent)
+    .filter((percent): percent is number => percent !== null);
+
+  return {
+    domainKey: domain.domainKey,
+    domainLabel: domain.domainLabel,
+    signals: Object.freeze(signals),
+    signalCount: signals.length,
+    topSignalKey: signals.find((signal) => signal.isTopSignal)?.signalKey ?? null,
+    maxWithinDomainPercent: numericPercents.length > 0 ? Math.max(...numericPercents) : null,
+    minWithinDomainPercent: numericPercents.length > 0 ? Math.min(...numericPercents) : null,
+  };
+}
+
 export function buildDomainSignalRingViewModel(
   payload: DomainSummarySource,
 ): readonly DomainSignalRingViewModel[] {
-  if (!payload || !Array.isArray(payload.domainSummaries)) {
+  if (!payload) {
+    return Object.freeze([]);
+  }
+
+  if (Array.isArray(payload.domains)) {
+    return Object.freeze(payload.domains.map((domain) => mapCanonicalDomainSignalRing(domain)));
+  }
+
+  if (!Array.isArray(payload.domainSummaries)) {
     return Object.freeze([]);
   }
 

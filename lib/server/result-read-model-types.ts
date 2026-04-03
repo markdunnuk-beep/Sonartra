@@ -108,6 +108,7 @@ export type AssessmentResultDetailViewModel = {
   assessmentTitle: string;
   version: string;
   metadata: CanonicalResultPayload['metadata'];
+  intro: CanonicalResultPayload['intro'];
   hero: CanonicalResultPayload['hero'];
   domains: CanonicalResultPayload['domains'];
   actions: CanonicalResultPayload['actions'];

@@ -311,11 +311,12 @@ test('ready persisted result appears in list view and ordering is deterministic 
 
   assert.equal(results.length, 2);
   assert.deepEqual(results.map((result) => result.resultId), ['result-2', 'result-1']);
-  assert.equal(results[0]?.topSignal?.signalId, 'signal-core');
+  assert.equal(results[0]?.topSignal?.signalId, 'core_focus');
+  assert.equal(results[0]?.topSignal?.signalKey, 'core_focus');
   assert.equal(results[0]?.resultAvailable, true);
 });
 
-test('detail load returns canonical payload projection including empty domains and zero-score signals', async () => {
+test('detail load returns canonical payload sections alongside compatibility projections', async () => {
   const service = createResultReadModelService({
     db: createFakeDb([
       {
@@ -340,13 +341,23 @@ test('detail load returns canonical payload projection including empty domains a
   });
 
   assert.equal(detail.resultId, 'result-1');
+  assert.equal(detail.intro.assessmentDescription, null);
+  assert.equal(detail.hero.headline, 'Core Focus leads the current pattern');
+  assert.equal(detail.hero.narrative, 'concentrated profile with Core Focus leading and Signals holding the strongest domain share.');
+  assert.equal(detail.hero.domainHighlights[0]?.primarySignalLabel, 'Core Focus');
+  assert.equal(detail.domains[0]?.domainKey, 'section_a');
+  assert.equal(detail.domains[1]?.primarySignal?.signalKey, 'core_focus');
+  assert.equal(detail.domains[1]?.secondarySignal?.signalKey, 'role_executor');
+  assert.equal(detail.domains[1]?.pairSummary?.pairKey, 'executor_focus');
+  assert.equal(detail.actions.strengths[0]?.signalKey, 'core_focus');
+  assert.equal(detail.actions.strengths[0]?.text, 'Core Focus strength.');
+  assert.equal(detail.actions.watchouts[0]?.signalKey, 'role_executor');
+  assert.equal(detail.actions.developmentFocus[0]?.text, 'Role Executor development.');
   assert.equal(detail.domainSummaries[0]?.signalScores.length, 0);
   assert.equal(detail.domainSummaries[0]?.domainSource, 'question_section');
   assert.equal(detail.normalizedScores[1]?.rawTotal, 0);
-  assert.equal(detail.normalizedScores[1]?.isOverlay, true);
+  assert.equal(detail.normalizedScores[1]?.isOverlay, false);
   assert.equal(detail.domainSummaries[1]?.interpretation?.primarySignalKey, 'core_focus');
-  assert.equal(detail.actions.strengths[0]?.signalKey, 'core_focus');
-  assert.equal(detail.actions.strengths[0]?.text, 'Core Focus strength.');
   assert.equal(detail.strengths[0]?.detail, 'Core Focus strength.');
 });
 

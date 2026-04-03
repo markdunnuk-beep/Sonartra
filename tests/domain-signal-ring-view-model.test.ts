@@ -51,6 +51,51 @@ test('domain signal ring mapper preserves authored domain order', () => {
   assert.deepEqual(rings.map((ring) => ring.domainKey), ['zeta', 'alpha']);
 });
 
+test('domain signal ring mapper accepts canonical domains payload directly', () => {
+  const rings = buildDomainSignalRingViewModel({
+    domains: Object.freeze([
+      {
+        domainKey: 'focus',
+        domainLabel: 'Focus',
+        summary: 'Focus summary.',
+        focus: null,
+        pressure: null,
+        environment: null,
+        primarySignal: null,
+        secondarySignal: null,
+        pairSummary: null,
+        signals: Object.freeze([
+          {
+            signalKey: 'core_focus',
+            signalLabel: 'Core Focus',
+            score: 61,
+            withinDomainPercent: 61,
+            rank: 1,
+            isPrimary: true,
+            isSecondary: false,
+          },
+          {
+            signalKey: 'scan',
+            signalLabel: 'Scan',
+            score: 39,
+            withinDomainPercent: 39,
+            rank: 2,
+            isPrimary: false,
+            isSecondary: true,
+          },
+        ]),
+      },
+    ]),
+  });
+
+  assert.deepEqual(rings.map((ring) => ring.domainKey), ['focus']);
+  assert.deepEqual(rings[0]?.signals.map((signal) => signal.signalKey), ['core_focus', 'scan']);
+  assert.equal(rings[0]?.signals[0]?.isTopSignal, true);
+  assert.equal(rings[0]?.signals[1]?.isSecondSignal, true);
+  assert.equal(rings[0]?.maxWithinDomainPercent, 61);
+  assert.equal(rings[0]?.minWithinDomainPercent, 39);
+});
+
 test('domain signal ring mapper preserves authored signal order while deriving top flags', () => {
   const rings = buildDomainSignalRingViewModel(
     buildPayload(

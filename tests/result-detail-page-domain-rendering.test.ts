@@ -5,7 +5,6 @@ import { join } from 'node:path';
 
 import { buildDomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 import type { AssessmentResultDetailViewModel } from '@/lib/server/result-read-model-types';
-import { getResultDetailDomains } from '@/lib/server/result-detail-domain-view';
 
 const pagePath = join(
   process.cwd(),
@@ -18,7 +17,7 @@ const pagePath = join(
 );
 
 function buildResultDetail(
-  domainSummaries: AssessmentResultDetailViewModel['domainSummaries'],
+  domains: AssessmentResultDetailViewModel['domains'],
 ): AssessmentResultDetailViewModel {
   return {
     resultId: 'result-1',
@@ -29,17 +28,64 @@ function buildResultDetail(
     version: '1.0.0',
     metadata: {
       assessmentKey: 'signals-flex',
+      assessmentTitle: 'Signals Flex',
       version: '1.0.0',
       attemptId: 'attempt-1',
-      assessmentDescription: null,
+      completedAt: '2026-01-01T00:00:00.000Z',
+      assessmentDescription: 'Legacy fallback copy.',
+    },
+    intro: {
+      assessmentDescription: 'Canonical intro copy.',
+    },
+    hero: {
+      headline: 'Canonical hero headline',
+      narrative: 'Canonical hero narrative.',
+      primaryPattern: {
+        label: 'Core Focus',
+        signalKey: 'core_focus',
+        signalLabel: 'Core Focus',
+      },
+      domainHighlights: [
+        {
+          domainKey: 'focus',
+          domainLabel: 'Focus',
+          primarySignalKey: 'core_focus',
+          primarySignalLabel: 'Core Focus',
+          summary: 'Keeps energy trained on the main line of work.',
+        },
+      ],
+    },
+    domains,
+    actions: {
+      strengths: [
+        {
+          signalKey: 'core_focus',
+          signalLabel: 'Core Focus',
+          text: 'Strength text.',
+        },
+      ],
+      watchouts: [
+        {
+          signalKey: 'pressure_guard',
+          signalLabel: 'Pressure Guard',
+          text: 'Watchout text.',
+        },
+      ],
+      developmentFocus: [
+        {
+          signalKey: 'environment_scan',
+          signalLabel: 'Environment Scan',
+          text: 'Development text.',
+        },
+      ],
     },
     topSignal: null,
     rankedSignals: Object.freeze([]),
     normalizedScores: Object.freeze([]),
-    domainSummaries,
+    domainSummaries: Object.freeze([]),
     overviewSummary: {
-      headline: 'Headline',
-      narrative: 'Narrative',
+      headline: 'Legacy hero headline',
+      narrative: 'Legacy hero narrative.',
     },
     strengths: Object.freeze([]),
     watchouts: Object.freeze([]),
@@ -75,7 +121,7 @@ function buildResultDetail(
       missingQuestionIds: Object.freeze([]),
       topSignalSelectionBasis: 'normalized_rank',
       rankedSignalCount: 0,
-      domainCount: domainSummaries.length,
+      domainCount: domains.length,
       zeroMass: true,
       zeroMassTopSignalFallbackApplied: false,
       warnings: Object.freeze([]),
@@ -86,125 +132,46 @@ function buildResultDetail(
   };
 }
 
-test('result detail domains preserve canonical payload order for arbitrary domain keys', () => {
-  const result = buildResultDetail(
-    Object.freeze([
-      {
-        domainId: 'domain-z',
-        domainKey: 'zeta_custom',
-        domainTitle: 'Zeta Custom',
-        domainSource: 'signal_group',
-        rawTotal: 9,
-        normalizedValue: 45,
-        percentage: 45,
-        signalScores: Object.freeze([]),
-        signalCount: 0,
-        answeredQuestionCount: 3,
-        rankedSignalIds: Object.freeze([]),
-        interpretation: null,
-      },
-      {
-        domainId: 'domain-a',
-        domainKey: 'adaptive_focus',
-        domainTitle: 'Adaptive Focus',
-        domainSource: 'signal_group',
-        rawTotal: 11,
-        normalizedValue: 55,
-        percentage: 55,
-        signalScores: Object.freeze([]),
-        signalCount: 0,
-        answeredQuestionCount: 3,
-        rankedSignalIds: Object.freeze([]),
-        interpretation: null,
-      },
-      {
-        domainId: 'domain-q',
-        domainKey: 'question_flow',
-        domainTitle: 'Question Flow',
-        domainSource: 'question_section',
-        rawTotal: 0,
-        normalizedValue: 0,
-        percentage: 0,
-        signalScores: Object.freeze([]),
-        signalCount: 0,
-        answeredQuestionCount: 3,
-        rankedSignalIds: Object.freeze([]),
-        interpretation: null,
-      },
-    ]),
-  );
-
-  assert.deepEqual(
-    getResultDetailDomains(result).map((domain) => domain.domainKey),
-    ['zeta_custom', 'adaptive_focus', 'question_flow'],
-  );
-});
-
-test('result detail domains tolerate an empty persisted collection', () => {
-  const result = buildResultDetail(Object.freeze([]));
-
-  assert.deepEqual(getResultDetailDomains(result), []);
-});
-
-test('result detail domain ring mapper preserves canonical payload order for arbitrary persisted domains', () => {
-  const result = buildResultDetail(
-    Object.freeze([
-      {
-        domainId: 'domain-z',
-        domainKey: 'zeta_custom',
-        domainTitle: 'Zeta Custom',
-        domainSource: 'signal_group',
-        rawTotal: 9,
-        normalizedValue: 45,
-        percentage: 45,
-        signalScores: Object.freeze([
-          {
-            signalId: 'signal-z-1',
-            signalKey: 'horizon',
-            signalTitle: 'Horizon',
-            domainId: 'domain-z',
-            domainKey: 'zeta_custom',
-            domainSource: 'signal_group' as const,
-            isOverlay: false,
-            overlayType: 'none' as const,
-            rawTotal: 8,
-            normalizedValue: 80,
-            percentage: 80,
-            domainPercentage: 80,
-            rank: 1,
-          },
-        ]),
-        signalCount: 1,
-        answeredQuestionCount: 3,
-        rankedSignalIds: Object.freeze(['signal-z-1']),
-        interpretation: {
-          domainKey: 'zeta_custom',
-          primarySignalKey: 'horizon',
-          primaryPercent: 80,
-          secondarySignalKey: null,
-          secondaryPercent: null,
-          summary: 'Zeta summary.',
+test('domain signal ring mapper can build rings directly from canonical domains payload order', () => {
+  const result = buildResultDetail([
+    {
+      domainKey: 'zeta_custom',
+      domainLabel: 'Zeta Custom',
+      summary: 'Zeta summary.',
+      focus: null,
+      pressure: null,
+      environment: null,
+      primarySignal: null,
+      secondarySignal: null,
+      pairSummary: null,
+      signals: [
+        {
+          signalKey: 'horizon',
+          signalLabel: 'Horizon',
+          score: 80,
+          withinDomainPercent: 80,
+          rank: 1,
+          isPrimary: true,
+          isSecondary: false,
         },
-      },
-      {
-        domainId: 'domain-a',
-        domainKey: 'adaptive_focus',
-        domainTitle: 'Adaptive Focus',
-        domainSource: 'signal_group',
-        rawTotal: 11,
-        normalizedValue: 55,
-        percentage: 55,
-        signalScores: Object.freeze([]),
-        signalCount: 0,
-        answeredQuestionCount: 3,
-        rankedSignalIds: Object.freeze([]),
-        interpretation: null,
-      },
-    ]),
-  );
+      ],
+    },
+    {
+      domainKey: 'adaptive_focus',
+      domainLabel: 'Adaptive Focus',
+      summary: 'Adaptive summary.',
+      focus: null,
+      pressure: null,
+      environment: null,
+      primarySignal: null,
+      secondarySignal: null,
+      pairSummary: null,
+      signals: [],
+    },
+  ]);
 
   const ringModels = buildDomainSignalRingViewModel({
-    domainSummaries: getResultDetailDomains(result),
+    domains: result.domains,
   });
 
   assert.deepEqual(ringModels.map((domain) => domain.domainKey), ['zeta_custom', 'adaptive_focus']);
@@ -212,203 +179,90 @@ test('result detail domain ring mapper preserves canonical payload order for arb
   assert.deepEqual(ringModels[1]?.signals, []);
 });
 
-test('result detail page no longer contains fixed WPLP intelligence domain ordering', () => {
+test('result detail page reads intro, hero, domains, and actions from canonical payload sections in final order', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.doesNotMatch(source, /INTELLIGENCE_DOMAIN_ORDER/);
-  assert.doesNotMatch(source, /INTELLIGENCE_DOMAIN_CONFIG/);
-  assert.doesNotMatch(source, /Six Intelligence Areas/);
-  assert.match(source, /getResultDetailDomains\(result\)/);
-  assert.match(source, /buildDomainSignalRingViewModel\(\{/);
-  assert.match(source, /function buildResultDetailDomainItems\(/);
-  assert.match(source, /ringModelsByDomainKey/);
-  assert.match(source, /ringModelsByDomainKey\.get\(domain\.domainKey\) \?\? params\.ringModels\[index\] \?\? null/);
+  assert.match(source, /const assessmentDescription = result\.intro\.assessmentDescription;/);
+  assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const heroNarrative = result\.hero\.narrative\?\.trim\(\) \?\? '';/);
+  assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,/);
+  assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
+  assert.match(source, /<HeroDomainHighlights highlights=\{result\.hero\.domainHighlights\} \/>/);
   assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
-  assert.match(source, /domainItems\.map\(\(\{ domain, ringModel \}\) =>/);
+  assert.match(source, /<ActionSection actions=\{result\.actions\} \/>/);
+
+  assert.doesNotMatch(source, /result\.metadata\.assessmentDescription/);
+  assert.doesNotMatch(source, /result\.overviewSummary\.headline/);
+  assert.doesNotMatch(source, /result\.overviewSummary\.narrative/);
+  assert.doesNotMatch(source, /getResultDetailDomains/);
+  assert.doesNotMatch(source, /<ActionSection result=\{result\} \/>/);
+
+  const introIndex = source.indexOf('const assessmentDescription = result.intro.assessmentDescription;');
+  const heroIndex = source.indexOf('<section className="overflow-hidden rounded-[1.5rem]');
+  const domainIndex = source.indexOf('title="Domain reading"');
+  const actionIndex = source.indexOf('title="Interpretation to hold onto"');
+
+  assert.ok(introIndex >= 0);
+  assert.ok(heroIndex >= 0);
+  assert.ok(domainIndex >= 0);
+  assert.ok(actionIndex >= 0);
+  assert.ok(introIndex < heroIndex);
+  assert.ok(heroIndex < domainIndex);
+  assert.ok(domainIndex < actionIndex);
 });
 
-test('result detail hero is narrative-first and no longer leads with derived signal interpretation copy', () => {
+test('result detail page renders canonical hero domain highlights beneath the hero narrative', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.match(source, /const heroHeading = result\.overviewSummary\.headline\.trim\(\)/);
-  assert.match(source, /const heroSupport = getHeroSupport\(result\)/);
-  assert.match(source, /\{heroHeading\}/);
-  assert.match(source, /\{heroSupport\.narrative\}/);
-  assert.doesNotMatch(source, /function getHeroNarrative\(/);
-  assert.doesNotMatch(source, /function getHeroHeading\(/);
-  assert.doesNotMatch(source, /const combinedInterpretation = getCombinedInterpretation/);
-  assert.doesNotMatch(source, /In practice:/);
-  assert.doesNotMatch(source, /heroPrimarySignalChips/);
+  assert.match(source, /function HeroDomainHighlights\(/);
+  assert.match(source, /highlights\.length === 0/);
+  assert.match(source, /highlight\.domainLabel/);
+  assert.match(source, /highlight\.primarySignalLabel/);
+  assert.match(source, /highlight\.summary \?/);
+  assert.match(source, /grid gap-4 border-t border-white\/10 pt-6 sm:grid-cols-2 xl:grid-cols-3/);
 });
 
-test('result detail page renders assessmentDescription above the hero when present and hides the section when absent', () => {
+test('result detail page renders canonical domain chapter fields without UI-side interpretation synthesis', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /domain\.summary/);
+  assert.match(source, /domain\.focus/);
+  assert.match(source, /domain\.pressure/);
+  assert.match(source, /domain\.environment/);
+  assert.match(source, /domain\.primarySignal/);
+  assert.match(source, /domain\.secondarySignal/);
+  assert.match(source, /domain\.pairSummary\?\.text/);
+  assert.match(source, /const visibleSignals = domain\.signals\.slice\(0, 2\);/);
+  assert.match(source, /const hiddenSignals = domain\.signals\.slice\(2\);/);
+  assert.match(source, /signal\.signalLabel/);
+
+  assert.doesNotMatch(source, /interpretation\?\.summary/);
+  assert.doesNotMatch(source, /supportingLine/);
+  assert.doesNotMatch(source, /tensionClause/);
+});
+
+test('result detail page renders actions from canonical action blocks only', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /function toVisibleActionItems\(/);
+  assert.match(source, /detail: item\.text/);
+  assert.match(source, /title: item\.signalLabel/);
+  assert.match(source, /items=\{toVisibleActionItems\(actions\.strengths\)\}/);
+  assert.match(source, /items=\{toVisibleActionItems\(actions\.watchouts\)\}/);
+  assert.match(source, /items=\{toVisibleActionItems\(actions\.developmentFocus\)\}/);
+
+  assert.doesNotMatch(source, /items=\{result\.strengths\}/);
+  assert.doesNotMatch(source, /items=\{result\.watchouts\}/);
+  assert.doesNotMatch(source, /items=\{result\.developmentFocus\}/);
+});
+
+test('result detail page keeps markdown intro rendering and editorial shell for canonical intro copy', () => {
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /import ReactMarkdown from 'react-markdown';/);
   assert.match(source, /import remarkGfm from 'remark-gfm';/);
-  assert.match(source, /const assessmentDescription = result\.metadata\.assessmentDescription;/);
-  assert.match(source, /const hasAssessmentDescription =\s*typeof assessmentDescription === 'string' && assessmentDescription\.trim\(\)\.length > 0/);
-  assert.match(source, /\{hasAssessmentDescription \? \(/);
-  assert.match(
-    source,
-    /<section className="mb-12 rounded-3xl border border-white\/10 bg-white\/\[0\.03\] px-7 py-7 shadow-\[0_20px_80px_rgba\(0,0,0,0\.35\)\] backdrop-blur-sm md:px-10 md:py-9">/,
-  );
-  assert.match(source, />\s*About this report\s*<\/p>/);
-  assert.match(source, /className="mb-5 text-\[11px\] font-semibold uppercase tracking-\[0\.24em\] text-white\/45"/);
-  assert.match(source, /max-w-3xl/);
-  assert.match(source, /\[\&>p\]:whitespace-pre-line/);
-  assert.match(source, /\[\&>p\]:text-\[18px\]/);
-  assert.match(source, /\[\&>p\]:leading-9/);
-  assert.match(source, /\[\&>p\]:text-white\/76/);
-  assert.match(source, /\[\&>p\+p\]:mt-6/);
-  assert.match(source, /\[\&_strong\]:font-semibold/);
-  assert.match(source, /\[\&_strong\]:text-white/);
   assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
   assert.match(source, /\{assessmentDescription\}/);
+  assert.match(source, /About this report/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
-
-  const descriptionIndex = source.indexOf('const assessmentDescription = result.metadata.assessmentDescription;');
-  const heroIndex = source.indexOf('<section className="overflow-hidden rounded-[1.5rem]');
-  assert.ok(descriptionIndex >= 0);
-  assert.ok(heroIndex >= 0);
-  assert.ok(descriptionIndex < heroIndex);
-});
-
-test('result detail page uses markdown output for bold text and paragraph structure in assessmentDescription', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
-  assert.match(source, /\[\&_strong\]:font-semibold/);
-  assert.match(source, /\[\&_strong\]:text-white/);
-  assert.match(source, /\[\&>p\]:whitespace-pre-line/);
-  assert.match(source, /\[\&>p\]:text-white\/76/);
-  assert.match(source, /\[\&>p\+p\]:mt-6/);
-});
-
-test('result detail page adds stronger markdown hierarchy for headings, rules, and lists in assessmentDescription', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.match(source, /\[\&>h1\]:text-\[30px\]/);
-  assert.match(source, /\[\&>h1\]:leading-\[1\.08\]/);
-  assert.match(source, /\[\&>h2\]:mt-10/);
-  assert.match(source, /\[\&>h2\]:text-\[20px\]/);
-  assert.match(source, /\[\&>hr\]:my-7/);
-  assert.match(source, /\[\&>hr\]:bg-white\/10/);
-  assert.match(source, /\[\&>ul\]:space-y-2/);
-  assert.match(source, /\[\&>ul\]:pl-5/);
-  assert.match(source, /\[\&>ul\]:text-white\/76/);
-  assert.match(source, /\[\&>ol\]:space-y-2/);
-  assert.match(source, /\[\&>ol\]:text-white\/76/);
-  assert.match(source, /\[\&>blockquote\]:border-l/);
-  assert.match(source, /\[\&>blockquote\]:text-white\/72/);
-});
-
-test('result detail page keeps personalisation prep outside UI prose generation', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.match(source, /import \{ getRequestUserId \} from '@\/lib\/server\/request-user';/);
-  assert.doesNotMatch(source, /getRequestUserContext/);
-  assert.doesNotMatch(source, /userEmail/);
-  assert.doesNotMatch(source, /displayName/);
-  assert.doesNotMatch(source, /fullName/);
-  assert.doesNotMatch(source, /firstName/);
-  assert.doesNotMatch(source, /, you tend to/);
-  assert.doesNotMatch(source, /, your natural style is/);
-});
-
-test('result detail action section uses a report-style text-led sequence without panel chrome', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.match(source, /title="Interpretation to hold onto"/);
-  assert.match(source, /<ActionSection result=\{result\} \/>/);
-  assert.match(source, /function ActionSection\(/);
-  assert.match(source, /Across the rest of the report, this pattern shows up in a few consistent ways: where it adds value, where it can create friction, and where attention may be useful\./);
-  assert.match(source, /<ActionList title="Strengths" items=\{result\.strengths\} \/>/);
-  assert.match(source, /<ActionList title="Watchouts" items=\{result\.watchouts\} \/>/);
-  assert.match(source, /<ActionList title="Development Focus" items=\{result\.developmentFocus\} \/>/);
-  assert.match(source, /mx-auto max-w-\[58rem\] space-y-12 md:space-y-14/);
-  assert.match(source, /border-white\/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10/);
-  assert.match(source, /max-w-\[42rem\] text-\[0\.98rem\] leading-8 text-white\/64/);
-  assert.doesNotMatch(source, /xl:grid-cols-3/);
-  assert.doesNotMatch(source, /rounded-\[1\.7rem\] p-6 sm:p-7 md:p-8/);
-  assert.doesNotMatch(source, /rounded-\[1\.35rem\] border px-5 py-5 sm:px-6/);
-  assert.doesNotMatch(source, /inline-flex rounded-full px-2\.5 py-1 text-\[11px\] font-medium/);
-  assert.doesNotMatch(source, /Practical synthesis/);
-});
-
-test('result detail domain section is summary-first and no longer emphasizes percentages', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.match(source, /title="Domain reading"/);
-  assert.match(source, /The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report\./);
-  assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
-  assert.match(source, /function DomainChapter\(\{/);
-  assert.match(source, /ringModel: DomainSignalRingViewModel \| null;/);
-  assert.match(source, /<SectionEyebrow>Domain<\/SectionEyebrow>/);
-  assert.match(source, /<DomainSignalRing/);
-  assert.match(source, /domain=\{ringModel\}/);
-  assert.match(source, /mx-auto max-w-\[58rem\] space-y-12 md:space-y-14/);
-  assert.match(source, /border-white\/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10/);
-  assert.match(source, /max-w-\[44rem\] text-\[1rem\] leading-8 text-white\/68 md:text-\[1\.05rem\] md:leading-9/);
-  assert.match(source, /interpretation\?\.summary/);
-  assert.doesNotMatch(source, /formatPercent\(signal\.domainPercentage\)/);
-  assert.doesNotMatch(source, /See why .* leads here/);
-  assert.doesNotMatch(source, /Primary signal/);
-  assert.doesNotMatch(source, /Secondary signal/);
-  assert.doesNotMatch(source, /2xl:grid-cols-2/);
-  assert.doesNotMatch(source, /rounded-\[1\.8rem\] p-6 sm:p-7 md:p-8/);
-  assert.match(source, /Additional signal context/);
-  assert.match(source, /also appears in this area/);
-  assert.doesNotMatch(source, /function getPersistedDomainInterpretation\(/);
-  assert.doesNotMatch(source, /function getDomainSignalContext\(/);
-  assert.doesNotMatch(source, /The main reading journey/);
-  assert.doesNotMatch(source, /These sections are rendered directly from the persisted result payload/);
-  assert.doesNotMatch(source, /These chapters follow the persisted payload order/);
-});
-
-test('result detail page keeps the domain chart integration on the wider editorial column for signal bars', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.match(source, /max-w-\[43rem\] border-white\/8 bg-\[linear-gradient\(180deg,rgba\(12,19,33,0\.68\),rgba\(8,12,24,0\.9\)\)\] p-4 sm:p-5 md:max-w-\[45rem\] md:p-6/);
-});
-
-test('result detail domain chapters keep rendering stable even when a persisted domain has no ring signals', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.match(source, /ringModel \? \(/);
-  assert.match(source, /No persisted domain signals are available for this area\./);
-  assert.doesNotMatch(source, /A domain reading is not available for this area yet\./);
-  assert.doesNotMatch(source, /throw new Error\(.+ring/i);
-});
-
-test('result detail page removes the separate status bar and keeps the reading order narrative then actions then domains', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.doesNotMatch(source, /StatusPill/);
-  assert.doesNotMatch(source, /<SurfaceCard className="rounded-\[1\.6rem\] px-5 py-4">/);
-  assert.match(source, /<span>\{result\.assessmentTitle\}<\/span>/);
-
-  const actionIndex = source.indexOf('title="Interpretation to hold onto"');
-  const domainIndex = source.indexOf('title="Domain reading"');
-
-  assert.ok(actionIndex >= 0);
-  assert.ok(domainIndex >= 0);
-  assert.ok(actionIndex < domainIndex);
-});
-
-test('result detail page uses tightened responsive spacing and reading widths for the final polish pass', () => {
-  const source = readFileSync(pagePath, 'utf8');
-
-  assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
-  assert.match(source, /<section className="overflow-hidden rounded-\[1\.5rem\] bg-\[radial-gradient\(circle_at_top_left,rgba\(118,147,255,0\.11\),transparent_38%\),linear-gradient\(180deg,rgba\(16,26,44,0\.72\),rgba\(9,15,28,0\.88\)\)\] px-7 py-8 sm:px-8 sm:py-9 md:px-12 md:py-12 lg:px-14">/);
-  assert.match(source, /max-w-\[82rem\] space-y-7 md:space-y-9/);
-  assert.match(source, /max-w-\[20ch\]/);
-  assert.match(source, /max-w-\[76ch\]/);
-  assert.match(source, /max-w-\[68ch\]/);
-  assert.match(source, /className="space-y-7"/);
-  assert.match(source, /md:grid-cols-\[minmax\(0,12rem\)_minmax\(0,1fr\)\]/);
-  assert.match(source, /max-w-\[43rem\] border-white\/8 bg-\[linear-gradient\(180deg,rgba\(12,19,33,0\.68\),rgba\(8,12,24,0\.9\)\)\] p-4 sm:p-5 md:max-w-\[45rem\] md:p-6/);
-  assert.match(source, /text-\[1\.32rem\] font-semibold tracking-\[-0\.03em\] text-white md:text-\[1\.45rem\]/);
-  assert.doesNotMatch(source, /<SurfaceCard\s+accent/);
-  assert.doesNotMatch(source, /rounded-\[2rem\] bg-\[radial-gradient\(circle_at_top_left,rgba\(118,147,255,0\.16\),transparent_32%\),linear-gradient\(180deg,rgba\(16,26,44,0\.92\),rgba\(9,15,28,0\.98\)\)\] px-6 py-7 sm:px-7 sm:py-8 md:px-10 md:py-12/);
 });

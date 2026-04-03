@@ -9,10 +9,8 @@ import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-
 import { buildDomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 import type {
   AssessmentResultDetailViewModel,
-  AssessmentResultDomainViewModel,
 } from '@/lib/server/result-read-model-types';
 import { getDbPool } from '@/lib/server/db';
-import { getResultDetailDomains } from '@/lib/server/result-detail-domain-view';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import { AssessmentResultNotFoundError } from '@/lib/server/result-read-model-types';
@@ -28,6 +26,9 @@ type VisibleActionItem = {
   title: string;
   detail: string;
 };
+
+type CanonicalDomainChapter = AssessmentResultDetailViewModel['domains'][number];
+type CanonicalActionItem = AssessmentResultDetailViewModel['actions']['strengths'][number];
 
 const VISIBLE_ACTION_LIMIT = 3;
 
@@ -58,33 +59,6 @@ function formatResultTimestamp(value: string | null): {
   };
 }
 
-function formatDomainLabel(value: string): string {
-  return value
-    .split('_')
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function splitNarrative(value: string): readonly string[] {
-  return value
-    .split(/(?<=[.!?])\s+/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-}
-
-function getHeroSupport(result: AssessmentResultDetailViewModel): {
-  narrative: string;
-  support: string | null;
-} {
-  const [narrative, support] = splitNarrative(result.overviewSummary.narrative.trim());
-
-  return {
-    narrative: narrative ?? result.overviewSummary.narrative.trim(),
-    support: support ?? null,
-  };
-}
-
 function getVisibleItems<T>(items: readonly T[]): {
   visible: readonly T[];
   overflow: readonly T[];
@@ -104,10 +78,10 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
 }
 
 function buildResultDetailDomainItems(params: {
-  domains: readonly AssessmentResultDomainViewModel[];
+  domains: readonly CanonicalDomainChapter[];
   ringModels: readonly DomainSignalRingViewModel[];
 }): readonly {
-  domain: AssessmentResultDomainViewModel;
+  domain: CanonicalDomainChapter;
   ringModel: DomainSignalRingViewModel | null;
 }[] {
   const ringModelsByDomainKey = new Map(
@@ -173,16 +147,24 @@ function ActionList({
   );
 }
 
+function toVisibleActionItems(items: readonly CanonicalActionItem[]): readonly VisibleActionItem[] {
+  return items.map((item, index) => ({
+    key: `${item.signalKey}-${index + 1}`,
+    title: item.signalLabel,
+    detail: item.text,
+  }));
+}
+
 function ActionSection({
-  result,
+  actions,
 }: {
-  result: AssessmentResultDetailViewModel;
+  actions: AssessmentResultDetailViewModel['actions'];
 }) {
   return (
     <div className="mx-auto max-w-[58rem] space-y-12 md:space-y-14">
-      <ActionList title="Strengths" items={result.strengths} />
-      <ActionList title="Watchouts" items={result.watchouts} />
-      <ActionList title="Development Focus" items={result.developmentFocus} />
+      <ActionList title="Strengths" items={toVisibleActionItems(actions.strengths)} />
+      <ActionList title="Watchouts" items={toVisibleActionItems(actions.watchouts)} />
+      <ActionList title="Development Focus" items={toVisibleActionItems(actions.developmentFocus)} />
     </div>
   );
 }
@@ -191,13 +173,12 @@ function DomainChapter({
   domain,
   ringModel,
 }: {
-  domain: AssessmentResultDomainViewModel;
+  domain: CanonicalDomainChapter;
   ringModel: DomainSignalRingViewModel | null;
 }) {
-  const visibleSignals = domain.signalScores.slice(0, 2);
-  const hiddenSignals = domain.signalScores.slice(2);
-  const interpretation = domain.interpretation;
-  const title = domain.domainTitle.trim() || formatDomainLabel(domain.domainKey);
+  const visibleSignals = domain.signals.slice(0, 2);
+  const hiddenSignals = domain.signals.slice(2);
+  const title = domain.domainLabel.trim();
 
   return (
     <article className="border-white/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10">
@@ -210,17 +191,45 @@ function DomainChapter({
         </div>
 
         <div className="space-y-4 md:space-y-5">
-          {interpretation?.summary ? (
+          {domain.summary ? (
             <p className="max-w-[44rem] text-[1rem] leading-8 text-white/68 md:text-[1.05rem] md:leading-9">
-              {interpretation.summary}
+              {domain.summary}
             </p>
           ) : null}
 
-          {interpretation?.supportingLine ? (
-            <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/52">{interpretation.supportingLine}</p>
+          {domain.focus ? (
+            <EditorialAside label="Focus" text={domain.focus} />
           ) : null}
-          {interpretation?.tensionClause ? (
-            <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/44">{interpretation.tensionClause}</p>
+          {domain.pressure ? (
+            <EditorialAside label="Pressure" text={domain.pressure} />
+          ) : null}
+          {domain.environment ? (
+            <EditorialAside label="Environment" text={domain.environment} />
+          ) : null}
+
+          {domain.primarySignal || domain.secondarySignal ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {domain.primarySignal ? (
+                <SignalEditorialBlock
+                  title="Primary signal"
+                  signalLabel={domain.primarySignal.signalLabel}
+                  summary={domain.primarySignal.summary}
+                />
+              ) : null}
+              {domain.secondarySignal ? (
+                <SignalEditorialBlock
+                  title="Secondary signal"
+                  signalLabel={domain.secondarySignal.signalLabel}
+                  summary={domain.secondarySignal.summary}
+                />
+              ) : null}
+            </div>
+          ) : null}
+
+          {domain.pairSummary?.text ? (
+            <p className="max-w-[42rem] border-l border-white/10 pl-4 text-[0.95rem] leading-8 text-white/58">
+              {domain.pairSummary.text}
+            </p>
           ) : null}
 
           {ringModel ? (
@@ -237,11 +246,11 @@ function DomainChapter({
               </summary>
               <div className="mt-3 space-y-3 border-l border-white/8 pl-4">
                 {hiddenSignals.map((signal) => (
-                  <div key={signal.signalId} className="text-sm leading-7 text-white/52">
-                    <span className="font-medium text-white/76">{signal.signalTitle}</span>
+                  <div key={signal.signalKey} className="text-sm leading-7 text-white/52">
+                    <span className="font-medium text-white/76">{signal.signalLabel}</span>
                     <span className="text-white/40">
                       {' '}
-                      also appears in this area{signal.isOverlay ? ' as an overlay' : ''}.
+                      also appears in this area.
                     </span>
                   </div>
                 ))}
@@ -264,7 +273,7 @@ function DomainSection({
   domainItems,
 }: {
   domainItems: readonly {
-    domain: AssessmentResultDomainViewModel;
+    domain: CanonicalDomainChapter;
     ringModel: DomainSignalRingViewModel | null;
   }[];
 }) {
@@ -279,7 +288,70 @@ function DomainSection({
   return (
     <div className="mx-auto max-w-[58rem] space-y-12 md:space-y-14">
       {domainItems.map(({ domain, ringModel }) => (
-        <DomainChapter key={domain.domainId} domain={domain} ringModel={ringModel} />
+        <DomainChapter key={domain.domainKey} domain={domain} ringModel={ringModel} />
+      ))}
+    </div>
+  );
+}
+
+function EditorialAside({
+  label,
+  text,
+}: {
+  label: string;
+  text: string;
+}) {
+  return (
+    <div className="max-w-[42rem] space-y-1.5 border-l border-white/10 pl-4">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">{label}</p>
+      <p className="text-[0.96rem] leading-8 text-white/56">{text}</p>
+    </div>
+  );
+}
+
+function SignalEditorialBlock({
+  title,
+  signalLabel,
+  summary,
+}: {
+  title: string;
+  signalLabel: string;
+  summary: string | null;
+}) {
+  return (
+    <div className="space-y-2 border-t border-white/10 pt-3 first:border-t-0 first:pt-0">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">{title}</p>
+      <p className="text-[1rem] font-medium tracking-[-0.02em] text-white/88">{signalLabel}</p>
+      {summary ? (
+        <p className="max-w-[32rem] text-[0.95rem] leading-8 text-white/56">{summary}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function HeroDomainHighlights({
+  highlights,
+}: {
+  highlights: AssessmentResultDetailViewModel['hero']['domainHighlights'];
+}) {
+  if (highlights.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="grid gap-4 border-t border-white/10 pt-6 sm:grid-cols-2 xl:grid-cols-3">
+      {highlights.map((highlight) => (
+        <article key={highlight.domainKey} className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
+            {highlight.domainLabel}
+          </p>
+          <p className="text-[0.98rem] font-medium tracking-[-0.02em] text-white/84">
+            {highlight.primarySignalLabel}
+          </p>
+          {highlight.summary ? (
+            <p className="text-[0.92rem] leading-7 text-white/52">{highlight.summary}</p>
+          ) : null}
+        </article>
       ))}
     </div>
   );
@@ -306,25 +378,24 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     throw error;
   }
 
-  const resultDomains = getResultDetailDomains(result);
   const domainRingModels = buildDomainSignalRingViewModel({
-    domainSummaries: resultDomains,
+    domains: result.domains,
   });
   const resultDomainItems = buildResultDetailDomainItems({
-    domains: resultDomains,
+    domains: result.domains,
     ringModels: domainRingModels,
   });
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   // The result detail page renders persisted report language only. Behavioural
   // copy belongs to the canonical result payload, not the client UI.
-  const assessmentDescription = result.metadata.assessmentDescription;
+  const assessmentDescription = result.intro.assessmentDescription;
   const hasAssessmentDescription =
     typeof assessmentDescription === 'string' && assessmentDescription.trim().length > 0;
-  const heroHeading = result.overviewSummary.headline.trim();
-  const heroSupport = getHeroSupport(result);
+  const heroHeadline = result.hero.headline?.trim() ?? '';
+  const heroNarrative = result.hero.narrative?.trim() ?? '';
 
   return (
-      <PageFrame className="space-y-12 md:space-y-14">
+    <PageFrame className="space-y-12 md:space-y-14">
       {hasAssessmentDescription ? (
         <section className="mb-12 rounded-3xl border border-white/10 bg-white/[0.03] px-7 py-7 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm md:px-10 md:py-9">
           <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
@@ -341,7 +412,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
       <section className="overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.11),transparent_38%),linear-gradient(180deg,rgba(16,26,44,0.72),rgba(9,15,28,0.88))] px-7 py-8 sm:px-8 sm:py-9 md:px-12 md:py-12 lg:px-14">
         <div className="max-w-[82rem] space-y-7 md:space-y-9">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
-            <SectionEyebrow>Overview</SectionEyebrow>
+            <SectionEyebrow>Hero</SectionEyebrow>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
             <span>{result.assessmentTitle}</span>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
@@ -354,20 +425,26 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
           <div className="space-y-6 md:space-y-7">
             <h1 className="max-w-[20ch] text-[2.45rem] font-semibold leading-[1.03] tracking-[-0.045em] text-white sm:text-[3rem] md:text-[4.2rem]">
-              {heroHeading}
+              {heroHeadline}
             </h1>
-            <div className="max-w-[76ch] space-y-4">
+            <div className="max-w-[76ch] space-y-5">
               <p className="text-[1rem] leading-8 text-white/74 sm:text-[1.05rem] md:text-[1.16rem] md:leading-9">
-                {heroSupport.narrative}
+                {heroNarrative}
               </p>
-              {heroSupport.support ? (
-                <p className="max-w-[68ch] text-[0.96rem] leading-8 text-white/50">
-                  {heroSupport.support}
-                </p>
-              ) : null}
+              <HeroDomainHighlights highlights={result.hero.domainHighlights} />
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="space-y-7">
+        <SectionHeader
+          eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
+          title="Domain reading"
+          description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
+        />
+
+        <DomainSection domainItems={resultDomainItems} />
       </section>
 
       <section className="space-y-7">
@@ -377,17 +454,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           description="Across the rest of the report, this pattern shows up in a few consistent ways: where it adds value, where it can create friction, and where attention may be useful."
         />
 
-        <ActionSection result={result} />
-      </section>
-
-      <section className="space-y-7">
-        <SectionHeader
-          eyebrow={`${resultDomains.length} Domain${resultDomains.length === 1 ? '' : 's'}`}
-          title="Domain reading"
-          description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
-        />
-
-        <DomainSection domainItems={resultDomainItems} />
+        <ActionSection actions={result.actions} />
       </section>
     </PageFrame>
   );
