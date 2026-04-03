@@ -599,6 +599,8 @@ test('completion path persists the canonical payload unchanged through the real 
     pairKey: 'executor_focus',
     text: 'Reserved pair-level summary.',
   });
+  assert.deepEqual(Object.keys(payload?.actions ?? {}), ['strengths', 'watchouts', 'developmentFocus']);
+  assert.deepEqual(Object.keys(payload?.actions.strengths[0] ?? {}), ['signalKey', 'signalLabel', 'text']);
   assert.equal(payload?.actions.strengths[0]?.text, 'Persisted strength language.');
   assert.equal(payload?.metadata.assessmentDescription, null);
   assert.equal(payload?.metadata.attemptId, 'attempt-2');

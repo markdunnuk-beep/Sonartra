@@ -405,14 +405,19 @@ export function buildDomains(
   });
 }
 
-function mapActionItems(
-  items: ReturnType<typeof buildStrengths>,
+function mapAttributedActionItems(
+  items: readonly {
+    signalId?: string;
+    detail: string;
+  }[],
   normalizedResult: CanonicalResultBuilderInput,
 ): ResultActionBlockItem[] {
   const signalsById = new Map(normalizedResult.signalScores.map((signalScore) => [signalScore.signalId, signalScore]));
 
   return items.flatMap((item) => {
     if (!item.signalId) {
+      // Structured action items require reliable signal provenance.
+      // Deterministic rule-only lines are excluded rather than assigned ambiguously.
       return [];
     }
 
@@ -436,9 +441,9 @@ export function buildActions(
   interpretationContext: ResultInterpretationContext,
 ): ResultActionBlocks {
   return {
-    strengths: mapActionItems(buildStrengths(normalizedResult, interpretationContext), normalizedResult),
-    watchouts: mapActionItems(buildWatchouts(normalizedResult, interpretationContext), normalizedResult),
-    developmentFocus: mapActionItems(buildDevelopmentFocus(normalizedResult, interpretationContext), normalizedResult),
+    strengths: mapAttributedActionItems(buildStrengths(normalizedResult, interpretationContext), normalizedResult),
+    watchouts: mapAttributedActionItems(buildWatchouts(normalizedResult, interpretationContext), normalizedResult),
+    developmentFocus: mapAttributedActionItems(buildDevelopmentFocus(normalizedResult, interpretationContext), normalizedResult),
   };
 }
 

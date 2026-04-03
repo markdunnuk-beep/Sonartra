@@ -71,10 +71,12 @@ export type AssessmentResultDomainViewModel = {
 };
 
 export type AssessmentResultActionItemViewModel = {
+  signalKey: string;
+  signalLabel: string;
+  text: string;
   key: string;
   title: string;
   detail: string;
-  signalId?: string;
 };
 
 export type AssessmentResultSummary = {
@@ -108,6 +110,7 @@ export type AssessmentResultDetailViewModel = {
   metadata: CanonicalResultPayload['metadata'];
   hero: CanonicalResultPayload['hero'];
   domains: CanonicalResultPayload['domains'];
+  actions: CanonicalResultPayload['actions'];
   topSignal: AssessmentResultTopSignalViewModel | null;
   rankedSignals: readonly AssessmentResultRankedSignalViewModel[];
   normalizedScores: readonly AssessmentResultSignalScoreViewModel[];

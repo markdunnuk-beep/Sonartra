@@ -34,174 +34,117 @@ function buildPayload(params?: {
   return {
     metadata: {
       assessmentKey: 'wplp80',
+      assessmentTitle: 'WPLP-80',
       version: '1.0.0',
       attemptId: params?.resultAttemptId ?? 'attempt-1',
+      completedAt: '2026-01-01T00:01:00.000Z',
     },
-    topSignal: {
-      signalId: 'signal-core',
-      signalKey: 'core_focus',
-      title: 'Core Focus',
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      normalizedValue: 70,
-      rawTotal: 7,
-      percentage: 70,
-      rank: 1,
+    intro: {
+      assessmentDescription: null,
     },
-    rankedSignals: Object.freeze([
-      {
-        signalId: 'signal-core',
+    hero: {
+      headline: 'Core Focus leads the current pattern',
+      narrative: 'concentrated profile with Core Focus leading and Signals holding the strongest domain share.',
+      primaryPattern: {
+        label: 'Core Focus',
         signalKey: 'core_focus',
-        title: 'Core Focus',
-        domainId: 'domain-signals',
-        domainKey: 'signals',
-        normalizedValue: 70,
-        rawTotal: 7,
-        percentage: 70,
-        domainPercentage: 70,
-        isOverlay: false,
-        overlayType: 'none',
-        rank: 1,
+        signalLabel: 'Core Focus',
       },
-      ...(includeZeroSignal
-        ? [{
-            signalId: 'signal-overlay',
-            signalKey: 'role_executor',
-            title: 'Role Executor',
-            domainId: 'domain-signals',
-            domainKey: 'signals',
-            normalizedValue: 0,
-            rawTotal: 0,
-            percentage: 0,
-            domainPercentage: 0,
-            isOverlay: true,
-            overlayType: 'role' as const,
-            rank: 2,
-          }]
-        : []),
-    ]),
-    normalizedScores: Object.freeze([
-      {
-        signalId: 'signal-core',
-        signalKey: 'core_focus',
-        signalTitle: 'Core Focus',
-        domainId: 'domain-signals',
+      domainHighlights: [{
         domainKey: 'signals',
-        domainSource: 'signal_group' as const,
-        isOverlay: false,
-        overlayType: 'none' as const,
-        rawTotal: 7,
-        normalizedValue: 70,
-        percentage: 70,
-        domainPercentage: 70,
-        rank: 1,
-      },
-      ...(includeZeroSignal
-        ? [{
-            signalId: 'signal-overlay',
-            signalKey: 'role_executor',
-            signalTitle: 'Role Executor',
-            domainId: 'domain-signals',
-            domainKey: 'signals',
-            domainSource: 'signal_group' as const,
-            isOverlay: true,
-            overlayType: 'role' as const,
-            rawTotal: 0,
-            normalizedValue: 0,
-            percentage: 0,
-            domainPercentage: 0,
-            rank: 2,
-          }]
-        : []),
-    ]),
-    domainSummaries: Object.freeze([
+        domainLabel: 'Signals',
+        primarySignalKey: 'core_focus',
+        primarySignalLabel: 'Core Focus',
+        summary: null,
+      }],
+    },
+    domains: Object.freeze([
       ...(includeEmptyDomain
         ? [{
-            domainId: 'domain-section',
             domainKey: 'section_a',
-            domainTitle: 'Section A',
-            domainSource: 'question_section' as const,
-            rawTotal: 0,
-            normalizedValue: 0,
-            percentage: 0,
-            signalScores: Object.freeze([]),
-            signalCount: 0,
-            answeredQuestionCount: 1,
-            rankedSignalIds: Object.freeze([]),
-            interpretation: null,
+            domainLabel: 'Section A',
+            summary: null,
+            focus: null,
+            pressure: null,
+            environment: null,
+            primarySignal: null,
+            secondarySignal: null,
+            pairSummary: null,
+            signals: Object.freeze([]),
           }]
         : []),
       {
-        domainId: 'domain-signals',
         domainKey: 'signals',
-        domainTitle: 'Signals',
-        domainSource: 'signal_group' as const,
-        rawTotal: 7,
-        normalizedValue: 100,
-        percentage: 100,
-        signalScores: Object.freeze([
+        domainLabel: 'Signals',
+        summary: 'Core Focus leads this domain, with Role Executor adding a secondary influence.',
+        focus: null,
+        pressure: null,
+        environment: null,
+        primarySignal: {
+          signalKey: 'core_focus',
+          signalLabel: 'Core Focus',
+          summary: null,
+          strength: null,
+          watchout: null,
+          development: null,
+        },
+        secondarySignal: includeZeroSignal
+          ? {
+              signalKey: 'role_executor',
+              signalLabel: 'Role Executor',
+              summary: null,
+              strength: null,
+              watchout: null,
+              development: null,
+            }
+          : null,
+        pairSummary: includeZeroSignal
+          ? {
+              pairKey: 'executor_focus',
+              text: null,
+            }
+          : null,
+        signals: Object.freeze([
           {
-            signalId: 'signal-core',
             signalKey: 'core_focus',
-            signalTitle: 'Core Focus',
-            domainId: 'domain-signals',
-            domainKey: 'signals',
-            domainSource: 'signal_group' as const,
-            isOverlay: false,
-            overlayType: 'none' as const,
-            rawTotal: 7,
-            normalizedValue: 70,
-            percentage: 70,
-            domainPercentage: 70,
+            signalLabel: 'Core Focus',
+            score: 70,
+            withinDomainPercent: 70,
             rank: 1,
+            isPrimary: true,
+            isSecondary: false,
           },
           ...(includeZeroSignal
             ? [{
-                signalId: 'signal-overlay',
                 signalKey: 'role_executor',
-                signalTitle: 'Role Executor',
-                domainId: 'domain-signals',
-                domainKey: 'signals',
-                domainSource: 'signal_group' as const,
-                isOverlay: true,
-                overlayType: 'role' as const,
-                rawTotal: 0,
-                normalizedValue: 0,
-                percentage: 0,
-                domainPercentage: 0,
+                signalLabel: 'Role Executor',
+                score: 0,
+                withinDomainPercent: 0,
                 rank: 2,
+                isPrimary: false,
+                isSecondary: true,
               }]
             : []),
         ]),
-        signalCount: includeZeroSignal ? 2 : 1,
-        answeredQuestionCount: 1,
-        rankedSignalIds: Object.freeze(includeZeroSignal ? ['signal-core', 'signal-overlay'] : ['signal-core']),
-        interpretation: {
-          domainKey: 'signals',
-          primarySignalKey: 'core_focus',
-          primaryPercent: 70,
-          secondarySignalKey: includeZeroSignal ? 'role_executor' : null,
-          secondaryPercent: includeZeroSignal ? 0 : null,
-          summary: 'Core Focus leads this domain, with Role Executor adding a secondary influence.',
-          supportingLine: null,
-          diagnostics: {
-            strategy: includeZeroSignal ? 'fragment_fallback' : 'single_signal_fallback',
-            ruleKey: null,
-            primaryBand: 'dominant',
-            secondaryBand: includeZeroSignal ? 'low' : null,
-            blendProfile: 'concentrated',
-            primarySecondaryGap: includeZeroSignal ? 70 : 70,
-          },
-        },
       },
     ]),
-    overviewSummary: {
-      headline: 'Core Focus leads the current pattern',
-      narrative: 'concentrated profile with Core Focus leading and Signals holding the strongest domain share.',
+    actions: {
+      strengths: Object.freeze([{
+        signalKey: 'core_focus',
+        signalLabel: 'Core Focus',
+        text: 'Core Focus strength.',
+      }]),
+      watchouts: Object.freeze([{
+        signalKey: 'role_executor',
+        signalLabel: 'Role Executor',
+        text: 'Role Executor watchout.',
+      }]),
+      developmentFocus: Object.freeze([{
+        signalKey: 'role_executor',
+        signalLabel: 'Role Executor',
+        text: 'Role Executor development.',
+      }]),
     },
-    strengths: Object.freeze([]),
-    watchouts: Object.freeze([]),
-    developmentFocus: Object.freeze([]),
     diagnostics: {
       readinessStatus: 'processing',
       scoring: {
@@ -221,6 +164,7 @@ function buildPayload(params?: {
         normalizationMethod: 'largest_remainder_integer_percentages',
         totalScoreMass: 7,
         zeroMass: false,
+        percentage: 70,
         globalPercentageSum: 70,
         domainPercentageSums: Object.freeze({
           'domain-section': 0,
@@ -401,6 +345,9 @@ test('detail load returns canonical payload projection including empty domains a
   assert.equal(detail.normalizedScores[1]?.rawTotal, 0);
   assert.equal(detail.normalizedScores[1]?.isOverlay, true);
   assert.equal(detail.domainSummaries[1]?.interpretation?.primarySignalKey, 'core_focus');
+  assert.equal(detail.actions.strengths[0]?.signalKey, 'core_focus');
+  assert.equal(detail.actions.strengths[0]?.text, 'Core Focus strength.');
+  assert.equal(detail.strengths[0]?.detail, 'Core Focus strength.');
 });
 
 test('malformed payload triggers explicit payload error', async () => {

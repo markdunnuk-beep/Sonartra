@@ -7,11 +7,6 @@ import {
   buildDomainSummaries,
   createResultInterpretationContext,
 } from '@/lib/engine/result-builder-helpers';
-import {
-  buildDevelopmentFocus,
-  buildStrengths,
-  buildWatchouts,
-} from '@/lib/engine/result-interpretation';
 import type { CanonicalResultBuilderInput } from '@/lib/engine/result-builder';
 import type {
   CanonicalResultPayload,
@@ -53,36 +48,7 @@ type LegacyResultPayloadView = CanonicalResultPayload & {
     headline: string | null;
     narrative: string | null;
   };
-  strengths: Array<{
-    key: string;
-    title: string;
-    detail: string;
-    signalId?: string;
-  }>;
-  watchouts: Array<{
-    key: string;
-    title: string;
-    detail: string;
-    signalId?: string;
-  }>;
-  developmentFocus: Array<{
-    key: string;
-    title: string;
-    detail: string;
-    signalId?: string;
-  }>;
 };
-
-function mapLegacyActionItems(
-  items: ReadonlyArray<{
-    key: string;
-    title: string;
-    detail: string;
-    signalId?: string;
-  }>,
-) {
-  return items.map((item) => ({ ...item }));
-}
 
 function buildCanonicalResultPayload(params: {
   normalizedResult: CanonicalResultBuilderInput;
@@ -130,15 +96,6 @@ function buildCanonicalResultPayload(params: {
     },
     overviewSummary: {
       value: payload.hero,
-    },
-    strengths: {
-      value: mapLegacyActionItems(buildStrengths(params.normalizedResult, interpretationContext)),
-    },
-    watchouts: {
-      value: mapLegacyActionItems(buildWatchouts(params.normalizedResult, interpretationContext)),
-    },
-    developmentFocus: {
-      value: mapLegacyActionItems(buildDevelopmentFocus(params.normalizedResult, interpretationContext)),
     },
   }) as LegacyResultPayloadView;
 }
@@ -415,6 +372,66 @@ test('minimal valid payload construction returns a complete canonical result pay
   assert.equal(payload.hero.primaryPattern?.signalKey, 'focus');
   assert.equal(payload.domains.length, 2);
   assert.deepEqual(Object.keys(payload.actions), ['strengths', 'watchouts', 'developmentFocus']);
+});
+
+test('canonical actions are emitted only in structured attributed arrays', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 55,
+          domainPercentage: 55,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-control',
+          signalKey: 'stress_control',
+          title: 'Control',
+          domainId: 'domain-stress',
+          domainKey: 'signal_stress',
+          rawTotal: 4,
+          percentage: 30,
+          domainPercentage: 30,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-evidence',
+          signalKey: 'decision_evidence',
+          title: 'Evidence',
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          rawTotal: 1,
+          percentage: 15,
+          domainPercentage: 15,
+          rank: 3,
+        }),
+      ]),
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  assert.ok(!('strengths' in payload));
+  assert.ok(!('watchouts' in payload));
+  assert.ok(!('developmentFocus' in payload));
+
+  for (const item of payload.actions.strengths) {
+    assert.deepEqual(Object.keys(item), ['signalKey', 'signalLabel', 'text']);
+  }
+
+  for (const item of payload.actions.watchouts) {
+    assert.deepEqual(Object.keys(item), ['signalKey', 'signalLabel', 'text']);
+  }
+
+  for (const item of payload.actions.developmentFocus) {
+    assert.deepEqual(Object.keys(item), ['signalKey', 'signalLabel', 'text']);
+  }
 });
 
 test('metadata includes assessmentDescription when provided by the engine context', () => {
@@ -1161,9 +1178,9 @@ test('domain language summary overrides persisted domain interpretation summary 
   );
   assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
   assert.equal(payload.overviewSummary.narrative, baseline.overviewSummary.narrative);
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
 });
 
 test('domain summary fallback remains unchanged when domain language summary is missing', () => {
@@ -1240,9 +1257,9 @@ test('domain summary fallback remains unchanged when domain language summary is 
 
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
   assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
 });
 
 test('domain ordering tie handling is deterministic in persisted payloads', () => {
@@ -1477,9 +1494,9 @@ test('overview summary uses overview language summary when the resolved canonica
     payload.overviewSummary.narrative,
     'Overview-language summary for the dominant analyst-driver combination.',
   );
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
@@ -1554,9 +1571,9 @@ test('overview summary uses overview template headline when the resolved canonic
   assert.ok(isCanonicalResultPayload(payload));
   assert.equal(payload.overviewSummary.headline, 'Assessment-authored overview headline.');
   assert.equal(payload.overviewSummary.narrative, 'Assessment-authored overview summary.');
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
@@ -1673,9 +1690,9 @@ test('overview summary headline falls back unchanged when overview template head
 
   assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
   assert.equal(payload.overviewSummary.narrative, 'Present but not used for headline.');
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
@@ -1913,11 +1930,15 @@ test('strengths are generated deterministically from top-ranked signals', () => 
     }),
   });
 
-  assert.equal(payload.strengths.length, 3);
-  assert.equal(payload.strengths[0]?.signalId, 'signal-driver');
-  assert.match(payload.strengths[0]?.detail ?? '', /direction, urgency, or firmer calls/i);
-  assert.match(payload.strengths[0]?.detail ?? '', /create movement quickly/i);
-  assert.doesNotMatch(payload.strengths[0]?.detail ?? '', /\d+%/);
+  assert.equal(payload.actions.strengths.length, 3);
+  assert.deepEqual(payload.actions.strengths[0], {
+    signalKey: 'style_driver',
+    signalLabel: 'Driver',
+    text: payload.actions.strengths[0]?.text ?? '',
+  });
+  assert.match(payload.actions.strengths[0]?.text ?? '', /direction, urgency, or firmer calls/i);
+  assert.match(payload.actions.strengths[0]?.text ?? '', /create movement quickly/i);
+  assert.doesNotMatch(payload.actions.strengths[0]?.text ?? '', /\d+%/);
 });
 
 test('signal language strength overrides fallback strength text when present', () => {
@@ -1983,12 +2004,12 @@ test('signal language strength overrides fallback strength text when present', (
     }),
   });
 
-  assert.equal(payload.strengths.length, baseline.strengths.length);
-  assert.equal(payload.strengths[0]?.detail, 'Assessment-owned strength language for the Driver signal.');
-  assert.equal(payload.strengths[0]?.title, baseline.strengths[0]?.title);
+  assert.equal(payload.actions.strengths.length, baseline.actions.strengths.length);
+  assert.equal(payload.actions.strengths[0]?.text, 'Assessment-owned strength language for the Driver signal.');
+  assert.equal(payload.actions.strengths[0]?.signalLabel, baseline.actions.strengths[0]?.signalLabel);
   assert.equal(payload.overviewSummary.narrative, baseline.overviewSummary.narrative);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
@@ -2035,12 +2056,61 @@ test('watchouts are generated deterministically from overuse, pressure rules, an
     }),
   });
 
-  assert.equal(payload.watchouts[0]?.title, 'Over-reliance on drive');
-  assert.match(payload.watchouts[0]?.detail ?? '', /too forceful, too fast, or too impatient/i);
-  assert.equal(payload.watchouts[1]?.title, 'Pattern under pressure');
-  assert.match(payload.watchouts[1]?.detail ?? '', /over-control/i);
-  assert.doesNotMatch(payload.watchouts[0]?.detail ?? '', /undefined|null/i);
-  assert.equal(payload.watchouts[2]?.title, 'Limited use of avoidance');
+  assert.equal(payload.actions.watchouts.length, 2);
+  assert.equal(payload.actions.watchouts[0]?.signalKey, 'style_driver');
+  assert.match(payload.actions.watchouts[0]?.text ?? '', /too forceful, too fast, or too impatient/i);
+  assert.doesNotMatch(payload.actions.watchouts[0]?.text ?? '', /undefined|null/i);
+  assert.equal(payload.actions.watchouts[1]?.signalKey, 'conflict_avoid');
+});
+
+test('structured actions drop unattributable watchout lines instead of fabricating signal provenance', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 42,
+          domainPercentage: 42,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-control',
+          signalKey: 'stress_control',
+          title: 'Control',
+          domainId: 'domain-stress',
+          domainKey: 'signal_stress',
+          rawTotal: 4,
+          percentage: 33,
+          domainPercentage: 33,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-avoid',
+          signalKey: 'conflict_avoid',
+          title: 'Avoid',
+          domainId: 'domain-conflict',
+          domainKey: 'signal_conflict',
+          rawTotal: 1,
+          percentage: 10,
+          domainPercentage: 10,
+          rank: 3,
+        }),
+      ]),
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-driver',
+    }),
+  });
+
+  assert.deepEqual(
+    payload.actions.watchouts.map((item) => item.signalKey),
+    ['style_driver', 'conflict_avoid'],
+  );
+  assert.equal(payload.actions.watchouts.length, 2);
 });
 
 test('signal language watchout overrides signal-led watchout text when present', () => {
@@ -2106,12 +2176,12 @@ test('signal language watchout overrides signal-led watchout text when present',
     }),
   });
 
-  assert.equal(payload.watchouts.length, baseline.watchouts.length);
-  assert.equal(payload.watchouts[0]?.detail, 'Assessment-owned watchout language for the Driver signal.');
-  assert.equal(payload.watchouts[1]?.detail, baseline.watchouts[1]?.detail);
-  assert.equal(payload.watchouts[2]?.detail, baseline.watchouts[2]?.detail);
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.equal(payload.actions.watchouts.length, baseline.actions.watchouts.length);
+  assert.equal(payload.actions.watchouts[0]?.text, 'Assessment-owned watchout language for the Driver signal.');
+  assert.equal(payload.actions.watchouts[1]?.text, baseline.actions.watchouts[1]?.text);
+  assert.equal(payload.actions.watchouts[2]?.text, baseline.actions.watchouts[2]?.text);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
   assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
 });
@@ -2170,11 +2240,11 @@ test('development focus is generated deterministically from lower-ranked signals
     }),
   });
 
-  assert.equal(payload.developmentFocus.length, 2);
-  assert.equal(payload.developmentFocus[0]?.signalId, 'signal-evidence');
-  assert.match(payload.developmentFocus[0]?.detail ?? '', /concise evidence checks/i);
-  assert.match(payload.developmentFocus[0]?.detail ?? '', /sharper calls/i);
-  assert.equal(payload.developmentFocus[1]?.signalId, 'signal-people');
+  assert.equal(payload.actions.developmentFocus.length, 2);
+  assert.equal(payload.actions.developmentFocus[0]?.signalKey, 'decision_evidence');
+  assert.match(payload.actions.developmentFocus[0]?.text ?? '', /concise evidence checks/i);
+  assert.match(payload.actions.developmentFocus[0]?.text ?? '', /sharper calls/i);
+  assert.equal(payload.actions.developmentFocus[1]?.signalKey, 'lead_people');
 });
 
 test('signal language development overrides fallback development text when present', () => {
@@ -2251,14 +2321,14 @@ test('signal language development overrides fallback development text when prese
     }),
   });
 
-  assert.equal(payload.developmentFocus.length, baseline.developmentFocus.length);
+  assert.equal(payload.actions.developmentFocus.length, baseline.actions.developmentFocus.length);
   assert.equal(
-    payload.developmentFocus[0]?.detail,
+    payload.actions.developmentFocus[0]?.text,
     'Assessment-owned development language for evidence-led judgement.',
   );
-  assert.equal(payload.developmentFocus[1]?.detail, baseline.developmentFocus[1]?.detail);
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
+  assert.equal(payload.actions.developmentFocus[1]?.text, baseline.actions.developmentFocus[1]?.text);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
   assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
 });
@@ -2326,9 +2396,9 @@ test('signal language fallback remains unchanged when required entries are missi
     }),
   });
 
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
@@ -2631,9 +2701,9 @@ test('repeated runs with signal-language sections remain byte-stable', () => {
   const first = buildCanonicalResultPayload({ normalizedResult });
   const second = buildCanonicalResultPayload({ normalizedResult });
 
-  assert.equal(first.strengths[0]?.detail, 'Stable custom strength.');
-  assert.equal(first.watchouts[0]?.detail, 'Stable custom watchout.');
-  assert.equal(first.developmentFocus[0]?.detail, 'Stable custom development.');
+  assert.equal(first.actions.strengths[0]?.text, 'Stable custom strength.');
+  assert.equal(first.actions.watchouts[0]?.text, 'Stable custom watchout.');
+  assert.equal(first.actions.developmentFocus[0]?.text, 'Stable custom development.');
   assert.equal(JSON.stringify(first), JSON.stringify(second));
 });
 

@@ -325,6 +325,16 @@ test('full end-to-end execution returns a canonical result payload', async () =>
       summary: null,
     },
   ]);
+  assert.deepEqual(Object.keys(payload.actions), ['strengths', 'watchouts', 'developmentFocus']);
+  for (const item of payload.actions.strengths) {
+    assert.deepEqual(Object.keys(item), ['signalKey', 'signalLabel', 'text']);
+  }
+  for (const item of payload.actions.watchouts) {
+    assert.deepEqual(Object.keys(item), ['signalKey', 'signalLabel', 'text']);
+  }
+  for (const item of payload.actions.developmentFocus) {
+    assert.deepEqual(Object.keys(item), ['signalKey', 'signalLabel', 'text']);
+  }
 });
 
 test('published assessment path loads by assessment key', async () => {

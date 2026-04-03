@@ -47,10 +47,12 @@ function toActionItems(
 ): readonly AssessmentResultActionItemViewModel[] {
   return Object.freeze(
     items.map((item) => ({
+      signalKey: item.signalKey,
+      signalLabel: item.signalLabel,
+      text: item.text,
       key: item.signalKey,
       title: item.signalLabel,
       detail: item.text,
-      signalId: item.signalKey,
     })),
   );
 }
@@ -194,6 +196,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     metadata: payload.metadata,
     hero: payload.hero,
     domains: payload.domains,
+    actions: payload.actions,
     topSignal,
     rankedSignals,
     normalizedScores,
