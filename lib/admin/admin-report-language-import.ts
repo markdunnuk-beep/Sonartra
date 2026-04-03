@@ -1,6 +1,6 @@
 import type {
+  ImportableReportLanguageSection,
   ReportLanguageParseError,
-  ReportLanguageSection,
   ReportLanguageValidationError,
 } from '@/lib/admin/report-language-import';
 
@@ -24,7 +24,7 @@ export type AdminReportLanguageImportSummary = {
 };
 
 export type AdminReportLanguageImportState = {
-  reportSection: ReportLanguageSection;
+  reportSection: ImportableReportLanguageSection;
   rawInput: string;
   lastAction: 'idle' | 'preview' | 'import';
   hasSubmitted: boolean;

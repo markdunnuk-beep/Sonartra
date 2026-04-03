@@ -6,7 +6,10 @@ import {
   initialAdminReportLanguageImportState,
   type AdminReportLanguageImportState,
 } from '@/lib/admin/admin-report-language-import';
-import type { ReportLanguageSection } from '@/lib/admin/report-language-import';
+import {
+  REPORT_ALIGNED_AUTHORING_NOTE,
+  type ImportableReportLanguageSection,
+} from '@/lib/admin/report-language-import';
 import {
   importReportLanguageAction,
   previewReportLanguageAction,
@@ -132,7 +135,7 @@ export function AdminReportLanguageImport({
   assessmentVersionId: string;
   existingRowCount: number;
   isEditableAssessmentVersion: boolean;
-  reportSection: Exclude<ReportLanguageSection, 'intro'>;
+  reportSection: ImportableReportLanguageSection;
   eyebrow: string;
   title: string;
   description: string;
@@ -210,6 +213,7 @@ export function AdminReportLanguageImport({
           <p className="sonartra-page-eyebrow">{eyebrow}</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">{title}</h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">{description}</p>
+          <p className="max-w-3xl text-sm leading-7 text-white/62">{REPORT_ALIGNED_AUTHORING_NOTE}</p>
           <p className="max-w-3xl text-sm leading-7 text-white/62">{detail}</p>
           {derivedNote ? <p className="max-w-3xl text-sm leading-7 text-white/62">{derivedNote}</p> : null}
         </div>

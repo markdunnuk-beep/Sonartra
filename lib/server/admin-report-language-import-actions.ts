@@ -8,7 +8,7 @@ import {
 } from '@/lib/admin/admin-report-language-import';
 import {
   getReportSectionEmptyInputNoun,
-  type ReportLanguageSection,
+  type ImportableReportLanguageSection,
 } from '@/lib/admin/report-language-import';
 import {
   importReportLanguageForAssessmentVersion,
@@ -17,7 +17,7 @@ import {
 
 type ReportLanguageActionContext = {
   assessmentVersionId: string;
-  reportSection: Exclude<ReportLanguageSection, 'intro'>;
+  reportSection: ImportableReportLanguageSection;
 };
 
 type ReportLanguageActionValues = {
@@ -25,7 +25,7 @@ type ReportLanguageActionValues = {
 };
 
 function buildEmptyInputState(
-  reportSection: Exclude<ReportLanguageSection, 'intro'>,
+  reportSection: ImportableReportLanguageSection,
   rawInput: string,
   lastAction: AdminReportLanguageImportState['lastAction'],
 ): AdminReportLanguageImportState {

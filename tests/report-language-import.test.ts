@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 import {
   buildReportAlignedLanguageStoragePlan,
   parseReportLanguageRows,
@@ -259,4 +260,20 @@ test('report-aligned validation rejects duplicate canonical hero rows', () => {
     validation.errors.map((error) => error.code),
     ['DUPLICATE_ENTRY', 'DUPLICATE_ENTRY'],
   );
+});
+
+test('pair-key canonicalization remains available for the report-aligned path and engine bridge', () => {
+  assert.deepEqual(canonicalizeSignalPairKey('driver_analyst'), {
+    success: true,
+    signalKeys: ['analyst', 'driver'],
+    canonicalSignalPair: 'analyst_driver',
+  });
+  assert.deepEqual(canonicalizeSignalPairKey('analyst_driver'), {
+    success: true,
+    signalKeys: ['analyst', 'driver'],
+    canonicalSignalPair: 'analyst_driver',
+  });
+  assert.deepEqual(canonicalizeSignalPairKey('driver_analyst_extra'), {
+    success: false,
+  });
 });

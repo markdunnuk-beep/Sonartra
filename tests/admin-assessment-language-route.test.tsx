@@ -510,10 +510,12 @@ test('language step component renders intro, hero, domain chapters, signals, and
   assert.match(markup, /Signal Language/);
   assert.match(markup, /Pair Summary Language/);
   assert.match(markup, /section \| target \| field \| content/);
+  assert.match(markup, /supported authoring path for report language/i);
   assert.match(markup, /hero\.primaryPattern or hero\.domainHighlights/);
   assert.match(markup, /Actions are not authored directly for MVP/);
   assert.match(markup, /Pair strength and watchout are legacy-only and are not surfaced here\./);
   assert.doesNotMatch(markup, /Actions<\/h3>/);
+  assert.doesNotMatch(markup, /AdminOverviewLanguageImport|AdminDomainLanguageImport|AdminSignalLanguageImport|AdminPairLanguageImport/);
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
   assert.match(markup, /3 entries/);

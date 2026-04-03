@@ -12,7 +12,7 @@ export type ReportLanguageSection = 'intro' | 'hero' | 'domain' | 'signal' | 'pa
 
 type RecognizedReportLanguageSection = ReportLanguageSection | 'actions';
 
-type ImportableReportLanguageSection = Exclude<ReportLanguageSection, 'intro'>;
+export type ImportableReportLanguageSection = Exclude<ReportLanguageSection, 'intro'>;
 
 export type ReportLanguageParseErrorCode =
   | 'INVALID_COLUMN_COUNT'
@@ -155,6 +155,8 @@ export type ReportAlignedLanguageStoragePlan = {
 
 export const HERO_OVERVIEW_STORAGE_NOTE =
   'Hero authoring continues to write to legacy overview storage so the persisted runtime contract stays unchanged.' as const;
+export const REPORT_ALIGNED_AUTHORING_NOTE =
+  'This is the supported authoring path for report language. Derived report sections remain engine-resolved.' as const;
 
 const SIGNAL_FIELDS = new Set<ValidSignalField>([
   'summary',
@@ -333,7 +335,7 @@ export function validateReportLanguageRows(params: {
         createValidationError(
           row,
           'DERIVED_FIELD_NOT_AUTHORABLE',
-          'Actions are derived in the engine and are not authorable in the report-aligned import model.',
+          'Actions are derived in the engine and are not part of the supported report-language authoring surface.',
         ),
       );
       continue;
@@ -417,7 +419,7 @@ export function validateReportLanguageRows(params: {
           createValidationError(
             row,
             'UNSUPPORTED_LEGACY_FIELD',
-            'Legacy overview strengths/watchouts/development are not part of the report-aligned import model.',
+            'Legacy hero strengths/watchouts/development rows are not supported. Author Hero headline/narrative here and keep actions engine-derived.',
           ),
         );
         continue;
@@ -569,7 +571,7 @@ export function validateReportLanguageRows(params: {
         createValidationError(
           row,
           'UNSUPPORTED_LEGACY_FIELD',
-          'Pair strength/watchout are legacy-only and are not part of the report-aligned import model.',
+          'Pair strength/watchout rows are legacy-only and not supported. Only pair summary is authorable in the report-language path.',
         ),
       );
       continue;

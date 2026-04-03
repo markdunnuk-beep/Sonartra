@@ -9,7 +9,7 @@ import {
   normalizeReportLanguageSection,
   parseReportLanguageRows,
   validateReportLanguageRows,
-  type ReportLanguageSection,
+  type ImportableReportLanguageSection,
   type ReportLanguageValidationError,
 } from '@/lib/admin/report-language-import';
 import type {
@@ -64,7 +64,7 @@ type AssessmentVersionImportTarget = {
 
 export type ReportLanguageImportCommand = {
   assessmentVersionId: string;
-  reportSection: Exclude<ReportLanguageSection, 'intro'>;
+  reportSection: ImportableReportLanguageSection;
   rawInput: string;
 };
 
@@ -340,7 +340,7 @@ async function loadTargetDomainsForImport(
 
 async function loadExistingRowCount(
   db: Queryable,
-  reportSection: Exclude<ReportLanguageSection, 'intro'>,
+  reportSection: ImportableReportLanguageSection,
   assessmentVersionId: string,
 ): Promise<number> {
   switch (reportSection) {
@@ -357,7 +357,7 @@ async function loadExistingRowCount(
 
 function buildWrongSectionErrors(
   rows: readonly ReturnType<typeof parseReportLanguageRows>['records'][number][],
-  reportSection: Exclude<ReportLanguageSection, 'intro'>,
+  reportSection: ImportableReportLanguageSection,
 ): readonly ReportLanguageImportPlanError[] {
   const errors: ReportLanguageImportPlanError[] = [];
 
@@ -377,7 +377,7 @@ function buildWrongSectionErrors(
 }
 
 function buildPlanErrors(
-  reportSection: Exclude<ReportLanguageSection, 'intro'>,
+  reportSection: ImportableReportLanguageSection,
   assessmentVersion: AssessmentVersionImportTarget | null,
   signalCount: number,
   domainCount: number,
@@ -417,7 +417,7 @@ function buildPlanErrors(
 }
 
 function buildPreviewGroups(
-  reportSection: Exclude<ReportLanguageSection, 'intro'>,
+  reportSection: ImportableReportLanguageSection,
   rows: ReturnType<typeof validateReportLanguageRows>['validRows'],
 ): readonly AdminReportLanguageImportPreviewGroup[] {
   const grouped = new Map<string, AdminReportLanguageImportPreviewGroup['entries'][number][]>();
@@ -467,7 +467,7 @@ function buildPreviewGroups(
 }
 
 function countTargetsForSection(
-  reportSection: Exclude<ReportLanguageSection, 'intro'>,
+  reportSection: ImportableReportLanguageSection,
   rows: ReturnType<typeof validateReportLanguageRows>['validRows'],
 ): number {
   switch (reportSection) {
@@ -523,6 +523,6 @@ function buildResult(params: {
   };
 }
 
-function toSectionLabel(reportSection: Exclude<ReportLanguageSection, 'intro'>): string {
+function toSectionLabel(reportSection: ImportableReportLanguageSection): string {
   return getReportSectionLabel(reportSection);
 }
