@@ -167,7 +167,9 @@ const DOMAIN_FIELDS = new Set<ValidDomainField>([
 
 const HERO_FIELDS = new Set<ValidHeroField>(['headline', 'narrative']);
 
-function normalizeSection(value: string): RecognizedReportLanguageSection | null {
+export function normalizeReportLanguageSection(
+  value: string,
+): RecognizedReportLanguageSection | null {
   const normalized = value.trim().toLowerCase();
 
   switch (normalized) {
@@ -267,7 +269,7 @@ export function validateReportLanguageRows(params: {
   const validRows: ValidatedReportLanguageRow[] = [];
 
   for (const row of params.rows) {
-    const section = normalizeSection(row.section);
+    const section = normalizeReportLanguageSection(row.section);
     if (!section) {
       errors.push(
         createValidationError(

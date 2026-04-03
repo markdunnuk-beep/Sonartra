@@ -35,9 +35,10 @@ test('domain language panel enforces preview-before-import against the current t
   assert.match(source, /disabled=\{!canImport\}/);
 });
 
-test('language step renders the live domain language import panel and removes the domain placeholder card', () => {
+test('language step renders the shared report-language import panel for domain chapters', () => {
   const source = readSource(languageStepPath);
 
-  assert.match(source, /<AdminDomainLanguageImport/);
-  assert.doesNotMatch(source, /Structured bulk import for domain-level narrative sections will follow this panel pattern/);
+  assert.match(source, /reportSection="domain"/);
+  assert.match(source, /title="Domain Chapter Language"/);
+  assert.doesNotMatch(source, /<AdminDomainLanguageImport/);
 });

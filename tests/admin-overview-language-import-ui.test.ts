@@ -15,6 +15,12 @@ const languageStepPath = join(
   'admin',
   'admin-assessment-language-step.tsx',
 );
+const reportComponentPath = join(
+  process.cwd(),
+  'components',
+  'admin',
+  'admin-report-language-import.tsx',
+);
 
 function readSource(path: string): string {
   return readFileSync(path, 'utf8');
@@ -35,9 +41,17 @@ test('overview templates panel enforces preview-before-import against the curren
   assert.match(source, /disabled=\{!canImport\}/);
 });
 
-test('language step renders the live overview templates import panel and removes the overview placeholder card', () => {
+test('report-oriented import panel binds the shared report-language actions for hero sections', () => {
+  const source = readSource(reportComponentPath);
+
+  assert.match(source, /previewReportLanguageAction\.bind\(null, \{ assessmentVersionId, reportSection \}\)/);
+  assert.match(source, /importReportLanguageAction\.bind\(null, \{ assessmentVersionId, reportSection \}\)/);
+});
+
+test('language step renders the shared report-language import panel for hero authoring', () => {
   const source = readSource(languageStepPath);
 
-  assert.match(source, /<AdminOverviewLanguageImport/);
-  assert.doesNotMatch(source, /Structured bulk import for overview template patterns will be added after signal language\./);
+  assert.match(source, /reportSection="hero"/);
+  assert.match(source, /title="Hero Language"/);
+  assert.doesNotMatch(source, /<AdminOverviewLanguageImport/);
 });

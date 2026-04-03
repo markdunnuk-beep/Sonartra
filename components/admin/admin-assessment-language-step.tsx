@@ -1,6 +1,5 @@
 import { AdminAssessmentLanguageEditor } from '@/components/admin/admin-assessment-language-editor';
-import { AdminDomainLanguageImport } from '@/components/admin/admin-domain-language-import';
-import { AdminOverviewLanguageImport } from '@/components/admin/admin-overview-language-import';
+import { AdminReportLanguageImport } from '@/components/admin/admin-report-language-import';
 import {
   EmptyState,
   LabelPill,
@@ -8,17 +7,7 @@ import {
   SectionHeader,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
-import { AdminSignalLanguageImport } from '@/components/admin/admin-signal-language-import';
-import { AdminPairLanguageImport } from '@/components/admin/admin-pair-language-import';
 import type { AdminAssessmentLanguageStepViewModel } from '@/lib/server/admin-assessment-language-step';
-
-const PLACEHOLDER_SECTIONS = [
-  {
-    title: 'Development / Pressure / Environment',
-    hint: 'key | section | content',
-    description: 'Structured bulk import for development, pressure, and environment datasets will be added next.',
-  },
-] as const;
 
 function getVersionSummary(viewModel: AdminAssessmentLanguageStepViewModel): string {
   if (!viewModel.activeVersion) {
@@ -81,7 +70,7 @@ export function AdminAssessmentLanguageStep({
       <SectionHeader
         eyebrow="Language"
         title="Language"
-        description="Manage the structured language datasets that will drive deterministic assessment outputs."
+        description="Author the persisted report sections the engine resolves into the final result payload."
       />
 
       <SurfaceCard className="space-y-4 p-5 lg:p-6">
@@ -92,16 +81,16 @@ export function AdminAssessmentLanguageStep({
           </LabelPill>
         </div>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          This builder step is reserved for structured assessment language datasets. Bulk import panels
-          will be added here without shifting scoring or interpretation into the UI.
+          Organize authored content in the same order the final report is read: Intro, Hero, Domain Chapters,
+          Signals, and Pairs. Derived report fields stay engine-owned and are not editable here.
         </p>
       </SurfaceCard>
 
       <div className="space-y-6">
         <SectionHeader
-          eyebrow="Assessment"
-          title="Assessment Description"
-          description="Define the report introduction shown to all users above the results."
+          eyebrow="Intro"
+          title="Intro"
+          description="Opening context for the assessment shown before the report hero."
         />
 
         <div className="rounded-[1.25rem] border border-white/10 bg-gradient-to-b from-white/[0.02] to-transparent p-[1px]">
@@ -115,51 +104,134 @@ export function AdminAssessmentLanguageStep({
         </div>
       </div>
 
-      <AdminSignalLanguageImport
-        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-        existingSignalLanguageRowCount={viewModel.counts.signals.entryCount}
-        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-      />
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Hero"
+          title="Hero"
+          description="Opening synthesis at the start of the report. Primary pattern and domain highlights remain engine-derived."
+        />
 
-      <AdminPairLanguageImport
-        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-        existingPairLanguageRowCount={viewModel.counts.pairs.entryCount}
-        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-      />
-
-      <AdminDomainLanguageImport
-        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-        existingDomainLanguageRowCount={viewModel.counts.domains.entryCount}
-        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-      />
-
-      <AdminOverviewLanguageImport
-        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-        existingOverviewLanguageRowCount={viewModel.counts.overview.entryCount}
-        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-      />
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetaItem label="Assessment" value={formatEntryCount(viewModel.counts.assessment.entryCount)} />
-        <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
-        <MetaItem label="Pairs" value={formatEntryCount(viewModel.counts.pairs.entryCount)} />
-        <MetaItem label="Domains" value={formatEntryCount(viewModel.counts.domains.entryCount)} />
-        <MetaItem label="Overview" value={formatEntryCount(viewModel.counts.overview.entryCount)} />
+        <AdminReportLanguageImport
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          existingRowCount={viewModel.counts.overview.entryCount}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+          reportSection="hero"
+          eyebrow="Hero"
+          title="Hero Language"
+          description="Author the Hero headline and narrative using report-oriented rows."
+          detail="This writes to the current overview-backed storage model through the report-aligned compatibility layer."
+          derivedNote="Do not author hero.primaryPattern or hero.domainHighlights here. Those are derived by the engine from ranking and signal summaries."
+          currentRowsLabel="Current Hero rows"
+          textareaLabel="Paste hero rows"
+          placeholder="hero|driver_analyst|headline|Fast, structured, decisive."
+          importButtonLabel="Import hero language"
+          formatExample={[
+            'section | target | field | content',
+            '',
+            'hero | driver_analyst | headline | Fast, structured, decisive.',
+            'hero | driver_analyst | narrative | You combine pace with analysis and tend to move quickly toward a considered conclusion.',
+          ].join('\n')}
+        />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        {PLACEHOLDER_SECTIONS.map((section) => (
-          <SurfaceCard className="space-y-3 p-5 lg:p-6" key={section.title}>
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">{section.title}</h3>
-              <p className="text-sm leading-7 text-white/62">{section.description}</p>
-            </div>
-            <div className="rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3">
-              <p className="text-[0.7rem] uppercase tracking-[0.18em] text-white/42">Input format</p>
-              <p className="pt-1 text-sm text-white/78">{section.hint}</p>
-            </div>
-          </SurfaceCard>
-        ))}
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Domain Chapters"
+          title="Domain Chapters"
+          description="Author chapter-level guidance within each domain section. Domain summary remains an optional override on top of engine interpretation."
+        />
+
+        <AdminReportLanguageImport
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          existingRowCount={viewModel.counts.domains.entryCount}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+          reportSection="domain"
+          eyebrow="Domain Chapters"
+          title="Domain Chapter Language"
+          description="Author summary override, focus, pressure, and environment rows for report domains."
+          detail="Signal ordering, primary and secondary signal selection, and pair selection remain engine-resolved."
+          derivedNote="Use summary only when you want to override the deterministic chapter opener. The rest of the domain chapter still combines authored and derived content."
+          currentRowsLabel="Current Domain rows"
+          textareaLabel="Paste domain chapter rows"
+          placeholder="domain|signal_style|focus|Your strongest contribution in this area is how you bring direction and consistency."
+          importButtonLabel="Import domain chapter language"
+          formatExample={[
+            'section | target | field | content',
+            '',
+            'domain | signal_style | summary | You tend to operate with visible pace, structure, and interpersonal impact.',
+            'domain | signal_style | focus | Your strongest contribution in this area is how you bring direction and consistency.',
+            'domain | signal_style | pressure | Under pressure, you may narrow your attention or become more forceful in your style.',
+            'domain | signal_style | environment | You perform best where expectations, pace, and collaboration are clear.',
+          ].join('\n')}
+        />
+      </div>
+
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Signals"
+          title="Signals"
+          description="Signal-level language building blocks reused across the report, including Hero highlights and action blocks."
+        />
+
+        <AdminReportLanguageImport
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          existingRowCount={viewModel.counts.signals.entryCount}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+          reportSection="signal"
+          eyebrow="Signals"
+          title="Signal Language"
+          description="Author summary, strength, watchout, and development language by signal."
+          detail="These are reusable report building blocks. The engine decides where each signal sentence appears."
+          derivedNote="Actions are not authored directly for MVP. Strengths, watchouts, and development focus remain engine-derived from signal ranking and signal-owned language."
+          currentRowsLabel="Current Signal rows"
+          textareaLabel="Paste signal rows"
+          placeholder="signal|style_driver|summary|You tend to move quickly and take initiative."
+          importButtonLabel="Import signal language"
+          formatExample={[
+            'section | target | field | content',
+            '',
+            'signal | style_driver | summary | You tend to move quickly and take initiative.',
+            'signal | style_driver | strength | You bring momentum and energy to delivery.',
+            'signal | style_driver | watchout | You may move ahead before others are ready.',
+            'signal | style_driver | development | Pause slightly longer before committing to direction.',
+          ].join('\n')}
+        />
+      </div>
+
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Pairs"
+          title="Pairs"
+          description="Summary language for the top two signals within a domain chapter."
+        />
+
+        <AdminReportLanguageImport
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          existingRowCount={viewModel.counts.pairs.entryCount}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+          reportSection="pair"
+          eyebrow="Pairs"
+          title="Pair Summary Language"
+          description="Author pair summaries only. Pair strength and watchout are legacy-only and are not surfaced here."
+          detail="Pair keys remain canonicalized under the hood so report-shaped inputs still round-trip into the current storage model safely."
+          currentRowsLabel="Current Pair rows"
+          textareaLabel="Paste pair summary rows"
+          placeholder="pair|driver_analyst|summary|You combine forward momentum with structured thinking."
+          importButtonLabel="Import pair summary language"
+          formatExample={[
+            'section | target | field | content',
+            '',
+            'pair | driver_analyst | summary | You combine forward momentum with structured thinking.',
+          ].join('\n')}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <MetaItem label="Intro" value={formatEntryCount(viewModel.counts.assessment.entryCount)} />
+        <MetaItem label="Hero" value={formatEntryCount(viewModel.counts.overview.entryCount)} />
+        <MetaItem label="Domain Chapters" value={formatEntryCount(viewModel.counts.domains.entryCount)} />
+        <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
+        <MetaItem label="Pairs" value={formatEntryCount(viewModel.counts.pairs.entryCount)} />
       </div>
     </section>
   );

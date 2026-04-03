@@ -35,10 +35,12 @@ test('signal language panel enforces preview-before-import against the current t
   assert.match(source, /disabled=\{!canImport\}/);
 });
 
-test('language step renders the live signal language import panel and keeps the remaining sections as placeholders', () => {
+test('language step renders the shared report-language import panel for signals and pairs', () => {
   const source = readSource(languageStepPath);
 
-  assert.match(source, /<AdminSignalLanguageImport/);
-  assert.match(source, /<AdminPairLanguageImport/);
-  assert.doesNotMatch(source, /Structured bulk import for per-signal narrative sections will live here/);
+  assert.match(source, /reportSection="signal"/);
+  assert.match(source, /reportSection="pair"/);
+  assert.match(source, /title="Signal Language"/);
+  assert.match(source, /title="Pair Summary Language"/);
+  assert.doesNotMatch(source, /<AdminSignalLanguageImport/);
 });

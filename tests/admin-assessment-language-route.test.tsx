@@ -462,7 +462,7 @@ test('language step view model returns null for a missing assessment and empty v
   });
 });
 
-test('language step component renders the signal, pair, domain, and overview language panels with count summaries', () => {
+test('language step component renders intro, hero, domain chapters, signals, and pairs in report order', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentLanguageStep
       viewModel={{
@@ -497,28 +497,23 @@ test('language step component renders the signal, pair, domain, and overview lan
   );
 
   assert.match(markup, /Language/);
-  assert.match(markup, /Assessment Description/);
-  assert.match(markup, /Define the report introduction shown to all users above the results\./);
+  assert.match(markup, /Intro/);
+  assert.match(markup, /Intro Description/);
+  assert.match(markup, /Opening context for the assessment shown before the report hero\./);
   assert.match(markup, /Assessment introduction copy/);
   assert.match(markup, /rounded-\[1\.25rem\] border border-white\/10 bg-gradient-to-b from-white\/\[0\.02\] to-transparent p-\[1px\]/);
   assert.match(markup, /rounded-\[1\.25rem\] bg-black\/30/);
+  assert.match(markup, /Hero/);
+  assert.match(markup, /Hero Language/);
+  assert.match(markup, /Domain Chapters/);
+  assert.match(markup, /Domain Chapter Language/);
   assert.match(markup, /Signal Language/);
-  assert.match(markup, /Signal Language import/);
-  assert.match(markup, /Pair Language/);
-  assert.match(markup, /Pair Language import/);
-  assert.match(markup, /Domain Language/);
-  assert.match(markup, /Domain Language import/);
-  assert.match(markup, /Overview Templates/);
-  assert.match(markup, /Overview Templates import/);
-  assert.match(markup, /Development \/ Pressure \/ Environment/);
-  assert.match(markup, /signal_key \| section \| content/);
-  assert.match(markup, /Import replaces all existing Signal Language rows for this assessment version\./);
-  assert.match(markup, /signal_pair \| section \| content/);
-  assert.match(markup, /Import replaces all existing Pair Language rows for this assessment version\./);
-  assert.match(markup, /Import replaces all existing Domain Language rows for this assessment version\./);
-  assert.match(markup, /domain_key \| section \| content/);
-  assert.match(markup, /Import replaces all existing Overview Template rows for this assessment version\./);
-  assert.match(markup, /pattern_key \| section \| content/);
+  assert.match(markup, /Pair Summary Language/);
+  assert.match(markup, /section \| target \| field \| content/);
+  assert.match(markup, /hero\.primaryPattern or hero\.domainHighlights/);
+  assert.match(markup, /Actions are not authored directly for MVP/);
+  assert.match(markup, /Pair strength and watchout are legacy-only and are not surfaced here\./);
+  assert.doesNotMatch(markup, /Actions<\/h3>/);
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
   assert.match(markup, /3 entries/);
@@ -611,8 +606,8 @@ test('language step component shows a safe schema-unavailable state instead of r
 
   assert.match(markup, /Language datasets unavailable/);
   assert.match(markup, /Apply the assessment version language migration before using this step\./);
-  assert.doesNotMatch(markup, /Signal Language import/);
-  assert.doesNotMatch(markup, /Pair Language import/);
-  assert.doesNotMatch(markup, /Domain Language import/);
-  assert.doesNotMatch(markup, /Overview Templates import/);
+  assert.doesNotMatch(markup, /Hero Language/);
+  assert.doesNotMatch(markup, /Domain Chapter Language/);
+  assert.doesNotMatch(markup, /Signal Language/);
+  assert.doesNotMatch(markup, /Pair Summary Language/);
 });

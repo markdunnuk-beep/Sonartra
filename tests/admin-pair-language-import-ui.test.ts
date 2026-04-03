@@ -35,9 +35,10 @@ test('pair language panel enforces preview-before-import against the current tex
   assert.match(source, /disabled=\{!canImport\}/);
 });
 
-test('language step renders the live pair language import panel and removes the pair placeholder card', () => {
+test('language step renders the shared report-language import panel for pairs only', () => {
   const source = readSource(languageStepPath);
 
-  assert.match(source, /<AdminPairLanguageImport/);
-  assert.doesNotMatch(source, /Structured bulk import for signal-pair summaries and watchouts will follow this panel pattern/);
+  assert.match(source, /reportSection="pair"/);
+  assert.match(source, /title="Pair Summary Language"/);
+  assert.doesNotMatch(source, /<AdminPairLanguageImport/);
 });
