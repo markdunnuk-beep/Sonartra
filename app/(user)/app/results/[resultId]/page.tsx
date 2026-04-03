@@ -23,6 +23,12 @@ type ResultDetailPageProps = {
   }>;
 };
 
+type VisibleActionItem = {
+  key: string;
+  title: string;
+  detail: string;
+};
+
 const VISIBLE_ACTION_LIMIT = 3;
 
 function formatResultTimestamp(value: string | null): {
@@ -121,9 +127,10 @@ function ActionList({
   items,
 }: {
   title: string;
-  items: AssessmentResultDetailViewModel['strengths'];
+  items: readonly VisibleActionItem[];
 }) {
-  const { visible, overflow } = getVisibleItems(items);
+  const typedItems: readonly VisibleActionItem[] = items;
+  const { visible, overflow } = getVisibleItems<VisibleActionItem>(typedItems);
 
   return (
     <article className="border-white/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10">

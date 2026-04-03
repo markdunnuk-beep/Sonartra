@@ -1,12 +1,81 @@
 import type {
   CanonicalResultPayload,
-  NormalizedSignalScore,
-  ResultDomainSummary,
   ResultDiagnostics,
-  ResultOverviewSummary,
-  ResultRankedSignal,
-  ResultTopSignal,
 } from '@/lib/engine/types';
+
+export type AssessmentResultTopSignalViewModel = {
+  signalId: string;
+  signalKey: string;
+  title: string;
+  domainId: string;
+  domainKey: string;
+  normalizedValue: number;
+  rawTotal: number;
+  percentage: number;
+  rank: 1;
+};
+
+export type AssessmentResultRankedSignalViewModel = {
+  signalId: string;
+  signalKey: string;
+  title: string;
+  domainId: string;
+  domainKey: string;
+  normalizedValue: number;
+  rawTotal: number;
+  percentage: number;
+  domainPercentage: number;
+  isOverlay: boolean;
+  overlayType: 'none' | 'decision' | 'role';
+  rank: number;
+};
+
+export type AssessmentResultSignalScoreViewModel = {
+  signalId: string;
+  signalKey: string;
+  signalTitle: string;
+  domainId: string;
+  domainKey: string;
+  domainSource: 'question_section' | 'signal_group';
+  isOverlay: boolean;
+  overlayType: 'none' | 'decision' | 'role';
+  rawTotal: number;
+  normalizedValue: number;
+  percentage: number;
+  domainPercentage: number;
+  rank: number;
+};
+
+export type AssessmentResultDomainViewModel = {
+  domainId: string;
+  domainKey: string;
+  domainTitle: string;
+  domainSource: 'question_section' | 'signal_group';
+  rawTotal: number;
+  normalizedValue: number;
+  percentage: number;
+  signalScores: readonly AssessmentResultSignalScoreViewModel[];
+  signalCount: number;
+  answeredQuestionCount: number;
+  rankedSignalIds: readonly string[];
+  interpretation: {
+    domainKey: string;
+    primarySignalKey: string | null;
+    primaryPercent: number | null;
+    secondarySignalKey: string | null;
+    secondaryPercent: number | null;
+    summary: string;
+    supportingLine?: string | null;
+    tensionClause?: string | null;
+  } | null;
+};
+
+export type AssessmentResultActionItemViewModel = {
+  key: string;
+  title: string;
+  detail: string;
+  signalId?: string;
+};
 
 export type AssessmentResultSummary = {
   resultId: string;
@@ -18,16 +87,16 @@ export type AssessmentResultSummary = {
   readinessStatus: 'ready';
   createdAt: string;
   generatedAt: string | null;
-  topSignal: ResultTopSignal | null;
+  topSignal: AssessmentResultTopSignalViewModel | null;
   topSignalPercentage: number | null;
   resultAvailable: true;
 };
 
 export type AssessmentResultListItem = AssessmentResultSummary;
 
-export type AssessmentResultSignalViewModel = NormalizedSignalScore | ResultRankedSignal;
-
-export type AssessmentResultDomainViewModel = ResultDomainSummary;
+export type AssessmentResultSignalViewModel =
+  | AssessmentResultSignalScoreViewModel
+  | AssessmentResultRankedSignalViewModel;
 
 export type AssessmentResultDetailViewModel = {
   resultId: string;
@@ -37,14 +106,17 @@ export type AssessmentResultDetailViewModel = {
   assessmentTitle: string;
   version: string;
   metadata: CanonicalResultPayload['metadata'];
-  topSignal: ResultTopSignal | null;
-  rankedSignals: readonly ResultRankedSignal[];
-  normalizedScores: readonly NormalizedSignalScore[];
-  domainSummaries: readonly ResultDomainSummary[];
-  overviewSummary: ResultOverviewSummary;
-  strengths: CanonicalResultPayload['strengths'];
-  watchouts: CanonicalResultPayload['watchouts'];
-  developmentFocus: CanonicalResultPayload['developmentFocus'];
+  topSignal: AssessmentResultTopSignalViewModel | null;
+  rankedSignals: readonly AssessmentResultRankedSignalViewModel[];
+  normalizedScores: readonly AssessmentResultSignalScoreViewModel[];
+  domainSummaries: readonly AssessmentResultDomainViewModel[];
+  overviewSummary: {
+    headline: string;
+    narrative: string;
+  };
+  strengths: readonly AssessmentResultActionItemViewModel[];
+  watchouts: readonly AssessmentResultActionItemViewModel[];
+  developmentFocus: readonly AssessmentResultActionItemViewModel[];
   diagnostics: ResultDiagnostics;
   createdAt: string;
   generatedAt: string | null;

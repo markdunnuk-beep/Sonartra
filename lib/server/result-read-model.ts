@@ -1,4 +1,5 @@
 import { isCanonicalResultPayload } from '@/lib/engine/result-contract';
+import type { CanonicalResultPayload } from '@/lib/engine/types';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import {
   getReadyResultDetailForUser,
@@ -6,8 +7,13 @@ import {
   type PersistedReadyResultRecord,
 } from '@/lib/server/result-read-model-queries';
 import type {
+  AssessmentResultActionItemViewModel,
   AssessmentResultDetailViewModel,
+  AssessmentResultDomainViewModel,
   AssessmentResultListItem,
+  AssessmentResultRankedSignalViewModel,
+  AssessmentResultSignalScoreViewModel,
+  AssessmentResultTopSignalViewModel,
 } from '@/lib/server/result-read-model-types';
 import {
   AssessmentResultNotFoundError,
@@ -36,8 +42,122 @@ function parseCanonicalPayload(record: PersistedReadyResultRecord) {
   return record.canonicalResultPayload;
 }
 
+function toActionItems(
+  items: CanonicalResultPayload['actions']['strengths'],
+): readonly AssessmentResultActionItemViewModel[] {
+  return Object.freeze(
+    items.map((item) => ({
+      key: item.signalKey,
+      title: item.signalLabel,
+      detail: item.text,
+      signalId: item.signalKey,
+    })),
+  );
+}
+
+function toDomainSummaries(payload: CanonicalResultPayload): readonly AssessmentResultDomainViewModel[] {
+  return Object.freeze(
+    payload.domains.map((domain) => {
+      const signalScores: AssessmentResultSignalScoreViewModel[] = domain.signals.map((signal) => ({
+        signalId: signal.signalKey,
+        signalKey: signal.signalKey,
+        signalTitle: signal.signalLabel,
+        domainId: domain.domainKey,
+        domainKey: domain.domainKey,
+        domainSource: domain.signals.length > 0 ? ('signal_group' as const) : ('question_section' as const),
+        isOverlay: false,
+        overlayType: 'none',
+        rawTotal: signal.score,
+        normalizedValue: signal.score,
+        percentage: signal.score,
+        domainPercentage: signal.withinDomainPercent,
+        rank: signal.rank,
+      }));
+
+      return {
+        domainId: domain.domainKey,
+        domainKey: domain.domainKey,
+        domainTitle: domain.domainLabel,
+        domainSource: signalScores.length > 0 ? ('signal_group' as const) : ('question_section' as const),
+        rawTotal: signalScores.reduce((sum, signal) => sum + signal.rawTotal, 0),
+        normalizedValue: signalScores.reduce((sum, signal) => sum + signal.normalizedValue, 0),
+        percentage: signalScores.length > 0 ? 100 : 0,
+        signalScores: Object.freeze(signalScores),
+        signalCount: signalScores.length,
+        answeredQuestionCount: 0,
+        rankedSignalIds: Object.freeze(signalScores.map((signal) => signal.signalId)),
+        interpretation: domain.summary
+          ? {
+              domainKey: domain.domainKey,
+              primarySignalKey: domain.primarySignal?.signalKey ?? null,
+              primaryPercent:
+                domain.primarySignal?.signalKey
+                  ? signalScores.find((signal) => signal.signalKey === domain.primarySignal?.signalKey)?.domainPercentage ?? null
+                  : null,
+              secondarySignalKey: domain.secondarySignal?.signalKey ?? null,
+              secondaryPercent:
+                domain.secondarySignal?.signalKey
+                  ? signalScores.find((signal) => signal.signalKey === domain.secondarySignal?.signalKey)?.domainPercentage ?? null
+                  : null,
+              summary: domain.summary,
+              supportingLine: domain.focus ?? null,
+              tensionClause: domain.pressure ?? null,
+            }
+          : null,
+      };
+    }),
+  );
+}
+
+function toRankedSignals(payload: CanonicalResultPayload): readonly AssessmentResultRankedSignalViewModel[] {
+  const signals = payload.domains.flatMap((domain) =>
+    domain.signals.map((signal) => ({
+      signalId: signal.signalKey,
+      signalKey: signal.signalKey,
+      title: signal.signalLabel,
+      domainId: domain.domainKey,
+      domainKey: domain.domainKey,
+      normalizedValue: signal.score,
+      rawTotal: signal.score,
+      percentage: signal.score,
+      domainPercentage: signal.withinDomainPercent,
+      isOverlay: false,
+      overlayType: 'none' as const,
+      rank: signal.rank,
+    })),
+  );
+
+  return Object.freeze(signals.sort((left, right) => left.rank - right.rank));
+}
+
+function toTopSignal(payload: CanonicalResultPayload): AssessmentResultTopSignalViewModel | null {
+  const primaryPattern = payload.hero.primaryPattern;
+  if (!primaryPattern?.signalKey) {
+    return null;
+  }
+
+  const rankedSignals = toRankedSignals(payload);
+  const signal = rankedSignals.find((entry) => entry.signalKey === primaryPattern.signalKey) ?? rankedSignals[0];
+  if (!signal) {
+    return null;
+  }
+
+  return {
+    signalId: signal.signalId,
+    signalKey: signal.signalKey,
+    title: signal.title,
+    domainId: signal.domainId,
+    domainKey: signal.domainKey,
+    normalizedValue: signal.normalizedValue,
+    rawTotal: signal.rawTotal,
+    percentage: signal.percentage,
+    rank: 1,
+  };
+}
+
 function toListItem(record: PersistedReadyResultRecord): AssessmentResultListItem {
   const payload = parseCanonicalPayload(record);
+  const topSignal = toTopSignal(payload);
 
   return {
     resultId: record.resultId,
@@ -49,14 +169,20 @@ function toListItem(record: PersistedReadyResultRecord): AssessmentResultListIte
     readinessStatus: 'ready',
     createdAt: record.createdAt,
     generatedAt: record.generatedAt,
-    topSignal: payload.topSignal,
-    topSignalPercentage: payload.topSignal?.percentage ?? null,
+    topSignal,
+    topSignalPercentage: topSignal?.percentage ?? null,
     resultAvailable: true,
   };
 }
 
 function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResultDetailViewModel {
   const payload = parseCanonicalPayload(record);
+  const rankedSignals = toRankedSignals(payload);
+  const domainSummaries = toDomainSummaries(payload);
+  const topSignal = toTopSignal(payload);
+  const normalizedScores = Object.freeze(
+    domainSummaries.flatMap((domain) => domain.signalScores),
+  );
 
   return {
     resultId: record.resultId,
@@ -66,14 +192,17 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     assessmentTitle: record.assessmentTitle,
     version: record.version,
     metadata: payload.metadata,
-    topSignal: payload.topSignal,
-    rankedSignals: Object.freeze([...payload.rankedSignals]),
-    normalizedScores: Object.freeze([...payload.normalizedScores]),
-    domainSummaries: Object.freeze([...payload.domainSummaries]),
-    overviewSummary: payload.overviewSummary,
-    strengths: Object.freeze([...payload.strengths]),
-    watchouts: Object.freeze([...payload.watchouts]),
-    developmentFocus: Object.freeze([...payload.developmentFocus]),
+    topSignal,
+    rankedSignals,
+    normalizedScores,
+    domainSummaries,
+    overviewSummary: {
+      headline: payload.hero.headline ?? '',
+      narrative: payload.hero.narrative ?? '',
+    },
+    strengths: toActionItems(payload.actions.strengths),
+    watchouts: toActionItems(payload.actions.watchouts),
+    developmentFocus: toActionItems(payload.actions.developmentFocus),
     diagnostics: payload.diagnostics,
     createdAt: record.createdAt,
     generatedAt: record.generatedAt,

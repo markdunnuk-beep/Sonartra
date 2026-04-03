@@ -265,8 +265,10 @@ async function runDraftVersionDiagnostics(params: {
         ...normalizedResult,
         metadata: {
           assessmentKey: definition.assessment.key,
+          assessmentTitle: definition.assessment.title,
           version: definition.version.versionTag,
           attemptId: responses.attemptId,
+          completedAt: responses.submittedAt ?? null,
         },
         scoringDiagnostics: scoreResult.diagnostics,
         languageBundle,
@@ -275,7 +277,7 @@ async function runDraftVersionDiagnostics(params: {
     const diagnostics = runFullDiagnostics({
       runtimeModel,
       languageConfig: languageBundle,
-      normalizationScores: payload.normalizedScores,
+      normalizationScores: normalizedResult.signalScores,
       result: payload,
     });
 

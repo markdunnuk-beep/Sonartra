@@ -328,7 +328,7 @@ export function buildDomains(
 }
 
 function mapActionItems(
-  items: readonly ReturnType<typeof buildStrengths>,
+  items: ReturnType<typeof buildStrengths>,
   normalizedResult: CanonicalResultBuilderInput,
 ): ResultActionBlockItem[] {
   const signalsById = new Map(normalizedResult.signalScores.map((signalScore) => [signalScore.signalId, signalScore]));
