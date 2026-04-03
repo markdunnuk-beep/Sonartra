@@ -405,8 +405,10 @@ export type DomainInterpretationOutput = {
 
 export type ResultMetadata = {
   assessmentKey: AssessmentKey;
+  assessmentTitle: string;
   version: AssessmentVersionTag;
   attemptId: AttemptId;
+  completedAt: string | null;
   assessmentDescription?: string | null;
 };
 
@@ -453,6 +455,79 @@ export type ResultDomainSummary = NormalizedDomainSummary & {
   interpretation: DomainInterpretationOutput | null;
 };
 
+export type ResultIntro = {
+  assessmentDescription: string | null;
+};
+
+export type ResultHeroSummary = {
+  headline: string | null;
+  narrative: string | null;
+  primaryPattern: {
+    label: string | null;
+    signalKey: string | null;
+    signalLabel: string | null;
+  } | null;
+  domainHighlights: Array<{
+    domainKey: string;
+    domainLabel: string;
+    primarySignalKey: string;
+    primarySignalLabel: string;
+    summary: string | null;
+  }>;
+};
+
+export type ResultActionBlockItem = {
+  signalKey: string;
+  signalLabel: string;
+  text: string;
+};
+
+export type ResultActionBlocks = {
+  strengths: ResultActionBlockItem[];
+  watchouts: ResultActionBlockItem[];
+  developmentFocus: ResultActionBlockItem[];
+};
+
+export type ResultDomainSignal = {
+  signalKey: string;
+  signalLabel: string;
+  score: number;
+  withinDomainPercent: number;
+  rank: number;
+  isPrimary: boolean;
+  isSecondary: boolean;
+};
+
+export type ResultDomainChapter = {
+  domainKey: string;
+  domainLabel: string;
+  summary: string | null;
+  focus: string | null;
+  pressure: string | null;
+  environment: string | null;
+  primarySignal: {
+    signalKey: string;
+    signalLabel: string;
+    summary: string | null;
+    strength: string | null;
+    watchout: string | null;
+    development: string | null;
+  } | null;
+  secondarySignal: {
+    signalKey: string;
+    signalLabel: string;
+    summary: string | null;
+    strength: string | null;
+    watchout: string | null;
+    development: string | null;
+  } | null;
+  pairSummary: {
+    pairKey: string;
+    text: string | null;
+  } | null;
+  signals: ResultDomainSignal[];
+};
+
 export type ResultDiagnostics = {
   readinessStatus: ResultReadinessStatus;
   scoring: ScoreDiagnostics;
@@ -471,14 +546,10 @@ export type ResultDiagnostics = {
 
 export type CanonicalResultPayload = {
   metadata: ResultMetadata;
-  topSignal: ResultTopSignal | null;
-  rankedSignals: readonly ResultRankedSignal[];
-  normalizedScores: readonly NormalizedSignalScore[];
-  domainSummaries: readonly ResultDomainSummary[];
-  overviewSummary: ResultOverviewSummary;
-  strengths: readonly ResultBulletItem[];
-  watchouts: readonly ResultBulletItem[];
-  developmentFocus: readonly ResultBulletItem[];
+  intro: ResultIntro;
+  hero: ResultHeroSummary;
+  domains: ResultDomainChapter[];
+  actions: ResultActionBlocks;
   diagnostics: ResultDiagnostics;
 };
 

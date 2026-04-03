@@ -1,25 +1,23 @@
 import type { CanonicalResultPayload } from '@/lib/engine/types';
 
 export type {
+  ResultActionBlockItem,
+  ResultActionBlocks,
   CanonicalResultPayload,
-  ResultBulletItem,
   ResultDiagnostics,
+  ResultDomainChapter,
+  ResultDomainSignal,
+  ResultHeroSummary,
+  ResultIntro,
   ResultMetadata,
-  ResultOverviewSummary,
-  ResultRankedSignal,
-  ResultTopSignal,
 } from '@/lib/engine/types';
 
 export const CANONICAL_RESULT_PAYLOAD_FIELDS = [
   'metadata',
-  'topSignal',
-  'rankedSignals',
-  'normalizedScores',
-  'domainSummaries',
-  'overviewSummary',
-  'strengths',
-  'watchouts',
-  'developmentFocus',
+  'intro',
+  'hero',
+  'domains',
+  'actions',
   'diagnostics',
 ] as const;
 

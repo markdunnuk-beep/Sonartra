@@ -2,13 +2,23 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { isCanonicalResultPayload } from '@/lib/engine/result-contract';
-import { buildCanonicalResultPayload } from '@/lib/engine/result-builder';
+import { buildCanonicalResultPayload as buildCanonicalResultPayloadBase } from '@/lib/engine/result-builder';
 import {
   buildDomainSummaries,
   createResultInterpretationContext,
 } from '@/lib/engine/result-builder-helpers';
+import {
+  buildDevelopmentFocus,
+  buildStrengths,
+  buildWatchouts,
+} from '@/lib/engine/result-interpretation';
 import type { CanonicalResultBuilderInput } from '@/lib/engine/result-builder';
-import type { EngineLanguageBundle, NormalizedDomainSummary, NormalizedSignalScore } from '@/lib/engine/types';
+import type {
+  CanonicalResultPayload,
+  EngineLanguageBundle,
+  NormalizedDomainSummary,
+  NormalizedSignalScore,
+} from '@/lib/engine/types';
 
 function createEmptyLanguageBundle(): EngineLanguageBundle {
   return {
@@ -17,6 +27,120 @@ function createEmptyLanguageBundle(): EngineLanguageBundle {
     domains: {},
     overview: {},
   };
+}
+
+type LegacyResultPayloadView = CanonicalResultPayload & {
+  topSignal: {
+    signalId: string;
+    signalKey: string;
+    title: string;
+    percentage: number;
+    rank: 1;
+  } | null;
+  rankedSignals: Array<{
+    signalId: string;
+    signalKey: string;
+    title: string;
+    percentage: number;
+    domainPercentage: number;
+    isOverlay: boolean;
+    overlayType: 'none' | 'decision' | 'role';
+    rank: number;
+  }>;
+  normalizedScores: readonly NormalizedSignalScore[];
+  domainSummaries: ReturnType<typeof buildDomainSummaries>;
+  overviewSummary: {
+    headline: string | null;
+    narrative: string | null;
+  };
+  strengths: Array<{
+    key: string;
+    title: string;
+    detail: string;
+    signalId?: string;
+  }>;
+  watchouts: Array<{
+    key: string;
+    title: string;
+    detail: string;
+    signalId?: string;
+  }>;
+  developmentFocus: Array<{
+    key: string;
+    title: string;
+    detail: string;
+    signalId?: string;
+  }>;
+};
+
+function mapLegacyActionItems(
+  items: ReadonlyArray<{
+    key: string;
+    title: string;
+    detail: string;
+    signalId?: string;
+  }>,
+) {
+  return items.map((item) => ({ ...item }));
+}
+
+function buildCanonicalResultPayload(params: {
+  normalizedResult: CanonicalResultBuilderInput;
+}): LegacyResultPayloadView {
+  const payload = buildCanonicalResultPayloadBase(params);
+  const legacyPayload = {
+    ...payload,
+  };
+  const interpretationContext = createResultInterpretationContext(params.normalizedResult);
+  const rankedSignals = [...params.normalizedResult.signalScores].sort((left, right) => left.rank - right.rank);
+  const topSignalScore =
+    params.normalizedResult.topSignalId === null
+      ? null
+      : params.normalizedResult.signalScores.find((signalScore) => signalScore.signalId === params.normalizedResult.topSignalId) ?? null;
+
+  return Object.defineProperties(legacyPayload, {
+    topSignal: {
+      value: topSignalScore
+        ? {
+            signalId: topSignalScore.signalId,
+            signalKey: topSignalScore.signalKey,
+            title: topSignalScore.signalTitle,
+            percentage: topSignalScore.percentage,
+            rank: 1 as const,
+          }
+        : null,
+    },
+    rankedSignals: {
+      value: rankedSignals.map((signalScore) => ({
+        signalId: signalScore.signalId,
+        signalKey: signalScore.signalKey,
+        title: signalScore.signalTitle,
+        percentage: signalScore.percentage,
+        domainPercentage: signalScore.domainPercentage,
+        isOverlay: signalScore.isOverlay,
+        overlayType: signalScore.overlayType,
+        rank: signalScore.rank,
+      })),
+    },
+    normalizedScores: {
+      value: params.normalizedResult.signalScores,
+    },
+    domainSummaries: {
+      value: buildDomainSummaries(params.normalizedResult, interpretationContext),
+    },
+    overviewSummary: {
+      value: payload.hero,
+    },
+    strengths: {
+      value: mapLegacyActionItems(buildStrengths(params.normalizedResult, interpretationContext)),
+    },
+    watchouts: {
+      value: mapLegacyActionItems(buildWatchouts(params.normalizedResult, interpretationContext)),
+    },
+    developmentFocus: {
+      value: mapLegacyActionItems(buildDevelopmentFocus(params.normalizedResult, interpretationContext)),
+    },
+  }) as LegacyResultPayloadView;
 }
 
 function buildNormalizedSignal(params: {
@@ -161,8 +285,10 @@ function buildNormalizedResultFixture(overrides?: {
     assessmentVersionId: 'version-1',
     metadata: {
       assessmentKey: 'wplp80',
+      assessmentTitle: 'WPLP-80',
       version: '1.0.0',
       attemptId: 'attempt-1',
+      completedAt: '2026-01-01T00:01:00.000Z',
       assessmentDescription: overrides?.assessmentDescription,
     },
     scoringDiagnostics: {
@@ -277,10 +403,18 @@ test('minimal valid payload construction returns a complete canonical result pay
   });
 
   assert.ok(isCanonicalResultPayload(payload));
+  assert.deepEqual(Object.keys(payload), ['metadata', 'intro', 'hero', 'domains', 'actions', 'diagnostics']);
   assert.equal(payload.metadata.assessmentKey, 'wplp80');
+  assert.equal(payload.metadata.assessmentTitle, 'WPLP-80');
   assert.equal(payload.metadata.version, '1.0.0');
   assert.equal(payload.metadata.attemptId, 'attempt-1');
+  assert.equal(payload.metadata.completedAt, '2026-01-01T00:01:00.000Z');
   assert.equal(payload.metadata.assessmentDescription, null);
+  assert.equal(payload.intro.assessmentDescription, null);
+  assert.equal(payload.hero.headline, 'A clear operating preference is coming through');
+  assert.equal(payload.hero.primaryPattern?.signalKey, 'focus');
+  assert.equal(payload.domains.length, 2);
+  assert.deepEqual(Object.keys(payload.actions), ['strengths', 'watchouts', 'developmentFocus']);
 });
 
 test('metadata includes assessmentDescription when provided by the engine context', () => {
@@ -291,6 +425,7 @@ test('metadata includes assessmentDescription when provided by the engine contex
   });
 
   assert.equal(payload.metadata.assessmentDescription, 'Assessment-owned description for this version.');
+  assert.equal(payload.intro.assessmentDescription, 'Assessment-owned description for this version.');
 });
 
 test('top signal projection matches normalization ranking', () => {
@@ -550,7 +685,8 @@ test('domain language summary overrides persisted domain interpretation summary 
     payload.domainSummaries[0]?.interpretation?.tensionClause,
     baseline.domainSummaries[0]?.interpretation?.tensionClause,
   );
-  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
+  assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
+  assert.equal(payload.overviewSummary.narrative, baseline.overviewSummary.narrative);
   assert.deepEqual(payload.strengths, baseline.strengths);
   assert.deepEqual(payload.watchouts, baseline.watchouts);
   assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);

@@ -388,57 +388,52 @@ export function validateResultPayload(result: unknown): readonly EngineDiagnosti
     );
   }
 
-  if (!payload.overviewSummary.headline.trim() || !payload.overviewSummary.narrative.trim()) {
+  if (!payload.intro || typeof payload.intro !== 'object') {
     issues.push(
       createIssue(
         'result_payload',
         'error',
-        'overview_summary_incomplete',
-        'Result overviewSummary must include a headline and narrative.',
+        'result_intro_missing',
+        'Result payload must include an intro section.',
       ),
     );
   }
 
-  if (payload.normalizedScores.length > 0 && payload.topSignal === null) {
+  if (!payload.hero || typeof payload.hero !== 'object') {
     issues.push(
       createIssue(
         'result_payload',
         'error',
-        'top_signal_missing',
-        'Result payload is missing topSignal even though normalized scores exist.',
+        'result_hero_missing',
+        'Result payload must include a hero section.',
       ),
     );
   }
 
-  if (payload.rankedSignals.length !== payload.normalizedScores.length) {
+  if (!Array.isArray(payload.domains) || payload.domains.length === 0) {
     issues.push(
       createIssue(
         'result_payload',
         'error',
-        'ranked_signal_count_mismatch',
-        'rankedSignals and normalizedScores must contain the same number of entries.',
+        'result_domains_missing',
+        'Result payload must include at least one domain chapter.',
       ),
     );
   }
 
-  if (!Array.isArray(payload.domainSummaries) || payload.domainSummaries.length === 0) {
-    issues.push(
-      createIssue(
-        'result_payload',
-        'error',
-        'domain_summaries_missing',
-        'Result payload must include at least one domain summary.',
-      ),
-    );
-  }
-
-  if (!Array.isArray(payload.strengths) || !Array.isArray(payload.watchouts) || !Array.isArray(payload.developmentFocus)) {
+  if (
+    !payload.actions ||
+    typeof payload.actions !== 'object' ||
+    !Array.isArray(payload.actions.strengths) ||
+    !Array.isArray(payload.actions.watchouts) ||
+    !Array.isArray(payload.actions.developmentFocus)
+  ) {
     issues.push(
       createIssue(
         'result_payload',
         'error',
         'result_sections_invalid',
-        'Result payload must include strengths, watchouts, and developmentFocus arrays.',
+        'Result payload must include actions.strengths, actions.watchouts, and actions.developmentFocus arrays.',
       ),
     );
   }

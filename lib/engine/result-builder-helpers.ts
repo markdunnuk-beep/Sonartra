@@ -4,9 +4,15 @@ import type {
   NormalizedDomainSummary,
   NormalizedResult,
   NormalizedSignalScore,
+  ResultActionBlockItem,
+  ResultActionBlocks,
+  ResultDomainChapter,
+  ResultDomainSignal,
   ResultInterpretationContext,
   ResultDomainSummary,
   ResultDiagnostics,
+  ResultHeroSummary,
+  ResultIntro,
   ResultMetadata,
   ResultRankedSignal,
   ResultTopSignal,
@@ -105,6 +111,34 @@ export function buildNormalizedScores(normalizedResult: NormalizedResult): reado
   return Object.freeze([...normalizedResult.signalScores]);
 }
 
+function getSignalLanguageSummary(
+  signalKey: string,
+  context: ResultInterpretationContext,
+): string | null {
+  return context.languageBundle.signals[signalKey]?.summary ?? null;
+}
+
+function getSignalLanguageStrength(
+  signalKey: string,
+  context: ResultInterpretationContext,
+): string | null {
+  return context.languageBundle.signals[signalKey]?.strength ?? null;
+}
+
+function getSignalLanguageWatchout(
+  signalKey: string,
+  context: ResultInterpretationContext,
+): string | null {
+  return context.languageBundle.signals[signalKey]?.watchout ?? null;
+}
+
+function getSignalLanguageDevelopment(
+  signalKey: string,
+  context: ResultInterpretationContext,
+): string | null {
+  return context.languageBundle.signals[signalKey]?.development ?? null;
+}
+
 function assertDomainSignalOrdering(domainSummary: ResultDomainSummary): void {
   const sortedSignalScores = sortDomainSignalsForDisplay(domainSummary.signalScores);
 
@@ -191,6 +225,145 @@ export function buildDomainSummaries(
   return Object.freeze(domainSummaries);
 }
 
+export function buildIntro(metadata: ResultMetadata): ResultIntro {
+  return {
+    assessmentDescription: metadata.assessmentDescription ?? null,
+  };
+}
+
+function buildDomainSignal(
+  signalScore: NormalizedSignalScore,
+  index: number,
+): ResultDomainSignal {
+  return {
+    signalKey: signalScore.signalKey,
+    signalLabel: signalScore.signalTitle,
+    score: signalScore.percentage,
+    withinDomainPercent: signalScore.domainPercentage,
+    rank: signalScore.rank,
+    isPrimary: index === 0,
+    isSecondary: index === 1,
+  };
+}
+
+function buildDomainChapterSignal(
+  signalScore: NormalizedSignalScore | null,
+  interpretationContext: ResultInterpretationContext,
+): ResultDomainChapter['primarySignal'] {
+  if (!signalScore) {
+    return null;
+  }
+
+  return {
+    signalKey: signalScore.signalKey,
+    signalLabel: signalScore.signalTitle,
+    summary: getSignalLanguageSummary(signalScore.signalKey, interpretationContext),
+    strength: getSignalLanguageStrength(signalScore.signalKey, interpretationContext),
+    watchout: getSignalLanguageWatchout(signalScore.signalKey, interpretationContext),
+    development: getSignalLanguageDevelopment(signalScore.signalKey, interpretationContext),
+  };
+}
+
+export function buildHero(params: {
+  normalizedResult: CanonicalResultBuilderInput;
+  domainSummaries: readonly ResultDomainSummary[];
+  interpretationContext: ResultInterpretationContext;
+}): ResultHeroSummary {
+  const overviewSummary = buildOverviewSummary(params.normalizedResult, params.interpretationContext);
+  const topSignal = buildTopSignal(params.normalizedResult);
+  const domainHighlights = params.domainSummaries
+    .filter((domainSummary) => domainSummary.signalScores.length > 0)
+    .map((domainSummary) => {
+      const primarySignal = domainSummary.signalScores[0];
+
+      if (!primarySignal) {
+        return null;
+      }
+
+      return {
+        domainKey: domainSummary.domainKey,
+        domainLabel: domainSummary.domainTitle,
+        primarySignalKey: primarySignal.signalKey,
+        primarySignalLabel: primarySignal.signalTitle,
+        summary: domainSummary.interpretation?.summary ?? null,
+      };
+    })
+    .filter((domainHighlight): domainHighlight is NonNullable<typeof domainHighlight> => domainHighlight !== null);
+
+  return {
+    headline: overviewSummary.headline ?? null,
+    narrative: overviewSummary.narrative ?? null,
+    primaryPattern: topSignal
+      ? {
+          label: topSignal.title,
+          signalKey: topSignal.signalKey,
+          signalLabel: topSignal.title,
+        }
+      : null,
+    domainHighlights,
+  };
+}
+
+export function buildDomains(
+  domainSummaries: readonly ResultDomainSummary[],
+  interpretationContext: ResultInterpretationContext,
+): ResultDomainChapter[] {
+  return domainSummaries.map((domainSummary) => {
+    const primarySignal = domainSummary.signalScores[0] ?? null;
+    const secondarySignal = domainSummary.signalScores[1] ?? null;
+
+    return {
+      domainKey: domainSummary.domainKey,
+      domainLabel: domainSummary.domainTitle,
+      summary: domainSummary.interpretation?.summary ?? null,
+      focus: domainSummary.interpretation?.supportingLine ?? null,
+      pressure: domainSummary.interpretation?.tensionClause ?? null,
+      environment: null,
+      primarySignal: buildDomainChapterSignal(primarySignal, interpretationContext),
+      secondarySignal: buildDomainChapterSignal(secondarySignal, interpretationContext),
+      pairSummary: null,
+      signals: domainSummary.signalScores.map((signalScore, index) => buildDomainSignal(signalScore, index)),
+    };
+  });
+}
+
+function mapActionItems(
+  items: readonly ReturnType<typeof buildStrengths>,
+  normalizedResult: CanonicalResultBuilderInput,
+): ResultActionBlockItem[] {
+  const signalsById = new Map(normalizedResult.signalScores.map((signalScore) => [signalScore.signalId, signalScore]));
+
+  return items.flatMap((item) => {
+    if (!item.signalId) {
+      return [];
+    }
+
+    const signalScore = signalsById.get(item.signalId);
+    if (!signalScore) {
+      return [];
+    }
+
+    return [
+      {
+        signalKey: signalScore.signalKey,
+        signalLabel: signalScore.signalTitle,
+        text: item.detail,
+      },
+    ];
+  });
+}
+
+export function buildActions(
+  normalizedResult: CanonicalResultBuilderInput,
+  interpretationContext: ResultInterpretationContext,
+): ResultActionBlocks {
+  return {
+    strengths: mapActionItems(buildStrengths(normalizedResult, interpretationContext), normalizedResult),
+    watchouts: mapActionItems(buildWatchouts(normalizedResult, interpretationContext), normalizedResult),
+    developmentFocus: mapActionItems(buildDevelopmentFocus(normalizedResult, interpretationContext), normalizedResult),
+  };
+}
+
 export function buildDiagnostics(params: {
   normalizedResult: NormalizedResult;
   scoringDiagnostics: ScoreDiagnostics;
@@ -225,9 +398,6 @@ export function buildDiagnostics(params: {
 export function buildPayload(params: {
   normalizedResult: CanonicalResultBuilderInput;
 }): CanonicalResultPayload {
-  const topSignal = buildTopSignal(params.normalizedResult);
-  const rankedSignals = buildRankedSignals(params.normalizedResult);
-  const normalizedScores = buildNormalizedScores(params.normalizedResult);
   const interpretationContext = createResultInterpretationContext(params.normalizedResult);
   const domainSummaries = buildDomainSummaries(params.normalizedResult, interpretationContext);
 
@@ -236,14 +406,14 @@ export function buildPayload(params: {
       ...params.normalizedResult.metadata,
       assessmentDescription: params.normalizedResult.metadata.assessmentDescription ?? null,
     },
-    topSignal,
-    rankedSignals,
-    normalizedScores,
-    domainSummaries,
-    overviewSummary: buildOverviewSummary(params.normalizedResult, interpretationContext),
-    strengths: buildStrengths(params.normalizedResult, interpretationContext),
-    watchouts: buildWatchouts(params.normalizedResult, interpretationContext),
-    developmentFocus: buildDevelopmentFocus(params.normalizedResult, interpretationContext),
+    intro: buildIntro(params.normalizedResult.metadata),
+    hero: buildHero({
+      normalizedResult: params.normalizedResult,
+      domainSummaries,
+      interpretationContext,
+    }),
+    domains: buildDomains(domainSummaries, interpretationContext),
+    actions: buildActions(params.normalizedResult, interpretationContext),
     diagnostics: buildDiagnostics({
       normalizedResult: params.normalizedResult,
       scoringDiagnostics: params.normalizedResult.scoringDiagnostics,

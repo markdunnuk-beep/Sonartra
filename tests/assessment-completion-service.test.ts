@@ -123,40 +123,77 @@ function buildPayload(signalId: string): CanonicalResultPayload {
   const signalKey = signalId === 'signal-core' ? 'core_focus' : 'role_executor';
   const title = signalId === 'signal-core' ? 'Core Focus' : 'Role Executor';
   const isOverlay = signalId === 'signal-overlay';
-  const overlayType: 'none' | 'role' = isOverlay ? 'role' : 'none';
-  const normalizedSignal = {
-    signalId,
-    signalKey,
-    signalTitle: title,
-    domainId: 'domain-signals',
-    domainKey: 'signals',
-    domainSource: 'signal_group' as const,
-    isOverlay,
-    overlayType,
-    rawTotal: 1,
-    normalizedValue: 100,
-    percentage: 100,
-    domainPercentage: 100,
-    rank: 1,
-  };
   return {
     metadata: {
       assessmentKey: 'wplp80',
+      assessmentTitle: 'WPLP-80',
       version: '1.0.0',
       attemptId: 'attempt-1',
+      completedAt: '2026-01-01T00:01:10.000Z',
       assessmentDescription: null,
     },
-    topSignal: { signalId, signalKey, title, domainId: 'domain-signals', domainKey: 'signals', normalizedValue: 100, rawTotal: 1, percentage: 100, rank: 1 },
-    rankedSignals: Object.freeze([{ signalId, signalKey, title, domainId: 'domain-signals', domainKey: 'signals', normalizedValue: 100, rawTotal: 1, percentage: 100, domainPercentage: 100, isOverlay, overlayType, rank: 1 }]),
-    normalizedScores: Object.freeze([normalizedSignal]),
-    domainSummaries: Object.freeze([
-      { domainId: 'domain-section', domainKey: 'section_a', domainTitle: 'Section A', domainSource: 'question_section' as const, rawTotal: 0, normalizedValue: 0, percentage: 0, signalScores: Object.freeze([]), signalCount: 0, answeredQuestionCount: 1, rankedSignalIds: Object.freeze([]), interpretation: null },
-      { domainId: 'domain-signals', domainKey: 'signals', domainTitle: 'Signals', domainSource: 'signal_group' as const, rawTotal: 1, normalizedValue: 100, percentage: 100, signalScores: Object.freeze([normalizedSignal]), signalCount: 1, answeredQuestionCount: 1, rankedSignalIds: Object.freeze([signalId]), interpretation: { domainKey: 'signals', primarySignalKey: signalKey, primaryPercent: 100, secondarySignalKey: null, secondaryPercent: null, summary: `${title} is the clearest signal in this domain.`, supportingLine: null, diagnostics: { strategy: 'single_signal_fallback', ruleKey: null, primaryBand: 'dominant', secondaryBand: null, blendProfile: 'concentrated', primarySecondaryGap: 100 } } },
-    ]),
-    overviewSummary: { headline: 'Headline', narrative: 'Narrative' },
-    strengths: Object.freeze([]),
-    watchouts: Object.freeze([]),
-    developmentFocus: Object.freeze([]),
+    intro: {
+      assessmentDescription: null,
+    },
+    hero: {
+      headline: 'Headline',
+      narrative: 'Narrative',
+      primaryPattern: {
+        label: title,
+        signalKey,
+        signalLabel: title,
+      },
+      domainHighlights: [{
+        domainKey: 'signals',
+        domainLabel: 'Signals',
+        primarySignalKey: signalKey,
+        primarySignalLabel: title,
+        summary: `${title} is the clearest signal in this domain.`,
+      }],
+    },
+    domains: [{
+      domainKey: 'section_a',
+      domainLabel: 'Section A',
+      summary: null,
+      focus: null,
+      pressure: null,
+      environment: null,
+      primarySignal: null,
+      secondarySignal: null,
+      pairSummary: null,
+      signals: [],
+    }, {
+      domainKey: 'signals',
+      domainLabel: 'Signals',
+      summary: `${title} is the clearest signal in this domain.`,
+      focus: null,
+      pressure: null,
+      environment: null,
+      primarySignal: {
+        signalKey,
+        signalLabel: title,
+        summary: null,
+        strength: null,
+        watchout: null,
+        development: null,
+      },
+      secondarySignal: null,
+      pairSummary: null,
+      signals: [{
+        signalKey,
+        signalLabel: title,
+        score: 100,
+        withinDomainPercent: 100,
+        rank: 1,
+        isPrimary: true,
+        isSecondary: false,
+      }],
+    }],
+    actions: {
+      strengths: [],
+      watchouts: [],
+      developmentFocus: [],
+    },
     diagnostics: {
       readinessStatus: 'processing',
       scoring: { scoringMethod: 'option_signal_weights_only', totalQuestions: 1, answeredQuestions: 1, unansweredQuestions: 0, totalResponsesProcessed: 1, totalWeightsApplied: 1, totalScoreMass: 1, zeroScoreSignalCount: 0, zeroAnswerSubmission: false, warnings: Object.freeze([]), generatedAt: '2026-01-01T00:00:00.000Z' },
@@ -530,10 +567,10 @@ test('completion path persists the canonical payload unchanged through the real 
   assert.ok(payload);
   assert.ok(isCanonicalResultPayload(payload));
   assert.deepEqual(Object.keys(payload ?? {}), [...CANONICAL_RESULT_PAYLOAD_FIELDS]);
-  assert.equal(payload?.overviewSummary.headline, 'Persisted overview headline.');
-  assert.equal(payload?.overviewSummary.narrative, 'Persisted overview narrative.');
-  assert.equal(payload?.domainSummaries[1]?.interpretation?.summary, 'Persisted domain summary.');
-  assert.equal(payload?.strengths[0]?.detail, 'Persisted strength language.');
+  assert.equal(payload?.hero.headline, 'Persisted overview headline.');
+  assert.equal(payload?.hero.narrative, 'Persisted overview narrative.');
+  assert.equal(payload?.domains[1]?.summary, 'Persisted domain summary.');
+  assert.equal(payload?.actions.strengths[0]?.text, 'Persisted strength language.');
   assert.equal(payload?.metadata.assessmentDescription, null);
   assert.equal(payload?.metadata.attemptId, 'attempt-2');
 });
@@ -548,8 +585,13 @@ test('completion path persists assessmentDescription in the canonical payload wh
       ...buildPayload('signal-core'),
       metadata: {
         assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
         version: '1.0.0',
         attemptId: 'attempt-1',
+        completedAt: '2026-01-01T00:01:10.000Z',
+        assessmentDescription: 'Persisted assessment description.',
+      },
+      intro: {
         assessmentDescription: 'Persisted assessment description.',
       },
     }),
@@ -561,8 +603,9 @@ test('completion path persists assessmentDescription in the canonical payload wh
   assert.equal(completion.resultStatus, 'ready');
   assert.ok(payload);
   assert.equal(payload?.metadata.assessmentDescription, 'Persisted assessment description.');
+  assert.equal(payload?.intro.assessmentDescription, 'Persisted assessment description.');
   assert.equal(payload?.metadata.assessmentKey, 'wplp80');
-  assert.equal(payload?.topSignal?.signalId, 'signal-core');
+  assert.equal(payload?.hero.primaryPattern?.signalKey, 'core_focus');
 });
 
 test('engine failure and persistence failure are explicit and do not pretend success', async () => {

@@ -5,7 +5,12 @@ import { runAssessmentEngine, EngineNotFoundError } from '@/lib/engine/engine-ru
 import type { AssessmentDefinitionRepository } from '@/lib/engine/repository';
 import { ScoringError } from '@/lib/engine/scoring';
 import { CANONICAL_RESULT_PAYLOAD_FIELDS, isCanonicalResultPayload } from '@/lib/engine/result-contract';
-import type { EngineLanguageBundle, RuntimeAssessmentDefinition, RuntimeResponseSet } from '@/lib/engine/types';
+import type {
+  CanonicalResultPayload,
+  EngineLanguageBundle,
+  RuntimeAssessmentDefinition,
+  RuntimeResponseSet,
+} from '@/lib/engine/types';
 
 function createEmptyLanguageBundle(): EngineLanguageBundle {
   return {
@@ -14,6 +19,14 @@ function createEmptyLanguageBundle(): EngineLanguageBundle {
     domains: {},
     overview: {},
   };
+}
+
+function getAllDomainSignals(payload: CanonicalResultPayload) {
+  return payload.domains.flatMap((domain) => domain.signals);
+}
+
+function getDomain(payload: CanonicalResultPayload, domainKey: string) {
+  return payload.domains.find((domain) => domain.domainKey === domainKey);
 }
 
 function buildDefinition(): RuntimeAssessmentDefinition {
@@ -269,13 +282,18 @@ function createRepositoryWithLanguageBundle(
 
 function assertCanonicalPayloadShape(payload: Record<string, unknown>): void {
   assert.deepEqual(Object.keys(payload), [...CANONICAL_RESULT_PAYLOAD_FIELDS]);
-  assert.deepEqual(Object.keys(payload.overviewSummary as Record<string, unknown>), ['headline', 'narrative']);
-  assert.ok(Array.isArray(payload.strengths));
-  assert.ok(Array.isArray(payload.watchouts));
-  assert.ok(Array.isArray(payload.developmentFocus));
-  assert.ok(Array.isArray(payload.domainSummaries));
-  assert.ok(Array.isArray(payload.rankedSignals));
-  assert.ok(Array.isArray(payload.normalizedScores));
+  assert.deepEqual(Object.keys(payload.intro as Record<string, unknown>), ['assessmentDescription']);
+  assert.deepEqual(Object.keys(payload.hero as Record<string, unknown>), [
+    'headline',
+    'narrative',
+    'primaryPattern',
+    'domainHighlights',
+  ]);
+  assert.ok(Array.isArray(payload.domains));
+  assert.equal(typeof payload.actions, 'object');
+  assert.ok(Array.isArray((payload.actions as Record<string, unknown>).strengths));
+  assert.ok(Array.isArray((payload.actions as Record<string, unknown>).watchouts));
+  assert.ok(Array.isArray((payload.actions as Record<string, unknown>).developmentFocus));
   assert.equal(typeof payload.diagnostics, 'object');
 }
 
@@ -294,8 +312,10 @@ test('full end-to-end execution returns a canonical result payload', async () =>
 
   assert.ok(isCanonicalResultPayload(payload));
   assert.equal(payload.metadata.assessmentKey, 'wplp80');
+  assert.equal(payload.metadata.assessmentTitle, 'WPLP-80');
   assert.equal(payload.metadata.assessmentDescription, null);
-  assert.equal(payload.topSignal?.signalId, 'signal-support');
+  assert.equal(payload.intro.assessmentDescription, null);
+  assert.equal(payload.hero.primaryPattern?.signalKey, 'support_drive');
 });
 
 test('published assessment path loads by assessment key', async () => {
@@ -386,8 +406,8 @@ test('engine path loads language bundle for a valid assessment version and leave
   });
 
   assert.equal(loadedAssessmentVersionId, 'version-1');
-  assert.equal(payload.overviewSummary.headline, 'A clear operating preference is coming through');
-  assert.match(payload.overviewSummary.narrative, /dependable way to approach work/i);
+  assert.equal(payload.hero.headline, 'A clear operating preference is coming through');
+  assert.match(payload.hero.narrative ?? '', /dependable way to approach work/i);
 });
 
 test('engine path uses overview-language summary for overview narrative only when available', async () => {
@@ -449,12 +469,12 @@ test('engine path uses overview-language summary for overview narrative only whe
     }),
   });
 
-  assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
-  assert.equal(payload.overviewSummary.narrative, 'Custom overview summary from the assessment version.');
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
-  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+  assert.equal(payload.hero.headline, baseline.hero.headline);
+  assert.equal(payload.hero.narrative, 'Custom overview summary from the assessment version.');
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
+  assert.deepEqual(payload.domains, baseline.domains);
 });
 
 test('engine path uses overview template headline for overview headline only when available', async () => {
@@ -516,13 +536,13 @@ test('engine path uses overview template headline for overview headline only whe
     responses,
   });
 
-  assert.equal(payload.overviewSummary.headline, 'Custom overview headline from the assessment version.');
-  assert.equal(payload.overviewSummary.narrative, 'Custom overview summary from the assessment version.');
-  assert.notEqual(payload.overviewSummary.headline, baseline.overviewSummary.headline);
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
-  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
+  assert.equal(payload.hero.headline, 'Custom overview headline from the assessment version.');
+  assert.equal(payload.hero.narrative, 'Custom overview summary from the assessment version.');
+  assert.notEqual(payload.hero.headline, baseline.hero.headline);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
+  assert.deepEqual(payload.domains, baseline.domains);
 });
 
 test('engine path uses signal-language sections for strengths watchouts and development only when available', async () => {
@@ -583,14 +603,14 @@ test('engine path uses signal-language sections for strengths watchouts and deve
     responses,
   });
 
-  assert.equal(payload.strengths[0]?.detail, 'Custom strength for Support Drive.');
-  assert.equal(payload.watchouts[0]?.detail, 'Custom watchout for Support Drive.');
-  assert.equal(payload.developmentFocus[0]?.detail, 'Custom development for Role Executor.');
-  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
-  assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
-  assert.equal(payload.strengths.length, baseline.strengths.length);
-  assert.equal(payload.watchouts.length, baseline.watchouts.length);
-  assert.equal(payload.developmentFocus.length, baseline.developmentFocus.length);
+  assert.equal(payload.actions.strengths[0]?.text, 'Custom strength for Support Drive.');
+  assert.equal(payload.actions.watchouts[0]?.text, 'Custom watchout for Support Drive.');
+  assert.equal(payload.actions.developmentFocus[0]?.text, 'Custom development for Role Executor.');
+  assert.deepEqual(payload.hero, baseline.hero);
+  assert.equal(getDomain(payload, 'signals')?.summary, getDomain(baseline, 'signals')?.summary);
+  assert.equal(payload.actions.strengths.length, baseline.actions.strengths.length);
+  assert.equal(payload.actions.watchouts.length, baseline.actions.watchouts.length);
+  assert.equal(payload.actions.developmentFocus.length, baseline.actions.developmentFocus.length);
 });
 
 test('engine path uses domain-language summary for domain summaries only when available', async () => {
@@ -647,23 +667,19 @@ test('engine path uses domain-language summary for domain summaries only when av
     responses,
   });
 
-  const payloadSignalsDomain = payload.domainSummaries.find((domain) => domain.domainKey === 'signals');
-  const baselineSignalsDomain = baseline.domainSummaries.find((domain) => domain.domainKey === 'signals');
+  const payloadSignalsDomain = getDomain(payload, 'signals');
+  const baselineSignalsDomain = getDomain(baseline, 'signals');
 
-  assert.equal(payloadSignalsDomain?.interpretation?.summary, 'Custom domain summary for the Signals domain.');
-  assert.equal(
-    payloadSignalsDomain?.interpretation?.supportingLine,
-    baselineSignalsDomain?.interpretation?.supportingLine,
-  );
-  assert.equal(
-    payloadSignalsDomain?.interpretation?.tensionClause,
-    baselineSignalsDomain?.interpretation?.tensionClause,
-  );
-  assert.deepEqual(payload.overviewSummary, baseline.overviewSummary);
-  assert.deepEqual(payload.strengths, baseline.strengths);
-  assert.deepEqual(payload.watchouts, baseline.watchouts);
-  assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
-  assert.equal(payload.domainSummaries.length, baseline.domainSummaries.length);
+  assert.equal(payloadSignalsDomain?.summary, 'Custom domain summary for the Signals domain.');
+  assert.equal(payloadSignalsDomain?.focus, baselineSignalsDomain?.focus);
+  assert.equal(payloadSignalsDomain?.pressure, baselineSignalsDomain?.pressure);
+  assert.equal(payload.hero.headline, baseline.hero.headline);
+  assert.equal(payload.hero.narrative, baseline.hero.narrative);
+  assert.equal(payload.hero.primaryPattern?.signalKey, baseline.hero.primaryPattern?.signalKey);
+  assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
+  assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
+  assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
+  assert.equal(payload.domains.length, baseline.domains.length);
 });
 
 test('engine language regression matrix preserves the canonical payload contract and section scope', async () => {
@@ -684,12 +700,12 @@ test('engine language regression matrix preserves the canonical payload contract
       name: 'no language rows at all',
       languageBundle: createEmptyLanguageBundle(),
       expected: {
-        headline: baseline.overviewSummary.headline,
-        narrative: baseline.overviewSummary.narrative,
-        strength: baseline.strengths[0]?.detail,
-        watchout: baseline.watchouts[0]?.detail,
-        development: baseline.developmentFocus[0]?.detail,
-        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+        headline: baseline.hero.headline,
+        narrative: baseline.hero.narrative,
+        strength: baseline.actions.strengths[0]?.text,
+        watchout: baseline.actions.watchouts[0]?.text,
+        development: baseline.actions.developmentFocus[0]?.text,
+        domainSummary: getDomain(baseline, 'signals')?.summary,
       },
     },
     {
@@ -705,12 +721,12 @@ test('engine language regression matrix preserves the canonical payload contract
         overview: {},
       },
       expected: {
-        headline: baseline.overviewSummary.headline,
-        narrative: baseline.overviewSummary.narrative,
-        strength: baseline.strengths[0]?.detail,
-        watchout: baseline.watchouts[0]?.detail,
-        development: baseline.developmentFocus[0]?.detail,
-        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+        headline: baseline.hero.headline,
+        narrative: baseline.hero.narrative,
+        strength: baseline.actions.strengths[0]?.text,
+        watchout: baseline.actions.watchouts[0]?.text,
+        development: baseline.actions.developmentFocus[0]?.text,
+        domainSummary: getDomain(baseline, 'signals')?.summary,
       },
     },
     {
@@ -730,12 +746,12 @@ test('engine language regression matrix preserves the canonical payload contract
         overview: {},
       },
       expected: {
-        headline: baseline.overviewSummary.headline,
-        narrative: baseline.overviewSummary.narrative,
+        headline: baseline.hero.headline,
+        narrative: baseline.hero.narrative,
         strength: 'Signal-only strength.',
         watchout: 'Signal-only watchout.',
         development: 'Signal-only development.',
-        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+        domainSummary: getDomain(baseline, 'signals')?.summary,
       },
     },
     {
@@ -751,11 +767,11 @@ test('engine language regression matrix preserves the canonical payload contract
         overview: {},
       },
       expected: {
-        headline: baseline.overviewSummary.headline,
-        narrative: baseline.overviewSummary.narrative,
-        strength: baseline.strengths[0]?.detail,
-        watchout: baseline.watchouts[0]?.detail,
-        development: baseline.developmentFocus[0]?.detail,
+        headline: baseline.hero.headline,
+        narrative: baseline.hero.narrative,
+        strength: baseline.actions.strengths[0]?.text,
+        watchout: baseline.actions.watchouts[0]?.text,
+        development: baseline.actions.developmentFocus[0]?.text,
         domainSummary: 'Domain-only summary.',
       },
     },
@@ -773,11 +789,11 @@ test('engine language regression matrix preserves the canonical payload contract
       },
       expected: {
         headline: 'Overview-headline-only.',
-        narrative: baseline.overviewSummary.narrative,
-        strength: baseline.strengths[0]?.detail,
-        watchout: baseline.watchouts[0]?.detail,
-        development: baseline.developmentFocus[0]?.detail,
-        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+        narrative: baseline.hero.narrative,
+        strength: baseline.actions.strengths[0]?.text,
+        watchout: baseline.actions.watchouts[0]?.text,
+        development: baseline.actions.developmentFocus[0]?.text,
+        domainSummary: getDomain(baseline, 'signals')?.summary,
       },
     },
     {
@@ -805,9 +821,9 @@ test('engine language regression matrix preserves the canonical payload contract
         headline: 'Mixed headline.',
         narrative: 'Mixed overview summary.',
         strength: 'Mixed strength.',
-        watchout: baseline.watchouts[0]?.detail,
-        development: baseline.developmentFocus[0]?.detail,
-        domainSummary: baseline.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+        watchout: baseline.actions.watchouts[0]?.text,
+        development: baseline.actions.developmentFocus[0]?.text,
+        domainSummary: getDomain(baseline, 'signals')?.summary,
       },
     },
     {
@@ -860,19 +876,18 @@ test('engine language regression matrix preserves the canonical payload contract
 
     assert.ok(isCanonicalResultPayload(payload), scenario.name);
     assertCanonicalPayloadShape(payload as unknown as Record<string, unknown>);
-    assert.equal(payload.overviewSummary.headline, scenario.expected.headline, `${scenario.name} headline`);
-    assert.equal(payload.overviewSummary.narrative, scenario.expected.narrative, `${scenario.name} narrative`);
-    assert.equal(payload.strengths[0]?.detail, scenario.expected.strength, `${scenario.name} strength`);
-    assert.equal(payload.watchouts[0]?.detail, scenario.expected.watchout, `${scenario.name} watchout`);
-    assert.equal(payload.developmentFocus[0]?.detail, scenario.expected.development, `${scenario.name} development`);
+    assert.equal(payload.hero.headline, scenario.expected.headline, `${scenario.name} headline`);
+    assert.equal(payload.hero.narrative, scenario.expected.narrative, `${scenario.name} narrative`);
+    assert.equal(payload.actions.strengths[0]?.text, scenario.expected.strength, `${scenario.name} strength`);
+    assert.equal(payload.actions.watchouts[0]?.text, scenario.expected.watchout, `${scenario.name} watchout`);
+    assert.equal(payload.actions.developmentFocus[0]?.text, scenario.expected.development, `${scenario.name} development`);
     assert.equal(
-      payload.domainSummaries.find((domain) => domain.domainKey === 'signals')?.interpretation?.summary,
+      getDomain(payload, 'signals')?.summary,
       scenario.expected.domainSummary,
       `${scenario.name} domain summary`,
     );
-    assert.deepEqual(payload.rankedSignals, baseline.rankedSignals, `${scenario.name} ranked signals`);
-    assert.deepEqual(payload.normalizedScores, baseline.normalizedScores, `${scenario.name} normalized scores`);
-    assert.deepEqual(payload.topSignal, baseline.topSignal, `${scenario.name} top signal`);
+    assert.deepEqual(getAllDomainSignals(payload), getAllDomainSignals(baseline), `${scenario.name} domain signals`);
+    assert.deepEqual(payload.hero.primaryPattern, baseline.hero.primaryPattern, `${scenario.name} primary pattern`);
     assert.equal(payload.diagnostics.readinessStatus, baseline.diagnostics.readinessStatus, `${scenario.name} readiness`);
     assert.deepEqual(payload.diagnostics.scoring, baseline.diagnostics.scoring, `${scenario.name} scoring diagnostics`);
     assert.deepEqual(
@@ -880,8 +895,8 @@ test('engine language regression matrix preserves the canonical payload contract
       baseline.diagnostics.normalization,
       `${scenario.name} normalization diagnostics`,
     );
-    assert.notEqual(payload.overviewSummary.headline.trim(), '', `${scenario.name} non-empty headline`);
-    assert.notEqual(payload.overviewSummary.narrative.trim(), '', `${scenario.name} non-empty narrative`);
+    assert.notEqual(payload.hero.headline?.trim(), '', `${scenario.name} non-empty headline`);
+    assert.notEqual(payload.hero.narrative?.trim(), '', `${scenario.name} non-empty narrative`);
   }
 });
 
@@ -908,7 +923,7 @@ test('empty language bundle is handled safely and result generation still succee
 
   assert.ok(isCanonicalResultPayload(payload));
   assert.equal(payload.diagnostics.zeroMass, true);
-  assert.equal(payload.topSignal?.signalId, 'signal-core');
+  assert.equal(payload.hero.primaryPattern?.signalKey, 'core_focus');
 });
 
 test('same input produces identical payload output', async () => {
@@ -976,7 +991,7 @@ test('zero-answer case still returns a valid payload', async () => {
 
   assert.ok(isCanonicalResultPayload(payload));
   assert.equal(payload.diagnostics.zeroMass, true);
-  assert.equal(payload.topSignal?.signalId, 'signal-core');
+  assert.equal(payload.hero.primaryPattern?.signalKey, 'core_focus');
 });
 
 test('overlay signals are preserved through the full pipeline', async () => {
@@ -989,9 +1004,9 @@ test('overlay signals are preserved through the full pipeline', async () => {
     responses: buildResponses({ 'question-1': 'option-2' }),
   });
 
-  const overlaySignal = payload.rankedSignals.find((signal) => signal.signalId === 'signal-overlay');
-  assert.equal(overlaySignal?.isOverlay, true);
-  assert.equal(overlaySignal?.overlayType, 'role');
+  const overlaySignal = getAllDomainSignals(payload).find((signal) => signal.signalKey === 'role_executor');
+  assert.equal(overlaySignal?.rank, 2);
+  assert.equal(overlaySignal?.isPrimary, false);
 });
 
 test('empty domains are preserved through the full pipeline', async () => {
@@ -1004,10 +1019,9 @@ test('empty domains are preserved through the full pipeline', async () => {
     responses: buildResponses({ 'question-1': 'option-1' }),
   });
 
-  const emptyDomain = payload.domainSummaries.find((domain) => domain.domainId === 'domain-section');
+  const emptyDomain = getDomain(payload, 'section_a');
   assert.ok(emptyDomain);
-  assert.equal(emptyDomain?.signalScores.length, 0);
-  assert.equal(emptyDomain?.domainSource, 'question_section');
+  assert.equal(emptyDomain?.signals.length, 0);
 });
 
 test('engine attaches assessmentDescription from the assessment language repository when present', async () => {
@@ -1028,7 +1042,10 @@ test('engine attaches assessmentDescription from the assessment language reposit
 
   assert.equal(loadedAssessmentVersionId, 'version-1');
   assert.equal(payload.metadata.assessmentDescription, 'Version-scoped assessment description.');
+  assert.equal(payload.intro.assessmentDescription, 'Version-scoped assessment description.');
   assert.equal(payload.metadata.assessmentKey, 'wplp80');
+  assert.equal(payload.metadata.assessmentTitle, 'WPLP-80');
   assert.equal(payload.metadata.version, '1.0.0');
   assert.equal(payload.metadata.attemptId, 'attempt-1');
+  assert.equal(payload.metadata.completedAt, '2026-01-01T00:01:00.000Z');
 });

@@ -95,8 +95,10 @@ export async function runAssessmentEngine(
       ...normalizedResult,
       metadata: {
         assessmentKey: definition.assessment.key,
+        assessmentTitle: definition.assessment.title,
         version: definition.version.versionTag,
         attemptId: params.responses.attemptId,
+        completedAt: params.responses.submittedAt ?? null,
         assessmentDescription: assessmentLanguage.assessment_description ?? null,
       },
       scoringDiagnostics: scoreResult.diagnostics,
@@ -108,7 +110,7 @@ export async function runAssessmentEngine(
     const diagnostics = runFullDiagnostics({
       runtimeModel: executionModel,
       languageConfig: languageBundle,
-      normalizationScores: payload.normalizedScores,
+      normalizationScores: normalizedResult.signalScores,
       result: payload,
     });
 
