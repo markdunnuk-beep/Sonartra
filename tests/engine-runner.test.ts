@@ -316,6 +316,15 @@ test('full end-to-end execution returns a canonical result payload', async () =>
   assert.equal(payload.metadata.assessmentDescription, null);
   assert.equal(payload.intro.assessmentDescription, null);
   assert.equal(payload.hero.primaryPattern?.signalKey, 'support_drive');
+  assert.deepEqual(payload.hero.domainHighlights, [
+    {
+      domainKey: 'signals',
+      domainLabel: 'Signals',
+      primarySignalKey: 'support_drive',
+      primarySignalLabel: 'Support Drive',
+      summary: null,
+    },
+  ]);
 });
 
 test('published assessment path loads by assessment key', async () => {
@@ -408,6 +417,55 @@ test('engine path loads language bundle for a valid assessment version and leave
   assert.equal(loadedAssessmentVersionId, 'version-1');
   assert.equal(payload.hero.headline, 'A clear operating preference is coming through');
   assert.match(payload.hero.narrative ?? '', /dependable way to approach work/i);
+  assert.equal(payload.hero.primaryPattern?.signalLabel, 'Core Focus');
+});
+
+test('hero domain highlights use authored domain order and primary signal summaries only', async () => {
+  const definition = buildDefinition();
+  const repository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return {
+        signals: {
+          support_drive: {
+            summary: 'Support Drive summary from signal language.',
+          },
+        },
+        pairs: {},
+        domains: {
+          signals: {
+            summary: 'Domain summary that should not be used in hero.',
+          },
+        },
+        overview: {},
+      };
+    },
+  };
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
+    responses: buildResponses({
+      'question-1': 'option-2',
+      'question-2': 'option-3',
+    }),
+  });
+
+  assert.deepEqual(payload.hero.domainHighlights, [
+    {
+      domainKey: 'signals',
+      domainLabel: 'Signals',
+      primarySignalKey: 'support_drive',
+      primarySignalLabel: 'Support Drive',
+      summary: 'Support Drive summary from signal language.',
+    },
+  ]);
 });
 
 test('engine path uses overview-language summary for overview narrative only when available', async () => {

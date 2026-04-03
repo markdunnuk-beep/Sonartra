@@ -106,6 +106,7 @@ export type AssessmentResultDetailViewModel = {
   assessmentTitle: string;
   version: string;
   metadata: CanonicalResultPayload['metadata'];
+  hero: CanonicalResultPayload['hero'];
   topSignal: AssessmentResultTopSignalViewModel | null;
   rankedSignals: readonly AssessmentResultRankedSignalViewModel[];
   normalizedScores: readonly AssessmentResultSignalScoreViewModel[];

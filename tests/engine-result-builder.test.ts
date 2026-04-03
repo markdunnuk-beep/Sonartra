@@ -428,6 +428,250 @@ test('metadata includes assessmentDescription when provided by the engine contex
   assert.equal(payload.intro.assessmentDescription, 'Assessment-owned description for this version.');
 });
 
+test('hero summary uses overview resolution path and top-ranked overall signal for primaryPattern', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture(),
+  });
+
+  assert.equal(payload.hero.headline, 'A clear operating preference is coming through');
+  assert.match(payload.hero.narrative ?? '', /dependable way to approach work/i);
+  assert.deepEqual(payload.hero.primaryPattern, {
+    label: 'Focus',
+    signalKey: 'focus',
+    signalLabel: 'Focus',
+  });
+});
+
+test('hero domain highlights stay in authored domain order and use each domain top-ranked signal', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-vision',
+          signalKey: 'lead_vision',
+          title: 'Vision',
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          rawTotal: 4,
+          percentage: 31,
+          domainPercentage: 60,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-results',
+          signalKey: 'lead_results',
+          title: 'Results',
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          rawTotal: 2,
+          percentage: 15,
+          domainPercentage: 40,
+          rank: 3,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-evidence',
+          signalKey: 'decision_evidence',
+          title: 'Evidence',
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          rawTotal: 3,
+          percentage: 24,
+          domainPercentage: 75,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-instinct',
+          signalKey: 'decision_instinct',
+          title: 'Instinct',
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          rawTotal: 1,
+          percentage: 8,
+          domainPercentage: 25,
+          rank: 4,
+        }),
+      ]),
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-lead',
+          domainKey: 'signal_lead',
+          title: 'Leadership',
+          rawTotal: 6,
+          percentage: 60,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-results',
+              signalKey: 'lead_results',
+              title: 'Results',
+              domainId: 'domain-lead',
+              domainKey: 'signal_lead',
+              rawTotal: 2,
+              percentage: 15,
+              domainPercentage: 40,
+              rank: 3,
+            }),
+            buildNormalizedSignal({
+              signalId: 'signal-vision',
+              signalKey: 'lead_vision',
+              title: 'Vision',
+              domainId: 'domain-lead',
+              domainKey: 'signal_lead',
+              rawTotal: 4,
+              percentage: 31,
+              domainPercentage: 60,
+              rank: 1,
+            }),
+          ]),
+          answeredQuestionCount: 3,
+        }),
+        buildDomainSummary({
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          title: 'Decision',
+          rawTotal: 4,
+          percentage: 40,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-instinct',
+              signalKey: 'decision_instinct',
+              title: 'Instinct',
+              domainId: 'domain-decision',
+              domainKey: 'signal_decision',
+              rawTotal: 1,
+              percentage: 8,
+              domainPercentage: 25,
+              rank: 4,
+            }),
+            buildNormalizedSignal({
+              signalId: 'signal-evidence',
+              signalKey: 'decision_evidence',
+              title: 'Evidence',
+              domainId: 'domain-decision',
+              domainKey: 'signal_decision',
+              rawTotal: 3,
+              percentage: 24,
+              domainPercentage: 75,
+              rank: 2,
+            }),
+          ]),
+          answeredQuestionCount: 3,
+        }),
+      ]),
+      topSignalId: 'signal-vision',
+    }),
+  });
+
+  assert.deepEqual(payload.hero.domainHighlights, [
+    {
+      domainKey: 'signal_lead',
+      domainLabel: 'Leadership',
+      primarySignalKey: 'lead_vision',
+      primarySignalLabel: 'Vision',
+      summary: null,
+    },
+    {
+      domainKey: 'signal_decision',
+      domainLabel: 'Decision',
+      primarySignalKey: 'decision_evidence',
+      primarySignalLabel: 'Evidence',
+      summary: null,
+    },
+  ]);
+});
+
+test('hero domain highlight summary uses primary signal summary only and stays null when missing', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 55,
+          domainPercentage: 55,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-evidence',
+          signalKey: 'decision_evidence',
+          title: 'Evidence',
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          rawTotal: 4,
+          percentage: 45,
+          domainPercentage: 45,
+          rank: 2,
+        }),
+      ]),
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 5,
+          percentage: 55,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-driver',
+              signalKey: 'style_driver',
+              title: 'Driver',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 5,
+              percentage: 55,
+              domainPercentage: 55,
+              rank: 1,
+            }),
+          ]),
+          answeredQuestionCount: 2,
+        }),
+        buildDomainSummary({
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          title: 'Decision',
+          rawTotal: 4,
+          percentage: 45,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-evidence',
+              signalKey: 'decision_evidence',
+              title: 'Evidence',
+              domainId: 'domain-decision',
+              domainKey: 'signal_decision',
+              rawTotal: 4,
+              percentage: 45,
+              domainPercentage: 45,
+              rank: 2,
+            }),
+          ]),
+          answeredQuestionCount: 2,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {
+          style_driver: {
+            summary: 'Signal-authored summary for the Driver signal.',
+          },
+        },
+        pairs: {},
+        domains: {
+          signal_decision: {
+            summary: 'Domain-authored summary that should not be used in hero.',
+          },
+        },
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.hero.domainHighlights[0]?.summary, 'Signal-authored summary for the Driver signal.');
+  assert.equal(payload.hero.domainHighlights[1]?.summary, null);
+});
+
 test('top signal projection matches normalization ranking', () => {
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture(),

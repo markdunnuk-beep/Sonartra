@@ -270,34 +270,33 @@ export function buildHero(params: {
   interpretationContext: ResultInterpretationContext;
 }): ResultHeroSummary {
   const overviewSummary = buildOverviewSummary(params.normalizedResult, params.interpretationContext);
-  const topSignal = buildTopSignal(params.normalizedResult);
-  const domainHighlights = params.domainSummaries
-    .filter((domainSummary) => domainSummary.signalScores.length > 0)
-    .map((domainSummary) => {
-      const primarySignal = domainSummary.signalScores[0];
+  const topSignal = getTopSignalsInRankOrder(params.normalizedResult.signalScores)[0] ?? null;
+  const domainHighlights = params.domainSummaries.flatMap((domainSummary) => {
+    const primarySignal = domainSummary.signalScores[0];
 
-      if (!primarySignal) {
-        return null;
-      }
+    if (!primarySignal) {
+      return [];
+    }
 
-      return {
+    return [
+      {
         domainKey: domainSummary.domainKey,
         domainLabel: domainSummary.domainTitle,
         primarySignalKey: primarySignal.signalKey,
         primarySignalLabel: primarySignal.signalTitle,
-        summary: domainSummary.interpretation?.summary ?? null,
-      };
-    })
-    .filter((domainHighlight): domainHighlight is NonNullable<typeof domainHighlight> => domainHighlight !== null);
+        summary: getSignalLanguageSummary(primarySignal.signalKey, params.interpretationContext),
+      },
+    ];
+  });
 
   return {
-    headline: overviewSummary.headline ?? null,
-    narrative: overviewSummary.narrative ?? null,
+    headline: overviewSummary.headline || null,
+    narrative: overviewSummary.narrative || null,
     primaryPattern: topSignal
       ? {
-          label: topSignal.title,
+          label: topSignal.signalTitle,
           signalKey: topSignal.signalKey,
-          signalLabel: topSignal.title,
+          signalLabel: topSignal.signalTitle,
         }
       : null,
     domainHighlights,

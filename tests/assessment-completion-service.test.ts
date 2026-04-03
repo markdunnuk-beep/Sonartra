@@ -531,6 +531,7 @@ test('completion path persists the canonical payload unchanged through the real 
         return {
           signals: {
             role_executor: {
+              summary: 'Persisted signal summary.',
               strength: 'Persisted strength language.',
             },
           },
@@ -569,6 +570,13 @@ test('completion path persists the canonical payload unchanged through the real 
   assert.deepEqual(Object.keys(payload ?? {}), [...CANONICAL_RESULT_PAYLOAD_FIELDS]);
   assert.equal(payload?.hero.headline, 'Persisted overview headline.');
   assert.equal(payload?.hero.narrative, 'Persisted overview narrative.');
+  assert.deepEqual(payload?.hero.domainHighlights, [{
+    domainKey: 'signals',
+    domainLabel: 'Signals',
+    primarySignalKey: 'role_executor',
+    primarySignalLabel: 'Role Executor',
+    summary: 'Persisted signal summary.',
+  }]);
   assert.equal(payload?.domains[1]?.summary, 'Persisted domain summary.');
   assert.equal(payload?.actions.strengths[0]?.text, 'Persisted strength language.');
   assert.equal(payload?.metadata.assessmentDescription, null);
