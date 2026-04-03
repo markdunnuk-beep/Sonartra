@@ -12,12 +12,12 @@ import type {
 import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking';
 
 /**
- * Current domain-language ownership for result-detail narrative:
+ * Current domain-language ownership for persisted domain chapters:
  * - Active: Domain_Language.summary -> domainSummaries[*].interpretation.summary
- * - Reserved: Domain_Language.focus / pressure / environment
+ * - Active elsewhere in the canonical payload: Domain_Language.focus / pressure / environment -> domains[*]
  *
- * Supporting and tension lines remain deterministic engine output until those
- * reserved sections are explicitly assigned.
+ * Supporting and tension lines remain deterministic engine output. Domain summary
+ * is the only authored override applied inside interpretation assembly itself.
  */
 type CoreDomainKey =
   | 'signal_style'
@@ -621,7 +621,7 @@ function buildPairwiseSummary(context: DomainInterpretationContext): {
   };
 }
 
-function resolveDomainLanguageSummary(
+function resolveDomainSummaryOverride(
   domainKey: string,
   interpretationContext?: ResultInterpretationContext,
 ): string | null {
@@ -697,7 +697,7 @@ export function buildDomainInterpretation(
 
     return {
       ...interpretation,
-      summary: resolveDomainLanguageSummary(domainSummary.domainKey, interpretationContext) ?? interpretation.summary,
+      summary: resolveDomainSummaryOverride(domainSummary.domainKey, interpretationContext) ?? interpretation.summary,
     };
   }
 
@@ -709,7 +709,7 @@ export function buildDomainInterpretation(
     primaryPercent: context.primarySignal.domainPercentage,
     secondarySignalKey: context.secondarySignal?.signalKey ?? null,
     secondaryPercent: context.secondarySignal?.domainPercentage ?? null,
-    summary: resolveDomainLanguageSummary(domainSummary.domainKey, interpretationContext) ?? pairwise.summary,
+    summary: resolveDomainSummaryOverride(domainSummary.domainKey, interpretationContext) ?? pairwise.summary,
     supportingLine: pairwise.supportingLine,
     tensionClause: pairwise.tensionClause,
     diagnostics: {

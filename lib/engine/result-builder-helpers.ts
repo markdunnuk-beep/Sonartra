@@ -337,6 +337,8 @@ export function buildHero(params: {
   domainSummaries: readonly ResultDomainSummary[];
   interpretationContext: ResultInterpretationContext;
 }): ResultHeroSummary {
+  // The persisted payload calls this section "hero". The underlying authored
+  // storage still uses overview rows, resolved through buildOverviewSummary.
   const overviewSummary = buildOverviewSummary(params.normalizedResult, params.interpretationContext);
   const topSignal = getTopSignalsInRankOrder(params.normalizedResult.signalScores)[0] ?? null;
   const domainHighlights = params.domainSummaries.flatMap((domainSummary) => {

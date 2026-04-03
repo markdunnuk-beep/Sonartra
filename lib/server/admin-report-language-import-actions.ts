@@ -6,7 +6,10 @@ import {
   initialAdminReportLanguageImportState,
   type AdminReportLanguageImportState,
 } from '@/lib/admin/admin-report-language-import';
-import type { ReportLanguageSection } from '@/lib/admin/report-language-import';
+import {
+  getReportSectionEmptyInputNoun,
+  type ReportLanguageSection,
+} from '@/lib/admin/report-language-import';
 import {
   importReportLanguageForAssessmentVersion,
   previewReportLanguageForAssessmentVersion,
@@ -32,7 +35,7 @@ function buildEmptyInputState(
     rawInput,
     lastAction,
     hasSubmitted: true,
-    formError: `Paste one or more ${toSectionCopy(reportSection)} rows before continuing.`,
+    formError: `Paste one or more ${getReportSectionEmptyInputNoun(reportSection)} rows before continuing.`,
   };
 }
 
@@ -99,16 +102,3 @@ export async function importReportLanguageAction(
 }
 
 export const reportLanguageImportRevalidate = revalidatePath;
-
-function toSectionCopy(reportSection: Exclude<ReportLanguageSection, 'intro'>): string {
-  switch (reportSection) {
-    case 'hero':
-      return 'hero';
-    case 'domain':
-      return 'domain chapter';
-    case 'signal':
-      return 'signal';
-    case 'pair':
-      return 'pair summary';
-  }
-}

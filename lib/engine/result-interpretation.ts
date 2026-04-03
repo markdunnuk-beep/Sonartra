@@ -8,11 +8,11 @@ import type {
 import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 
 /**
- * Canonical result-language ownership for current UI-visible report fields.
+ * Canonical result-language ownership for the persisted report fields.
  *
  * Active:
- * - Overview_Language.headline -> overviewSummary.headline
- * - Overview_Language.summary -> overviewSummary.narrative
+ * - Overview_Language.headline -> hero.headline via the overview-backed hero storage bridge
+ * - Overview_Language.summary -> hero.narrative via the overview-backed hero storage bridge
  * - Signal_Language.strength -> strengths[]
  * - Signal_Language.watchout -> watchouts[]
  * - Signal_Language.development -> developmentFocus[]
@@ -26,7 +26,9 @@ import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
  * - Overview_Language.watchouts
  * - Overview_Language.development
  *
- * The results UI reads these persisted fields directly and must not recreate
+ * Signal summaries and pair summaries are active elsewhere in the canonical
+ * report payload. This helper remains focused on hero text plus derived action
+ * blocks. The results UI reads persisted fields directly and must not recreate
  * behavioural copy client-side.
  */
 const CONCENTRATED_TOP_SIGNAL_THRESHOLD = 45;
@@ -415,7 +417,7 @@ function getSignalPairLookupToken(signalKey: string): string {
   return segments[segments.length - 1] ?? signalKey;
 }
 
-function resolveCanonicalOverviewPatternKey(
+function resolveCanonicalHeroPatternKey(
   signalScores: readonly NormalizedSignalScore[],
 ): string | null {
   const rankedSignals = getTopSignalsInRankOrder(signalScores);
@@ -432,7 +434,7 @@ function resolveCanonicalOverviewPatternKey(
   return canonicalPair.success ? canonicalPair.canonicalSignalPair : null;
 }
 
-function resolveOverviewLanguageSection(
+function resolveHeroOverviewStorageSection(
   signalScores: readonly NormalizedSignalScore[],
   section: 'headline' | 'summary',
   context?: ResultInterpretationContext,
@@ -441,7 +443,7 @@ function resolveOverviewLanguageSection(
     return null;
   }
 
-  const canonicalPatternKey = resolveCanonicalOverviewPatternKey(signalScores);
+  const canonicalPatternKey = resolveCanonicalHeroPatternKey(signalScores);
   if (!canonicalPatternKey) {
     return null;
   }
@@ -475,10 +477,10 @@ export function buildOverviewSummary(
   }
 
   const topTemplate = getSignalTemplate(topSignal.signalKey);
-  // Overview narrative ownership is explicit: both persisted overview fields are
-  // resolved from Overview_Language first, then fall back to deterministic text.
-  const overviewTemplateHeadline = resolveOverviewLanguageSection(rankedSignals, 'headline', context);
-  const overviewTemplateSummary = resolveOverviewLanguageSection(rankedSignals, 'summary', context);
+  // Hero authoring still reads from overview-backed storage. This bridge keeps
+  // the report-facing Hero model aligned without changing persisted storage.
+  const overviewTemplateHeadline = resolveHeroOverviewStorageSection(rankedSignals, 'headline', context);
+  const overviewTemplateSummary = resolveHeroOverviewStorageSection(rankedSignals, 'summary', context);
   const distribution = classifyDistribution(rankedSignals);
   let supportSentence = topTemplate.impact;
 

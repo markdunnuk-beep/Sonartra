@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 
 import {
   buildReportAlignedLanguageStoragePlan,
+  getReportSectionLabel,
+  getReportSectionRowName,
   normalizeReportLanguageSection,
   parseReportLanguageRows,
   validateReportLanguageRows,
@@ -367,7 +369,7 @@ function buildWrongSectionErrors(
 
     errors.push({
       code: 'WRONG_REPORT_SECTION',
-      message: `${toSectionLabel(reportSection)} accepts only ${reportSection} rows. Line ${row.lineNumber} targets ${row.section}.`,
+      message: `${toSectionLabel(reportSection)} accepts only ${getReportSectionRowName(reportSection)} rows. Line ${row.lineNumber} targets ${row.section}.`,
     });
   }
 
@@ -522,14 +524,5 @@ function buildResult(params: {
 }
 
 function toSectionLabel(reportSection: Exclude<ReportLanguageSection, 'intro'>): string {
-  switch (reportSection) {
-    case 'hero':
-      return 'Hero';
-    case 'domain':
-      return 'Domain Chapters';
-    case 'signal':
-      return 'Signals';
-    case 'pair':
-      return 'Pairs';
-  }
+  return getReportSectionLabel(reportSection);
 }

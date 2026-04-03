@@ -1,5 +1,6 @@
 import { AdminAssessmentLanguageEditor } from '@/components/admin/admin-assessment-language-editor';
 import { AdminReportLanguageImport } from '@/components/admin/admin-report-language-import';
+import { HERO_OVERVIEW_STORAGE_NOTE } from '@/lib/admin/report-language-import';
 import {
   EmptyState,
   LabelPill,
@@ -119,7 +120,7 @@ export function AdminAssessmentLanguageStep({
           eyebrow="Hero"
           title="Hero Language"
           description="Author the Hero headline and narrative using report-oriented rows."
-          detail="This writes to the current overview-backed storage model through the report-aligned compatibility layer."
+          detail={HERO_OVERVIEW_STORAGE_NOTE}
           derivedNote="Do not author hero.primaryPattern or hero.domainHighlights here. Those are derived by the engine from ranking and signal summaries."
           currentRowsLabel="Current Hero rows"
           textareaLabel="Paste hero rows"

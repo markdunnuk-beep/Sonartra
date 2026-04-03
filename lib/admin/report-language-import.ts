@@ -12,6 +12,8 @@ export type ReportLanguageSection = 'intro' | 'hero' | 'domain' | 'signal' | 'pa
 
 type RecognizedReportLanguageSection = ReportLanguageSection | 'actions';
 
+type ImportableReportLanguageSection = Exclude<ReportLanguageSection, 'intro'>;
+
 export type ReportLanguageParseErrorCode =
   | 'INVALID_COLUMN_COUNT'
   | 'EMPTY_SECTION'
@@ -151,6 +153,9 @@ export type ReportAlignedLanguageStoragePlan = {
   };
 };
 
+export const HERO_OVERVIEW_STORAGE_NOTE =
+  'Hero authoring continues to write to legacy overview storage so the persisted runtime contract stays unchanged.' as const;
+
 const SIGNAL_FIELDS = new Set<ValidSignalField>([
   'summary',
   'strength',
@@ -166,6 +171,36 @@ const DOMAIN_FIELDS = new Set<ValidDomainField>([
 ]);
 
 const HERO_FIELDS = new Set<ValidHeroField>(['headline', 'narrative']);
+
+const REPORT_SECTION_METADATA: Record<
+  ImportableReportLanguageSection,
+  {
+    label: string;
+    emptyInputNoun: string;
+    rowSectionName: string;
+  }
+> = {
+  hero: {
+    label: 'Hero',
+    emptyInputNoun: 'hero',
+    rowSectionName: 'hero',
+  },
+  domain: {
+    label: 'Domain Chapters',
+    emptyInputNoun: 'domain chapter',
+    rowSectionName: 'domain',
+  },
+  signal: {
+    label: 'Signals',
+    emptyInputNoun: 'signal',
+    rowSectionName: 'signal',
+  },
+  pair: {
+    label: 'Pairs',
+    emptyInputNoun: 'pair summary',
+    rowSectionName: 'pair',
+  },
+};
 
 export function normalizeReportLanguageSection(
   value: string,
@@ -204,8 +239,20 @@ function toSignalSection(field: ValidSignalField): AssessmentVersionLanguageSign
   return field;
 }
 
-function toOverviewSection(field: ValidHeroField): 'headline' | 'summary' {
+function toHeroOverviewStorageSection(field: ValidHeroField): 'headline' | 'summary' {
   return field === 'narrative' ? 'summary' : 'headline';
+}
+
+export function getReportSectionLabel(section: ImportableReportLanguageSection): string {
+  return REPORT_SECTION_METADATA[section].label;
+}
+
+export function getReportSectionEmptyInputNoun(section: ImportableReportLanguageSection): string {
+  return REPORT_SECTION_METADATA[section].emptyInputNoun;
+}
+
+export function getReportSectionRowName(section: ImportableReportLanguageSection): string {
+  return REPORT_SECTION_METADATA[section].rowSectionName;
 }
 
 function createValidationError(
@@ -685,9 +732,10 @@ export function buildReportAlignedLanguageStoragePlan(
             content: introRow.content,
           }
         : null,
+      // Hero authoring remains overview-backed until storage is formally renamed.
       overview: hero.map((row) => ({
         patternKey: row.patternKey,
-        section: toOverviewSection(row.field),
+        section: toHeroOverviewStorageSection(row.field),
         content: row.content,
       })),
       domains: domainChapters.map((row) => ({
