@@ -317,13 +317,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const heroSupport = getHeroSupport(result);
 
   return (
-    <PageFrame className="space-y-12 md:space-y-14">
+      <PageFrame className="space-y-12 md:space-y-14">
       {hasAssessmentDescription ? (
-        <section className="mb-10 rounded-3xl border border-white/10 bg-white/[0.03] px-8 py-7 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
+        <section className="mb-12 rounded-3xl border border-white/10 bg-white/[0.03] px-7 py-7 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm md:px-10 md:py-9">
+          <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
             About this report
           </p>
-          <div className="max-w-3xl text-[17px] text-white/88 md:text-[18px] [&_h1]:text-[22px] [&_h1]:font-medium [&_h1]:text-white [&_h2]:text-[20px] [&_h2]:font-medium [&_h2]:text-white [&_h3]:text-[18px] [&_h3]:font-medium [&_h3]:text-white [&_p]:whitespace-pre-line [&_p]:leading-8 [&_p:not(:first-child)]:mt-5 [&_strong]:font-semibold [&_strong]:text-white">
+          <div className="max-w-4xl [&>h1]:mb-6 [&>h1]:text-[30px] [&>h1]:font-semibold [&>h1]:leading-[1.08] [&>h1]:tracking-[-0.02em] [&>h1]:text-white [&>h2]:mt-8 [&>h2]:mb-3 [&>h2]:text-[20px] [&>h2]:font-semibold [&>h2]:leading-tight [&>h2]:tracking-[-0.01em] [&>h2]:text-white [&>h3]:mt-6 [&>h3]:mb-2 [&>h3]:text-[17px] [&>h3]:font-semibold [&>h3]:leading-tight [&>h3]:text-white/95 [&>p]:my-0 [&>p]:whitespace-pre-line [&>p]:text-[18px] [&>p]:leading-9 [&>p]:tracking-[-0.01em] [&>p]:text-white/82 [&>p+p]:mt-5 [&_strong]:font-semibold [&_strong]:text-white [&>hr]:my-7 [&>hr]:h-px [&>hr]:border-0 [&>hr]:bg-white/10 [&>ul]:my-5 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-[18px] [&>ul]:leading-8 [&>ul]:text-white/82 [&>ol]:my-5 [&>ol]:space-y-2 [&>ol]:pl-5 [&>ol]:text-[18px] [&>ol]:leading-8 [&>ol]:text-white/82 [&>blockquote]:my-6 [&>blockquote]:border-l [&>blockquote]:border-white/10 [&>blockquote]:pl-4 [&>blockquote]:text-white/72">
             <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
               {assessmentDescription}
             </ReactMarkdown>

@@ -251,15 +251,15 @@ test('result detail page renders assessmentDescription above the hero when prese
   assert.match(source, /\{hasAssessmentDescription \? \(/);
   assert.match(
     source,
-    /<section className="mb-10 rounded-3xl border border-white\/10 bg-white\/\[0\.03\] px-8 py-7 shadow-\[0_20px_80px_rgba\(0,0,0,0\.35\)\] backdrop-blur-sm">/,
+    /<section className="mb-12 rounded-3xl border border-white\/10 bg-white\/\[0\.03\] px-7 py-7 shadow-\[0_20px_80px_rgba\(0,0,0,0\.35\)\] backdrop-blur-sm md:px-10 md:py-9">/,
   );
   assert.match(source, />\s*About this report\s*<\/p>/);
-  assert.match(
-    source,
-    /max-w-3xl text-\[17px\] text-white\/88 md:text-\[18px\]/,
-  );
-  assert.match(source, /\[\&_p\]:whitespace-pre-line/);
-  assert.match(source, /\[\&_p\]:leading-8/);
+  assert.match(source, /className="mb-5 text-\[11px\] font-semibold uppercase tracking-\[0\.24em\] text-white\/45"/);
+  assert.match(source, /max-w-4xl/);
+  assert.match(source, /\[\&>p\]:whitespace-pre-line/);
+  assert.match(source, /\[\&>p\]:text-\[18px\]/);
+  assert.match(source, /\[\&>p\]:leading-9/);
+  assert.match(source, /\[\&>p\+p\]:mt-5/);
   assert.match(source, /\[\&_strong\]:font-semibold/);
   assert.match(source, /\[\&_strong\]:text-white/);
   assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
@@ -279,8 +279,24 @@ test('result detail page uses markdown output for bold text and paragraph struct
   assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
   assert.match(source, /\[\&_strong\]:font-semibold/);
   assert.match(source, /\[\&_strong\]:text-white/);
-  assert.match(source, /\[\&_p\]:whitespace-pre-line/);
-  assert.match(source, /\[\&_p:not\(:first-child\)\]:mt-5/);
+  assert.match(source, /\[\&>p\]:whitespace-pre-line/);
+  assert.match(source, /\[\&>p\+p\]:mt-5/);
+});
+
+test('result detail page adds stronger markdown hierarchy for headings, rules, and lists in assessmentDescription', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /\[\&>h1\]:text-\[30px\]/);
+  assert.match(source, /\[\&>h1\]:leading-\[1\.08\]/);
+  assert.match(source, /\[\&>h2\]:mt-8/);
+  assert.match(source, /\[\&>h2\]:text-\[20px\]/);
+  assert.match(source, /\[\&>hr\]:my-7/);
+  assert.match(source, /\[\&>hr\]:bg-white\/10/);
+  assert.match(source, /\[\&>ul\]:space-y-2/);
+  assert.match(source, /\[\&>ul\]:pl-5/);
+  assert.match(source, /\[\&>ol\]:space-y-2/);
+  assert.match(source, /\[\&>blockquote\]:border-l/);
+  assert.match(source, /\[\&>blockquote\]:text-white\/72/);
 });
 
 test('result detail page keeps personalisation prep outside UI prose generation', () => {
