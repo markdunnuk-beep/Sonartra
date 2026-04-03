@@ -220,6 +220,21 @@ export async function reconcileKnownMigrations(params: {
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);
       }
+
+      continue;
+    }
+
+    if (migration.filename === '202604030001_assessment_language.sql') {
+      const hasAssessmentLanguageTable = await tableExists(
+        params.db,
+        'assessment_version_language_assessment',
+      );
+
+      if (hasAssessmentLanguageTable) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
     }
   }
 
