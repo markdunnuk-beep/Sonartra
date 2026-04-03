@@ -317,8 +317,11 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   return (
     <PageFrame className="space-y-12 md:space-y-14">
       {hasAssessmentDescription ? (
-        <section className="mb-6">
-          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+        <section className="mb-10 rounded-3xl border border-white/10 bg-white/[0.03] px-8 py-7 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
+            About this report
+          </p>
+          <p className="max-w-3xl whitespace-pre-line text-[17px] leading-8 text-white/88 md:text-[18px]">
             {assessmentDescription}
           </p>
         </section>

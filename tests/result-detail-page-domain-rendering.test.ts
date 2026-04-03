@@ -247,8 +247,15 @@ test('result detail page renders assessmentDescription above the hero when prese
   assert.match(source, /const assessmentDescription = result\.metadata\.assessmentDescription;/);
   assert.match(source, /const hasAssessmentDescription =\s*typeof assessmentDescription === 'string' && assessmentDescription\.trim\(\)\.length > 0/);
   assert.match(source, /\{hasAssessmentDescription \? \(/);
-  assert.match(source, /<section className="mb-6">/);
-  assert.match(source, /text-sm text-muted-foreground leading-relaxed whitespace-pre-line/);
+  assert.match(
+    source,
+    /<section className="mb-10 rounded-3xl border border-white\/10 bg-white\/\[0\.03\] px-8 py-7 shadow-\[0_20px_80px_rgba\(0,0,0,0\.35\)\] backdrop-blur-sm">/,
+  );
+  assert.match(source, />\s*About this report\s*<\/p>/);
+  assert.match(
+    source,
+    /max-w-3xl whitespace-pre-line text-\[17px\] leading-8 text-white\/88 md:text-\[18px\]/,
+  );
   assert.match(source, /\{assessmentDescription\}/);
 
   const descriptionIndex = source.indexOf('const assessmentDescription = result.metadata.assessmentDescription;');
