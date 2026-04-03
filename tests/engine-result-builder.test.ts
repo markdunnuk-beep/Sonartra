@@ -785,7 +785,7 @@ test('overview summary classification is deterministic for concentrated profiles
   assert.match(payload.overviewSummary.narrative, /dependable way to approach work/i);
 });
 
-test('overview summary uses pair language summary when the resolved canonical pair has one', () => {
+test('overview summary uses overview language summary when the resolved canonical pattern has one', () => {
   const signals = Object.freeze([
     buildNormalizedSignal({
       signalId: 'signal-driver',
@@ -837,13 +837,13 @@ test('overview summary uses pair language summary when the resolved canonical pa
       topSignalId: 'signal-driver',
       languageBundle: {
         signals: {},
-        pairs: {
+        pairs: {},
+        domains: {},
+        overview: {
           analyst_driver: {
-            summary: 'Pair-language overview for the dominant analyst-driver combination.',
+            summary: 'Overview-language summary for the dominant analyst-driver combination.',
           },
         },
-        domains: {},
-        overview: {},
       },
     }),
   });
@@ -852,7 +852,7 @@ test('overview summary uses pair language summary when the resolved canonical pa
   assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
   assert.equal(
     payload.overviewSummary.narrative,
-    'Pair-language overview for the dominant analyst-driver combination.',
+    'Overview-language summary for the dominant analyst-driver combination.',
   );
   assert.deepEqual(payload.strengths, baseline.strengths);
   assert.deepEqual(payload.watchouts, baseline.watchouts);
@@ -914,13 +914,14 @@ test('overview summary uses overview template headline when the resolved canonic
         signals: {},
         pairs: {
           analyst_driver: {
-            summary: 'Pair-language overview for the dominant analyst-driver combination.',
+            summary: 'Reserved pair-level summary.',
           },
         },
         domains: {},
         overview: {
           analyst_driver: {
             headline: 'Assessment-authored overview headline.',
+            summary: 'Assessment-authored overview summary.',
           },
         },
       },
@@ -929,17 +930,14 @@ test('overview summary uses overview template headline when the resolved canonic
 
   assert.ok(isCanonicalResultPayload(payload));
   assert.equal(payload.overviewSummary.headline, 'Assessment-authored overview headline.');
-  assert.equal(
-    payload.overviewSummary.narrative,
-    'Pair-language overview for the dominant analyst-driver combination.',
-  );
+  assert.equal(payload.overviewSummary.narrative, 'Assessment-authored overview summary.');
   assert.deepEqual(payload.strengths, baseline.strengths);
   assert.deepEqual(payload.watchouts, baseline.watchouts);
   assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
-test('overview summary falls back unchanged when pair language summary is missing', () => {
+test('overview summary falls back unchanged when overview language summary is missing', () => {
   const signals = Object.freeze([
     buildNormalizedSignal({
       signalId: 'signal-driver',
@@ -982,7 +980,7 @@ test('overview summary falls back unchanged when pair language summary is missin
         signals: {},
         pairs: {
           analyst_driver: {
-            strength: 'Present but not used for overview.',
+            summary: 'Reserved pair summary should not affect overview narrative.',
           },
         },
         domains: {},
@@ -1037,7 +1035,7 @@ test('overview summary headline falls back unchanged when overview template head
         signals: {},
         pairs: {
           analyst_driver: {
-            summary: 'Pair-language overview for the dominant analyst-driver combination.',
+            summary: 'Reserved pair summary.',
           },
         },
         domains: {},
@@ -1051,17 +1049,14 @@ test('overview summary headline falls back unchanged when overview template head
   });
 
   assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
-  assert.equal(
-    payload.overviewSummary.narrative,
-    'Pair-language overview for the dominant analyst-driver combination.',
-  );
+  assert.equal(payload.overviewSummary.narrative, 'Present but not used for headline.');
   assert.deepEqual(payload.strengths, baseline.strengths);
   assert.deepEqual(payload.watchouts, baseline.watchouts);
   assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
-test('overview pair-language lookup is canonical even when the top two signals resolve in reverse lexical order', () => {
+test('overview summary lookup is canonical even when the top two signals resolve in reverse lexical order', () => {
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture({
       signalScores: Object.freeze([
@@ -1092,18 +1087,18 @@ test('overview pair-language lookup is canonical even when the top two signals r
       topSignalId: 'signal-driver',
       languageBundle: {
         signals: {},
-        pairs: {
+        pairs: {},
+        domains: {},
+        overview: {
           analyst_driver: {
-            summary: 'Canonical pair summary.',
+            summary: 'Canonical overview summary.',
           },
         },
-        domains: {},
-        overview: {},
       },
     }),
   });
 
-  assert.equal(payload.overviewSummary.narrative, 'Canonical pair summary.');
+  assert.equal(payload.overviewSummary.narrative, 'Canonical overview summary.');
 });
 
 test('overview template headline lookup is canonical even when the top two signals resolve in reverse lexical order', () => {
@@ -1840,7 +1835,7 @@ test('repeated runs with the same normalized input are byte-stable', () => {
   assert.equal(JSON.stringify(first), JSON.stringify(second));
 });
 
-test('repeated runs with pair-language overview summary remain byte-stable', () => {
+test('repeated runs with overview-language summary remain byte-stable', () => {
   const normalizedResult = buildNormalizedResultFixture({
     signalScores: Object.freeze([
       buildNormalizedSignal({
@@ -1872,11 +1867,15 @@ test('repeated runs with pair-language overview summary remain byte-stable', () 
       signals: {},
       pairs: {
         drive_focus: {
-          summary: 'Consistent custom overview.',
+          summary: 'Reserved pair summary.',
         },
       },
       domains: {},
-      overview: {},
+      overview: {
+        drive_focus: {
+          summary: 'Consistent custom overview.',
+        },
+      },
     },
   });
 
@@ -1919,12 +1918,13 @@ test('repeated runs with overview template headline remain byte-stable', () => {
       signals: {},
       pairs: {
         drive_focus: {
-          summary: 'Consistent custom overview.',
+          summary: 'Reserved pair summary.',
         },
       },
       domains: {},
       overview: {
         drive_focus: {
+          summary: 'Consistent custom overview.',
           headline: 'Consistent custom overview headline.',
         },
       },

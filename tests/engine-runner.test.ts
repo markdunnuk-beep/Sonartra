@@ -384,7 +384,7 @@ test('engine path loads language bundle for a valid assessment version and leave
   assert.match(payload.overviewSummary.narrative, /dependable way to approach work/i);
 });
 
-test('engine path uses pair-language summary for overview narrative only when available', async () => {
+test('engine path uses overview-language summary for overview narrative only when available', async () => {
   const definition = buildDefinition();
   const repository: AssessmentDefinitionRepository = {
     async getPublishedAssessmentDefinitionByKey() {
@@ -398,11 +398,15 @@ test('engine path uses pair-language summary for overview narrative only when av
         signals: {},
         pairs: {
           drive_focus: {
-            summary: 'Custom pair-language overview from the assessment version.',
+            summary: 'Reserved pair-level summary.',
           },
         },
         domains: {},
-        overview: {},
+        overview: {
+          drive_focus: {
+            summary: 'Custom overview summary from the assessment version.',
+          },
+        },
       };
     },
   };
@@ -438,7 +442,7 @@ test('engine path uses pair-language summary for overview narrative only when av
   });
 
   assert.equal(payload.overviewSummary.headline, baseline.overviewSummary.headline);
-  assert.equal(payload.overviewSummary.narrative, 'Custom pair-language overview from the assessment version.');
+  assert.equal(payload.overviewSummary.narrative, 'Custom overview summary from the assessment version.');
   assert.deepEqual(payload.strengths, baseline.strengths);
   assert.deepEqual(payload.watchouts, baseline.watchouts);
   assert.deepEqual(payload.developmentFocus, baseline.developmentFocus);
@@ -459,13 +463,14 @@ test('engine path uses overview template headline for overview headline only whe
         signals: {},
         pairs: {
           drive_focus: {
-            summary: 'Custom pair-language overview from the assessment version.',
+            summary: 'Reserved pair-level summary.',
           },
         },
         domains: {},
         overview: {
           drive_focus: {
             headline: 'Custom overview headline from the assessment version.',
+            summary: 'Custom overview summary from the assessment version.',
           },
         },
       };
@@ -502,7 +507,7 @@ test('engine path uses overview template headline for overview headline only whe
   });
 
   assert.equal(payload.overviewSummary.headline, 'Custom overview headline from the assessment version.');
-  assert.equal(payload.overviewSummary.narrative, 'Custom pair-language overview from the assessment version.');
+  assert.equal(payload.overviewSummary.narrative, 'Custom overview summary from the assessment version.');
   assert.notEqual(payload.overviewSummary.headline, baseline.overviewSummary.headline);
   assert.deepEqual(payload.strengths, baseline.strengths);
   assert.deepEqual(payload.watchouts, baseline.watchouts);
@@ -686,7 +691,7 @@ test('engine language regression matrix preserves the canonical payload contract
       },
       expected: {
         headline: baseline.overviewSummary.headline,
-        narrative: 'Pair-only overview narrative.',
+        narrative: baseline.overviewSummary.narrative,
         strength: baseline.strengths[0]?.detail,
         watchout: baseline.watchouts[0]?.detail,
         development: baseline.developmentFocus[0]?.detail,
@@ -777,12 +782,13 @@ test('engine language regression matrix preserves the canonical payload contract
         overview: {
           drive_focus: {
             headline: 'Mixed headline.',
+            summary: 'Mixed overview summary.',
           },
         },
       },
       expected: {
         headline: 'Mixed headline.',
-        narrative: 'Mixed narrative.',
+        narrative: 'Mixed overview summary.',
         strength: 'Mixed strength.',
         watchout: baseline.watchouts[0]?.detail,
         development: baseline.developmentFocus[0]?.detail,
@@ -814,12 +820,13 @@ test('engine language regression matrix preserves the canonical payload contract
         overview: {
           drive_focus: {
             headline: 'Full headline.',
+            summary: 'Full overview summary.',
           },
         },
       },
       expected: {
         headline: 'Full headline.',
-        narrative: 'Full narrative.',
+        narrative: 'Full overview summary.',
         strength: 'Full strength.',
         watchout: 'Full watchout.',
         development: 'Full development.',

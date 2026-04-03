@@ -11,6 +11,14 @@ import type {
 } from '@/lib/engine/types';
 import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking';
 
+/**
+ * Current domain-language ownership for result-detail narrative:
+ * - Active: Domain_Language.summary -> domainSummaries[*].interpretation.summary
+ * - Reserved: Domain_Language.focus / pressure / environment
+ *
+ * Supporting and tension lines remain deterministic engine output until those
+ * reserved sections are explicitly assigned.
+ */
 type CoreDomainKey =
   | 'signal_style'
   | 'signal_mot'

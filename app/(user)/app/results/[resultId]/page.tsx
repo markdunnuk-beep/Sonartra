@@ -58,19 +58,6 @@ function formatDomainLabel(value: string): string {
     .join(' ');
 }
 
-function getHeroNarrative(result: AssessmentResultDetailViewModel): string {
-  const narrative = result.overviewSummary.narrative?.trim();
-  if (narrative) {
-    return narrative;
-  }
-
-  if (result.topSignal) {
-    return `${result.topSignal.title} is the strongest signal in this result.`;
-  }
-
-  return 'This result is ready to review.';
-}
-
 function splitNarrative(value: string): readonly string[] {
   return value
     .split(/(?<=[.!?])\s+/)
@@ -78,29 +65,14 @@ function splitNarrative(value: string): readonly string[] {
     .filter(Boolean);
 }
 
-function getHeroHeading(
-  result: AssessmentResultDetailViewModel,
-): string {
-  const headline = result.overviewSummary.headline?.trim();
-  if (headline) {
-    return headline;
-  }
-
-  if (result.topSignal) {
-    return result.topSignal.title;
-  }
-
-  return 'Overall pattern';
-}
-
 function getHeroSupport(result: AssessmentResultDetailViewModel): {
   narrative: string;
   support: string | null;
 } {
-  const [narrative, support] = splitNarrative(getHeroNarrative(result));
+  const [narrative, support] = splitNarrative(result.overviewSummary.narrative.trim());
 
   return {
-    narrative: narrative ?? 'This result is ready to review.',
+    narrative: narrative ?? result.overviewSummary.narrative.trim(),
     support: support ?? null,
   };
 }
@@ -123,27 +95,6 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
   );
 }
 
-function getPersistedDomainInterpretation(domain: AssessmentResultDomainViewModel): {
-  summary: string;
-  support: string | null;
-  tension: string | null;
-} {
-  const interpretation = domain.interpretation;
-  if (interpretation?.summary) {
-    return {
-      summary: interpretation.summary,
-      support: interpretation.supportingLine ?? null,
-      tension: interpretation.tensionClause ?? null,
-    };
-  }
-
-  return {
-    summary: 'A domain reading is not available for this area yet.',
-    support: null,
-    tension: null,
-  };
-}
-
 function buildResultDetailDomainItems(params: {
   domains: readonly AssessmentResultDomainViewModel[];
   ringModels: readonly DomainSignalRingViewModel[];
@@ -161,21 +112,6 @@ function buildResultDetailDomainItems(params: {
     domain,
     ringModel: ringModelsByDomainKey.get(domain.domainKey) ?? params.ringModels[index] ?? null,
   }));
-}
-
-function getDomainSignalContext(
-  primarySignal: AssessmentResultDomainViewModel['signalScores'][number] | null,
-  secondarySignal: AssessmentResultDomainViewModel['signalScores'][number] | null,
-): string | null {
-  if (primarySignal && secondarySignal) {
-    return `${primarySignal.signalTitle} is most evident in this area, with ${secondarySignal.signalTitle} also shaping the picture.`;
-  }
-
-  if (primarySignal) {
-    return `${primarySignal.signalTitle} is the clearest signal in this area.`;
-  }
-
-  return null;
 }
 
 function ActionList({
@@ -251,11 +187,8 @@ function DomainChapter({
 }) {
   const visibleSignals = domain.signalScores.slice(0, 2);
   const hiddenSignals = domain.signalScores.slice(2);
-  const interpretation = getPersistedDomainInterpretation(domain);
+  const interpretation = domain.interpretation;
   const title = domain.domainTitle.trim() || formatDomainLabel(domain.domainKey);
-  const primarySignal = visibleSignals[0] ?? null;
-  const secondarySignal = visibleSignals[1] ?? null;
-  const signalContext = getDomainSignalContext(primarySignal, secondarySignal);
 
   return (
     <article className="border-white/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10">
@@ -268,15 +201,17 @@ function DomainChapter({
         </div>
 
         <div className="space-y-4 md:space-y-5">
-          <p className="max-w-[44rem] text-[1rem] leading-8 text-white/68 md:text-[1.05rem] md:leading-9">
-            {interpretation.summary}
-          </p>
-
-          {interpretation.support ? (
-            <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/52">{interpretation.support}</p>
+          {interpretation?.summary ? (
+            <p className="max-w-[44rem] text-[1rem] leading-8 text-white/68 md:text-[1.05rem] md:leading-9">
+              {interpretation.summary}
+            </p>
           ) : null}
-          {interpretation.tension ? (
-            <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/44">{interpretation.tension}</p>
+
+          {interpretation?.supportingLine ? (
+            <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/52">{interpretation.supportingLine}</p>
+          ) : null}
+          {interpretation?.tensionClause ? (
+            <p className="max-w-[40rem] text-[0.96rem] leading-8 text-white/44">{interpretation.tensionClause}</p>
           ) : null}
 
           {ringModel ? (
@@ -284,12 +219,6 @@ function DomainChapter({
               domain={ringModel}
               className="max-w-[43rem] border-white/8 bg-[linear-gradient(180deg,rgba(12,19,33,0.68),rgba(8,12,24,0.9))] p-4 sm:p-5 md:max-w-[45rem] md:p-6"
             />
-          ) : null}
-
-          {signalContext ? (
-            <p className="max-w-[41rem] pt-1 text-[0.92rem] leading-7 text-white/50">
-              {signalContext}
-            </p>
           ) : null}
 
           {hiddenSignals.length > 0 ? (
@@ -377,7 +306,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     ringModels: domainRingModels,
   });
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
-  const heroHeading = getHeroHeading(result);
+  // The result detail page renders persisted report language only. Behavioural
+  // copy belongs to the canonical result payload, not the client UI.
+  const heroHeading = result.overviewSummary.headline.trim();
   const heroSupport = getHeroSupport(result);
 
   return (

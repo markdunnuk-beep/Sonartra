@@ -229,10 +229,12 @@ test('result detail page no longer contains fixed WPLP intelligence domain order
 test('result detail hero is narrative-first and no longer leads with derived signal interpretation copy', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.match(source, /const heroHeading = getHeroHeading\(result\)/);
+  assert.match(source, /const heroHeading = result\.overviewSummary\.headline\.trim\(\)/);
   assert.match(source, /const heroSupport = getHeroSupport\(result\)/);
   assert.match(source, /\{heroHeading\}/);
   assert.match(source, /\{heroSupport\.narrative\}/);
+  assert.doesNotMatch(source, /function getHeroNarrative\(/);
+  assert.doesNotMatch(source, /function getHeroHeading\(/);
   assert.doesNotMatch(source, /const combinedInterpretation = getCombinedInterpretation/);
   assert.doesNotMatch(source, /In practice:/);
   assert.doesNotMatch(source, /heroPrimarySignalChips/);
@@ -280,13 +282,12 @@ test('result detail domain section is summary-first and no longer emphasizes per
   assert.match(source, /function DomainChapter\(\{/);
   assert.match(source, /ringModel: DomainSignalRingViewModel \| null;/);
   assert.match(source, /<SectionEyebrow>Domain<\/SectionEyebrow>/);
-  assert.match(source, /const primarySignal = visibleSignals\[0\] \?\? null/);
-  assert.match(source, /const signalContext = getDomainSignalContext\(primarySignal, secondarySignal\)/);
   assert.match(source, /<DomainSignalRing/);
   assert.match(source, /domain=\{ringModel\}/);
   assert.match(source, /mx-auto max-w-\[58rem\] space-y-12 md:space-y-14/);
   assert.match(source, /border-white\/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10/);
   assert.match(source, /max-w-\[44rem\] text-\[1rem\] leading-8 text-white\/68 md:text-\[1\.05rem\] md:leading-9/);
+  assert.match(source, /interpretation\?\.summary/);
   assert.doesNotMatch(source, /formatPercent\(signal\.domainPercentage\)/);
   assert.doesNotMatch(source, /See why .* leads here/);
   assert.doesNotMatch(source, /Primary signal/);
@@ -295,6 +296,8 @@ test('result detail domain section is summary-first and no longer emphasizes per
   assert.doesNotMatch(source, /rounded-\[1\.8rem\] p-6 sm:p-7 md:p-8/);
   assert.match(source, /Additional signal context/);
   assert.match(source, /also appears in this area/);
+  assert.doesNotMatch(source, /function getPersistedDomainInterpretation\(/);
+  assert.doesNotMatch(source, /function getDomainSignalContext\(/);
   assert.doesNotMatch(source, /The main reading journey/);
   assert.doesNotMatch(source, /These sections are rendered directly from the persisted result payload/);
   assert.doesNotMatch(source, /These chapters follow the persisted payload order/);
@@ -311,7 +314,7 @@ test('result detail domain chapters keep rendering stable even when a persisted 
 
   assert.match(source, /ringModel \? \(/);
   assert.match(source, /No persisted domain signals are available for this area\./);
-  assert.match(source, /A domain reading is not available for this area yet\./);
+  assert.doesNotMatch(source, /A domain reading is not available for this area yet\./);
   assert.doesNotMatch(source, /throw new Error\(.+ring/i);
 });
 
@@ -341,7 +344,6 @@ test('result detail page uses tightened responsive spacing and reading widths fo
   assert.match(source, /max-w-\[68ch\]/);
   assert.match(source, /className="space-y-7"/);
   assert.match(source, /md:grid-cols-\[minmax\(0,12rem\)_minmax\(0,1fr\)\]/);
-  assert.match(source, /max-w-\[41rem\] pt-1 text-\[0\.92rem\] leading-7 text-white\/50/);
   assert.match(source, /max-w-\[43rem\] border-white\/8 bg-\[linear-gradient\(180deg,rgba\(12,19,33,0\.68\),rgba\(8,12,24,0\.9\)\)\] p-4 sm:p-5 md:max-w-\[45rem\] md:p-6/);
   assert.match(source, /text-\[1\.32rem\] font-semibold tracking-\[-0\.03em\] text-white md:text-\[1\.45rem\]/);
   assert.doesNotMatch(source, /<SurfaceCard\s+accent/);

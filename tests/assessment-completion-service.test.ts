@@ -488,7 +488,7 @@ test('completion path persists the canonical payload unchanged through the real 
           },
           pairs: {
             executor_focus: {
-              summary: 'Persisted pair-language narrative.',
+              summary: 'Reserved pair-level summary.',
             },
           },
           domains: {
@@ -499,6 +499,7 @@ test('completion path persists the canonical payload unchanged through the real 
           overview: {
             executor_focus: {
               headline: 'Persisted overview headline.',
+              summary: 'Persisted overview narrative.',
             },
           },
         };
@@ -514,7 +515,7 @@ test('completion path persists the canonical payload unchanged through the real 
   assert.ok(isCanonicalResultPayload(payload));
   assert.deepEqual(Object.keys(payload ?? {}), [...CANONICAL_RESULT_PAYLOAD_FIELDS]);
   assert.equal(payload?.overviewSummary.headline, 'Persisted overview headline.');
-  assert.equal(payload?.overviewSummary.narrative, 'Persisted pair-language narrative.');
+  assert.equal(payload?.overviewSummary.narrative, 'Persisted overview narrative.');
   assert.equal(payload?.domainSummaries[1]?.interpretation?.summary, 'Persisted domain summary.');
   assert.equal(payload?.strengths[0]?.detail, 'Persisted strength language.');
   assert.equal(payload?.metadata.attemptId, 'attempt-2');

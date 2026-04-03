@@ -15,12 +15,10 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
   return {
     domainKey: 'adaptive_patterns',
     domainLabel: 'Adaptive Patterns',
-    domainSummary: 'A calm editorial summary for the domain.',
     signals: Object.freeze([
       {
         signalKey: 'signal_b',
         signalLabel: 'Signal B',
-        signalDescriptor: null,
         withinDomainPercent: 22,
         displayStrength: 0.552,
         rankWithinDomain: 3,
@@ -30,7 +28,6 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
       {
         signalKey: 'signal_a',
         signalLabel: 'Signal A',
-        signalDescriptor: 'Drives action and momentum',
         withinDomainPercent: 44,
         displayStrength: 0.904,
         rankWithinDomain: 1,
@@ -40,7 +37,6 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
       {
         signalKey: 'signal_c',
         signalLabel: 'Signal C',
-        signalDescriptor: 'Engages and energises others',
         withinDomainPercent: 34,
         displayStrength: 0.776,
         rankWithinDomain: 2,
@@ -60,7 +56,6 @@ test('domain signal ring renders the domain label from props', () => {
   const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
 
   assert.match(markup, /Adaptive Patterns/);
-  assert.match(markup, /A calm editorial summary for the domain\./);
   assert.match(markup, /aria-label="Adaptive Patterns signal bars"/);
   assert.match(markup, /domain-signal-bar-enter/);
   assert.match(markup, /data-bar-track="true"/);
@@ -138,11 +133,10 @@ test('domain signal ring renders the active detail treatment for the selected si
   assert.match(markup, /data-active-detail-key="signal_c"/);
   assert.match(markup, /Signal C/);
   assert.match(markup, /34%/);
-  assert.match(markup, /Signal C - Engages and energises others/);
   assert.doesNotMatch(markup, /Tap or press Enter\/Space to keep a signal active\./);
 });
 
-test('domain signal ring falls back to a generic active detail line when no descriptor is available', () => {
+test('domain signal ring active detail stays summary-free and label-led', () => {
   const markup = renderToStaticMarkup(
     <DomainSignalRing
       domain={buildDomain({
@@ -150,7 +144,6 @@ test('domain signal ring falls back to a generic active detail line when no desc
           {
             signalKey: 'signal_b',
             signalLabel: 'Signal B',
-            signalDescriptor: null,
             withinDomainPercent: 100,
             displayStrength: 1,
             rankWithinDomain: 1,
@@ -166,7 +159,8 @@ test('domain signal ring falls back to a generic active detail line when no desc
     />,
   );
 
-  assert.match(markup, /A short descriptor is not available for this signal yet\./);
+  assert.match(markup, /Signal B/);
+  assert.doesNotMatch(markup, /A short descriptor is not available for this signal yet\./);
 });
 
 test('domain signal ring keeps the bar stack ahead of the active detail panel in markup', () => {
@@ -241,7 +235,6 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'northbound',
             signalLabel: 'Northbound',
-            signalDescriptor: null,
             withinDomainPercent: 36,
             displayStrength: 0.936,
             rankWithinDomain: 1,
@@ -251,7 +244,6 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'eastbound',
             signalLabel: 'Eastbound',
-            signalDescriptor: null,
             withinDomainPercent: 28,
             displayStrength: 0.816,
             rankWithinDomain: 2,
@@ -261,7 +253,6 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'southbound',
             signalLabel: 'Southbound',
-            signalDescriptor: null,
             withinDomainPercent: 18,
             displayStrength: 0.64,
             rankWithinDomain: 3,
@@ -271,7 +262,6 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'westbound',
             signalLabel: 'Westbound',
-            signalDescriptor: null,
             withinDomainPercent: 11,
             displayStrength: 0.504,
             rankWithinDomain: 4,
@@ -281,7 +271,6 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
           {
             signalKey: 'zenith',
             signalLabel: 'Zenith',
-            signalDescriptor: null,
             withinDomainPercent: 7,
             displayStrength: 0.368,
             rankWithinDomain: 5,

@@ -38,14 +38,6 @@ function getSignalBarWidth(value: number | null): string {
   return `${Math.min(100, Math.max(0, value))}%`;
 }
 
-function getSignalDetailCopy(signal: DomainSignalRingViewModel['signals'][number]): string {
-  if (signal.signalDescriptor) {
-    return `${signal.signalLabel} - ${signal.signalDescriptor}`;
-  }
-
-  return 'A short descriptor is not available for this signal yet.';
-}
-
 function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
   markerLabel: string | null;
   markerClassName: string;
@@ -221,7 +213,6 @@ function SignalBarRow({
             domain: {
               domainKey: '',
               domainLabel: '',
-              domainSummary: null,
               signals: [signal],
               signalCount: 1,
               topSignalKey: signal.signalKey,
@@ -346,13 +337,6 @@ export function DomainSignalRing({
       <style>{DOMAIN_SIGNAL_RING_CSS}</style>
 
       <div className="space-y-6">
-        <div className="space-y-2">
-          <h3 className="text-[1.2rem] font-semibold tracking-[-0.04em] text-white sm:text-[1.32rem]">{domain.domainLabel}</h3>
-          {domain.domainSummary ? (
-            <p className="max-w-[38rem] text-[0.92rem] leading-7 text-white/60 sm:text-[0.95rem]">{domain.domainSummary}</p>
-          ) : null}
-        </div>
-
         <div className="space-y-3.5">
           {signals.length > 0 ? (
             <ol className="space-y-3">
@@ -417,9 +401,6 @@ export function DomainSignalRing({
                   {formatPercent(activeSignal.withinDomainPercent)}
                 </p>
               </div>
-              <p className="text-[0.86rem] leading-6 text-white/64 sm:text-[0.9rem]">
-                {getSignalDetailCopy(activeSignal)}
-              </p>
             </div>
           </div>
         ) : (

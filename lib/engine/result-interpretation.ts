@@ -7,6 +7,28 @@ import type {
 } from '@/lib/engine/types';
 import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 
+/**
+ * Canonical result-language ownership for current UI-visible report fields.
+ *
+ * Active:
+ * - Overview_Language.headline -> overviewSummary.headline
+ * - Overview_Language.summary -> overviewSummary.narrative
+ * - Signal_Language.strength -> strengths[]
+ * - Signal_Language.watchout -> watchouts[]
+ * - Signal_Language.development -> developmentFocus[]
+ *
+ * Reserved / inactive for future wiring:
+ * - Signal_Language.summary
+ * - Pair_Language.summary
+ * - Pair_Language.strength
+ * - Pair_Language.watchout
+ * - Overview_Language.strengths
+ * - Overview_Language.watchouts
+ * - Overview_Language.development
+ *
+ * The results UI reads these persisted fields directly and must not recreate
+ * behavioural copy client-side.
+ */
 const CONCENTRATED_TOP_SIGNAL_THRESHOLD = 45;
 const BALANCED_TOP_TWO_GAP_THRESHOLD = 8;
 const BALANCED_TOP_SIGNAL_THRESHOLD = 40;
@@ -410,8 +432,9 @@ function resolveCanonicalOverviewPatternKey(
   return canonicalPair.success ? canonicalPair.canonicalSignalPair : null;
 }
 
-function resolvePairLanguageSummary(
+function resolveOverviewLanguageSection(
   signalScores: readonly NormalizedSignalScore[],
+  section: 'headline' | 'summary',
   context?: ResultInterpretationContext,
 ): string | null {
   if (!context) {
@@ -423,25 +446,8 @@ function resolvePairLanguageSummary(
     return null;
   }
 
-  const summary = context.languageBundle.pairs[canonicalPatternKey]?.summary?.trim();
-  return summary ? summary : null;
-}
-
-function resolveOverviewTemplateHeadline(
-  signalScores: readonly NormalizedSignalScore[],
-  context?: ResultInterpretationContext,
-): string | null {
-  if (!context) {
-    return null;
-  }
-
-  const canonicalPatternKey = resolveCanonicalOverviewPatternKey(signalScores);
-  if (!canonicalPatternKey) {
-    return null;
-  }
-
-  const headline = context.languageBundle.overview[canonicalPatternKey]?.headline?.trim();
-  return headline ? headline : null;
+  const content = context.languageBundle.overview[canonicalPatternKey]?.[section]?.trim();
+  return content ? content : null;
 }
 
 function resolveSignalLanguageSection(
@@ -469,8 +475,10 @@ export function buildOverviewSummary(
   }
 
   const topTemplate = getSignalTemplate(topSignal.signalKey);
-  const overviewTemplateHeadline = resolveOverviewTemplateHeadline(rankedSignals, context);
-  const pairLanguageSummary = resolvePairLanguageSummary(rankedSignals, context);
+  // Overview narrative ownership is explicit: both persisted overview fields are
+  // resolved from Overview_Language first, then fall back to deterministic text.
+  const overviewTemplateHeadline = resolveOverviewLanguageSection(rankedSignals, 'headline', context);
+  const overviewTemplateSummary = resolveOverviewLanguageSection(rankedSignals, 'summary', context);
   const distribution = classifyDistribution(rankedSignals);
   let supportSentence = topTemplate.impact;
 
@@ -486,7 +494,7 @@ export function buildOverviewSummary(
 
   return {
     headline: overviewTemplateHeadline ?? topTemplate.headline,
-    narrative: pairLanguageSummary ?? `${topTemplate.hero} ${supportSentence}`,
+    narrative: overviewTemplateSummary ?? `${topTemplate.hero} ${supportSentence}`,
   };
 }
 

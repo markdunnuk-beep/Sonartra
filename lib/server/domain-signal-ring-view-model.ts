@@ -1,5 +1,4 @@
 import type { ResultDomainSummary } from '@/lib/engine/types';
-import { resolveDomainSignalDescriptor } from '@/lib/server/domain-signal-descriptor';
 
 type DomainSummarySource = {
   domainSummaries?: readonly unknown[];
@@ -12,7 +11,6 @@ export type DomainSignalRingDisplayStrength = {
 export type DomainSignalRingEntryViewModel = {
   signalKey: string;
   signalLabel: string;
-  signalDescriptor: string | null;
   withinDomainPercent: number | null;
   displayStrength: number;
   rankWithinDomain: number | null;
@@ -23,7 +21,6 @@ export type DomainSignalRingEntryViewModel = {
 export type DomainSignalRingViewModel = {
   domainKey: string;
   domainLabel: string;
-  domainSummary: string | null;
   signals: readonly DomainSignalRingEntryViewModel[];
   signalCount: number;
   topSignalKey: string | null;
@@ -113,16 +110,6 @@ function getSignalLabel(signal: unknown, index: number): string {
   return `Signal ${index + 1}`;
 }
 
-function getDomainSummaryText(domain: unknown): string | null {
-  if (!isRecord(domain) || !isRecord(domain.interpretation)) {
-    return null;
-  }
-
-  return typeof domain.interpretation.summary === 'string' && domain.interpretation.summary.length > 0
-    ? domain.interpretation.summary
-    : null;
-}
-
 function rankSignals(signalScores: readonly unknown[]): ReadonlyMap<number, number> {
   const ranked = signalScores
     .map((signal, index) => ({
@@ -183,7 +170,6 @@ function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknow
   const signals = signalScores.map((signal, index) => ({
     signalKey: getSignalKey(signal, index),
     signalLabel: getSignalLabel(signal, index),
-    signalDescriptor: resolveDomainSignalDescriptor(isRecord(signal) ? signal : null),
     withinDomainPercent: withinDomainPercents[index] ?? null,
     displayStrength: computeSignalDisplayStrength(withinDomainPercents[index] ?? null).displayStrength,
     rankWithinDomain: ranksByIndex.get(index) ?? null,
@@ -200,7 +186,6 @@ function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknow
       typeof domain.domainTitle === 'string' && domain.domainTitle.length > 0
         ? domain.domainTitle
         : `Domain ${domainIndex + 1}`,
-    domainSummary: getDomainSummaryText(domain),
     signals: Object.freeze(signals),
     signalCount: signals.length,
     topSignalKey: topSignalIndex === null ? null : signals[topSignalIndex]?.signalKey ?? null,
