@@ -88,7 +88,7 @@ export function AdminAssessmentLanguageEditor({
       <div className="space-y-2">
         <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">Assessment Description</h3>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          Plain-text report introduction shown above the result hero. Line breaks are preserved.
+          Plain-text introduction shown at the top of every report.
         </p>
       </div>
 

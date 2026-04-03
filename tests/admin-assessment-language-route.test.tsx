@@ -498,7 +498,10 @@ test('language step component renders the signal, pair, domain, and overview lan
 
   assert.match(markup, /Language/);
   assert.match(markup, /Assessment Description/);
+  assert.match(markup, /Define the report introduction shown to all users above the results\./);
   assert.match(markup, /Assessment introduction copy/);
+  assert.match(markup, /rounded-\[1\.25rem\] border border-white\/10 bg-gradient-to-b from-white\/\[0\.02\] to-transparent p-\[1px\]/);
+  assert.match(markup, /rounded-\[1\.25rem\] bg-black\/30/);
   assert.match(markup, /Signal Language/);
   assert.match(markup, /Signal Language import/);
   assert.match(markup, /Pair Language/);

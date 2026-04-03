@@ -97,11 +97,23 @@ export function AdminAssessmentLanguageStep({
         </p>
       </SurfaceCard>
 
-      <AdminAssessmentLanguageEditor
-        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-        initialValue={viewModel.assessmentLanguageDescription}
-        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-      />
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Assessment"
+          title="Assessment Description"
+          description="Define the report introduction shown to all users above the results."
+        />
+
+        <div className="rounded-[1.25rem] border border-white/10 bg-gradient-to-b from-white/[0.02] to-transparent p-[1px]">
+          <div className="rounded-[1.25rem] bg-black/30">
+            <AdminAssessmentLanguageEditor
+              assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+              initialValue={viewModel.assessmentLanguageDescription}
+              isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+            />
+          </div>
+        </div>
+      </div>
 
       <AdminSignalLanguageImport
         assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
