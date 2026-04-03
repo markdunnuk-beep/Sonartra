@@ -407,6 +407,7 @@ export type ResultMetadata = {
   assessmentKey: AssessmentKey;
   version: AssessmentVersionTag;
   attemptId: AttemptId;
+  assessmentDescription?: string | null;
 };
 
 export type ResultTopSignal = {

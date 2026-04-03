@@ -89,6 +89,7 @@ function buildNormalizedResultFixture(overrides?: {
   answeredQuestions?: number;
   totalQuestions?: number;
   languageBundle?: EngineLanguageBundle;
+  assessmentDescription?: string | null;
 }): CanonicalResultBuilderInput {
   const signalScores =
     overrides?.signalScores ??
@@ -162,6 +163,7 @@ function buildNormalizedResultFixture(overrides?: {
       assessmentKey: 'wplp80',
       version: '1.0.0',
       attemptId: 'attempt-1',
+      assessmentDescription: overrides?.assessmentDescription,
     },
     scoringDiagnostics: {
       scoringMethod: 'option_signal_weights_only',
@@ -278,6 +280,17 @@ test('minimal valid payload construction returns a complete canonical result pay
   assert.equal(payload.metadata.assessmentKey, 'wplp80');
   assert.equal(payload.metadata.version, '1.0.0');
   assert.equal(payload.metadata.attemptId, 'attempt-1');
+  assert.equal(payload.metadata.assessmentDescription, null);
+});
+
+test('metadata includes assessmentDescription when provided by the engine context', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      assessmentDescription: 'Assessment-owned description for this version.',
+    }),
+  });
+
+  assert.equal(payload.metadata.assessmentDescription, 'Assessment-owned description for this version.');
 });
 
 test('top signal projection matches normalization ranking', () => {

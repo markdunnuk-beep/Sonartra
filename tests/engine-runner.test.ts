@@ -285,6 +285,7 @@ test('full end-to-end execution returns a canonical result payload', async () =>
   const payload = await runAssessmentEngine({
     repository,
     assessmentKey: 'wplp80',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({
       'question-1': 'option-2',
       'question-2': 'option-3',
@@ -293,6 +294,7 @@ test('full end-to-end execution returns a canonical result payload', async () =>
 
   assert.ok(isCanonicalResultPayload(payload));
   assert.equal(payload.metadata.assessmentKey, 'wplp80');
+  assert.equal(payload.metadata.assessmentDescription, null);
   assert.equal(payload.topSignal?.signalId, 'signal-support');
 });
 
@@ -302,6 +304,7 @@ test('published assessment path loads by assessment key', async () => {
   await runAssessmentEngine({
     repository,
     assessmentKey: 'wplp80',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({ 'question-1': 'option-1' }),
   });
 
@@ -317,6 +320,7 @@ test('version path loads by explicit version key', async () => {
     repository,
     assessmentKey: 'wplp80',
     versionKey: '1.0.0',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({ 'question-1': 'option-1' }),
   });
 
@@ -336,6 +340,7 @@ test('assessment version path loads by explicit assessmentVersionId', async () =
   const payload = await runAssessmentEngine({
     repository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({ 'question-1': 'option-1' }),
   });
 
@@ -376,6 +381,7 @@ test('engine path loads language bundle for a valid assessment version and leave
   const payload = await runAssessmentEngine({
     repository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({ 'question-1': 'option-1' }),
   });
 
@@ -426,6 +432,7 @@ test('engine path uses overview-language summary for overview narrative only whe
   const baseline = await runAssessmentEngine({
     repository: baselineRepository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({
       'question-1': 'option-2',
       'question-2': 'option-3',
@@ -435,6 +442,7 @@ test('engine path uses overview-language summary for overview narrative only whe
   const payload = await runAssessmentEngine({
     repository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({
       'question-1': 'option-2',
       'question-2': 'option-3',
@@ -497,12 +505,14 @@ test('engine path uses overview template headline for overview headline only whe
   const baseline = await runAssessmentEngine({
     repository: baselineRepository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
 
   const payload = await runAssessmentEngine({
     repository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
 
@@ -562,12 +572,14 @@ test('engine path uses signal-language sections for strengths watchouts and deve
   const baseline = await runAssessmentEngine({
     repository: baselineRepository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
 
   const payload = await runAssessmentEngine({
     repository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
 
@@ -624,12 +636,14 @@ test('engine path uses domain-language summary for domain summaries only when av
   const baseline = await runAssessmentEngine({
     repository: baselineRepository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
 
   const payload = await runAssessmentEngine({
     repository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
 
@@ -661,6 +675,7 @@ test('engine language regression matrix preserves the canonical payload contract
   const baseline = await runAssessmentEngine({
     repository: createRepositoryWithLanguageBundle(definition, createEmptyLanguageBundle()),
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
 
@@ -839,6 +854,7 @@ test('engine language regression matrix preserves the canonical payload contract
     const payload = await runAssessmentEngine({
       repository: createRepositoryWithLanguageBundle(definition, scenario.languageBundle),
       assessmentVersionId: 'version-1',
+      loadAssessmentLanguage: async () => ({ assessment_description: null }),
       responses,
     });
 
@@ -886,6 +902,7 @@ test('empty language bundle is handled safely and result generation still succee
   const payload = await runAssessmentEngine({
     repository,
     assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({}),
   });
 
@@ -904,11 +921,13 @@ test('same input produces identical payload output', async () => {
   const first = await runAssessmentEngine({
     repository,
     assessmentKey: 'wplp80',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
   const second = await runAssessmentEngine({
     repository,
     assessmentKey: 'wplp80',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses,
   });
 
@@ -923,6 +942,7 @@ test('invalid assessment throws EngineNotFoundError', async () => {
       runAssessmentEngine({
         repository,
         assessmentKey: 'missing',
+        loadAssessmentLanguage: async () => ({ assessment_description: null }),
         responses: buildResponses({ 'question-1': 'option-1' }),
       }),
     EngineNotFoundError,
@@ -937,6 +957,7 @@ test('invalid responses propagate ScoringError', async () => {
       runAssessmentEngine({
         repository,
         assessmentKey: 'wplp80',
+        loadAssessmentLanguage: async () => ({ assessment_description: null }),
         responses: buildResponses({ 'question-1': 'option-4' }),
       }),
     ScoringError,
@@ -949,6 +970,7 @@ test('zero-answer case still returns a valid payload', async () => {
   const payload = await runAssessmentEngine({
     repository,
     assessmentKey: 'wplp80',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({}),
   });
 
@@ -963,6 +985,7 @@ test('overlay signals are preserved through the full pipeline', async () => {
   const payload = await runAssessmentEngine({
     repository,
     assessmentKey: 'wplp80',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({ 'question-1': 'option-2' }),
   });
 
@@ -977,6 +1000,7 @@ test('empty domains are preserved through the full pipeline', async () => {
   const payload = await runAssessmentEngine({
     repository,
     assessmentKey: 'wplp80',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
     responses: buildResponses({ 'question-1': 'option-1' }),
   });
 
@@ -984,4 +1008,27 @@ test('empty domains are preserved through the full pipeline', async () => {
   assert.ok(emptyDomain);
   assert.equal(emptyDomain?.signalScores.length, 0);
   assert.equal(emptyDomain?.domainSource, 'question_section');
+});
+
+test('engine attaches assessmentDescription from the assessment language repository when present', async () => {
+  const { repository } = createRepositoryFixture(buildDefinition());
+  let loadedAssessmentVersionId: string | null = null;
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async (assessmentVersionId) => {
+      loadedAssessmentVersionId = assessmentVersionId;
+      return {
+        assessment_description: 'Version-scoped assessment description.',
+      };
+    },
+    responses: buildResponses({ 'question-1': 'option-1' }),
+  });
+
+  assert.equal(loadedAssessmentVersionId, 'version-1');
+  assert.equal(payload.metadata.assessmentDescription, 'Version-scoped assessment description.');
+  assert.equal(payload.metadata.assessmentKey, 'wplp80');
+  assert.equal(payload.metadata.version, '1.0.0');
+  assert.equal(payload.metadata.attemptId, 'attempt-1');
 });

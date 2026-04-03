@@ -4,6 +4,7 @@ import type { AssessmentDefinitionRepository } from '@/lib/engine/repository';
 import { loadRuntimeExecutionModel } from '@/lib/engine/runtime-loader';
 import { scoreAssessmentResponses } from '@/lib/engine/scoring';
 import { normalizeScoreResult } from '@/lib/engine/normalization';
+import { getAssessmentLanguage } from '@/lib/server/assessment-language-repository';
 import type {
   AssessmentKey,
   AssessmentVersionId,
@@ -26,6 +27,7 @@ export type RunAssessmentEngineParams = {
   assessmentKey?: AssessmentKey;
   versionKey?: AssessmentVersionTag;
   responses: RuntimeResponseSet;
+  loadAssessmentLanguage?: typeof getAssessmentLanguage;
 };
 
 async function loadDefinition(
@@ -78,6 +80,8 @@ export async function runAssessmentEngine(
 ): Promise<CanonicalResultPayload> {
   const definition = await loadDefinition(params);
   const languageBundle = await params.repository.getAssessmentVersionLanguageBundle(definition.version.id);
+  const assessmentLanguageLoader = params.loadAssessmentLanguage ?? getAssessmentLanguage;
+  const assessmentLanguage = await assessmentLanguageLoader(definition.version.id);
   const executionModel = loadRuntimeExecutionModel(definition);
   const scoreResult = scoreAssessmentResponses({
     executionModel,
@@ -93,6 +97,7 @@ export async function runAssessmentEngine(
         assessmentKey: definition.assessment.key,
         version: definition.version.versionTag,
         attemptId: params.responses.attemptId,
+        assessmentDescription: assessmentLanguage.assessment_description ?? null,
       },
       scoringDiagnostics: scoreResult.diagnostics,
       languageBundle,

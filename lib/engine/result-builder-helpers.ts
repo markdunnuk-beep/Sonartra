@@ -232,7 +232,10 @@ export function buildPayload(params: {
   const domainSummaries = buildDomainSummaries(params.normalizedResult, interpretationContext);
 
   return Object.freeze({
-    metadata: params.normalizedResult.metadata,
+    metadata: {
+      ...params.normalizedResult.metadata,
+      assessmentDescription: params.normalizedResult.metadata.assessmentDescription ?? null,
+    },
     topSignal,
     rankedSignals,
     normalizedScores,

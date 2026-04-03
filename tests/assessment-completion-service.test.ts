@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { runAssessmentEngine } from '@/lib/engine/engine-runner';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import type { CanonicalResultPayload, EngineLanguageBundle, RuntimeAssessmentDefinition } from '@/lib/engine/types';
 import { CANONICAL_RESULT_PAYLOAD_FIELDS, isCanonicalResultPayload } from '@/lib/engine/result-contract';
@@ -139,7 +140,12 @@ function buildPayload(signalId: string): CanonicalResultPayload {
     rank: 1,
   };
   return {
-    metadata: { assessmentKey: 'wplp80', version: '1.0.0', attemptId: 'attempt-1' },
+    metadata: {
+      assessmentKey: 'wplp80',
+      version: '1.0.0',
+      attemptId: 'attempt-1',
+      assessmentDescription: null,
+    },
     topSignal: { signalId, signalKey, title, domainId: 'domain-signals', domainKey: 'signals', normalizedValue: 100, rawTotal: 1, percentage: 100, rank: 1 },
     rankedSignals: Object.freeze([{ signalId, signalKey, title, domainId: 'domain-signals', domainKey: 'signals', normalizedValue: 100, rawTotal: 1, percentage: 100, domainPercentage: 100, isOverlay, overlayType, rank: 1 }]),
     normalizedScores: Object.freeze([normalizedSignal]),
@@ -426,6 +432,11 @@ test('completion resolves the runtime definition by the attempt assessmentVersio
         return createEmptyLanguageBundle();
       },
     },
+    executeEngine: async (params) =>
+      runAssessmentEngine({
+        ...params,
+        loadAssessmentLanguage: async () => ({ assessment_description: null }),
+      }),
   });
 
   const result = await service.completeAssessmentAttempt({
@@ -505,6 +516,11 @@ test('completion path persists the canonical payload unchanged through the real 
         };
       },
     },
+    executeEngine: async (params) =>
+      runAssessmentEngine({
+        ...params,
+        loadAssessmentLanguage: async () => ({ assessment_description: null }),
+      }),
   });
 
   const completion = await service.completeAssessmentAttempt({ attemptId: 'attempt-2', userId: 'user-1' });
@@ -518,7 +534,35 @@ test('completion path persists the canonical payload unchanged through the real 
   assert.equal(payload?.overviewSummary.narrative, 'Persisted overview narrative.');
   assert.equal(payload?.domainSummaries[1]?.interpretation?.summary, 'Persisted domain summary.');
   assert.equal(payload?.strengths[0]?.detail, 'Persisted strength language.');
+  assert.equal(payload?.metadata.assessmentDescription, null);
   assert.equal(payload?.metadata.attemptId, 'attempt-2');
+});
+
+test('completion path persists assessmentDescription in the canonical payload when sourced by the engine', async () => {
+  const db = createFakeDb();
+
+  const service = createAssessmentCompletionService({
+    db,
+    repository: createRepository(),
+    executeEngine: async () => ({
+      ...buildPayload('signal-core'),
+      metadata: {
+        assessmentKey: 'wplp80',
+        version: '1.0.0',
+        attemptId: 'attempt-1',
+        assessmentDescription: 'Persisted assessment description.',
+      },
+    }),
+  });
+
+  const completion = await service.completeAssessmentAttempt({ attemptId: 'attempt-1', userId: 'user-1' });
+  const payload = await loadPersistedResultPayload(db, 'attempt-1');
+
+  assert.equal(completion.resultStatus, 'ready');
+  assert.ok(payload);
+  assert.equal(payload?.metadata.assessmentDescription, 'Persisted assessment description.');
+  assert.equal(payload?.metadata.assessmentKey, 'wplp80');
+  assert.equal(payload?.topSignal?.signalId, 'signal-core');
 });
 
 test('engine failure and persistence failure are explicit and do not pretend success', async () => {
