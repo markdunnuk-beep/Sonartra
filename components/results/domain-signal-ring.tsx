@@ -50,12 +50,12 @@ function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
   if (signal.isTopSignal) {
     return {
       markerLabel: 'Top',
-      markerClassName: 'border-white/25 bg-white/12 text-white',
-      rowClassName: 'border-white/16 bg-white/[0.07]',
+      markerClassName: 'border-white/22 bg-white/10 text-white',
+      rowClassName: 'border-white/14 bg-white/[0.055]',
       labelClassName: 'text-white',
       valueClassName: 'text-white',
       fillClassName: 'bg-[linear-gradient(90deg,rgba(238,245,255,0.96),rgba(198,216,255,0.92))]',
-      detailAccentClassName: 'border-white/16 bg-white/[0.06]',
+      detailAccentClassName: 'border-white/12 bg-white/[0.045]',
     };
   }
 
@@ -63,22 +63,22 @@ function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
     return {
       markerLabel: '2nd',
       markerClassName: 'border-[#8eb1ff]/35 bg-[#8eb1ff]/10 text-[#d9e5ff]',
-      rowClassName: 'border-[#8eb1ff]/18 bg-[#8eb1ff]/[0.05]',
+      rowClassName: 'border-[#8eb1ff]/16 bg-[#8eb1ff]/[0.045]',
       labelClassName: 'text-white/92',
       valueClassName: 'text-white/90',
       fillClassName: 'bg-[linear-gradient(90deg,rgba(181,205,255,0.88),rgba(142,177,255,0.8))]',
-      detailAccentClassName: 'border-[#8eb1ff]/18 bg-[#8eb1ff]/[0.05]',
+      detailAccentClassName: 'border-[#8eb1ff]/16 bg-[#8eb1ff]/[0.045]',
     };
   }
 
   return {
     markerLabel: null,
     markerClassName: 'border-white/10 bg-white/5 text-white/58',
-    rowClassName: 'border-white/8 bg-white/[0.03]',
+    rowClassName: 'border-white/8 bg-white/[0.025]',
     labelClassName: 'text-white/84',
     valueClassName: 'text-white/82',
     fillClassName: 'bg-[linear-gradient(90deg,rgba(135,158,203,0.72),rgba(112,135,179,0.52))]',
-    detailAccentClassName: 'border-white/10 bg-white/[0.03]',
+    detailAccentClassName: 'border-white/10 bg-white/[0.025]',
   };
 }
 
@@ -192,11 +192,11 @@ function SignalBarRow({
       <button
         type="button"
         className={cn(
-          'domain-signal-ring-button flex w-full flex-col gap-3 rounded-[1.1rem] border px-4 py-4 text-left transition duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
+          'domain-signal-ring-button flex w-full flex-col gap-3 rounded-[1.05rem] border px-4 py-4 text-left transition duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
           isSelectedState
-            ? 'border-white/18 bg-white/[0.09] shadow-[0_16px_38px_rgba(4,10,24,0.24)]'
+            ? 'border-white/16 bg-white/[0.075] shadow-[0_12px_30px_rgba(4,10,24,0.2)]'
             : isHighlighted
-              ? 'border-[#b7cbff]/28 bg-[#8eb1ff]/[0.08] shadow-[0_12px_28px_rgba(10,20,42,0.22)]'
+              ? 'border-[#b7cbff]/24 bg-[#8eb1ff]/[0.07] shadow-[0_10px_24px_rgba(10,20,42,0.18)]'
               : tone.rowClassName,
         )}
         aria-pressed={isSelected}
@@ -270,7 +270,7 @@ function SignalBarRow({
         <div
           className={cn(
             'w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.08)] transition duration-200 ease-out',
-            isSelectedState ? 'h-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]' : isHighlighted ? 'h-[0.92rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.08)]' : 'h-3',
+            isSelectedState ? 'h-[0.95rem] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]' : isHighlighted ? 'h-[0.9rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.08)]' : 'h-[0.7rem]',
           )}
           aria-hidden="true"
           data-bar-track="true"
@@ -280,9 +280,9 @@ function SignalBarRow({
               'domain-signal-bar-fill h-full rounded-full transition duration-200 ease-out',
               tone.fillClassName,
               isSelectedState
-                ? 'opacity-100 shadow-[0_0_18px_rgba(228,237,255,0.28)] brightness-[1.06]'
+                ? 'opacity-100 shadow-[0_0_14px_rgba(228,237,255,0.2)] brightness-[1.04]'
                 : isHighlighted
-                  ? 'opacity-100 shadow-[0_0_14px_rgba(157,186,255,0.2)] brightness-[1.03]'
+                  ? 'opacity-100 shadow-[0_0_12px_rgba(157,186,255,0.16)] brightness-[1.02]'
                   : signal.isTopSignal
                     ? 'opacity-100'
                     : signal.isSecondSignal
@@ -326,7 +326,7 @@ export function DomainSignalRing({
   return (
     <section
       className={cn(
-        'overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,24,40,0.78),rgba(8,13,24,0.94))] p-6 shadow-[0_24px_80px_rgba(3,8,20,0.32)] sm:p-7',
+        'overflow-hidden rounded-[1.45rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,24,40,0.72),rgba(8,13,24,0.9))] p-5 shadow-[0_20px_60px_rgba(3,8,20,0.24)] sm:p-6',
         className,
       )}
       aria-label={`${domain.domainLabel} signal bars`}
@@ -336,8 +336,8 @@ export function DomainSignalRing({
     >
       <style>{DOMAIN_SIGNAL_RING_CSS}</style>
 
-      <div className="space-y-6">
-        <div className="space-y-3.5">
+      <div className="space-y-5">
+        <div className="space-y-3">
           {signals.length > 0 ? (
             <ol className="space-y-3">
               {signals.map((signal, index) => {
@@ -375,7 +375,7 @@ export function DomainSignalRing({
         {activeSignal ? (
           <div
             className={cn(
-              'rounded-[1.1rem] border px-4 py-3.5',
+              'rounded-[1rem] border px-4 py-3',
               getSignalTone(activeSignal).detailAccentClassName,
             )}
             aria-live="polite"

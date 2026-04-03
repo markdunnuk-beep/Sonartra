@@ -59,6 +59,7 @@ test('domain signal ring renders the domain label from props', () => {
   assert.match(markup, /aria-label="Adaptive Patterns signal bars"/);
   assert.match(markup, /domain-signal-bar-enter/);
   assert.match(markup, /data-bar-track="true"/);
+  assert.match(markup, /rounded-\[1\.45rem\] border border-white\/10/);
   assert.doesNotMatch(markup, /Domain Ring/);
 });
 
@@ -176,7 +177,7 @@ test('domain signal ring keeps the bar stack ahead of the active detail panel in
 test('domain signal ring keeps signal labels and badges wrap-safe for narrow layouts', () => {
   const markup = renderToStaticMarkup(<DomainSignalRing domain={buildDomain()} />);
 
-  assert.match(markup, /flex w-full flex-col gap-3 rounded-\[1\.1rem\] border px-4 py-4 text-left/);
+  assert.match(markup, /flex w-full flex-col gap-3 rounded-\[1\.05rem\] border px-4 py-4 text-left/);
   assert.match(markup, /flex min-w-0 items-start justify-between gap-4/);
   assert.match(markup, /w-full overflow-hidden rounded-full bg-\[rgba\(255,255,255,0\.08\)\] transition duration-200 ease-out/);
 });

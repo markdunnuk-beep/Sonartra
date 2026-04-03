@@ -107,20 +107,20 @@ function ActionList({
   const { visible, overflow } = getVisibleItems<VisibleActionItem>(typedItems);
 
   return (
-    <article className="border-white/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10">
-      <div className="space-y-3">
+    <article className="border-white/8 space-y-5 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-6 md:pt-10">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] md:gap-6">
         <SectionEyebrow>{title}</SectionEyebrow>
-        <h3 className="text-[1.32rem] font-semibold tracking-[-0.03em] text-white md:text-[1.45rem]">{title}</h3>
+        <h3 className="text-[1.28rem] font-semibold tracking-[-0.03em] text-white md:text-[1.4rem]">{title}</h3>
       </div>
 
       <ul className="space-y-5">
         {visible.length > 0 ? (
           visible.map((item) => (
-            <li key={item.key} className="space-y-2">
-              <p className="text-[0.96rem] font-semibold tracking-[-0.01em] text-white/86">
+            <li key={item.key} className="space-y-2.5">
+              <p className="text-[0.95rem] font-semibold tracking-[-0.01em] text-white/86">
                 {item.title}
               </p>
-              <p className="max-w-[42rem] text-[0.98rem] leading-8 text-white/64">{item.detail}</p>
+              <p className="max-w-[41rem] text-[0.97rem] leading-8 text-white/62">{item.detail}</p>
             </li>
           ))
         ) : (
@@ -161,7 +161,7 @@ function ActionSection({
   actions: AssessmentResultDetailViewModel['actions'];
 }) {
   return (
-    <div className="mx-auto max-w-[58rem] space-y-12 md:space-y-14">
+    <div className="mx-auto max-w-[56rem] rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-6 py-7 shadow-[0_22px_70px_rgba(0,0,0,0.18)] md:px-8 md:py-9">
       <ActionList title="Strengths" items={toVisibleActionItems(actions.strengths)} />
       <ActionList title="Watchouts" items={toVisibleActionItems(actions.watchouts)} />
       <ActionList title="Development Focus" items={toVisibleActionItems(actions.developmentFocus)} />
@@ -181,8 +181,8 @@ function DomainChapter({
   const title = domain.domainLabel.trim();
 
   return (
-    <article className="border-white/8 space-y-6 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-7 md:pt-10">
-      <div className="grid gap-4 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:gap-8">
+    <article className="border-white/8 space-y-7 border-t pt-10 first:border-t-0 first:pt-0 md:space-y-8 md:pt-12">
+      <div className="grid gap-5 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] md:gap-9">
         <div className="space-y-3">
           <SectionEyebrow>Domain</SectionEyebrow>
           <h3 className="max-w-[14ch] text-[1.55rem] font-semibold tracking-[-0.035em] text-white md:text-[1.9rem]">
@@ -190,25 +190,29 @@ function DomainChapter({
           </h3>
         </div>
 
-        <div className="space-y-4 md:space-y-5">
+        <div className="space-y-5 md:space-y-6">
           {domain.summary ? (
             <p className="max-w-[44rem] text-[1rem] leading-8 text-white/68 md:text-[1.05rem] md:leading-9">
               {domain.summary}
             </p>
           ) : null}
 
-          {domain.focus ? (
-            <EditorialAside label="Focus" text={domain.focus} />
-          ) : null}
-          {domain.pressure ? (
-            <EditorialAside label="Pressure" text={domain.pressure} />
-          ) : null}
-          {domain.environment ? (
-            <EditorialAside label="Environment" text={domain.environment} />
+          {domain.focus || domain.pressure || domain.environment ? (
+            <div className="grid gap-3.5 border-l border-white/8 pl-4 sm:grid-cols-3 sm:border-l-0 sm:pl-0">
+              {domain.focus ? (
+                <EditorialAside label="Focus" text={domain.focus} />
+              ) : null}
+              {domain.pressure ? (
+                <EditorialAside label="Pressure" text={domain.pressure} />
+              ) : null}
+              {domain.environment ? (
+                <EditorialAside label="Environment" text={domain.environment} />
+              ) : null}
+            </div>
           ) : null}
 
           {domain.primarySignal || domain.secondarySignal ? (
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3.5 border-t border-white/8 pt-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
               {domain.primarySignal ? (
                 <SignalEditorialBlock
                   title="Primary signal"
@@ -227,7 +231,7 @@ function DomainChapter({
           ) : null}
 
           {domain.pairSummary?.text ? (
-            <p className="max-w-[42rem] border-l border-white/10 pl-4 text-[0.95rem] leading-8 text-white/58">
+            <p className="max-w-[42rem] text-[0.96rem] leading-8 text-white/58 italic">
               {domain.pairSummary.text}
             </p>
           ) : null}
@@ -235,7 +239,7 @@ function DomainChapter({
           {ringModel ? (
             <DomainSignalRing
               domain={ringModel}
-              className="max-w-[43rem] border-white/8 bg-[linear-gradient(180deg,rgba(12,19,33,0.68),rgba(8,12,24,0.9))] p-4 sm:p-5 md:max-w-[45rem] md:p-6"
+              className="max-w-[44rem] border-white/8 bg-[linear-gradient(180deg,rgba(14,21,36,0.62),rgba(8,12,24,0.84))] p-4 sm:p-5 md:max-w-[46rem] md:p-6"
             />
           ) : null}
 
@@ -286,7 +290,7 @@ function DomainSection({
   }
 
   return (
-    <div className="mx-auto max-w-[58rem] space-y-12 md:space-y-14">
+    <div className="mx-auto max-w-[58rem] rounded-[2.2rem] border border-white/7 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] px-6 py-7 shadow-[0_24px_80px_rgba(0,0,0,0.16)] md:px-8 md:py-9">
       {domainItems.map(({ domain, ringModel }) => (
         <DomainChapter key={domain.domainKey} domain={domain} ringModel={ringModel} />
       ))}
@@ -302,9 +306,9 @@ function EditorialAside({
   text: string;
 }) {
   return (
-    <div className="max-w-[42rem] space-y-1.5 border-l border-white/10 pl-4">
+    <div className="max-w-[16rem] space-y-1.5">
       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">{label}</p>
-      <p className="text-[0.96rem] leading-8 text-white/56">{text}</p>
+      <p className="text-[0.94rem] leading-7 text-white/56">{text}</p>
     </div>
   );
 }
@@ -319,11 +323,11 @@ function SignalEditorialBlock({
   summary: string | null;
 }) {
   return (
-    <div className="space-y-2 border-t border-white/10 pt-3 first:border-t-0 first:pt-0">
+    <div className="space-y-2.5 rounded-[1.2rem] border border-white/8 bg-white/[0.025] px-4 py-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">{title}</p>
       <p className="text-[1rem] font-medium tracking-[-0.02em] text-white/88">{signalLabel}</p>
       {summary ? (
-        <p className="max-w-[32rem] text-[0.95rem] leading-8 text-white/56">{summary}</p>
+        <p className="max-w-[32rem] text-[0.94rem] leading-7 text-white/56">{summary}</p>
       ) : null}
     </div>
   );
@@ -339,9 +343,9 @@ function HeroDomainHighlights({
   }
 
   return (
-    <div className="grid gap-4 border-t border-white/10 pt-6 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-x-5 gap-y-4 border-t border-white/8 pt-6 sm:grid-cols-2 xl:grid-cols-3">
       {highlights.map((highlight) => (
-        <article key={highlight.domainKey} className="space-y-1.5">
+        <article key={highlight.domainKey} className="space-y-1.5 border-l border-white/8 pl-4 first:border-l-0 first:pl-0 sm:first:border-l sm:first:pl-4 xl:first:border-l-0 xl:first:pl-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
             {highlight.domainLabel}
           </p>
@@ -395,9 +399,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const heroNarrative = result.hero.narrative?.trim() ?? '';
 
   return (
-    <PageFrame className="space-y-12 md:space-y-14">
+    <PageFrame className="space-y-14 md:space-y-16">
       {hasAssessmentDescription ? (
-        <section className="mb-12 rounded-3xl border border-white/10 bg-white/[0.03] px-7 py-7 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm md:px-10 md:py-9">
+        <section className="rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] px-7 py-7 shadow-[0_20px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm md:px-10 md:py-9">
           <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
             About this report
           </p>
@@ -409,8 +413,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </section>
       ) : null}
 
-      <section className="overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.11),transparent_38%),linear-gradient(180deg,rgba(16,26,44,0.72),rgba(9,15,28,0.88))] px-7 py-8 sm:px-8 sm:py-9 md:px-12 md:py-12 lg:px-14">
-        <div className="max-w-[82rem] space-y-7 md:space-y-9">
+      <section className="overflow-hidden rounded-[2.1rem] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.09),transparent_38%),linear-gradient(180deg,rgba(16,26,44,0.68),rgba(9,15,28,0.84))] px-7 py-9 shadow-[0_28px_90px_rgba(0,0,0,0.24)] sm:px-8 sm:py-10 md:px-12 md:py-12 lg:px-14">
+        <div className="max-w-[82rem] space-y-8 md:space-y-10">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
             <SectionEyebrow>Hero</SectionEyebrow>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
@@ -423,12 +427,12 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             <span>{completionTimestamp.date}</span>
           </div>
 
-          <div className="space-y-6 md:space-y-7">
-            <h1 className="max-w-[20ch] text-[2.45rem] font-semibold leading-[1.03] tracking-[-0.045em] text-white sm:text-[3rem] md:text-[4.2rem]">
+          <div className="space-y-7 md:space-y-8">
+            <h1 className="max-w-[18ch] text-[2.45rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[3rem] md:text-[4.15rem]">
               {heroHeadline}
             </h1>
-            <div className="max-w-[76ch] space-y-5">
-              <p className="text-[1rem] leading-8 text-white/74 sm:text-[1.05rem] md:text-[1.16rem] md:leading-9">
+            <div className="max-w-[74ch] space-y-6">
+              <p className="max-w-[68ch] text-[1rem] leading-8 text-white/74 sm:text-[1.05rem] md:text-[1.14rem] md:leading-9">
                 {heroNarrative}
               </p>
               <HeroDomainHighlights highlights={result.hero.domainHighlights} />
@@ -437,7 +441,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </div>
       </section>
 
-      <section className="space-y-7">
+      <section className="space-y-8">
         <SectionHeader
           eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
           title="Domain reading"
@@ -447,7 +451,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <DomainSection domainItems={resultDomainItems} />
       </section>
 
-      <section className="space-y-7">
+      <section className="space-y-8">
         <SectionHeader
           eyebrow="Action Focus"
           title="Interpretation to hold onto"

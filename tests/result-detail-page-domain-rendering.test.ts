@@ -198,7 +198,7 @@ test('result detail page reads intro, hero, domains, and actions from canonical 
   assert.doesNotMatch(source, /<ActionSection result=\{result\} \/>/);
 
   const introIndex = source.indexOf('const assessmentDescription = result.intro.assessmentDescription;');
-  const heroIndex = source.indexOf('<section className="overflow-hidden rounded-[1.5rem]');
+  const heroIndex = source.indexOf('<section className="overflow-hidden rounded-[2.1rem]');
   const domainIndex = source.indexOf('title="Domain reading"');
   const actionIndex = source.indexOf('title="Interpretation to hold onto"');
 
@@ -219,7 +219,8 @@ test('result detail page renders canonical hero domain highlights beneath the he
   assert.match(source, /highlight\.domainLabel/);
   assert.match(source, /highlight\.primarySignalLabel/);
   assert.match(source, /highlight\.summary \?/);
-  assert.match(source, /grid gap-4 border-t border-white\/10 pt-6 sm:grid-cols-2 xl:grid-cols-3/);
+  assert.match(source, /grid gap-x-5 gap-y-4 border-t border-white\/8 pt-6 sm:grid-cols-2 xl:grid-cols-3/);
+  assert.match(source, /border-l border-white\/8 pl-4/);
 });
 
 test('result detail page renders canonical domain chapter fields without UI-side interpretation synthesis', () => {
@@ -235,6 +236,8 @@ test('result detail page renders canonical domain chapter fields without UI-side
   assert.match(source, /const visibleSignals = domain\.signals\.slice\(0, 2\);/);
   assert.match(source, /const hiddenSignals = domain\.signals\.slice\(2\);/);
   assert.match(source, /signal\.signalLabel/);
+  assert.match(source, /grid gap-3\.5 border-t border-white\/8 pt-5 md:grid-cols-\[minmax\(0,1\.1fr\)_minmax\(0,0\.9fr\)\]/);
+  assert.match(source, /text-\[0\.96rem\] leading-8 text-white\/58 italic/);
 
   assert.doesNotMatch(source, /interpretation\?\.summary/);
   assert.doesNotMatch(source, /supportingLine/);
@@ -264,5 +267,9 @@ test('result detail page keeps markdown intro rendering and editorial shell for 
   assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
   assert.match(source, /\{assessmentDescription\}/);
   assert.match(source, /About this report/);
+  assert.match(source, /<PageFrame className="space-y-14 md:space-y-16">/);
+  assert.match(source, /rounded-\[2\.1rem\] border border-white\/8/);
+  assert.match(source, /rounded-\[2\.2rem\] border border-white\/7/);
+  assert.match(source, /rounded-\[2rem\] border border-white\/8/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
 });
