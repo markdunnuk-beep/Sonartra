@@ -672,6 +672,236 @@ test('hero domain highlight summary uses primary signal summary only and stays n
   assert.equal(payload.hero.domainHighlights[1]?.summary, null);
 });
 
+test('domains expand to structured report chapters in authored order with authored language where available', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 38,
+          domainPercentage: 60,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-analyst',
+          signalKey: 'style_analyst',
+          title: 'Analyst',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 3,
+          percentage: 24,
+          domainPercentage: 40,
+          rank: 2,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-evidence',
+          signalKey: 'decision_evidence',
+          title: 'Evidence',
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          rawTotal: 2,
+          percentage: 20,
+          domainPercentage: 100,
+          rank: 3,
+        }),
+      ]),
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-section',
+          domainKey: 'section_a',
+          title: 'Section A',
+          domainSource: 'question_section',
+          rawTotal: 0,
+          percentage: 0,
+          signalScores: Object.freeze([]),
+          answeredQuestionCount: 3,
+        }),
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 80,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-analyst',
+              signalKey: 'style_analyst',
+              title: 'Analyst',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 3,
+              percentage: 24,
+              domainPercentage: 40,
+              rank: 2,
+            }),
+            buildNormalizedSignal({
+              signalId: 'signal-driver',
+              signalKey: 'style_driver',
+              title: 'Driver',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 5,
+              percentage: 38,
+              domainPercentage: 60,
+              rank: 1,
+            }),
+          ]),
+          answeredQuestionCount: 3,
+        }),
+        buildDomainSummary({
+          domainId: 'domain-decision',
+          domainKey: 'signal_decision',
+          title: 'Decision',
+          rawTotal: 2,
+          percentage: 20,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-evidence',
+              signalKey: 'decision_evidence',
+              title: 'Evidence',
+              domainId: 'domain-decision',
+              domainKey: 'signal_decision',
+              rawTotal: 2,
+              percentage: 20,
+              domainPercentage: 100,
+              rank: 3,
+            }),
+          ]),
+          answeredQuestionCount: 3,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {
+          style_driver: {
+            summary: 'Driver summary.',
+            strength: 'Driver strength.',
+            watchout: 'Driver watchout.',
+            development: 'Driver development.',
+          },
+          style_analyst: {
+            summary: 'Analyst summary.',
+            strength: 'Analyst strength.',
+          },
+        },
+        pairs: {
+          analyst_driver: {
+            summary: 'Driver and Analyst pair summary.',
+          },
+        },
+        domains: {
+          signal_style: {
+            summary: 'Authored behaviour style summary.',
+            focus: 'Authored focus.',
+            pressure: 'Authored pressure.',
+            environment: 'Authored environment.',
+          },
+        },
+        overview: {},
+      },
+    }),
+  });
+
+  assert.deepEqual(
+    payload.domains.map((domain) => domain.domainKey),
+    ['section_a', 'signal_style', 'signal_decision'],
+  );
+
+  assert.deepEqual(payload.domains[0], {
+    domainKey: 'section_a',
+    domainLabel: 'Section A',
+    summary: null,
+    focus: null,
+    pressure: null,
+    environment: null,
+    primarySignal: null,
+    secondarySignal: null,
+    pairSummary: null,
+    signals: [],
+  });
+
+  assert.deepEqual(payload.domains[1], {
+    domainKey: 'signal_style',
+    domainLabel: 'Behaviour Style',
+    summary: 'Authored behaviour style summary.',
+    focus: 'Authored focus.',
+    pressure: 'Authored pressure.',
+    environment: 'Authored environment.',
+    primarySignal: {
+      signalKey: 'style_driver',
+      signalLabel: 'Driver',
+      summary: 'Driver summary.',
+      strength: 'Driver strength.',
+      watchout: 'Driver watchout.',
+      development: 'Driver development.',
+    },
+    secondarySignal: {
+      signalKey: 'style_analyst',
+      signalLabel: 'Analyst',
+      summary: 'Analyst summary.',
+      strength: 'Analyst strength.',
+      watchout: null,
+      development: null,
+    },
+    pairSummary: {
+      pairKey: 'analyst_driver',
+      text: 'Driver and Analyst pair summary.',
+    },
+    signals: [
+      {
+        signalKey: 'style_driver',
+        signalLabel: 'Driver',
+        score: 38,
+        withinDomainPercent: 60,
+        rank: 1,
+        isPrimary: true,
+        isSecondary: false,
+      },
+      {
+        signalKey: 'style_analyst',
+        signalLabel: 'Analyst',
+        score: 24,
+        withinDomainPercent: 40,
+        rank: 2,
+        isPrimary: false,
+        isSecondary: true,
+      },
+    ],
+  });
+
+  assert.equal(payload.domains[2]?.domainKey, 'signal_decision');
+  assert.ok(payload.domains[2]?.summary);
+  assert.equal(payload.domains[2]?.focus, null);
+  assert.equal(payload.domains[2]?.pressure, null);
+  assert.equal(payload.domains[2]?.environment, null);
+  assert.deepEqual(payload.domains[2]?.primarySignal, {
+    signalKey: 'decision_evidence',
+    signalLabel: 'Evidence',
+    summary: null,
+    strength: null,
+    watchout: null,
+    development: null,
+  });
+  assert.equal(payload.domains[2]?.secondarySignal, null);
+  assert.equal(payload.domains[2]?.pairSummary, null);
+  assert.deepEqual(payload.domains[2]?.signals, [
+    {
+      signalKey: 'decision_evidence',
+      signalLabel: 'Evidence',
+      score: 20,
+      withinDomainPercent: 100,
+      rank: 3,
+      isPrimary: true,
+      isSecondary: false,
+    },
+  ]);
+});
+
 test('top signal projection matches normalization ranking', () => {
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture(),

@@ -532,7 +532,13 @@ test('engine path uses overview-language summary for overview narrative only whe
   assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
   assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
   assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
-  assert.deepEqual(payload.domains, baseline.domains);
+  assert.equal(getDomain(payload, 'signals')?.pairSummary?.pairKey, 'drive_focus');
+  assert.equal(getDomain(payload, 'signals')?.pairSummary?.text, 'Reserved pair-level summary.');
+  assert.equal(getDomain(baseline, 'signals')?.pairSummary?.text, null);
+  assert.equal(getDomain(payload, 'signals')?.summary, getDomain(baseline, 'signals')?.summary);
+  assert.equal(getDomain(payload, 'signals')?.focus, getDomain(baseline, 'signals')?.focus);
+  assert.equal(getDomain(payload, 'signals')?.pressure, getDomain(baseline, 'signals')?.pressure);
+  assert.equal(getDomain(payload, 'signals')?.environment, getDomain(baseline, 'signals')?.environment);
 });
 
 test('engine path uses overview template headline for overview headline only when available', async () => {
@@ -600,7 +606,13 @@ test('engine path uses overview template headline for overview headline only whe
   assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
   assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
   assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
-  assert.deepEqual(payload.domains, baseline.domains);
+  assert.equal(getDomain(payload, 'signals')?.pairSummary?.pairKey, 'drive_focus');
+  assert.equal(getDomain(payload, 'signals')?.pairSummary?.text, 'Reserved pair-level summary.');
+  assert.equal(getDomain(baseline, 'signals')?.pairSummary?.text, null);
+  assert.equal(getDomain(payload, 'signals')?.summary, getDomain(baseline, 'signals')?.summary);
+  assert.equal(getDomain(payload, 'signals')?.focus, getDomain(baseline, 'signals')?.focus);
+  assert.equal(getDomain(payload, 'signals')?.pressure, getDomain(baseline, 'signals')?.pressure);
+  assert.equal(getDomain(payload, 'signals')?.environment, getDomain(baseline, 'signals')?.environment);
 });
 
 test('engine path uses signal-language sections for strengths watchouts and development only when available', async () => {
@@ -738,6 +750,116 @@ test('engine path uses domain-language summary for domain summaries only when av
   assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
   assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.equal(payload.domains.length, baseline.domains.length);
+});
+
+test('engine path expands domains into structured chapters with pair summaries and authored sections', async () => {
+  const definition = buildDefinition();
+  const repository: AssessmentDefinitionRepository = {
+    async getPublishedAssessmentDefinitionByKey() {
+      return definition;
+    },
+    async getAssessmentDefinitionByVersion() {
+      return definition;
+    },
+    async getAssessmentVersionLanguageBundle() {
+      return {
+        signals: {
+          support_drive: {
+            summary: 'Support Drive summary.',
+            strength: 'Support Drive strength.',
+            watchout: 'Support Drive watchout.',
+            development: 'Support Drive development.',
+          },
+          core_focus: {
+            summary: 'Core Focus summary.',
+          },
+        },
+        pairs: {
+          drive_focus: {
+            summary: 'Drive and Focus pair summary.',
+          },
+        },
+        domains: {
+          signals: {
+            focus: 'Custom focus section.',
+            pressure: 'Custom pressure section.',
+            environment: 'Custom environment section.',
+          },
+        },
+        overview: {},
+      };
+    },
+  };
+
+  const payload = await runAssessmentEngine({
+    repository,
+    assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
+    responses: buildResponses({
+      'question-1': 'option-2',
+      'question-2': 'option-3',
+    }),
+  });
+
+  const signalsDomain = getDomain(payload, 'signals');
+  const sectionDomain = getDomain(payload, 'section_a');
+
+  assert.deepEqual(payload.domains.map((domain) => domain.domainKey), ['section_a', 'signals']);
+  assert.equal(sectionDomain?.summary, null);
+  assert.equal(sectionDomain?.primarySignal, null);
+  assert.equal(sectionDomain?.pairSummary, null);
+  assert.equal(signalsDomain?.focus, 'Custom focus section.');
+  assert.equal(signalsDomain?.pressure, 'Custom pressure section.');
+  assert.equal(signalsDomain?.environment, 'Custom environment section.');
+  assert.deepEqual(signalsDomain?.primarySignal, {
+    signalKey: 'support_drive',
+    signalLabel: 'Support Drive',
+    summary: 'Support Drive summary.',
+    strength: 'Support Drive strength.',
+    watchout: 'Support Drive watchout.',
+    development: 'Support Drive development.',
+  });
+  assert.deepEqual(signalsDomain?.secondarySignal, {
+    signalKey: 'core_focus',
+    signalLabel: 'Core Focus',
+    summary: 'Core Focus summary.',
+    strength: null,
+    watchout: null,
+    development: null,
+  });
+  assert.deepEqual(signalsDomain?.pairSummary, {
+    pairKey: 'drive_focus',
+    text: 'Drive and Focus pair summary.',
+  });
+  assert.deepEqual(signalsDomain?.signals, [
+    {
+      signalKey: 'support_drive',
+      signalLabel: 'Support Drive',
+      score: 50,
+      withinDomainPercent: 50,
+      rank: 1,
+      isPrimary: true,
+      isSecondary: false,
+    },
+    {
+      signalKey: 'core_focus',
+      signalLabel: 'Core Focus',
+      score: 38,
+      withinDomainPercent: 38,
+      rank: 2,
+      isPrimary: false,
+      isSecondary: true,
+    },
+    {
+      signalKey: 'role_executor',
+      signalLabel: 'Role Executor',
+      score: 12,
+      withinDomainPercent: 12,
+      rank: 3,
+      isPrimary: false,
+      isSecondary: false,
+    },
+  ]);
 });
 
 test('engine language regression matrix preserves the canonical payload contract and section scope', async () => {

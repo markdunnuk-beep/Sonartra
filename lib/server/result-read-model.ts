@@ -193,6 +193,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     version: record.version,
     metadata: payload.metadata,
     hero: payload.hero,
+    domains: payload.domains,
     topSignal,
     rankedSignals,
     normalizedScores,

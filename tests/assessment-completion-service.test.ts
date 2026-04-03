@@ -534,6 +534,9 @@ test('completion path persists the canonical payload unchanged through the real 
               summary: 'Persisted signal summary.',
               strength: 'Persisted strength language.',
             },
+            core_focus: {
+              summary: 'Persisted secondary summary.',
+            },
           },
           pairs: {
             executor_focus: {
@@ -543,6 +546,9 @@ test('completion path persists the canonical payload unchanged through the real 
           domains: {
             signals: {
               summary: 'Persisted domain summary.',
+              focus: 'Persisted focus section.',
+              pressure: 'Persisted pressure section.',
+              environment: 'Persisted environment section.',
             },
           },
           overview: {
@@ -578,6 +584,21 @@ test('completion path persists the canonical payload unchanged through the real 
     summary: 'Persisted signal summary.',
   }]);
   assert.equal(payload?.domains[1]?.summary, 'Persisted domain summary.');
+  assert.equal(payload?.domains[1]?.focus, 'Persisted focus section.');
+  assert.equal(payload?.domains[1]?.pressure, 'Persisted pressure section.');
+  assert.equal(payload?.domains[1]?.environment, 'Persisted environment section.');
+  assert.deepEqual(payload?.domains[1]?.secondarySignal, {
+    signalKey: 'core_focus',
+    signalLabel: 'Core Focus',
+    summary: 'Persisted secondary summary.',
+    strength: null,
+    watchout: null,
+    development: null,
+  });
+  assert.deepEqual(payload?.domains[1]?.pairSummary, {
+    pairKey: 'executor_focus',
+    text: 'Reserved pair-level summary.',
+  });
   assert.equal(payload?.actions.strengths[0]?.text, 'Persisted strength language.');
   assert.equal(payload?.metadata.assessmentDescription, null);
   assert.equal(payload?.metadata.attemptId, 'attempt-2');

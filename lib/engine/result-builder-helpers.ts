@@ -26,6 +26,10 @@ import {
   buildStrengths,
   buildWatchouts,
 } from '@/lib/engine/result-interpretation';
+import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
+import type {
+  AssessmentVersionLanguageDomainSection,
+} from '@/lib/server/assessment-version-language-types';
 
 export type CanonicalResultBuilderInput = NormalizedResult & {
   assessmentVersionId: string;
@@ -137,6 +141,68 @@ function getSignalLanguageDevelopment(
   context: ResultInterpretationContext,
 ): string | null {
   return context.languageBundle.signals[signalKey]?.development ?? null;
+}
+
+function trimToNull(value: string | null | undefined): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function resolveDomainLanguageSection(
+  domainKey: string,
+  section: AssessmentVersionLanguageDomainSection,
+  interpretationContext: ResultInterpretationContext,
+): string | null {
+  return trimToNull(interpretationContext.languageBundle.domains[domainKey]?.[section]);
+}
+
+function resolveSignalLanguageBundle(
+  signalKey: string,
+  interpretationContext: ResultInterpretationContext,
+): {
+  summary: string | null;
+  strength: string | null;
+  watchout: string | null;
+  development: string | null;
+} {
+  return {
+    summary: getSignalLanguageSummary(signalKey, interpretationContext),
+    strength: getSignalLanguageStrength(signalKey, interpretationContext),
+    watchout: getSignalLanguageWatchout(signalKey, interpretationContext),
+    development: getSignalLanguageDevelopment(signalKey, interpretationContext),
+  };
+}
+
+function getSignalPairLookupToken(signalKey: string): string {
+  const segments = signalKey.split('_').filter((segment) => segment.length > 0);
+  return segments[segments.length - 1] ?? signalKey;
+}
+
+function buildCanonicalSignalPairKey(
+  primarySignalKey: string,
+  secondarySignalKey: string,
+): string | null {
+  const canonicalPair = canonicalizeSignalPairKey(
+    `${getSignalPairLookupToken(primarySignalKey)}_${getSignalPairLookupToken(secondarySignalKey)}`,
+  );
+
+  return canonicalPair.success ? canonicalPair.canonicalSignalPair : null;
+}
+
+function selectPrimaryAndSecondaryDomainSignals(
+  signalScores: readonly NormalizedSignalScore[],
+): {
+  primarySignal: NormalizedSignalScore | null;
+  secondarySignal: NormalizedSignalScore | null;
+} {
+  return {
+    primarySignal: signalScores[0] ?? null,
+    secondarySignal: signalScores[1] ?? null,
+  };
 }
 
 function assertDomainSignalOrdering(domainSummary: ResultDomainSummary): void {
@@ -254,13 +320,15 @@ function buildDomainChapterSignal(
     return null;
   }
 
+  const language = resolveSignalLanguageBundle(signalScore.signalKey, interpretationContext);
+
   return {
     signalKey: signalScore.signalKey,
     signalLabel: signalScore.signalTitle,
-    summary: getSignalLanguageSummary(signalScore.signalKey, interpretationContext),
-    strength: getSignalLanguageStrength(signalScore.signalKey, interpretationContext),
-    watchout: getSignalLanguageWatchout(signalScore.signalKey, interpretationContext),
-    development: getSignalLanguageDevelopment(signalScore.signalKey, interpretationContext),
+    summary: language.summary,
+    strength: language.strength,
+    watchout: language.watchout,
+    development: language.development,
   };
 }
 
@@ -308,19 +376,30 @@ export function buildDomains(
   interpretationContext: ResultInterpretationContext,
 ): ResultDomainChapter[] {
   return domainSummaries.map((domainSummary) => {
-    const primarySignal = domainSummary.signalScores[0] ?? null;
-    const secondarySignal = domainSummary.signalScores[1] ?? null;
+    const { primarySignal, secondarySignal } = selectPrimaryAndSecondaryDomainSignals(domainSummary.signalScores);
+    const pairKey =
+      primarySignal && secondarySignal
+        ? buildCanonicalSignalPairKey(primarySignal.signalKey, secondarySignal.signalKey)
+        : null;
+    const pairText = pairKey
+      ? trimToNull(interpretationContext.languageBundle.pairs[pairKey]?.summary)
+      : null;
 
     return {
       domainKey: domainSummary.domainKey,
       domainLabel: domainSummary.domainTitle,
       summary: domainSummary.interpretation?.summary ?? null,
-      focus: domainSummary.interpretation?.supportingLine ?? null,
-      pressure: domainSummary.interpretation?.tensionClause ?? null,
-      environment: null,
+      focus: resolveDomainLanguageSection(domainSummary.domainKey, 'focus', interpretationContext),
+      pressure: resolveDomainLanguageSection(domainSummary.domainKey, 'pressure', interpretationContext),
+      environment: resolveDomainLanguageSection(domainSummary.domainKey, 'environment', interpretationContext),
       primarySignal: buildDomainChapterSignal(primarySignal, interpretationContext),
       secondarySignal: buildDomainChapterSignal(secondarySignal, interpretationContext),
-      pairSummary: null,
+      pairSummary: pairKey
+        ? {
+            pairKey,
+            text: pairText,
+          }
+        : null,
       signals: domainSummary.signalScores.map((signalScore, index) => buildDomainSignal(signalScore, index)),
     };
   });
