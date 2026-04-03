@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
@@ -321,9 +323,11 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
             About this report
           </p>
-          <p className="max-w-3xl whitespace-pre-line text-[17px] leading-8 text-white/88 md:text-[18px]">
-            {assessmentDescription}
-          </p>
+          <div className="max-w-3xl text-[17px] text-white/88 md:text-[18px] [&_h1]:text-[22px] [&_h1]:font-medium [&_h1]:text-white [&_h2]:text-[20px] [&_h2]:font-medium [&_h2]:text-white [&_h3]:text-[18px] [&_h3]:font-medium [&_h3]:text-white [&_p]:whitespace-pre-line [&_p]:leading-8 [&_p:not(:first-child)]:mt-5 [&_strong]:font-semibold [&_strong]:text-white">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
+              {assessmentDescription}
+            </ReactMarkdown>
+          </div>
         </section>
       ) : null}
 

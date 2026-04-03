@@ -88,7 +88,7 @@ export function AdminAssessmentLanguageEditor({
       <div className="space-y-2">
         <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">Assessment Description</h3>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          Plain-text introduction shown at the top of every report.
+          Markdown introduction shown at the top of every report. Supports `**bold**` and blank-line paragraphs; raw HTML is ignored.
         </p>
       </div>
 
@@ -113,7 +113,7 @@ export function AdminAssessmentLanguageEditor({
             setError(null);
           }
         }}
-        placeholder="Add the assessment description shown above the results hero."
+        placeholder="Add the assessment description shown above the results hero. Use **bold** and blank lines for paragraphs."
         value={draftValue}
       />
 

@@ -244,6 +244,8 @@ test('result detail hero is narrative-first and no longer leads with derived sig
 test('result detail page renders assessmentDescription above the hero when present and hides the section when absent', () => {
   const source = readFileSync(pagePath, 'utf8');
 
+  assert.match(source, /import ReactMarkdown from 'react-markdown';/);
+  assert.match(source, /import remarkGfm from 'remark-gfm';/);
   assert.match(source, /const assessmentDescription = result\.metadata\.assessmentDescription;/);
   assert.match(source, /const hasAssessmentDescription =\s*typeof assessmentDescription === 'string' && assessmentDescription\.trim\(\)\.length > 0/);
   assert.match(source, /\{hasAssessmentDescription \? \(/);
@@ -254,15 +256,31 @@ test('result detail page renders assessmentDescription above the hero when prese
   assert.match(source, />\s*About this report\s*<\/p>/);
   assert.match(
     source,
-    /max-w-3xl whitespace-pre-line text-\[17px\] leading-8 text-white\/88 md:text-\[18px\]/,
+    /max-w-3xl text-\[17px\] text-white\/88 md:text-\[18px\]/,
   );
+  assert.match(source, /\[\&_p\]:whitespace-pre-line/);
+  assert.match(source, /\[\&_p\]:leading-8/);
+  assert.match(source, /\[\&_strong\]:font-semibold/);
+  assert.match(source, /\[\&_strong\]:text-white/);
+  assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
   assert.match(source, /\{assessmentDescription\}/);
+  assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
 
   const descriptionIndex = source.indexOf('const assessmentDescription = result.metadata.assessmentDescription;');
   const heroIndex = source.indexOf('<section className="overflow-hidden rounded-[1.5rem]');
   assert.ok(descriptionIndex >= 0);
   assert.ok(heroIndex >= 0);
   assert.ok(descriptionIndex < heroIndex);
+});
+
+test('result detail page uses markdown output for bold text and paragraph structure in assessmentDescription', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
+  assert.match(source, /\[\&_strong\]:font-semibold/);
+  assert.match(source, /\[\&_strong\]:text-white/);
+  assert.match(source, /\[\&_p\]:whitespace-pre-line/);
+  assert.match(source, /\[\&_p:not\(:first-child\)\]:mt-5/);
 });
 
 test('result detail page keeps personalisation prep outside UI prose generation', () => {
