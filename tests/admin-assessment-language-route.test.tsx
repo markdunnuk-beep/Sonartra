@@ -26,6 +26,11 @@ type AssessmentRow = {
 type LanguageFixture = {
   baseRows: AssessmentRow[];
   throwMissingLanguageTables?: boolean;
+  assessment?: Array<{
+    assessmentVersionId: string;
+    section: 'assessment_description';
+    content: string;
+  }>;
   signals?: Array<{
     id: string;
     assessmentVersionId: string;
@@ -179,6 +184,26 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
         };
       }
 
+      if (text.includes('FROM assessment_version_language_assessment')) {
+        if (fixture.throwMissingLanguageTables) {
+          const error = new Error('relation "assessment_version_language_assessment" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
+        const assessmentVersionId = params?.[0] as string;
+        return {
+          rows: (fixture.assessment ?? [])
+            .filter((row) => row.assessmentVersionId === assessmentVersionId)
+            .map((row) => ({
+              section: row.section,
+              content: row.content,
+            })) as T[],
+        };
+      }
+
       if (text.includes('FROM assessment_version_language_pairs')) {
         if (fixture.throwMissingLanguageTables) {
           const error = new Error('relation "assessment_version_language_pairs" does not exist') as Error & {
@@ -293,6 +318,13 @@ test('language step view model resolves the latest draft version and derives cou
           version_updated_at: '2026-01-03T00:00:00.000Z',
         }),
       ],
+      assessment: [
+        {
+          assessmentVersionId: 'version-draft',
+          section: 'assessment_description',
+          content: 'Assessment introduction copy',
+        },
+      ],
       signals: [
         {
           id: 'signal-language-1',
@@ -353,7 +385,9 @@ test('language step view model resolves the latest draft version and derives cou
   assert.ok(viewModel);
   assert.equal(viewModel?.activeVersion?.assessmentVersionId, 'version-draft');
   assert.equal(viewModel?.activeVersion?.status, 'draft');
+  assert.equal(viewModel?.assessmentLanguageDescription, 'Assessment introduction copy');
   assert.deepEqual(viewModel?.counts, {
+    assessment: { entryCount: 1 },
     signals: { entryCount: 2 },
     pairs: { entryCount: 1 },
     domains: { entryCount: 1 },
@@ -392,6 +426,7 @@ test('language step view model falls back to the published version when no draft
   assert.ok(viewModel);
   assert.equal(viewModel?.activeVersion?.assessmentVersionId, 'version-published');
   assert.equal(viewModel?.activeVersion?.status, 'published');
+  assert.equal(viewModel?.assessmentLanguageDescription, null);
   assert.equal(viewModel?.counts.overview.entryCount, 1);
 });
 
@@ -419,6 +454,7 @@ test('language step view model returns null for a missing assessment and empty v
   assert.equal(missingAssessment, null);
   assert.equal(noVersionAssessment?.activeVersion, null);
   assert.deepEqual(noVersionAssessment?.counts, {
+    assessment: { entryCount: 0 },
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
@@ -448,7 +484,9 @@ test('language step component renders the signal, pair, domain, and overview lan
         ],
         languageSchemaStatus: 'available',
         languageSchemaMessage: null,
+        assessmentLanguageDescription: 'Assessment introduction copy',
         counts: {
+          assessment: { entryCount: 1 },
           signals: { entryCount: 2 },
           pairs: { entryCount: 1 },
           domains: { entryCount: 1 },
@@ -459,6 +497,8 @@ test('language step component renders the signal, pair, domain, and overview lan
   );
 
   assert.match(markup, /Language/);
+  assert.match(markup, /Assessment Description/);
+  assert.match(markup, /Assessment introduction copy/);
   assert.match(markup, /Signal Language/);
   assert.match(markup, /Signal Language import/);
   assert.match(markup, /Pair Language/);
@@ -493,7 +533,9 @@ test('language step component shows a safe empty state when no usable version co
         availableVersions: [],
         languageSchemaStatus: 'available',
         languageSchemaMessage: null,
+        assessmentLanguageDescription: null,
         counts: {
+          assessment: { entryCount: 0 },
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
           domains: { entryCount: 0 },
@@ -521,6 +563,7 @@ test('language step view model degrades safely when language tables are unavaila
   assert.equal(viewModel?.languageSchemaStatus, 'unavailable');
   assert.match(viewModel?.languageSchemaMessage ?? '', /Language datasets are unavailable/);
   assert.deepEqual(viewModel?.counts, {
+    assessment: { entryCount: 0 },
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
@@ -551,7 +594,9 @@ test('language step component shows a safe schema-unavailable state instead of r
         languageSchemaStatus: 'unavailable',
         languageSchemaMessage:
           'Language datasets are unavailable for this environment. Apply the assessment version language migration before using this step.',
+        assessmentLanguageDescription: null,
         counts: {
+          assessment: { entryCount: 0 },
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
           domains: { entryCount: 0 },

@@ -3,6 +3,7 @@ import {
   getAdminAssessmentDetailByKey,
   type AdminAssessmentDetailVersion,
 } from '@/lib/server/admin-assessment-detail';
+import { getAssessmentLanguage } from '@/lib/server/assessment-language-repository';
 import { getAssessmentVersionLanguageBundle } from '@/lib/server/assessment-version-language';
 
 export type AdminAssessmentLanguageDatasetSummary = {
@@ -10,6 +11,7 @@ export type AdminAssessmentLanguageDatasetSummary = {
 };
 
 export type AdminAssessmentLanguageDatasetCounts = {
+  assessment: AdminAssessmentLanguageDatasetSummary;
   signals: AdminAssessmentLanguageDatasetSummary;
   pairs: AdminAssessmentLanguageDatasetSummary;
   domains: AdminAssessmentLanguageDatasetSummary;
@@ -35,6 +37,7 @@ export type AdminAssessmentLanguageStepViewModel = {
   }[];
   languageSchemaStatus: 'available' | 'unavailable';
   languageSchemaMessage: string | null;
+  assessmentLanguageDescription: string | null;
   counts: AdminAssessmentLanguageDatasetCounts;
 };
 
@@ -73,6 +76,7 @@ function countEntriesByKey(bundle: Readonly<Record<string, unknown>>): number {
 
 function createEmptyCounts(): AdminAssessmentLanguageDatasetCounts {
   return {
+    assessment: { entryCount: 0 },
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
@@ -106,12 +110,16 @@ export async function getAdminAssessmentLanguageStepViewModel(
       })),
       languageSchemaStatus: 'available',
       languageSchemaMessage: null,
+      assessmentLanguageDescription: null,
       counts: createEmptyCounts(),
     };
   }
 
   try {
-    const bundle = await getAssessmentVersionLanguageBundle(db, resolvedVersion.assessmentVersionId);
+    const [bundle, assessmentLanguage] = await Promise.all([
+      getAssessmentVersionLanguageBundle(db, resolvedVersion.assessmentVersionId),
+      getAssessmentLanguage(resolvedVersion.assessmentVersionId, db),
+    ]);
 
     return {
       assessmentId: assessment.assessmentId,
@@ -126,7 +134,11 @@ export async function getAdminAssessmentLanguageStepViewModel(
       })),
       languageSchemaStatus: 'available',
       languageSchemaMessage: null,
+      assessmentLanguageDescription: assessmentLanguage.assessment_description,
       counts: {
+        assessment: {
+          entryCount: assessmentLanguage.assessment_description ? 1 : 0,
+        },
         signals: { entryCount: countEntriesByKey(bundle.signals) },
         pairs: { entryCount: countEntriesByKey(bundle.pairs) },
         domains: { entryCount: countEntriesByKey(bundle.domains) },
@@ -152,6 +164,7 @@ export async function getAdminAssessmentLanguageStepViewModel(
       languageSchemaStatus: 'unavailable',
       languageSchemaMessage:
         'Language datasets are unavailable for this environment. Apply the assessment version language migration before using this step.',
+      assessmentLanguageDescription: null,
       counts: createEmptyCounts(),
     };
   }

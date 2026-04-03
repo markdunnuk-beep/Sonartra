@@ -308,11 +308,22 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   // The result detail page renders persisted report language only. Behavioural
   // copy belongs to the canonical result payload, not the client UI.
+  const assessmentDescription = result.metadata.assessmentDescription;
+  const hasAssessmentDescription =
+    typeof assessmentDescription === 'string' && assessmentDescription.trim().length > 0;
   const heroHeading = result.overviewSummary.headline.trim();
   const heroSupport = getHeroSupport(result);
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
+      {hasAssessmentDescription ? (
+        <section className="mb-6">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+            {assessmentDescription}
+          </p>
+        </section>
+      ) : null}
+
       <section className="overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.11),transparent_38%),linear-gradient(180deg,rgba(16,26,44,0.72),rgba(9,15,28,0.88))] px-7 py-8 sm:px-8 sm:py-9 md:px-12 md:py-12 lg:px-14">
         <div className="max-w-[82rem] space-y-7 md:space-y-9">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">

@@ -1,3 +1,4 @@
+import { AdminAssessmentLanguageEditor } from '@/components/admin/admin-assessment-language-editor';
 import { AdminDomainLanguageImport } from '@/components/admin/admin-domain-language-import';
 import { AdminOverviewLanguageImport } from '@/components/admin/admin-overview-language-import';
 import {
@@ -96,6 +97,12 @@ export function AdminAssessmentLanguageStep({
         </p>
       </SurfaceCard>
 
+      <AdminAssessmentLanguageEditor
+        assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+        initialValue={viewModel.assessmentLanguageDescription}
+        isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+      />
+
       <AdminSignalLanguageImport
         assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
         existingSignalLanguageRowCount={viewModel.counts.signals.entryCount}
@@ -121,6 +128,7 @@ export function AdminAssessmentLanguageStep({
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <MetaItem label="Assessment" value={formatEntryCount(viewModel.counts.assessment.entryCount)} />
         <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
         <MetaItem label="Pairs" value={formatEntryCount(viewModel.counts.pairs.entryCount)} />
         <MetaItem label="Domains" value={formatEntryCount(viewModel.counts.domains.entryCount)} />

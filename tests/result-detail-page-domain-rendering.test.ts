@@ -31,6 +31,7 @@ function buildResultDetail(
       assessmentKey: 'signals-flex',
       version: '1.0.0',
       attemptId: 'attempt-1',
+      assessmentDescription: null,
     },
     topSignal: null,
     rankedSignals: Object.freeze([]),
@@ -238,6 +239,23 @@ test('result detail hero is narrative-first and no longer leads with derived sig
   assert.doesNotMatch(source, /const combinedInterpretation = getCombinedInterpretation/);
   assert.doesNotMatch(source, /In practice:/);
   assert.doesNotMatch(source, /heroPrimarySignalChips/);
+});
+
+test('result detail page renders assessmentDescription above the hero when present and hides the section when absent', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  assert.match(source, /const assessmentDescription = result\.metadata\.assessmentDescription;/);
+  assert.match(source, /const hasAssessmentDescription =\s*typeof assessmentDescription === 'string' && assessmentDescription\.trim\(\)\.length > 0/);
+  assert.match(source, /\{hasAssessmentDescription \? \(/);
+  assert.match(source, /<section className="mb-6">/);
+  assert.match(source, /text-sm text-muted-foreground leading-relaxed whitespace-pre-line/);
+  assert.match(source, /\{assessmentDescription\}/);
+
+  const descriptionIndex = source.indexOf('const assessmentDescription = result.metadata.assessmentDescription;');
+  const heroIndex = source.indexOf('<section className="overflow-hidden rounded-[1.5rem]');
+  assert.ok(descriptionIndex >= 0);
+  assert.ok(heroIndex >= 0);
+  assert.ok(descriptionIndex < heroIndex);
 });
 
 test('result detail page keeps personalisation prep outside UI prose generation', () => {
