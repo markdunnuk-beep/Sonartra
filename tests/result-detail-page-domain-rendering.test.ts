@@ -255,11 +255,12 @@ test('result detail page renders assessmentDescription above the hero when prese
   );
   assert.match(source, />\s*About this report\s*<\/p>/);
   assert.match(source, /className="mb-5 text-\[11px\] font-semibold uppercase tracking-\[0\.24em\] text-white\/45"/);
-  assert.match(source, /max-w-4xl/);
+  assert.match(source, /max-w-3xl/);
   assert.match(source, /\[\&>p\]:whitespace-pre-line/);
   assert.match(source, /\[\&>p\]:text-\[18px\]/);
   assert.match(source, /\[\&>p\]:leading-9/);
-  assert.match(source, /\[\&>p\+p\]:mt-5/);
+  assert.match(source, /\[\&>p\]:text-white\/76/);
+  assert.match(source, /\[\&>p\+p\]:mt-6/);
   assert.match(source, /\[\&_strong\]:font-semibold/);
   assert.match(source, /\[\&_strong\]:text-white/);
   assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
@@ -280,7 +281,8 @@ test('result detail page uses markdown output for bold text and paragraph struct
   assert.match(source, /\[\&_strong\]:font-semibold/);
   assert.match(source, /\[\&_strong\]:text-white/);
   assert.match(source, /\[\&>p\]:whitespace-pre-line/);
-  assert.match(source, /\[\&>p\+p\]:mt-5/);
+  assert.match(source, /\[\&>p\]:text-white\/76/);
+  assert.match(source, /\[\&>p\+p\]:mt-6/);
 });
 
 test('result detail page adds stronger markdown hierarchy for headings, rules, and lists in assessmentDescription', () => {
@@ -288,13 +290,15 @@ test('result detail page adds stronger markdown hierarchy for headings, rules, a
 
   assert.match(source, /\[\&>h1\]:text-\[30px\]/);
   assert.match(source, /\[\&>h1\]:leading-\[1\.08\]/);
-  assert.match(source, /\[\&>h2\]:mt-8/);
+  assert.match(source, /\[\&>h2\]:mt-10/);
   assert.match(source, /\[\&>h2\]:text-\[20px\]/);
   assert.match(source, /\[\&>hr\]:my-7/);
   assert.match(source, /\[\&>hr\]:bg-white\/10/);
   assert.match(source, /\[\&>ul\]:space-y-2/);
   assert.match(source, /\[\&>ul\]:pl-5/);
+  assert.match(source, /\[\&>ul\]:text-white\/76/);
   assert.match(source, /\[\&>ol\]:space-y-2/);
+  assert.match(source, /\[\&>ol\]:text-white\/76/);
   assert.match(source, /\[\&>blockquote\]:border-l/);
   assert.match(source, /\[\&>blockquote\]:text-white\/72/);
 });
