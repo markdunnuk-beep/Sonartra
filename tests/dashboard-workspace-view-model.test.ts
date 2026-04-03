@@ -75,100 +75,63 @@ function buildPayload(params?: {
   return {
     metadata: {
       assessmentKey: params?.assessmentKey ?? 'wplp80',
+      assessmentTitle: 'WPLP-80',
       version: params?.version ?? '1.0.0',
       attemptId: params?.attemptId ?? 'attempt-1',
+      completedAt: '2026-01-01T00:01:00.000Z',
+      assessmentDescription: null,
     },
-    topSignal: {
-      signalId: 'signal-core',
-      signalKey: 'core_focus',
-      title: topSignalTitle,
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      normalizedValue: topSignalPercentage,
-      rawTotal: 7,
-      percentage: topSignalPercentage,
-      rank: 1,
+    intro: {
+      assessmentDescription: null,
     },
-    rankedSignals: Object.freeze([{
-      signalId: 'signal-core',
-      signalKey: 'core_focus',
-      title: topSignalTitle,
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      normalizedValue: topSignalPercentage,
-      rawTotal: 7,
-      percentage: topSignalPercentage,
-      domainPercentage: topSignalPercentage,
-      isOverlay: false,
-      overlayType: 'none',
-      rank: 1,
-    }]),
-    normalizedScores: Object.freeze([{
-      signalId: 'signal-core',
-      signalKey: 'core_focus',
-      signalTitle: topSignalTitle,
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      domainSource: 'signal_group',
-      isOverlay: false,
-      overlayType: 'none',
-      rawTotal: 7,
-      normalizedValue: topSignalPercentage,
-      percentage: topSignalPercentage,
-      domainPercentage: topSignalPercentage,
-      rank: 1,
-    }]),
-    domainSummaries: Object.freeze([{
-      domainId: 'domain-signals',
-      domainKey: 'signals',
-      domainTitle: 'Signals',
-      domainSource: 'signal_group',
-      rawTotal: 7,
-      normalizedValue: 100,
-      percentage: 100,
-      signalScores: Object.freeze([{
-        signalId: 'signal-core',
-        signalKey: 'core_focus',
-        signalTitle: topSignalTitle,
-        domainId: 'domain-signals',
-        domainKey: 'signals',
-        domainSource: 'signal_group' as const,
-        isOverlay: false,
-        overlayType: 'none' as const,
-        rawTotal: 7,
-        normalizedValue: topSignalPercentage,
-        percentage: topSignalPercentage,
-        domainPercentage: topSignalPercentage,
-        rank: 1,
-      }]),
-      signalCount: 1,
-      answeredQuestionCount: 1,
-      rankedSignalIds: Object.freeze(['signal-core']),
-      interpretation: {
-        domainKey: 'signals',
-        primarySignalKey: 'core_focus',
-        primaryPercent: topSignalPercentage,
-        secondarySignalKey: null,
-        secondaryPercent: null,
-        summary: `${topSignalTitle} is the clearest signal in this domain.`,
-        supportingLine: null,
-        diagnostics: {
-          strategy: 'single_signal_fallback',
-          ruleKey: null,
-          primaryBand: 'dominant',
-          secondaryBand: null,
-          blendProfile: 'concentrated',
-          primarySecondaryGap: topSignalPercentage,
-        },
-      },
-    }]),
-    overviewSummary: {
+    hero: {
       headline: `${topSignalTitle} leads the current pattern`,
       narrative: `${topSignalTitle} leads the persisted result summary.`,
+      primaryPattern: {
+        label: topSignalTitle,
+        signalKey: 'core_focus',
+        signalLabel: topSignalTitle,
+      },
+      domainHighlights: [{
+        domainKey: 'signals',
+        domainLabel: 'Signals',
+        primarySignalKey: 'core_focus',
+        primarySignalLabel: topSignalTitle,
+        summary: `${topSignalTitle} is the clearest signal in this domain.`,
+      }],
     },
-    strengths: Object.freeze([]),
-    watchouts: Object.freeze([]),
-    developmentFocus: Object.freeze([]),
+    domains: [{
+      domainKey: 'signals',
+      domainLabel: 'Signals',
+      summary: `${topSignalTitle} is the clearest signal in this domain.`,
+      focus: null,
+      pressure: null,
+      environment: null,
+      primarySignal: {
+        signalKey: 'core_focus',
+        signalLabel: topSignalTitle,
+        summary: null,
+        strength: null,
+        watchout: null,
+        development: null,
+      },
+      secondarySignal: null,
+      pairSummary: null,
+      signals: [{
+        signalKey: 'core_focus',
+        signalLabel: topSignalTitle,
+        score: 7,
+        withinDomainPercent: topSignalPercentage,
+        rank: 1,
+        isPrimary: true,
+        isSecondary: false,
+      }],
+    }],
+    actions: {
+      strengths: [],
+      watchouts: [],
+      developmentFocus: [],
+    },
     diagnostics: {
       readinessStatus: 'ready',
       scoring: {
@@ -694,4 +657,72 @@ test('dashboard and workspace builders project canonical lifecycle and latest re
   assert.equal(dashboard.recommendation?.kind, 'view_results');
   assert.equal(dashboard.latestReadyResult?.resultId, 'result-1');
   assert.equal(dashboard.latestReadyResult?.topSignalTitle, 'Core Focus');
+});
+
+test('workspace and dashboard skip malformed ready payload rows instead of crashing the route', async () => {
+  const db = createFakeDb({
+    inventory: [
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        title: 'WPLP-80',
+        description: 'Signals assessment',
+        assessmentVersionId: 'version-1',
+        versionTag: '1.0.0',
+        publishedAt: '2026-01-01T00:00:00.000Z',
+      },
+    ],
+    attempts: [
+      {
+        attemptId: 'attempt-1',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        lifecycleStatus: 'RESULT_READY',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        submittedAt: '2026-01-01T00:15:00.000Z',
+        completedAt: '2026-01-01T00:16:00.000Z',
+        lastActivityAt: '2026-01-01T00:16:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:16:00.000Z',
+      },
+    ],
+    results: [
+      {
+        resultId: 'result-bad',
+        attemptId: 'attempt-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.0.0',
+        userId: 'user-1',
+        pipelineStatus: 'COMPLETED',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:16:00.000Z',
+        failureReason: null,
+        hasCanonicalResultPayload: true,
+        createdAt: '2026-01-01T00:16:00.000Z',
+        updatedAt: '2026-01-01T00:16:00.000Z',
+        canonicalResultPayload: { invalid: true },
+      },
+    ],
+    questionCountByVersionId: {
+      'version-1': 80,
+    },
+  });
+
+  const workspace = await buildAssessmentWorkspaceViewModel({
+    db,
+    userId: 'user-1',
+  });
+  const dashboard = await buildDashboardViewModel({
+    db,
+    userId: 'user-1',
+  });
+
+  assert.equal(workspace.assessments[0]?.status, 'completed_processing');
+  assert.equal(workspace.assessments[0]?.latestReadyResultId, null);
+  assert.equal(dashboard.readyResultCount, 0);
+  assert.equal(dashboard.latestReadyResult, null);
 });

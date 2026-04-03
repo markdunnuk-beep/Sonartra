@@ -177,6 +177,18 @@ function toListItem(record: PersistedReadyResultRecord): AssessmentResultListIte
   };
 }
 
+function tryToListItem(record: PersistedReadyResultRecord): AssessmentResultListItem | null {
+  try {
+    return toListItem(record);
+  } catch (error) {
+    if (error instanceof AssessmentResultPayloadError) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
 function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResultDetailViewModel {
   const payload = parseCanonicalPayload(record);
   const rankedSignals = toRankedSignals(payload);
@@ -221,7 +233,11 @@ export function createResultReadModelService(
   return {
     async listAssessmentResults(params) {
       const records = await listReadyResultsForUser(deps.db, params.userId);
-      return Object.freeze(records.map(toListItem));
+      return Object.freeze(
+        records
+          .map(tryToListItem)
+          .filter((result): result is AssessmentResultListItem => result !== null),
+      );
     },
 
     async getAssessmentResultDetail(params) {

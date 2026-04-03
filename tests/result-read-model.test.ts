@@ -386,6 +386,43 @@ test('malformed payload triggers explicit payload error', async () => {
   );
 });
 
+test('list view skips malformed persisted payloads without breaking other ready results', async () => {
+  const service = createResultReadModelService({
+    db: createFakeDb([
+      {
+        resultId: 'result-1',
+        attemptId: 'attempt-1',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.0.0',
+        userId: 'user-1',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:02:00.000Z',
+        createdAt: '2026-01-01T00:02:00.000Z',
+        canonicalResultPayload: { invalid: true },
+      },
+      {
+        resultId: 'result-2',
+        attemptId: 'attempt-2',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.0.1',
+        userId: 'user-1',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:01:00.000Z',
+        createdAt: '2026-01-01T00:01:00.000Z',
+        canonicalResultPayload: buildPayload({ resultAttemptId: 'attempt-2' }),
+      },
+    ]),
+  });
+
+  const results = await service.listAssessmentResults({ userId: 'user-1' });
+
+  assert.deepEqual(results.map((result) => result.resultId), ['result-2']);
+});
+
 test('missing or non-owned result triggers not found', async () => {
   const service = createResultReadModelService({
     db: createFakeDb([

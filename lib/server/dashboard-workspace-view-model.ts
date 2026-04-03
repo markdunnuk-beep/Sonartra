@@ -162,14 +162,17 @@ export function projectAssessmentWorkspaceItem(params: {
   lifecycle: AssessmentAttemptLifecycleViewModel;
   latestReadyResult: AssessmentResultListItem | null;
 }): AssessmentWorkspaceItemViewModel {
-  const latestReadyResultId =
-    params.latestReadyResult?.resultId ?? (params.lifecycle.latestResultReady ? params.lifecycle.latestResultId : null);
+  const effectiveStatus =
+    params.lifecycle.status === 'ready' && !params.latestReadyResult
+      ? ('completed_processing' as const)
+      : params.lifecycle.status;
+  const latestReadyResultId = params.latestReadyResult?.resultId ?? null;
   const topSignalTitle = params.latestReadyResult?.topSignal?.title ?? null;
   const topSignalPercentage = params.latestReadyResult?.topSignalPercentage ?? null;
   const latestReadyResultAt = params.latestReadyResult?.generatedAt ?? params.latestReadyResult?.createdAt ?? null;
   const errorCode = formatErrorCode(params.lifecycle.lastError);
   const cta = mapLifecycleStatusToCta({
-    status: params.lifecycle.status,
+    status: effectiveStatus,
     assessmentKey: params.assessment.assessmentKey,
     latestReadyResultId,
   });
@@ -177,7 +180,7 @@ export function projectAssessmentWorkspaceItem(params: {
   let statusLabel = 'Not started';
   let statusDetail = `${params.lifecycle.totalQuestions} questions ready to begin.`;
 
-  switch (params.lifecycle.status) {
+  switch (effectiveStatus) {
     case 'in_progress':
       statusLabel = 'In progress';
       statusDetail = `${params.lifecycle.answeredQuestions} of ${params.lifecycle.totalQuestions} questions answered.`;
@@ -208,7 +211,7 @@ export function projectAssessmentWorkspaceItem(params: {
     title: params.assessment.title,
     description: params.assessment.description,
     versionTag: params.assessment.versionTag,
-    status: params.lifecycle.status,
+    status: effectiveStatus,
     statusLabel,
     statusDetail,
     totalQuestions: params.lifecycle.totalQuestions,
