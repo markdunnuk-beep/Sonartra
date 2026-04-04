@@ -407,11 +407,11 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   return (
     <PageFrame className="space-y-14 md:space-y-16">
       {hasAssessmentDescription ? (
-        <section className="rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] px-7 py-7 shadow-[0_20px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm md:px-10 md:py-9">
-          <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
+        <section className="rounded-[1.9rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_10px_28px_rgba(0,0,0,0.08)] md:px-10 md:py-10">
+          <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/40">
             About this report
           </p>
-          <div className="max-w-3xl [&>h1]:mb-6 [&>h1]:text-[30px] [&>h1]:font-semibold [&>h1]:leading-[1.08] [&>h1]:tracking-[-0.02em] [&>h1]:text-white [&>h2]:mt-10 [&>h2]:mb-3 [&>h2]:text-[20px] [&>h2]:font-semibold [&>h2]:leading-tight [&>h2]:tracking-[-0.01em] [&>h2]:text-white [&>h3]:mt-6 [&>h3]:mb-2 [&>h3]:text-[17px] [&>h3]:font-semibold [&>h3]:leading-tight [&>h3]:text-white/95 [&>p]:my-0 [&>p]:whitespace-pre-line [&>p]:text-[18px] [&>p]:leading-9 [&>p]:tracking-[-0.01em] [&>p]:text-white/76 [&>p+p]:mt-6 [&_strong]:font-semibold [&_strong]:text-white [&>hr]:my-7 [&>hr]:h-px [&>hr]:border-0 [&>hr]:bg-white/10 [&>ul]:my-5 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-[18px] [&>ul]:leading-8 [&>ul]:text-white/76 [&>ol]:my-5 [&>ol]:space-y-2 [&>ol]:pl-5 [&>ol]:text-[18px] [&>ol]:leading-8 [&>ol]:text-white/76 [&>blockquote]:my-6 [&>blockquote]:border-l [&>blockquote]:border-white/10 [&>blockquote]:pl-4 [&>blockquote]:text-white/72">
+          <div className="max-w-[72ch] [&>h1]:mb-5 [&>h1]:text-[28px] [&>h1]:font-semibold [&>h1]:leading-[1.08] [&>h1]:tracking-[-0.02em] [&>h1]:text-white/96 [&>h2]:mt-9 [&>h2]:mb-3 [&>h2]:text-[19px] [&>h2]:font-semibold [&>h2]:leading-tight [&>h2]:tracking-[-0.01em] [&>h2]:text-white/94 [&>h3]:mt-6 [&>h3]:mb-2 [&>h3]:text-[16px] [&>h3]:font-semibold [&>h3]:leading-tight [&>h3]:text-white/90 [&>p]:my-0 [&>p]:whitespace-pre-line [&>p]:text-[17px] [&>p]:leading-[1.95] [&>p]:tracking-[-0.005em] [&>p]:text-white/72 [&>p+p]:mt-6 [&_strong]:font-semibold [&_strong]:text-white/94 [&>hr]:my-7 [&>hr]:h-px [&>hr]:border-0 [&>hr]:bg-white/8 [&>ul]:my-5 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-[17px] [&>ul]:leading-[1.9] [&>ul]:text-white/72 [&>ol]:my-5 [&>ol]:space-y-2 [&>ol]:pl-5 [&>ol]:text-[17px] [&>ol]:leading-[1.9] [&>ol]:text-white/72 [&>blockquote]:my-6 [&>blockquote]:border-l [&>blockquote]:border-white/8 [&>blockquote]:pl-4 [&>blockquote]:text-white/68">
             <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
               {assessmentDescription}
             </ReactMarkdown>

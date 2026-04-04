@@ -272,8 +272,8 @@ test('result detail page keeps markdown intro rendering and editorial shell for 
   assert.match(source, /\{assessmentDescription\}/);
   assert.match(source, /About this report/);
   assert.match(source, /<PageFrame className="space-y-14 md:space-y-16">/);
-  assert.match(source, /rounded-\[2rem\] border border-white\/6/);
+  assert.match(source, /rounded-\[1\.9rem\] border border-white\/6/);
+  assert.match(source, /max-w-\[72ch\]/);
   assert.match(source, /mx-auto max-w-\[58rem\] px-1 md:px-2/);
-  assert.match(source, /rounded-\[2rem\] border border-white\/8/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
 });
