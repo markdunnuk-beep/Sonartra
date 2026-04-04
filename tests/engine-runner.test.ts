@@ -425,7 +425,7 @@ test('engine path loads language bundle for a valid assessment version and leave
   });
 
   assert.equal(loadedAssessmentVersionId, 'version-1');
-  assert.equal(payload.hero.headline, 'A clear operating preference is coming through');
+  assert.equal(payload.hero.headline, 'Core Focus');
   assert.match(payload.hero.narrative ?? '', /dependable way to approach work/i);
   assert.equal(payload.hero.primaryPattern?.signalLabel, 'Core Focus');
 });
@@ -1085,7 +1085,7 @@ test('engine language regression matrix preserves the canonical payload contract
       baseline.diagnostics.normalization,
       `${scenario.name} normalization diagnostics`,
     );
-    assert.notEqual(payload.hero.headline?.trim(), '', `${scenario.name} non-empty headline`);
+    assert.ok(payload.hero.headline === null || payload.hero.headline.trim().length > 0, `${scenario.name} headline`);
     assert.notEqual(payload.hero.narrative?.trim(), '', `${scenario.name} non-empty narrative`);
   }
 });

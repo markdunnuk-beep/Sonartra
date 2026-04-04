@@ -343,20 +343,24 @@ function HeroDomainHighlights({
   }
 
   return (
-    <div className="grid gap-x-5 gap-y-4 border-t border-white/8 pt-6 sm:grid-cols-2 xl:grid-cols-3">
-      {highlights.map((highlight) => (
-        <article key={highlight.domainKey} className="space-y-1.5 border-l border-white/8 pl-4 first:border-l-0 first:pl-0 sm:first:border-l sm:first:pl-4 xl:first:border-l-0 xl:first:pl-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
-            {highlight.domainLabel}
-          </p>
-          <p className="text-[0.98rem] font-medium tracking-[-0.02em] text-white/84">
-            {highlight.primarySignalLabel}
-          </p>
-          {highlight.summary ? (
-            <p className="text-[0.92rem] leading-7 text-white/52">{highlight.summary}</p>
-          ) : null}
-        </article>
-      ))}
+    <div className="max-w-[60rem] border-t border-white/7 pt-7">
+      <div className="space-y-3.5">
+        {highlights.map((highlight) => (
+          <article key={highlight.domainKey} className="space-y-1.5">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+                {highlight.domainLabel}
+              </p>
+              <p className="text-[1rem] font-medium tracking-[-0.02em] text-white/82">
+                {highlight.primarySignalLabel}
+              </p>
+            </div>
+            {highlight.summary ? (
+              <p className="max-w-[52ch] text-[0.95rem] leading-7 text-white/52">{highlight.summary}</p>
+            ) : null}
+          </article>
+        ))}
+      </div>
     </div>
   );
 }
@@ -413,28 +417,28 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </section>
       ) : null}
 
-      <section className="overflow-hidden rounded-[2.1rem] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(118,147,255,0.09),transparent_38%),linear-gradient(180deg,rgba(16,26,44,0.68),rgba(9,15,28,0.84))] px-7 py-9 shadow-[0_28px_90px_rgba(0,0,0,0.24)] sm:px-8 sm:py-10 md:px-12 md:py-12 lg:px-14">
-        <div className="max-w-[82rem] space-y-8 md:space-y-10">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
+      <section className="rounded-[2rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] px-7 py-10 shadow-[0_16px_48px_rgba(0,0,0,0.14)] sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14">
+        <div className="max-w-[74rem] space-y-9 md:space-y-11">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/38">
             <SectionEyebrow>Hero</SectionEyebrow>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
             <span>{result.assessmentTitle}</span>
             <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
-            <span>{result.metadata.assessmentKey}</span>
-            <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
-            <span>v{result.version}</span>
-            <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
             <span>{completionTimestamp.date}</span>
           </div>
 
-          <div className="space-y-7 md:space-y-8">
-            <h1 className="max-w-[18ch] text-[2.45rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[3rem] md:text-[4.15rem]">
-              {heroHeadline}
-            </h1>
-            <div className="max-w-[74ch] space-y-6">
-              <p className="max-w-[68ch] text-[1rem] leading-8 text-white/74 sm:text-[1.05rem] md:text-[1.14rem] md:leading-9">
-                {heroNarrative}
-              </p>
+          <div className="space-y-8 md:space-y-10">
+            {heroHeadline ? (
+              <h1 className="max-w-[14ch] text-[3rem] font-semibold leading-[0.96] tracking-[-0.055em] text-white sm:text-[4rem] md:text-[5rem]">
+                {heroHeadline}
+              </h1>
+            ) : null}
+            <div className="max-w-[60ch] space-y-7">
+              {heroNarrative ? (
+                <p className="max-w-[60ch] text-[1.04rem] leading-[1.95] text-white/72 sm:text-[1.08rem] md:text-[1.16rem]">
+                  {heroNarrative}
+                </p>
+              ) : null}
               <HeroDomainHighlights highlights={result.hero.domainHighlights} />
             </div>
           </div>

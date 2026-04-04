@@ -368,7 +368,7 @@ test('minimal valid payload construction returns a complete canonical result pay
   assert.equal(payload.metadata.completedAt, '2026-01-01T00:01:00.000Z');
   assert.equal(payload.metadata.assessmentDescription, null);
   assert.equal(payload.intro.assessmentDescription, null);
-  assert.equal(payload.hero.headline, 'A clear operating preference is coming through');
+  assert.equal(payload.hero.headline, 'Focus');
   assert.equal(payload.hero.primaryPattern?.signalKey, 'focus');
   assert.equal(payload.domains.length, 2);
   assert.deepEqual(Object.keys(payload.actions), ['strengths', 'watchouts', 'developmentFocus']);
@@ -450,7 +450,7 @@ test('hero summary uses overview resolution path and top-ranked overall signal f
     normalizedResult: buildNormalizedResultFixture(),
   });
 
-  assert.equal(payload.hero.headline, 'A clear operating preference is coming through');
+  assert.equal(payload.hero.headline, 'Focus');
   assert.match(payload.hero.narrative ?? '', /dependable way to approach work/i);
   assert.deepEqual(payload.hero.primaryPattern, {
     label: 'Focus',
@@ -1421,7 +1421,7 @@ test('overview summary classification is deterministic for concentrated profiles
     normalizedResult: buildNormalizedResultFixture(),
   });
 
-  assert.equal(payload.overviewSummary.headline, 'A clear operating preference is coming through');
+  assert.equal(payload.overviewSummary.headline, 'Focus');
   assert.match(payload.overviewSummary.narrative, /dependable way to approach work/i);
 });
 

@@ -51,7 +51,7 @@ type SignalTemplate = {
 };
 
 const DEFAULT_TEMPLATE: SignalTemplate = {
-  headline: 'A clear operating preference is coming through',
+  headline: '',
   hero: 'You tend to rely on this signal when deciding how to respond and where to place your effort.',
   impact: 'This is usually most useful when you need a dependable way to approach work and make progress.',
   supportFragment: 'additional range around how you apply it',
@@ -495,7 +495,9 @@ export function buildOverviewSummary(
   }
 
   return {
-    headline: overviewTemplateHeadline ?? topTemplate.headline,
+    headline:
+      overviewTemplateHeadline ??
+      (topTemplate === DEFAULT_TEMPLATE ? topSignal.signalTitle : topTemplate.headline),
     narrative: overviewTemplateSummary ?? `${topTemplate.hero} ${supportSentence}`,
   };
 }

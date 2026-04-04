@@ -198,7 +198,7 @@ test('result detail page reads intro, hero, domains, and actions from canonical 
   assert.doesNotMatch(source, /<ActionSection result=\{result\} \/>/);
 
   const introIndex = source.indexOf('const assessmentDescription = result.intro.assessmentDescription;');
-  const heroIndex = source.indexOf('<section className="overflow-hidden rounded-[2.1rem]');
+  const heroIndex = source.indexOf('<section className="rounded-[2rem] border border-white/6');
   const domainIndex = source.indexOf('title="Domain reading"');
   const actionIndex = source.indexOf('title="Interpretation to hold onto"');
 
@@ -219,8 +219,9 @@ test('result detail page renders canonical hero domain highlights beneath the he
   assert.match(source, /highlight\.domainLabel/);
   assert.match(source, /highlight\.primarySignalLabel/);
   assert.match(source, /highlight\.summary \?/);
-  assert.match(source, /grid gap-x-5 gap-y-4 border-t border-white\/8 pt-6 sm:grid-cols-2 xl:grid-cols-3/);
-  assert.match(source, /border-l border-white\/8 pl-4/);
+  assert.match(source, /max-w-\[60rem\] border-t border-white\/7 pt-7/);
+  assert.match(source, /space-y-3\.5/);
+  assert.match(source, /flex flex-wrap items-baseline gap-x-3 gap-y-1/);
 });
 
 test('result detail page renders canonical domain chapter fields without UI-side interpretation synthesis', () => {
@@ -268,7 +269,7 @@ test('result detail page keeps markdown intro rendering and editorial shell for 
   assert.match(source, /\{assessmentDescription\}/);
   assert.match(source, /About this report/);
   assert.match(source, /<PageFrame className="space-y-14 md:space-y-16">/);
-  assert.match(source, /rounded-\[2\.1rem\] border border-white\/8/);
+  assert.match(source, /rounded-\[2rem\] border border-white\/6/);
   assert.match(source, /rounded-\[2\.2rem\] border border-white\/7/);
   assert.match(source, /rounded-\[2rem\] border border-white\/8/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
