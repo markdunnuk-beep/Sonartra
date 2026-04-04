@@ -228,100 +228,117 @@ export function AssessmentRunnerClient({
 
   if (showIntro && runner.assessmentIntro) {
     return (
-      <section className="sonartra-panel overflow-hidden p-6 sm:p-7 lg:p-9">
-        <div className="space-y-8 lg:space-y-10">
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.85fr)] xl:gap-12">
-            <div className="space-y-6">
+      <section className="sonartra-panel overflow-hidden p-5 sm:p-6 lg:p-7">
+        <div className="space-y-6 lg:space-y-7">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.82fr)] xl:gap-8">
+            <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">
                 <span>Assessment Intro</span>
                 <span className="hidden h-1 w-1 rounded-full bg-white/18 sm:inline-block" />
                 <span>{runner.assessmentTitle}</span>
               </div>
 
-              <div className="space-y-4">
-                <p className="text-sm font-medium tracking-[-0.01em] text-white/54">
+              <div className="space-y-3">
+                <p className="text-[0.82rem] font-medium tracking-[-0.01em] text-white/54">
                   {runner.assessmentTitle}
                 </p>
-                <h2 className="max-w-[14ch] text-[2.7rem] font-semibold leading-[0.95] tracking-[-0.055em] text-white sm:text-[3.2rem] lg:text-[4rem]">
+                <h2 className="max-w-[14ch] text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.65rem] lg:text-[3.15rem]">
                   {runner.assessmentIntro.introTitle || runner.assessmentTitle}
                 </h2>
               </div>
 
               {runner.assessmentIntro.introSummary ? (
-                <p className="max-w-[62ch] text-[1.02rem] leading-[1.95] text-white/72 sm:text-[1.08rem] lg:text-[1.14rem]">
+                <p className="max-w-[60ch] text-[0.98rem] leading-7 text-white/72 sm:text-[1rem]">
                   {runner.assessmentIntro.introSummary}
                 </p>
               ) : null}
-            </div>
 
-            <div className="flex flex-col justify-between gap-8 border-t border-white/8 pt-6 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
-              <div className="space-y-5">
-                {runner.assessmentIntro.estimatedTimeOverride ? (
-                  <div className="space-y-1.5">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
-                      Estimated duration
-                    </p>
-                    <p className="text-[0.98rem] font-medium tracking-[-0.02em] text-white/78">
-                      {runner.assessmentIntro.estimatedTimeOverride}
-                    </p>
-                  </div>
-                ) : null}
-
+              <div className="grid gap-3 sm:grid-cols-2">
                 {runner.assessmentIntro.instructions ? (
-                  <div className="space-y-1.5">
+                  <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
                       Instructions
                     </p>
-                    <p className="max-w-[30rem] text-[0.95rem] leading-7 text-white/58">
+                    <p className="mt-2 text-sm leading-6 text-white/62">
                       {runner.assessmentIntro.instructions}
                     </p>
                   </div>
                 ) : null}
 
                 {runner.assessmentIntro.confidentialityNote ? (
-                  <div className="space-y-1.5">
+                  <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
                       Confidentiality
                     </p>
-                    <p className="max-w-[30rem] text-[0.95rem] leading-7 text-white/58">
+                    <p className="mt-2 text-sm leading-6 text-white/62">
                       {runner.assessmentIntro.confidentialityNote}
                     </p>
                   </div>
                 ) : null}
               </div>
+            </div>
 
-              <div className="space-y-4">
-                <p className="max-w-[26rem] text-sm leading-7 text-white/48">
-                  The runner will begin at Question 1 and continue in the published assessment order.
+            <div className="flex flex-col gap-4 border-t border-white/8 pt-5 xl:border-l xl:border-t-0 xl:pl-7 xl:pt-0">
+              <div className="rounded-[1.15rem] border border-white/8 bg-white/[0.03] p-4">
+                <div className="space-y-3">
+                  {runner.assessmentIntro.estimatedTimeOverride ? (
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
+                        Estimated duration
+                      </p>
+                      <p className="text-[0.95rem] font-medium tracking-[-0.02em] text-white/82">
+                        {runner.assessmentIntro.estimatedTimeOverride}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <div className="space-y-1">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
+                      Runner flow
+                    </p>
+                    <p className="text-sm leading-6 text-white/58">
+                      The runner will begin at Question 1 and continue in the published assessment order.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowIntro(false)}
+                    className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
+                  >
+                    Start Assessment
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-[1.15rem] border border-white/8 bg-black/10 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/34">
+                  Before you begin
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setShowIntro(false)}
-                  className="inline-flex h-12 min-w-[12rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
-                >
-                  Start Assessment
-                </button>
+                <p className="mt-2 text-sm leading-6 text-white/52">
+                  Read the opening guidance once, then move into the live runner. Your saved progress
+                  and completion flow continue exactly as configured.
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="grid gap-5 border-t border-white/7 pt-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-8 lg:pt-8">
-            <div className="space-y-3">
+          <div className="grid gap-3 border-t border-white/7 pt-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+            <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/38">
                 How It Works
               </p>
-              <p className="max-w-[50rem] text-[0.98rem] leading-8 text-white/70 sm:text-[1.01rem]">
+              <p className="mt-2 max-w-[48rem] text-sm leading-6 text-white/68">
                 {runner.assessmentIntro.introHowItWorks}
               </p>
             </div>
 
-            <div className="space-y-2 border-t border-white/7 pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/34">
-                Before you begin
+                Assessment order
               </p>
-              <p className="max-w-[28rem] text-[0.94rem] leading-7 text-white/52">
-                Read the opening guidance once, then move into the live runner. Your saved progress
-                and completion flow continue exactly as configured.
+              <p className="mt-2 text-sm leading-6 text-white/52">
+                You will move through the published questions in sequence, with progress saved as you go.
               </p>
             </div>
           </div>
