@@ -13,8 +13,8 @@ import {
   type ReportLanguageValidationError,
 } from '@/lib/admin/report-language-import';
 import type {
-  AdminReportLanguageImportPreviewGroup,
-} from '@/lib/admin/admin-report-language-import';
+  AdminLanguageDatasetImportPreviewGroup,
+} from '@/lib/admin/admin-language-dataset-import';
 import { getDbPool } from '@/lib/server/db';
 import {
   getAssessmentVersionLanguageDomains,
@@ -93,7 +93,7 @@ export type ReportLanguageImportPreviewResult = {
   parseErrors: ReturnType<typeof parseReportLanguageRows>['errors'];
   validationErrors: readonly ReportLanguageValidationError[];
   planErrors: readonly ReportLanguageImportPlanError[];
-  previewGroups: readonly AdminReportLanguageImportPreviewGroup[];
+  previewGroups: readonly AdminLanguageDatasetImportPreviewGroup[];
   summary: ReportLanguageImportSummary;
   executionError: string | null;
 };
@@ -419,8 +419,8 @@ function buildPlanErrors(
 function buildPreviewGroups(
   reportSection: ImportableReportLanguageSection,
   rows: ReturnType<typeof validateReportLanguageRows>['validRows'],
-): readonly AdminReportLanguageImportPreviewGroup[] {
-  const grouped = new Map<string, AdminReportLanguageImportPreviewGroup['entries'][number][]>();
+): readonly AdminLanguageDatasetImportPreviewGroup[] {
+  const grouped = new Map<string, AdminLanguageDatasetImportPreviewGroup['entries'][number][]>();
   const labels = new Map<string, string>();
 
   for (const row of rows) {
@@ -448,7 +448,7 @@ function buildPreviewGroups(
     const entries = grouped.get(targetKey) ?? [];
     entries.push({
       lineNumber: row.lineNumber,
-      field: row.field,
+      label: row.field,
       content: row.content,
     });
     grouped.set(targetKey, entries);
@@ -460,7 +460,7 @@ function buildPreviewGroups(
       targetKey,
       targetLabel: labels.get(targetKey) ?? targetKey,
       entries: [...entries].sort(
-        (left, right) => left.lineNumber - right.lineNumber || left.field.localeCompare(right.field),
+        (left, right) => left.lineNumber - right.lineNumber || left.label.localeCompare(right.label),
       ),
     }))
     .sort((left, right) => left.targetKey.localeCompare(right.targetKey));
@@ -492,7 +492,7 @@ function buildResult(params: {
   parseErrors: ReturnType<typeof parseReportLanguageRows>['errors'];
   validationErrors: readonly ReportLanguageValidationError[];
   planErrors: readonly ReportLanguageImportPlanError[];
-  previewGroups: readonly AdminReportLanguageImportPreviewGroup[];
+  previewGroups: readonly AdminLanguageDatasetImportPreviewGroup[];
   existingRowCount: number;
   rowCount?: number;
   targetCount?: number;

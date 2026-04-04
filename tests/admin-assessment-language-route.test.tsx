@@ -710,21 +710,19 @@ test('language step component renders intro, hero header, domain chapters, signa
   assert.match(markup, /Assessment introduction copy/);
   assert.match(markup, /rounded-\[1\.25rem\] border border-white\/10 bg-gradient-to-b from-white\/\[0\.02\] to-transparent p-\[1px\]/);
   assert.match(markup, /rounded-\[1\.25rem\] bg-black\/30/);
-  assert.match(markup, /Hero Header/);
+  assert.match(markup, /Language Datasets/);
+  assert.match(markup, /Language Import/);
+  assert.match(markup, /Dataset type/);
   assert.match(markup, /Hero Header Language/);
   assert.match(markup, /Format: scope \| key \| headline/);
   assert.match(markup, /Paste Hero Header rows/);
-  assert.match(markup, /Domain Chapters/);
+  assert.match(markup, /Domain Chapter Language/);
   assert.match(markup, /Domain Chapter Language/);
   assert.match(markup, /Signal Language/);
   assert.match(markup, /Pair Summary Language/);
-  assert.match(markup, /section \| target \| field \| content/);
   assert.match(markup, /pair \| driver_influencer \| Fast-moving, people-driven and energised by momentum/);
   assert.match(markup, /supported authoring path for report language/i);
-  assert.match(markup, /Actions are not authored directly for MVP/);
-  assert.match(markup, /Pair strength and watchout are legacy-only and are not surfaced here\./);
   assert.doesNotMatch(markup, /Actions<\/h3>/);
-  assert.doesNotMatch(markup, /AdminOverviewLanguageImport|AdminDomainLanguageImport|AdminSignalLanguageImport|AdminPairLanguageImport/);
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
   assert.match(markup, /Current Hero Header rows: 2/);
@@ -789,7 +787,8 @@ test('hero header preview and import accept valid pair rows and replace version-
       entries: [
         {
           lineNumber: 1,
-          headline: 'Fast-moving, people-driven and energised by momentum',
+          label: 'headline',
+          content: 'Fast-moving, people-driven and energised by momentum',
         },
       ],
     },

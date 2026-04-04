@@ -1,6 +1,5 @@
 import { AdminAssessmentLanguageEditor } from '@/components/admin/admin-assessment-language-editor';
-import { AdminHeroHeaderLanguageImport } from '@/components/admin/admin-hero-header-language-import';
-import { AdminReportLanguageImport } from '@/components/admin/admin-report-language-import';
+import { AdminLanguageDatasetImport } from '@/components/admin/admin-language-dataset-import';
 import {
   EmptyState,
   LabelPill,
@@ -82,8 +81,9 @@ export function AdminAssessmentLanguageStep({
           </LabelPill>
         </div>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          Organize authored content in the same order the final report is read: Intro, Hero, Domain Chapters,
-          Signals, and Pairs. Derived report fields stay engine-owned and are not editable here.
+          Organize authored content in the same order the final report is read. Intro remains inline, while
+          report language datasets now use one selector-driven import surface for Hero Header, Domain Chapters,
+          Signals, and Pairs.
         </p>
       </SurfaceCard>
 
@@ -107,107 +107,15 @@ export function AdminAssessmentLanguageStep({
 
       <div className="space-y-6">
         <SectionHeader
-          eyebrow="Hero Header"
-          title="Hero Header"
-          description="Author pair-level hero headlines. Hero narrative remains pair-summary driven and domain highlights remain engine-derived."
+          eyebrow="Language Datasets"
+          title="Language Datasets"
+          description="Replace Hero Header, Domain Chapter, Signal, and Pair Summary language from one shared import surface."
         />
 
-        <AdminHeroHeaderLanguageImport
+        <AdminLanguageDatasetImport
           assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-          existingRowCount={viewModel.counts.heroHeaders.entryCount}
+          counts={viewModel.counts}
           isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-        />
-      </div>
-
-      <div className="space-y-6">
-        <SectionHeader
-          eyebrow="Domain Chapters"
-          title="Domain Chapters"
-          description="Author chapter-level guidance within each domain section. Domain summary remains an optional override on top of engine interpretation."
-        />
-
-        <AdminReportLanguageImport
-          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-          existingRowCount={viewModel.counts.domains.entryCount}
-          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-          reportSection="domain"
-          eyebrow="Domain Chapters"
-          title="Domain Chapter Language"
-          description="Author summary override, focus, pressure, and environment rows for report domains."
-          detail="Signal ordering, primary and secondary signal selection, and pair selection remain engine-resolved."
-          derivedNote="Use summary only when you want to override the deterministic chapter opener. The rest of the domain chapter still combines authored and derived content."
-          currentRowsLabel="Current Domain rows"
-          textareaLabel="Paste domain chapter rows"
-          placeholder="domain|signal_style|focus|Your strongest contribution in this area is how you bring direction and consistency."
-          importButtonLabel="Import domain chapter language"
-          formatExample={[
-            'section | target | field | content',
-            '',
-            'domain | signal_style | summary | You tend to operate with visible pace, structure, and interpersonal impact.',
-            'domain | signal_style | focus | Your strongest contribution in this area is how you bring direction and consistency.',
-            'domain | signal_style | pressure | Under pressure, you may narrow your attention or become more forceful in your style.',
-            'domain | signal_style | environment | You perform best where expectations, pace, and collaboration are clear.',
-          ].join('\n')}
-        />
-      </div>
-
-      <div className="space-y-6">
-        <SectionHeader
-          eyebrow="Signals"
-          title="Signals"
-          description="Signal-level language building blocks reused across the report, including Hero highlights and action blocks."
-        />
-
-        <AdminReportLanguageImport
-          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-          existingRowCount={viewModel.counts.signals.entryCount}
-          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-          reportSection="signal"
-          eyebrow="Signals"
-          title="Signal Language"
-          description="Author summary, strength, watchout, and development language by signal."
-          detail="These are reusable report building blocks. The engine decides where each signal sentence appears."
-          derivedNote="Actions are not authored directly for MVP. Strengths, watchouts, and development focus remain engine-derived from signal ranking and signal-owned language."
-          currentRowsLabel="Current Signal rows"
-          textareaLabel="Paste signal rows"
-          placeholder="signal|style_driver|summary|You tend to move quickly and take initiative."
-          importButtonLabel="Import signal language"
-          formatExample={[
-            'section | target | field | content',
-            '',
-            'signal | style_driver | summary | You tend to move quickly and take initiative.',
-            'signal | style_driver | strength | You bring momentum and energy to delivery.',
-            'signal | style_driver | watchout | You may move ahead before others are ready.',
-            'signal | style_driver | development | Pause slightly longer before committing to direction.',
-          ].join('\n')}
-        />
-      </div>
-
-      <div className="space-y-6">
-        <SectionHeader
-          eyebrow="Pairs"
-          title="Pairs"
-          description="Summary language for the top two signals within a domain chapter."
-        />
-
-        <AdminReportLanguageImport
-          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-          existingRowCount={viewModel.counts.pairs.entryCount}
-          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-          reportSection="pair"
-          eyebrow="Pairs"
-          title="Pair Summary Language"
-          description="Author pair summaries only. Pair strength and watchout are legacy-only and are not surfaced here."
-          detail="Pair keys remain canonicalized under the hood so report-shaped inputs still round-trip into the current storage model safely."
-          currentRowsLabel="Current Pair rows"
-          textareaLabel="Paste pair summary rows"
-          placeholder="pair|driver_analyst|summary|You combine forward momentum with structured thinking."
-          importButtonLabel="Import pair summary language"
-          formatExample={[
-            'section | target | field | content',
-            '',
-            'pair | driver_analyst | summary | You combine forward momentum with structured thinking.',
-          ].join('\n')}
         />
       </div>
 

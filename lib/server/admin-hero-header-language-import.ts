@@ -7,7 +7,7 @@ import {
   parseHeroHeaderLanguageRows,
   validateHeroHeaderLanguageRows,
 } from '@/lib/admin/hero-header-language-import';
-import type { AdminHeroHeaderPreviewGroup } from '@/lib/admin/admin-hero-header-language-import';
+import type { AdminLanguageDatasetImportPreviewGroup } from '@/lib/admin/admin-language-dataset-import';
 import {
   getAssessmentVersionLanguageHeroHeaders,
   replaceAssessmentVersionLanguageHeroHeaders,
@@ -69,7 +69,7 @@ export type HeroHeaderImportResult = {
   parseErrors: ReturnType<typeof parseHeroHeaderLanguageRows>['errors'];
   validationErrors: ReturnType<typeof validateHeroHeaderLanguageRows>['errors'];
   planErrors: readonly HeroHeaderImportPlanError[];
-  previewGroups: readonly AdminHeroHeaderPreviewGroup[];
+  previewGroups: readonly AdminLanguageDatasetImportPreviewGroup[];
   summary: {
     assessmentVersionId: string | null;
     rowCount: number;
@@ -353,13 +353,13 @@ function getHeroHeaderImportExecutionError(error: unknown): string {
 
 function buildPreviewGroups(
   rows: readonly ReturnType<typeof validateHeroHeaderLanguageRows>['validRows'][number][],
-): readonly AdminHeroHeaderPreviewGroup[] {
+): readonly AdminLanguageDatasetImportPreviewGroup[] {
   return [...new Map(rows.map((row) => [
     row.canonicalPairKey,
     {
       targetKey: row.canonicalPairKey,
       targetLabel: row.canonicalPairKey,
-      entries: [{ lineNumber: row.lineNumber, headline: row.headline }],
+      entries: [{ lineNumber: row.lineNumber, label: 'headline', content: row.headline }],
     },
   ])).values()].sort((left, right) => left.targetKey.localeCompare(right.targetKey));
 }
@@ -369,7 +369,7 @@ function buildResult(params: {
   parseErrors: ReturnType<typeof parseHeroHeaderLanguageRows>['errors'];
   validationErrors: ReturnType<typeof validateHeroHeaderLanguageRows>['errors'];
   planErrors: readonly HeroHeaderImportPlanError[];
-  previewGroups: readonly AdminHeroHeaderPreviewGroup[];
+  previewGroups: readonly AdminLanguageDatasetImportPreviewGroup[];
   existingRowCount: number;
   rowCount?: number;
   targetCount?: number;
