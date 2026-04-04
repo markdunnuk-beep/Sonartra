@@ -12,15 +12,12 @@ import {
 } from '@/components/shared/user-app-ui';
 import { AdminBulkOptionImport } from '@/components/admin/admin-bulk-option-import';
 import {
-  emptyAdminBulkQuestionAuthoringFormValues,
   emptyAdminBulkQuestionByDomainAuthoringFormValues,
   emptyAdminOptionAuthoringFormValues,
   emptyAdminQuestionAuthoringFormValues,
-  initialAdminBulkQuestionAuthoringFormState,
   initialAdminBulkQuestionByDomainAuthoringFormState,
   initialAdminOptionAuthoringFormState,
   initialAdminQuestionAuthoringFormState,
-  type AdminBulkQuestionAuthoringFormState,
   type AdminBulkQuestionByDomainAuthoringFormState,
   type AdminOptionAuthoringFormState,
   type AdminQuestionAuthoringFormState,
@@ -30,7 +27,6 @@ import type {
   AdminAssessmentDetailQuestionDomain,
 } from '@/lib/server/admin-assessment-detail';
 import {
-  createBulkQuestions,
   createBulkQuestionsByDomain,
   createOptionAction,
   createQuestionAction,
@@ -101,40 +97,6 @@ function normalizeQuestionState(
     },
   };
 }
-function normalizeBulkQuestionState(
-  state:
-    | (AdminBulkQuestionAuthoringFormState & {
-        createdQuestions?: readonly {
-          questionId: string;
-          domainId: string;
-          assessmentVersionId: string;
-          key: string;
-          prompt: string;
-          orderIndex: number;
-          options: readonly {
-            optionId: string;
-            key: string;
-            label: string;
-            text: string;
-            orderIndex: number;
-          }[];
-        }[];
-      })
-    | null
-    | undefined,
-) {
-  return {
-    formError: state?.formError ?? null,
-    fieldErrors: state?.fieldErrors ?? {},
-    values: {
-      questionLines:
-        state?.values?.questionLines ?? emptyAdminBulkQuestionAuthoringFormValues.questionLines,
-      domainId: state?.values?.domainId ?? emptyAdminBulkQuestionAuthoringFormValues.domainId,
-    },
-    createdQuestions: state?.createdQuestions ?? [],
-  };
-}
-
 function normalizeBulkQuestionByDomainState(
   state:
     | (AdminBulkQuestionByDomainAuthoringFormState & {
@@ -588,154 +550,6 @@ function formatDomainType(domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP'): stri
   return domainType === 'QUESTION_SECTION' ? 'Question section' : 'Domain';
 }
 
-function BulkQuestionForm({
-  assessmentKey,
-  assessmentVersionId,
-  domains,
-}: {
-  assessmentKey: string;
-  assessmentVersionId: string;
-  domains: readonly AdminAssessmentDetailQuestionDomain[];
-}) {
-  const defaultDomainId = domains[0]?.domainId ?? '';
-  const createBulkQuestionsFormAction = useMemo(
-    () =>
-      createBulkQuestions.bind(null, {
-        assessmentKey,
-        assessmentVersionId,
-      }),
-    [assessmentKey, assessmentVersionId],
-  );
-  const [state, formAction] = useActionState(createBulkQuestionsFormAction, {
-    ...initialAdminBulkQuestionAuthoringFormState,
-    values: {
-      ...initialAdminBulkQuestionAuthoringFormState.values,
-      domainId: defaultDomainId,
-    },
-  });
-  const currentState = normalizeBulkQuestionState(state);
-  const [selectedDomainId, setSelectedDomainId] = useState(
-    currentState.values.domainId || defaultDomainId,
-  );
-  const [questionLines, setQuestionLines] = useState(
-    currentState.values.questionLines,
-  );
-  const [hasImported, setHasImported] = useState(false);
-
-  useEffect(() => {
-    if (currentState.createdQuestions.length < 1) {
-      return;
-    }
-
-    setQuestionLines('');
-    setHasImported(true);
-  }, [currentState.createdQuestions.length]);
-
-  const canImport =
-    questionLines.trim().length > 0 &&
-    selectedDomainId.length > 0;
-
-  return (
-    <SurfaceCard className="overflow-hidden p-5 lg:p-6">
-      <div className="space-y-5">
-        <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Bulk authoring</p>
-          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Bulk paste questions
-          </h3>
-          <p className="max-w-2xl text-sm leading-7 text-white/62">
-            Paste one question per line. All questions will be assigned to the selected domain.
-          </p>
-        </div>
-        <form action={formAction} className="space-y-5">
-          <div className="grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
-            <Field
-              error={currentState.fieldErrors.domainId}
-              hint="Choose the domain for every imported question."
-              label="Domain"
-            >
-              <SelectInput
-                error={currentState.fieldErrors.domainId}
-                name="domainId"
-                onChange={(event) => {
-                  const nextDomainId = event.currentTarget.value;
-                  setSelectedDomainId(nextDomainId);
-                  setHasImported(false);
-                }}
-                value={selectedDomainId}
-              >
-                <option value="">Select a domain</option>
-                {domains.map((domain) => (
-                  <option key={domain.domainId} value={domain.domainId}>
-                    {domain.label} ({formatDomainType(domain.domainType)})
-                  </option>
-                ))}
-              </SelectInput>
-            </Field>
-            <Field
-              error={currentState.fieldErrors.questionLines}
-              hint="One question per line. Blank lines are ignored."
-              label="Questions"
-            >
-              <TextArea
-                error={currentState.fieldErrors.questionLines}
-                minHeightClass="min-h-[220px]"
-                name="questionLines"
-                onChange={(event) => {
-                  const nextQuestionLines = event.currentTarget.value;
-                  setQuestionLines(nextQuestionLines);
-                  setHasImported(false);
-                }}
-                placeholder={[
-                  'When starting a new initiative, what do you focus on first?',
-                  'How do you usually approach a new process?',
-                  'What matters most when work becomes ambiguous?',
-                ].join('\n')}
-                value={questionLines}
-              />
-            </Field>
-          </div>
-
-          <InlineError message={currentState.formError} />
-
-          {!canImport && questionLines.trim().length > 0 && !selectedDomainId ? (
-            <InlineBanner tone="warning">
-              Select a domain before importing questions.
-            </InlineBanner>
-          ) : null}
-
-          <div className="flex items-end justify-between gap-3">
-            <p className="text-xs uppercase tracking-[0.14em] text-white/40">
-              Each imported question gets the canonical A-D option scaffold.
-            </p>
-            <BulkImportAction
-              canImport={canImport}
-              hasImported={hasImported}
-            />
-          </div>
-        </form>
-        {hasImported && currentState.createdQuestions.length > 0 ? (
-          <div className="space-y-3 rounded-[1rem] border border-white/8 bg-black/10 p-4">
-            <p className="text-sm font-medium text-white">
-              Imported {currentState.createdQuestions.length} question{currentState.createdQuestions.length === 1 ? '' : 's'} in this action.
-            </p>
-            <div className="space-y-2 text-sm text-white/62">
-              {currentState.createdQuestions.map((question) => (
-                <div className="flex flex-wrap items-center gap-2" key={question.questionId}>
-                  <LabelPill>{question.key}</LabelPill>
-                  <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
-                    Question {question.orderIndex + 1}
-                  </LabelPill>
-                  <span>{question.options.map((option) => option.key).join(', ')}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </SurfaceCard>
-  );
-}
 function BulkQuestionByDomainForm({
   assessmentKey,
   assessmentVersionId,
@@ -1344,12 +1158,6 @@ export function AdminQuestionOptionAuthoring({
         <>
           {showQuestionControls ? (
             <>
-              <BulkQuestionForm
-                assessmentKey={assessmentKey}
-                assessmentVersionId={assessmentVersionId}
-                domains={domains}
-              />
-
               <BulkQuestionByDomainForm
                 assessmentKey={assessmentKey}
                 assessmentVersionId={assessmentVersionId}

@@ -14,12 +14,12 @@ function readComponentSource(): string {
   return readFileSync(componentPath, 'utf8');
 }
 
-test('bulk paste form memoizes its server action before useActionState', () => {
+test('plain bulk paste questions form has been removed', () => {
   const source = readComponentSource();
 
-  assert.match(source, /const createBulkQuestionsFormAction = useMemo\(/);
-  assert.match(source, /useActionState\(createBulkQuestionsFormAction,/);
-  assert.doesNotMatch(source, /useActionState\(\s*createBulkQuestions\.bind/);
+  assert.doesNotMatch(source, /function BulkQuestionForm\(/);
+  assert.doesNotMatch(source, /createBulkQuestionsFormAction/);
+  assert.doesNotMatch(source, /\bcreateBulkQuestions\b/);
 });
 
 test('multi-domain bulk paste form memoizes its server action before useActionState', () => {
@@ -30,17 +30,11 @@ test('multi-domain bulk paste form memoizes its server action before useActionSt
   assert.doesNotMatch(source, /useActionState\(\s*createBulkQuestionsByDomain\.bind/);
 });
 
-test('bulk paste textarea snapshots event values before updating local state', () => {
+test('multi-domain bulk paste textarea snapshots event values before updating local state', () => {
   const source = readComponentSource();
 
-  assert.match(source, /const nextQuestionLines = event\.currentTarget\.value/);
-  assert.match(source, /setQuestionLines\(nextQuestionLines\)/);
+  assert.match(source, /const nextQuestionLines = event\.currentTarget\.value[\s\S]*setQuestionLines\(nextQuestionLines\)/);
   assert.doesNotMatch(source, /setQuestionLines\(event\.currentTarget\.value\)/);
-});
-
-test('bulk paste textarea does not mirror action state back into typing state', () => {
-  const source = readComponentSource();
-
   assert.doesNotMatch(source, /setQuestionLines\(currentState\.values\.questionLines\)/);
 });
 
@@ -50,12 +44,6 @@ test('bulk paste non-submit controls remain explicit button-safe forms', () => {
   assert.match(source, /onClick=\{startEditing\}[\s\S]*type="button"/);
 });
 
-
-test('multi-domain bulk paste textarea snapshots event values before updating local state', () => {
-  const source = readComponentSource();
-
-  assert.match(source, /const nextQuestionLines = event\.currentTarget\.value[\s\S]*setQuestionLines\(nextQuestionLines\)/);
-});
 
 test('multi-domain bulk paste textarea does not mirror action state back into typing state', () => {
   const source = readComponentSource();
