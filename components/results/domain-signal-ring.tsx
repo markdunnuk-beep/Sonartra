@@ -38,6 +38,24 @@ function getSignalBarWidth(value: number | null): string {
   return `${Math.min(100, Math.max(0, value))}%`;
 }
 
+function resolveDomainSignalInsightText(
+  signal: DomainSignalRingViewModel['signals'][number],
+): string | null {
+  if ((signal.rankWithinDomain === 1 || signal.rankWithinDomain === 2) && signal.strength) {
+    return signal.strength;
+  }
+
+  if (signal.watchout) {
+    return signal.watchout;
+  }
+
+  if (signal.development) {
+    return signal.development;
+  }
+
+  return signal.summary;
+}
+
 function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
   markerLabel: string | null;
   markerClassName: string;
@@ -242,7 +260,7 @@ function SignalBarRow({
               >
                 {signal.signalLabel}
               </span>
-                  {tone.markerLabel ? (
+              {tone.markerLabel ? (
                 <span
                   className={cn(
                     'inline-flex rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em]',
@@ -267,37 +285,39 @@ function SignalBarRow({
           </div>
         </div>
 
-        <div
-          className={cn(
-            'w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.05)] transition duration-200 ease-out',
-            isSelectedState ? 'h-[0.56rem] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]' : isHighlighted ? 'h-[0.54rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.05)]' : 'h-[0.42rem]',
-          )}
-          aria-hidden="true"
-          data-bar-track="true"
-        >
+        <div className="mx-auto w-full max-w-[88%] px-0.5">
           <div
             className={cn(
-              'domain-signal-bar-fill h-full rounded-full transition duration-200 ease-out',
-              tone.fillClassName,
-              isSelectedState
-                ? 'opacity-100 brightness-[1.01]'
-                : isHighlighted
-                  ? 'opacity-100 brightness-[1.01]'
-                  : signal.isTopSignal
-                    ? 'opacity-100'
-                    : signal.isSecondSignal
-                      ? 'opacity-90'
-                      : 'opacity-72',
+              'w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.05)] transition duration-200 ease-out',
+              isSelectedState ? 'h-[0.68rem] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]' : isHighlighted ? 'h-[0.64rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.05)]' : 'h-[0.52rem]',
             )}
-            data-bar-fill={signal.signalKey}
-            data-bar-width={barWidth}
-            style={{
-              width: barWidth,
-              ['--signal-bar-target-width' as string]: barWidth,
-              animation: 'domain-signal-bar-enter 560ms cubic-bezier(0.22, 1, 0.36, 1) both',
-              animationDelay: `${index * 55}ms`,
-            }}
-          />
+            aria-hidden="true"
+            data-bar-track="true"
+          >
+            <div
+              className={cn(
+                'domain-signal-bar-fill h-full rounded-full transition duration-200 ease-out',
+                tone.fillClassName,
+                isSelectedState
+                  ? 'opacity-100 brightness-[1.01]'
+                  : isHighlighted
+                    ? 'opacity-100 brightness-[1.01]'
+                    : signal.isTopSignal
+                      ? 'opacity-100'
+                      : signal.isSecondSignal
+                        ? 'opacity-90'
+                        : 'opacity-72',
+              )}
+              data-bar-fill={signal.signalKey}
+              data-bar-width={barWidth}
+              style={{
+                width: barWidth,
+                ['--signal-bar-target-width' as string]: barWidth,
+                animation: 'domain-signal-bar-enter 560ms cubic-bezier(0.22, 1, 0.36, 1) both',
+                animationDelay: `${index * 55}ms`,
+              }}
+            />
+          </div>
         </div>
       </button>
     </li>
@@ -322,6 +342,7 @@ export function DomainSignalRing({
     selectedSignalKey,
     highlightedSignalKey,
   });
+  const activeSignalInsight = activeSignal ? resolveDomainSignalInsightText(activeSignal) : null;
 
   return (
     <section
@@ -381,7 +402,7 @@ export function DomainSignalRing({
             aria-live="polite"
             data-active-detail-key={activeSignal.signalKey}
           >
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex flex-wrap items-start justify-between gap-2.5">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
                   <p className="min-w-0 flex-1 text-[0.92rem] font-medium leading-6 tracking-[-0.02em] text-white/88 sm:text-[0.95rem]">
@@ -401,6 +422,12 @@ export function DomainSignalRing({
                   {formatPercent(activeSignal.withinDomainPercent)}
                 </p>
               </div>
+
+              {activeSignalInsight ? (
+                <p className="max-w-[42rem] text-[0.96rem] leading-7 text-white/66">
+                  {activeSignalInsight}
+                </p>
+              ) : null}
             </div>
           </div>
         ) : (

@@ -390,6 +390,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   const domainRingModels = buildDomainSignalRingViewModel({
     domains: result.domains,
+    actions: result.actions,
   });
   const resultDomainItems = buildResultDetailDomainItems({
     domains: result.domains,

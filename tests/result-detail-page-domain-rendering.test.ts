@@ -185,7 +185,7 @@ test('result detail page reads intro, hero, domains, and actions from canonical 
   assert.match(source, /const assessmentDescription = result\.intro\.assessmentDescription;/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroNarrative = result\.hero\.narrative\?\.trim\(\) \?\? '';/);
-  assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,/);
+  assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
   assert.match(source, /<HeroDomainHighlights highlights=\{result\.hero\.domainHighlights\} \/>/);
   assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);

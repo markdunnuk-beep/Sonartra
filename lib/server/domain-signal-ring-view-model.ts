@@ -1,9 +1,11 @@
 import type { ResultDomainSummary } from '@/lib/engine/types';
 import type { CanonicalResultPayload } from '@/lib/engine/types';
+import { resolveDomainSignalDescriptor } from '@/lib/server/domain-signal-descriptor';
 
 type DomainSummarySource = {
   domainSummaries?: readonly unknown[];
   domains?: readonly CanonicalResultPayload['domains'][number][];
+  actions?: CanonicalResultPayload['actions'];
 } | null | undefined;
 
 export type DomainSignalRingDisplayStrength = {
@@ -18,6 +20,10 @@ export type DomainSignalRingEntryViewModel = {
   rankWithinDomain: number | null;
   isTopSignal: boolean;
   isSecondSignal: boolean;
+  summary: string | null;
+  strength: string | null;
+  watchout: string | null;
+  development: string | null;
 };
 
 export type DomainSignalRingViewModel = {
@@ -179,6 +185,15 @@ function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknow
     rankWithinDomain: ranksByIndex.get(index) ?? null,
     isTopSignal: index === topSignalIndex,
     isSecondSignal: index === secondSignalIndex,
+    summary: resolveDomainSignalDescriptor({
+      signalKey: getSignalKey(signal, index),
+      signalTitle: getSignalLabel(signal, index),
+      signalDescription: isRecord(signal) ? signal.signalDescription : null,
+      description: isRecord(signal) ? signal.description : null,
+    }),
+    strength: null,
+    watchout: null,
+    development: null,
   }));
 
   return {
@@ -200,7 +215,35 @@ function mapDomainSignalRing(domain: ResultDomainSummary | Record<string, unknow
 
 function mapCanonicalDomainSignalRing(
   domain: CanonicalDomainChapter,
+  actionTextBySignalKey: {
+    strengths: ReadonlyMap<string, string>;
+    watchouts: ReadonlyMap<string, string>;
+    development: ReadonlyMap<string, string>;
+  },
 ): DomainSignalRingViewModel {
+  const signalDetailsByKey = new Map<
+    string,
+    {
+      summary: string | null;
+      strength: string | null;
+      watchout: string | null;
+      development: string | null;
+    }
+  >();
+
+  for (const signal of [domain.primarySignal, domain.secondarySignal]) {
+    if (!signal) {
+      continue;
+    }
+
+    signalDetailsByKey.set(signal.signalKey, {
+      summary: signal.summary,
+      strength: signal.strength,
+      watchout: signal.watchout,
+      development: signal.development,
+    });
+  }
+
   const signals = domain.signals.map((signal) => ({
     signalKey: signal.signalKey,
     signalLabel: signal.signalLabel,
@@ -209,6 +252,24 @@ function mapCanonicalDomainSignalRing(
     rankWithinDomain: signal.rank,
     isTopSignal: signal.isPrimary,
     isSecondSignal: signal.isSecondary,
+    summary:
+      signalDetailsByKey.get(signal.signalKey)?.summary
+      ?? resolveDomainSignalDescriptor({
+        signalKey: signal.signalKey,
+        signalTitle: signal.signalLabel,
+      }),
+    strength:
+      signalDetailsByKey.get(signal.signalKey)?.strength
+      ?? actionTextBySignalKey.strengths.get(signal.signalKey)
+      ?? null,
+    watchout:
+      signalDetailsByKey.get(signal.signalKey)?.watchout
+      ?? actionTextBySignalKey.watchouts.get(signal.signalKey)
+      ?? null,
+    development:
+      signalDetailsByKey.get(signal.signalKey)?.development
+      ?? actionTextBySignalKey.development.get(signal.signalKey)
+      ?? null,
   }));
 
   const numericPercents = signals
@@ -234,7 +295,13 @@ export function buildDomainSignalRingViewModel(
   }
 
   if (Array.isArray(payload.domains)) {
-    return Object.freeze(payload.domains.map((domain) => mapCanonicalDomainSignalRing(domain)));
+    const actionTextBySignalKey = {
+      strengths: new Map((payload.actions?.strengths ?? []).map((item) => [item.signalKey, item.text])),
+      watchouts: new Map((payload.actions?.watchouts ?? []).map((item) => [item.signalKey, item.text])),
+      development: new Map((payload.actions?.developmentFocus ?? []).map((item) => [item.signalKey, item.text])),
+    };
+
+    return Object.freeze(payload.domains.map((domain) => mapCanonicalDomainSignalRing(domain, actionTextBySignalKey)));
   }
 
   if (!Array.isArray(payload.domainSummaries)) {

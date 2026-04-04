@@ -61,7 +61,14 @@ test('domain signal ring mapper accepts canonical domains payload directly', () 
         focus: null,
         pressure: null,
         environment: null,
-        primarySignal: null,
+        primarySignal: {
+          signalKey: 'core_focus',
+          signalLabel: 'Core Focus',
+          summary: 'Core Focus summary.',
+          strength: null,
+          watchout: null,
+          development: null,
+        },
         secondarySignal: null,
         pairSummary: null,
         signals: Object.freeze([
@@ -86,6 +93,29 @@ test('domain signal ring mapper accepts canonical domains payload directly', () 
         ]),
       },
     ]),
+    actions: {
+      strengths: Object.freeze([
+        {
+          signalKey: 'core_focus',
+          signalLabel: 'Core Focus',
+          text: 'Core Focus strength.',
+        },
+      ]),
+      watchouts: Object.freeze([
+        {
+          signalKey: 'scan',
+          signalLabel: 'Scan',
+          text: 'Scan watchout.',
+        },
+      ]),
+      developmentFocus: Object.freeze([
+        {
+          signalKey: 'scan',
+          signalLabel: 'Scan',
+          text: 'Scan development.',
+        },
+      ]),
+    },
   });
 
   assert.deepEqual(rings.map((ring) => ring.domainKey), ['focus']);
@@ -94,6 +124,102 @@ test('domain signal ring mapper accepts canonical domains payload directly', () 
   assert.equal(rings[0]?.signals[1]?.isSecondSignal, true);
   assert.equal(rings[0]?.maxWithinDomainPercent, 61);
   assert.equal(rings[0]?.minWithinDomainPercent, 39);
+  assert.equal(rings[0]?.signals[0]?.strength, 'Core Focus strength.');
+  assert.equal(rings[0]?.signals[0]?.summary, 'Core Focus summary.');
+  assert.equal(rings[0]?.signals[1]?.watchout, 'Scan watchout.');
+  assert.equal(rings[0]?.signals[1]?.development, 'Scan development.');
+});
+
+test('domain signal ring mapper carries canonical signal insight fields from existing persisted data only', () => {
+  const rings = buildDomainSignalRingViewModel({
+    domains: Object.freeze([
+      {
+        domainKey: 'leadership',
+        domainLabel: 'Leadership',
+        summary: 'Leadership summary.',
+        focus: null,
+        pressure: null,
+        environment: null,
+        primarySignal: {
+          signalKey: 'lead_results',
+          signalLabel: 'Results',
+          summary: 'Primary summary.',
+          strength: 'Primary strength.',
+          watchout: 'Primary watchout.',
+          development: 'Primary development.',
+        },
+        secondarySignal: {
+          signalKey: 'lead_vision',
+          signalLabel: 'Vision',
+          summary: 'Secondary summary.',
+          strength: 'Secondary strength.',
+          watchout: null,
+          development: null,
+        },
+        pairSummary: null,
+        signals: Object.freeze([
+          {
+            signalKey: 'lead_results',
+            signalLabel: 'Results',
+            score: 55,
+            withinDomainPercent: 55,
+            rank: 1,
+            isPrimary: true,
+            isSecondary: false,
+          },
+          {
+            signalKey: 'lead_vision',
+            signalLabel: 'Vision',
+            score: 28,
+            withinDomainPercent: 28,
+            rank: 2,
+            isPrimary: false,
+            isSecondary: true,
+          },
+          {
+            signalKey: 'lead_people',
+            signalLabel: 'People',
+            score: 17,
+            withinDomainPercent: 17,
+            rank: 3,
+            isPrimary: false,
+            isSecondary: false,
+          },
+        ]),
+      },
+    ]),
+    actions: {
+      strengths: Object.freeze([
+        {
+          signalKey: 'lead_results',
+          signalLabel: 'Results',
+          text: 'Action strength.',
+        },
+      ]),
+      watchouts: Object.freeze([
+        {
+          signalKey: 'lead_people',
+          signalLabel: 'People',
+          text: 'People watchout.',
+        },
+      ]),
+      developmentFocus: Object.freeze([
+        {
+          signalKey: 'lead_people',
+          signalLabel: 'People',
+          text: 'People development.',
+        },
+      ]),
+    },
+  });
+
+  assert.equal(rings[0]?.signals[0]?.summary, 'Primary summary.');
+  assert.equal(rings[0]?.signals[0]?.strength, 'Primary strength.');
+  assert.equal(rings[0]?.signals[1]?.summary, 'Secondary summary.');
+  assert.equal(rings[0]?.signals[1]?.strength, 'Secondary strength.');
+  assert.equal(rings[0]?.signals[2]?.watchout, 'People watchout.');
+  assert.equal(rings[0]?.signals[2]?.development, 'People development.');
+  assert.equal(rings[0]?.signals[2]?.summary, 'Leads through trust, support, and development');
 });
 
 test('domain signal ring mapper preserves authored signal order while deriving top flags', () => {

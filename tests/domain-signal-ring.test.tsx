@@ -24,6 +24,10 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
         rankWithinDomain: 3,
         isTopSignal: false,
         isSecondSignal: false,
+        summary: 'Signal B summary.',
+        strength: null,
+        watchout: 'Signal B watchout.',
+        development: 'Signal B development.',
       },
       {
         signalKey: 'signal_a',
@@ -33,6 +37,10 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
         rankWithinDomain: 1,
         isTopSignal: true,
         isSecondSignal: false,
+        summary: 'Signal A summary.',
+        strength: 'Signal A strength.',
+        watchout: 'Signal A watchout.',
+        development: 'Signal A development.',
       },
       {
         signalKey: 'signal_c',
@@ -42,6 +50,10 @@ function buildDomain(overrides?: Partial<DomainSignalRingViewModel>): DomainSign
         rankWithinDomain: 2,
         isTopSignal: false,
         isSecondSignal: true,
+        summary: 'Signal C summary.',
+        strength: 'Signal C strength.',
+        watchout: null,
+        development: 'Signal C development.',
       },
     ]),
     signalCount: 3,
@@ -134,10 +146,11 @@ test('domain signal ring renders the active detail treatment for the selected si
   assert.match(markup, /data-active-detail-key="signal_c"/);
   assert.match(markup, /Signal C/);
   assert.match(markup, /34%/);
+  assert.match(markup, /Signal C strength\./);
   assert.doesNotMatch(markup, /Tap or press Enter\/Space to keep a signal active\./);
 });
 
-test('domain signal ring active detail stays summary-free and label-led', () => {
+test('domain signal ring active detail uses summary fallback when no higher-priority insight text exists', () => {
   const markup = renderToStaticMarkup(
     <DomainSignalRing
       domain={buildDomain({
@@ -150,6 +163,10 @@ test('domain signal ring active detail stays summary-free and label-led', () => 
             rankWithinDomain: 1,
             isTopSignal: true,
             isSecondSignal: false,
+            summary: 'Signal B summary.',
+            strength: null,
+            watchout: null,
+            development: null,
           },
         ]),
         signalCount: 1,
@@ -161,7 +178,17 @@ test('domain signal ring active detail stays summary-free and label-led', () => 
   );
 
   assert.match(markup, /Signal B/);
-  assert.doesNotMatch(markup, /A short descriptor is not available for this signal yet\./);
+  assert.match(markup, /Signal B summary\./);
+});
+
+test('domain signal ring active detail uses watchout before development for lower-ranked signals', () => {
+  const markup = renderToStaticMarkup(
+    <DomainSignalRing domain={buildDomain()} initialSelectedSignalKey="signal_b" />,
+  );
+
+  assert.match(markup, /Signal B watchout\./);
+  assert.doesNotMatch(markup, /Signal B development\./);
+  assert.doesNotMatch(markup, /Signal B summary\./);
 });
 
 test('domain signal ring keeps the bar stack ahead of the active detail panel in markup', () => {
@@ -179,6 +206,7 @@ test('domain signal ring keeps signal labels and badges wrap-safe for narrow lay
 
   assert.match(markup, /flex w-full flex-col gap-2\.5 rounded-\[0\.95rem\] border px-0 py-2 text-left/);
   assert.match(markup, /flex min-w-0 items-start justify-between gap-4 px-0\.5/);
+  assert.match(markup, /mx-auto w-full max-w-\[88%\] px-0\.5/);
   assert.match(markup, /w-full overflow-hidden rounded-full bg-\[rgba\(255,255,255,0\.05\)\] transition duration-200 ease-out/);
 });
 
@@ -241,6 +269,10 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
             rankWithinDomain: 1,
             isTopSignal: true,
             isSecondSignal: false,
+            summary: 'Northbound summary.',
+            strength: 'Northbound strength.',
+            watchout: null,
+            development: null,
           },
           {
             signalKey: 'eastbound',
@@ -250,6 +282,10 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
             rankWithinDomain: 2,
             isTopSignal: false,
             isSecondSignal: true,
+            summary: 'Eastbound summary.',
+            strength: 'Eastbound strength.',
+            watchout: null,
+            development: null,
           },
           {
             signalKey: 'southbound',
@@ -259,6 +295,10 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
             rankWithinDomain: 3,
             isTopSignal: false,
             isSecondSignal: false,
+            summary: 'Southbound summary.',
+            strength: null,
+            watchout: 'Southbound watchout.',
+            development: 'Southbound development.',
           },
           {
             signalKey: 'westbound',
@@ -268,6 +308,10 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
             rankWithinDomain: 4,
             isTopSignal: false,
             isSecondSignal: false,
+            summary: 'Westbound summary.',
+            strength: null,
+            watchout: 'Westbound watchout.',
+            development: 'Westbound development.',
           },
           {
             signalKey: 'zenith',
@@ -277,6 +321,10 @@ test('domain signal ring handles non-4 signal counts without crashing', () => {
             rankWithinDomain: 5,
             isTopSignal: false,
             isSecondSignal: false,
+            summary: 'Zenith summary.',
+            strength: null,
+            watchout: 'Zenith watchout.',
+            development: 'Zenith development.',
           },
         ]),
         signalCount: 5,
