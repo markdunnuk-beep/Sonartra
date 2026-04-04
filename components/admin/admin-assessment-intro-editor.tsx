@@ -1,0 +1,345 @@
+'use client';
+
+import { useActionState, useEffect, useMemo, useState } from 'react';
+import { useFormStatus } from 'react-dom';
+
+import {
+  initialAdminAssessmentIntroFormState,
+  type AdminAssessmentIntroFormState,
+  type AdminAssessmentIntroFormValues,
+} from '@/lib/admin/admin-assessment-intro';
+import { saveAssessmentIntroAction } from '@/lib/server/admin-assessment-intro';
+import type { AdminAssessmentIntroStepViewModel } from '@/lib/server/admin-assessment-intro-step';
+import {
+  EmptyState,
+  LabelPill,
+  SectionHeader,
+  SurfaceCard,
+  cn,
+} from '@/components/shared/user-app-ui';
+
+function FieldShell({
+  label,
+  hint,
+  children,
+}: Readonly<{
+  label: string;
+  hint: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <label className="block space-y-2">
+      <div className="space-y-1">
+        <span className="block text-sm font-medium text-white">{label}</span>
+        <span className="block text-sm leading-6 text-white/54">{hint}</span>
+      </div>
+      {children}
+    </label>
+  );
+}
+
+function TextInput({
+  name,
+  value,
+  placeholder,
+  onChange,
+}: Readonly<{
+  name: keyof AdminAssessmentIntroFormValues;
+  value: string;
+  placeholder: string;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+}>) {
+  return (
+    <input
+      className="sonartra-focus-ring min-h-12 w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]"
+      name={name}
+      onChange={onChange}
+      placeholder={placeholder}
+      type="text"
+      value={value}
+    />
+  );
+}
+
+function TextArea({
+  name,
+  value,
+  placeholder,
+  minHeightClassName = 'min-h-[132px]',
+  onChange,
+}: Readonly<{
+  name: keyof AdminAssessmentIntroFormValues;
+  value: string;
+  placeholder: string;
+  minHeightClassName?: string;
+  onChange: React.ChangeEventHandler<HTMLTextAreaElement>;
+}>) {
+  return (
+    <textarea
+      className={cn(
+        'sonartra-focus-ring w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm leading-7 text-white placeholder:text-white/28 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
+        minHeightClassName,
+      )}
+      name={name}
+      onChange={onChange}
+      placeholder={placeholder}
+      value={value}
+    />
+  );
+}
+
+function SaveButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      className={cn(
+        'sonartra-button sonartra-focus-ring min-w-[140px]',
+        pending ? 'cursor-wait border-white/8 bg-white/[0.05] text-white/48' : 'sonartra-button-primary',
+      )}
+      disabled={pending}
+      type="submit"
+    >
+      {pending ? 'Saving...' : 'Save intro'}
+    </button>
+  );
+}
+
+function PreviewField({
+  label,
+  value,
+  emptyCopy = 'Not added yet.',
+}: Readonly<{
+  label: string;
+  value: string;
+  emptyCopy?: string;
+}>) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs uppercase tracking-[0.18em] text-white/42">{label}</p>
+      <p className={value ? 'text-sm leading-7 text-white/82' : 'text-sm leading-7 text-white/42'}>
+        {value || emptyCopy}
+      </p>
+    </div>
+  );
+}
+
+function EditableAssessmentIntroEditor({
+  viewModel,
+}: Readonly<{
+  viewModel: AdminAssessmentIntroStepViewModel & {
+    draftVersion: {
+      assessmentVersionId: string;
+      versionTag: string;
+    };
+  };
+}>) {
+  const formActionFactory = useMemo(
+    () =>
+      saveAssessmentIntroAction.bind(null, {
+        assessmentKey: viewModel.assessmentKey,
+        assessmentVersionId: viewModel.draftVersion.assessmentVersionId,
+      }),
+    [viewModel.assessmentKey, viewModel.draftVersion],
+  );
+  const [state, formAction] = useActionState(formActionFactory, {
+    ...initialAdminAssessmentIntroFormState,
+    values: viewModel.intro,
+  });
+  const safeState: AdminAssessmentIntroFormState = {
+    formError: state?.formError ?? null,
+    formSuccess: state?.formSuccess ?? null,
+    values: state?.values ?? viewModel.intro,
+  };
+  const [values, setValues] = useState(safeState.values);
+
+  useEffect(() => {
+    setValues(safeState.values);
+  }, [safeState.values]);
+
+  function updateValue<Key extends keyof AdminAssessmentIntroFormValues>(
+    key: Key,
+    nextValue: AdminAssessmentIntroFormValues[Key],
+  ) {
+    setValues((current) => ({
+      ...current,
+      [key]: nextValue,
+    }));
+  }
+
+  return (
+    <section className="space-y-8">
+      <SectionHeader
+        eyebrow="Assessment Intro"
+        title="Assessment Intro"
+        description="Author the version-scoped introduction content that will later appear before the assessment runner begins."
+      />
+
+      <SurfaceCard className="space-y-4 p-5 lg:p-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <LabelPill>{viewModel.assessmentKey}</LabelPill>
+          <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+            Editing draft {viewModel.draftVersion.versionTag}
+          </LabelPill>
+        </div>
+        <p className="max-w-3xl text-sm leading-7 text-white/62">
+          This content is saved against the current draft version only. The preview reflects the draft copy live,
+          but the runner and published runtime remain unchanged until later tasks wire them in.
+        </p>
+      </SurfaceCard>
+
+      <SurfaceCard className="p-5 lg:p-6">
+        <form action={formAction} className="space-y-6">
+          <div className="grid gap-6 xl:grid-cols-2">
+            <FieldShell
+              hint="The primary headline shown at the top of the runner intro."
+              label="Intro title"
+            >
+              <TextInput
+                name="introTitle"
+                onChange={(event) => updateValue('introTitle', event.currentTarget.value)}
+                placeholder="Welcome to Sonartra Signals"
+                value={values.introTitle}
+              />
+            </FieldShell>
+
+            <FieldShell
+              hint="Optional short duration label shown near the intro summary."
+              label="Estimated duration"
+            >
+              <TextInput
+                name="estimatedTimeOverride"
+                onChange={(event) => updateValue('estimatedTimeOverride', event.currentTarget.value)}
+                placeholder="Approx. 20 minutes"
+                value={values.estimatedTimeOverride}
+              />
+            </FieldShell>
+          </div>
+
+          <FieldShell
+            hint="A concise summary that frames the purpose of the assessment before participants begin."
+            label="Intro summary"
+          >
+            <TextArea
+              name="introSummary"
+              onChange={(event) => updateValue('introSummary', event.currentTarget.value)}
+              placeholder="Explain what participants are about to do and what this assessment is designed to surface."
+              value={values.introSummary}
+            />
+          </FieldShell>
+
+          <FieldShell
+            hint="Describe the sequence participants should expect while completing the assessment."
+            label="How it works"
+          >
+            <TextArea
+              name="introHowItWorks"
+              onChange={(event) => updateValue('introHowItWorks', event.currentTarget.value)}
+              placeholder="Outline how the assessment works, what participants will see, and how they should move through the questions."
+              value={values.introHowItWorks}
+            />
+          </FieldShell>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <FieldShell
+              hint="Operator-facing guidance or participant instructions shown before Question 1."
+              label="Instructions"
+            >
+              <TextArea
+                minHeightClassName="min-h-[156px]"
+                name="instructions"
+                onChange={(event) => updateValue('instructions', event.currentTarget.value)}
+                placeholder="Add clear instructions for how participants should complete the assessment."
+                value={values.instructions}
+              />
+            </FieldShell>
+
+            <FieldShell
+              hint="Optional reassurance about privacy, handling, or intended use."
+              label="Confidentiality note"
+            >
+              <TextArea
+                minHeightClassName="min-h-[156px]"
+                name="confidentialityNote"
+                onChange={(event) => updateValue('confidentialityNote', event.currentTarget.value)}
+                placeholder="Add any confidentiality or handling note you want participants to read before they begin."
+                value={values.confidentialityNote}
+              />
+            </FieldShell>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className={safeState.formError ? 'text-sm text-[rgba(255,198,198,0.92)]' : 'text-sm text-white/45'}>
+              {safeState.formError ?? safeState.formSuccess ?? 'Saving updates rewrites the intro row for this draft version.'}
+            </p>
+            <SaveButton />
+          </div>
+        </form>
+      </SurfaceCard>
+
+      <SurfaceCard className="space-y-5 p-5 lg:p-6">
+        <div className="space-y-2">
+          <p className="sonartra-page-eyebrow">Preview</p>
+          <h3 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
+            Runner intro preview
+          </h3>
+          <p className="max-w-3xl text-sm leading-7 text-white/62">
+            Preview only. This shows the expected reading experience for the runner intro shell without changing the live runner yet.
+          </p>
+        </div>
+
+        <div className="rounded-[1.2rem] border border-white/10 bg-black/20 p-5">
+          <div className="space-y-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
+                Draft preview
+              </LabelPill>
+              {values.estimatedTimeOverride ? (
+                <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+                  {values.estimatedTimeOverride}
+                </LabelPill>
+              ) : null}
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="text-[1.7rem] font-semibold tracking-[-0.03em] text-white">
+                {values.introTitle || 'Intro title not added yet'}
+              </h4>
+              <p className={values.introSummary ? 'max-w-3xl text-sm leading-7 text-white/78' : 'max-w-3xl text-sm leading-7 text-white/42'}>
+                {values.introSummary || 'Intro summary not added yet.'}
+              </p>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-3">
+              <PreviewField label="How it works" value={values.introHowItWorks} />
+              <PreviewField label="Instructions" value={values.instructions} />
+              <PreviewField label="Confidentiality note" value={values.confidentialityNote} />
+            </div>
+          </div>
+        </div>
+      </SurfaceCard>
+    </section>
+  );
+}
+
+export function AdminAssessmentIntroEditor({
+  viewModel,
+}: Readonly<{
+  viewModel: AdminAssessmentIntroStepViewModel;
+}>) {
+  if (!viewModel.draftVersion) {
+    return (
+      <EmptyState
+        title="No draft version available"
+        description="Create a draft version before authoring assessment intro content."
+      />
+    );
+  }
+
+  const editableViewModel = {
+    ...viewModel,
+    draftVersion: viewModel.draftVersion,
+  };
+
+  return <EditableAssessmentIntroEditor viewModel={editableViewModel} />;
+}

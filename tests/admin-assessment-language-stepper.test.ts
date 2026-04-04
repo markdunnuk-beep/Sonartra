@@ -50,7 +50,7 @@ test('builder navigation resolves language as a first-class active route', () =>
   assert.match(source, /href: `\/admin\/assessments\/\$\{assessment\.assessmentKey\}\/\$\{step\.slug\}`/);
 });
 
-test('assessment intro route renders a structural placeholder shell', () => {
+test('assessment intro route now delegates to the persisted authoring step instead of a static placeholder', () => {
   const source = readSource(
     join(
       process.cwd(),
@@ -64,11 +64,8 @@ test('assessment intro route renders a structural placeholder shell', () => {
     ),
   );
 
-  assert.match(source, /title="Assessment Intro"/);
-  assert.match(source, /pre-assessment introduction shown before participants enter the runner/);
-  assert.match(source, /Placeholder shell/);
-  assert.match(source, /Task 2/);
-  assert.doesNotMatch(source, /save/i);
+  assert.match(source, /getAdminAssessmentIntroStepViewModel\(getDbPool\(\), assessmentKey\)/);
+  assert.match(source, /return <AdminAssessmentIntroEditor viewModel=\{viewModel\} \/>;/);
 });
 
 test('language route delegates to the server-side view model and renders the shared step shell', () => {

@@ -235,6 +235,21 @@ export async function reconcileKnownMigrations(params: {
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);
       }
+
+      continue;
+    }
+
+    if (migration.filename === '202604040002_assessment_version_intro.sql') {
+      const hasAssessmentVersionIntroTable = await tableExists(
+        params.db,
+        'assessment_version_intro',
+      );
+
+      if (hasAssessmentVersionIntroTable) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
     }
   }
 

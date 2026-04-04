@@ -95,6 +95,7 @@ function createFakeMigrationDb(applied: string[] = []) {
 test('compareMigrationFilenames sorts migration files deterministically', () => {
   assert.deepEqual(
     [
+      '202604040002_assessment_version_intro.sql',
       '202604030001_assessment_language.sql',
       '202604010001_assessment_version_language_tables.sql',
       '202603290001_option_version_key_scope.sql',
@@ -107,6 +108,7 @@ test('compareMigrationFilenames sorts migration files deterministically', () => 
       '202603290001_option_version_key_scope.sql',
       '202604010001_assessment_version_language_tables.sql',
       '202604030001_assessment_language.sql',
+      '202604040002_assessment_version_intro.sql',
     ],
   );
 });
@@ -115,6 +117,7 @@ test('loadMigrationsFromDirectory loads sorted sql files only', async () => {
   const root = await mkdtemp(join(tmpdir(), 'sonartra-migrations-'));
   await mkdir(join(root, 'nested'));
   await writeFile(join(root, '202604030001_assessment_language.sql'), 'SELECT 4;');
+  await writeFile(join(root, '202604040002_assessment_version_intro.sql'), 'SELECT 5;');
   await writeFile(join(root, '202604010001_assessment_version_language_tables.sql'), 'SELECT 3;');
   await writeFile(join(root, '202603290001_option_version_key_scope.sql'), 'SELECT 2;');
   await writeFile(join(root, '202603260001_mvp_canonical_schema.sql'), 'SELECT 1;');
@@ -129,12 +132,14 @@ test('loadMigrationsFromDirectory loads sorted sql files only', async () => {
       '202603290001_option_version_key_scope.sql',
       '202604010001_assessment_version_language_tables.sql',
       '202604030001_assessment_language.sql',
+      '202604040002_assessment_version_intro.sql',
     ],
   );
   assert.equal(migrations[0]?.sql, 'SELECT 1;');
   assert.equal(migrations[1]?.sql, 'SELECT 2;');
   assert.equal(migrations[2]?.sql, 'SELECT 3;');
   assert.equal(migrations[3]?.sql, 'SELECT 4;');
+  assert.equal(migrations[4]?.sql, 'SELECT 5;');
 });
 
 test('applyPendingMigrations runs pending migrations once and records them', async () => {
@@ -159,6 +164,10 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
         filename: '202604030001_assessment_language.sql',
         sql: 'CREATE TABLE assessment_version_language_assessment (id UUID);',
       },
+      {
+        filename: '202604040002_assessment_version_intro.sql',
+        sql: 'CREATE TABLE assessment_version_intro (id UUID);',
+      },
     ],
   });
 
@@ -166,16 +175,19 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
     '202603290001_option_version_key_scope.sql',
     '202604010001_assessment_version_language_tables.sql',
     '202604030001_assessment_language.sql',
+    '202604040002_assessment_version_intro.sql',
   ]);
   assert.deepEqual(fake.state.executedSql, [
     'ALTER TABLE options ADD COLUMN assessment_version_id UUID;',
     'CREATE TABLE assessment_version_language_signals (id UUID);',
     'CREATE TABLE assessment_version_language_assessment (id UUID);',
+    'CREATE TABLE assessment_version_intro (id UUID);',
   ]);
   assert.deepEqual(fake.state.inserted, [
     '202603290001_option_version_key_scope.sql',
     '202604010001_assessment_version_language_tables.sql',
     '202604030001_assessment_language.sql',
+    '202604040002_assessment_version_intro.sql',
   ]);
   assert.equal(fake.state.began, 1);
   assert.equal(fake.state.committed, 1);
@@ -188,6 +200,7 @@ test('applyPendingMigrations is idempotent when all migrations are already recor
     '202603290001_option_version_key_scope.sql',
     '202604010001_assessment_version_language_tables.sql',
     '202604030001_assessment_language.sql',
+    '202604040002_assessment_version_intro.sql',
   ]);
 
   const applied = await applyPendingMigrations({
@@ -208,6 +221,10 @@ test('applyPendingMigrations is idempotent when all migrations are already recor
       {
         filename: '202604030001_assessment_language.sql',
         sql: 'SELECT 4;',
+      },
+      {
+        filename: '202604040002_assessment_version_intro.sql',
+        sql: 'SELECT 5;',
       },
     ],
   });
@@ -232,6 +249,7 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     'assessment_version_language_domains',
     'assessment_version_language_overview',
     'assessment_version_language_assessment',
+    'assessment_version_intro',
   ]);
   fake.state.columns = new Set(['options.assessment_version_id']);
   fake.state.indexes = new Set([
@@ -261,6 +279,10 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
         filename: '202604030001_assessment_language.sql',
         sql: 'SELECT 4;',
       },
+      {
+        filename: '202604040002_assessment_version_intro.sql',
+        sql: 'SELECT 5;',
+      },
     ],
   });
 
@@ -269,11 +291,13 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     '202603290001_option_version_key_scope.sql',
     '202604010001_assessment_version_language_tables.sql',
     '202604030001_assessment_language.sql',
+    '202604040002_assessment_version_intro.sql',
   ]);
   assert.deepEqual(fake.state.inserted, [
     '202603260001_mvp_canonical_schema.sql',
     '202603290001_option_version_key_scope.sql',
     '202604010001_assessment_version_language_tables.sql',
     '202604030001_assessment_language.sql',
+    '202604040002_assessment_version_intro.sql',
   ]);
 });
