@@ -181,24 +181,24 @@ function DomainChapter({
   const title = domain.domainLabel.trim();
 
   return (
-    <article className="border-white/8 space-y-7 border-t pt-10 first:border-t-0 first:pt-0 md:space-y-8 md:pt-12">
-      <div className="grid gap-5 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] md:gap-9">
-        <div className="space-y-3">
+    <article className="space-y-8 border-t border-white/6 pt-14 first:border-t-0 first:pt-0 md:space-y-10 md:pt-16">
+      <div className="grid gap-6 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:gap-10">
+        <div className="space-y-4">
           <SectionEyebrow>Domain</SectionEyebrow>
-          <h3 className="max-w-[14ch] text-[1.55rem] font-semibold tracking-[-0.035em] text-white md:text-[1.9rem]">
+          <h3 className="max-w-[14ch] text-[1.7rem] font-semibold tracking-[-0.04em] text-white md:text-[2.1rem]">
             {title}
           </h3>
         </div>
 
-        <div className="space-y-5 md:space-y-6">
+        <div className="space-y-6 md:space-y-7">
           {domain.summary ? (
-            <p className="max-w-[44rem] text-[1rem] leading-8 text-white/68 md:text-[1.05rem] md:leading-9">
+            <p className="max-w-[46rem] text-[1.02rem] leading-8 text-white/70 md:text-[1.08rem] md:leading-9">
               {domain.summary}
             </p>
           ) : null}
 
           {domain.focus || domain.pressure || domain.environment ? (
-            <div className="grid gap-3.5 border-l border-white/8 pl-4 sm:grid-cols-3 sm:border-l-0 sm:pl-0">
+            <div className="grid gap-x-8 gap-y-4 sm:grid-cols-3">
               {domain.focus ? (
                 <EditorialAside label="Focus" text={domain.focus} />
               ) : null}
@@ -212,7 +212,7 @@ function DomainChapter({
           ) : null}
 
           {domain.primarySignal || domain.secondarySignal ? (
-            <div className="grid gap-3.5 border-t border-white/8 pt-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+            <div className="grid gap-x-10 gap-y-6 border-t border-white/7 pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               {domain.primarySignal ? (
                 <SignalEditorialBlock
                   title="Primary signal"
@@ -231,7 +231,7 @@ function DomainChapter({
           ) : null}
 
           {domain.pairSummary?.text ? (
-            <p className="max-w-[42rem] text-[0.96rem] leading-8 text-white/58 italic">
+            <p className="max-w-[44rem] text-[0.97rem] leading-8 text-white/50 italic">
               {domain.pairSummary.text}
             </p>
           ) : null}
@@ -239,7 +239,7 @@ function DomainChapter({
           {ringModel ? (
             <DomainSignalRing
               domain={ringModel}
-              className="max-w-[44rem] border-white/8 bg-[linear-gradient(180deg,rgba(14,21,36,0.62),rgba(8,12,24,0.84))] p-4 sm:p-5 md:max-w-[46rem] md:p-6"
+              className="max-w-[45rem] md:max-w-[47rem]"
             />
           ) : null}
 
@@ -290,7 +290,7 @@ function DomainSection({
   }
 
   return (
-    <div className="mx-auto max-w-[58rem] rounded-[2.2rem] border border-white/7 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] px-6 py-7 shadow-[0_24px_80px_rgba(0,0,0,0.16)] md:px-8 md:py-9">
+    <div className="mx-auto max-w-[58rem] px-1 md:px-2">
       {domainItems.map(({ domain, ringModel }) => (
         <DomainChapter key={domain.domainKey} domain={domain} ringModel={ringModel} />
       ))}
@@ -307,8 +307,8 @@ function EditorialAside({
 }) {
   return (
     <div className="max-w-[16rem] space-y-1.5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">{label}</p>
-      <p className="text-[0.94rem] leading-7 text-white/56">{text}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/38">{label}</p>
+      <p className="text-[0.94rem] leading-7 text-white/54">{text}</p>
     </div>
   );
 }
@@ -323,11 +323,11 @@ function SignalEditorialBlock({
   summary: string | null;
 }) {
   return (
-    <div className="space-y-2.5 rounded-[1.2rem] border border-white/8 bg-white/[0.025] px-4 py-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">{title}</p>
-      <p className="text-[1rem] font-medium tracking-[-0.02em] text-white/88">{signalLabel}</p>
+    <div className="space-y-2.5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/38">{title}</p>
+      <p className="text-[1.04rem] font-medium tracking-[-0.025em] text-white/88">{signalLabel}</p>
       {summary ? (
-        <p className="max-w-[32rem] text-[0.94rem] leading-7 text-white/56">{summary}</p>
+        <p className="max-w-[32rem] text-[0.95rem] leading-7 text-white/56">{summary}</p>
       ) : null}
     </div>
   );

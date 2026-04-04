@@ -50,35 +50,35 @@ function getSignalTone(signal: DomainSignalRingViewModel['signals'][number]): {
   if (signal.isTopSignal) {
     return {
       markerLabel: 'Top',
-      markerClassName: 'border-white/22 bg-white/10 text-white',
-      rowClassName: 'border-white/14 bg-white/[0.055]',
+      markerClassName: 'border-white/12 bg-white/[0.045] text-white/72',
+      rowClassName: 'border-white/10 bg-white/[0.03]',
       labelClassName: 'text-white',
-      valueClassName: 'text-white',
-      fillClassName: 'bg-[linear-gradient(90deg,rgba(238,245,255,0.96),rgba(198,216,255,0.92))]',
-      detailAccentClassName: 'border-white/12 bg-white/[0.045]',
+      valueClassName: 'text-white/90',
+      fillClassName: 'bg-[linear-gradient(90deg,rgba(226,235,248,0.82),rgba(183,200,227,0.68))]',
+      detailAccentClassName: 'border-white/8 bg-white/[0.02]',
     };
   }
 
   if (signal.isSecondSignal) {
     return {
       markerLabel: '2nd',
-      markerClassName: 'border-[#8eb1ff]/35 bg-[#8eb1ff]/10 text-[#d9e5ff]',
-      rowClassName: 'border-[#8eb1ff]/16 bg-[#8eb1ff]/[0.045]',
+      markerClassName: 'border-[#8eb1ff]/18 bg-[#8eb1ff]/[0.05] text-[#d4def2]',
+      rowClassName: 'border-[#8eb1ff]/10 bg-[#8eb1ff]/[0.028]',
       labelClassName: 'text-white/92',
-      valueClassName: 'text-white/90',
-      fillClassName: 'bg-[linear-gradient(90deg,rgba(181,205,255,0.88),rgba(142,177,255,0.8))]',
-      detailAccentClassName: 'border-[#8eb1ff]/16 bg-[#8eb1ff]/[0.045]',
+      valueClassName: 'text-white/84',
+      fillClassName: 'bg-[linear-gradient(90deg,rgba(172,191,223,0.72),rgba(134,156,194,0.62))]',
+      detailAccentClassName: 'border-[#8eb1ff]/10 bg-[#8eb1ff]/[0.02]',
     };
   }
 
   return {
     markerLabel: null,
     markerClassName: 'border-white/10 bg-white/5 text-white/58',
-    rowClassName: 'border-white/8 bg-white/[0.025]',
+    rowClassName: 'border-white/8 bg-white/[0.018]',
     labelClassName: 'text-white/84',
-    valueClassName: 'text-white/82',
-    fillClassName: 'bg-[linear-gradient(90deg,rgba(135,158,203,0.72),rgba(112,135,179,0.52))]',
-    detailAccentClassName: 'border-white/10 bg-white/[0.025]',
+    valueClassName: 'text-white/74',
+    fillClassName: 'bg-[linear-gradient(90deg,rgba(132,150,181,0.56),rgba(102,118,146,0.46))]',
+    detailAccentClassName: 'border-white/8 bg-white/[0.016]',
   };
 }
 
@@ -192,11 +192,11 @@ function SignalBarRow({
       <button
         type="button"
         className={cn(
-          'domain-signal-ring-button flex w-full flex-col gap-3 rounded-[1.05rem] border px-4 py-4 text-left transition duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
+          'domain-signal-ring-button flex w-full flex-col gap-2.5 rounded-[0.95rem] border px-0 py-2 text-left transition duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1220]',
           isSelectedState
-            ? 'border-white/16 bg-white/[0.075] shadow-[0_12px_30px_rgba(4,10,24,0.2)]'
+            ? 'border-white/12 bg-white/[0.03]'
             : isHighlighted
-              ? 'border-[#b7cbff]/24 bg-[#8eb1ff]/[0.07] shadow-[0_10px_24px_rgba(10,20,42,0.18)]'
+              ? 'border-[#b7cbff]/14 bg-[#8eb1ff]/[0.028]'
               : tone.rowClassName,
         )}
         aria-pressed={isSelected}
@@ -230,7 +230,7 @@ function SignalBarRow({
           }
         }}
       >
-        <div className="flex min-w-0 items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start justify-between gap-4 px-0.5">
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
               <span
@@ -242,10 +242,10 @@ function SignalBarRow({
               >
                 {signal.signalLabel}
               </span>
-              {tone.markerLabel ? (
+                  {tone.markerLabel ? (
                 <span
                   className={cn(
-                    'inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em]',
+                    'inline-flex rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em]',
                     tone.markerClassName,
                   )}
                 >
@@ -258,7 +258,7 @@ function SignalBarRow({
           <div className="shrink-0 text-right">
             <p
               className={cn(
-                'text-[0.97rem] font-semibold tracking-[-0.02em] sm:text-[1rem]',
+                'text-[0.94rem] font-medium tracking-[-0.02em] sm:text-[0.98rem]',
                 isSelectedState || isHighlighted ? 'text-white' : tone.valueClassName,
               )}
             >
@@ -269,8 +269,8 @@ function SignalBarRow({
 
         <div
           className={cn(
-            'w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.08)] transition duration-200 ease-out',
-            isSelectedState ? 'h-[0.95rem] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]' : isHighlighted ? 'h-[0.9rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.08)]' : 'h-[0.7rem]',
+            'w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.05)] transition duration-200 ease-out',
+            isSelectedState ? 'h-[0.56rem] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]' : isHighlighted ? 'h-[0.54rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.05)]' : 'h-[0.42rem]',
           )}
           aria-hidden="true"
           data-bar-track="true"
@@ -280,14 +280,14 @@ function SignalBarRow({
               'domain-signal-bar-fill h-full rounded-full transition duration-200 ease-out',
               tone.fillClassName,
               isSelectedState
-                ? 'opacity-100 shadow-[0_0_14px_rgba(228,237,255,0.2)] brightness-[1.04]'
+                ? 'opacity-100 brightness-[1.01]'
                 : isHighlighted
-                  ? 'opacity-100 shadow-[0_0_12px_rgba(157,186,255,0.16)] brightness-[1.02]'
+                  ? 'opacity-100 brightness-[1.01]'
                   : signal.isTopSignal
                     ? 'opacity-100'
                     : signal.isSecondSignal
-                      ? 'opacity-92'
-                      : 'opacity-78',
+                      ? 'opacity-90'
+                      : 'opacity-72',
             )}
             data-bar-fill={signal.signalKey}
             data-bar-width={barWidth}
@@ -326,7 +326,7 @@ export function DomainSignalRing({
   return (
     <section
       className={cn(
-        'overflow-hidden rounded-[1.45rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,24,40,0.72),rgba(8,13,24,0.9))] p-5 shadow-[0_20px_60px_rgba(3,8,20,0.24)] sm:p-6',
+        'overflow-hidden rounded-[1.2rem] border border-white/7 bg-[linear-gradient(180deg,rgba(11,18,30,0.38),rgba(8,12,22,0.54))] p-4 shadow-[0_14px_36px_rgba(3,8,20,0.12)] sm:p-5',
         className,
       )}
       aria-label={`${domain.domainLabel} signal bars`}
@@ -336,10 +336,10 @@ export function DomainSignalRing({
     >
       <style>{DOMAIN_SIGNAL_RING_CSS}</style>
 
-      <div className="space-y-5">
-        <div className="space-y-3">
+      <div className="space-y-4">
+        <div className="space-y-2.5">
           {signals.length > 0 ? (
-            <ol className="space-y-3">
+            <ol className="space-y-2.5">
               {signals.map((signal, index) => {
                 const signalState = getSignalState({
                   signalKey: signal.signalKey,
@@ -366,7 +366,7 @@ export function DomainSignalRing({
               })}
             </ol>
           ) : (
-            <div className="rounded-[1.1rem] border border-dashed border-white/10 bg-white/[0.03] px-4 py-5 text-[0.92rem] leading-7 text-white/48">
+            <div className="rounded-[1rem] border border-dashed border-white/8 bg-white/[0.018] px-4 py-5 text-[0.92rem] leading-7 text-white/48">
               No signal balance is available for this area yet.
             </div>
           )}
@@ -375,29 +375,29 @@ export function DomainSignalRing({
         {activeSignal ? (
           <div
             className={cn(
-              'rounded-[1rem] border px-4 py-3',
+              'rounded-[0.95rem] border px-4 py-3',
               getSignalTone(activeSignal).detailAccentClassName,
             )}
             aria-live="polite"
             data-active-detail-key={activeSignal.signalKey}
           >
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <div className="flex flex-wrap items-start justify-between gap-2.5">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
-                  <p className="min-w-0 flex-1 text-[0.93rem] font-semibold leading-6 tracking-[-0.02em] text-white sm:text-[0.96rem]">
+                  <p className="min-w-0 flex-1 text-[0.92rem] font-medium leading-6 tracking-[-0.02em] text-white/88 sm:text-[0.95rem]">
                     {activeSignal.signalLabel}
                   </p>
                   {activeSignal.isTopSignal ? (
-                    <span className="inline-flex rounded-full border border-white/22 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
+                    <span className="inline-flex rounded-full border border-white/12 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/72">
                       Top
                     </span>
                   ) : activeSignal.isSecondSignal ? (
-                    <span className="inline-flex rounded-full border border-[#8eb1ff]/35 bg-[#8eb1ff]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d9e5ff]">
+                    <span className="inline-flex rounded-full border border-[#8eb1ff]/18 bg-[#8eb1ff]/[0.05] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#d4def2]">
                       2nd
                     </span>
                   ) : null}
                 </div>
-                <p className="shrink-0 pt-0.5 text-[0.96rem] font-semibold tracking-[-0.03em] text-white/88 sm:text-[1rem]">
+                <p className="shrink-0 pt-0.5 text-[0.94rem] font-medium tracking-[-0.03em] text-white/76 sm:text-[0.98rem]">
                   {formatPercent(activeSignal.withinDomainPercent)}
                 </p>
               </div>
@@ -405,7 +405,7 @@ export function DomainSignalRing({
           </div>
         ) : (
           <div
-            className="rounded-[1.1rem] border border-white/10 bg-white/[0.03] px-4 py-3.5"
+            className="rounded-[1rem] border border-white/8 bg-white/[0.018] px-4 py-3.5"
             aria-live="polite"
             data-active-detail-key=""
           >

@@ -237,8 +237,8 @@ test('result detail page renders canonical domain chapter fields without UI-side
   assert.match(source, /const visibleSignals = domain\.signals\.slice\(0, 2\);/);
   assert.match(source, /const hiddenSignals = domain\.signals\.slice\(2\);/);
   assert.match(source, /signal\.signalLabel/);
-  assert.match(source, /grid gap-3\.5 border-t border-white\/8 pt-5 md:grid-cols-\[minmax\(0,1\.1fr\)_minmax\(0,0\.9fr\)\]/);
-  assert.match(source, /text-\[0\.96rem\] leading-8 text-white\/58 italic/);
+  assert.match(source, /grid gap-x-10 gap-y-6 border-t border-white\/7 pt-6 md:grid-cols-\[minmax\(0,1fr\)_minmax\(0,1fr\)\]/);
+  assert.match(source, /text-\[0\.97rem\] leading-8 text-white\/50 italic/);
 
   assert.doesNotMatch(source, /interpretation\?\.summary/);
   assert.doesNotMatch(source, /supportingLine/);
@@ -270,7 +270,7 @@ test('result detail page keeps markdown intro rendering and editorial shell for 
   assert.match(source, /About this report/);
   assert.match(source, /<PageFrame className="space-y-14 md:space-y-16">/);
   assert.match(source, /rounded-\[2rem\] border border-white\/6/);
-  assert.match(source, /rounded-\[2\.2rem\] border border-white\/7/);
+  assert.match(source, /mx-auto max-w-\[58rem\] px-1 md:px-2/);
   assert.match(source, /rounded-\[2rem\] border border-white\/8/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
 });
