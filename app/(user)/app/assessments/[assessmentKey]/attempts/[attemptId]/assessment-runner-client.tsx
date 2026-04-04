@@ -252,30 +252,6 @@ export function AssessmentRunnerClient({
                   {runner.assessmentIntro.introSummary}
                 </p>
               ) : null}
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                {runner.assessmentIntro.instructions ? (
-                  <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
-                      Instructions
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-white/62">
-                      {runner.assessmentIntro.instructions}
-                    </p>
-                  </div>
-                ) : null}
-
-                {runner.assessmentIntro.confidentialityNote ? (
-                  <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
-                      Confidentiality
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-white/62">
-                      {runner.assessmentIntro.confidentialityNote}
-                    </p>
-                  </div>
-                ) : null}
-              </div>
             </div>
 
             <div className="flex flex-col gap-4 border-t border-white/8 pt-5 xl:border-l xl:border-t-0 xl:pl-7 xl:pt-0">
@@ -292,14 +268,27 @@ export function AssessmentRunnerClient({
                     </div>
                   ) : null}
 
-                  <div className="space-y-1">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
-                      Runner flow
-                    </p>
-                    <p className="text-sm leading-6 text-white/58">
-                      The runner will begin at Question 1 and continue in the published assessment order.
-                    </p>
-                  </div>
+                  {runner.assessmentIntro.instructions ? (
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
+                        Instructions
+                      </p>
+                      <p className="text-sm leading-6 text-white/62">
+                        {runner.assessmentIntro.instructions}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {runner.assessmentIntro.introHowItWorks ? (
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
+                        How It Works
+                      </p>
+                      <p className="text-sm leading-6 text-white/62">
+                        {runner.assessmentIntro.introHowItWorks}
+                      </p>
+                    </div>
+                  ) : null}
 
                   <button
                     type="button"
@@ -310,36 +299,6 @@ export function AssessmentRunnerClient({
                   </button>
                 </div>
               </div>
-
-              <div className="rounded-[1.15rem] border border-white/8 bg-black/10 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/34">
-                  Before you begin
-                </p>
-                <p className="mt-2 text-sm leading-6 text-white/52">
-                  Read the opening guidance once, then move into the live runner. Your saved progress
-                  and completion flow continue exactly as configured.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3 border-t border-white/7 pt-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-            <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3.5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/38">
-                How It Works
-              </p>
-              <p className="mt-2 max-w-[48rem] text-sm leading-6 text-white/68">
-                {runner.assessmentIntro.introHowItWorks}
-              </p>
-            </div>
-
-            <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3.5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/34">
-                Assessment order
-              </p>
-              <p className="mt-2 text-sm leading-6 text-white/52">
-                You will move through the published questions in sequence, with progress saved as you go.
-              </p>
             </div>
           </div>
         </div>
