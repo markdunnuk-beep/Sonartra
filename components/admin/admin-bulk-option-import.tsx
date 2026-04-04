@@ -202,9 +202,9 @@ export function AdminBulkOptionImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Bulk option import</p>
+          <p className="sonartra-page-eyebrow">Options</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Bulk option import
+            Import options
           </h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
             Paste one option per line using the format: question_number | option_label | option_text

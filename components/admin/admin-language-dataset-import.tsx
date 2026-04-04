@@ -237,10 +237,10 @@ export function AdminLanguageDatasetImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Language Datasets</p>
-          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">Language Import</h3>
+          <p className="sonartra-page-eyebrow">Report Language</p>
+          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">Import report language</h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Select the dataset you want to replace, paste the rows, and run a single import action.
+            Select the section you want to replace, paste the rows, and run a single import action.
           </p>
           <p className="max-w-3xl text-sm leading-7 text-white/62">{REPORT_ALIGNED_AUTHORING_NOTE}</p>
         </div>
@@ -252,7 +252,7 @@ export function AdminLanguageDatasetImport({
         ) : null}
 
         <div className="space-y-3">
-          <p className="text-sm font-medium text-white">Dataset type</p>
+          <p className="text-sm font-medium text-white">Report section</p>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {DATASET_OPTIONS.map((option) => {
               const isSelected = option.key === selectedDataset;

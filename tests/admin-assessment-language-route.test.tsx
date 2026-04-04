@@ -704,15 +704,13 @@ test('language step component renders intro, hero header, domain chapters, signa
   );
 
   assert.match(markup, /Language/);
-  assert.match(markup, /Intro/);
-  assert.match(markup, /Intro Description/);
-  assert.match(markup, /Opening context for the assessment shown before the report hero\./);
+  assert.match(markup, /Report Introduction/);
+  assert.match(markup, /Opening report copy shown in the results experience, separate from the Assessment Intro shown before questions\./);
   assert.match(markup, /Assessment introduction copy/);
   assert.match(markup, /rounded-\[1\.25rem\] border border-white\/10 bg-gradient-to-b from-white\/\[0\.02\] to-transparent p-\[1px\]/);
   assert.match(markup, /rounded-\[1\.25rem\] bg-black\/30/);
-  assert.match(markup, /Language Datasets/);
-  assert.match(markup, /Language Import/);
-  assert.match(markup, /Dataset type/);
+  assert.match(markup, /Import report language/);
+  assert.match(markup, /Report section/);
   assert.match(markup, /Hero Header Language/);
   assert.match(markup, /Format: scope \| key \| headline/);
   assert.match(markup, /Paste Hero Header rows/);
@@ -726,6 +724,7 @@ test('language step component renders intro, hero header, domain chapters, signa
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
   assert.match(markup, /Current Hero Header rows: 2/);
+  assert.match(markup, /Report introduction/);
 });
 
 test('language step component shows a safe empty state when no usable version context exists', () => {

@@ -86,14 +86,14 @@ export function AdminAssessmentLanguageEditor({
   return (
     <SurfaceCard className="space-y-4 p-5 lg:p-6">
       <div className="space-y-2">
-        <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">Intro Description</h3>
+        <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">Report Introduction</h3>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          Markdown opening context shown at the top of every report. Supports `**bold**` and blank-line paragraphs; raw HTML is ignored.
+          Opening copy shown at the start of the report. Supports `**bold**` and blank-line paragraphs; raw HTML is ignored.
         </p>
       </div>
 
       <textarea
-        aria-label="Assessment Description"
+        aria-label="Report Introduction"
         className={cn(
           'sonartra-focus-ring min-h-[148px] w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm leading-7 text-white placeholder:text-white/28',
           error
@@ -113,7 +113,7 @@ export function AdminAssessmentLanguageEditor({
             setError(null);
           }
         }}
-        placeholder="Add the intro description shown above the report hero. Use **bold** and blank lines for paragraphs."
+        placeholder="Add the report introduction shown before the main report sections. Use **bold** and blank lines for paragraphs."
         value={draftValue}
       />
 

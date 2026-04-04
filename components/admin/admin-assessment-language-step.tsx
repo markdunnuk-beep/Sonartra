@@ -43,7 +43,7 @@ export function AdminAssessmentLanguageStep({
         <SectionHeader
           eyebrow="Language"
           title="Language"
-          description="Manage the structured language datasets that will drive deterministic assessment outputs."
+          description="Manage the report language used in the published results experience."
         />
 
         <SurfaceCard className="space-y-4 p-5 lg:p-6">
@@ -70,7 +70,7 @@ export function AdminAssessmentLanguageStep({
       <SectionHeader
         eyebrow="Language"
         title="Language"
-        description="Author the persisted report sections the engine resolves into the final result payload."
+        description="Author the report language used in results, separate from the Assessment Intro shown before questions."
       />
 
       <SurfaceCard className="space-y-4 p-5 lg:p-6">
@@ -81,17 +81,16 @@ export function AdminAssessmentLanguageStep({
           </LabelPill>
         </div>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          Organize authored content in the same order the final report is read. Intro remains inline, while
-          report language datasets now use one selector-driven import surface for Hero Header, Domain Chapters,
-          Signals, and Pairs.
+          Use this step for report-facing copy only. The Assessment Intro introduces the assessment before Question 1;
+          the sections here shape the language participants see in their results.
         </p>
       </SurfaceCard>
 
       <div className="space-y-6">
         <SectionHeader
-          eyebrow="Intro"
-          title="Intro"
-          description="Opening context for the assessment shown before the report hero."
+          eyebrow="Report Introduction"
+          title="Report Introduction"
+          description="Opening report copy shown in the results experience, separate from the Assessment Intro shown before questions."
         />
 
         <div className="rounded-[1.25rem] border border-white/10 bg-gradient-to-b from-white/[0.02] to-transparent p-[1px]">
@@ -107,9 +106,9 @@ export function AdminAssessmentLanguageStep({
 
       <div className="space-y-6">
         <SectionHeader
-          eyebrow="Language Datasets"
-          title="Language Datasets"
-          description="Replace Hero Header, Domain Chapter, Signal, and Pair Summary language from one shared import surface."
+          eyebrow="Imports"
+          title="Import report language"
+          description="Replace hero header, domain chapter, signal, and pair language from one shared import surface."
         />
 
         <AdminLanguageDatasetImport
@@ -120,7 +119,7 @@ export function AdminAssessmentLanguageStep({
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <MetaItem label="Intro" value={formatEntryCount(viewModel.counts.assessment.entryCount)} />
+        <MetaItem label="Report introduction" value={formatEntryCount(viewModel.counts.assessment.entryCount)} />
         <MetaItem label="Hero Header" value={formatEntryCount(viewModel.counts.heroHeaders.entryCount)} />
         <MetaItem label="Domain Chapters" value={formatEntryCount(viewModel.counts.domains.entryCount)} />
         <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
