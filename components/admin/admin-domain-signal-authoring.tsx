@@ -19,7 +19,6 @@ import {
 } from '@/lib/admin/admin-domain-signal-authoring';
 import type { AdminAssessmentDetailDomain } from '@/lib/server/admin-assessment-detail';
 import {
-  createDomainAction,
   createSignalAction,
   deleteDomainAction,
   deleteSignalAction,
@@ -32,12 +31,6 @@ import {
   type InlineSignalKeyRegenerateResult,
   type InlineSignalLabelUpdateResult,
 } from '@/lib/server/admin-domain-signal-authoring';
-import {
-  DOMAIN_KEY_PATTERN,
-  createDomainKeyDraftState,
-  syncDomainKeyFromLabel,
-  syncDomainKeyFromManualInput,
-} from '@/lib/utils/domain-key';
 import {
   SIGNAL_KEY_PATTERN,
   createSignalKeyDraftState,
@@ -447,138 +440,6 @@ function InlineTextEditor({
       </button>
       {error ? <p className="text-xs text-[rgba(255,198,198,0.92)]">{error}</p> : null}
     </div>
-  );
-}
-
-function CreateDomainForm({
-  assessmentKey,
-  assessmentVersionId,
-}: {
-  assessmentKey: string;
-  assessmentVersionId: string;
-}) {
-  const createDomainFormAction = useMemo(
-    () =>
-      createDomainAction.bind(null, {
-        assessmentKey,
-        assessmentVersionId,
-      }),
-    [assessmentKey, assessmentVersionId],
-  );
-  const [state, formAction] = useActionState(
-    createDomainFormAction,
-    initialAdminAuthoringFormState,
-  );
-  const currentState = normalizeState(state);
-  const [draftState, setDraftState] = useState(() =>
-    createDomainKeyDraftState({
-      label: currentState.values.label,
-      key: currentState.values.key,
-    }),
-  );
-  const [description, setDescription] = useState(currentState.values.description);
-
-  useEffect(() => {
-    if (
-      currentState.formError ||
-      currentState.fieldErrors.label ||
-      currentState.fieldErrors.key ||
-      currentState.fieldErrors.description
-    ) {
-      return;
-    }
-
-    if (
-      currentState.values.label ||
-      currentState.values.key ||
-      currentState.values.description
-    ) {
-      return;
-    }
-
-    setDraftState(createDomainKeyDraftState({ label: '', key: '' }));
-    setDescription('');
-  }, [
-    currentState.fieldErrors.description,
-    currentState.fieldErrors.key,
-    currentState.fieldErrors.label,
-    currentState.formError,
-    currentState.values.description,
-    currentState.values.key,
-    currentState.values.label,
-  ]);
-
-  return (
-    <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
-      <div className="space-y-5">
-        <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Add domain</p>
-          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Add a domain
-          </h3>
-          <p className="max-w-2xl text-sm leading-7 text-white/62">
-            Add the main areas for this assessment.
-          </p>
-        </div>
-
-        <form action={formAction} className="space-y-5">
-          <div className="grid gap-5 lg:grid-cols-2">
-            <Field error={currentState.fieldErrors.label} hint="Name this domain." label="Domain name">
-              <TextInput
-                error={currentState.fieldErrors.label}
-                name="label"
-                onChange={(event) => {
-                  const nextLabel = event.currentTarget.value;
-                  setDraftState((previousState) =>
-                    syncDomainKeyFromLabel(previousState, nextLabel),
-                  );
-                }}
-                placeholder="Leadership style"
-                required
-                value={draftState.label}
-              />
-            </Field>
-            <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Domain key">
-              <TextInput
-                error={currentState.fieldErrors.key}
-                name="key"
-                onChange={(event) => {
-                  const nextKey = event.currentTarget.value;
-                  setDraftState((previousState) =>
-                    syncDomainKeyFromManualInput(previousState, nextKey),
-                  );
-                }}
-                pattern={DOMAIN_KEY_PATTERN.source}
-                placeholder="leadership-style"
-                required
-                title="Use lowercase letters, numbers, and single hyphens only."
-                value={draftState.key}
-              />
-            </Field>
-          </div>
-
-          <Field
-            error={currentState.fieldErrors.description}
-            hint="Optional short note."
-            label="Description"
-          >
-            <TextArea
-              error={currentState.fieldErrors.description}
-              name="description"
-              onChange={(event) => {
-                setDescription(event.currentTarget.value);
-              }}
-              placeholder="Groups the signals used to interpret leadership tendencies."
-              value={description}
-            />
-          </Field>
-
-          <InlineError message={currentState.formError} />
-
-          <SubmitButton idleLabel="Add domain" pendingLabel="Adding domain..." />
-        </form>
-      </div>
-    </SurfaceCard>
   );
 }
 
@@ -1040,13 +901,6 @@ export function AdminDomainSignalAuthoring({
           assessmentVersionId={assessmentVersionId}
           domains={domains}
           isEditableAssessmentVersion
-        />
-      ) : null}
-
-      {showDomainControls ? (
-        <CreateDomainForm
-          assessmentKey={assessmentKey}
-          assessmentVersionId={assessmentVersionId}
         />
       ) : null}
 

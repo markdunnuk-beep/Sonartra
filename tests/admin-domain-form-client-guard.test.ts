@@ -41,16 +41,14 @@ function readDomainsLayoutSource(): string {
   return readFileSync(domainsLayoutPath, 'utf8');
 }
 
-test('create domain form change handlers stay local and avoid direct submit/navigation calls', () => {
+test('domain authoring no longer renders a manual create domain form', () => {
   const source = readComponentSource();
 
-  assert.match(source, /const nextLabel = event\.currentTarget\.value/);
-  assert.match(source, /syncDomainKeyFromLabel\(previousState, nextLabel\)/);
-  assert.match(source, /const nextKey = event\.currentTarget\.value/);
-  assert.match(source, /syncDomainKeyFromManualInput\(previousState, nextKey\)/);
-  assert.doesNotMatch(source, /requestSubmit\(/);
-  assert.doesNotMatch(source, /router\.(refresh|push|replace)\(/);
-  assert.doesNotMatch(source, /redirect\(/);
+  assert.doesNotMatch(source, /CreateDomainForm/);
+  assert.doesNotMatch(source, /createDomainAction/);
+  assert.doesNotMatch(source, /syncDomainKeyFromLabel/);
+  assert.doesNotMatch(source, /syncDomainKeyFromManualInput/);
+  assert.doesNotMatch(source, /DOMAIN_KEY_PATTERN/);
 });
 
 test('create signal form change handlers snapshot event values and stay local-only', () => {
@@ -71,15 +69,6 @@ test('non-submit inline editor controls stay explicit button elements', () => {
   assert.match(source, /onClick=\{startEditing\}[\s\S]*type="button"/);
 });
 
-test('create domain draft is not rehydrated from action state during typing', () => {
-  const source = readComponentSource();
-
-  assert.doesNotMatch(
-    source,
-    /setDraftState\(\s*createDomainKeyDraftState\(\{\s*label:\s*currentState\.values\.label,\s*key:\s*currentState\.values\.key,/,
-  );
-});
-
 test('create signal draft is not rehydrated from action state during typing', () => {
   const source = readComponentSource();
 
@@ -87,14 +76,6 @@ test('create signal draft is not rehydrated from action state during typing', ()
     source,
     /setDraftState\(\s*createSignalKeyDraftState\(\{\s*label:\s*currentState\.values\.label,\s*key:\s*currentState\.values\.key,/,
   );
-});
-
-test('create domain server action is memoized so typing does not replace the action identity', () => {
-  const source = readComponentSource();
-
-  assert.match(source, /const createDomainFormAction = useMemo\(/);
-  assert.match(source, /useActionState\(\s*createDomainFormAction,/);
-  assert.doesNotMatch(source, /useActionState\(\s*createDomainAction\.bind/);
 });
 
 test('create signal server action is memoized so typing does not replace the action identity', () => {

@@ -53,9 +53,10 @@ test('bulk domain import panel shows append guidance and no-valid-rows guidance 
   assert.match(source, /No valid rows were found to import\. Fix the rejected rows and preview again\./);
 });
 
-test('domain authoring renders the bulk panel only in domains mode above the manual create form', () => {
+test('domain authoring renders the bulk panel only in domains mode and omits the manual create form', () => {
   const source = readSource(authoringComponentPath);
 
   assert.match(source, /\{mode === 'domains' \? \(\s*<AdminBulkDomainImport/);
-  assert.match(source, /<AdminBulkDomainImport[\s\S]*<CreateDomainForm/);
+  assert.doesNotMatch(source, /CreateDomainForm/);
+  assert.doesNotMatch(source, /createDomainAction/);
 });
