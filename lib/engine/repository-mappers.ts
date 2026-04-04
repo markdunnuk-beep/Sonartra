@@ -2,6 +2,7 @@ import type {
   AssessmentRecord,
   AssessmentVersionRecord,
   RuntimeAssessmentDefinition,
+  RuntimeAssessmentIntro,
   RuntimeDomain,
   RuntimeOption,
   RuntimeOptionSignalWeight,
@@ -12,6 +13,7 @@ import type {
 import type {
   AssessmentRow,
   AssessmentVersionRow,
+  AssessmentIntroRow,
   DefinitionGraphRows,
   DomainRow,
   OptionRow,
@@ -65,6 +67,17 @@ export function mapAssessmentVersionRecord(row: AssessmentVersionRow): Assessmen
     publishedAt: row.published_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+export function mapRuntimeAssessmentIntro(row: AssessmentIntroRow): RuntimeAssessmentIntro {
+  return {
+    introTitle: row.intro_title,
+    introSummary: row.intro_summary,
+    introHowItWorks: row.intro_how_it_works,
+    estimatedTimeOverride: row.estimated_time_override,
+    instructions: row.instructions,
+    confidentialityNote: row.confidentiality_note,
   };
 }
 
@@ -193,6 +206,7 @@ export function assembleRuntimeAssessmentDefinition(rows: DefinitionGraphRows): 
   return {
     assessment,
     version,
+    assessmentIntro: rows.assessmentIntro ? mapRuntimeAssessmentIntro(rows.assessmentIntro) : null,
     domains,
     signals,
     questions,

@@ -136,9 +136,19 @@ export type OptionSignalWeightRecord = {
 export type RuntimeAssessmentDefinition = {
   assessment: AssessmentRecord;
   version: AssessmentVersionRecord;
+  assessmentIntro: RuntimeAssessmentIntro | null;
   domains: RuntimeDomain[];
   signals: RuntimeSignal[];
   questions: RuntimeQuestion[];
+};
+
+export type RuntimeAssessmentIntro = {
+  introTitle: string;
+  introSummary: string;
+  introHowItWorks: string;
+  estimatedTimeOverride: string | null;
+  instructions: string | null;
+  confidentialityNote: string | null;
 };
 
 export type RuntimeLookupById<TKey extends string, TValue> = Readonly<Record<TKey, TValue>>;

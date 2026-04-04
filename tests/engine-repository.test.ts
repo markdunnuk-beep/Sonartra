@@ -5,6 +5,7 @@ import { createAssessmentDefinitionRepository } from '@/lib/engine/repository';
 import { DefinitionGraphIntegrityError, assembleRuntimeAssessmentDefinition } from '@/lib/engine/repository-mappers';
 import type {
   AssessmentRow,
+  AssessmentIntroRow,
   AssessmentVersionRow,
   DefinitionGraphRows,
   DomainRow,
@@ -33,6 +34,16 @@ function buildGraphRows(): DefinitionGraphRows {
     published_at: '2026-01-01T00:00:00.000Z',
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-01-01T00:00:00.000Z',
+  };
+
+  const assessmentIntro: AssessmentIntroRow = {
+    assessment_version_id: 'v1',
+    intro_title: 'Welcome to WPLP-80',
+    intro_summary: 'Measure the patterns that shape how you work.',
+    intro_how_it_works: 'Work through each prompt and choose the option that fits best.',
+    estimated_time_override: 'About 18 minutes',
+    instructions: 'Answer from your typical behaviour.',
+    confidentiality_note: 'Responses are handled confidentially.',
   };
 
   const domains: DomainRow[] = [
@@ -176,7 +187,7 @@ function buildGraphRows(): DefinitionGraphRows {
     },
   ];
 
-  return { assessment, version, domains, signals, questions, options, optionSignalWeights };
+  return { assessment, version, assessmentIntro, domains, signals, questions, options, optionSignalWeights };
 }
 
 function createFakeDb(data: {
@@ -212,6 +223,10 @@ function createFakeDb(data: {
         return { rows: ([{ a: data.graph.assessment, v: data.graph.version }] as unknown[]) as T[] };
       }
 
+      if (text.includes('FROM assessment_version_intro')) {
+        return { rows: ((data.graph?.assessmentIntro ? [data.graph.assessmentIntro] : []) as unknown[]) as T[] };
+      }
+
       if (text.includes('FROM domains')) {
         return { rows: ((data.graph?.domains ?? []) as unknown[]) as T[] };
       }
@@ -243,6 +258,7 @@ test('assembles a minimal valid runtime definition', () => {
 
   assert.equal(definition.assessment.key, 'wplp80');
   assert.equal(definition.version.versionTag, '1.0.0');
+  assert.equal(definition.assessmentIntro?.introTitle, 'Welcome to WPLP-80');
   assert.equal(definition.questions.length, 2);
   assert.equal(definition.questions[0]?.options.length, 2);
   assert.equal(definition.questions[0]?.options[0]?.signalWeights.length, 1);
@@ -270,6 +286,7 @@ test('resolves published version by assessment key', async () => {
   const result = await repo.getPublishedAssessmentDefinitionByKey('wplp80');
   assert.ok(result);
   assert.equal(result.version.id, 'v1');
+  assert.equal(result.assessmentIntro?.estimatedTimeOverride, 'About 18 minutes');
 });
 
 test('loads explicit version by assessmentVersionId and by assessmentKey+version', async () => {
@@ -298,6 +315,98 @@ test('returns null for not-found assessment and versions', async () => {
 
   assert.equal(published, null);
   assert.equal(explicit, null);
+});
+
+test('returns null assessmentIntro when no intro row exists for the resolved version', async () => {
+  const graph = buildGraphRows();
+  const repo = createAssessmentDefinitionRepository({
+    db: createFakeDb({
+      assessmentByKey: graph.assessment,
+      publishedVersion: graph.version,
+      graph: {
+        ...graph,
+        assessmentIntro: null,
+      },
+    }),
+  });
+
+  const result = await repo.getPublishedAssessmentDefinitionByKey('wplp80');
+
+  assert.ok(result);
+  assert.equal(result.assessmentIntro, null);
+});
+
+test('published runtime definition reads intro from the published version, not a different draft version', async () => {
+  const publishedGraph = buildGraphRows();
+  const draftGraph: DefinitionGraphRows = {
+    ...buildGraphRows(),
+    version: {
+      ...buildGraphRows().version,
+      id: 'v2',
+      version: '1.1.0',
+      lifecycle_status: 'DRAFT',
+      published_at: null,
+    },
+    assessmentIntro: {
+      assessment_version_id: 'v2',
+      intro_title: 'Draft intro only',
+      intro_summary: 'Draft summary',
+      intro_how_it_works: 'Draft how it works',
+      estimated_time_override: 'Draft timing',
+      instructions: 'Draft instructions',
+      confidentiality_note: 'Draft confidentiality',
+    },
+  };
+
+  const db: Queryable = {
+    async query<T>(text: string) {
+      if (text.includes('FROM assessments') && text.includes('assessment_key = $1')) {
+        return { rows: [publishedGraph.assessment] as T[] };
+      }
+
+      if (text.includes('FROM assessment_versions') && text.includes("lifecycle_status = 'PUBLISHED'")) {
+        return { rows: [publishedGraph.version] as T[] };
+      }
+
+      if (text.includes('row_to_json(a.*) AS a')) {
+        return { rows: ([{ a: publishedGraph.assessment, v: publishedGraph.version }] as unknown[]) as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_intro')) {
+        return { rows: ([publishedGraph.assessmentIntro] as unknown[]) as T[] };
+      }
+
+      if (text.includes('FROM domains')) {
+        return { rows: (publishedGraph.domains as unknown[]) as T[] };
+      }
+
+      if (text.includes('FROM signals')) {
+        return { rows: (publishedGraph.signals as unknown[]) as T[] };
+      }
+
+      if (text.includes('FROM questions') && !text.includes('INNER JOIN')) {
+        return { rows: (publishedGraph.questions as unknown[]) as T[] };
+      }
+
+      if (text.includes('FROM options o')) {
+        return { rows: (publishedGraph.options as unknown[]) as T[] };
+      }
+
+      if (text.includes('FROM option_signal_weights')) {
+        return { rows: (publishedGraph.optionSignalWeights as unknown[]) as T[] };
+      }
+
+      return { rows: [] as T[] };
+    },
+  };
+
+  const repo = createAssessmentDefinitionRepository({ db });
+  const result = await repo.getPublishedAssessmentDefinitionByKey('wplp80');
+
+  assert.ok(result);
+  assert.equal(result.version.id, 'v1');
+  assert.notEqual(draftGraph.assessmentIntro?.introTitle, result.assessmentIntro?.introTitle);
+  assert.equal(result.assessmentIntro?.introTitle, 'Welcome to WPLP-80');
 });
 
 test('throws graph integrity error when linked data is missing', () => {

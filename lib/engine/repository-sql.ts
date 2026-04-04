@@ -81,9 +81,20 @@ export type OptionSignalWeightRow = {
   updated_at: string;
 };
 
+export type AssessmentIntroRow = {
+  assessment_version_id: string;
+  intro_title: string;
+  intro_summary: string;
+  intro_how_it_works: string;
+  estimated_time_override: string | null;
+  instructions: string | null;
+  confidentiality_note: string | null;
+};
+
 export type DefinitionGraphRows = {
   assessment: AssessmentRow;
   version: AssessmentVersionRow;
+  assessmentIntro: AssessmentIntroRow | null;
   domains: DomainRow[];
   signals: SignalRow[];
   questions: QuestionRow[];
@@ -204,7 +215,22 @@ export async function loadDefinitionGraphByVersionId(
     return null;
   }
 
-  const [domains, signals, questions, options, optionSignalWeights] = await Promise.all([
+  const [assessmentIntro, domains, signals, questions, options, optionSignalWeights] = await Promise.all([
+    db.query<AssessmentIntroRow>(
+      `
+      SELECT
+        assessment_version_id,
+        intro_title,
+        intro_summary,
+        intro_how_it_works,
+        estimated_time_override,
+        instructions,
+        confidentiality_note
+      FROM assessment_version_intro
+      WHERE assessment_version_id = $1
+      `,
+      [assessmentVersionId],
+    ),
     db.query<DomainRow>(
       `
       SELECT
@@ -301,6 +327,7 @@ export async function loadDefinitionGraphByVersionId(
   return {
     assessment: metadata.a,
     version: metadata.v,
+    assessmentIntro: assessmentIntro.rows[0] ?? null,
     domains: domains.rows,
     signals: signals.rows,
     questions: questions.rows,
