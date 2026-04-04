@@ -38,21 +38,22 @@ function readPageSource(): string {
   return readFileSync(pagePath, 'utf8');
 }
 
-test('bulk weight import panel shows the required format help and action labels', () => {
+test('bulk weight import panel shows the required format help and a single import action', () => {
   const source = readComponentSource();
 
   assert.match(source, /question_number \| option_label \| signal_key \| weight/);
-  assert.match(source, /Preview import/);
-  assert.match(source, /Import weights/);
-  assert.match(source, /Clear/);
+  assert.match(source, /Importing\.\.\./);
+  assert.match(source, /hasImported \? 'Imported' : 'Import'/);
+  assert.doesNotMatch(source, /Preview import/);
+  assert.doesNotMatch(source, /Clear/);
 });
 
 test('bulk weight import panel uses canonical server actions and refreshes after successful import', () => {
   const source = readComponentSource();
 
-  assert.match(source, /previewBulkWeightsAction\.bind\(null, \{ assessmentVersionId \}\)/);
   assert.match(source, /importBulkWeightsAction\.bind\(null, \{ assessmentVersionId \}\)/);
-  assert.match(source, /if \(nextState\.success\) \{\s*router\.refresh\(\);/);
+  assert.doesNotMatch(source, /previewBulkWeightsAction/);
+  assert.match(source, /if \(nextState\.success\) \{\s*setHasImported\(true\);\s*router\.refresh\(\);/);
 });
 
 test('bulk weight import panel keeps textarea input client-side and snapshots event values before updates', () => {
@@ -64,10 +65,12 @@ test('bulk weight import panel keeps textarea input client-side and snapshots ev
   assert.doesNotMatch(source, /setRawInput\(resultState\.rawInput\)/);
 });
 
-test('bulk weight import panel enforces preview-before-import and draft-only execution in button state', () => {
+test('bulk weight import panel resets imported state on edits and keeps draft-only execution in button state', () => {
   const source = readComponentSource();
 
-  assert.match(source, /const canImport =[\s\S]*isEditableAssessmentVersion[\s\S]*resultState\.canImport/);
+  assert.match(source, /const canImport =[\s\S]*isEditableAssessmentVersion/);
+  assert.match(source, /setHasImported\(false\)/);
+  assert.match(source, /Review the highlighted import issues, then try again\./);
   assert.match(source, /disabled=\{!canImport\}/);
   assert.match(source, /Bulk weight import is only available for draft assessment versions\./);
 });
@@ -102,5 +105,5 @@ test('weighting authoring flow includes the bulk weight import panel', () => {
 test('weights page passes draft editability into the weighting authoring component', () => {
   const source = readPageSource();
 
-  assert.match(source, /isEditableAssessmentVersion=\{\s*assessment\.latestDraftVersion\.lifecycleStatus === 'DRAFT'/);
+  assert.match(source, /isEditableAssessmentVersion=\{Boolean\(assessment\.latestDraftVersion\)\}/);
 });

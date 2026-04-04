@@ -20,29 +20,31 @@ function readSource(path: string): string {
   return readFileSync(path, 'utf8');
 }
 
-test('bulk signal import panel binds explicit preview and import actions for the active version', () => {
+test('bulk signal import panel binds the import action for the active version', () => {
   const source = readSource(bulkComponentPath);
 
-  assert.match(source, /previewSignalBulkImportAction\.bind\(null, \{ assessmentVersionId \}\)/);
   assert.match(source, /importSignalBulkAction\.bind\(null, \{ assessmentVersionId \}\)/);
+  assert.doesNotMatch(source, /previewSignalBulkImportAction/);
 });
 
-test('bulk signal import panel keeps textarea input client-side and invalidates stale preview state after edits', () => {
+test('bulk signal import panel keeps textarea input client-side and resets imported state after edits', () => {
   const source = readSource(bulkComponentPath);
 
   assert.match(source, /const nextRawInput = event\.currentTarget\.value/);
   assert.match(source, /setRawInput\(nextRawInput\)/);
-  assert.match(source, /resultState\.rawInput === rawInput/);
-  assert.match(source, /Preview again before importing/);
+  assert.match(source, /setSuccessMessage\(null\)/);
+  assert.match(source, /successMessage \? 'Imported' : 'Import'/);
 });
 
-test('bulk signal import panel enables import only with a current valid preview and clears after success', () => {
+test('bulk signal import panel uses one primary import action without preview or clear controls', () => {
   const source = readSource(bulkComponentPath);
 
-  assert.match(source, /resultState\.accepted\.length > 0/);
+  assert.match(source, /Importing\.\.\./);
+  assert.match(source, /successMessage \? 'Imported' : 'Import'/);
   assert.match(source, /disabled=\{!canImport\}/);
-  assert.match(source, /setRawInput\(''\)/);
-  assert.match(source, /setResultState\(initialAdminSignalBulkImportState\)/);
+  assert.doesNotMatch(source, /Previewing\.\.\./);
+  assert.doesNotMatch(source, /'Preview'/);
+  assert.doesNotMatch(source, /Clear/);
 });
 
 test('bulk signal import panel groups accepted preview rows using authored domain order', () => {
@@ -56,9 +58,10 @@ test('bulk signal import panel groups accepted preview rows using authored domai
 test('bulk signal import panel shows domain-required and append guidance for operator clarity', () => {
   const source = readSource(bulkComponentPath);
 
-  assert.match(source, /Add at least one domain before previewing signal imports\./);
+  assert.match(source, /Add at least one domain before importing signals\./);
   assert.match(source, /This will append new signals within each matched domain/);
-  assert.match(source, /No valid rows were found to import\. Fix the rejected rows and preview again\./);
+  assert.match(source, /No valid rows were found to import\. Fix the rejected rows and try again\./);
+  assert.match(source, /Review the rejected rows below, then try importing again\./);
 });
 
 test('signal authoring renders the bulk panel only in signals mode above the manual signal cards', () => {

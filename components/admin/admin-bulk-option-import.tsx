@@ -9,7 +9,6 @@ import {
 } from '@/lib/admin/admin-bulk-option-import';
 import {
   importBulkOptionsAction,
-  previewBulkOptionsAction,
 } from '@/lib/server/admin-bulk-option-import-actions';
 import {
   LabelPill,
@@ -152,10 +151,6 @@ export function AdminBulkOptionImport({
   isEditableAssessmentVersion,
 }: AdminBulkOptionImportProps) {
   const router = useRouter();
-  const previewAction = useMemo(
-    () => previewBulkOptionsAction.bind(null, { assessmentVersionId }),
-    [assessmentVersionId],
-  );
   const importAction = useMemo(
     () => importBulkOptionsAction.bind(null, { assessmentVersionId }),
     [assessmentVersionId],
@@ -164,34 +159,26 @@ export function AdminBulkOptionImport({
   const [resultState, setResultState] = useState<AdminBulkOptionImportState>(
     initialAdminBulkOptionImportState,
   );
-  const [isPreviewPending, startPreviewTransition] = useTransition();
+  const [hasImported, setHasImported] = useState(false);
   const [isImportPending, startImportTransition] = useTransition();
 
   const isInputEmpty = rawInput.trim().length === 0;
-  const isBusy = isPreviewPending || isImportPending;
+  const isBusy = isImportPending;
   const showResult = resultState.hasSubmitted;
-  const hasBlockingErrors =
-    resultState.parseErrors.length > 0 ||
-    resultState.groupErrors.length > 0 ||
-    resultState.planErrors.length > 0 ||
-    Boolean(resultState.executionError);
+  const actionErrorMessage =
+    resultState.formError ??
+    resultState.executionError ??
+    (resultState.hasSubmitted && !resultState.success && (
+      resultState.parseErrors.length > 0 ||
+      resultState.groupErrors.length > 0 ||
+      resultState.planErrors.length > 0
+    )
+      ? 'Review the highlighted import issues, then try again.'
+      : null);
   const canImport =
     !isInputEmpty &&
     !isBusy &&
-    isEditableAssessmentVersion &&
-    resultState.canImport &&
-    !hasBlockingErrors;
-
-  function handlePreview() {
-    if (isInputEmpty || isBusy || !isEditableAssessmentVersion) {
-      return;
-    }
-
-    startPreviewTransition(async () => {
-      const nextState = await previewAction({ rawInput });
-      setResultState(nextState);
-    });
-  }
+    isEditableAssessmentVersion;
 
   function handleImport() {
     if (!canImport) {
@@ -202,14 +189,13 @@ export function AdminBulkOptionImport({
       const nextState = await importAction({ rawInput });
       setResultState(nextState);
       if (nextState.success) {
+        setHasImported(true);
         router.refresh();
+        return;
       }
-    });
-  }
 
-  function handleClear() {
-    setRawInput('');
-    setResultState(initialAdminBulkOptionImportState);
+      setHasImported(false);
+    });
   }
 
   return (
@@ -256,34 +242,23 @@ export function AdminBulkOptionImport({
             onChange={(event) => {
               const nextRawInput = event.currentTarget.value;
               setRawInput(nextRawInput);
+              setHasImported(false);
             }}
             placeholder="1|A|I prefer to move quickly and decide fast"
             value={rawInput}
           />
         </label>
 
+        {actionErrorMessage ? <InlineBanner tone="danger">{actionErrorMessage}</InlineBanner> : null}
+
         <div className="flex flex-wrap items-center gap-3">
-          <ActionButton
-            disabled={isInputEmpty || isBusy || !isEditableAssessmentVersion}
-            onClick={handlePreview}
-            variant="secondary"
-          >
-            {isPreviewPending ? 'Previewing...' : 'Preview import'}
-          </ActionButton>
           <ActionButton disabled={!canImport} onClick={handleImport} variant="primary">
-            {isImportPending ? 'Importing...' : 'Import options'}
-          </ActionButton>
-          <ActionButton disabled={isBusy || isInputEmpty} onClick={handleClear} variant="secondary">
-            Clear
+            {isImportPending ? 'Importing...' : hasImported ? 'Imported' : 'Import'}
           </ActionButton>
         </div>
 
         {showResult ? (
           <div className="space-y-5">
-            {resultState.formError ? (
-              <InlineBanner tone="danger">{resultState.formError}</InlineBanner>
-            ) : null}
-
             <SectionBlock title="Summary">
               <SummaryGrid state={resultState} />
             </SectionBlock>
@@ -386,7 +361,7 @@ export function AdminBulkOptionImport({
                   <InlineBanner tone="danger">{resultState.executionError}</InlineBanner>
                 ) : (
                   <InlineBanner tone="neutral">
-                    Import did not run because the current preview contains blocking issues.
+                    Import did not run because the current input still contains blocking issues.
                   </InlineBanner>
                 )}
               </SectionBlock>

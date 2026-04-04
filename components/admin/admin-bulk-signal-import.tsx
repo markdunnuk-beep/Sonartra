@@ -9,7 +9,6 @@ import {
 } from '@/lib/admin/admin-signal-bulk-import';
 import {
   importSignalBulkAction,
-  previewSignalBulkImportAction,
 } from '@/lib/server/admin-signal-bulk-import-actions';
 import type { AdminAssessmentDetailDomain } from '@/lib/server/admin-assessment-detail';
 import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
@@ -145,10 +144,6 @@ export function AdminBulkSignalImport({
   isEditableAssessmentVersion: boolean;
 }>) {
   const router = useRouter();
-  const previewAction = useMemo(
-    () => previewSignalBulkImportAction.bind(null, { assessmentVersionId }),
-    [assessmentVersionId],
-  );
   const importAction = useMemo(
     () => importSignalBulkAction.bind(null, { assessmentVersionId }),
     [assessmentVersionId],
@@ -158,38 +153,25 @@ export function AdminBulkSignalImport({
     initialAdminSignalBulkImportState,
   );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isPreviewPending, startPreviewTransition] = useTransition();
   const [isImportPending, startImportTransition] = useTransition();
 
   const isInputEmpty = rawInput.trim().length === 0;
-  const isBusy = isPreviewPending || isImportPending;
+  const isBusy = isImportPending;
   const hasAuthoredDomains = domains.length > 0;
   const existingSignalCount = domains.reduce((count, domain) => count + domain.signals.length, 0);
   const hasExistingSignals = existingSignalCount > 0;
-  const isPreviewCurrent =
-    resultState.lastAction === 'preview' &&
-    resultState.rawInput === rawInput &&
-    resultState.accepted.length > 0;
+  const actionErrorMessage =
+    resultState.formError ??
+    resultState.executionError ??
+    (resultState.hasSubmitted && !resultState.success && resultState.rejected.length > 0
+      ? 'Review the rejected rows below, then try importing again.'
+      : null);
   const canImport =
     !isInputEmpty &&
     !isBusy &&
     isEditableAssessmentVersion &&
-    hasAuthoredDomains &&
-    resultState.canImport &&
-    isPreviewCurrent;
+    hasAuthoredDomains;
   const acceptedPreviewGroups = buildAcceptedPreviewGroups(domains, resultState.accepted);
-
-  function handlePreview() {
-    if (isInputEmpty || isBusy || !isEditableAssessmentVersion) {
-      return;
-    }
-
-    startPreviewTransition(async () => {
-      const nextState = await previewAction({ rawInput });
-      setSuccessMessage(null);
-      setResultState(nextState);
-    });
-  }
 
   function handleImport() {
     if (!canImport) {
@@ -198,26 +180,18 @@ export function AdminBulkSignalImport({
 
     startImportTransition(async () => {
       const nextState = await importAction({ rawInput });
+      setResultState(nextState);
       if (nextState.success && nextState.didImport) {
         const importedDomainCount = Object.keys(nextState.summary.perDomainCreateCounts).length;
         setSuccessMessage(
           `${nextState.summary.importedCount} signal${nextState.summary.importedCount === 1 ? '' : 's'} imported across ${importedDomainCount} domain${importedDomainCount === 1 ? '' : 's'}.`,
         );
-        setRawInput('');
-        setResultState(initialAdminSignalBulkImportState);
         router.refresh();
         return;
       }
 
       setSuccessMessage(null);
-      setResultState(nextState);
     });
-  }
-
-  function handleClear() {
-    setRawInput('');
-    setSuccessMessage(null);
-    setResultState(initialAdminSignalBulkImportState);
   }
 
   return (
@@ -248,7 +222,7 @@ export function AdminBulkSignalImport({
 
         {!hasAuthoredDomains ? (
           <InlineBanner tone="warning">
-            Add at least one domain before previewing signal imports.
+            Add at least one domain before importing signals.
           </InlineBanner>
         ) : null}
 
@@ -286,40 +260,23 @@ export function AdminBulkSignalImport({
           />
         </label>
 
-        {!isInputEmpty && resultState.lastAction === 'preview' && resultState.rawInput !== rawInput ? (
-          <InlineBanner tone="warning">
-            The pasted rows changed after the last preview. Preview again before importing.
-          </InlineBanner>
-        ) : null}
+        {actionErrorMessage ? <InlineBanner tone="danger">{actionErrorMessage}</InlineBanner> : null}
 
         <div className="flex flex-wrap items-center gap-3">
-          <ActionButton
-            disabled={isInputEmpty || isBusy || !isEditableAssessmentVersion || !hasAuthoredDomains}
-            onClick={handlePreview}
-            variant="secondary"
-          >
-            {isPreviewPending ? 'Previewing...' : 'Preview'}
-          </ActionButton>
           <ActionButton disabled={!canImport} onClick={handleImport} variant="primary">
-            {isImportPending ? 'Importing...' : 'Import'}
-          </ActionButton>
-          <ActionButton disabled={isBusy || isInputEmpty} onClick={handleClear} variant="secondary">
-            Clear
+            {isImportPending ? 'Importing...' : successMessage ? 'Imported' : 'Import'}
           </ActionButton>
         </div>
 
         {resultState.hasSubmitted ? (
           <div className="space-y-5">
-            {resultState.formError ? <InlineBanner tone="danger">{resultState.formError}</InlineBanner> : null}
-            {resultState.executionError ? <InlineBanner tone="danger">{resultState.executionError}</InlineBanner> : null}
-
             <SectionBlock title="Summary">
               <SummaryGrid state={resultState} />
             </SectionBlock>
 
-            {resultState.lastAction === 'preview' && resultState.accepted.length === 0 ? (
+            {!resultState.didImport && resultState.accepted.length === 0 ? (
               <InlineBanner tone="warning">
-                No valid rows were found to import. Fix the rejected rows and preview again.
+                No valid rows were found to import. Fix the rejected rows and try again.
               </InlineBanner>
             ) : null}
 
@@ -391,7 +348,7 @@ export function AdminBulkSignalImport({
             {resultState.lastAction === 'import' && !resultState.didImport && !resultState.executionError ? (
               <SectionBlock title="Import result">
                 <InlineBanner tone="neutral">
-                  Import is blocked right now. Review the preview messages, then preview again after fixing the rows.
+                  Import did not run. Review the messages, then try again after fixing the rows.
                 </InlineBanner>
               </SectionBlock>
             ) : null}

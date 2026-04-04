@@ -9,7 +9,6 @@ import {
 } from '@/lib/admin/admin-bulk-weight-import';
 import {
   importBulkWeightsAction,
-  previewBulkWeightsAction,
 } from '@/lib/server/admin-bulk-weight-import-actions';
 import {
   LabelPill,
@@ -156,10 +155,6 @@ export function AdminBulkWeightImport({
   isEditableAssessmentVersion,
 }: AdminBulkWeightImportProps) {
   const router = useRouter();
-  const previewAction = useMemo(
-    () => previewBulkWeightsAction.bind(null, { assessmentVersionId }),
-    [assessmentVersionId],
-  );
   const importAction = useMemo(
     () => importBulkWeightsAction.bind(null, { assessmentVersionId }),
     [assessmentVersionId],
@@ -168,34 +163,26 @@ export function AdminBulkWeightImport({
   const [resultState, setResultState] = useState<AdminBulkWeightImportState>(
     initialAdminBulkWeightImportState,
   );
-  const [isPreviewPending, startPreviewTransition] = useTransition();
+  const [hasImported, setHasImported] = useState(false);
   const [isImportPending, startImportTransition] = useTransition();
 
   const isInputEmpty = rawInput.trim().length === 0;
-  const isBusy = isPreviewPending || isImportPending;
+  const isBusy = isImportPending;
   const showResult = resultState.hasSubmitted;
-  const hasBlockingErrors =
-    resultState.parseErrors.length > 0 ||
-    resultState.groupErrors.length > 0 ||
-    resultState.planErrors.length > 0 ||
-    Boolean(resultState.executionError);
+  const actionErrorMessage =
+    resultState.formError ??
+    resultState.executionError ??
+    (resultState.hasSubmitted && !resultState.success && (
+      resultState.parseErrors.length > 0 ||
+      resultState.groupErrors.length > 0 ||
+      resultState.planErrors.length > 0
+    )
+      ? 'Review the highlighted import issues, then try again.'
+      : null);
   const canImport =
     !isInputEmpty &&
     !isBusy &&
-    isEditableAssessmentVersion &&
-    resultState.canImport &&
-    !hasBlockingErrors;
-
-  function handlePreview() {
-    if (isInputEmpty || isBusy || !isEditableAssessmentVersion) {
-      return;
-    }
-
-    startPreviewTransition(async () => {
-      const nextState = await previewAction({ rawInput });
-      setResultState(nextState);
-    });
-  }
+    isEditableAssessmentVersion;
 
   function handleImport() {
     if (!canImport) {
@@ -206,14 +193,13 @@ export function AdminBulkWeightImport({
       const nextState = await importAction({ rawInput });
       setResultState(nextState);
       if (nextState.success) {
+        setHasImported(true);
         router.refresh();
+        return;
       }
-    });
-  }
 
-  function handleClear() {
-    setRawInput('');
-    setResultState(initialAdminBulkWeightImportState);
+      setHasImported(false);
+    });
   }
 
   return (
@@ -260,34 +246,23 @@ export function AdminBulkWeightImport({
             onChange={(event) => {
               const nextRawInput = event.currentTarget.value;
               setRawInput(nextRawInput);
+              setHasImported(false);
             }}
             placeholder="1|A|driver|3"
             value={rawInput}
           />
         </label>
 
+        {actionErrorMessage ? <InlineBanner tone="danger">{actionErrorMessage}</InlineBanner> : null}
+
         <div className="flex flex-wrap items-center gap-3">
-          <ActionButton
-            disabled={isInputEmpty || isBusy || !isEditableAssessmentVersion}
-            onClick={handlePreview}
-            variant="secondary"
-          >
-            {isPreviewPending ? 'Previewing...' : 'Preview import'}
-          </ActionButton>
           <ActionButton disabled={!canImport} onClick={handleImport} variant="primary">
-            {isImportPending ? 'Importing...' : 'Import weights'}
-          </ActionButton>
-          <ActionButton disabled={isBusy || isInputEmpty} onClick={handleClear} variant="secondary">
-            Clear
+            {isImportPending ? 'Importing...' : hasImported ? 'Imported' : 'Import'}
           </ActionButton>
         </div>
 
         {showResult ? (
           <div className="space-y-5">
-            {resultState.formError ? (
-              <InlineBanner tone="danger">{resultState.formError}</InlineBanner>
-            ) : null}
-
             <SectionBlock title="Summary">
               <SummaryGrid state={resultState} />
             </SectionBlock>
@@ -393,7 +368,7 @@ export function AdminBulkWeightImport({
                   <InlineBanner tone="danger">{resultState.executionError}</InlineBanner>
                 ) : (
                   <InlineBanner tone="neutral">
-                    Import did not run because the current preview contains blocking issues.
+                    Import did not run because the current input still contains blocking issues.
                   </InlineBanner>
                 )}
               </SectionBlock>

@@ -14,27 +14,28 @@ function readSource(): string {
   return readFileSync(componentPath, 'utf8');
 }
 
-test('question bulk import forms add explicit preview buttons and gate import on preview state', () => {
+test('question bulk import forms use a single import action with imported state', () => {
   const source = readSource();
 
-  assert.match(source, /function BulkImportActions/);
-  assert.match(source, /Previewing\.\.\./);
-  assert.match(source, /Import questions/);
+  assert.match(source, /function BulkImportAction/);
+  assert.match(source, /Importing\.\.\./);
+  assert.match(source, /hasImported \? 'Imported' : 'Import'/);
   assert.match(source, /disabled=\{pending \|\| !canImport\}/);
+  assert.doesNotMatch(source, /Previewing\.\.\./);
 });
 
-test('question bulk preview is cleared when textarea or domain selection changes', () => {
+test('question bulk imported state resets when textarea or domain selection changes', () => {
   const source = readSource();
 
-  assert.match(source, /setPreviewResult\(null\)/);
-  assert.match(source, /Preview again before importing/);
+  assert.match(source, /setHasImported\(false\)/);
+  assert.match(source, /setQuestionLines\(''\);/);
 });
 
-test('question bulk forms render lightweight preview summaries and accepted\/issue sections', () => {
+test('question bulk forms remove preview-specific helpers and guidance', () => {
   const source = readSource();
 
-  assert.match(source, /function BulkQuestionPreviewPanel/);
-  assert.match(source, /Questions parsed/);
-  assert.match(source, /Accepted preview/);
-  assert.match(source, /SectionBlock title="Issues"/);
+  assert.doesNotMatch(source, /function BulkQuestionPreviewPanel/);
+  assert.doesNotMatch(source, /buildBulkQuestionPreview/);
+  assert.doesNotMatch(source, /buildBulkQuestionByDomainPreview/);
+  assert.doesNotMatch(source, /Preview again before importing/);
 });

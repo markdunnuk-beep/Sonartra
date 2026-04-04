@@ -9,7 +9,6 @@ import {
 } from '@/lib/admin/admin-domain-bulk-import';
 import {
   importDomainBulkAction,
-  previewDomainBulkImportAction,
 } from '@/lib/server/admin-domain-bulk-import-actions';
 import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
 
@@ -116,10 +115,6 @@ export function AdminBulkDomainImport({
   existingDomainCount: number;
 }>) {
   const router = useRouter();
-  const previewAction = useMemo(
-    () => previewDomainBulkImportAction.bind(null, { assessmentVersionId }),
-    [assessmentVersionId],
-  );
   const importAction = useMemo(
     () => importDomainBulkAction.bind(null, { assessmentVersionId }),
     [assessmentVersionId],
@@ -129,34 +124,21 @@ export function AdminBulkDomainImport({
     initialAdminDomainBulkImportState,
   );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isPreviewPending, startPreviewTransition] = useTransition();
   const [isImportPending, startImportTransition] = useTransition();
 
   const isInputEmpty = rawInput.trim().length === 0;
-  const isBusy = isPreviewPending || isImportPending;
+  const isBusy = isImportPending;
   const hasExistingDomains = existingDomainCount > 0;
-  const isPreviewCurrent =
-    resultState.lastAction === 'preview' &&
-    resultState.rawInput === rawInput &&
-    resultState.accepted.length > 0;
+  const actionErrorMessage =
+    resultState.formError ??
+    resultState.executionError ??
+    (resultState.hasSubmitted && !resultState.success && resultState.rejected.length > 0
+      ? 'Review the rejected rows below, then try importing again.'
+      : null);
   const canImport =
     !isInputEmpty &&
     !isBusy &&
-    isEditableAssessmentVersion &&
-    resultState.canImport &&
-    isPreviewCurrent;
-
-  function handlePreview() {
-    if (isInputEmpty || isBusy || !isEditableAssessmentVersion) {
-      return;
-    }
-
-    startPreviewTransition(async () => {
-      const nextState = await previewAction({ rawInput });
-      setSuccessMessage(null);
-      setResultState(nextState);
-    });
-  }
+    isEditableAssessmentVersion;
 
   function handleImport() {
     if (!canImport) {
@@ -165,25 +147,17 @@ export function AdminBulkDomainImport({
 
     startImportTransition(async () => {
       const nextState = await importAction({ rawInput });
+      setResultState(nextState);
       if (nextState.success && nextState.didImport) {
         setSuccessMessage(
           `${nextState.summary.importedCount} domain${nextState.summary.importedCount === 1 ? '' : 's'} imported successfully.`,
         );
-        setRawInput('');
-        setResultState(initialAdminDomainBulkImportState);
         router.refresh();
         return;
       }
 
       setSuccessMessage(null);
-      setResultState(nextState);
     });
-  }
-
-  function handleClear() {
-    setRawInput('');
-    setSuccessMessage(null);
-    setResultState(initialAdminDomainBulkImportState);
   }
 
   return (
@@ -242,40 +216,23 @@ export function AdminBulkDomainImport({
           />
         </label>
 
-        {!isInputEmpty && resultState.lastAction === 'preview' && resultState.rawInput !== rawInput ? (
-          <InlineBanner tone="warning">
-            The pasted rows changed after the last preview. Preview again before importing.
-          </InlineBanner>
-        ) : null}
+        {actionErrorMessage ? <InlineBanner tone="danger">{actionErrorMessage}</InlineBanner> : null}
 
         <div className="flex flex-wrap items-center gap-3">
-          <ActionButton
-            disabled={isInputEmpty || isBusy || !isEditableAssessmentVersion}
-            onClick={handlePreview}
-            variant="secondary"
-          >
-            {isPreviewPending ? 'Previewing...' : 'Preview'}
-          </ActionButton>
           <ActionButton disabled={!canImport} onClick={handleImport} variant="primary">
-            {isImportPending ? 'Importing...' : 'Import'}
-          </ActionButton>
-          <ActionButton disabled={isBusy || isInputEmpty} onClick={handleClear} variant="secondary">
-            Clear
+            {isImportPending ? 'Importing...' : successMessage ? 'Imported' : 'Import'}
           </ActionButton>
         </div>
 
         {resultState.hasSubmitted ? (
           <div className="space-y-5">
-            {resultState.formError ? <InlineBanner tone="danger">{resultState.formError}</InlineBanner> : null}
-            {resultState.executionError ? <InlineBanner tone="danger">{resultState.executionError}</InlineBanner> : null}
-
             <SectionBlock title="Summary">
               <SummaryGrid state={resultState} />
             </SectionBlock>
 
-            {resultState.lastAction === 'preview' && resultState.accepted.length === 0 ? (
+            {!resultState.didImport && resultState.accepted.length === 0 ? (
               <InlineBanner tone="warning">
-                No valid rows were found to import. Fix the rejected rows and preview again.
+                No valid rows were found to import. Fix the rejected rows and try again.
               </InlineBanner>
             ) : null}
 
@@ -324,7 +281,7 @@ export function AdminBulkDomainImport({
             {resultState.lastAction === 'import' && !resultState.didImport && !resultState.executionError ? (
               <SectionBlock title="Import result">
                 <InlineBanner tone="neutral">
-                  Import is blocked right now. Review the preview messages, then preview again after fixing the rows.
+                  Import did not run. Review the messages, then try again after fixing the rows.
                 </InlineBanner>
               </SectionBlock>
             ) : null}
