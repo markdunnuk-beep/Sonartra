@@ -5,6 +5,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { AdminAssessmentLanguageStep } from '@/components/admin/admin-assessment-language-step';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import { getAdminAssessmentLanguageStepViewModel } from '@/lib/server/admin-assessment-language-step';
+import {
+  importHeroHeaderLanguageForAssessmentVersionWithDependencies,
+  previewHeroHeaderLanguageForAssessmentVersionWithDependencies,
+} from '@/lib/server/admin-hero-header-language-import';
 
 type AssessmentRow = {
   assessment_id: string;
@@ -64,6 +68,14 @@ type LanguageFixture = {
     patternKey: string;
     section: 'headline' | 'summary' | 'strengths' | 'watchouts' | 'development';
     content: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  heroHeaders?: Array<{
+    id: string;
+    assessmentVersionId: string;
+    pairKey: string;
+    headline: string;
     createdAt: string;
     updatedAt: string;
   }>;
@@ -279,6 +291,30 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
         };
       }
 
+      if (text.includes('SELECT') && text.includes('FROM assessment_version_language_hero_headers')) {
+        if (fixture.throwMissingLanguageTables) {
+          const error = new Error('relation "assessment_version_language_hero_headers" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
+        const assessmentVersionId = params?.[0] as string;
+        return {
+          rows: (fixture.heroHeaders ?? [])
+            .filter((row) => row.assessmentVersionId === assessmentVersionId)
+            .map((row) => ({
+              id: row.id,
+              assessment_version_id: row.assessmentVersionId,
+              pair_key: row.pairKey,
+              headline: row.headline,
+              created_at: row.createdAt,
+              updated_at: row.updatedAt,
+            })) as T[],
+        };
+      }
+
       return { rows: [] as T[] };
     },
   };
@@ -302,6 +338,134 @@ function buildAssessmentRow(overrides?: Partial<AssessmentRow>): AssessmentRow {
     question_count: '0',
     ...overrides,
   };
+}
+
+function createHeroHeaderImportDb(seed?: {
+  assessments?: Array<{ id: string; assessmentKey: string }>;
+  versions?: Array<{ id: string; assessmentId: string; lifecycleStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' }>;
+  domains?: Array<{ id: string; assessmentVersionId: string; orderIndex: number }>;
+  signals?: Array<{ id: string; assessmentVersionId: string; domainId: string; signalKey: string; orderIndex: number }>;
+  heroHeaders?: Array<{ id: string; assessmentVersionId: string; pairKey: string; headline: string }>;
+}) {
+  const state = {
+    assessments: [...(seed?.assessments ?? [])],
+    versions: [...(seed?.versions ?? [])],
+    domains: [...(seed?.domains ?? [])],
+    signals: [...(seed?.signals ?? [])],
+    heroHeaders: [...(seed?.heroHeaders ?? [])],
+  };
+
+  let snapshot: typeof state | null = null;
+
+  const client = {
+    async query<T>(text: string, params?: readonly unknown[]) {
+      const sql = text.replace(/\s+/g, ' ').trim();
+
+      if (sql === 'BEGIN') {
+        snapshot = {
+          assessments: state.assessments.map((row) => ({ ...row })),
+          versions: state.versions.map((row) => ({ ...row })),
+          domains: state.domains.map((row) => ({ ...row })),
+          signals: state.signals.map((row) => ({ ...row })),
+          heroHeaders: state.heroHeaders.map((row) => ({ ...row })),
+        };
+        return { rows: [] as T[] };
+      }
+
+      if (sql === 'COMMIT') {
+        snapshot = null;
+        return { rows: [] as T[] };
+      }
+
+      if (sql === 'ROLLBACK') {
+        if (snapshot) {
+          state.assessments = snapshot.assessments;
+          state.versions = snapshot.versions;
+          state.domains = snapshot.domains;
+          state.signals = snapshot.signals;
+          state.heroHeaders = snapshot.heroHeaders;
+        }
+        snapshot = null;
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_versions av') && sql.includes('INNER JOIN assessments a ON a.id = av.assessment_id')) {
+        const assessmentVersionId = params?.[0] as string;
+        const version = state.versions.find((row) => row.id === assessmentVersionId) ?? null;
+        const assessment = version ? state.assessments.find((row) => row.id === version.assessmentId) ?? null : null;
+        return {
+          rows: version && assessment
+            ? ([{
+                assessment_key: assessment.assessmentKey,
+                assessment_version_id: version.id,
+                lifecycle_status: version.lifecycleStatus,
+              }] as unknown as T[])
+            : ([] as T[]),
+        };
+      }
+
+      if (sql.includes('FROM signals s') && sql.includes('INNER JOIN domains d')) {
+        const assessmentVersionId = params?.[0] as string;
+        const domainOrder = new Map(
+          state.domains.filter((row) => row.assessmentVersionId === assessmentVersionId).map((row) => [row.id, row.orderIndex]),
+        );
+        return {
+          rows: state.signals
+            .filter((row) => row.assessmentVersionId === assessmentVersionId)
+            .sort(
+              (left, right) =>
+                (domainOrder.get(left.domainId) ?? 0) - (domainOrder.get(right.domainId) ?? 0) ||
+                left.orderIndex - right.orderIndex ||
+                left.id.localeCompare(right.id),
+            )
+            .map((row) => ({ signal_key: row.signalKey })) as unknown as T[],
+        };
+      }
+
+      if (sql.includes('SELECT') && sql.includes('FROM assessment_version_language_hero_headers')) {
+        const assessmentVersionId = params?.[0] as string;
+        return {
+          rows: state.heroHeaders
+            .filter((row) => row.assessmentVersionId === assessmentVersionId)
+            .map((row) => ({
+              id: row.id,
+              assessment_version_id: row.assessmentVersionId,
+              pair_key: row.pairKey,
+              headline: row.headline,
+              created_at: '2026-04-01T00:00:00.000Z',
+              updated_at: '2026-04-01T00:00:00.000Z',
+            })) as unknown as T[],
+        };
+      }
+
+      if (sql.startsWith('DELETE FROM assessment_version_language_hero_headers')) {
+        const assessmentVersionId = params?.[0] as string;
+        state.heroHeaders = state.heroHeaders.filter((row) => row.assessmentVersionId !== assessmentVersionId);
+        return { rows: [] as T[] };
+      }
+
+      if (sql.startsWith('INSERT INTO assessment_version_language_hero_headers')) {
+        const [assessmentVersionId, pairKey, headline] = params as [string, string, string];
+        state.heroHeaders.push({
+          id: `hero-header-${state.heroHeaders.length + 1}`,
+          assessmentVersionId,
+          pairKey,
+          headline,
+        });
+        return { rows: [] as T[] };
+      }
+
+      return { rows: [] as T[] };
+    },
+    async connect() {
+      return {
+        query: client.query,
+        release() {},
+      };
+    },
+  };
+
+  return { client, state };
 }
 
 test('language step view model resolves the latest draft version and derives counts server-side', async () => {
@@ -378,6 +542,16 @@ test('language step view model resolves the latest draft version and derives cou
           updatedAt: '2026-04-01T00:00:05.000Z',
         },
       ],
+      heroHeaders: [
+        {
+          id: 'hero-header-1',
+          assessmentVersionId: 'version-draft',
+          pairKey: 'driver_analyst',
+          headline: 'Fast, structured, decisive.',
+          createdAt: '2026-04-01T00:00:06.000Z',
+          updatedAt: '2026-04-01T00:00:06.000Z',
+        },
+      ],
     }),
     'wplp80',
   );
@@ -388,10 +562,10 @@ test('language step view model resolves the latest draft version and derives cou
   assert.equal(viewModel?.assessmentLanguageDescription, 'Assessment introduction copy');
   assert.deepEqual(viewModel?.counts, {
     assessment: { entryCount: 1 },
+    heroHeaders: { entryCount: 1 },
     signals: { entryCount: 2 },
     pairs: { entryCount: 1 },
     domains: { entryCount: 1 },
-    overview: { entryCount: 1 },
   });
 });
 
@@ -427,7 +601,7 @@ test('language step view model falls back to the published version when no draft
   assert.equal(viewModel?.activeVersion?.assessmentVersionId, 'version-published');
   assert.equal(viewModel?.activeVersion?.status, 'published');
   assert.equal(viewModel?.assessmentLanguageDescription, null);
-  assert.equal(viewModel?.counts.overview.entryCount, 1);
+  assert.equal(viewModel?.counts.heroHeaders.entryCount, 0);
 });
 
 test('language step view model returns null for a missing assessment and empty version state when no versions exist', async () => {
@@ -455,14 +629,14 @@ test('language step view model returns null for a missing assessment and empty v
   assert.equal(noVersionAssessment?.activeVersion, null);
   assert.deepEqual(noVersionAssessment?.counts, {
     assessment: { entryCount: 0 },
+    heroHeaders: { entryCount: 0 },
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
-    overview: { entryCount: 0 },
   });
 });
 
-test('language step component renders intro, hero, domain chapters, signals, and pairs in report order', () => {
+test('language step component renders intro, hero header, domain chapters, signals, and pairs in report order', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentLanguageStep
       viewModel={{
@@ -487,10 +661,10 @@ test('language step component renders intro, hero, domain chapters, signals, and
         assessmentLanguageDescription: 'Assessment introduction copy',
         counts: {
           assessment: { entryCount: 1 },
+          heroHeaders: { entryCount: 2 },
           signals: { entryCount: 2 },
           pairs: { entryCount: 1 },
           domains: { entryCount: 1 },
-          overview: { entryCount: 3 },
         },
       }}
     />,
@@ -503,22 +677,24 @@ test('language step component renders intro, hero, domain chapters, signals, and
   assert.match(markup, /Assessment introduction copy/);
   assert.match(markup, /rounded-\[1\.25rem\] border border-white\/10 bg-gradient-to-b from-white\/\[0\.02\] to-transparent p-\[1px\]/);
   assert.match(markup, /rounded-\[1\.25rem\] bg-black\/30/);
-  assert.match(markup, /Hero/);
-  assert.match(markup, /Hero Language/);
+  assert.match(markup, /Hero Header/);
+  assert.match(markup, /Hero Header Language/);
+  assert.match(markup, /Format: scope \| key \| headline/);
+  assert.match(markup, /Paste Hero Header rows/);
   assert.match(markup, /Domain Chapters/);
   assert.match(markup, /Domain Chapter Language/);
   assert.match(markup, /Signal Language/);
   assert.match(markup, /Pair Summary Language/);
   assert.match(markup, /section \| target \| field \| content/);
+  assert.match(markup, /pair \| driver_influencer \| Fast-moving, people-driven and energised by momentum/);
   assert.match(markup, /supported authoring path for report language/i);
-  assert.match(markup, /hero\.primaryPattern or hero\.domainHighlights/);
   assert.match(markup, /Actions are not authored directly for MVP/);
   assert.match(markup, /Pair strength and watchout are legacy-only and are not surfaced here\./);
   assert.doesNotMatch(markup, /Actions<\/h3>/);
   assert.doesNotMatch(markup, /AdminOverviewLanguageImport|AdminDomainLanguageImport|AdminSignalLanguageImport|AdminPairLanguageImport/);
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
-  assert.match(markup, /3 entries/);
+  assert.match(markup, /Current Hero Header rows: 2/);
 });
 
 test('language step component shows a safe empty state when no usable version context exists', () => {
@@ -536,10 +712,10 @@ test('language step component shows a safe empty state when no usable version co
         assessmentLanguageDescription: null,
         counts: {
           assessment: { entryCount: 0 },
+          heroHeaders: { entryCount: 0 },
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
           domains: { entryCount: 0 },
-          overview: { entryCount: 0 },
         },
       }}
     />,
@@ -547,6 +723,95 @@ test('language step component shows a safe empty state when no usable version co
 
   assert.match(markup, /No version context available/);
   assert.match(markup, /Create a draft or publish a version before adding structured language datasets\./);
+});
+
+test('hero header preview and import accept valid pair rows and replace version-scoped rows', async () => {
+  const fake = createHeroHeaderImportDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [{ id: 'version-draft', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+    domains: [{ id: 'domain-1', assessmentVersionId: 'version-draft', orderIndex: 0 }],
+    signals: [
+      { id: 'signal-1', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'style_driver', orderIndex: 0 },
+      { id: 'signal-2', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'style_influencer', orderIndex: 1 },
+    ],
+    heroHeaders: [
+      { id: 'hero-header-old', assessmentVersionId: 'version-draft', pairKey: 'driver_analyst', headline: 'Old headline' },
+    ],
+  });
+
+  const preview = await previewHeroHeaderLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-draft',
+      rawInput: 'pair | driver_influencer | Fast-moving, people-driven and energised by momentum',
+    },
+    { db: fake.client },
+  );
+
+  assert.equal(preview.success, true);
+  assert.equal(preview.summary.existingRowCount, 1);
+  assert.deepEqual(preview.previewGroups, [
+    {
+      targetKey: 'driver_influencer',
+      targetLabel: 'driver_influencer',
+      entries: [
+        {
+          lineNumber: 1,
+          headline: 'Fast-moving, people-driven and energised by momentum',
+        },
+      ],
+    },
+  ]);
+
+  const result = await importHeroHeaderLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-draft',
+      rawInput: 'pair | driver_influencer | Fast-moving, people-driven and energised by momentum',
+    },
+    { db: fake.client, revalidatePath() {} },
+  );
+
+  assert.equal(result.success, true);
+  assert.deepEqual(fake.state.heroHeaders, [
+    {
+      id: 'hero-header-1',
+      assessmentVersionId: 'version-draft',
+      pairKey: 'driver_influencer',
+      headline: 'Fast-moving, people-driven and energised by momentum',
+    },
+  ]);
+});
+
+test('hero header validation rejects invalid pair keys and invalid scopes', async () => {
+  const fake = createHeroHeaderImportDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [{ id: 'version-draft', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+    domains: [{ id: 'domain-1', assessmentVersionId: 'version-draft', orderIndex: 0 }],
+    signals: [
+      { id: 'signal-1', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'style_driver', orderIndex: 0 },
+      { id: 'signal-2', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'style_influencer', orderIndex: 1 },
+    ],
+  });
+
+  const invalidKey = await previewHeroHeaderLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-draft',
+      rawInput: 'pair | driver_unknown | Invalid pair key',
+    },
+    { db: fake.client },
+  );
+
+  const invalidScope = await previewHeroHeaderLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-draft',
+      rawInput: 'signal | driver_influencer | Invalid scope',
+    },
+    { db: fake.client },
+  );
+
+  assert.equal(invalidKey.success, false);
+  assert.equal(invalidKey.validationErrors[0]?.code, 'UNKNOWN_SIGNAL_KEY');
+  assert.equal(invalidScope.success, false);
+  assert.equal(invalidScope.validationErrors[0]?.code, 'INVALID_SCOPE');
 });
 
 test('language step view model degrades safely when language tables are unavailable at runtime', async () => {
@@ -564,10 +829,10 @@ test('language step view model degrades safely when language tables are unavaila
   assert.match(viewModel?.languageSchemaMessage ?? '', /Language datasets are unavailable/);
   assert.deepEqual(viewModel?.counts, {
     assessment: { entryCount: 0 },
+    heroHeaders: { entryCount: 0 },
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
-    overview: { entryCount: 0 },
   });
 });
 
@@ -597,10 +862,10 @@ test('language step component shows a safe schema-unavailable state instead of r
         assessmentLanguageDescription: null,
         counts: {
           assessment: { entryCount: 0 },
+          heroHeaders: { entryCount: 0 },
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
           domains: { entryCount: 0 },
-          overview: { entryCount: 0 },
         },
       }}
     />,
@@ -608,7 +873,7 @@ test('language step component shows a safe schema-unavailable state instead of r
 
   assert.match(markup, /Language datasets unavailable/);
   assert.match(markup, /Apply the assessment version language migration before using this step\./);
-  assert.doesNotMatch(markup, /Hero Language/);
+  assert.doesNotMatch(markup, /Hero Header Language/);
   assert.doesNotMatch(markup, /Domain Chapter Language/);
   assert.doesNotMatch(markup, /Signal Language/);
   assert.doesNotMatch(markup, /Pair Summary Language/);

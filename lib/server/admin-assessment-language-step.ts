@@ -12,10 +12,10 @@ export type AdminAssessmentLanguageDatasetSummary = {
 
 export type AdminAssessmentLanguageDatasetCounts = {
   assessment: AdminAssessmentLanguageDatasetSummary;
+  heroHeaders: AdminAssessmentLanguageDatasetSummary;
   signals: AdminAssessmentLanguageDatasetSummary;
   pairs: AdminAssessmentLanguageDatasetSummary;
   domains: AdminAssessmentLanguageDatasetSummary;
-  overview: AdminAssessmentLanguageDatasetSummary;
 };
 
 export type AdminAssessmentLanguageActiveVersion = {
@@ -77,10 +77,10 @@ function countEntriesByKey(bundle: Readonly<Record<string, unknown>>): number {
 function createEmptyCounts(): AdminAssessmentLanguageDatasetCounts {
   return {
     assessment: { entryCount: 0 },
+    heroHeaders: { entryCount: 0 },
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
-    overview: { entryCount: 0 },
   };
 }
 
@@ -139,10 +139,10 @@ export async function getAdminAssessmentLanguageStepViewModel(
         assessment: {
           entryCount: assessmentLanguage.assessment_description ? 1 : 0,
         },
+        heroHeaders: { entryCount: countEntriesByKey(bundle.heroHeaders ?? {}) },
         signals: { entryCount: countEntriesByKey(bundle.signals) },
         pairs: { entryCount: countEntriesByKey(bundle.pairs) },
         domains: { entryCount: countEntriesByKey(bundle.domains) },
-        overview: { entryCount: countEntriesByKey(bundle.overview) },
       },
     };
   } catch (error) {

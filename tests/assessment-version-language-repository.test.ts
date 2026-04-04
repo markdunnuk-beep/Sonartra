@@ -9,6 +9,7 @@ import {
   getAssessmentVersionLanguagePairs,
   getAssessmentVersionLanguageSignals,
   replaceAssessmentVersionLanguageDomains,
+  replaceAssessmentVersionLanguageHeroHeaders,
   replaceAssessmentVersionLanguageOverview,
   replaceAssessmentVersionLanguagePairs,
   replaceAssessmentVersionLanguageSignals,
@@ -177,6 +178,12 @@ function createFakeLanguageDb(seed?: {
         return { rows: [] as T[] };
       }
 
+      if (sql.startsWith('DELETE FROM assessment_version_language_hero_headers')) {
+        const assessmentVersionId = params?.[0] as string;
+        state.heroHeaders = state.heroHeaders.filter((row) => row.assessmentVersionId !== assessmentVersionId);
+        return { rows: [] as T[] };
+      }
+
       if (sql.includes('FROM assessment_version_language_signals')) {
         const assessmentVersionId = params?.[0] as string;
         return {
@@ -245,7 +252,7 @@ function createFakeLanguageDb(seed?: {
         };
       }
 
-      if (sql.includes('FROM assessment_version_language_hero_headers')) {
+      if (sql.includes('SELECT') && sql.includes('FROM assessment_version_language_hero_headers')) {
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: [...state.heroHeaders]
@@ -352,6 +359,20 @@ function createFakeLanguageDb(seed?: {
           patternKey,
           section,
           content,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+        return { rows: [] as T[] };
+      }
+
+      if (sql.startsWith('INSERT INTO assessment_version_language_hero_headers')) {
+        const [assessmentVersionId, pairKey, headline] = params as [string, string, string];
+        const timestamp = nextTimestamp();
+        state.heroHeaders.push({
+          id: nextId('hero-header-language'),
+          assessmentVersionId,
+          pairKey,
+          headline,
           createdAt: timestamp,
           updatedAt: timestamp,
         });
@@ -500,6 +521,29 @@ test('writing and then reading overview language round-trips correctly', async (
     [
       { patternKey: 'pattern_core', section: 'headline', content: 'Core pattern' },
       { patternKey: 'pattern_core', section: 'development', content: 'improve follow-through' },
+    ],
+  );
+});
+
+test('writing and then reading hero header language round-trips correctly', async () => {
+  const fake = createFakeLanguageDb();
+
+  await replaceAssessmentVersionLanguageHeroHeaders(fake.db, {
+    assessmentVersionId: 'version-1',
+    inputs: [
+      { pairKey: ' driver_operator ', headline: ' Fast, steady, and dependable ' },
+    ],
+  });
+
+  const rows = await getAssessmentVersionLanguageHeroHeaders(fake.db, 'version-1');
+
+  assert.deepEqual(
+    rows.map((row) => ({
+      pairKey: row.pairKey,
+      headline: row.headline,
+    })),
+    [
+      { pairKey: 'driver_operator', headline: 'Fast, steady, and dependable' },
     ],
   );
 });

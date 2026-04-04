@@ -6,6 +6,7 @@ import type {
   AssessmentVersionLanguageDomainRow,
   AssessmentVersionLanguageDomainSection,
   AssessmentVersionLanguageDomainsByKey,
+  AssessmentVersionLanguageHeroHeaderInput,
   AssessmentVersionLanguageHeroHeaderRow,
   AssessmentVersionLanguageHeroHeadersByKey,
   AssessmentVersionLanguageOverviewByKey,
@@ -209,6 +210,19 @@ export function normalizeAssessmentVersionLanguageOverviewInputs(
     })),
     (input) => input.patternKey,
     OVERVIEW_SECTION_ORDER,
+  );
+}
+
+export function normalizeAssessmentVersionLanguageHeroHeaderInputs(
+  inputs: readonly AssessmentVersionLanguageHeroHeaderInput[],
+): readonly AssessmentVersionLanguageHeroHeaderInput[] {
+  return Object.freeze(
+    [...inputs]
+      .map((input) => ({
+        pairKey: normalizeLanguageKey(input.pairKey),
+        headline: normalizeLanguageContent(input.headline),
+      }))
+      .sort((left, right) => left.pairKey.localeCompare(right.pairKey)),
   );
 }
 
@@ -699,6 +713,39 @@ export async function replaceAssessmentVersionLanguageOverview(
       input.patternKey,
       input.section,
       input.content,
+    ],
+  });
+}
+
+export async function replaceAssessmentVersionLanguageHeroHeaders(
+  db: Queryable | TransactionCapable,
+  params: {
+    assessmentVersionId: AssessmentVersionId;
+    inputs: readonly AssessmentVersionLanguageHeroHeaderInput[];
+  },
+): Promise<void> {
+  const inputs = normalizeAssessmentVersionLanguageHeroHeaderInputs(params.inputs);
+
+  await replaceLanguageDataset({
+    db,
+    assessmentVersionId: params.assessmentVersionId,
+    deleteSql: `
+      DELETE FROM assessment_version_language_hero_headers
+      WHERE assessment_version_id = $1
+    `,
+    insertSql: `
+      INSERT INTO assessment_version_language_hero_headers (
+        assessment_version_id,
+        pair_key,
+        headline
+      )
+      VALUES ($1, $2, $3)
+    `,
+    inputs,
+    toInsertParams: (input) => [
+      params.assessmentVersionId,
+      input.pairKey,
+      input.headline,
     ],
   });
 }

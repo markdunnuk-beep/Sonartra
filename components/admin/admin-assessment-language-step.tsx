@@ -1,6 +1,6 @@
 import { AdminAssessmentLanguageEditor } from '@/components/admin/admin-assessment-language-editor';
+import { AdminHeroHeaderLanguageImport } from '@/components/admin/admin-hero-header-language-import';
 import { AdminReportLanguageImport } from '@/components/admin/admin-report-language-import';
-import { HERO_OVERVIEW_STORAGE_NOTE } from '@/lib/admin/report-language-import';
 import {
   EmptyState,
   LabelPill,
@@ -107,31 +107,15 @@ export function AdminAssessmentLanguageStep({
 
       <div className="space-y-6">
         <SectionHeader
-          eyebrow="Hero"
-          title="Hero"
-          description="Opening synthesis at the start of the report. Primary pattern and domain highlights remain engine-derived."
+          eyebrow="Hero Header"
+          title="Hero Header"
+          description="Author pair-level hero headlines. Hero narrative remains pair-summary driven and domain highlights remain engine-derived."
         />
 
-        <AdminReportLanguageImport
+        <AdminHeroHeaderLanguageImport
           assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-          existingRowCount={viewModel.counts.overview.entryCount}
+          existingRowCount={viewModel.counts.heroHeaders.entryCount}
           isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-          reportSection="hero"
-          eyebrow="Hero"
-          title="Hero Language"
-          description="Author the Hero headline and narrative using report-oriented rows."
-          detail={HERO_OVERVIEW_STORAGE_NOTE}
-          derivedNote="Do not author hero.primaryPattern or hero.domainHighlights here. Those are derived by the engine from ranking and signal summaries."
-          currentRowsLabel="Current Hero rows"
-          textareaLabel="Paste hero rows"
-          placeholder="hero|driver_analyst|headline|Fast, structured, decisive."
-          importButtonLabel="Import hero language"
-          formatExample={[
-            'section | target | field | content',
-            '',
-            'hero | driver_analyst | headline | Fast, structured, decisive.',
-            'hero | driver_analyst | narrative | You combine pace with analysis and tend to move quickly toward a considered conclusion.',
-          ].join('\n')}
         />
       </div>
 
@@ -229,7 +213,7 @@ export function AdminAssessmentLanguageStep({
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <MetaItem label="Intro" value={formatEntryCount(viewModel.counts.assessment.entryCount)} />
-        <MetaItem label="Hero" value={formatEntryCount(viewModel.counts.overview.entryCount)} />
+        <MetaItem label="Hero Header" value={formatEntryCount(viewModel.counts.heroHeaders.entryCount)} />
         <MetaItem label="Domain Chapters" value={formatEntryCount(viewModel.counts.domains.entryCount)} />
         <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
         <MetaItem label="Pairs" value={formatEntryCount(viewModel.counts.pairs.entryCount)} />
