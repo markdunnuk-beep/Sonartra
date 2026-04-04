@@ -228,7 +228,7 @@ export function AdminBulkSignalImport({
 
         {hasExistingSignals ? (
           <InlineBanner tone="warning">
-            This will append new signals within each matched domain. Existing signals stay in place.
+            New signals will be added to each matched domain. Existing signals will not be changed or removed.
           </InlineBanner>
         ) : null}
 

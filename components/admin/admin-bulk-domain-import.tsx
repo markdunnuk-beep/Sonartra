@@ -184,7 +184,7 @@ export function AdminBulkDomainImport({
 
         {hasExistingDomains ? (
           <InlineBanner tone="warning">
-            This will append new domains after the existing set. Existing domains stay in place.
+            New domains will be added. Existing domains will not be changed or removed.
           </InlineBanner>
         ) : null}
 

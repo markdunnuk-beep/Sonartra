@@ -55,11 +55,11 @@ test('bulk signal import panel groups accepted preview rows using authored domai
   assert.match(source, /acceptedByDomainId\.get\(domain\.domainId\) \?\? \[\]/);
 });
 
-test('bulk signal import panel shows domain-required and append guidance for operator clarity', () => {
+test('bulk signal import panel shows domain-required and non-overwrite guidance for operator clarity', () => {
   const source = readSource(bulkComponentPath);
 
   assert.match(source, /Add at least one domain before importing signals\./);
-  assert.match(source, /This will append new signals within each matched domain/);
+  assert.match(source, /New signals will be added to each matched domain\. Existing signals will not be changed or removed\./);
   assert.match(source, /No valid rows were found to import\. Fix the rejected rows and try again\./);
   assert.match(source, /Review the rejected rows below, then try importing again\./);
 });
