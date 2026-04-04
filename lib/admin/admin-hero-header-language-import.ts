@@ -24,7 +24,8 @@ export type AdminHeroHeaderImportState = {
     code:
       | 'ASSESSMENT_VERSION_NOT_FOUND'
       | 'ASSESSMENT_VERSION_NOT_EDITABLE'
-      | 'SIGNAL_SET_EMPTY';
+      | 'SIGNAL_SET_EMPTY'
+      | 'HERO_HEADER_TABLE_UNAVAILABLE';
     message: string;
   }[];
   previewGroups: readonly AdminHeroHeaderPreviewGroup[];

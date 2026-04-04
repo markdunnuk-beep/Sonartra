@@ -45,6 +45,19 @@ type AssessmentVersionImportTarget = {
   lifecycleStatus: AssessmentVersionRow['lifecycle_status'];
 };
 
+type TableExistsRow = {
+  present: boolean;
+};
+
+export type HeroHeaderImportPlanError = {
+  code:
+    | 'ASSESSMENT_VERSION_NOT_FOUND'
+    | 'ASSESSMENT_VERSION_NOT_EDITABLE'
+    | 'SIGNAL_SET_EMPTY'
+    | 'HERO_HEADER_TABLE_UNAVAILABLE';
+  message: string;
+};
+
 export type HeroHeaderImportCommand = {
   assessmentVersionId: string;
   rawInput: string;
@@ -55,10 +68,7 @@ export type HeroHeaderImportResult = {
   canImport: boolean;
   parseErrors: ReturnType<typeof parseHeroHeaderLanguageRows>['errors'];
   validationErrors: ReturnType<typeof validateHeroHeaderLanguageRows>['errors'];
-  planErrors: readonly {
-    code: 'ASSESSMENT_VERSION_NOT_FOUND' | 'ASSESSMENT_VERSION_NOT_EDITABLE' | 'SIGNAL_SET_EMPTY';
-    message: string;
-  }[];
+  planErrors: readonly HeroHeaderImportPlanError[];
   previewGroups: readonly AdminHeroHeaderPreviewGroup[];
   summary: {
     assessmentVersionId: string | null;
@@ -99,17 +109,22 @@ export async function previewHeroHeaderLanguageForAssessmentVersionWithDependenc
     });
   }
 
-  const assessmentVersion = await loadAssessmentVersionForImport(dependencies.db, command.assessmentVersionId);
-  const authoredSignals = await loadTargetSignalsForImport(dependencies.db, command.assessmentVersionId);
+  const [assessmentVersion, authoredSignals, heroHeaderTableAvailable] = await Promise.all([
+    loadAssessmentVersionForImport(dependencies.db, command.assessmentVersionId),
+    loadTargetSignalsForImport(dependencies.db, command.assessmentVersionId),
+    isHeroHeaderLanguageTableAvailable(dependencies.db),
+  ]);
   const validation = validateHeroHeaderLanguageRows({
     rows: parsed.records,
     validSignalKeys: authoredSignals,
   });
-  const planErrors = buildPlanErrors(assessmentVersion, authoredSignals.length);
-  const existingRowCount = await loadExistingRowCount(
-    dependencies.db,
-    assessmentVersion?.assessmentVersionId ?? command.assessmentVersionId,
-  );
+  const planErrors = buildPlanErrors(assessmentVersion, authoredSignals.length, heroHeaderTableAvailable);
+  const existingRowCount = heroHeaderTableAvailable
+    ? await loadExistingRowCount(
+        dependencies.db,
+        assessmentVersion?.assessmentVersionId ?? command.assessmentVersionId,
+      )
+    : 0;
 
   if (validation.errors.length > 0 || planErrors.length > 0) {
     return buildResult({
@@ -163,7 +178,7 @@ export async function importHeroHeaderLanguageForAssessmentVersionWithDependenci
       ...preview,
       success: false,
       canImport: false,
-      planErrors: buildPlanErrors(null, preview.summary.targetCount),
+      planErrors: buildPlanErrors(null, preview.summary.targetCount, true),
     };
   }
 
@@ -193,12 +208,12 @@ export async function importHeroHeaderLanguageForAssessmentVersionWithDependenci
         importedTargetCount: new Set(validation.validRows.map((row) => row.canonicalPairKey)).size,
       },
     };
-  } catch {
+  } catch (error) {
     return {
       ...preview,
       success: false,
       canImport: false,
-      executionError: 'Hero Header import could not be saved. Try again.',
+      executionError: getHeroHeaderImportExecutionError(error),
     };
   }
 }
@@ -260,17 +275,27 @@ async function loadExistingRowCount(
   return (await getAssessmentVersionLanguageHeroHeaders(db, assessmentVersionId)).length;
 }
 
+async function isHeroHeaderLanguageTableAvailable(db: Queryable): Promise<boolean> {
+  const result = await db.query<TableExistsRow>(
+    `
+    SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
+        AND table_name = 'assessment_version_language_hero_headers'
+    ) AS present
+    `,
+  );
+
+  return result.rows[0]?.present === true;
+}
+
 function buildPlanErrors(
   assessmentVersion: AssessmentVersionImportTarget | null,
   signalCount: number,
-): readonly {
-  code: 'ASSESSMENT_VERSION_NOT_FOUND' | 'ASSESSMENT_VERSION_NOT_EDITABLE' | 'SIGNAL_SET_EMPTY';
-  message: string;
-}[] {
-  const errors: Array<{
-    code: 'ASSESSMENT_VERSION_NOT_FOUND' | 'ASSESSMENT_VERSION_NOT_EDITABLE' | 'SIGNAL_SET_EMPTY';
-    message: string;
-  }> = [];
+  heroHeaderTableAvailable: boolean,
+): readonly HeroHeaderImportPlanError[] {
+  const errors: HeroHeaderImportPlanError[] = [];
 
   if (!assessmentVersion) {
     errors.push({
@@ -294,7 +319,36 @@ function buildPlanErrors(
     });
   }
 
+  if (!heroHeaderTableAvailable) {
+    errors.push({
+      code: 'HERO_HEADER_TABLE_UNAVAILABLE',
+      message: 'Hero Header table is missing in this environment. Run the hero header migration before importing.',
+    });
+  }
+
   return errors;
+}
+
+function isMissingRelationError(error: unknown, relationName: string): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const code = 'code' in error ? error.code : null;
+  return (
+    code === '42P01' ||
+    (typeof error.message === 'string'
+      && error.message.includes(relationName)
+      && error.message.includes('does not exist'))
+  );
+}
+
+function getHeroHeaderImportExecutionError(error: unknown): string {
+  if (isMissingRelationError(error, 'assessment_version_language_hero_headers')) {
+    return 'Hero Header table is missing in this environment. Run the hero header migration before importing.';
+  }
+
+  return 'Hero Header import could not be saved because the write failed. Review the import rows and try again.';
 }
 
 function buildPreviewGroups(
@@ -314,10 +368,7 @@ function buildResult(params: {
   assessmentVersionId: string | null;
   parseErrors: ReturnType<typeof parseHeroHeaderLanguageRows>['errors'];
   validationErrors: ReturnType<typeof validateHeroHeaderLanguageRows>['errors'];
-  planErrors: readonly {
-    code: 'ASSESSMENT_VERSION_NOT_FOUND' | 'ASSESSMENT_VERSION_NOT_EDITABLE' | 'SIGNAL_SET_EMPTY';
-    message: string;
-  }[];
+  planErrors: readonly HeroHeaderImportPlanError[];
   previewGroups: readonly AdminHeroHeaderPreviewGroup[];
   existingRowCount: number;
   rowCount?: number;

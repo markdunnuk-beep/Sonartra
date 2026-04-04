@@ -346,6 +346,8 @@ function createHeroHeaderImportDb(seed?: {
   domains?: Array<{ id: string; assessmentVersionId: string; orderIndex: number }>;
   signals?: Array<{ id: string; assessmentVersionId: string; domainId: string; signalKey: string; orderIndex: number }>;
   heroHeaders?: Array<{ id: string; assessmentVersionId: string; pairKey: string; headline: string }>;
+}, config?: {
+  heroHeaderTableAvailable?: boolean;
 }) {
   const state = {
     assessments: [...(seed?.assessments ?? [])],
@@ -354,6 +356,7 @@ function createHeroHeaderImportDb(seed?: {
     signals: [...(seed?.signals ?? [])],
     heroHeaders: [...(seed?.heroHeaders ?? [])],
   };
+  const heroHeaderTableAvailable = config?.heroHeaderTableAvailable ?? true;
 
   let snapshot: typeof state | null = null;
 
@@ -422,7 +425,21 @@ function createHeroHeaderImportDb(seed?: {
         };
       }
 
+      if (sql.includes('FROM information_schema.tables') && sql.includes('assessment_version_language_hero_headers')) {
+        return {
+          rows: ([{ present: heroHeaderTableAvailable }] as unknown[]) as T[],
+        };
+      }
+
       if (sql.includes('SELECT') && sql.includes('FROM assessment_version_language_hero_headers')) {
+        if (!heroHeaderTableAvailable) {
+          const error = new Error('relation "assessment_version_language_hero_headers" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: state.heroHeaders
@@ -439,12 +456,28 @@ function createHeroHeaderImportDb(seed?: {
       }
 
       if (sql.startsWith('DELETE FROM assessment_version_language_hero_headers')) {
+        if (!heroHeaderTableAvailable) {
+          const error = new Error('relation "assessment_version_language_hero_headers" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
         const assessmentVersionId = params?.[0] as string;
         state.heroHeaders = state.heroHeaders.filter((row) => row.assessmentVersionId !== assessmentVersionId);
         return { rows: [] as T[] };
       }
 
       if (sql.startsWith('INSERT INTO assessment_version_language_hero_headers')) {
+        if (!heroHeaderTableAvailable) {
+          const error = new Error('relation "assessment_version_language_hero_headers" does not exist') as Error & {
+            code?: string;
+          };
+          error.code = '42P01';
+          throw error;
+        }
+
         const [assessmentVersionId, pairKey, headline] = params as [string, string, string];
         state.heroHeaders.push({
           id: `hero-header-${state.heroHeaders.length + 1}`,
@@ -812,6 +845,115 @@ test('hero header validation rejects invalid pair keys and invalid scopes', asyn
   assert.equal(invalidKey.validationErrors[0]?.code, 'UNKNOWN_SIGNAL_KEY');
   assert.equal(invalidScope.success, false);
   assert.equal(invalidScope.validationErrors[0]?.code, 'INVALID_SCOPE');
+});
+
+test('hero header preview blocks imports for published versions', async () => {
+  const fake = createHeroHeaderImportDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [{ id: 'version-published', assessmentId: 'assessment-1', lifecycleStatus: 'PUBLISHED' }],
+    domains: [{ id: 'domain-1', assessmentVersionId: 'version-published', orderIndex: 0 }],
+    signals: [
+      { id: 'signal-1', assessmentVersionId: 'version-published', domainId: 'domain-1', signalKey: 'driver', orderIndex: 0 },
+      { id: 'signal-2', assessmentVersionId: 'version-published', domainId: 'domain-1', signalKey: 'influencer', orderIndex: 1 },
+    ],
+  });
+
+  const result = await previewHeroHeaderLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-published',
+      rawInput: 'pair | driver_influencer | Published versions should not import',
+    },
+    { db: fake.client },
+  );
+
+  assert.equal(result.success, false);
+  assert.equal(result.canImport, false);
+  assert.equal(result.planErrors[0]?.code, 'ASSESSMENT_VERSION_NOT_EDITABLE');
+  assert.match(result.planErrors[0]?.message ?? '', /draft assessment versions/i);
+});
+
+test('hero header validation rejects duplicate canonical pair rows', async () => {
+  const fake = createHeroHeaderImportDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [{ id: 'version-draft', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+    domains: [{ id: 'domain-1', assessmentVersionId: 'version-draft', orderIndex: 0 }],
+    signals: [
+      { id: 'signal-1', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'driver', orderIndex: 0 },
+      { id: 'signal-2', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'influencer', orderIndex: 1 },
+    ],
+  });
+
+  const result = await previewHeroHeaderLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-draft',
+      rawInput: [
+        'pair | driver_influencer | First headline',
+        'pair | influencer_driver | Duplicate canonical headline',
+      ].join('\n'),
+    },
+    { db: fake.client },
+  );
+
+  assert.equal(result.success, false);
+  assert.equal(result.validationErrors[0]?.code, 'DUPLICATE_ENTRY');
+  assert.match(result.validationErrors[0]?.message ?? '', /Duplicate hero header entry detected for pair driver_influencer/i);
+});
+
+test('hero header preview reports when the hero header table is missing in the environment', async () => {
+  const fake = createHeroHeaderImportDb(
+    {
+      assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+      versions: [{ id: 'version-draft', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+      domains: [{ id: 'domain-1', assessmentVersionId: 'version-draft', orderIndex: 0 }],
+      signals: [
+        { id: 'signal-1', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'driver', orderIndex: 0 },
+        { id: 'signal-2', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'influencer', orderIndex: 1 },
+      ],
+    },
+    { heroHeaderTableAvailable: false },
+  );
+
+  const result = await previewHeroHeaderLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-draft',
+      rawInput: 'pair | driver_influencer | Missing table should block import',
+    },
+    { db: fake.client },
+  );
+
+  assert.equal(result.success, false);
+  assert.equal(result.canImport, false);
+  assert.equal(result.planErrors[0]?.code, 'HERO_HEADER_TABLE_UNAVAILABLE');
+  assert.match(result.planErrors[0]?.message ?? '', /Hero Header table is missing in this environment/i);
+});
+
+test('hero header import returns a specific execution error when the table is missing at write time', async () => {
+  const fake = createHeroHeaderImportDb(
+    {
+      assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+      versions: [{ id: 'version-draft', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+      domains: [{ id: 'domain-1', assessmentVersionId: 'version-draft', orderIndex: 0 }],
+      signals: [
+        { id: 'signal-1', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'driver', orderIndex: 0 },
+        { id: 'signal-2', assessmentVersionId: 'version-draft', domainId: 'domain-1', signalKey: 'influencer', orderIndex: 1 },
+      ],
+    },
+    { heroHeaderTableAvailable: false },
+  );
+
+  const result = await importHeroHeaderLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-draft',
+      rawInput: 'pair | driver_influencer | Missing table should surface a useful error',
+    },
+    { db: fake.client, revalidatePath() {} },
+  );
+
+  assert.equal(result.success, false);
+  assert.equal(result.canImport, false);
+  assert.equal(result.executionError, null);
+  assert.equal(result.planErrors[0]?.code, 'HERO_HEADER_TABLE_UNAVAILABLE');
+  assert.match(result.planErrors[0]?.message ?? '', /Run the hero header migration before importing/i);
 });
 
 test('language step view model degrades safely when language tables are unavailable at runtime', async () => {
