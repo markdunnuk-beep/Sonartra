@@ -43,6 +43,10 @@ test('assessment intro editor includes draft-scoped fields, save form, and previ
   assert.match(source, /label="Instructions"/);
   assert.match(source, /label="Confidentiality note"/);
   assert.match(source, /Save intro/);
-  assert.match(source, /Runner intro preview/);
-  assert.match(source, /Preview only\./);
+  assert.match(source, /Set the opening content shown before Question 1 for this assessment version\./);
+  assert.match(source, /When that version is published, this intro becomes/);
+  assert.match(source, /Assessment intro/);
+  assert.match(source, /Publish the version to make this/);
+  assert.match(source, /Draft version/);
+  assert.doesNotMatch(source, /Preview only\./);
 });

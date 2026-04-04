@@ -172,7 +172,7 @@ function EditableAssessmentIntroEditor({
       <SectionHeader
         eyebrow="Assessment Intro"
         title="Assessment Intro"
-        description="Author the version-scoped introduction content that will later appear before the assessment runner begins."
+        description="Set the opening content shown before Question 1 for this assessment version."
       />
 
       <SurfaceCard className="space-y-4 p-5 lg:p-6">
@@ -183,8 +183,8 @@ function EditableAssessmentIntroEditor({
           </LabelPill>
         </div>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          This content is saved against the current draft version only. The preview reflects the draft copy live,
-          but the runner and published runtime remain unchanged until later tasks wire them in.
+          This content belongs to the current draft version. When that version is published, this intro becomes
+          the live start of the assessment for participants.
         </p>
       </SurfaceCard>
 
@@ -192,7 +192,7 @@ function EditableAssessmentIntroEditor({
         <form action={formAction} className="space-y-6">
           <div className="grid gap-6 xl:grid-cols-2">
             <FieldShell
-              hint="The primary headline shown at the top of the runner intro."
+              hint="The opening headline shown at the start of the assessment."
               label="Intro title"
             >
               <TextInput
@@ -204,7 +204,7 @@ function EditableAssessmentIntroEditor({
             </FieldShell>
 
             <FieldShell
-              hint="Optional short duration label shown near the intro summary."
+              hint="Optional time estimate shown alongside the opening intro content."
               label="Estimated duration"
             >
               <TextInput
@@ -217,7 +217,7 @@ function EditableAssessmentIntroEditor({
           </div>
 
           <FieldShell
-            hint="A concise summary that frames the purpose of the assessment before participants begin."
+            hint="A short introduction that explains what this assessment is for before participants begin."
             label="Intro summary"
           >
             <TextArea
@@ -229,7 +229,7 @@ function EditableAssessmentIntroEditor({
           </FieldShell>
 
           <FieldShell
-            hint="Describe the sequence participants should expect while completing the assessment."
+            hint="Explain how participants should move through the assessment once they begin."
             label="How it works"
           >
             <TextArea
@@ -242,7 +242,7 @@ function EditableAssessmentIntroEditor({
 
           <div className="grid gap-6 xl:grid-cols-2">
             <FieldShell
-              hint="Operator-facing guidance or participant instructions shown before Question 1."
+              hint="Optional instructions shown before Question 1."
               label="Instructions"
             >
               <TextArea
@@ -270,7 +270,7 @@ function EditableAssessmentIntroEditor({
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className={safeState.formError ? 'text-sm text-[rgba(255,198,198,0.92)]' : 'text-sm text-white/45'}>
-              {safeState.formError ?? safeState.formSuccess ?? 'Saving updates rewrites the intro row for this draft version.'}
+              {safeState.formError ?? safeState.formSuccess ?? 'Saving updates stores this intro on the current draft version.'}
             </p>
             <SaveButton />
           </div>
@@ -279,12 +279,13 @@ function EditableAssessmentIntroEditor({
 
       <SurfaceCard className="space-y-5 p-5 lg:p-6">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Preview</p>
+          <p className="sonartra-page-eyebrow">Assessment Start</p>
           <h3 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-            Runner intro preview
+            Assessment intro
           </h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Preview only. This shows the expected reading experience for the runner intro shell without changing the live runner yet.
+            This is how the opening intro reads for the current draft version. Publish the version to make this
+            content live for participants.
           </p>
         </div>
 
@@ -292,7 +293,7 @@ function EditableAssessmentIntroEditor({
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-2">
               <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
-                Draft preview
+                Draft version
               </LabelPill>
               {values.estimatedTimeOverride ? (
                 <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
