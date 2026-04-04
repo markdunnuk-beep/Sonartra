@@ -71,7 +71,7 @@ function getVisibleItems<T>(items: readonly T[]): {
 
 function SectionEyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">
+    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">
       {children}
     </p>
   );
@@ -107,7 +107,7 @@ function ActionList({
   const { visible, overflow } = getVisibleItems<VisibleActionItem>(typedItems);
 
   return (
-    <article className="space-y-6 border-t border-white/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-14">
+    <article className="space-y-6 border-t border-white/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12">
       <div className="grid gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] md:gap-7">
         <SectionEyebrow>{title}</SectionEyebrow>
         <h3 className="text-[1.12rem] font-medium tracking-[-0.025em] text-white/78 md:text-[1.18rem]">{title}</h3>
@@ -120,7 +120,7 @@ function ActionList({
               <p className="text-[0.95rem] font-medium tracking-[-0.01em] text-white/84">
                 {item.title}
               </p>
-              <p className="max-w-[46rem] text-[0.99rem] leading-8 text-white/64 md:max-w-[48rem]">
+              <p className="max-w-[45rem] text-[0.99rem] leading-8 text-white/64">
                 {item.detail}
               </p>
             </li>
@@ -131,7 +131,7 @@ function ActionList({
       </ul>
 
       {overflow.length > 0 ? (
-        <details className="max-w-[46rem] pt-2">
+        <details className="max-w-[45rem] pt-2">
           <summary className="cursor-pointer list-none text-[0.92rem] font-medium text-white/54 marker:hidden">
             Show {overflow.length} more
           </summary>
@@ -139,7 +139,7 @@ function ActionList({
             {overflow.map((item) => (
               <li key={item.key} className="space-y-2.5">
                 <p className="text-sm font-medium text-white/80">{item.title}</p>
-                <p className="max-w-[44rem] text-sm leading-7 text-white/56">{item.detail}</p>
+                <p className="max-w-[42rem] text-sm leading-7 text-white/56">{item.detail}</p>
               </li>
             ))}
           </ul>
@@ -183,7 +183,7 @@ function DomainChapter({
   const title = domain.domainLabel.trim();
 
   return (
-    <article className="space-y-8 border-t border-white/6 pt-14 first:border-t-0 first:pt-0 md:space-y-10 md:pt-16">
+    <article className="space-y-9 border-t border-white/6 pt-14 first:border-t-0 first:pt-0 md:space-y-11 md:pt-16">
       <div className="grid gap-6 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:gap-10">
         <div className="space-y-4">
           <SectionEyebrow>Domain</SectionEyebrow>
@@ -192,9 +192,9 @@ function DomainChapter({
           </h3>
         </div>
 
-        <div className="space-y-6 md:space-y-7">
+        <div className="space-y-7 md:space-y-8">
           {domain.summary ? (
-            <p className="max-w-[46rem] text-[1.02rem] leading-8 text-white/70 md:text-[1.08rem] md:leading-9">
+            <p className="max-w-[45rem] text-[1.02rem] leading-8 text-white/70 md:text-[1.08rem] md:leading-9">
               {domain.summary}
             </p>
           ) : null}
@@ -233,7 +233,7 @@ function DomainChapter({
           ) : null}
 
           {domain.pairSummary?.text ? (
-            <p className="max-w-[44rem] text-[0.97rem] leading-8 text-white/50 italic">
+            <p className="max-w-[45rem] text-[0.97rem] leading-8 text-white/50 italic">
               {domain.pairSummary.text}
             </p>
           ) : null}
@@ -358,7 +358,7 @@ function HeroDomainHighlights({
               </p>
             </div>
             {highlight.summary ? (
-              <p className="max-w-[52ch] text-[0.95rem] leading-7 text-white/52">{highlight.summary}</p>
+              <p className="max-w-[45rem] text-[0.95rem] leading-7 text-white/52">{highlight.summary}</p>
             ) : null}
           </article>
         ))}
@@ -405,7 +405,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const heroNarrative = result.hero.narrative?.trim() ?? '';
 
   return (
-    <PageFrame className="space-y-14 md:space-y-16">
+    <PageFrame className="space-y-16 md:space-y-20">
       {hasAssessmentDescription ? (
         <section className="rounded-[1.9rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_10px_28px_rgba(0,0,0,0.08)] md:px-10 md:py-10">
           <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/40">
@@ -447,7 +447,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </div>
       </section>
 
-      <section className="space-y-8">
+      <section className="space-y-10 md:space-y-11">
         <SectionHeader
           eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
           title="Domain reading"
@@ -457,7 +457,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <DomainSection domainItems={resultDomainItems} />
       </section>
 
-      <section className="space-y-8">
+      <section className="space-y-10 md:space-y-11">
         <SectionHeader
           eyebrow="Action Focus"
           title="What this means in practice"

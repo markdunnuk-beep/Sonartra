@@ -256,7 +256,7 @@ test('result detail page renders actions from canonical action blocks only', () 
   assert.match(source, /items=\{toVisibleActionItems\(actions\.developmentFocus\)\}/);
   assert.match(source, /title="What this means in practice"/);
   assert.match(source, /mx-auto max-w-\[56rem\] px-1 md:px-2/);
-  assert.match(source, /space-y-6 border-t border-white\/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-14/);
+  assert.match(source, /space-y-6 border-t border-white\/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12/);
 
   assert.doesNotMatch(source, /items=\{result\.strengths\}/);
   assert.doesNotMatch(source, /items=\{result\.watchouts\}/);
@@ -271,7 +271,7 @@ test('result detail page keeps markdown intro rendering and editorial shell for 
   assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
   assert.match(source, /\{assessmentDescription\}/);
   assert.match(source, /About this report/);
-  assert.match(source, /<PageFrame className="space-y-14 md:space-y-16">/);
+  assert.match(source, /<PageFrame className="space-y-16 md:space-y-20">/);
   assert.match(source, /rounded-\[1\.9rem\] border border-white\/6/);
   assert.match(source, /max-w-\[72ch\]/);
   assert.match(source, /mx-auto max-w-\[58rem\] px-1 md:px-2/);
