@@ -6,6 +6,8 @@ import type {
   AssessmentVersionLanguageDomainRow,
   AssessmentVersionLanguageDomainSection,
   AssessmentVersionLanguageDomainsByKey,
+  AssessmentVersionLanguageHeroHeaderRow,
+  AssessmentVersionLanguageHeroHeadersByKey,
   AssessmentVersionLanguageOverviewByKey,
   AssessmentVersionLanguageOverviewInput,
   AssessmentVersionLanguageOverviewRow,
@@ -65,6 +67,15 @@ type AssessmentVersionLanguageOverviewDbRow = {
   pattern_key: string;
   section: AssessmentVersionLanguageOverviewSection;
   content: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type AssessmentVersionLanguageHeroHeaderDbRow = {
+  id: string;
+  assessment_version_id: string;
+  pair_key: string;
+  headline: string;
   created_at: string;
   updated_at: string;
 };
@@ -249,6 +260,17 @@ function mapOverviewRow(row: AssessmentVersionLanguageOverviewDbRow): Assessment
   };
 }
 
+function mapHeroHeaderRow(row: AssessmentVersionLanguageHeroHeaderDbRow): AssessmentVersionLanguageHeroHeaderRow {
+  return {
+    id: row.id,
+    assessmentVersionId: row.assessment_version_id,
+    pairKey: row.pair_key,
+    headline: row.headline,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 function buildSectionBundle<TRow extends { section: TSection; content: string }, TSection extends string>(
   rows: readonly TRow[],
   getKey: (row: TRow) => string,
@@ -300,6 +322,32 @@ export function buildAssessmentVersionLanguageOverviewBundle(
   rows: readonly AssessmentVersionLanguageOverviewRow[],
 ): AssessmentVersionLanguageOverviewByKey {
   return buildSectionBundle(rows, (row) => row.patternKey, 'overview');
+}
+
+export function buildAssessmentVersionLanguageHeroHeadersBundle(
+  rows: readonly AssessmentVersionLanguageHeroHeaderRow[],
+): AssessmentVersionLanguageHeroHeadersByKey {
+  const result: Record<string, Readonly<{ headline: string }>> = {};
+
+  for (const row of rows) {
+    if (result[row.pairKey] !== undefined) {
+      throw new DuplicateAssessmentVersionLanguageEntryError(
+        `Duplicate hero header language entry detected for pair "${row.pairKey}"`,
+      );
+    }
+
+    result[row.pairKey] = Object.freeze({ headline: row.headline });
+  }
+
+  return Object.freeze(result);
+}
+
+function isMissingRelationError(error: unknown, tableName: string): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return error.message.includes(tableName) && error.message.includes('does not exist');
 }
 
 export async function getAssessmentVersionLanguageSignals(
@@ -434,15 +482,49 @@ export async function getAssessmentVersionLanguageOverview(
   return Object.freeze(result.rows.map(mapOverviewRow));
 }
 
+export async function getAssessmentVersionLanguageHeroHeaders(
+  db: Queryable,
+  assessmentVersionId: AssessmentVersionId,
+): Promise<readonly AssessmentVersionLanguageHeroHeaderRow[]> {
+  try {
+    const result = await db.query<AssessmentVersionLanguageHeroHeaderDbRow>(
+      `
+      SELECT
+        id,
+        assessment_version_id,
+        pair_key,
+        headline,
+        created_at,
+        updated_at
+      FROM assessment_version_language_hero_headers
+      WHERE assessment_version_id = $1
+      ORDER BY
+        pair_key ASC,
+        id ASC
+      `,
+      [assessmentVersionId],
+    );
+
+    return Object.freeze(result.rows.map(mapHeroHeaderRow));
+  } catch (error) {
+    if (isMissingRelationError(error, 'assessment_version_language_hero_headers')) {
+      return Object.freeze([]);
+    }
+
+    throw error;
+  }
+}
+
 export async function getAssessmentVersionLanguageBundle(
   db: Queryable,
   assessmentVersionId: AssessmentVersionId,
 ): Promise<AssessmentVersionLanguageBundle> {
-  const [signals, pairs, domains, overview] = await Promise.all([
+  const [signals, pairs, domains, overview, heroHeaders] = await Promise.all([
     getAssessmentVersionLanguageSignals(db, assessmentVersionId),
     getAssessmentVersionLanguagePairs(db, assessmentVersionId),
     getAssessmentVersionLanguageDomains(db, assessmentVersionId),
     getAssessmentVersionLanguageOverview(db, assessmentVersionId),
+    getAssessmentVersionLanguageHeroHeaders(db, assessmentVersionId),
   ]);
 
   return Object.freeze({
@@ -450,6 +532,7 @@ export async function getAssessmentVersionLanguageBundle(
     pairs: buildAssessmentVersionLanguagePairsBundle(pairs),
     domains: buildAssessmentVersionLanguageDomainsBundle(domains),
     overview: buildAssessmentVersionLanguageOverviewBundle(overview),
+    heroHeaders: buildAssessmentVersionLanguageHeroHeadersBundle(heroHeaders),
   });
 }
 

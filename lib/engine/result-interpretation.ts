@@ -11,15 +11,14 @@ import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
  * Canonical result-language ownership for the persisted report fields.
  *
  * Active:
- * - Overview_Language.headline -> hero.headline via the overview-backed hero storage bridge
- * - Overview_Language.summary -> hero.narrative via the overview-backed hero storage bridge
+ * - Hero_Header_Language.headline -> hero.headline
+ * - Pair_Language.summary -> hero.narrative
  * - Signal_Language.strength -> strengths[]
  * - Signal_Language.watchout -> watchouts[]
  * - Signal_Language.development -> developmentFocus[]
  *
  * Reserved / inactive for future wiring:
  * - Signal_Language.summary
- * - Pair_Language.summary
  * - Pair_Language.strength
  * - Pair_Language.watchout
  * - Overview_Language.strengths
@@ -31,9 +30,6 @@ import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
  * blocks. The results UI reads persisted fields directly and must not recreate
  * behavioural copy client-side.
  */
-const CONCENTRATED_TOP_SIGNAL_THRESHOLD = 45;
-const BALANCED_TOP_TWO_GAP_THRESHOLD = 8;
-const BALANCED_TOP_SIGNAL_THRESHOLD = 40;
 const DEVELOPMENT_SIGNAL_THRESHOLD = 16;
 const MAX_STRENGTH_COUNT = 3;
 const MAX_WATCHOUT_COUNT = 3;
@@ -292,30 +288,6 @@ function getTopSignalsInRankOrder(signalScores: readonly NormalizedSignalScore[]
   });
 }
 
-function classifyDistribution(signalScores: readonly NormalizedSignalScore[]): 'concentrated' | 'balanced' | 'mixed' {
-  const rankedSignals = getTopSignalsInRankOrder(signalScores);
-  const first = rankedSignals[0];
-  const second = rankedSignals[1];
-
-  if (!first) {
-    return 'mixed';
-  }
-
-  if (first.percentage >= CONCENTRATED_TOP_SIGNAL_THRESHOLD) {
-    return 'concentrated';
-  }
-
-  if (
-    second &&
-    first.percentage <= BALANCED_TOP_SIGNAL_THRESHOLD &&
-    Math.abs(first.percentage - second.percentage) <= BALANCED_TOP_TWO_GAP_THRESHOLD
-  ) {
-    return 'balanced';
-  }
-
-  return 'mixed';
-}
-
 function getSignalTemplate(signalKey: string): SignalTemplate {
   const exact = SIGNAL_TEMPLATES[signalKey];
   if (exact) {
@@ -434,21 +406,32 @@ function resolveCanonicalHeroPatternKey(
   return canonicalPair.success ? canonicalPair.canonicalSignalPair : null;
 }
 
-function resolveHeroOverviewStorageSection(
+function resolveHeroPairKey(
   signalScores: readonly NormalizedSignalScore[],
-  section: 'headline' | 'summary',
   context?: ResultInterpretationContext,
 ): string | null {
   if (!context) {
     return null;
   }
 
-  const canonicalPatternKey = resolveCanonicalHeroPatternKey(signalScores);
-  if (!canonicalPatternKey) {
-    return null;
-  }
+  return resolveCanonicalHeroPatternKey(signalScores);
+}
 
-  const content = context.languageBundle.overview[canonicalPatternKey]?.[section]?.trim();
+function resolveHeroHeaderHeadline(
+  signalScores: readonly NormalizedSignalScore[],
+  context?: ResultInterpretationContext,
+): string | null {
+  const pairKey = resolveHeroPairKey(signalScores, context);
+  const content = pairKey ? context?.languageBundle.heroHeaders?.[pairKey]?.headline?.trim() : null;
+  return content ? content : null;
+}
+
+function resolveHeroPairSummary(
+  signalScores: readonly NormalizedSignalScore[],
+  context?: ResultInterpretationContext,
+): string | null {
+  const pairKey = resolveHeroPairKey(signalScores, context);
+  const content = pairKey ? context?.languageBundle.pairs[pairKey]?.summary?.trim() : null;
   return content ? content : null;
 }
 
@@ -477,7 +460,6 @@ export function buildOverviewSummary(
 ): ResultOverviewSummary {
   const rankedSignals = getTopSignalsInRankOrder(normalizedResult.signalScores);
   const topSignal = rankedSignals[0];
-  const secondSignal = rankedSignals[1];
 
   if (!topSignal) {
     return {
@@ -487,28 +469,10 @@ export function buildOverviewSummary(
   }
 
   const topTemplate = getSignalTemplate(topSignal.signalKey);
-  // Hero authoring still reads from overview-backed storage. This bridge keeps
-  // the report-facing Hero model aligned without changing persisted storage.
-  const overviewTemplateHeadline = resolveHeroOverviewStorageSection(rankedSignals, 'headline', context);
-  const overviewTemplateSummary = resolveHeroOverviewStorageSection(rankedSignals, 'summary', context);
-  const distribution = classifyDistribution(rankedSignals);
-  let supportSentence = topTemplate.impact;
-
-  if (
-    distribution === 'balanced' &&
-    secondSignal &&
-    Math.abs(topSignal.percentage - secondSignal.percentage) <= BALANCED_TOP_TWO_GAP_THRESHOLD
-  ) {
-    supportSentence = `A close secondary signal in ${secondSignal.signalTitle} adds ${
-      getSignalTemplate(secondSignal.signalKey).supportFragment
-    }.`;
-  }
 
   return {
-    headline:
-      overviewTemplateHeadline ??
-      resolveFallbackHeadline(topSignal, topTemplate),
-    narrative: overviewTemplateSummary ?? `${topTemplate.hero} ${supportSentence}`,
+    headline: resolveHeroHeaderHeadline(rankedSignals, context) ?? resolveFallbackHeadline(topSignal, topTemplate),
+    narrative: resolveHeroPairSummary(rankedSignals, context),
   };
 }
 

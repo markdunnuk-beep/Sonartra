@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   getAssessmentVersionLanguageBundle,
   getAssessmentVersionLanguageDomains,
+  getAssessmentVersionLanguageHeroHeaders,
   getAssessmentVersionLanguageOverview,
   getAssessmentVersionLanguagePairs,
   getAssessmentVersionLanguageSignals,
@@ -53,11 +54,21 @@ type StoredOverviewRow = {
   updatedAt: string;
 };
 
+type StoredHeroHeaderRow = {
+  id: string;
+  assessmentVersionId: string;
+  pairKey: string;
+  headline: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 function createFakeLanguageDb(seed?: {
   signals?: StoredSignalRow[];
   pairs?: StoredPairRow[];
   domains?: StoredDomainRow[];
   overview?: StoredOverviewRow[];
+  heroHeaders?: StoredHeroHeaderRow[];
 }, config?: {
   failInsertTable?: 'signals' | 'pairs' | 'domains' | 'overview';
 }) {
@@ -66,6 +77,7 @@ function createFakeLanguageDb(seed?: {
     pairs: [...(seed?.pairs ?? [])],
     domains: [...(seed?.domains ?? [])],
     overview: [...(seed?.overview ?? [])],
+    heroHeaders: [...(seed?.heroHeaders ?? [])],
   };
 
   let idCounter = 0;
@@ -79,6 +91,7 @@ function createFakeLanguageDb(seed?: {
     pairs: state.pairs.map((row) => ({ ...row })),
     domains: state.domains.map((row) => ({ ...row })),
     overview: state.overview.map((row) => ({ ...row })),
+    heroHeaders: state.heroHeaders.map((row) => ({ ...row })),
   });
 
   const sortSignals = (rows: StoredSignalRow[]) =>
@@ -134,6 +147,7 @@ function createFakeLanguageDb(seed?: {
           state.pairs = snapshot.pairs;
           state.domains = snapshot.domains;
           state.overview = snapshot.overview;
+          state.heroHeaders = snapshot.heroHeaders;
         }
         snapshot = null;
         return { rows: [] as T[] };
@@ -225,6 +239,23 @@ function createFakeLanguageDb(seed?: {
               pattern_key: row.patternKey,
               section: row.section,
               content: row.content,
+              created_at: row.createdAt,
+              updated_at: row.updatedAt,
+            })) as T[],
+        };
+      }
+
+      if (sql.includes('FROM assessment_version_language_hero_headers')) {
+        const assessmentVersionId = params?.[0] as string;
+        return {
+          rows: [...state.heroHeaders]
+            .sort((left, right) => left.pairKey.localeCompare(right.pairKey) || left.id.localeCompare(right.id))
+            .filter((row) => row.assessmentVersionId === assessmentVersionId)
+            .map((row) => ({
+              id: row.id,
+              assessment_version_id: row.assessmentVersionId,
+              pair_key: row.pairKey,
+              headline: row.headline,
               created_at: row.createdAt,
               updated_at: row.updatedAt,
             })) as T[],
@@ -344,11 +375,12 @@ function createFakeLanguageDb(seed?: {
 test('reading empty language datasets returns empty collections cleanly', async () => {
   const fake = createFakeLanguageDb();
 
-  const [signals, pairs, domains, overview, bundle] = await Promise.all([
+  const [signals, pairs, domains, overview, heroHeaders, bundle] = await Promise.all([
     getAssessmentVersionLanguageSignals(fake.db, 'version-1'),
     getAssessmentVersionLanguagePairs(fake.db, 'version-1'),
     getAssessmentVersionLanguageDomains(fake.db, 'version-1'),
     getAssessmentVersionLanguageOverview(fake.db, 'version-1'),
+    getAssessmentVersionLanguageHeroHeaders(fake.db, 'version-1'),
     getAssessmentVersionLanguageBundle(fake.db, 'version-1'),
   ]);
 
@@ -356,11 +388,13 @@ test('reading empty language datasets returns empty collections cleanly', async 
   assert.deepEqual(pairs, []);
   assert.deepEqual(domains, []);
   assert.deepEqual(overview, []);
+  assert.deepEqual(heroHeaders, []);
   assert.deepEqual(bundle, {
     signals: {},
     pairs: {},
     domains: {},
     overview: {},
+    heroHeaders: {},
   });
 });
 
@@ -525,6 +559,16 @@ test('bundle loader groups content correctly by key and section', async () => {
         updatedAt: '2026-04-01T00:00:05.000Z',
       },
     ],
+    heroHeaders: [
+      {
+        id: 'h1',
+        assessmentVersionId: 'version-1',
+        pairKey: 'driver_analyst',
+        headline: 'Fast, structured, decisive.',
+        createdAt: '2026-04-01T00:00:06.000Z',
+        updatedAt: '2026-04-01T00:00:06.000Z',
+      },
+    ],
   });
 
   const bundle = await getAssessmentVersionLanguageBundle(fake.db, 'version-1');
@@ -549,6 +593,11 @@ test('bundle loader groups content correctly by key and section', async () => {
     overview: {
       pattern_primary: {
         headline: 'headline',
+      },
+    },
+    heroHeaders: {
+      driver_analyst: {
+        headline: 'Fast, structured, decisive.',
       },
     },
   });

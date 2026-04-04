@@ -24,6 +24,15 @@ export type AssessmentVersionLanguageOverviewSection =
   | 'development'
   | 'headline';
 
+export type AssessmentVersionLanguageHeroHeaderRow = {
+  id: string;
+  assessmentVersionId: AssessmentVersionId;
+  pairKey: string;
+  headline: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type AssessmentVersionLanguageSignalRow = {
   id: string;
   assessmentVersionId: AssessmentVersionId;
@@ -88,6 +97,11 @@ export type AssessmentVersionLanguageOverviewInput = {
   content: string;
 };
 
+export type AssessmentVersionLanguageHeroHeaderInput = {
+  pairKey: string;
+  headline: string;
+};
+
 export type AssessmentVersionLanguageSectionMap<TSection extends string> =
   Readonly<Partial<Record<TSection, string>>>;
 
@@ -103,9 +117,13 @@ export type AssessmentVersionLanguageDomainsByKey =
 export type AssessmentVersionLanguageOverviewByKey =
   Readonly<Record<string, AssessmentVersionLanguageSectionMap<AssessmentVersionLanguageOverviewSection>>>;
 
+export type AssessmentVersionLanguageHeroHeadersByKey =
+  Readonly<Record<string, Readonly<{ headline: string }>>>;
+
 export type AssessmentVersionLanguageBundle = {
   signals: AssessmentVersionLanguageSignalsByKey;
   pairs: AssessmentVersionLanguagePairsByKey;
   domains: AssessmentVersionLanguageDomainsByKey;
   overview: AssessmentVersionLanguageOverviewByKey;
+  heroHeaders?: AssessmentVersionLanguageHeroHeadersByKey;
 };

@@ -540,7 +540,7 @@ test('completion path persists the canonical payload unchanged through the real 
           },
           pairs: {
             executor_focus: {
-              summary: 'Reserved pair-level summary.',
+              summary: 'Persisted pair summary.',
             },
           },
           domains: {
@@ -551,10 +551,10 @@ test('completion path persists the canonical payload unchanged through the real 
               environment: 'Persisted environment section.',
             },
           },
-          overview: {
+          overview: {},
+          heroHeaders: {
             executor_focus: {
-              headline: 'Persisted overview headline.',
-              summary: 'Persisted overview narrative.',
+              headline: 'Persisted hero headline.',
             },
           },
         };
@@ -574,8 +574,8 @@ test('completion path persists the canonical payload unchanged through the real 
   assert.ok(payload);
   assert.ok(isCanonicalResultPayload(payload));
   assert.deepEqual(Object.keys(payload ?? {}), [...CANONICAL_RESULT_PAYLOAD_FIELDS]);
-  assert.equal(payload?.hero.headline, 'Persisted overview headline.');
-  assert.equal(payload?.hero.narrative, 'Persisted overview narrative.');
+  assert.equal(payload?.hero.headline, 'Persisted hero headline.');
+  assert.equal(payload?.hero.narrative, 'Persisted pair summary.');
   assert.deepEqual(payload?.hero.domainHighlights, [{
     domainKey: 'signals',
     domainLabel: 'Signals',
@@ -597,7 +597,7 @@ test('completion path persists the canonical payload unchanged through the real 
   });
   assert.deepEqual(payload?.domains[1]?.pairSummary, {
     pairKey: 'executor_focus',
-    text: 'Reserved pair-level summary.',
+    text: 'Persisted pair summary.',
   });
   assert.deepEqual(Object.keys(payload?.actions ?? {}), ['strengths', 'watchouts', 'developmentFocus']);
   assert.deepEqual(Object.keys(payload?.actions.strengths[0] ?? {}), ['signalKey', 'signalLabel', 'text']);

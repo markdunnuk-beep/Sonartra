@@ -441,7 +441,7 @@ export type ResultRankedSignal = {
 
 export type ResultOverviewSummary = {
   headline: string;
-  narrative: string;
+  narrative: string | null;
 };
 
 export type ResultBulletItem = {

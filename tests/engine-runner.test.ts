@@ -429,7 +429,7 @@ test('engine path loads language bundle for a valid assessment version and leave
 
   assert.equal(loadedAssessmentVersionId, 'version-1');
   assert.equal(payload.hero.headline, 'Core Focus');
-  assert.match(payload.hero.narrative ?? '', /dependable way to approach work/i);
+  assert.equal(payload.hero.narrative, null);
   assert.equal(payload.hero.primaryPattern?.signalLabel, 'Core Focus');
 });
 
@@ -481,7 +481,7 @@ test('hero domain highlights use authored domain order and primary signal summar
   ]);
 });
 
-test('engine path uses overview-language summary for overview narrative only when available', async () => {
+test('engine path uses pair summaries for hero narrative only when available', async () => {
   const definition = buildDefinition();
   const repository: AssessmentDefinitionRepository = {
     async getPublishedAssessmentDefinitionByKey() {
@@ -495,15 +495,11 @@ test('engine path uses overview-language summary for overview narrative only whe
         signals: {},
         pairs: {
           drive_focus: {
-            summary: 'Reserved pair-level summary.',
+            summary: 'Custom pair summary from the assessment version.',
           },
         },
         domains: {},
-        overview: {
-          drive_focus: {
-            summary: 'Custom overview summary from the assessment version.',
-          },
-        },
+        overview: {},
       };
     },
   };
@@ -541,12 +537,12 @@ test('engine path uses overview-language summary for overview narrative only whe
   });
 
   assert.equal(payload.hero.headline, baseline.hero.headline);
-  assert.equal(payload.hero.narrative, 'Custom overview summary from the assessment version.');
+  assert.equal(payload.hero.narrative, 'Custom pair summary from the assessment version.');
   assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
   assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
   assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.equal(getDomain(payload, 'signals')?.pairSummary?.pairKey, 'drive_focus');
-  assert.equal(getDomain(payload, 'signals')?.pairSummary?.text, 'Reserved pair-level summary.');
+  assert.equal(getDomain(payload, 'signals')?.pairSummary?.text, 'Custom pair summary from the assessment version.');
   assert.equal(getDomain(baseline, 'signals')?.pairSummary?.text, null);
   assert.equal(getDomain(payload, 'signals')?.summary, getDomain(baseline, 'signals')?.summary);
   assert.equal(getDomain(payload, 'signals')?.focus, getDomain(baseline, 'signals')?.focus);
@@ -554,7 +550,7 @@ test('engine path uses overview-language summary for overview narrative only whe
   assert.equal(getDomain(payload, 'signals')?.environment, getDomain(baseline, 'signals')?.environment);
 });
 
-test('engine path uses overview template headline for overview headline only when available', async () => {
+test('engine path uses pair hero headers for hero headline only when available', async () => {
   const definition = buildDefinition();
   const repository: AssessmentDefinitionRepository = {
     async getPublishedAssessmentDefinitionByKey() {
@@ -568,14 +564,14 @@ test('engine path uses overview template headline for overview headline only whe
         signals: {},
         pairs: {
           drive_focus: {
-            summary: 'Reserved pair-level summary.',
+            summary: 'Custom pair summary from the assessment version.',
           },
         },
         domains: {},
-        overview: {
+        overview: {},
+        heroHeaders: {
           drive_focus: {
-            headline: 'Custom overview headline from the assessment version.',
-            summary: 'Custom overview summary from the assessment version.',
+            headline: 'Custom hero headline from the assessment version.',
           },
         },
       };
@@ -613,14 +609,14 @@ test('engine path uses overview template headline for overview headline only whe
     responses,
   });
 
-  assert.equal(payload.hero.headline, 'Custom overview headline from the assessment version.');
-  assert.equal(payload.hero.narrative, 'Custom overview summary from the assessment version.');
+  assert.equal(payload.hero.headline, 'Custom hero headline from the assessment version.');
+  assert.equal(payload.hero.narrative, 'Custom pair summary from the assessment version.');
   assert.notEqual(payload.hero.headline, baseline.hero.headline);
   assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
   assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
   assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
   assert.equal(getDomain(payload, 'signals')?.pairSummary?.pairKey, 'drive_focus');
-  assert.equal(getDomain(payload, 'signals')?.pairSummary?.text, 'Reserved pair-level summary.');
+  assert.equal(getDomain(payload, 'signals')?.pairSummary?.text, 'Custom pair summary from the assessment version.');
   assert.equal(getDomain(baseline, 'signals')?.pairSummary?.text, null);
   assert.equal(getDomain(payload, 'signals')?.summary, getDomain(baseline, 'signals')?.summary);
   assert.equal(getDomain(payload, 'signals')?.focus, getDomain(baseline, 'signals')?.focus);
@@ -987,7 +983,7 @@ test('engine language regression matrix preserves the canonical payload contract
         signals: {},
         pairs: {
           drive_focus: {
-            summary: 'Pair-only overview narrative.',
+            summary: 'Pair-only hero narrative.',
           },
         },
         domains: {},
@@ -995,7 +991,7 @@ test('engine language regression matrix preserves the canonical payload contract
       },
       expected: {
         headline: baseline.hero.headline,
-        narrative: baseline.hero.narrative,
+        narrative: 'Pair-only hero narrative.',
         strength: baseline.actions.strengths[0]?.text,
         watchout: baseline.actions.watchouts[0]?.text,
         development: baseline.actions.developmentFocus[0]?.text,
@@ -1049,19 +1045,20 @@ test('engine language regression matrix preserves the canonical payload contract
       },
     },
     {
-      name: 'overview headline only',
+      name: 'pair hero header only',
       languageBundle: {
         signals: {},
         pairs: {},
         domains: {},
-        overview: {
+        overview: {},
+        heroHeaders: {
           drive_focus: {
-            headline: 'Overview-headline-only.',
+            headline: 'Hero-headline-only.',
           },
         },
       },
       expected: {
-        headline: 'Overview-headline-only.',
+        headline: 'Hero-headline-only.',
         narrative: baseline.hero.narrative,
         strength: baseline.actions.strengths[0]?.text,
         watchout: baseline.actions.watchouts[0]?.text,
@@ -1083,16 +1080,16 @@ test('engine language regression matrix preserves the canonical payload contract
           },
         },
         domains: {},
-        overview: {
+        overview: {},
+        heroHeaders: {
           drive_focus: {
             headline: 'Mixed headline.',
-            summary: 'Mixed overview summary.',
           },
         },
       },
       expected: {
         headline: 'Mixed headline.',
-        narrative: 'Mixed overview summary.',
+        narrative: 'Mixed narrative.',
         strength: 'Mixed strength.',
         watchout: baseline.actions.watchouts[0]?.text,
         development: baseline.actions.developmentFocus[0]?.text,
@@ -1121,16 +1118,16 @@ test('engine language regression matrix preserves the canonical payload contract
             summary: 'Full domain summary.',
           },
         },
-        overview: {
+        overview: {},
+        heroHeaders: {
           drive_focus: {
             headline: 'Full headline.',
-            summary: 'Full overview summary.',
           },
         },
       },
       expected: {
         headline: 'Full headline.',
-        narrative: 'Full overview summary.',
+        narrative: 'Full narrative.',
         strength: 'Full strength.',
         watchout: 'Full watchout.',
         development: 'Full development.',
@@ -1169,7 +1166,9 @@ test('engine language regression matrix preserves the canonical payload contract
       `${scenario.name} normalization diagnostics`,
     );
     assert.ok(payload.hero.headline === null || payload.hero.headline.trim().length > 0, `${scenario.name} headline`);
-    assert.notEqual(payload.hero.narrative?.trim(), '', `${scenario.name} non-empty narrative`);
+    if (payload.hero.narrative !== null) {
+      assert.notEqual(payload.hero.narrative.trim(), '', `${scenario.name} non-empty narrative`);
+    }
   }
 });
 
