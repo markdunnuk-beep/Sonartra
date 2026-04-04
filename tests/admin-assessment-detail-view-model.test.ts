@@ -90,6 +90,55 @@ type DetailFixture = {
     domain_label: string;
     domain_order_index: number;
   }>;
+  introRows?: Array<{
+    intro_title: string;
+    intro_summary: string;
+    intro_how_it_works: string;
+  }>;
+  languageSignals?: Array<{
+    id: string;
+    assessment_version_id: string;
+    signal_key: string;
+    section: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  languagePairs?: Array<{
+    id: string;
+    assessment_version_id: string;
+    signal_pair: string;
+    section: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  languageDomains?: Array<{
+    id: string;
+    assessment_version_id: string;
+    domain_key: string;
+    section: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  languageOverview?: Array<{
+    id: string;
+    assessment_version_id: string;
+    pattern_key: string;
+    section: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  languageHeroHeaders?: Array<{
+    id: string;
+    assessment_version_id: string;
+    pair_key: string;
+    headline: string;
+    created_at: string;
+    updated_at: string;
+  }>;
 };
 
 function createFakeDb(fixture: DetailFixture): Queryable {
@@ -183,6 +232,30 @@ function createFakeDb(fixture: DetailFixture): Queryable {
 
       if (text.includes('FROM signals s') && text.includes('INNER JOIN domains d')) {
         return { rows: fixture.availableSignals as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_intro')) {
+        return { rows: (fixture.introRows ?? []) as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_language_signals')) {
+        return { rows: (fixture.languageSignals ?? []) as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_language_pairs')) {
+        return { rows: (fixture.languagePairs ?? []) as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_language_domains')) {
+        return { rows: (fixture.languageDomains ?? []) as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_language_overview')) {
+        return { rows: (fixture.languageOverview ?? []) as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_language_hero_headers')) {
+        return { rows: (fixture.languageHeroHeaders ?? []) as T[] };
       }
 
       return { rows: [] as T[] };
@@ -379,6 +452,68 @@ test('loads latest draft weighting data and coverage for admin assessment detail
   assert.equal(detail?.draftValidation.status, 'not_ready');
   assert.equal(detail?.draftValidation.isPublishReady, false);
   assert.equal(detail?.draftValidation.blockingErrors[0]?.code, 'options_without_weights');
+  assert.deepEqual(detail?.stepCompletion, {
+    assessmentIntro: 'incomplete',
+    language: 'incomplete',
+  });
 });
 
+test('derives trustworthy intro and language step completion from persisted draft content', async () => {
+  const detail = await getAdminAssessmentDetailByKey(
+    createFakeDb({
+      baseRows: [
+        {
+          assessment_id: 'assessment-1',
+          assessment_key: 'wplp80',
+          assessment_title: 'WPLP-80',
+          assessment_description: 'Flagship assessment',
+          assessment_is_active: true,
+          assessment_created_at: '2026-01-01T00:00:00.000Z',
+          assessment_updated_at: '2026-01-05T00:00:00.000Z',
+          assessment_version_id: 'version-draft',
+          version_tag: '1.1.0',
+          version_status: 'DRAFT',
+          published_at: null,
+          version_created_at: '2026-01-04T00:00:00.000Z',
+          version_updated_at: '2026-01-05T00:00:00.000Z',
+          question_count: '0',
+        },
+      ],
+      signalGroupDomains: [],
+      signals: [],
+      questionDomains: [],
+      questions: [],
+      optionSignalWeights: [],
+      availableSignals: [],
+      introRows: [
+        {
+          intro_title: '',
+          intro_summary: 'Measure the patterns that shape how you work.',
+          intro_how_it_works: '',
+        },
+      ],
+      languageSignals: [
+        {
+          id: 'signal-language-1',
+          assessment_version_id: 'version-draft',
+          signal_key: 'driver',
+          section: 'summary',
+          content: 'Driver summary',
+          created_at: '2026-04-01T00:00:01.000Z',
+          updated_at: '2026-04-01T00:00:01.000Z',
+        },
+      ],
+      languagePairs: [],
+      languageDomains: [],
+      languageOverview: [],
+      languageHeroHeaders: [],
+    }),
+    'wplp80',
+  );
+
+  assert.deepEqual(detail?.stepCompletion, {
+    assessmentIntro: 'complete',
+    language: 'complete',
+  });
+});
 

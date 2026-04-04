@@ -4,6 +4,10 @@ import {
   validateLatestDraftAssessmentVersion,
   type AdminAssessmentValidationResult,
 } from '@/lib/server/admin-assessment-validation';
+import {
+  isMissingAssessmentVersionIntroSchemaError,
+} from '@/lib/server/assessment-version-intro-repository';
+import { getAssessmentVersionLanguageBundle } from '@/lib/server/assessment-version-language';
 
 import type { AdminAssessmentVersionStatus } from '@/lib/server/admin-assessment-dashboard';
 
@@ -104,6 +108,13 @@ export type AdminAssessmentDetailVersion = {
   updatedAt: string;
 };
 
+export type AdminAssessmentDetailStepCompletionStatus = 'complete' | 'incomplete' | 'neutral';
+
+export type AdminAssessmentDetailStepCompletion = {
+  assessmentIntro: AdminAssessmentDetailStepCompletionStatus;
+  language: AdminAssessmentDetailStepCompletionStatus;
+};
+
 export type AdminAssessmentDetailViewModel = {
   assessmentId: string;
   assessmentKey: string;
@@ -121,6 +132,7 @@ export type AdminAssessmentDetailViewModel = {
   availableSignals: readonly AdminAssessmentDetailAvailableSignal[];
   weightingSummary: AdminAssessmentDetailWeightingSummary;
   draftValidation: AdminAssessmentValidationResult;
+  stepCompletion: AdminAssessmentDetailStepCompletion;
 };
 
 type AdminAssessmentDetailRow = {
@@ -251,6 +263,80 @@ function compareStringsDesc(left: unknown, right: unknown): number {
 
 function compareTimestampsDesc(left: unknown, right: unknown): number {
   return toTimestamp(right) - toTimestamp(left);
+}
+
+function hasMeaningfulText(value: string | null | undefined): boolean {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isMissingLanguageSchemaError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const code = 'code' in error ? error.code : null;
+  const message = 'message' in error ? error.message : null;
+
+  return code === '42P01' && typeof message === 'string' && message.includes('assessment_version_language_');
+}
+
+async function loadAssessmentIntroStepCompletion(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<AdminAssessmentDetailStepCompletionStatus> {
+  try {
+    const result = await db.query<{
+      intro_title: string;
+      intro_summary: string;
+      intro_how_it_works: string;
+    }>(
+      `
+      SELECT
+        intro_title,
+        intro_summary,
+        intro_how_it_works
+      FROM assessment_version_intro
+      WHERE assessment_version_id = $1
+      `,
+      [assessmentVersionId],
+    );
+    const intro = result.rows[0];
+
+    return intro &&
+      (hasMeaningfulText(intro.intro_title) ||
+        hasMeaningfulText(intro.intro_summary) ||
+        hasMeaningfulText(intro.intro_how_it_works))
+      ? 'complete'
+      : 'incomplete';
+  } catch (error) {
+    if (isMissingAssessmentVersionIntroSchemaError(error)) {
+      return 'neutral';
+    }
+
+    throw error;
+  }
+}
+
+async function loadLanguageStepCompletion(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<AdminAssessmentDetailStepCompletionStatus> {
+  try {
+    const bundle = await getAssessmentVersionLanguageBundle(db, assessmentVersionId);
+
+    return Object.keys(bundle.heroHeaders ?? {}).length > 0 ||
+      Object.keys(bundle.domains).length > 0 ||
+      Object.keys(bundle.signals).length > 0 ||
+      Object.keys(bundle.pairs).length > 0
+      ? 'complete'
+      : 'incomplete';
+  } catch (error) {
+    if (isMissingLanguageSchemaError(error)) {
+      return 'neutral';
+    }
+
+    throw error;
+  }
 }
 
 async function loadAuthoringDomainsForVersion(
@@ -638,7 +724,7 @@ export async function getAdminAssessmentDetailByKey(
     });
   const publishedVersion = versions.find((version) => version.status === 'published') ?? null;
   const latestDraftVersion = versions.find((version) => version.status === 'draft') ?? null;
-  const [authoredDomains, questionDomains, authoredQuestions, availableSignals, draftValidation] =
+  const [authoredDomains, questionDomains, authoredQuestions, availableSignals, draftValidation, stepCompletion] =
     latestDraftVersion
       ? await Promise.all([
           loadAuthoringDomainsForVersion(db, latestDraftVersion.assessmentVersionId),
@@ -646,6 +732,10 @@ export async function getAdminAssessmentDetailByKey(
           loadQuestionsForVersion(db, latestDraftVersion.assessmentVersionId),
           loadAvailableSignalsForVersion(db, latestDraftVersion.assessmentVersionId),
           validateLatestDraftAssessmentVersion(db, assessmentKey),
+          Promise.all([
+            loadAssessmentIntroStepCompletion(db, latestDraftVersion.assessmentVersionId),
+            loadLanguageStepCompletion(db, latestDraftVersion.assessmentVersionId),
+          ]).then(([assessmentIntro, language]) => ({ assessmentIntro, language })),
         ])
       : await Promise.all([
           Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailDomain[]),
@@ -653,6 +743,10 @@ export async function getAdminAssessmentDetailByKey(
           Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailQuestion[]),
           Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailAvailableSignal[]),
           validateLatestDraftAssessmentVersion(db, assessmentKey),
+          Promise.resolve({
+            assessmentIntro: 'incomplete' as const,
+            language: 'incomplete' as const,
+          }),
         ]);
   const allOptions = authoredQuestions.flatMap((question) => question.options);
   const weightedOptions = allOptions.filter((option) => option.signalWeights.length > 0).length;
@@ -680,6 +774,7 @@ export async function getAdminAssessmentDetailByKey(
       totalMappings,
     },
     draftValidation,
+    stepCompletion,
   };
 }
 
