@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -19,7 +19,6 @@ import {
 } from '@/lib/admin/admin-domain-signal-authoring';
 import type { AdminAssessmentDetailDomain } from '@/lib/server/admin-assessment-detail';
 import {
-  createSignalAction,
   deleteDomainAction,
   deleteSignalAction,
   regenerateDomainKeyAction,
@@ -31,12 +30,6 @@ import {
   type InlineSignalKeyRegenerateResult,
   type InlineSignalLabelUpdateResult,
 } from '@/lib/server/admin-domain-signal-authoring';
-import {
-  SIGNAL_KEY_PATTERN,
-  createSignalKeyDraftState,
-  syncSignalKeyFromManualInput,
-  syncSignalKeyFromName,
-} from '@/lib/utils/signal-key';
 
 function normalizeState(state: AdminAuthoringFormState | null | undefined): AdminAuthoringFormState {
   return {
@@ -48,101 +41,6 @@ function normalizeState(state: AdminAuthoringFormState | null | undefined): Admi
       description: state?.values?.description ?? emptyAdminAuthoringFormValues.description,
     },
   };
-}
-
-function Field({
-  label,
-  hint,
-  error,
-  children,
-}: Readonly<{
-  label: string;
-  hint: string;
-  error?: string;
-  children: React.ReactNode;
-}>) {
-  return (
-    <label className="block space-y-2">
-      <div className="space-y-1">
-        <span className="block text-sm font-medium text-white">{label}</span>
-        <span className="block text-sm leading-6 text-white/54">{hint}</span>
-      </div>
-      {children}
-      {error ? <p className="text-sm text-[rgba(255,198,198,0.92)]">{error}</p> : null}
-    </label>
-  );
-}
-
-function TextInput({
-  name,
-  defaultValue,
-  value,
-  placeholder,
-  error,
-  onChange,
-  required,
-  pattern,
-  title,
-}: Readonly<{
-  name: string;
-  defaultValue?: string;
-  value?: string;
-  placeholder: string;
-  error?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  required?: boolean;
-  pattern?: string;
-  title?: string;
-}>) {
-  return (
-    <input
-      className={cn(
-        'sonartra-focus-ring min-h-11 w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
-        error
-          ? 'border-[rgba(255,157,157,0.32)]'
-          : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
-      )}
-      name={name}
-      {...(value !== undefined ? { value } : { defaultValue: defaultValue ?? '' })}
-      onChange={onChange}
-      placeholder={placeholder}
-      pattern={pattern}
-      required={required}
-      title={title}
-      type="text"
-    />
-  );
-}
-
-function TextArea({
-  name,
-  defaultValue,
-  value,
-  placeholder,
-  error,
-  onChange,
-}: Readonly<{
-  name: string;
-  defaultValue?: string;
-  value?: string;
-  placeholder: string;
-  error?: string;
-  onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-}>) {
-  return (
-    <textarea
-      className={cn(
-        'sonartra-focus-ring min-h-[112px] w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
-        error
-          ? 'border-[rgba(255,157,157,0.32)]'
-          : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
-      )}
-      name={name}
-      {...(value !== undefined ? { value } : { defaultValue: defaultValue ?? '' })}
-      onChange={onChange}
-      placeholder={placeholder}
-    />
-  );
 }
 
 function SubmitButton({
@@ -443,138 +341,6 @@ function InlineTextEditor({
   );
 }
 
-function CreateSignalForm({
-  assessmentKey,
-  assessmentVersionId,
-  domainId,
-}: {
-  assessmentKey: string;
-  assessmentVersionId: string;
-  domainId: string;
-}) {
-  const createSignalFormAction = useMemo(
-    () =>
-      createSignalAction.bind(null, {
-        assessmentKey,
-        assessmentVersionId,
-        domainId,
-      }),
-    [assessmentKey, assessmentVersionId, domainId],
-  );
-  const [state, formAction] = useActionState(
-    createSignalFormAction,
-    initialAdminAuthoringFormState,
-  );
-  const currentState = normalizeState(state);
-  const [draftState, setDraftState] = useState(() =>
-    createSignalKeyDraftState({
-      label: currentState.values.label,
-      key: currentState.values.key,
-    }),
-  );
-  const [description, setDescription] = useState(currentState.values.description);
-
-  useEffect(() => {
-    if (
-      currentState.formError ||
-      currentState.fieldErrors.label ||
-      currentState.fieldErrors.key ||
-      currentState.fieldErrors.description
-    ) {
-      return;
-    }
-
-    if (
-      currentState.values.label ||
-      currentState.values.key ||
-      currentState.values.description
-    ) {
-      return;
-    }
-
-    setDraftState(createSignalKeyDraftState({ label: '', key: '' }));
-    setDescription('');
-  }, [
-    currentState.fieldErrors.description,
-    currentState.fieldErrors.key,
-    currentState.fieldErrors.label,
-    currentState.formError,
-    currentState.values.description,
-    currentState.values.key,
-    currentState.values.label,
-  ]);
-
-  return (
-    <SurfaceCard className="p-4">
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <p className="sonartra-page-eyebrow">Add signal</p>
-          <p className="text-sm leading-7 text-white/58">
-            Add signals to this domain.
-          </p>
-        </div>
-
-        <form action={formAction} className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Field error={currentState.fieldErrors.label} hint="Name this signal." label="Name">
-              <TextInput
-                error={currentState.fieldErrors.label}
-                name="label"
-                onChange={(event) => {
-                  const nextName = event.currentTarget.value;
-                  setDraftState((previousState) =>
-                    syncSignalKeyFromName(previousState, nextName),
-                  );
-                }}
-                placeholder="Directive"
-                required
-                value={draftState.label}
-              />
-            </Field>
-            <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Key">
-              <TextInput
-                error={currentState.fieldErrors.key}
-                name="key"
-                onChange={(event) => {
-                  const nextKey = event.currentTarget.value;
-                  setDraftState((previousState) =>
-                    syncSignalKeyFromManualInput(previousState, nextKey),
-                  );
-                }}
-                pattern={SIGNAL_KEY_PATTERN.source}
-                placeholder="directive"
-                required
-                title="Use lowercase letters, numbers, and single hyphens only."
-                value={draftState.key}
-              />
-            </Field>
-          </div>
-
-          <Field
-            error={currentState.fieldErrors.description}
-            hint="Optional short note."
-            label="Description"
-          >
-            <TextArea
-              error={currentState.fieldErrors.description}
-              name="description"
-              onChange={(event) => {
-                setDescription(event.currentTarget.value);
-              }}
-              placeholder="Represents a clear, direct leadership tendency."
-              value={description}
-            />
-          </Field>
-
-          <InlineError message={currentState.formError} />
-
-          <SubmitButton idleLabel="Add signal" pendingLabel="Adding signal..." />
-        </form>
-      </div>
-    </SurfaceCard>
-  );
-}
-
 function DomainLabelEditor({
   assessmentKey,
   assessmentVersionId,
@@ -785,18 +551,18 @@ function DomainCard({
         )}
 
         {showSignals ? (
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <p className="sonartra-page-eyebrow">Signals</p>
-              <p className="text-sm leading-7 text-white/58">
-                Add signals to this domain.
-              </p>
-            </div>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <p className="sonartra-page-eyebrow">Signals</p>
+                <p className="text-sm leading-7 text-white/58">
+                Signals in this domain are managed through bulk import and inline editing.
+                </p>
+              </div>
 
             {domain.signals.length === 0 ? (
               <EmptyState
                 className="p-4"
-                description="Add a signal to this domain."
+                description="Use the bulk import panel above to add signals to this domain."
                 title="No signals yet"
               />
             ) : (
@@ -827,12 +593,6 @@ function DomainCard({
                 ))}
               </div>
             )}
-
-            <CreateSignalForm
-              assessmentKey={assessmentKey}
-              assessmentVersionId={assessmentVersionId}
-              domainId={domain.domainId}
-            />
           </div>
         ) : (
           <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">

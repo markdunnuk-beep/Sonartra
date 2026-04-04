@@ -64,10 +64,13 @@ test('bulk signal import panel shows domain-required and append guidance for ope
   assert.match(source, /Review the rejected rows below, then try importing again\./);
 });
 
-test('signal authoring renders the bulk panel only in signals mode above the manual signal cards', () => {
+test('signal authoring renders the bulk panel only in signals mode without a manual add-signal section', () => {
   const source = readSource(authoringComponentPath);
 
   assert.match(source, /\{mode === 'signals' \? \(\s*<AdminBulkSignalImport/);
   assert.match(source, /<AdminBulkSignalImport[\s\S]*\{domains\.length === 0 \?/);
   assert.doesNotMatch(source, /\{mode === 'domains' \? \(\s*<AdminBulkSignalImport/);
+  assert.doesNotMatch(source, /sonartra-page-eyebrow">Add signal/);
+  assert.doesNotMatch(source, /idleLabel="Add signal"/);
+  assert.doesNotMatch(source, /pendingLabel="Adding signal\.\.\."/);
 });

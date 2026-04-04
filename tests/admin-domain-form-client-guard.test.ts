@@ -51,39 +51,24 @@ test('domain authoring no longer renders a manual create domain form', () => {
   assert.doesNotMatch(source, /DOMAIN_KEY_PATTERN/);
 });
 
-test('create signal form change handlers snapshot event values and stay local-only', () => {
+test('signal authoring no longer renders a manual create signal form', () => {
   const source = readComponentSource();
 
-  assert.match(source, /const nextName = event\.currentTarget\.value/);
-  assert.match(source, /syncSignalKeyFromName\(previousState, nextName\)/);
-  assert.match(source, /const nextKey = event\.currentTarget\.value/);
-  assert.match(source, /syncSignalKeyFromManualInput\(previousState, nextKey\)/);
-  assert.doesNotMatch(source, /requestSubmit\(/);
-  assert.doesNotMatch(source, /router\.(refresh|push|replace)\(/);
-  assert.doesNotMatch(source, /redirect\(/);
+  assert.doesNotMatch(source, /CreateSignalForm/);
+  assert.doesNotMatch(source, /createSignalAction/);
+  assert.doesNotMatch(source, /syncSignalKeyFromName/);
+  assert.doesNotMatch(source, /syncSignalKeyFromManualInput/);
+  assert.doesNotMatch(source, /createSignalKeyDraftState/);
+  assert.doesNotMatch(source, /SIGNAL_KEY_PATTERN/);
+  assert.doesNotMatch(source, /sonartra-page-eyebrow">Add signal/);
+  assert.doesNotMatch(source, /idleLabel="Add signal"/);
+  assert.doesNotMatch(source, /pendingLabel="Adding signal\.\.\."/);
 });
 
 test('non-submit inline editor controls stay explicit button elements', () => {
   const source = readComponentSource();
 
   assert.match(source, /onClick=\{startEditing\}[\s\S]*type="button"/);
-});
-
-test('create signal draft is not rehydrated from action state during typing', () => {
-  const source = readComponentSource();
-
-  assert.doesNotMatch(
-    source,
-    /setDraftState\(\s*createSignalKeyDraftState\(\{\s*label:\s*currentState\.values\.label,\s*key:\s*currentState\.values\.key,/,
-  );
-});
-
-test('create signal server action is memoized so typing does not replace the action identity', () => {
-  const source = readComponentSource();
-
-  assert.match(source, /const createSignalFormAction = useMemo\(/);
-  assert.match(source, /useActionState\(\s*createSignalFormAction,/);
-  assert.doesNotMatch(source, /useActionState\(\s*createSignalAction\.bind/);
 });
 
 test('admin domain authoring path does not use mutable draft values as React keys', () => {
