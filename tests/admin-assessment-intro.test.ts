@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
+import { AdminAssessmentIntroEditor } from '@/components/admin/admin-assessment-intro-editor';
 import { createEmptyAssessmentIntroState } from '@/lib/admin/admin-assessment-intro';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import {
@@ -358,4 +361,63 @@ test('assessment intro step view model loads persisted content for the latest dr
     instructions: '',
     confidentialityNote: '',
   });
+});
+
+test('assessment intro step view model returns null for an invalid assessment key and preserves a safe empty state when no draft exists', async () => {
+  const missingAssessment = await getAdminAssessmentIntroStepViewModel(
+    createFakeDb({ assessmentRows: [] }).db,
+    'missing-assessment',
+  );
+  const noDraftAssessment = await getAdminAssessmentIntroStepViewModel(
+    createFakeDb({
+      assessmentRows: [
+        buildAssessmentRow({
+          assessment_version_id: 'version-published',
+          version_tag: '1.0.0',
+          version_status: 'PUBLISHED',
+          published_at: '2026-01-03T00:00:00.000Z',
+          version_created_at: '2026-01-02T00:00:00.000Z',
+          version_updated_at: '2026-01-03T00:00:00.000Z',
+        }),
+      ],
+    }).db,
+    'wplp80',
+  );
+
+  assert.equal(missingAssessment, null);
+  assert.ok(noDraftAssessment);
+  assert.equal(noDraftAssessment?.draftVersion, null);
+  assert.deepEqual(noDraftAssessment?.intro, {
+    introTitle: '',
+    introSummary: '',
+    introHowItWorks: '',
+    estimatedTimeOverride: '',
+    instructions: '',
+    confidentialityNote: '',
+  });
+});
+
+test('assessment intro editor renders a guarded empty state when no editable draft version exists', () => {
+  const markup = renderToStaticMarkup(
+    React.createElement(AdminAssessmentIntroEditor, {
+      viewModel: {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        assessmentDescription: 'Flagship assessment',
+        draftVersion: null,
+        intro: {
+          introTitle: '',
+          introSummary: '',
+          introHowItWorks: '',
+          estimatedTimeOverride: '',
+          instructions: '',
+          confidentialityNote: '',
+        },
+      },
+    }),
+  );
+
+  assert.match(markup, /No draft version available/);
+  assert.match(markup, /Create a draft version before authoring assessment intro content\./);
 });

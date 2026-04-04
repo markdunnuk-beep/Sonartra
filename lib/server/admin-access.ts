@@ -1,6 +1,10 @@
 import { redirect } from 'next/navigation';
 
-import { getRequestUserContext, type RequestUserContext } from '@/lib/server/request-user';
+import {
+  getRequestUserContext,
+  isMissingRequestUserError,
+  type RequestUserContext,
+} from '@/lib/server/request-user';
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -24,12 +28,36 @@ export function isApprovedAdminEmail(email: string | null): boolean {
   return getApprovedAdminEmails().includes(normalizeEmail(email));
 }
 
-export async function requireAdminRequestUserContext(): Promise<RequestUserContext> {
-  const requestUser = await getRequestUserContext();
+type RequireAdminRequestUserContextDependencies = {
+  getRequestUserContext(): Promise<RequestUserContext>;
+  redirect(path: string): never;
+};
+
+export async function requireAdminRequestUserContextWithDependencies(
+  dependencies: RequireAdminRequestUserContextDependencies,
+): Promise<RequestUserContext> {
+  let requestUser: RequestUserContext;
+
+  try {
+    requestUser = await dependencies.getRequestUserContext();
+  } catch (error) {
+    if (isMissingRequestUserError(error)) {
+      dependencies.redirect('/');
+    }
+
+    throw error;
+  }
 
   if (!isApprovedAdminEmail(requestUser.userEmail)) {
-    redirect('/app/workspace');
+    dependencies.redirect('/');
   }
 
   return requestUser;
+}
+
+export async function requireAdminRequestUserContext(): Promise<RequestUserContext> {
+  return requireAdminRequestUserContextWithDependencies({
+    getRequestUserContext,
+    redirect,
+  });
 }

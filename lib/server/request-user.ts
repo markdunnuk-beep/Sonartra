@@ -5,6 +5,8 @@ export type RequestUserContext = {
   userEmail: string | null;
 };
 
+const MISSING_REQUEST_USER_ID_ERROR = 'Authenticated user id is required for user app routes';
+
 export function resolveUserIdFromHeaders(requestHeaders: Headers): string {
   const userId =
     requestHeaders.get('x-user-id') ??
@@ -12,10 +14,14 @@ export function resolveUserIdFromHeaders(requestHeaders: Headers): string {
     null;
 
   if (!userId) {
-    throw new Error('Authenticated user id is required for user app routes');
+    throw new Error(MISSING_REQUEST_USER_ID_ERROR);
   }
 
   return userId;
+}
+
+export function isMissingRequestUserError(error: unknown): boolean {
+  return error instanceof Error && error.message === MISSING_REQUEST_USER_ID_ERROR;
 }
 
 export function resolveUserEmailFromHeaders(requestHeaders: Headers): string | null {
