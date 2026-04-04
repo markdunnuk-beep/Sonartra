@@ -13,13 +13,18 @@ function formatDate(value: string): string {
 
 export default function AdminAssessmentOverviewPage() {
   const assessment = useAdminAssessmentAuthoring();
+  const currentStatus = assessment.latestDraftVersion
+    ? 'Draft'
+    : assessment.publishedVersion
+      ? 'Published'
+      : 'Not started';
 
   return (
     <section className="space-y-8">
       <SectionHeader
         eyebrow="Overview"
         title="Overview"
-        description="Start here to review the draft and overall status."
+        description="Assessment identity and current version status."
       />
 
       <SurfaceCard className="p-5 lg:p-6">
@@ -35,8 +40,7 @@ export default function AdminAssessmentOverviewPage() {
               {assessment.title}
             </h2>
             <p className="max-w-3xl text-sm leading-7 text-white/62">
-              {assessment.description ??
-                'Build your draft here, then publish when it is ready.'}
+              {assessment.description ?? 'Assessment identity, versioning context, and current status.'}
             </p>
           </div>
         </div>
@@ -44,38 +48,10 @@ export default function AdminAssessmentOverviewPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetaItem label="Version label" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
-        <MetaItem
-          label="Status"
-          value={assessment.publishedVersion ? 'Published' : assessment.latestDraftVersion ? 'Draft' : 'Not started'}
-        />
-        <MetaItem
-          label="Publish check"
-          value={
-            assessment.draftValidation.status === 'no_draft'
-              ? 'No draft yet'
-              : assessment.draftValidation.isPublishReady
-                ? 'Ready'
-                : 'Needs review'
-          }
-        />
+        <MetaItem label="Status" value={currentStatus} />
+        <MetaItem label="Assessment key" value={assessment.assessmentKey} />
         <MetaItem label="Current published" value={assessment.publishedVersion?.versionTag ?? 'None'} />
       </div>
-
-      <SurfaceCard className="p-5 lg:p-6">
-        <div className="space-y-3">
-          <p className="sonartra-page-eyebrow">Publish check</p>
-          <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-            Check before publishing
-          </h2>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">
-            {assessment.draftValidation.isPublishReady
-              ? `Draft ${assessment.draftValidation.draftVersionTag ?? assessment.latestDraftVersion?.versionTag ?? 'version'} is ready to publish.`
-              : assessment.draftValidation.status === 'no_draft'
-                ? 'No draft yet.'
-                : `${assessment.draftValidation.blockingErrors.length} issue${assessment.draftValidation.blockingErrors.length === 1 ? '' : 's'} to fix before publishing. Review the full checks in Review.`}
-          </p>
-        </div>
-      </SurfaceCard>
     </section>
   );
 }
