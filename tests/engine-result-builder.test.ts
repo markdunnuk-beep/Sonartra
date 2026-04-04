@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { isCanonicalResultPayload } from '@/lib/engine/result-contract';
 import { buildCanonicalResultPayload as buildCanonicalResultPayloadBase } from '@/lib/engine/result-builder';
@@ -14,6 +16,18 @@ import type {
   NormalizedDomainSummary,
   NormalizedSignalScore,
 } from '@/lib/engine/types';
+
+const resultInterpretationPath = join(process.cwd(), 'lib', 'engine', 'result-interpretation.ts');
+const DISALLOWED_GENERIC_HERO_HEADLINES = Object.freeze([
+  'A clear working style is coming through',
+  'A clear source of motivation is coming through',
+  'A clear leadership pattern is coming through',
+  'A clear conflict response is coming through',
+  'A clear environment preference is coming through',
+  'A pressure pattern is coming through',
+  'A clear decision pattern is coming through',
+  'A clear role fit is coming through',
+]);
 
 function createEmptyLanguageBundle(): EngineLanguageBundle {
   return {
@@ -1696,6 +1710,45 @@ test('overview summary headline falls back unchanged when overview template head
   assert.deepEqual(payload.domainSummaries, baseline.domainSummaries);
 });
 
+test('overview summary headline falls back to the top signal title when only a prefix template exists', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-mastery',
+          signalKey: 'mot_mastery',
+          title: 'Mastery',
+          domainId: 'domain-mot',
+          domainKey: 'signal_mot',
+          rawTotal: 5,
+          percentage: 47,
+          domainPercentage: 47,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 4,
+          percentage: 34,
+          domainPercentage: 34,
+          rank: 2,
+        }),
+      ]),
+      domainSummaries: Object.freeze([]),
+      topSignalId: 'signal-mastery',
+    }),
+  });
+
+  assert.equal(payload.overviewSummary.headline, 'Mastery');
+  assert.doesNotMatch(
+    payload.overviewSummary.headline ?? '',
+    /A clear (working style|source of motivation|leadership pattern|conflict response|environment preference|decision pattern|role fit) is coming through|A pressure pattern is coming through/,
+  );
+});
+
 test('overview summary lookup is canonical even when the top two signals resolve in reverse lexical order', () => {
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture({
@@ -1836,6 +1889,14 @@ test('overview summary uses top-signal interpretation when a mapped signal leads
   assert.equal(payload.overviewSummary.headline, 'Structured, thoughtful and evidence-led');
   assert.match(payload.overviewSummary.narrative, /logic rather than impulse/i);
   assert.match(payload.overviewSummary.narrative, /accuracy, sound judgement, and careful problem-solving/i);
+});
+
+test('generic prefix-level hero fallback headlines are absent from result interpretation source', () => {
+  const source = readFileSync(resultInterpretationPath, 'utf8');
+
+  for (const headline of DISALLOWED_GENERIC_HERO_HEADLINES) {
+    assert.doesNotMatch(source, new RegExp(headline.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
 });
 
 test('overview summary uses secondary support language for balanced profiles', () => {

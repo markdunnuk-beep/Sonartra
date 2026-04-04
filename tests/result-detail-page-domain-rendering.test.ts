@@ -16,6 +16,9 @@ const pagePath = join(
   'page.tsx',
 );
 
+const DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN =
+  /A clear (working style|source of motivation|leadership pattern|conflict response|environment preference|decision pattern|role fit) is coming through|A pressure pattern is coming through/;
+
 function buildResultDetail(
   domains: AssessmentResultDetailViewModel['domains'],
 ): AssessmentResultDetailViewModel {
@@ -194,6 +197,7 @@ test('result detail page reads intro, hero, domains, and actions from canonical 
   assert.doesNotMatch(source, /result\.metadata\.assessmentDescription/);
   assert.doesNotMatch(source, /result\.overviewSummary\.headline/);
   assert.doesNotMatch(source, /result\.overviewSummary\.narrative/);
+  assert.doesNotMatch(source, DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN);
   assert.doesNotMatch(source, /getResultDetailDomains/);
   assert.doesNotMatch(source, /<ActionSection result=\{result\} \/>/);
 

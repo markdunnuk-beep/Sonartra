@@ -40,7 +40,7 @@ const MAX_WATCHOUT_COUNT = 3;
 const MAX_DEVELOPMENT_COUNT = 2;
 
 type SignalTemplate = {
-  headline: string;
+  headline: string | null;
   hero: string;
   impact: string;
   supportFragment: string;
@@ -51,7 +51,7 @@ type SignalTemplate = {
 };
 
 const DEFAULT_TEMPLATE: SignalTemplate = {
-  headline: '',
+  headline: null,
   hero: 'You tend to rely on this signal when deciding how to respond and where to place your effort.',
   impact: 'This is usually most useful when you need a dependable way to approach work and make progress.',
   supportFragment: 'additional range around how you apply it',
@@ -63,7 +63,7 @@ const DEFAULT_TEMPLATE: SignalTemplate = {
 
 const PREFIX_TEMPLATES: Record<string, SignalTemplate> = {
   style_: {
-    headline: 'A clear working style is coming through',
+    headline: null,
     hero: 'You tend to approach work in a consistent way that shapes how quickly you move, how much structure you use, and how you show up with others.',
     impact: 'This is usually most useful because it gives people a reliable sense of how you operate when work needs to move.',
     supportFragment: 'additional style range',
@@ -73,7 +73,7 @@ const PREFIX_TEMPLATES: Record<string, SignalTemplate> = {
     development: 'Practise using this style more deliberately in lower-risk situations so it is easier to access when needed. The aim is broader control over your range, not behaving out of character.',
   },
   mot_: {
-    headline: 'A clear source of motivation is coming through',
+    headline: null,
     hero: 'You are likely to stay most engaged when the work rewards this kind of progress, environment, or contribution.',
     impact: 'This matters because motivation tends to shape where you sustain effort and where your energy drops.',
     supportFragment: 'extra energy in that direction',
@@ -83,7 +83,7 @@ const PREFIX_TEMPLATES: Record<string, SignalTemplate> = {
     development: 'Look for small ways to activate this driver more deliberately so it becomes easier to access when the role needs it. That usually makes effort more sustainable without needing the whole role to change.',
   },
   lead_: {
-    headline: 'A clear leadership pattern is coming through',
+    headline: null,
     hero: 'When you step into leadership, this is one of the clearest ways you are likely to guide people and shape the work.',
     impact: 'This matters because it affects what people get from you first when direction, accountability, or support is needed.',
     supportFragment: 'more leadership range',
@@ -93,7 +93,7 @@ const PREFIX_TEMPLATES: Record<string, SignalTemplate> = {
     development: 'Build more deliberate range in this leadership pattern so it is available without taking over every situation. Better timing here usually improves trust as much as effectiveness.',
   },
   conflict_: {
-    headline: 'A clear conflict response is coming through',
+    headline: null,
     hero: 'When tension appears, this is one of the clearest ways you are likely to respond.',
     impact: 'This matters because conflict style shapes whether issues get surfaced, softened, shared, or delayed.',
     supportFragment: 'more range in conflict',
@@ -103,7 +103,7 @@ const PREFIX_TEMPLATES: Record<string, SignalTemplate> = {
     development: 'Practise this response in lower-risk disagreements so it becomes easier to use deliberately rather than by habit. The goal is more choice under tension, not more conflict for its own sake.',
   },
   culture_: {
-    headline: 'A clear environment preference is coming through',
+    headline: null,
     hero: 'You are likely to do your best work when the surrounding culture rewards this kind of behaviour and operating rhythm.',
     impact: 'This matters because environment fit affects how naturally your strengths come through.',
     supportFragment: 'extra environmental fit in that direction',
@@ -113,7 +113,7 @@ const PREFIX_TEMPLATES: Record<string, SignalTemplate> = {
     development: 'Build more conscious range around this environment preference so you can adapt without losing your best work. That usually improves fit judgement and resilience at the same time.',
   },
   stress_: {
-    headline: 'A pressure pattern is coming through',
+    headline: null,
     hero: 'Under strain, this is one of the clearest ways your behaviour may shift.',
     impact: 'This matters because pressure patterns often show up faster than intention unless you recognise them early.',
     supportFragment: 'additional pressure awareness',
@@ -123,7 +123,7 @@ const PREFIX_TEMPLATES: Record<string, SignalTemplate> = {
     development: 'Build a simple pressure reset around this pattern so it becomes easier to spot and manage early. Early intervention usually matters more than a perfect recovery later.',
   },
   decision_: {
-    headline: 'A clear decision pattern is coming through',
+    headline: null,
     hero: 'This is one of the clearest ways you are likely to make decisions when there is uncertainty or trade-off.',
     impact: 'This matters because decision style shapes pace, involvement, confidence, and the quality of the call.',
     supportFragment: 'more decision range',
@@ -133,7 +133,7 @@ const PREFIX_TEMPLATES: Record<string, SignalTemplate> = {
     development: 'Practise using this decision pattern more deliberately so it becomes available without dominating every choice.',
   },
   role_: {
-    headline: 'A clear role fit is coming through',
+    headline: null,
     hero: 'This signal suggests a kind of work where your pattern may feel especially natural and effective.',
     impact: 'This matters because role fit often affects where your strengths are easiest to apply at a high level.',
     supportFragment: 'additional role fit',
@@ -461,6 +461,16 @@ function resolveSignalLanguageSection(
   return content ? content : null;
 }
 
+function resolveFallbackHeadline(
+  topSignal: NormalizedSignalScore,
+  topTemplate: SignalTemplate,
+): string {
+  const templateHeadline = topTemplate.headline?.trim();
+  return templateHeadline && templateHeadline.length > 0
+    ? templateHeadline
+    : topSignal.signalTitle;
+}
+
 export function buildOverviewSummary(
   normalizedResult: NormalizedResult,
   context?: ResultInterpretationContext,
@@ -497,7 +507,7 @@ export function buildOverviewSummary(
   return {
     headline:
       overviewTemplateHeadline ??
-      (topTemplate === DEFAULT_TEMPLATE ? topSignal.signalTitle : topTemplate.headline),
+      resolveFallbackHeadline(topSignal, topTemplate),
     narrative: overviewTemplateSummary ?? `${topTemplate.hero} ${supportSentence}`,
   };
 }

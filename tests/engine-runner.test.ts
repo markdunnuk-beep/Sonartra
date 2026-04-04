@@ -21,6 +21,9 @@ function createEmptyLanguageBundle(): EngineLanguageBundle {
   };
 }
 
+const DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN =
+  /A clear (working style|source of motivation|leadership pattern|conflict response|environment preference|decision pattern|role fit) is coming through|A pressure pattern is coming through/;
+
 function getAllDomainSignals(payload: CanonicalResultPayload) {
   return payload.domains.flatMap((domain) => domain.signals);
 }
@@ -625,6 +628,86 @@ test('engine path uses overview template headline for overview headline only whe
   assert.equal(getDomain(payload, 'signals')?.environment, getDomain(baseline, 'signals')?.environment);
 });
 
+test('engine path falls back to the top signal title instead of generic prefix hero prose', async () => {
+  const definition = buildDefinition();
+  definition.signals = [
+    {
+      id: 'signal-mastery',
+      key: 'mot_mastery',
+      title: 'Mastery',
+      description: null,
+      domainId: 'domain-signals',
+      orderIndex: 1,
+      isOverlay: false,
+      overlayType: 'none',
+    },
+    {
+      id: 'signal-support',
+      key: 'support_drive',
+      title: 'Support Drive',
+      description: null,
+      domainId: 'domain-signals',
+      orderIndex: 2,
+      isOverlay: false,
+      overlayType: 'none',
+    },
+  ];
+  definition.questions = [
+    {
+      id: 'question-1',
+      key: 'q1',
+      prompt: 'First question?',
+      description: null,
+      domainId: 'domain-section',
+      orderIndex: 1,
+      options: [
+        {
+          id: 'option-1',
+          key: 'q1_a',
+          label: 'Option 1',
+          description: 'A',
+          questionId: 'question-1',
+          orderIndex: 1,
+          signalWeights: [
+            {
+              signalId: 'signal-mastery',
+              weight: 5,
+              reverseFlag: false,
+              sourceWeightKey: '1|A',
+            },
+          ],
+        },
+        {
+          id: 'option-2',
+          key: 'q1_b',
+          label: 'Option 2',
+          description: 'B',
+          questionId: 'question-1',
+          orderIndex: 2,
+          signalWeights: [
+            {
+              signalId: 'signal-support',
+              weight: 1,
+              reverseFlag: false,
+              sourceWeightKey: '1|B',
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  const payload = await runAssessmentEngine({
+    repository: createRepositoryWithLanguageBundle(definition, createEmptyLanguageBundle()),
+    assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
+    responses: buildResponses({ 'question-1': 'option-1' }),
+  });
+
+  assert.equal(payload.hero.headline, 'Mastery');
+  assert.doesNotMatch(payload.hero.headline ?? '', DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN);
+});
+
 test('engine path uses signal-language sections for strengths watchouts and development only when available', async () => {
   const definition = buildDefinition();
   const repository: AssessmentDefinitionRepository = {
@@ -1114,6 +1197,7 @@ test('empty language bundle is handled safely and result generation still succee
   assert.ok(isCanonicalResultPayload(payload));
   assert.equal(payload.diagnostics.zeroMass, true);
   assert.equal(payload.hero.primaryPattern?.signalKey, 'core_focus');
+  assert.doesNotMatch(payload.hero.headline ?? '', DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN);
 });
 
 test('same input produces identical payload output', async () => {
