@@ -6,7 +6,6 @@ import type {
   AdminAssessmentIntroFormState,
   AdminAssessmentIntroFormValues,
 } from '@/lib/admin/admin-assessment-intro';
-import { emptyAdminAssessmentIntroFormValues } from '@/lib/admin/admin-assessment-intro';
 import { getDbPool } from '@/lib/server/db';
 import { upsertAssessmentVersionIntro } from '@/lib/server/assessment-version-intro-repository';
 
@@ -137,12 +136,4 @@ export async function saveAssessmentIntroActionWithDependencies(
       values,
     };
   }
-}
-
-export function createEmptyAssessmentIntroState(): AdminAssessmentIntroFormState {
-  return {
-    formError: null,
-    formSuccess: null,
-    values: emptyAdminAssessmentIntroFormValues,
-  };
 }

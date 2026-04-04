@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { createEmptyAssessmentIntroState } from '@/lib/admin/admin-assessment-intro';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import {
-  createEmptyAssessmentIntroState,
   saveAssessmentIntroActionWithDependencies,
 } from '@/lib/server/admin-assessment-intro';
 import { getAdminAssessmentIntroStepViewModel } from '@/lib/server/admin-assessment-intro-step';

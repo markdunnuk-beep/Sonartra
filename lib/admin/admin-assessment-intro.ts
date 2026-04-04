@@ -27,3 +27,11 @@ export const initialAdminAssessmentIntroFormState: AdminAssessmentIntroFormState
   formSuccess: null,
   values: emptyAdminAssessmentIntroFormValues,
 };
+
+export function createEmptyAssessmentIntroState(): AdminAssessmentIntroFormState {
+  return {
+    formError: null,
+    formSuccess: null,
+    values: emptyAdminAssessmentIntroFormValues,
+  };
+}
