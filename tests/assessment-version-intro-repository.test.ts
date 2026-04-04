@@ -78,6 +78,22 @@ test('getAssessmentVersionIntro returns null when no version-scoped intro exists
   assert.equal(result, null);
 });
 
+test('getAssessmentVersionIntro returns null when the intro schema is unavailable', async () => {
+  const db = {
+    async query<T>() {
+      const error = new Error('relation "assessment_version_intro" does not exist') as Error & {
+        code?: string;
+      };
+      error.code = '42P01';
+      throw error;
+    },
+  };
+
+  const result = await getAssessmentVersionIntro('version-1', db);
+
+  assert.equal(result, null);
+});
+
 test('upsertAssessmentVersionIntro creates and then updates the row for the same assessment version', async () => {
   const fake = createFakeDb();
 

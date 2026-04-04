@@ -19,24 +19,49 @@ type AssessmentVersionIntroRow = {
   confidentiality_note: string | null;
 };
 
+export function isMissingAssessmentVersionIntroSchemaError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const code = 'code' in error ? error.code : null;
+  const message = 'message' in error ? error.message : null;
+
+  return (
+    code === '42P01' &&
+    typeof message === 'string' &&
+    message.includes('assessment_version_intro')
+  );
+}
+
 export async function getAssessmentVersionIntro(
   assessmentVersionId: string,
   db: Queryable = getDbPool(),
 ): Promise<AssessmentVersionIntroRecord | null> {
-  const result = await db.query<AssessmentVersionIntroRow>(
-    `
-    SELECT
-      intro_title,
-      intro_summary,
-      intro_how_it_works,
-      estimated_time_override,
-      instructions,
-      confidentiality_note
-    FROM assessment_version_intro
-    WHERE assessment_version_id = $1
-    `,
-    [assessmentVersionId],
-  );
+  let result: { rows: AssessmentVersionIntroRow[] };
+
+  try {
+    result = await db.query<AssessmentVersionIntroRow>(
+      `
+      SELECT
+        intro_title,
+        intro_summary,
+        intro_how_it_works,
+        estimated_time_override,
+        instructions,
+        confidentiality_note
+      FROM assessment_version_intro
+      WHERE assessment_version_id = $1
+      `,
+      [assessmentVersionId],
+    );
+  } catch (error) {
+    if (isMissingAssessmentVersionIntroSchemaError(error)) {
+      return null;
+    }
+
+    throw error;
+  }
 
   const row = result.rows[0];
 

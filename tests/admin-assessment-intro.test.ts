@@ -68,6 +68,7 @@ function createFakeDb(seed?: {
   assessmentRows?: readonly AssessmentRow[];
   introRows?: readonly AssessmentVersionIntroRow[];
   versionRows?: readonly AssessmentVersionRow[];
+  throwMissingIntroSchema?: boolean;
 }): { db: Queryable; state: { introRows: AssessmentVersionIntroRow[] } } {
   const state = {
     assessmentRows: [...(seed?.assessmentRows ?? [])],
@@ -103,6 +104,14 @@ function createFakeDb(seed?: {
         }
 
         if (sql.includes('FROM assessment_version_intro')) {
+          if (seed?.throwMissingIntroSchema) {
+            const error = new Error('relation "assessment_version_intro" does not exist') as Error & {
+              code?: string;
+            };
+            error.code = '42P01';
+            throw error;
+          }
+
           const assessmentVersionId = String(params?.[0] ?? '');
 
           return {
@@ -120,6 +129,14 @@ function createFakeDb(seed?: {
         }
 
         if (sql.startsWith('INSERT INTO assessment_version_intro')) {
+          if (seed?.throwMissingIntroSchema) {
+            const error = new Error('relation "assessment_version_intro" does not exist') as Error & {
+              code?: string;
+            };
+            error.code = '42P01';
+            throw error;
+          }
+
           const assessmentVersionId = String(params?.[0] ?? '');
           const existing = state.introRows.find((row) => row.assessmentVersionId === assessmentVersionId);
           const nextRow: AssessmentVersionIntroRow = {
@@ -420,4 +437,59 @@ test('assessment intro editor renders a guarded empty state when no editable dra
 
   assert.match(markup, /No draft version available/);
   assert.match(markup, /Create a draft version before authoring assessment intro content\./);
+});
+
+test('assessment intro step view model falls back to empty intro content when the intro schema is unavailable', async () => {
+  const viewModel = await getAdminAssessmentIntroStepViewModel(
+    createFakeDb({
+      assessmentRows: [buildAssessmentRow()],
+      throwMissingIntroSchema: true,
+    }).db,
+    'wplp80',
+  );
+
+  assert.ok(viewModel);
+  assert.equal(viewModel?.draftVersion?.assessmentVersionId, 'version-draft');
+  assert.deepEqual(viewModel?.intro, {
+    introTitle: '',
+    introSummary: '',
+    introHowItWorks: '',
+    estimatedTimeOverride: '',
+    instructions: '',
+    confidentialityNote: '',
+  });
+});
+
+test('saveAssessmentIntroAction returns a clear inline error when the intro schema is unavailable', async () => {
+  const fake = createFakeDb({
+    versionRows: [{
+      assessmentVersionId: 'version-draft',
+      assessmentKey: 'wplp80',
+      lifecycleStatus: 'DRAFT',
+    }],
+    throwMissingIntroSchema: true,
+  });
+
+  const state = await saveAssessmentIntroActionWithDependencies(
+    {
+      assessmentKey: 'wplp80',
+      assessmentVersionId: 'version-draft',
+    },
+    createEmptyAssessmentIntroState(),
+    buildFormData({
+      introTitle: 'Welcome to Signals',
+      introSummary: 'Measure the patterns that shape how you work.',
+      introHowItWorks: 'Read each prompt and choose the response that fits best.',
+      estimatedTimeOverride: '',
+      instructions: '',
+      confidentialityNote: '',
+    }),
+    {
+      db: fake.db,
+      revalidatePath() {},
+    },
+  );
+
+  assert.match(state.formError ?? '', /intro storage is unavailable/i);
+  assert.equal(state.formSuccess, null);
 });

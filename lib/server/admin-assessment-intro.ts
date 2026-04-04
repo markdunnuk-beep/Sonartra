@@ -7,7 +7,10 @@ import type {
   AdminAssessmentIntroFormValues,
 } from '@/lib/admin/admin-assessment-intro';
 import { getDbPool } from '@/lib/server/db';
-import { upsertAssessmentVersionIntro } from '@/lib/server/assessment-version-intro-repository';
+import {
+  isMissingAssessmentVersionIntroSchemaError,
+  upsertAssessmentVersionIntro,
+} from '@/lib/server/assessment-version-intro-repository';
 
 type Queryable = {
   query<T>(text: string, params?: readonly unknown[]): Promise<{ rows: T[] }>;
@@ -129,7 +132,16 @@ export async function saveAssessmentIntroActionWithDependencies(
       formSuccess: 'Assessment intro saved.',
       values,
     };
-  } catch {
+  } catch (error) {
+    if (isMissingAssessmentVersionIntroSchemaError(error)) {
+      return {
+        formError:
+          'Assessment intro storage is unavailable in this environment. Apply the assessment intro migration, then try again.',
+        formSuccess: null,
+        values,
+      };
+    }
+
     return {
       formError: 'Assessment intro could not be saved. Try again.',
       formSuccess: null,
