@@ -107,20 +107,22 @@ function ActionList({
   const { visible, overflow } = getVisibleItems<VisibleActionItem>(typedItems);
 
   return (
-    <article className="border-white/8 space-y-5 border-t pt-8 first:border-t-0 first:pt-0 md:space-y-6 md:pt-10">
-      <div className="grid gap-3 md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] md:gap-6">
+    <article className="space-y-6 border-t border-white/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-14">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] md:gap-7">
         <SectionEyebrow>{title}</SectionEyebrow>
-        <h3 className="text-[1.28rem] font-semibold tracking-[-0.03em] text-white md:text-[1.4rem]">{title}</h3>
+        <h3 className="text-[1.12rem] font-medium tracking-[-0.025em] text-white/78 md:text-[1.18rem]">{title}</h3>
       </div>
 
-      <ul className="space-y-5">
+      <ul className="space-y-6 md:space-y-7">
         {visible.length > 0 ? (
           visible.map((item) => (
             <li key={item.key} className="space-y-2.5">
-              <p className="text-[0.95rem] font-semibold tracking-[-0.01em] text-white/86">
+              <p className="text-[0.95rem] font-medium tracking-[-0.01em] text-white/84">
                 {item.title}
               </p>
-              <p className="max-w-[41rem] text-[0.97rem] leading-8 text-white/62">{item.detail}</p>
+              <p className="max-w-[46rem] text-[0.99rem] leading-8 text-white/64 md:max-w-[48rem]">
+                {item.detail}
+              </p>
             </li>
           ))
         ) : (
@@ -129,15 +131,15 @@ function ActionList({
       </ul>
 
       {overflow.length > 0 ? (
-        <details className="max-w-[42rem] pt-1">
-          <summary className="cursor-pointer list-none text-[0.92rem] font-medium text-white/58 marker:hidden">
+        <details className="max-w-[46rem] pt-2">
+          <summary className="cursor-pointer list-none text-[0.92rem] font-medium text-white/54 marker:hidden">
             Show {overflow.length} more
           </summary>
-          <ul className="mt-3 space-y-4 border-l border-white/8 pl-4">
+          <ul className="mt-4 space-y-5 border-l border-white/6 pl-4">
             {overflow.map((item) => (
-              <li key={item.key} className="space-y-2">
-                <p className="text-sm font-medium text-white/82">{item.title}</p>
-                <p className="text-sm leading-7 text-white/56">{item.detail}</p>
+              <li key={item.key} className="space-y-2.5">
+                <p className="text-sm font-medium text-white/80">{item.title}</p>
+                <p className="max-w-[44rem] text-sm leading-7 text-white/56">{item.detail}</p>
               </li>
             ))}
           </ul>
@@ -161,7 +163,7 @@ function ActionSection({
   actions: AssessmentResultDetailViewModel['actions'];
 }) {
   return (
-    <div className="mx-auto max-w-[56rem] rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015))] px-6 py-7 shadow-[0_22px_70px_rgba(0,0,0,0.18)] md:px-8 md:py-9">
+    <div className="mx-auto max-w-[56rem] px-1 md:px-2">
       <ActionList title="Strengths" items={toVisibleActionItems(actions.strengths)} />
       <ActionList title="Watchouts" items={toVisibleActionItems(actions.watchouts)} />
       <ActionList title="Development Focus" items={toVisibleActionItems(actions.developmentFocus)} />
@@ -458,7 +460,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
       <section className="space-y-8">
         <SectionHeader
           eyebrow="Action Focus"
-          title="Interpretation to hold onto"
+          title="What this means in practice"
           description="Across the rest of the report, this pattern shows up in a few consistent ways: where it adds value, where it can create friction, and where attention may be useful."
         />
 

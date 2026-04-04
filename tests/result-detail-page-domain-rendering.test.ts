@@ -200,7 +200,7 @@ test('result detail page reads intro, hero, domains, and actions from canonical 
   const introIndex = source.indexOf('const assessmentDescription = result.intro.assessmentDescription;');
   const heroIndex = source.indexOf('<section className="rounded-[2rem] border border-white/6');
   const domainIndex = source.indexOf('title="Domain reading"');
-  const actionIndex = source.indexOf('title="Interpretation to hold onto"');
+  const actionIndex = source.indexOf('title="What this means in practice"');
 
   assert.ok(introIndex >= 0);
   assert.ok(heroIndex >= 0);
@@ -254,6 +254,9 @@ test('result detail page renders actions from canonical action blocks only', () 
   assert.match(source, /items=\{toVisibleActionItems\(actions\.strengths\)\}/);
   assert.match(source, /items=\{toVisibleActionItems\(actions\.watchouts\)\}/);
   assert.match(source, /items=\{toVisibleActionItems\(actions\.developmentFocus\)\}/);
+  assert.match(source, /title="What this means in practice"/);
+  assert.match(source, /mx-auto max-w-\[56rem\] px-1 md:px-2/);
+  assert.match(source, /space-y-6 border-t border-white\/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-14/);
 
   assert.doesNotMatch(source, /items=\{result\.strengths\}/);
   assert.doesNotMatch(source, /items=\{result\.watchouts\}/);
