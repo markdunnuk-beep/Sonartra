@@ -8,6 +8,7 @@ import { SurfaceCard, cn } from '@/components/shared/user-app-ui';
 
 const builderSteps = [
   { slug: 'overview', label: 'Overview' },
+  { slug: 'assessment-intro', label: 'Assessment Intro' },
   { slug: 'domains', label: 'Domains' },
   { slug: 'signals', label: 'Signals' },
   { slug: 'questions', label: 'Questions' },
@@ -27,6 +28,7 @@ function getActiveStepSlug(pathname: string, assessmentKey: string): (typeof bui
 
   switch (slug) {
     case 'overview':
+    case 'assessment-intro':
     case 'domains':
     case 'signals':
     case 'questions':
@@ -52,6 +54,8 @@ function getStepStatus(
   switch (slug) {
     case 'overview':
       return 'complete';
+    case 'assessment-intro':
+      return 'incomplete';
     case 'domains':
       return assessment.authoredDomains.length > 0 ? 'complete' : 'incomplete';
     case 'signals':
