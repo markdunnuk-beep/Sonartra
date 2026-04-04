@@ -86,4 +86,7 @@ test('responses authoring flow includes the bulk option import panel', () => {
 
   assert.match(source, /import \{ AdminBulkOptionImport \} from '@\/components\/admin\/admin-bulk-option-import';/);
   assert.match(source, /<AdminBulkOptionImport[\s\S]*assessmentVersionId=\{assessmentVersionId\}[\s\S]*isEditableAssessmentVersion/);
+  assert.doesNotMatch(source, /<CreateOptionForm/);
+  assert.doesNotMatch(source, /sonartra-page-eyebrow">Add option/);
+  assert.match(source, /description="Import options for this question, then refine them inline\."/);
 });

@@ -13,7 +13,6 @@ import {
 import { AdminBulkOptionImport } from '@/components/admin/admin-bulk-option-import';
 import {
   emptyAdminBulkQuestionByDomainAuthoringFormValues,
-  emptyAdminOptionAuthoringFormValues,
   emptyAdminQuestionAuthoringFormValues,
   initialAdminBulkQuestionByDomainAuthoringFormState,
   initialAdminOptionAuthoringFormState,
@@ -28,7 +27,6 @@ import type {
 } from '@/lib/server/admin-assessment-detail';
 import {
   createBulkQuestionsByDomain,
-  createOptionAction,
   duplicateQuestionAction,
   deleteOptionAction,
   deleteQuestionAction,
@@ -136,11 +134,7 @@ function normalizeOptionState(
   return {
     formError: state?.formError ?? null,
     fieldErrors: state?.fieldErrors ?? {},
-    values: {
-      key: state?.values?.key ?? emptyAdminOptionAuthoringFormValues.key,
-      label: state?.values?.label ?? emptyAdminOptionAuthoringFormValues.label,
-      text: state?.values?.text ?? emptyAdminOptionAuthoringFormValues.text,
-    },
+    values: state?.values ?? initialAdminOptionAuthoringFormState.values,
   };
 }
 
@@ -164,63 +158,6 @@ function Field({
       {children}
       {error ? <p className="text-sm text-[rgba(255,198,198,0.92)]">{error}</p> : null}
     </label>
-  );
-}
-
-function TextInput({
-  name,
-  defaultValue,
-  placeholder,
-  error,
-}: Readonly<{
-  name: string;
-  defaultValue: string;
-  placeholder: string;
-  error?: string;
-}>) {
-  return (
-    <input
-      className={cn(
-        'sonartra-focus-ring min-h-11 w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
-        error
-          ? 'border-[rgba(255,157,157,0.32)]'
-          : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
-      )}
-      defaultValue={defaultValue}
-      name={name}
-      placeholder={placeholder}
-      type="text"
-    />
-  );
-}
-function NumberInput({
-  name,
-  defaultValue,
-  min,
-  max,
-  error,
-}: Readonly<{
-  name: string;
-  defaultValue: string;
-  min: number;
-  max: number;
-  error?: string;
-}>) {
-  return (
-    <input
-      className={cn(
-        'sonartra-focus-ring min-h-11 w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
-        error
-          ? 'border-[rgba(255,157,157,0.32)]'
-          : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
-      )}
-      defaultValue={defaultValue}
-      max={max}
-      min={min}
-      name={name}
-      step={1}
-      type="number"
-    />
   );
 }
 
@@ -711,72 +648,6 @@ function DuplicateQuestionForm({
   );
 }
 
-function CreateOptionForm({
-  assessmentKey,
-  assessmentVersionId,
-  questionId,
-}: {
-  assessmentKey: string;
-  assessmentVersionId: string;
-  questionId: string;
-}) {
-  const [state, formAction] = useActionState(
-    createOptionAction.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-      questionId,
-    }),
-    initialAdminOptionAuthoringFormState,
-  );
-  const currentState = normalizeOptionState(state);
-
-  return (
-    <SurfaceCard className="p-4">
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <p className="sonartra-page-eyebrow">Add option</p>
-          <p className="text-sm leading-7 text-white/58">
-            Add response options for this question.
-          </p>
-        </div>
-
-        <form action={formAction} className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-[160px_160px_minmax(0,1fr)]">
-            <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Option key">
-              <TextInput
-                defaultValue={currentState.values.key}
-                error={currentState.fieldErrors.key}
-                name="key"
-                placeholder="strongly-agree"
-              />
-            </Field>
-            <Field error={currentState.fieldErrors.label} hint="Optional short label." label="Label">
-              <TextInput
-                defaultValue={currentState.values.label}
-                error={currentState.fieldErrors.label}
-                name="label"
-                placeholder="A"
-              />
-            </Field>
-            <Field error={currentState.fieldErrors.text} hint="What people will see." label="Option text">
-              <TextInput
-                defaultValue={currentState.values.text}
-                error={currentState.fieldErrors.text}
-                name="text"
-                placeholder="Strongly agree"
-              />
-            </Field>
-          </div>
-
-          <InlineError message={currentState.formError} />
-
-          <SubmitButton idleLabel="Add option" pendingLabel="Adding option..." />
-        </form>
-      </div>
-    </SurfaceCard>
-  );
-}
-
 function OptionTextEditor({
   assessmentKey,
   assessmentVersionId,
@@ -943,7 +814,7 @@ function QuestionCard({
             {question.options.length === 0 ? (
               <EmptyState
                 className="p-4"
-                description="Add options for this question."
+                description="Import options for this question, then refine them inline."
                 title="No options yet"
               />
             ) : (
@@ -974,12 +845,6 @@ function QuestionCard({
                 ))}
               </div>
             )}
-
-            <CreateOptionForm
-              assessmentKey={assessmentKey}
-              assessmentVersionId={assessmentVersionId}
-              questionId={question.questionId}
-            />
           </div>
         ) : (
           <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
