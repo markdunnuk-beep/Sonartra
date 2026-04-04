@@ -29,7 +29,6 @@ import type {
 import {
   createBulkQuestionsByDomain,
   createOptionAction,
-  createQuestionAction,
   duplicateQuestionAction,
   deleteOptionAction,
   deleteQuestionAction,
@@ -256,38 +255,6 @@ function TextArea({
       onChange={onChange}
       placeholder={placeholder}
     />
-  );
-}
-
-function SelectInput({
-  name,
-  defaultValue,
-  value,
-  error,
-  children,
-  onChange,
-}: Readonly<{
-  name: string;
-  defaultValue?: string;
-  value?: string;
-  error?: string;
-  children: React.ReactNode;
-  onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-}>) {
-  return (
-    <select
-      className={cn(
-        'sonartra-focus-ring min-h-11 w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white',
-        error
-          ? 'border-[rgba(255,157,157,0.32)]'
-          : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
-      )}
-      name={name}
-      {...(value !== undefined ? { value } : { defaultValue: defaultValue ?? '' })}
-      onChange={onChange}
-    >
-      {children}
-    </select>
   );
 }
 
@@ -652,85 +619,6 @@ function BulkQuestionByDomainForm({
             </div>
           </div>
         ) : null}
-      </div>
-    </SurfaceCard>
-  );
-}
-
-function CreateQuestionForm({
-  assessmentKey,
-  assessmentVersionId,
-  domains,
-}: {
-  assessmentKey: string;
-  assessmentVersionId: string;
-  domains: readonly AdminAssessmentDetailQuestionDomain[];
-}) {
-  const [state, formAction] = useActionState(
-    createQuestionAction.bind(null, {
-      assessmentKey,
-      assessmentVersionId,
-    }),
-    {
-      ...initialAdminQuestionAuthoringFormState,
-      values: {
-        ...initialAdminQuestionAuthoringFormState.values,
-        domainId: domains[0]?.domainId ?? '',
-      },
-    },
-  );
-  const currentState = normalizeQuestionState(state);
-
-  return (
-    <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
-      <div className="space-y-5">
-        <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Add question</p>
-          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-            Add a question
-          </h3>
-          <p className="max-w-2xl text-sm leading-7 text-white/62">
-            Add a question and choose where it belongs.
-          </p>
-        </div>
-
-        <form action={formAction} className="space-y-5">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
-            <Field error={currentState.fieldErrors.prompt} hint="What people will see." label="Question">
-              <TextArea
-                defaultValue={currentState.values.prompt}
-                error={currentState.fieldErrors.prompt}
-                minHeightClass="min-h-[132px]"
-                name="prompt"
-                placeholder="I tend to make decisions quickly when the direction is clear."
-              />
-            </Field>
-            <div className="space-y-5">
-              <Field error={currentState.fieldErrors.key} hint="Use a short key." label="Question key">
-                <TextInput
-                  defaultValue={currentState.values.key}
-                  error={currentState.fieldErrors.key}
-                  name="key"
-                  placeholder="decision-speed"
-                />
-              </Field>
-              <Field error={currentState.fieldErrors.domainId} hint="Choose a domain." label="Domain">
-                <SelectInput defaultValue={currentState.values.domainId || domains[0]?.domainId || ''} error={currentState.fieldErrors.domainId} name="domainId">
-                  <option value="">Select a domain</option>
-                  {domains.map((domain) => (
-                    <option key={domain.domainId} value={domain.domainId}>
-                      {domain.label} ({formatDomainType(domain.domainType)})
-                    </option>
-                  ))}
-                </SelectInput>
-              </Field>
-            </div>
-          </div>
-
-          <InlineError message={currentState.formError} />
-
-          <SubmitButton idleLabel="Add question" pendingLabel="Adding question..." />
-        </form>
       </div>
     </SurfaceCard>
   );
@@ -1159,12 +1047,6 @@ export function AdminQuestionOptionAuthoring({
           {showQuestionControls ? (
             <>
               <BulkQuestionByDomainForm
-                assessmentKey={assessmentKey}
-                assessmentVersionId={assessmentVersionId}
-                domains={domains}
-              />
-
-              <CreateQuestionForm
                 assessmentKey={assessmentKey}
                 assessmentVersionId={assessmentVersionId}
                 domains={domains}

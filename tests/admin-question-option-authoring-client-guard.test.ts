@@ -22,6 +22,14 @@ test('plain bulk paste questions form has been removed', () => {
   assert.doesNotMatch(source, /\bcreateBulkQuestions\b/);
 });
 
+test('manual add question form has been removed', () => {
+  const source = readComponentSource();
+
+  assert.doesNotMatch(source, /function CreateQuestionForm\(/);
+  assert.doesNotMatch(source, /\bcreateQuestionAction\b/);
+  assert.doesNotMatch(source, /Add a question/);
+});
+
 test('multi-domain bulk paste form memoizes its server action before useActionState', () => {
   const source = readComponentSource();
 

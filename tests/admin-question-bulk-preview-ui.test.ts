@@ -23,6 +23,7 @@ test('question bulk import forms use a single import action with imported state'
   assert.match(source, /disabled=\{pending \|\| !canImport\}/);
   assert.doesNotMatch(source, /Previewing\.\.\./);
   assert.doesNotMatch(source, /function BulkQuestionForm\(/);
+  assert.doesNotMatch(source, /function CreateQuestionForm\(/);
 });
 
 test('question bulk imported state resets when textarea or domain selection changes', () => {
@@ -48,4 +49,5 @@ test('questions authoring keeps the pipe-delimited bulk import flow', () => {
   assert.match(source, /Bulk paste questions by domain/);
   assert.match(source, /domain\|question text/);
   assert.match(source, /Each imported question gets the canonical A-D option scaffold\./);
+  assert.doesNotMatch(source, /Add a question/);
 });
