@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { Queryable } from '@/lib/engine/repository-sql';
+import type { RuntimeAssessmentDefinition } from '@/lib/engine/types';
 import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
 import {
   AssessmentRunnerForbiddenError,
@@ -52,6 +53,36 @@ type ResultFixture = {
   hasCanonicalResultPayload: boolean;
   failureReason: string | null;
 };
+
+function buildDefinition(params?: {
+  assessmentIntro?: RuntimeAssessmentDefinition['assessmentIntro'];
+}): RuntimeAssessmentDefinition {
+  return {
+    assessment: {
+      id: 'assessment-1',
+      key: 'wplp80',
+      title: 'WPLP-80',
+      description: 'Signals',
+      estimatedTimeMinutes: null,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
+    version: {
+      id: 'version-1',
+      assessmentId: 'assessment-1',
+      versionTag: '1.0.0',
+      status: 'published',
+      isPublished: true,
+      publishedAt: '2026-01-01T00:00:00.000Z',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
+    assessmentIntro: params?.assessmentIntro ?? null,
+    domains: [],
+    signals: [],
+    questions: [],
+  };
+}
 
 function createFakeDb(params: {
   attempts: AttemptFixture[];
@@ -311,6 +342,20 @@ test('runner view model loads ordered questions and saved responses for owned at
         selectedOptionId: 'option-3',
       }],
     }),
+    definitionRepository: {
+      async getAssessmentDefinitionByVersion() {
+        return buildDefinition({
+          assessmentIntro: {
+            introTitle: 'Welcome to WPLP-80',
+            introSummary: 'Measure the patterns that shape how you work.',
+            introHowItWorks: 'Work through each prompt in order.',
+            estimatedTimeOverride: 'About 18 minutes',
+            instructions: 'Answer honestly.',
+            confidentialityNote: 'Responses remain confidential.',
+          },
+        });
+      },
+    },
   });
 
   const runner = await service.getAssessmentRunnerViewModel({
@@ -323,6 +368,7 @@ test('runner view model loads ordered questions and saved responses for owned at
   assert.equal(runner.questions.length, 2);
   assert.equal(runner.questions[0]?.questionId, 'question-1');
   assert.equal(runner.questions[1]?.selectedOptionId, 'option-3');
+  assert.equal(runner.assessmentIntro?.introTitle, 'Welcome to WPLP-80');
   assert.equal(runner.answeredQuestions, 1);
   assert.equal(runner.totalQuestions, 2);
   assert.equal(runner.completionPercentage, 50);
@@ -373,6 +419,30 @@ test('runner view model serves the question structure linked to the attempt vers
         ],
       },
     }),
+    definitionRepository: {
+      async getAssessmentDefinitionByVersion(params) {
+        return buildDefinition({
+          assessmentIntro:
+            params.assessmentVersionId === 'version-2'
+              ? {
+                  introTitle: 'Published intro for version 2',
+                  introSummary: 'Version 2 summary.',
+                  introHowItWorks: 'Version 2 flow.',
+                  estimatedTimeOverride: null,
+                  instructions: null,
+                  confidentialityNote: null,
+                }
+              : {
+                  introTitle: 'Wrong version intro',
+                  introSummary: 'Wrong version summary.',
+                  introHowItWorks: 'Wrong version flow.',
+                  estimatedTimeOverride: null,
+                  instructions: null,
+                  confidentialityNote: null,
+                },
+        });
+      },
+    },
   });
 
   const runner = await service.getAssessmentRunnerViewModel({
@@ -382,7 +452,55 @@ test('runner view model serves the question structure linked to the attempt vers
   });
 
   assert.equal(runner.assessmentVersionId, 'version-2');
+  assert.equal(runner.assessmentIntro?.introTitle, 'Published intro for version 2');
   assert.deepEqual(runner.questions.map((question) => question.questionId), ['question-live']);
+});
+
+test('runner view model returns null intro cleanly when the canonical runtime definition has no intro content', async () => {
+  const service = createAssessmentRunnerService({
+    db: createFakeDb({
+      attempts: [{
+        attemptId: 'attempt-3',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        assessmentDescription: 'Signals',
+        assessmentVersionId: 'version-1',
+        versionTag: '1.0.0',
+        lifecycleStatus: 'IN_PROGRESS',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        submittedAt: null,
+        completedAt: null,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      }],
+      questionsByVersionId: {
+        'version-1': [{
+          questionId: 'question-1',
+          questionKey: 'q1',
+          prompt: 'Question one?',
+          orderIndex: 1,
+          domainTitle: 'Section A',
+          options: [
+            { optionId: 'option-1', optionKey: 'q1_a', optionLabel: 'A', optionText: 'First', orderIndex: 1 },
+          ],
+        }],
+      },
+    }),
+    definitionRepository: {
+      async getAssessmentDefinitionByVersion() {
+        return buildDefinition({ assessmentIntro: null });
+      },
+    },
+  });
+
+  const runner = await service.getAssessmentRunnerViewModel({
+    userId: 'user-1',
+    assessmentKey: 'wplp80',
+    attemptId: 'attempt-3',
+  });
+
+  assert.equal(runner.assessmentIntro, null);
 });
 
 test('save response preserves overwrite semantics and returns updated progress', async () => {

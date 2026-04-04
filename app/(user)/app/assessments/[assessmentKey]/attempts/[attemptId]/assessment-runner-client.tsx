@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
-import { getResumeQuestionIndex } from '@/lib/assessment-runner/runner-ux';
+import { getResumeQuestionIndex, shouldShowAssessmentIntro } from '@/lib/assessment-runner/runner-ux';
 import type { AssessmentRunnerViewModel } from '@/lib/server/assessment-runner-types';
 
 type AssessmentRunnerClientProps = {
@@ -33,6 +33,11 @@ export function AssessmentRunnerClient({
 }: AssessmentRunnerClientProps) {
   const router = useRouter();
   const initialQuestionIndex = getResumeQuestionIndex(runner.questions);
+  const initialIntroVisible = shouldShowAssessmentIntro({
+    answeredQuestions: runner.answeredQuestions,
+    assessmentIntro: runner.assessmentIntro,
+  });
+  const [showIntro, setShowIntro] = useState(initialIntroVisible);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialQuestionIndex);
   const [selectedByQuestionId, setSelectedByQuestionId] = useState<Record<string, string | null>>(
     () =>
@@ -217,6 +222,79 @@ export function AssessmentRunnerClient({
         <Link href="/app/assessments" className="text-sm font-medium text-white/70 transition hover:text-white">
           Back to workspace
         </Link>
+      </section>
+    );
+  }
+
+  if (showIntro && runner.assessmentIntro) {
+    return (
+      <section className="sonartra-panel space-y-6 p-5 lg:p-6">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">
+            <span>Assessment Intro</span>
+            {runner.assessmentIntro.estimatedTimeOverride ? (
+              <>
+                <span className="text-white/22">/</span>
+                <span>{runner.assessmentIntro.estimatedTimeOverride}</span>
+              </>
+            ) : null}
+          </div>
+          <h2 className="text-[2rem] font-semibold tracking-[-0.03em] text-white lg:text-[2.35rem]">
+            {runner.assessmentIntro.introTitle || runner.assessmentTitle}
+          </h2>
+          <p className="text-sm text-white/58">{runner.assessmentTitle}</p>
+          {runner.assessmentIntro.introSummary ? (
+            <p className="max-w-3xl text-sm leading-7 text-white/74">
+              {runner.assessmentIntro.introSummary}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.03] p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">
+              How It Works
+            </p>
+            <p className="mt-3 text-sm leading-7 text-white/78">
+              {runner.assessmentIntro.introHowItWorks}
+            </p>
+          </div>
+
+          {runner.assessmentIntro.instructions ? (
+            <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">
+                Instructions
+              </p>
+              <p className="mt-3 text-sm leading-7 text-white/78">
+                {runner.assessmentIntro.instructions}
+              </p>
+            </div>
+          ) : null}
+
+          {runner.assessmentIntro.confidentialityNote ? (
+            <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">
+                Confidentiality
+              </p>
+              <p className="mt-3 text-sm leading-7 text-white/78">
+                {runner.assessmentIntro.confidentialityNote}
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-white/8 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-white/52">
+            The runner will begin at Question 1 and continue in the published assessment order.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowIntro(false)}
+            className="inline-flex h-12 min-w-[12rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
+          >
+            Start Assessment
+          </button>
+        </div>
       </section>
     );
   }

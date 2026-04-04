@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getResumeQuestionIndex } from '@/lib/assessment-runner/runner-ux';
+import {
+  getResumeQuestionIndex,
+  shouldShowAssessmentIntro,
+} from '@/lib/assessment-runner/runner-ux';
 
 test('resume opens on the first unanswered question in canonical order', () => {
   const index = getResumeQuestionIndex([
@@ -41,4 +44,35 @@ test('resume prefers the first unanswered question for sparse response patterns'
   ]);
 
   assert.equal(index, 1);
+});
+
+test('fresh attempts with zero saved responses show the intro when published intro content exists', () => {
+  const visible = shouldShowAssessmentIntro({
+    answeredQuestions: 0,
+    assessmentIntro: {
+      introTitle: 'Welcome',
+    },
+  });
+
+  assert.equal(visible, true);
+});
+
+test('resumed attempts bypass the intro once saved responses exist', () => {
+  const visible = shouldShowAssessmentIntro({
+    answeredQuestions: 1,
+    assessmentIntro: {
+      introTitle: 'Welcome',
+    },
+  });
+
+  assert.equal(visible, false);
+});
+
+test('runner bypasses the intro safely when no published intro content exists', () => {
+  const visible = shouldShowAssessmentIntro({
+    answeredQuestions: 0,
+    assessmentIntro: null,
+  });
+
+  assert.equal(visible, false);
 });

@@ -1,3 +1,4 @@
+import { createAssessmentDefinitionRepository } from '@/lib/engine/repository';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
 import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
@@ -26,6 +27,10 @@ import {
 
 export type AssessmentRunnerServiceDeps = {
   db: Queryable;
+  definitionRepository?: Pick<
+    ReturnType<typeof createAssessmentDefinitionRepository>,
+    'getAssessmentDefinitionByVersion'
+  >;
   lifecycleService?: ReturnType<typeof createAssessmentAttemptLifecycleService>;
   completionService?: ReturnType<typeof createAssessmentCompletionService>;
 };
@@ -99,6 +104,8 @@ export function createAssessmentRunnerService(
 ): AssessmentRunnerService {
   const lifecycleService =
     deps.lifecycleService ?? createAssessmentAttemptLifecycleService({ db: deps.db });
+  const definitionRepository =
+    deps.definitionRepository ?? createAssessmentDefinitionRepository({ db: deps.db });
   const completionService =
     deps.completionService ?? createAssessmentCompletionService({ db: deps.db });
 
@@ -171,11 +178,14 @@ export function createAssessmentRunnerService(
 
     async getAssessmentRunnerViewModel(params) {
       const attempt = await loadOwnedAttemptOrThrow(deps.db, params);
-      const [questions, savedResponses, latestResult, progress] = await Promise.all([
+      const [questions, savedResponses, latestResult, progress, definition] = await Promise.all([
         listRunnerQuestions(deps.db, attempt.assessmentVersionId),
         loadPersistedResponsesForRunner(deps.db, attempt.attemptId),
         getLatestResultStatusForAttempt(deps.db, attempt.attemptId),
         getAttemptProgressCounts(deps.db, attempt.attemptId, attempt.assessmentVersionId),
+        definitionRepository.getAssessmentDefinitionByVersion({
+          assessmentVersionId: attempt.assessmentVersionId,
+        }),
       ]);
 
       const runnerStatus = resolveRunnerStatus({
@@ -193,6 +203,7 @@ export function createAssessmentRunnerService(
         assessmentKey: attempt.assessmentKey,
         assessmentTitle: attempt.assessmentTitle,
         assessmentDescription: attempt.assessmentDescription,
+        assessmentIntro: definition?.assessmentIntro ?? null,
         assessmentVersionId: attempt.assessmentVersionId,
         versionTag: attempt.versionTag,
         status: runnerStatus.status,

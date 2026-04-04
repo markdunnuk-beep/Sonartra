@@ -1,3 +1,4 @@
+import type { RuntimeAssessmentIntro } from '@/lib/engine/types';
 import type { AssessmentLifecycleStatus } from '@/lib/server/assessment-attempt-lifecycle-types';
 import type { AssessmentCompletionServiceResult } from '@/lib/server/assessment-completion-types';
 
@@ -31,6 +32,7 @@ export type AssessmentRunnerViewModel = {
   assessmentKey: string;
   assessmentTitle: string;
   assessmentDescription: string | null;
+  assessmentIntro: RuntimeAssessmentIntro | null;
   assessmentVersionId: string;
   versionTag: string;
   status: AssessmentRunnerStatus;
