@@ -42,12 +42,25 @@ function buildResultDetail(
     },
     hero: {
       headline: 'Canonical hero headline',
+      subheadline: 'Canonical hero subheadline.',
+      summary: 'Canonical hero summary.',
       narrative: 'Canonical hero narrative.',
+      pressureOverlay: 'Canonical pressure overlay.',
+      environmentOverlay: 'Canonical environment overlay.',
       primaryPattern: {
         label: 'Core Focus',
         signalKey: 'core_focus',
         signalLabel: 'Core Focus',
       },
+      heroPattern: {
+        patternKey: 'steady_steward',
+        label: 'Steady Steward',
+        priority: 26,
+        isFallback: false,
+      },
+      domainPairWinners: [],
+      traitTotals: [],
+      matchedPatterns: [],
       domainHighlights: [
         {
           domainKey: 'focus',
@@ -187,10 +200,17 @@ test('result detail page reads intro, hero, domains, and actions from canonical 
 
   assert.match(source, /const assessmentDescription = result\.intro\.assessmentDescription;/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const heroSubheadline = result\.hero\.subheadline\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const heroSummary = result\.hero\.summary\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroNarrative = result\.hero\.narrative\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const heroPatternLabel = result\.hero\.heroPattern\?\.label\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const pressureOverlay = result\.hero\.pressureOverlay\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const environmentOverlay = result\.hero\.environmentOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
   assert.match(source, /<HeroDomainHighlights highlights=\{result\.hero\.domainHighlights\} \/>/);
+  assert.match(source, /<EditorialAside label="Pressure" text=\{pressureOverlay\} \/>/);
+  assert.match(source, /<EditorialAside label="Environment" text=\{environmentOverlay\} \/>/);
   assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
   assert.match(source, /<ActionSection actions=\{result\.actions\} \/>/);
 

@@ -4,8 +4,13 @@ import type {
   RuntimeAssessmentDefinition,
   RuntimeAssessmentIntro,
   RuntimeDomain,
+  RuntimeHeroDefinition,
+  RuntimeHeroPatternLanguage,
+  RuntimeHeroPatternRule,
+  RuntimeHeroRuleCondition,
   RuntimeOption,
   RuntimeOptionSignalWeight,
+  RuntimePairTraitWeight,
   RuntimeQuestion,
   RuntimeSignal,
   SignalOverlayType,
@@ -16,8 +21,11 @@ import type {
   AssessmentIntroRow,
   DefinitionGraphRows,
   DomainRow,
+  HeroPatternLanguageRow,
+  HeroPatternRuleRow,
   OptionRow,
   OptionSignalWeightRow,
+  PairTraitWeightRow,
   QuestionRow,
   SignalRow,
 } from '@/lib/engine/repository-sql';
@@ -138,6 +146,92 @@ export function mapRuntimeOptionSignalWeight(row: OptionSignalWeightRow): Runtim
   };
 }
 
+function mapRuntimePairTraitWeight(row: PairTraitWeightRow): RuntimePairTraitWeight {
+  return {
+    profileDomainKey: row.profile_domain_key as RuntimePairTraitWeight['profileDomainKey'],
+    pairKey: row.pair_key,
+    traitKey: row.trait_key as RuntimePairTraitWeight['traitKey'],
+    weight: Number(row.weight),
+    orderIndex: row.order_index,
+  };
+}
+
+function mapRuntimeHeroRuleCondition(row: HeroPatternRuleRow): RuntimeHeroRuleCondition {
+  return {
+    traitKey: row.trait_key as RuntimeHeroRuleCondition['traitKey'],
+    operator: row.operator as RuntimeHeroRuleCondition['operator'],
+    value: Number(row.threshold_value),
+  };
+}
+
+function mapRuntimeHeroPatternRules(rows: readonly HeroPatternRuleRow[]): readonly RuntimeHeroPatternRule[] {
+  const grouped = new Map<string, { priority: number; conditions: RuntimeHeroRuleCondition[]; exclusions: RuntimeHeroRuleCondition[] }>();
+
+  for (const row of rows) {
+    const existing = grouped.get(row.pattern_key) ?? {
+      priority: Number(row.priority),
+      conditions: [],
+      exclusions: [],
+    };
+
+    if (existing.priority !== Number(row.priority)) {
+      throw new DefinitionGraphIntegrityError(`Hero pattern ${row.pattern_key} has inconsistent priorities.`);
+    }
+
+    const target = row.rule_type === 'exclusion' ? existing.exclusions : existing.conditions;
+    target.push(mapRuntimeHeroRuleCondition(row));
+    grouped.set(row.pattern_key, existing);
+  }
+
+  return Object.freeze(
+    [...grouped.entries()]
+      .map(([patternKey, value]) => ({
+        patternKey,
+        priority: value.priority,
+        conditions: Object.freeze(value.conditions),
+        exclusions: Object.freeze(value.exclusions),
+      }))
+      .sort((left, right) => left.priority - right.priority || left.patternKey.localeCompare(right.patternKey)),
+  );
+}
+
+function mapRuntimeHeroPatternLanguage(row: HeroPatternLanguageRow): RuntimeHeroPatternLanguage {
+  return {
+    patternKey: row.pattern_key,
+    headline: row.headline,
+    subheadline: row.subheadline,
+    summary: row.summary,
+    narrative: row.narrative,
+    pressureOverlay: row.pressure_overlay,
+    environmentOverlay: row.environment_overlay,
+  };
+}
+
+function mapRuntimeHeroDefinition(rows: Pick<DefinitionGraphRows, 'pairTraitWeights' | 'heroPatternRules' | 'heroPatternLanguage'>): RuntimeHeroDefinition | null {
+  if (
+    rows.pairTraitWeights.length === 0 &&
+    rows.heroPatternRules.length === 0 &&
+    rows.heroPatternLanguage.length === 0
+  ) {
+    return null;
+  }
+
+  if (
+    rows.pairTraitWeights.length === 0 ||
+    rows.heroPatternRules.length === 0 ||
+    rows.heroPatternLanguage.length === 0
+  ) {
+    throw new DefinitionGraphIntegrityError('Hero engine data is incomplete for this assessment version.');
+  }
+
+  return {
+    fallbackPatternKey: 'balanced_operator',
+    pairTraitWeights: Object.freeze(rows.pairTraitWeights.map(mapRuntimePairTraitWeight)),
+    patternRules: mapRuntimeHeroPatternRules(rows.heroPatternRules),
+    patternLanguage: Object.freeze(rows.heroPatternLanguage.map(mapRuntimeHeroPatternLanguage)),
+  };
+}
+
 export function assembleRuntimeAssessmentDefinition(rows: DefinitionGraphRows): RuntimeAssessmentDefinition {
   const assessment = mapAssessmentRecord(rows.assessment);
   const version = mapAssessmentVersionRecord(rows.version);
@@ -207,6 +301,7 @@ export function assembleRuntimeAssessmentDefinition(rows: DefinitionGraphRows): 
     assessment,
     version,
     assessmentIntro: rows.assessmentIntro ? mapRuntimeAssessmentIntro(rows.assessmentIntro) : null,
+    heroDefinition: mapRuntimeHeroDefinition(rows),
     domains,
     signals,
     questions,

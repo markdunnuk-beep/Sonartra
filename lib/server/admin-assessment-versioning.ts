@@ -95,6 +95,37 @@ type OptionSignalWeightRow = {
   source_weight_key: string | null;
 };
 
+type PairTraitWeightRow = {
+  pair_trait_weight_id: string;
+  profile_domain_key: string;
+  pair_key: string;
+  trait_key: string;
+  weight: number;
+  order_index: number;
+};
+
+type HeroPatternRuleRow = {
+  hero_pattern_rule_id: string;
+  pattern_key: string;
+  priority: number;
+  rule_type: 'condition' | 'exclusion';
+  trait_key: string;
+  operator: string;
+  threshold_value: number;
+  order_index: number;
+};
+
+type HeroPatternLanguageRow = {
+  hero_pattern_language_id: string;
+  pattern_key: string;
+  headline: string;
+  subheadline: string | null;
+  summary: string | null;
+  narrative: string | null;
+  pressure_overlay: string | null;
+  environment_overlay: string | null;
+};
+
 type InsertedIdRow = {
   id: string;
 };
@@ -124,7 +155,13 @@ type AssessmentVersioningFailureStage =
   | 'load_source_options'
   | 'insert_options'
   | 'load_source_weights'
-  | 'insert_weights';
+  | 'insert_weights'
+  | 'load_source_pair_trait_weights'
+  | 'insert_pair_trait_weights'
+  | 'load_source_hero_pattern_rules'
+  | 'insert_hero_pattern_rules'
+  | 'load_source_hero_pattern_language'
+  | 'insert_hero_pattern_language';
 
 class AssessmentVersioningPersistenceError extends Error {
   readonly stage: AssessmentVersioningFailureStage;
@@ -625,6 +662,91 @@ async function loadSourceWeights(
   }
 }
 
+async function loadSourcePairTraitWeights(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<readonly PairTraitWeightRow[]> {
+  try {
+    const result = await db.query<PairTraitWeightRow>(
+      `
+      SELECT
+        id AS pair_trait_weight_id,
+        profile_domain_key,
+        pair_key,
+        trait_key,
+        weight,
+        order_index
+      FROM assessment_version_pair_trait_weights
+      WHERE assessment_version_id = $1
+      ORDER BY profile_domain_key ASC, pair_key ASC, order_index ASC, id ASC
+      `,
+      [assessmentVersionId],
+    );
+
+    return result.rows;
+  } catch (error) {
+    throw new AssessmentVersioningPersistenceError('load_source_pair_trait_weights', error);
+  }
+}
+
+async function loadSourceHeroPatternRules(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<readonly HeroPatternRuleRow[]> {
+  try {
+    const result = await db.query<HeroPatternRuleRow>(
+      `
+      SELECT
+        id AS hero_pattern_rule_id,
+        pattern_key,
+        priority,
+        rule_type,
+        trait_key,
+        operator,
+        threshold_value,
+        order_index
+      FROM assessment_version_hero_pattern_rules
+      WHERE assessment_version_id = $1
+      ORDER BY priority ASC, pattern_key ASC, rule_type ASC, order_index ASC, id ASC
+      `,
+      [assessmentVersionId],
+    );
+
+    return result.rows;
+  } catch (error) {
+    throw new AssessmentVersioningPersistenceError('load_source_hero_pattern_rules', error);
+  }
+}
+
+async function loadSourceHeroPatternLanguage(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<readonly HeroPatternLanguageRow[]> {
+  try {
+    const result = await db.query<HeroPatternLanguageRow>(
+      `
+      SELECT
+        id AS hero_pattern_language_id,
+        pattern_key,
+        headline,
+        subheadline,
+        summary,
+        narrative,
+        pressure_overlay,
+        environment_overlay
+      FROM assessment_version_hero_pattern_language
+      WHERE assessment_version_id = $1
+      ORDER BY pattern_key ASC, id ASC
+      `,
+      [assessmentVersionId],
+    );
+
+    return result.rows;
+  } catch (error) {
+    throw new AssessmentVersioningPersistenceError('load_source_hero_pattern_language', error);
+  }
+}
+
 export async function createNextDraftAssessmentVersionRecords(params: {
   db: Queryable;
   assessmentKey: string;
@@ -851,6 +973,104 @@ export async function createNextDraftAssessmentVersionRecords(params: {
       );
     } catch (error) {
       throw new AssessmentVersioningPersistenceError('insert_weights', error);
+    }
+  }
+
+  const pairTraitWeights = await loadSourcePairTraitWeights(params.db, sourceVersion.assessment_version_id);
+
+  for (const entry of pairTraitWeights) {
+    try {
+      await params.db.query(
+        `
+        INSERT INTO assessment_version_pair_trait_weights (
+          assessment_version_id,
+          profile_domain_key,
+          pair_key,
+          trait_key,
+          weight,
+          order_index
+        )
+        VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+        [
+          insertedDraft.id,
+          entry.profile_domain_key,
+          entry.pair_key,
+          entry.trait_key,
+          entry.weight,
+          entry.order_index,
+        ],
+      );
+    } catch (error) {
+      throw new AssessmentVersioningPersistenceError('insert_pair_trait_weights', error);
+    }
+  }
+
+  const heroPatternRules = await loadSourceHeroPatternRules(params.db, sourceVersion.assessment_version_id);
+
+  for (const rule of heroPatternRules) {
+    try {
+      await params.db.query(
+        `
+        INSERT INTO assessment_version_hero_pattern_rules (
+          assessment_version_id,
+          pattern_key,
+          priority,
+          rule_type,
+          trait_key,
+          operator,
+          threshold_value,
+          order_index
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `,
+        [
+          insertedDraft.id,
+          rule.pattern_key,
+          rule.priority,
+          rule.rule_type,
+          rule.trait_key,
+          rule.operator,
+          rule.threshold_value,
+          rule.order_index,
+        ],
+      );
+    } catch (error) {
+      throw new AssessmentVersioningPersistenceError('insert_hero_pattern_rules', error);
+    }
+  }
+
+  const heroPatternLanguage = await loadSourceHeroPatternLanguage(params.db, sourceVersion.assessment_version_id);
+
+  for (const pattern of heroPatternLanguage) {
+    try {
+      await params.db.query(
+        `
+        INSERT INTO assessment_version_hero_pattern_language (
+          assessment_version_id,
+          pattern_key,
+          headline,
+          subheadline,
+          summary,
+          narrative,
+          pressure_overlay,
+          environment_overlay
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `,
+        [
+          insertedDraft.id,
+          pattern.pattern_key,
+          pattern.headline,
+          pattern.subheadline,
+          pattern.summary,
+          pattern.narrative,
+          pattern.pressure_overlay,
+          pattern.environment_overlay,
+        ],
+      );
+    } catch (error) {
+      throw new AssessmentVersioningPersistenceError('insert_hero_pattern_language', error);
     }
   }
 

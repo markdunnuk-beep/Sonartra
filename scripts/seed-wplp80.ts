@@ -287,6 +287,110 @@ for (const domain of seeds.domains) {
       );
     }
 
+    // 8) Hero pair trait weights
+    for (const entry of seeds.pairTraitWeights) {
+      await client.query(
+        `
+        INSERT INTO assessment_version_pair_trait_weights (
+          assessment_version_id,
+          profile_domain_key,
+          pair_key,
+          trait_key,
+          weight,
+          order_index
+        )
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (assessment_version_id, profile_domain_key, pair_key, trait_key)
+        DO UPDATE SET
+          weight = EXCLUDED.weight,
+          order_index = EXCLUDED.order_index,
+          updated_at = NOW()
+        `,
+        [
+          assessmentVersionId,
+          entry.profileDomainKey,
+          entry.pairKey,
+          entry.traitKey,
+          entry.weight,
+          entry.orderIndex,
+        ],
+      );
+    }
+
+    // 9) Hero pattern rules
+    for (const rule of seeds.heroPatternRules) {
+      await client.query(
+        `
+        INSERT INTO assessment_version_hero_pattern_rules (
+          assessment_version_id,
+          pattern_key,
+          priority,
+          rule_type,
+          trait_key,
+          operator,
+          threshold_value,
+          order_index
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (assessment_version_id, pattern_key, rule_type, order_index)
+        DO UPDATE SET
+          priority = EXCLUDED.priority,
+          trait_key = EXCLUDED.trait_key,
+          operator = EXCLUDED.operator,
+          threshold_value = EXCLUDED.threshold_value,
+          updated_at = NOW()
+        `,
+        [
+          assessmentVersionId,
+          rule.patternKey,
+          rule.priority,
+          rule.ruleType,
+          rule.traitKey,
+          rule.operator,
+          rule.thresholdValue,
+          rule.orderIndex,
+        ],
+      );
+    }
+
+    // 10) Hero pattern language
+    for (const pattern of seeds.heroPatternLanguage) {
+      await client.query(
+        `
+        INSERT INTO assessment_version_hero_pattern_language (
+          assessment_version_id,
+          pattern_key,
+          headline,
+          subheadline,
+          summary,
+          narrative,
+          pressure_overlay,
+          environment_overlay
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (assessment_version_id, pattern_key)
+        DO UPDATE SET
+          headline = EXCLUDED.headline,
+          subheadline = EXCLUDED.subheadline,
+          summary = EXCLUDED.summary,
+          narrative = EXCLUDED.narrative,
+          pressure_overlay = EXCLUDED.pressure_overlay,
+          environment_overlay = EXCLUDED.environment_overlay,
+          updated_at = NOW()
+        `,
+        [
+          assessmentVersionId,
+          pattern.patternKey,
+          pattern.headline,
+          pattern.subheadline,
+          pattern.summary,
+          pattern.narrative,
+          pattern.pressureOverlay,
+          pattern.environmentOverlay,
+        ],
+      );
+    }
+
     await client.query('COMMIT');
 
     console.log('WPLP-80 seed completed successfully.');
@@ -297,6 +401,9 @@ for (const domain of seeds.domains) {
     console.log(`Questions: ${seeds.questions.length}`);
     console.log(`Options: ${seeds.options.length}`);
     console.log(`Option Signal Weights: ${seeds.optionSignalWeights.length}`);
+    console.log(`Hero Pair Trait Weights: ${seeds.pairTraitWeights.length}`);
+    console.log(`Hero Pattern Rules: ${seeds.heroPatternRules.length}`);
+    console.log(`Hero Pattern Language Rows: ${seeds.heroPatternLanguage.length}`);
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('WPLP-80 seed failed.');

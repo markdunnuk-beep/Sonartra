@@ -91,10 +91,53 @@ export type AssessmentIntroRow = {
   confidentiality_note: string | null;
 };
 
+export type PairTraitWeightRow = {
+  id: string;
+  assessment_version_id: string;
+  profile_domain_key: string;
+  pair_key: string;
+  trait_key: string;
+  weight: number;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HeroPatternRuleRow = {
+  id: string;
+  assessment_version_id: string;
+  pattern_key: string;
+  priority: number;
+  rule_type: 'condition' | 'exclusion';
+  trait_key: string;
+  operator: string;
+  threshold_value: number;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HeroPatternLanguageRow = {
+  id: string;
+  assessment_version_id: string;
+  pattern_key: string;
+  headline: string;
+  subheadline: string | null;
+  summary: string | null;
+  narrative: string | null;
+  pressure_overlay: string | null;
+  environment_overlay: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type DefinitionGraphRows = {
   assessment: AssessmentRow;
   version: AssessmentVersionRow;
   assessmentIntro: AssessmentIntroRow | null;
+  pairTraitWeights: PairTraitWeightRow[];
+  heroPatternRules: HeroPatternRuleRow[];
+  heroPatternLanguage: HeroPatternLanguageRow[];
   domains: DomainRow[];
   signals: SignalRow[];
   questions: QuestionRow[];
@@ -215,7 +258,7 @@ export async function loadDefinitionGraphByVersionId(
     return null;
   }
 
-  const [assessmentIntro, domains, signals, questions, options, optionSignalWeights] = await Promise.all([
+  const [assessmentIntro, pairTraitWeights, heroPatternRules, heroPatternLanguage, domains, signals, questions, options, optionSignalWeights] = await Promise.all([
     db.query<AssessmentIntroRow>(
       `
       SELECT
@@ -228,6 +271,64 @@ export async function loadDefinitionGraphByVersionId(
         confidentiality_note
       FROM assessment_version_intro
       WHERE assessment_version_id = $1
+      `,
+      [assessmentVersionId],
+    ),
+    db.query<PairTraitWeightRow>(
+      `
+      SELECT
+        id,
+        assessment_version_id,
+        profile_domain_key,
+        pair_key,
+        trait_key,
+        weight,
+        order_index,
+        created_at,
+        updated_at
+      FROM assessment_version_pair_trait_weights
+      WHERE assessment_version_id = $1
+      ORDER BY profile_domain_key ASC, pair_key ASC, order_index ASC, id ASC
+      `,
+      [assessmentVersionId],
+    ),
+    db.query<HeroPatternRuleRow>(
+      `
+      SELECT
+        id,
+        assessment_version_id,
+        pattern_key,
+        priority,
+        rule_type,
+        trait_key,
+        operator,
+        threshold_value,
+        order_index,
+        created_at,
+        updated_at
+      FROM assessment_version_hero_pattern_rules
+      WHERE assessment_version_id = $1
+      ORDER BY priority ASC, pattern_key ASC, rule_type ASC, order_index ASC, id ASC
+      `,
+      [assessmentVersionId],
+    ),
+    db.query<HeroPatternLanguageRow>(
+      `
+      SELECT
+        id,
+        assessment_version_id,
+        pattern_key,
+        headline,
+        subheadline,
+        summary,
+        narrative,
+        pressure_overlay,
+        environment_overlay,
+        created_at,
+        updated_at
+      FROM assessment_version_hero_pattern_language
+      WHERE assessment_version_id = $1
+      ORDER BY pattern_key ASC, id ASC
       `,
       [assessmentVersionId],
     ),
@@ -328,6 +429,9 @@ export async function loadDefinitionGraphByVersionId(
     assessment: metadata.a,
     version: metadata.v,
     assessmentIntro: assessmentIntro.rows[0] ?? null,
+    pairTraitWeights: pairTraitWeights.rows,
+    heroPatternRules: heroPatternRules.rows,
+    heroPatternLanguage: heroPatternLanguage.rows,
     domains: domains.rows,
     signals: signals.rows,
     questions: questions.rows,

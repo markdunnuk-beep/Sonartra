@@ -53,6 +53,8 @@ function buildDefinition(): RuntimeAssessmentDefinition {
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     },
+    assessmentIntro: null,
+    heroDefinition: null,
     domains: [
       {
         id: 'domain-signals',
@@ -288,8 +290,16 @@ function assertCanonicalPayloadShape(payload: Record<string, unknown>): void {
   assert.deepEqual(Object.keys(payload.intro as Record<string, unknown>), ['assessmentDescription']);
   assert.deepEqual(Object.keys(payload.hero as Record<string, unknown>), [
     'headline',
+    'subheadline',
+    'summary',
     'narrative',
+    'pressureOverlay',
+    'environmentOverlay',
     'primaryPattern',
+    'heroPattern',
+    'domainPairWinners',
+    'traitTotals',
+    'matchedPatterns',
     'domainHighlights',
   ]);
   assert.ok(Array.isArray(payload.domains));
@@ -1321,4 +1331,118 @@ test('engine attaches assessmentDescription from the assessment language reposit
   assert.equal(payload.metadata.version, '1.0.0');
   assert.equal(payload.metadata.attemptId, 'attempt-1');
   assert.equal(payload.metadata.completedAt, '2026-01-01T00:01:00.000Z');
+});
+
+test('hero runtime definition persists canonical hero pattern output in the payload', async () => {
+  const definition = buildDefinition();
+  definition.heroDefinition = {
+    fallbackPatternKey: 'balanced_operator',
+    pairTraitWeights: [
+      { profileDomainKey: 'operatingStyle', pairKey: 'driver_influencer', traitKey: 'adaptive', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'operatingStyle', pairKey: 'driver_influencer', traitKey: 'assertive', weight: 1, orderIndex: 2 },
+      { profileDomainKey: 'coreDrivers', pairKey: 'purpose_reward', traitKey: 'adaptive', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'leadershipApproach', pairKey: 'directive_inclusive', traitKey: 'people_led', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'tensionResponse', pairKey: 'accommodate_compete', traitKey: 'adaptive', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'environmentFit', pairKey: 'autonomy_collaboration', traitKey: 'flexible', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'pressureResponse', pairKey: 'critical_scatter', traitKey: 'adaptive', weight: 1, orderIndex: 1 },
+    ],
+    patternRules: [
+      {
+        patternKey: 'adaptive_mobiliser',
+        priority: 24,
+        conditions: [
+          { traitKey: 'adaptive', operator: '>=', value: 3 },
+          { traitKey: 'flexible', operator: '>=', value: 1 },
+        ],
+        exclusions: [],
+      },
+    ],
+    patternLanguage: [
+      {
+        patternKey: 'adaptive_mobiliser',
+        headline: 'Adaptive Mobiliser',
+        subheadline: 'Fast and flexible across shifting conditions.',
+        summary: 'You adapt quickly while keeping people moving.',
+        narrative: 'You tend to reorient in motion and keep momentum alive.',
+        pressureOverlay: 'Under pressure you may accelerate adaptation.',
+        environmentOverlay: 'You do best where room to adjust remains visible.',
+      },
+      {
+        patternKey: 'balanced_operator',
+        headline: 'Balanced Operator',
+        subheadline: 'Broadly balanced across the Hero traits.',
+        summary: 'No single Hero pattern dominates strongly.',
+        narrative: 'Your mix stays comparatively even across the trait profile.',
+        pressureOverlay: null,
+        environmentOverlay: null,
+      },
+    ],
+  };
+  definition.domains = [
+    { id: 'domain-style', key: 'signal_style', title: 'Operating Style', description: null, source: 'signal_group', orderIndex: 1 },
+    { id: 'domain-mot', key: 'signal_mot', title: 'Core Drivers', description: null, source: 'signal_group', orderIndex: 2 },
+    { id: 'domain-lead', key: 'signal_lead', title: 'Leadership Approach', description: null, source: 'signal_group', orderIndex: 3 },
+    { id: 'domain-conflict', key: 'signal_conflict', title: 'Tension Response', description: null, source: 'signal_group', orderIndex: 4 },
+    { id: 'domain-culture', key: 'signal_culture', title: 'Environment Fit', description: null, source: 'signal_group', orderIndex: 5 },
+    { id: 'domain-stress', key: 'signal_stress', title: 'Pressure Response', description: null, source: 'signal_group', orderIndex: 6 },
+    { id: 'domain-section', key: 'section_a', title: 'Section A', description: null, source: 'question_section', orderIndex: 7 },
+  ];
+  definition.signals = [
+    { id: 'style-driver', key: 'style_driver', title: 'Driver', description: null, domainId: 'domain-style', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'style-influencer', key: 'style_influencer', title: 'Influencer', description: null, domainId: 'domain-style', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'mot-purpose', key: 'mot_purpose', title: 'Purpose', description: null, domainId: 'domain-mot', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'mot-reward', key: 'mot_reward', title: 'Reward', description: null, domainId: 'domain-mot', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'lead-directive', key: 'lead_directive', title: 'Directive', description: null, domainId: 'domain-lead', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'lead-inclusive', key: 'lead_inclusive', title: 'Inclusive', description: null, domainId: 'domain-lead', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'conflict-compete', key: 'conflict_compete', title: 'Compete', description: null, domainId: 'domain-conflict', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'conflict-accommodate', key: 'conflict_accommodate', title: 'Accommodate', description: null, domainId: 'domain-conflict', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'culture-autonomy', key: 'culture_autonomy', title: 'Autonomy', description: null, domainId: 'domain-culture', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'culture-collaboration', key: 'culture_collaboration', title: 'Collaboration', description: null, domainId: 'domain-culture', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'stress-criticality', key: 'stress_criticality', title: 'Criticality', description: null, domainId: 'domain-stress', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'stress-scatter', key: 'stress_scatter', title: 'Scatter', description: null, domainId: 'domain-stress', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+  ];
+  definition.questions = [
+    {
+      id: 'hero-question-1',
+      key: 'hero_q1',
+      prompt: 'Hero fixture question?',
+      description: null,
+      domainId: 'domain-section',
+      orderIndex: 1,
+      options: [
+        {
+          id: 'hero-option-1',
+          key: 'hero_q1_a',
+          label: 'Hero option',
+          description: 'Fixture',
+          questionId: 'hero-question-1',
+          orderIndex: 1,
+          signalWeights: definition.signals.map((signal, index) => ({
+            signalId: signal.id,
+            weight: index + 1,
+            reverseFlag: false,
+            sourceWeightKey: `hero|${index + 1}`,
+          })),
+        },
+      ],
+    },
+  ];
+
+  const payload = await runAssessmentEngine({
+    repository: createRepositoryWithLanguageBundle(definition, createEmptyLanguageBundle()),
+    assessmentVersionId: 'version-1',
+    loadAssessmentLanguage: async () => ({ assessment_description: null }),
+    responses: buildResponses({}),
+  });
+
+  assert.equal(payload.hero.headline, 'Adaptive Mobiliser');
+  assert.equal(payload.hero.subheadline, 'Fast and flexible across shifting conditions.');
+  assert.equal(payload.hero.summary, 'You adapt quickly while keeping people moving.');
+  assert.equal(payload.hero.narrative, 'You tend to reorient in motion and keep momentum alive.');
+  assert.equal(payload.hero.heroPattern?.patternKey, 'adaptive_mobiliser');
+  assert.equal(payload.hero.heroPattern?.isFallback, false);
+  assert.equal(payload.hero.domainPairWinners.length, 6);
+  assert.equal(payload.hero.traitTotals[0]?.traitKey, 'adaptive');
+  assert.equal(payload.hero.traitTotals[0]?.value, 4);
+  assert.deepEqual(payload.hero.matchedPatterns, [{ patternKey: 'adaptive_mobiliser', priority: 24 }]);
 });

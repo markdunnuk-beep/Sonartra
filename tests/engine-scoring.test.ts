@@ -26,6 +26,8 @@ function buildDefinition(): RuntimeAssessmentDefinition {
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     },
+    assessmentIntro: null,
+    heroDefinition: null,
     domains: [
       {
         id: 'domain-signals',

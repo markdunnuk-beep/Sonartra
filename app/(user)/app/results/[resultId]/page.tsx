@@ -448,7 +448,12 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const hasAssessmentDescription =
     typeof assessmentDescription === 'string' && assessmentDescription.trim().length > 0;
   const heroHeadline = result.hero.headline?.trim() ?? '';
+  const heroSubheadline = result.hero.subheadline?.trim() ?? '';
+  const heroSummary = result.hero.summary?.trim() ?? '';
   const heroNarrative = result.hero.narrative?.trim() ?? '';
+  const heroPatternLabel = result.hero.heroPattern?.label?.trim() ?? '';
+  const pressureOverlay = result.hero.pressureOverlay?.trim() ?? '';
+  const environmentOverlay = result.hero.environmentOverlay?.trim() ?? '';
 
   return (
     <PageFrame className="space-y-16 md:space-y-20">
@@ -487,11 +492,30 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                     {heroHeadline}
                   </h1>
                 ) : null}
+                {heroSubheadline ? (
+                  <p className="sonartra-report-body-soft max-w-[46rem] text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                    {heroSubheadline}
+                  </p>
+                ) : null}
                 <div className="sonartra-report-prose space-y-7">
+                  {heroPatternLabel ? <p className="sonartra-report-kicker">{heroPatternLabel}</p> : null}
+                  {heroSummary ? (
+                    <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                      {heroSummary}
+                    </p>
+                  ) : null}
                   {heroNarrative ? (
                     <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
                       {heroNarrative}
                     </p>
+                  ) : null}
+                  {pressureOverlay || environmentOverlay ? (
+                    <div className="grid gap-x-8 gap-y-5 border-white/6 border-y py-5 sm:grid-cols-2">
+                      {pressureOverlay ? <EditorialAside label="Pressure" text={pressureOverlay} /> : null}
+                      {environmentOverlay ? (
+                        <EditorialAside label="Environment" text={environmentOverlay} />
+                      ) : null}
+                    </div>
                   ) : null}
                   <HeroDomainHighlights highlights={result.hero.domainHighlights} />
                 </div>

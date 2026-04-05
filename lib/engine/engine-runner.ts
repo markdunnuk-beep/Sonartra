@@ -103,6 +103,7 @@ export async function runAssessmentEngine(
       },
       scoringDiagnostics: scoreResult.diagnostics,
       languageBundle,
+      heroDefinition: definition.heroDefinition,
     },
   });
 

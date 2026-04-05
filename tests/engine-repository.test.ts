@@ -9,8 +9,11 @@ import type {
   AssessmentVersionRow,
   DefinitionGraphRows,
   DomainRow,
+  HeroPatternLanguageRow,
+  HeroPatternRuleRow,
   OptionRow,
   OptionSignalWeightRow,
+  PairTraitWeightRow,
   Queryable,
   QuestionRow,
   SignalRow,
@@ -187,7 +190,23 @@ function buildGraphRows(): DefinitionGraphRows {
     },
   ];
 
-  return { assessment, version, assessmentIntro, domains, signals, questions, options, optionSignalWeights };
+  const pairTraitWeights: PairTraitWeightRow[] = [];
+  const heroPatternRules: HeroPatternRuleRow[] = [];
+  const heroPatternLanguage: HeroPatternLanguageRow[] = [];
+
+  return {
+    assessment,
+    version,
+    assessmentIntro,
+    pairTraitWeights,
+    heroPatternRules,
+    heroPatternLanguage,
+    domains,
+    signals,
+    questions,
+    options,
+    optionSignalWeights,
+  };
 }
 
 function createFakeDb(data: {
@@ -227,6 +246,18 @@ function createFakeDb(data: {
         return { rows: ((data.graph?.assessmentIntro ? [data.graph.assessmentIntro] : []) as unknown[]) as T[] };
       }
 
+      if (text.includes('FROM assessment_version_pair_trait_weights')) {
+        return { rows: ((data.graph?.pairTraitWeights ?? []) as unknown[]) as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_hero_pattern_rules')) {
+        return { rows: ((data.graph?.heroPatternRules ?? []) as unknown[]) as T[] };
+      }
+
+      if (text.includes('FROM assessment_version_hero_pattern_language')) {
+        return { rows: ((data.graph?.heroPatternLanguage ?? []) as unknown[]) as T[] };
+      }
+
       if (text.includes('FROM domains')) {
         return { rows: ((data.graph?.domains ?? []) as unknown[]) as T[] };
       }
@@ -259,6 +290,7 @@ test('assembles a minimal valid runtime definition', () => {
   assert.equal(definition.assessment.key, 'wplp80');
   assert.equal(definition.version.versionTag, '1.0.0');
   assert.equal(definition.assessmentIntro?.introTitle, 'Welcome to WPLP-80');
+  assert.equal(definition.heroDefinition, null);
   assert.equal(definition.questions.length, 2);
   assert.equal(definition.questions[0]?.options.length, 2);
   assert.equal(definition.questions[0]?.options[0]?.signalWeights.length, 1);
@@ -431,4 +463,70 @@ test('preserves WPLP-80 compatibility fields (domain source + overlay)', () => {
   assert.equal(definition.domains[1]?.source, 'signal_group');
   assert.equal(definition.signals[1]?.isOverlay, true);
   assert.equal(definition.signals[1]?.overlayType, 'role');
+});
+
+test('assembles hero runtime data when all hero datasets are present', () => {
+  const graph = buildGraphRows();
+  graph.pairTraitWeights = [{
+    id: 'ptw-1',
+    assessment_version_id: 'v1',
+    profile_domain_key: 'operatingStyle',
+    pair_key: 'analyst_driver',
+    trait_key: 'paced',
+    weight: 2,
+    order_index: 1,
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  }];
+  graph.heroPatternRules = [{
+    id: 'rule-1',
+    assessment_version_id: 'v1',
+    pattern_key: 'steady_steward',
+    priority: 10,
+    rule_type: 'condition',
+    trait_key: 'paced',
+    operator: '>=',
+    threshold_value: 2,
+    order_index: 1,
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  }];
+  graph.heroPatternLanguage = [{
+    id: 'lang-1',
+    assessment_version_id: 'v1',
+    pattern_key: 'steady_steward',
+    headline: 'Steady Steward',
+    subheadline: 'Measured and reliable.',
+    summary: 'Summary',
+    narrative: 'Narrative',
+    pressure_overlay: 'Pressure',
+    environment_overlay: 'Environment',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  }];
+
+  const definition = assembleRuntimeAssessmentDefinition(graph);
+
+  assert.ok(definition.heroDefinition);
+  assert.equal(definition.heroDefinition?.fallbackPatternKey, 'balanced_operator');
+  assert.equal(definition.heroDefinition?.pairTraitWeights.length, 1);
+  assert.equal(definition.heroDefinition?.patternRules[0]?.patternKey, 'steady_steward');
+  assert.equal(definition.heroDefinition?.patternLanguage[0]?.headline, 'Steady Steward');
+});
+
+test('throws when hero runtime data is only partially present', () => {
+  const graph = buildGraphRows();
+  graph.pairTraitWeights = [{
+    id: 'ptw-1',
+    assessment_version_id: 'v1',
+    profile_domain_key: 'operatingStyle',
+    pair_key: 'analyst_driver',
+    trait_key: 'paced',
+    weight: 2,
+    order_index: 1,
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  }];
+
+  assert.throws(() => assembleRuntimeAssessmentDefinition(graph), DefinitionGraphIntegrityError);
 });

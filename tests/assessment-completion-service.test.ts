@@ -85,6 +85,8 @@ function buildDefinition(params?: {
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     },
+    assessmentIntro: null,
+    heroDefinition: null,
     domains: [
       { id: 'domain-signals', key: 'signals', title: 'Signals', description: null, source: 'signal_group', orderIndex: 2 },
       { id: 'domain-section', key: 'section_a', title: 'Section A', description: null, source: 'question_section', orderIndex: 1 },
@@ -137,12 +139,20 @@ function buildPayload(signalId: string): CanonicalResultPayload {
     },
     hero: {
       headline: 'Headline',
+      subheadline: null,
+      summary: null,
       narrative: 'Narrative',
+      pressureOverlay: null,
+      environmentOverlay: null,
       primaryPattern: {
         label: title,
         signalKey,
         signalLabel: title,
       },
+      heroPattern: null,
+      domainPairWinners: [],
+      traitTotals: [],
+      matchedPatterns: [],
       domainHighlights: [{
         domainKey: 'signals',
         domainLabel: 'Signals',

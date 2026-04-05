@@ -79,6 +79,9 @@ type LanguageFixture = {
     createdAt: string;
     updatedAt: string;
   }>;
+  pairTraitWeights?: Array<{ assessmentVersionId: string }>;
+  heroPatternRules?: Array<{ assessmentVersionId: string }>;
+  heroPatternLanguage?: Array<{ assessmentVersionId: string }>;
 };
 
 function createFakeDb(fixture: LanguageFixture): Queryable {
@@ -312,6 +315,30 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
               created_at: row.createdAt,
               updated_at: row.updatedAt,
             })) as T[],
+        };
+      }
+
+      if (text.includes('FROM assessment_version_pair_trait_weights')) {
+        const assessmentVersionId = params?.[0] as string;
+        return {
+          rows: (fixture.pairTraitWeights ?? [])
+            .filter((row) => row.assessmentVersionId === assessmentVersionId) as T[],
+        };
+      }
+
+      if (text.includes('FROM assessment_version_hero_pattern_rules')) {
+        const assessmentVersionId = params?.[0] as string;
+        return {
+          rows: (fixture.heroPatternRules ?? [])
+            .filter((row) => row.assessmentVersionId === assessmentVersionId) as T[],
+        };
+      }
+
+      if (text.includes('FROM assessment_version_hero_pattern_language')) {
+        const assessmentVersionId = params?.[0] as string;
+        return {
+          rows: (fixture.heroPatternLanguage ?? [])
+            .filter((row) => row.assessmentVersionId === assessmentVersionId) as T[],
         };
       }
 
@@ -585,6 +612,9 @@ test('language step view model resolves the latest draft version and derives cou
           updatedAt: '2026-04-01T00:00:06.000Z',
         },
       ],
+      pairTraitWeights: [{ assessmentVersionId: 'version-draft' }, { assessmentVersionId: 'version-draft' }],
+      heroPatternRules: [{ assessmentVersionId: 'version-draft' }],
+      heroPatternLanguage: [{ assessmentVersionId: 'version-draft' }],
     }),
     'wplp80',
   );
@@ -599,6 +629,9 @@ test('language step view model resolves the latest draft version and derives cou
     signals: { entryCount: 2 },
     pairs: { entryCount: 1 },
     domains: { entryCount: 1 },
+    pairTraitWeights: { entryCount: 2 },
+    heroPatternRules: { entryCount: 1 },
+    heroPatternLanguage: { entryCount: 1 },
   });
 });
 
@@ -635,6 +668,7 @@ test('language step view model falls back to the published version when no draft
   assert.equal(viewModel?.activeVersion?.status, 'published');
   assert.equal(viewModel?.assessmentLanguageDescription, null);
   assert.equal(viewModel?.counts.heroHeaders.entryCount, 0);
+  assert.equal(viewModel?.counts.pairTraitWeights.entryCount, 0);
 });
 
 test('language step view model returns null for a missing assessment and empty version state when no versions exist', async () => {
@@ -666,6 +700,9 @@ test('language step view model returns null for a missing assessment and empty v
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
+    pairTraitWeights: { entryCount: 0 },
+    heroPatternRules: { entryCount: 0 },
+    heroPatternLanguage: { entryCount: 0 },
   });
 });
 
@@ -698,6 +735,9 @@ test('language step component renders intro, hero header, domain chapters, signa
           signals: { entryCount: 2 },
           pairs: { entryCount: 1 },
           domains: { entryCount: 1 },
+          pairTraitWeights: { entryCount: 12 },
+          heroPatternRules: { entryCount: 8 },
+          heroPatternLanguage: { entryCount: 9 },
         },
       }}
     />,
@@ -710,6 +750,11 @@ test('language step component renders intro, hero header, domain chapters, signa
   assert.match(markup, /rounded-\[1\.25rem\] border border-white\/10 bg-gradient-to-b from-white\/\[0\.02\] to-transparent p-\[1px\]/);
   assert.match(markup, /rounded-\[1\.25rem\] bg-black\/30/);
   assert.match(markup, /Import report language/);
+  assert.match(markup, /Import Hero engine datasets/);
+  assert.match(markup, /Pair Trait Weights/);
+  assert.match(markup, /Hero Pattern Rules/);
+  assert.match(markup, /Hero Pattern Language/);
+  assert.match(markup, /Current rows: 12/);
   assert.match(markup, /Dataset type/);
   assert.match(markup, /Hero Header Language/);
   assert.match(markup, /Format: scope \| key \| headline/);
@@ -724,6 +769,9 @@ test('language step component renders intro, hero header, domain chapters, signa
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
   assert.match(markup, /Current Hero Header rows: 2/);
+  assert.match(markup, /Pair Traits/);
+  assert.match(markup, /Hero Rules/);
+  assert.match(markup, /Hero Language/);
   assert.match(markup, /Report introduction/);
 });
 
@@ -746,6 +794,9 @@ test('language step component shows a safe empty state when no usable version co
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
           domains: { entryCount: 0 },
+          pairTraitWeights: { entryCount: 0 },
+          heroPatternRules: { entryCount: 0 },
+          heroPatternLanguage: { entryCount: 0 },
         },
       }}
     />,
@@ -973,6 +1024,9 @@ test('language step view model degrades safely when language tables are unavaila
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
+    pairTraitWeights: { entryCount: 0 },
+    heroPatternRules: { entryCount: 0 },
+    heroPatternLanguage: { entryCount: 0 },
   });
 });
 
@@ -1006,6 +1060,9 @@ test('language step component shows a safe schema-unavailable state instead of r
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
           domains: { entryCount: 0 },
+          pairTraitWeights: { entryCount: 0 },
+          heroPatternRules: { entryCount: 0 },
+          heroPatternLanguage: { entryCount: 0 },
         },
       }}
     />,

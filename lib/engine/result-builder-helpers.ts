@@ -1,6 +1,7 @@
 import type {
   CanonicalResultPayload,
   EngineLanguageBundle,
+  HeroTraitKey,
   NormalizedDomainSummary,
   NormalizedResult,
   NormalizedSignalScore,
@@ -16,6 +17,7 @@ import type {
   ResultMetadata,
   ResultRankedSignal,
   ResultTopSignal,
+  RuntimeAssessmentDefinition,
   ScoreDiagnostics,
 } from '@/lib/engine/types';
 import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking';
@@ -27,6 +29,7 @@ import {
   buildWatchouts,
 } from '@/lib/engine/result-interpretation';
 import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
+import { evaluateHeroPattern, getHeroPatternLabel } from '@/lib/engine/hero';
 import type {
   AssessmentVersionLanguageDomainSection,
 } from '@/lib/server/assessment-version-language-types';
@@ -36,6 +39,7 @@ export type CanonicalResultBuilderInput = NormalizedResult & {
   metadata: ResultMetadata;
   scoringDiagnostics: ScoreDiagnostics;
   languageBundle: EngineLanguageBundle;
+  heroDefinition?: RuntimeAssessmentDefinition['heroDefinition'];
 };
 
 export function createResultInterpretationContext(
@@ -337,10 +341,6 @@ export function buildHero(params: {
   domainSummaries: readonly ResultDomainSummary[];
   interpretationContext: ResultInterpretationContext;
 }): ResultHeroSummary {
-  // The persisted payload calls this section "hero". Headline resolution is
-  // pair-header first, then deterministic signal fallback; narrative is pair
-  // summary or null.
-  const overviewSummary = buildOverviewSummary(params.normalizedResult, params.interpretationContext);
   const topSignal = getTopSignalsInRankOrder(params.normalizedResult.signalScores)[0] ?? null;
   const domainHighlights = params.domainSummaries.flatMap((domainSummary) => {
     const primarySignal = domainSummary.signalScores[0];
@@ -360,9 +360,26 @@ export function buildHero(params: {
     ];
   });
 
+  const heroEvaluation = params.normalizedResult.heroDefinition
+    ? evaluateHeroPattern({
+        heroDefinition: params.normalizedResult.heroDefinition,
+        domainSummaries: params.domainSummaries,
+      })
+    : null;
+  const overviewSummary = heroEvaluation
+    ? {
+        headline: heroEvaluation.headline,
+        narrative: heroEvaluation.narrative,
+      }
+    : buildOverviewSummary(params.normalizedResult, params.interpretationContext);
+
   return {
     headline: overviewSummary.headline || null,
+    subheadline: heroEvaluation?.subheadline ?? null,
+    summary: heroEvaluation?.summary ?? null,
     narrative: overviewSummary.narrative || null,
+    pressureOverlay: heroEvaluation?.pressureOverlay ?? null,
+    environmentOverlay: heroEvaluation?.environmentOverlay ?? null,
     primaryPattern: topSignal
       ? {
           label: topSignal.signalTitle,
@@ -370,6 +387,21 @@ export function buildHero(params: {
           signalLabel: topSignal.signalTitle,
         }
       : null,
+    heroPattern: heroEvaluation
+      ? {
+          patternKey: heroEvaluation.patternKey,
+          label: getHeroPatternLabel(heroEvaluation.patternKey),
+          priority: heroEvaluation.priority,
+          isFallback: heroEvaluation.isFallback,
+        }
+      : null,
+    domainPairWinners: heroEvaluation ? [...heroEvaluation.domainPairWinners] : [],
+    traitTotals: heroEvaluation
+      ? Object.entries(heroEvaluation.traitTotals)
+          .map(([traitKey, value]) => ({ traitKey: traitKey as HeroTraitKey, value }))
+          .sort((left, right) => right.value - left.value || left.traitKey.localeCompare(right.traitKey))
+      : [],
+    matchedPatterns: heroEvaluation ? [...heroEvaluation.matchedPatterns] : [],
     domainHighlights,
   };
 }

@@ -1,4 +1,5 @@
 import { AdminAssessmentLanguageEditor } from '@/components/admin/admin-assessment-language-editor';
+import { AdminHeroDatasetImport } from '@/components/admin/admin-hero-dataset-import';
 import { AdminLanguageDatasetImport } from '@/components/admin/admin-language-dataset-import';
 import {
   EmptyState,
@@ -118,12 +119,33 @@ export function AdminAssessmentLanguageStep({
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Hero Engine"
+          title="Import Hero engine datasets"
+          description="Replace the version-scoped pair traits, pattern rules, and pattern language used by the canonical Hero engine."
+        />
+
+        <AdminHeroDatasetImport
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          counts={{
+            pairTraitWeights: viewModel.counts.pairTraitWeights,
+            heroPatternRules: viewModel.counts.heroPatternRules,
+            heroPatternLanguage: viewModel.counts.heroPatternLanguage,
+          }}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-8">
         <MetaItem label="Report introduction" value={formatEntryCount(viewModel.counts.assessment.entryCount)} />
         <MetaItem label="Hero Header" value={formatEntryCount(viewModel.counts.heroHeaders.entryCount)} />
         <MetaItem label="Domain Chapters" value={formatEntryCount(viewModel.counts.domains.entryCount)} />
         <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
         <MetaItem label="Pairs" value={formatEntryCount(viewModel.counts.pairs.entryCount)} />
+        <MetaItem label="Pair Traits" value={formatEntryCount(viewModel.counts.pairTraitWeights.entryCount)} />
+        <MetaItem label="Hero Rules" value={formatEntryCount(viewModel.counts.heroPatternRules.entryCount)} />
+        <MetaItem label="Hero Language" value={formatEntryCount(viewModel.counts.heroPatternLanguage.entryCount)} />
       </div>
     </section>
   );

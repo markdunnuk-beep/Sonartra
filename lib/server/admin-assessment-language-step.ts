@@ -3,6 +3,11 @@ import {
   getAdminAssessmentDetailByKey,
   type AdminAssessmentDetailVersion,
 } from '@/lib/server/admin-assessment-detail';
+import {
+  getAssessmentVersionHeroPatternLanguage,
+  getAssessmentVersionHeroPatternRules,
+  getAssessmentVersionPairTraitWeights,
+} from '@/lib/server/assessment-version-hero';
 import { getAssessmentLanguage } from '@/lib/server/assessment-language-repository';
 import { getAssessmentVersionLanguageBundle } from '@/lib/server/assessment-version-language';
 
@@ -16,6 +21,9 @@ export type AdminAssessmentLanguageDatasetCounts = {
   signals: AdminAssessmentLanguageDatasetSummary;
   pairs: AdminAssessmentLanguageDatasetSummary;
   domains: AdminAssessmentLanguageDatasetSummary;
+  pairTraitWeights: AdminAssessmentLanguageDatasetSummary;
+  heroPatternRules: AdminAssessmentLanguageDatasetSummary;
+  heroPatternLanguage: AdminAssessmentLanguageDatasetSummary;
 };
 
 export type AdminAssessmentLanguageActiveVersion = {
@@ -81,6 +89,9 @@ function createEmptyCounts(): AdminAssessmentLanguageDatasetCounts {
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
+    pairTraitWeights: { entryCount: 0 },
+    heroPatternRules: { entryCount: 0 },
+    heroPatternLanguage: { entryCount: 0 },
   };
 }
 
@@ -116,9 +127,12 @@ export async function getAdminAssessmentLanguageStepViewModel(
   }
 
   try {
-    const [bundle, assessmentLanguage] = await Promise.all([
+    const [bundle, assessmentLanguage, pairTraitWeights, heroPatternRules, heroPatternLanguage] = await Promise.all([
       getAssessmentVersionLanguageBundle(db, resolvedVersion.assessmentVersionId),
       getAssessmentLanguage(resolvedVersion.assessmentVersionId, db),
+      getAssessmentVersionPairTraitWeights(db, resolvedVersion.assessmentVersionId),
+      getAssessmentVersionHeroPatternRules(db, resolvedVersion.assessmentVersionId),
+      getAssessmentVersionHeroPatternLanguage(db, resolvedVersion.assessmentVersionId),
     ]);
 
     return {
@@ -143,6 +157,9 @@ export async function getAdminAssessmentLanguageStepViewModel(
         signals: { entryCount: countEntriesByKey(bundle.signals) },
         pairs: { entryCount: countEntriesByKey(bundle.pairs) },
         domains: { entryCount: countEntriesByKey(bundle.domains) },
+        pairTraitWeights: { entryCount: pairTraitWeights.length },
+        heroPatternRules: { entryCount: heroPatternRules.length },
+        heroPatternLanguage: { entryCount: heroPatternLanguage.length },
       },
     };
   } catch (error) {

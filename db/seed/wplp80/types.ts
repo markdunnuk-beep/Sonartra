@@ -84,3 +84,55 @@ export type RuleEngineSeed = {
   output: string;
   sourceSheetRow: number;
 };
+
+export type HeroProfileDomainKey =
+  | 'operatingStyle'
+  | 'coreDrivers'
+  | 'leadershipApproach'
+  | 'tensionResponse'
+  | 'environmentFit'
+  | 'pressureResponse';
+
+export type HeroTraitKey =
+  | 'paced'
+  | 'deliberate'
+  | 'people_led'
+  | 'task_led'
+  | 'structured'
+  | 'flexible'
+  | 'assertive'
+  | 'receptive'
+  | 'stable'
+  | 'adaptive'
+  | 'exacting'
+  | 'tolerant';
+
+export type HeroRuleOperator = '>=' | '<=' | '>' | '<' | '===';
+
+export type PairTraitWeightSeed = {
+  profileDomainKey: HeroProfileDomainKey;
+  pairKey: string;
+  traitKey: HeroTraitKey;
+  weight: number;
+  orderIndex: number;
+};
+
+export type HeroPatternRuleSeed = {
+  patternKey: string;
+  priority: number;
+  ruleType: 'condition' | 'exclusion';
+  traitKey: HeroTraitKey;
+  operator: HeroRuleOperator;
+  thresholdValue: number;
+  orderIndex: number;
+};
+
+export type HeroPatternLanguageSeed = {
+  patternKey: string;
+  headline: string;
+  subheadline: string;
+  summary: string;
+  narrative: string;
+  pressureOverlay: string;
+  environmentOverlay: string;
+};

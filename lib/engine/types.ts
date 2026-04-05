@@ -31,6 +31,30 @@ export type OptionKey = string;
 export type AttemptId = string;
 export type AttemptResponseId = string;
 
+export type HeroProfileDomainKey =
+  | 'operatingStyle'
+  | 'coreDrivers'
+  | 'leadershipApproach'
+  | 'tensionResponse'
+  | 'environmentFit'
+  | 'pressureResponse';
+
+export type HeroTraitKey =
+  | 'paced'
+  | 'deliberate'
+  | 'people_led'
+  | 'task_led'
+  | 'structured'
+  | 'flexible'
+  | 'assertive'
+  | 'receptive'
+  | 'stable'
+  | 'adaptive'
+  | 'exacting'
+  | 'tolerant';
+
+export type HeroRuleOperator = '>=' | '<=' | '>' | '<' | '===';
+
 /* ----------------------------------
  * Persisted assessment definition model (DB record shape)
  * ---------------------------------- */
@@ -129,6 +153,46 @@ export type OptionSignalWeightRecord = {
   updatedAt: string;
 };
 
+export type PairTraitWeightRecord = {
+  id: string;
+  assessmentVersionId: AssessmentVersionId;
+  profileDomainKey: HeroProfileDomainKey;
+  pairKey: string;
+  traitKey: HeroTraitKey;
+  weight: number;
+  orderIndex: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type HeroPatternRuleRecord = {
+  id: string;
+  assessmentVersionId: AssessmentVersionId;
+  patternKey: string;
+  priority: number;
+  ruleType: 'condition' | 'exclusion';
+  traitKey: HeroTraitKey;
+  operator: HeroRuleOperator;
+  thresholdValue: number;
+  orderIndex: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type HeroPatternLanguageRecord = {
+  id: string;
+  assessmentVersionId: AssessmentVersionId;
+  patternKey: string;
+  headline: string;
+  subheadline: string | null;
+  summary: string | null;
+  narrative: string | null;
+  pressureOverlay: string | null;
+  environmentOverlay: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 /* ----------------------------------
  * Runtime assembled definition model
  * ---------------------------------- */
@@ -137,6 +201,7 @@ export type RuntimeAssessmentDefinition = {
   assessment: AssessmentRecord;
   version: AssessmentVersionRecord;
   assessmentIntro: RuntimeAssessmentIntro | null;
+  heroDefinition: RuntimeHeroDefinition | null;
   domains: RuntimeDomain[];
   signals: RuntimeSignal[];
   questions: RuntimeQuestion[];
@@ -199,6 +264,44 @@ export type RuntimeOptionSignalWeight = {
   weight: number;
   reverseFlag: boolean;
   sourceWeightKey: string | null;
+};
+
+export type RuntimePairTraitWeight = {
+  profileDomainKey: HeroProfileDomainKey;
+  pairKey: string;
+  traitKey: HeroTraitKey;
+  weight: number;
+  orderIndex: number;
+};
+
+export type RuntimeHeroRuleCondition = {
+  traitKey: HeroTraitKey;
+  operator: HeroRuleOperator;
+  value: number;
+};
+
+export type RuntimeHeroPatternRule = {
+  patternKey: string;
+  priority: number;
+  conditions: readonly RuntimeHeroRuleCondition[];
+  exclusions: readonly RuntimeHeroRuleCondition[];
+};
+
+export type RuntimeHeroPatternLanguage = {
+  patternKey: string;
+  headline: string;
+  subheadline: string | null;
+  summary: string | null;
+  narrative: string | null;
+  pressureOverlay: string | null;
+  environmentOverlay: string | null;
+};
+
+export type RuntimeHeroDefinition = {
+  fallbackPatternKey: string;
+  pairTraitWeights: readonly RuntimePairTraitWeight[];
+  patternRules: readonly RuntimeHeroPatternRule[];
+  patternLanguage: readonly RuntimeHeroPatternLanguage[];
 };
 
 export type RuntimeExecutionIndexes = {
@@ -471,12 +574,40 @@ export type ResultIntro = {
 
 export type ResultHeroSummary = {
   headline: string | null;
+  subheadline: string | null;
+  summary: string | null;
   narrative: string | null;
+  pressureOverlay: string | null;
+  environmentOverlay: string | null;
   primaryPattern: {
     label: string | null;
     signalKey: string | null;
     signalLabel: string | null;
   } | null;
+  heroPattern: {
+    patternKey: string;
+    label: string;
+    priority: number | null;
+    isFallback: boolean;
+  } | null;
+  domainPairWinners: Array<{
+    profileDomainKey: HeroProfileDomainKey;
+    pairKey: string;
+    sourceDomainKey: string;
+    sourceDomainLabel: string;
+    primarySignalKey: string;
+    primarySignalLabel: string;
+    secondarySignalKey: string;
+    secondarySignalLabel: string;
+  }>;
+  traitTotals: Array<{
+    traitKey: HeroTraitKey;
+    value: number;
+  }>;
+  matchedPatterns: Array<{
+    patternKey: string;
+    priority: number;
+  }>;
   domainHighlights: Array<{
     domainKey: string;
     domainLabel: string;
