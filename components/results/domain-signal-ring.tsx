@@ -358,7 +358,7 @@ export function DomainSignalRing({
   return (
     <section
       className={cn(
-        'border-white/7 overflow-hidden rounded-[1.2rem] border bg-[linear-gradient(180deg,rgba(11,18,30,0.38),rgba(8,12,22,0.54))] p-4 shadow-[0_14px_36px_rgba(3,8,20,0.12)] sm:p-5',
+        'sonartra-report-utility-surface border-white/7 overflow-hidden rounded-[1.2rem] border p-4 sm:p-5',
         className,
       )}
       aria-label={`${domain.domainLabel} signal bars`}
@@ -369,6 +369,11 @@ export function DomainSignalRing({
       <style>{DOMAIN_SIGNAL_RING_CSS}</style>
 
       <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="sonartra-report-kicker">Within this domain</p>
+          <p className="sonartra-type-caption text-white/42">{signals.length} signals</p>
+        </div>
+
         <div className="space-y-2.5">
           {signals.length > 0 ? (
             <ol className="space-y-2.5">

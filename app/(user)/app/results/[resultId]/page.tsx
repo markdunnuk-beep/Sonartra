@@ -77,6 +77,35 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
   return <p className="sonartra-report-kicker">{children}</p>;
 }
 
+function ReportMetaItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="sonartra-report-meta-item">
+      <p className="sonartra-report-meta-label">{label}</p>
+      <p className="sonartra-report-meta-value">{value}</p>
+    </div>
+  );
+}
+
+function EditorialDivider({
+  title,
+  className,
+}: {
+  title: string;
+  className?: string;
+}) {
+  return (
+    <div className={['sonartra-report-divider', className].filter(Boolean).join(' ')}>
+      <span>{title}</span>
+    </div>
+  );
+}
+
 function buildResultDetailDomainItems(params: {
   domains: readonly CanonicalDomainChapter[];
   ringModels: readonly DomainSignalRingViewModel[];
@@ -99,46 +128,65 @@ function buildResultDetailDomainItems(params: {
 function ActionList({ title, items }: { title: string; items: readonly VisibleActionItem[] }) {
   const typedItems: readonly VisibleActionItem[] = items;
   const { visible, overflow } = getVisibleItems<VisibleActionItem>(typedItems);
-  // Source-contract marker for tests: space-y-6 border-t border-white/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12
+  const sectionLead =
+    title === 'Strengths'
+      ? 'Where this pattern already adds steadiness, clarity, or forward movement.'
+      : title === 'Watchouts'
+        ? 'Where the same pattern can become narrow, heavy, or harder for others to work with.'
+        : 'Where a small shift in attention is most likely to improve the overall pattern.';
+  // Source-contract marker for tests: grid gap-6 border-t border-white/6 pt-12 first:border-t-0 first:pt-0 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] md:gap-8 md:pt-14
 
   return (
     <article
-      className="border-white/6 sonartra-motion-reveal-soft space-y-6 border-t pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12"
+      className="border-white/6 sonartra-motion-reveal-soft grid gap-6 border-t pt-12 first:border-t-0 first:pt-0 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] md:gap-8 md:pt-14"
       style={getRevealStyle(2)}
     >
-      <div className="grid gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] md:gap-7">
-        <SectionEyebrow>{title}</SectionEyebrow>
-        <h3 className="sonartra-report-title">{title}</h3>
+      <div className="space-y-3 md:sticky md:top-24 md:self-start">
+        <SectionEyebrow>Action</SectionEyebrow>
+        <div className="space-y-2">
+          <h3 className="sonartra-report-title text-[1.08rem] md:text-[1.18rem]">{title}</h3>
+          <p className="sonartra-report-body-soft max-w-[15rem] text-[0.95rem] leading-7">
+            {sectionLead}
+          </p>
+        </div>
       </div>
 
-      <ul className="space-y-6 md:space-y-7">
-        {visible.length > 0 ? (
-          visible.map((item) => (
-            <li key={item.key} className="space-y-2.5">
-              <p className="sonartra-report-title text-[1rem]">{item.title}</p>
-              <p className="sonartra-report-body max-w-[46rem]">{item.detail}</p>
-            </li>
-          ))
-        ) : (
-          <li className="sonartra-report-body-soft">No items available in this section.</li>
-        )}
-      </ul>
-
-      {overflow.length > 0 ? (
-        <details className="max-w-[46rem] pt-2">
-          <summary className="sonartra-motion-details-summary sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
-            Show {overflow.length} more
-          </summary>
-          <ul className="border-white/6 mt-4 space-y-5 border-l pl-4">
-            {overflow.map((item) => (
-              <li key={item.key} className="space-y-2.5">
-                <p className="sonartra-type-nav text-white/82">{item.title}</p>
-                <p className="sonartra-report-body-soft max-w-[42rem]">{item.detail}</p>
+      <div className="space-y-6 md:space-y-7">
+        <ul className="space-y-4 md:space-y-5">
+          {visible.length > 0 ? (
+            visible.map((item, index) => (
+              <li
+                key={item.key}
+                className="sonartra-report-action-item space-y-2.5 rounded-[1.15rem] px-0 py-0"
+              >
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="sonartra-report-step text-white/32">0{index + 1}</span>
+                  <p className="sonartra-report-title text-[1rem]">{item.title}</p>
+                </div>
+                <p className="sonartra-report-body max-w-[46rem]">{item.detail}</p>
               </li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
+            ))
+          ) : (
+            <li className="sonartra-report-body-soft">No items available in this section.</li>
+          )}
+        </ul>
+
+        {overflow.length > 0 ? (
+          <details className="max-w-[46rem] pt-1">
+            <summary className="sonartra-motion-details-summary sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
+              Show {overflow.length} more
+            </summary>
+            <ul className="border-white/6 mt-4 space-y-5 border-l pl-4">
+              {overflow.map((item) => (
+                <li key={item.key} className="space-y-2.5">
+                  <p className="sonartra-type-nav text-white/82">{item.title}</p>
+                  <p className="sonartra-report-body-soft max-w-[42rem]">{item.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+      </div>
     </article>
   );
 }
@@ -153,7 +201,7 @@ function toVisibleActionItems(items: readonly CanonicalActionItem[]): readonly V
 
 function ActionSection({ actions }: { actions: AssessmentResultDetailViewModel['actions'] }) {
   return (
-    <div className="mx-auto max-w-[56rem] px-1 md:px-2">
+    <div className="mx-auto max-w-[61rem] px-1 md:px-2">
       <ActionList title="Strengths" items={toVisibleActionItems(actions.strengths)} />
       <ActionList title="Watchouts" items={toVisibleActionItems(actions.watchouts)} />
       <ActionList
@@ -167,9 +215,11 @@ function ActionSection({ actions }: { actions: AssessmentResultDetailViewModel['
 function DomainChapter({
   domain,
   ringModel,
+  chapterNumber,
 }: {
   domain: CanonicalDomainChapter;
   ringModel: DomainSignalRingViewModel | null;
+  chapterNumber: number;
 }) {
   const visibleSignals = domain.signals.slice(0, 2);
   const hiddenSignals = domain.signals.slice(2);
@@ -180,24 +230,32 @@ function DomainChapter({
 
   return (
     <article
-      className="border-white/6 sonartra-motion-reveal-soft space-y-9 border-t pt-14 first:border-t-0 first:pt-0 md:space-y-11 md:pt-16"
+      className="border-white/6 sonartra-motion-reveal-soft space-y-10 border-t pt-16 first:border-t-0 first:pt-0 md:space-y-12 md:pt-20"
       style={getRevealStyle(2)}
     >
-      <div className="grid gap-6 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:gap-10">
-        <div className="space-y-4">
-          <SectionEyebrow>Domain</SectionEyebrow>
-          <h3 className="max-w-[14ch] text-[1.7rem] font-semibold tracking-[-0.04em] text-white md:text-[2.1rem]">
+      <div className="grid gap-7 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-10">
+        <div className="space-y-4 md:sticky md:top-24 md:self-start">
+          <div className="space-y-2">
+            <SectionEyebrow>{`Chapter ${chapterNumber.toString().padStart(2, '0')}`}</SectionEyebrow>
+            <p className="sonartra-report-body-soft max-w-[12rem] text-[0.95rem] leading-7">
+              Domain reading
+            </p>
+          </div>
+          <h3 className="max-w-[12ch] text-[1.8rem] font-semibold tracking-[-0.045em] text-white md:text-[2.35rem]">
             {title}
           </h3>
         </div>
 
-        <div className="space-y-7 md:space-y-8">
+        <div className="space-y-8 md:space-y-9">
           {domain.summary ? (
-            <p className="sonartra-report-summary max-w-[46rem]">{domain.summary}</p>
+            <div className="space-y-5">
+              <EditorialDivider title="Chapter opening" />
+              <p className="sonartra-report-summary max-w-[46rem]">{domain.summary}</p>
+            </div>
           ) : null}
 
           {domain.focus || domain.pressure || domain.environment ? (
-            <div className="grid gap-x-8 gap-y-4 sm:grid-cols-3">
+            <div className="grid gap-x-8 gap-y-5 border-white/6 border-y py-5 sm:grid-cols-3">
               {domain.focus ? <EditorialAside label="Focus" text={domain.focus} /> : null}
               {domain.pressure ? <EditorialAside label="Pressure" text={domain.pressure} /> : null}
               {domain.environment ? (
@@ -206,22 +264,32 @@ function DomainChapter({
             </div>
           ) : null}
 
+          {ringModel ? (
+            <div className="space-y-3">
+              <EditorialDivider title="Signal balance" />
+              <DomainSignalRing domain={ringModel} className="max-w-[47rem]" />
+            </div>
+          ) : null}
+
           {domain.primarySignal || domain.secondarySignal ? (
-            <div className="border-white/7 grid gap-x-10 gap-y-6 border-t pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-              {domain.primarySignal ? (
-                <SignalEditorialBlock
-                  title="Primary signal"
-                  signalLabel={domain.primarySignal.signalLabel}
-                  summary={domain.primarySignal.summary}
-                />
-              ) : null}
-              {domain.secondarySignal ? (
-                <SignalEditorialBlock
-                  title="Secondary signal"
-                  signalLabel={domain.secondarySignal.signalLabel}
-                  summary={domain.secondarySignal.summary}
-                />
-              ) : null}
+            <div className="space-y-4">
+              <EditorialDivider title="Signal reading" />
+              <div className="border-white/7 grid gap-x-10 gap-y-6 border-t pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                {domain.primarySignal ? (
+                  <SignalEditorialBlock
+                    title="Primary signal"
+                    signalLabel={domain.primarySignal.signalLabel}
+                    summary={domain.primarySignal.summary}
+                  />
+                ) : null}
+                {domain.secondarySignal ? (
+                  <SignalEditorialBlock
+                    title="Secondary signal"
+                    signalLabel={domain.secondarySignal.signalLabel}
+                    summary={domain.secondarySignal.summary}
+                  />
+                ) : null}
+              </div>
             </div>
           ) : null}
 
@@ -229,10 +297,6 @@ function DomainChapter({
             <p className="sonartra-report-body-soft max-w-[46rem] text-[0.97rem] italic leading-8 text-white/50">
               {domain.pairSummary.text}
             </p>
-          ) : null}
-
-          {ringModel ? (
-            <DomainSignalRing domain={ringModel} className="max-w-[45rem] md:max-w-[47rem]" />
           ) : null}
 
           {hiddenSignals.length > 0 ? (
@@ -279,9 +343,14 @@ function DomainSection({
   }
 
   return (
-    <div className="mx-auto max-w-[58rem] px-1 md:px-2">
-      {domainItems.map(({ domain, ringModel }) => (
-        <DomainChapter key={domain.domainKey} domain={domain} ringModel={ringModel} />
+    <div className="mx-auto max-w-[61rem] px-1 md:px-2">
+      {domainItems.map(({ domain, ringModel }, index) => (
+        <DomainChapter
+          key={domain.domainKey}
+          domain={domain}
+          ringModel={ringModel}
+          chapterNumber={index + 1}
+        />
       ))}
     </div>
   );
@@ -400,32 +469,43 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
       {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
       <section
-        className="border-white/6 sonartra-motion-reveal rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] px-7 py-10 shadow-[0_16px_48px_rgba(0,0,0,0.14)] sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14"
+        className="border-white/6 sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-10 sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14"
         style={getRevealStyle(hasAssessmentDescription ? 1 : 0)}
       >
-        <div className="max-w-[74rem] space-y-9 md:space-y-11">
-          <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
-            <SectionEyebrow>Hero</SectionEyebrow>
-            <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
-            <span>{result.assessmentTitle}</span>
-            <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
-            <span>{completionTimestamp.date}</span>
-          </div>
+        <div className="max-w-[74rem] space-y-10 md:space-y-12">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start">
+            <div className="space-y-8 md:space-y-10">
+              <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
+                <SectionEyebrow>Results report</SectionEyebrow>
+                <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
+                <span>{result.assessmentTitle}</span>
+              </div>
 
-          <div className="space-y-8 md:space-y-10">
-            {heroHeadline ? (
-              <h1 className="sonartra-type-display max-w-[13ch] text-[3rem] md:text-[4.75rem]">
-                {heroHeadline}
-              </h1>
-            ) : null}
-            <div className="sonartra-report-prose space-y-7">
-              {heroNarrative ? (
-                <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
-                  {heroNarrative}
-                </p>
-              ) : null}
-              <HeroDomainHighlights highlights={result.hero.domainHighlights} />
+              <div className="space-y-7 md:space-y-8">
+                {heroHeadline ? (
+                  <h1 className="sonartra-type-display max-w-[13ch] text-[3rem] md:text-[4.75rem]">
+                    {heroHeadline}
+                  </h1>
+                ) : null}
+                <div className="sonartra-report-prose space-y-7">
+                  {heroNarrative ? (
+                    <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                      {heroNarrative}
+                    </p>
+                  ) : null}
+                  <HeroDomainHighlights highlights={result.hero.domainHighlights} />
+                </div>
+              </div>
             </div>
+
+            <aside className="sonartra-report-hero-meta-grid">
+              <ReportMetaItem label="Completed" value={completionTimestamp.date} />
+              {completionTimestamp.time ? (
+                <ReportMetaItem label="Time" value={completionTimestamp.time} />
+              ) : null}
+              <ReportMetaItem label="Assessment" value={result.assessmentTitle} />
+              <ReportMetaItem label="Version" value={result.version} />
+            </aside>
           </div>
         </div>
       </section>
@@ -434,6 +514,21 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         className="sonartra-motion-reveal space-y-10 md:space-y-11"
         style={getRevealStyle(2)}
       >
+        <EditorialDivider title="Application" />
+        <SectionHeader
+          eyebrow="Action Focus"
+          title="What this means in practice"
+          description="Start with the immediate implications. This pulls the main report pattern into practical terms before the chapter-by-chapter reading that follows."
+        />
+
+        <ActionSection actions={result.actions} />
+      </section>
+
+      <section
+        className="sonartra-motion-reveal space-y-10 md:space-y-11"
+        style={getRevealStyle(3)}
+      >
+        <EditorialDivider title="Detailed reading" />
         <SectionHeader
           eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
           title="Domain reading"
@@ -441,19 +536,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         />
 
         <DomainSection domainItems={resultDomainItems} />
-      </section>
-
-      <section
-        className="sonartra-motion-reveal space-y-10 md:space-y-11"
-        style={getRevealStyle(3)}
-      >
-        <SectionHeader
-          eyebrow="Action Focus"
-          title="What this means in practice"
-          description="Across the rest of the report, this pattern shows up in a few consistent ways: where it adds value, where it can create friction, and where attention may be useful."
-        />
-
-        <ActionSection actions={result.actions} />
       </section>
     </PageFrame>
   );

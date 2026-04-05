@@ -203,16 +203,16 @@ test('result detail page reads intro, hero, domains, and actions from canonical 
 
   const introIndex = source.indexOf('const assessmentDescription = result.intro.assessmentDescription;');
   const heroIndex = source.indexOf('<section className="rounded-[2rem] border border-white/6');
-  const domainIndex = source.indexOf('title="Domain reading"');
   const actionIndex = source.indexOf('title="What this means in practice"');
+  const domainIndex = source.indexOf('title="Domain reading"');
 
   assert.ok(introIndex >= 0);
   assert.ok(heroIndex >= 0);
-  assert.ok(domainIndex >= 0);
   assert.ok(actionIndex >= 0);
+  assert.ok(domainIndex >= 0);
   assert.ok(introIndex < heroIndex);
-  assert.ok(heroIndex < domainIndex);
-  assert.ok(domainIndex < actionIndex);
+  assert.ok(heroIndex < actionIndex);
+  assert.ok(actionIndex < domainIndex);
 });
 
 test('result detail page renders canonical hero domain highlights beneath the hero narrative', () => {
@@ -240,6 +240,8 @@ test('result detail page renders canonical domain chapter fields without UI-side
   assert.match(source, /domain\.pairSummary\?\.text/);
   assert.match(source, /const visibleSignals = domain\.signals\.slice\(0, 2\);/);
   assert.match(source, /const hiddenSignals = domain\.signals\.slice\(2\);/);
+  assert.match(source, /chapterNumber: number;/);
+  assert.match(source, /Chapter \$\{chapterNumber\.toString\(\)\.padStart\(2, '0'\)\}/);
   assert.match(source, /signal\.signalLabel/);
   assert.match(source, /grid gap-x-10 gap-y-6 border-t border-white\/7 pt-6 md:grid-cols-\[minmax\(0,1fr\)_minmax\(0,1fr\)\]/);
   assert.match(source, /text-\[0\.97rem\] leading-8 text-white\/50 italic/);
@@ -259,8 +261,9 @@ test('result detail page renders actions from canonical action blocks only', () 
   assert.match(source, /items=\{toVisibleActionItems\(actions\.watchouts\)\}/);
   assert.match(source, /items=\{toVisibleActionItems\(actions\.developmentFocus\)\}/);
   assert.match(source, /title="What this means in practice"/);
-  assert.match(source, /mx-auto max-w-\[56rem\] px-1 md:px-2/);
-  assert.match(source, /space-y-6 border-t border-white\/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12/);
+  assert.match(source, /mx-auto max-w-\[61rem\] px-1 md:px-2/);
+  assert.match(source, /grid gap-6 border-t border-white\/6 pt-12 first:border-t-0 first:pt-0 md:grid-cols-\[minmax\(0,13rem\)_minmax\(0,1fr\)\] md:gap-8 md:pt-14/);
+  assert.match(source, /sonartra-report-step text-white\/32/);
 
   assert.doesNotMatch(source, /items=\{result\.strengths\}/);
   assert.doesNotMatch(source, /items=\{result\.watchouts\}/);
@@ -277,7 +280,9 @@ test('result detail page keeps markdown intro rendering and editorial shell for 
   assert.match(source, /About this report/);
   assert.match(source, /<PageFrame className="space-y-16 md:space-y-20">/);
   assert.match(source, /rounded-\[1\.9rem\] border border-white\/6/);
+  assert.match(source, /sonartra-report-hero/);
+  assert.match(source, /sonartra-report-hero-meta-grid/);
   assert.match(source, /max-w-\[72ch\]/);
-  assert.match(source, /mx-auto max-w-\[58rem\] px-1 md:px-2/);
+  assert.match(source, /mx-auto max-w-\[61rem\] px-1 md:px-2/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
 });

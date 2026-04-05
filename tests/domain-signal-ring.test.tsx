@@ -71,7 +71,8 @@ test('domain signal ring renders the domain label from props', () => {
   assert.match(markup, /aria-label="Adaptive Patterns signal bars"/);
   assert.match(markup, /domain-signal-bar-enter/);
   assert.match(markup, /data-bar-track="true"/);
-  assert.match(markup, /rounded-\[1\.2rem\] border border-white\/7/);
+  assert.match(markup, /sonartra-report-utility-surface border-white\/7 overflow-hidden rounded-\[1\.2rem\] border/);
+  assert.match(markup, /Within this domain/);
   assert.doesNotMatch(markup, /Domain Ring/);
 });
 

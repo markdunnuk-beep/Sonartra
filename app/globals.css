@@ -504,6 +504,78 @@ main {
     @apply max-w-[68ch];
   }
 
+  .sonartra-report-hero {
+    background:
+      radial-gradient(circle at top left, rgba(142, 162, 255, 0.12), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.014)),
+      rgba(10, 17, 31, 0.72);
+    box-shadow: 0 20px 56px rgba(0, 0, 0, 0.16);
+  }
+
+  .sonartra-report-divider {
+    @apply sonartra-type-utility flex items-center gap-3;
+    color: rgba(207, 218, 243, 0.42);
+  }
+
+  .sonartra-report-divider::before {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    min-width: 2.5rem;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .sonartra-report-divider::after {
+    content: '';
+    flex: 999 1 auto;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .sonartra-report-hero-meta-grid {
+    @apply grid gap-3 sm:grid-cols-2 lg:grid-cols-1;
+  }
+
+  .sonartra-report-meta-item {
+    @apply rounded-[1.15rem] border px-4 py-4;
+    border-color: rgba(223, 232, 255, 0.08);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0.012)),
+      rgba(8, 13, 24, 0.24);
+  }
+
+  .sonartra-report-meta-label {
+    @apply sonartra-type-utility;
+    color: rgba(207, 218, 243, 0.42);
+  }
+
+  .sonartra-report-meta-value {
+    @apply mt-2 text-[0.98rem] font-medium leading-7 tracking-[0];
+    color: rgba(232, 238, 255, 0.82);
+  }
+
+  .sonartra-report-action-item {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 1rem;
+  }
+
+  .sonartra-report-action-item:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .sonartra-report-step {
+    @apply sonartra-type-utility;
+  }
+
+  .sonartra-report-utility-surface {
+    border-color: rgba(223, 232, 255, 0.07);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.01)),
+      rgba(9, 14, 24, 0.28);
+    box-shadow: 0 12px 32px rgba(3, 8, 20, 0.1);
+  }
+
   .sonartra-report-markdown {
     @apply sonartra-report-prose;
   }
