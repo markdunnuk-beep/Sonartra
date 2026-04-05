@@ -2,51 +2,43 @@
 
 - Run mode: full_combinatorial
 - Total profiles processed: 46656
-- Final fallback count: 12062
-- Final fallback share: 25.9%
-- Final worst collision count: 5
+- Final fallback count: 11177
+- Final fallback share: 24.0%
+- Final worst collision count: 3
 - Implementation-ready: no
 
 ## Final 12 Active Patterns
 
 - forceful_driver
-- adaptive_challenger
 - exacting_controller
-- decisive_orchestrator
 - delivery_commander
 - deliberate_craftsperson
 - grounded_planner
-- steady_executor
-- structured_collaborator
 - relational_catalyst
 - adaptive_mobiliser
 - steady_steward
 
 ## Consolidation Map
 
-- forceful_driver: forceful_driver
-- adaptive_challenger: adaptive_challenger
+- forceful_driver: forceful_driver, adaptive_challenger
 - exacting_controller: exacting_controller
-- decisive_orchestrator: decisive_orchestrator
-- delivery_commander: delivery_commander
+- delivery_commander: delivery_commander, decisive_orchestrator, steady_executor
 - deliberate_craftsperson: deliberate_craftsperson
 - grounded_planner: grounded_planner
-- steady_executor: steady_executor
-- structured_collaborator: structured_collaborator
 - relational_catalyst: relational_catalyst, driving_integrator
 - adaptive_mobiliser: flexible_mobiliser, adaptive_catalyst, adaptive_orchestrator
-- steady_steward: steady_connector, diplomatic_stabiliser, responsive_mediator, grounded_steward
+- steady_steward: steady_steward, steady_connector, diplomatic_stabiliser, responsive_mediator, grounded_steward, structured_collaborator
 
 ## Round 2 vs Round 3 vs Final
 
 | Metric | Round 2 | Round 3 | Final |
 | --- | ---: | ---: | ---: |
 | total profiles processed | 46656 | 46656 | 46656 |
-| fallback count | 16881 (36.2%) | 17432 (37.4%) | 12062 (25.9%) |
-| zero-match count | 16881 | 17432 | 12062 |
-| single-match count | 16766 | 19626 | 30624 |
-| multi-match count | 13009 | 9598 | 3970 |
-| worst collision count | 6 | 6 | 5 |
+| fallback count | 16881 (36.2%) | 17432 (37.4%) | 11177 (24.0%) |
+| zero-match count | 16881 | 17432 | 11177 |
+| single-match count | 16766 | 19626 | 32245 |
+| multi-match count | 13009 | 9598 | 3234 |
+| worst collision count | 6 | 6 | 3 |
 | dead pattern count | 0 | 0 | 0 |
 
 - Dead patterns in round 2: none
@@ -57,47 +49,43 @@
 
 | Round 2 | Count | Share | Round 3 | Count | Share | Final | Count | Share |
 | --- | ---: | ---: | --- | ---: | ---: | --- | ---: | ---: |
-| balanced_operator | 16881 | 36.2% | balanced_operator | 17432 | 37.4% | balanced_operator | 12062 | 25.9% |
-| flexible_mobiliser | 5117 | 11.0% | flexible_mobiliser | 5410 | 11.6% | relational_catalyst | 11636 | 24.9% |
-| relational_catalyst | 4220 | 9.0% | relational_catalyst | 4061 | 8.7% | steady_steward | 8944 | 19.2% |
-| delivery_commander | 3450 | 7.4% | steady_connector | 3359 | 7.2% | adaptive_mobiliser | 4080 | 8.7% |
-| driving_integrator | 3405 | 7.3% | driving_integrator | 3145 | 6.7% | delivery_commander | 3132 | 6.7% |
-| steady_connector | 3074 | 6.6% | delivery_commander | 3132 | 6.7% | grounded_planner | 1633 | 3.5% |
-| structured_collaborator | 1919 | 4.1% | adaptive_catalyst | 1453 | 3.1% | structured_collaborator | 1158 | 2.5% |
+| balanced_operator | 16881 | 36.2% | balanced_operator | 17432 | 37.4% | relational_catalyst | 12098 | 25.9% |
+| flexible_mobiliser | 5117 | 11.0% | flexible_mobiliser | 5410 | 11.6% | balanced_operator | 11177 | 24.0% |
+| relational_catalyst | 4220 | 9.0% | relational_catalyst | 4061 | 8.7% | steady_steward | 9178 | 19.7% |
+| delivery_commander | 3450 | 7.4% | steady_connector | 3359 | 7.2% | adaptive_mobiliser | 4229 | 9.1% |
+| driving_integrator | 3405 | 7.3% | driving_integrator | 3145 | 6.7% | delivery_commander | 3405 | 7.3% |
+| steady_connector | 3074 | 6.6% | delivery_commander | 3132 | 6.7% | forceful_driver | 3120 | 6.7% |
+| structured_collaborator | 1919 | 4.1% | adaptive_catalyst | 1453 | 3.1% | grounded_planner | 1502 | 3.2% |
 | adaptive_catalyst | 1854 | 4.0% | structured_collaborator | 1377 | 3.0% | deliberate_craftsperson | 1113 | 2.4% |
-| deliberate_craftsperson | 1113 | 2.4% | adaptive_orchestrator | 1336 | 2.9% | exacting_controller | 920 | 2.0% |
-| diplomatic_stabiliser | 972 | 2.1% | deliberate_craftsperson | 1113 | 2.4% | steady_executor | 575 | 1.2% |
+| deliberate_craftsperson | 1113 | 2.4% | adaptive_orchestrator | 1336 | 2.9% | exacting_controller | 834 | 1.8% |
+| diplomatic_stabiliser | 972 | 2.1% | deliberate_craftsperson | 1113 | 2.4% | - | - | - |
 
 ## Final Pattern Coverage
 
 | Pattern | Match Count | Win Count | Win Rate | Example Profiles | Change Note |
 | --- | ---: | ---: | ---: | --- | --- |
-| balanced_operator | 0 | 12062 | 0.0% | generated_00110, generated_00111, generated_00113 | unchanged fallback retained as the final deterministic catch-all. |
-| relational_catalyst | 12162 | 11636 | 95.7% | generated_00115, generated_00117, generated_00118 | tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane. |
-| steady_steward | 10334 | 8944 | 86.5% | generated_01424, generated_01435, generated_01436 | new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, keeping the calmer relational profiles that no longer belong in relational_catalyst. |
-| adaptive_mobiliser | 4671 | 4080 | 87.3% | generated_00112, generated_00136, generated_00148 | new consolidated adaptive identity merging flexible_mobiliser, adaptive_catalyst, and adaptive_orchestrator into one mobile change-oriented lane, with a broader adaptive threshold to reduce underfit mid-range profiles. |
-| delivery_commander | 3558 | 3132 | 88.0% | generated_00229, generated_00230, generated_00231 | retained as the direct delivery lane because it remains one of the clearest execution identities. |
-| grounded_planner | 2031 | 1633 | 80.4% | generated_00072, generated_00108, generated_00216 | retained as the stable deliberate planning identity, but now yields the more overtly relational middle to steady_steward instead of colliding there. |
-| structured_collaborator | 1443 | 1158 | 80.2% | generated_00553, generated_00554, generated_00555 | retained as the organised people-aware lane, but still requires stronger structure so it does not reopen the broad social overlap families. |
+| relational_catalyst | 12922 | 12098 | 93.6% | generated_00115, generated_00117, generated_00118 | retained as the activating social lane, now broad enough to absorb socially energising profiles even when the pace signal is carried more by people energy than by raw pace points. |
+| balanced_operator | 0 | 11177 | 0.0% | generated_00110, generated_00113, generated_00114 | unchanged fallback retained as the final deterministic catch-all. |
+| steady_steward | 10334 | 9178 | 88.8% | generated_01424, generated_01435, generated_01436 | retained as the broad calm relational lane for the MVP, absorbing connector, mediator, grounded stewardship, and structured collaborator territory. |
+| adaptive_mobiliser | 4671 | 4229 | 90.5% | generated_00112, generated_00136, generated_00148 | new consolidated adaptive identity merging flexible_mobiliser, adaptive_catalyst, and adaptive_orchestrator into one mobile change-oriented lane, with a broader adaptive threshold to reduce underfit mid-range profiles. |
+| delivery_commander | 3558 | 3405 | 95.7% | generated_00229, generated_00230, generated_00231 | retained as the direct execution lane, now absorbing decisive_orchestrator and steady_executor for the MVP taxonomy. |
+| forceful_driver | 3120 | 3120 | 100.0% | generated_00001, generated_00002, generated_00003 | retained as the clearest high-pace high-assertive Hero lane, now also covering the adaptive challenger edge for MVP. |
+| grounded_planner | 2031 | 1502 | 74.0% | generated_00072, generated_00108, generated_00216 | retained as the quiet grounded planning identity for the MVP, holding the deliberate-stable middle that does not need its own delivery or social variant. |
 | deliberate_craftsperson | 1176 | 1113 | 94.6% | generated_03042, generated_03054, generated_03078 | retained as the quality-and-method identity because it stayed clean and editorially strong. |
-| exacting_controller | 936 | 920 | 98.3% | generated_02595, generated_02601, generated_02607 | retained unchanged because it was already highly specific, low-collision, and implementation-ready. |
-| steady_executor | 1382 | 575 | 41.6% | generated_00374, generated_00410, generated_01622 | retained as the dependable task-and-stability lane, distinct from the more forceful delivery patterns. |
-| adaptive_challenger | 656 | 539 | 82.2% | generated_00001, generated_00005, generated_00025 | retained as the adaptive force lane because it stayed behaviourally distinct after simplification. |
-| forceful_driver | 498 | 498 | 100.0% | generated_00001, generated_00002, generated_00003 | retained unchanged as the clearest high-pace high-assertive Hero lane. |
-| decisive_orchestrator | 372 | 366 | 98.4% | generated_01741, generated_01742, generated_01743 | retained as the structured control lane with a lower structured threshold to protect mid-range execution profiles from fallback. |
+| exacting_controller | 936 | 834 | 89.1% | generated_02595, generated_02601, generated_02607 | retained unchanged because it was already highly specific, low-collision, and implementation-ready. |
 
 ## Final Collision Summary
 
-- delivery_commander > steady_steward: 360
-- delivery_commander > relational_catalyst: 339
-- steady_executor > steady_steward: 264
-- delivery_commander > steady_executor: 260
-- decisive_orchestrator > delivery_commander: 252
-- delivery_commander > steady_executor > steady_steward: 221
-- adaptive_mobiliser > steady_steward: 187
-- deliberate_craftsperson > structured_collaborator: 183
-- delivery_commander > adaptive_mobiliser: 171
+- delivery_commander > steady_steward: 595
+- delivery_commander > relational_catalyst: 343
+- forceful_driver > relational_catalyst: 262
+- delivery_commander > adaptive_mobiliser: 227
+- adaptive_mobiliser > steady_steward: 213
+- delivery_commander > grounded_planner: 202
+- forceful_driver > steady_steward: 197
 - deliberate_craftsperson > grounded_planner: 166
+- exacting_controller > relational_catalyst: 142
+- forceful_driver > grounded_planner: 139
 
 ## Curated Comparison
 
@@ -123,36 +111,36 @@
 
 Rule and pattern changes:
 - adaptive_catalyst: retired into adaptive_mobiliser for the final consolidation.
-- adaptive_challenger: retained as the adaptive force lane because it stayed behaviourally distinct after simplification.
+- adaptive_challenger: retired into forceful_driver for the 8-pattern MVP so the fast assertive pole remains one clearer Hero lane.
 - adaptive_mobiliser: new consolidated adaptive identity merging flexible_mobiliser, adaptive_catalyst, and adaptive_orchestrator into one mobile change-oriented lane, with a broader adaptive threshold to reduce underfit mid-range profiles.
 - adaptive_orchestrator: retired into adaptive_mobiliser for the final consolidation.
 - balanced_operator: unchanged fallback retained as the final deterministic catch-all.
 - calm_operator: legacy baseline pattern retained only for historical comparison.
-- decisive_orchestrator: retained as the structured control lane with a lower structured threshold to protect mid-range execution profiles from fallback.
+- decisive_orchestrator: retired into delivery_commander for the 8-pattern MVP so execution control and delivery pressure live in one lane.
 - deliberate_craftsperson: retained as the quality-and-method identity because it stayed clean and editorially strong.
-- delivery_commander: retained as the direct delivery lane because it remains one of the clearest execution identities.
+- delivery_commander: retained as the direct execution lane, now absorbing decisive_orchestrator and steady_executor for the MVP taxonomy.
 - diplomatic_stabiliser: retired into steady_steward for the final consolidation.
 - driving_integrator: merged into relational_catalyst to remove a near-neighbour social pace distinction that belonged more in domain chapters than Hero identity.
 - exacting_controller: retained unchanged because it was already highly specific, low-collision, and implementation-ready.
 - flexible_mobiliser: retired into adaptive_mobiliser for the final consolidation.
-- forceful_driver: retained unchanged as the clearest high-pace high-assertive Hero lane.
-- grounded_planner: retained as the stable deliberate planning identity, but now yields the more overtly relational middle to steady_steward instead of colliding there.
+- forceful_driver: retained as the clearest high-pace high-assertive Hero lane, now also covering the adaptive challenger edge for MVP.
+- grounded_planner: retained as the quiet grounded planning identity for the MVP, holding the deliberate-stable middle that does not need its own delivery or social variant.
 - grounded_steward: retired into steady_steward for the final consolidation.
-- relational_catalyst: tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane.
+- relational_catalyst: retained as the activating social lane, now broad enough to absorb socially energising profiles even when the pace signal is carried more by people energy than by raw pace points.
 - responsive_mediator: retired into steady_steward for the final consolidation.
 - steady_connector: retired into steady_steward for the final consolidation.
-- steady_executor: retained as the dependable task-and-stability lane, distinct from the more forceful delivery patterns.
-- steady_steward: new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, keeping the calmer relational profiles that no longer belong in relational_catalyst.
-- structured_collaborator: retained as the organised people-aware lane, but still requires stronger structure so it does not reopen the broad social overlap families.
+- steady_executor: retired into delivery_commander for the 8-pattern MVP so execution reliability is handled in one broader delivery lane.
+- steady_steward: retained as the broad calm relational lane for the MVP, absorbing connector, mediator, grounded stewardship, and structured collaborator territory.
+- structured_collaborator: retired into steady_steward for the 8-pattern MVP so the structured social middle does not compete for its own narrow Hero lane.
 
 Pair-trait weight changes:
 - No pair-trait weight mappings changed in the final 12-pattern consolidation.
 
 Pattern inventory changes:
-- final active patterns: forceful_driver, adaptive_challenger, exacting_controller, decisive_orchestrator, delivery_commander, deliberate_craftsperson, grounded_planner, steady_executor, structured_collaborator, relational_catalyst, adaptive_mobiliser, steady_steward
+- final active patterns: forceful_driver, exacting_controller, delivery_commander, deliberate_craftsperson, grounded_planner, relational_catalyst, adaptive_mobiliser, steady_steward
 - added in final consolidation: adaptive_mobiliser, steady_steward
-- retired from round 3: adaptive_catalyst, adaptive_orchestrator, diplomatic_stabiliser, driving_integrator, flexible_mobiliser, grounded_steward, responsive_mediator, steady_connector
-- retained into final system: adaptive_challenger, decisive_orchestrator, deliberate_craftsperson, delivery_commander, exacting_controller, forceful_driver, grounded_planner, relational_catalyst, steady_executor, structured_collaborator
+- retired from round 3: adaptive_catalyst, adaptive_challenger, adaptive_orchestrator, decisive_orchestrator, diplomatic_stabiliser, driving_integrator, flexible_mobiliser, grounded_steward, responsive_mediator, steady_connector, steady_executor, structured_collaborator
+- retained into final system: deliberate_craftsperson, delivery_commander, exacting_controller, forceful_driver, grounded_planner, relational_catalyst
 
 ## Detailed Worked Examples
 
