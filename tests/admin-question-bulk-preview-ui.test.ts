@@ -26,11 +26,19 @@ test('question bulk import forms use a single import action with imported state'
   assert.doesNotMatch(source, /function CreateQuestionForm\(/);
 });
 
-test('question bulk imported state resets when textarea or domain selection changes', () => {
+test('question bulk imported state resets via keyed remount and clears after edits', () => {
   const source = readSource();
 
   assert.match(source, /setHasImported\(false\)/);
-  assert.match(source, /setQuestionLines\(''\);/);
+  assert.match(
+    source,
+    /<BulkQuestionByDomainFormFields[\s\S]*key=\{\s*currentState\.createdQuestions\.length > 0[\s\S]*question\.questionId\)\.join\('\|'\)[\s\S]*: 'draft'/,
+  );
+  assert.match(
+    source,
+    /useState\(\s*currentState\.createdQuestions\.length > 0 \? '' : currentState\.values\.questionLines,\s*\)/,
+  );
+  assert.match(source, /useState\(currentState\.createdQuestions\.length > 0\)/);
   assert.doesNotMatch(source, /setSelectedDomainId/);
 });
 

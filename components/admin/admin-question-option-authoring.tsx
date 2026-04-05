@@ -457,11 +457,9 @@ function formatDomainType(domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP'): stri
 function BulkQuestionByDomainForm({
   assessmentKey,
   assessmentVersionId,
-  domains,
 }: {
   assessmentKey: string;
   assessmentVersionId: string;
-  domains: readonly AdminAssessmentDetailQuestionDomain[];
 }) {
   const createBulkQuestionsByDomainFormAction = useMemo(
     () =>
@@ -475,17 +473,31 @@ function BulkQuestionByDomainForm({
     ...initialAdminBulkQuestionByDomainAuthoringFormState,
   });
   const currentState = normalizeBulkQuestionByDomainState(state);
-  const [questionLines, setQuestionLines] = useState(currentState.values.questionLines);
-  const [hasImported, setHasImported] = useState(false);
 
-  useEffect(() => {
-    if (currentState.createdQuestions.length < 1) {
-      return;
-    }
+  return (
+    <BulkQuestionByDomainFormFields
+      key={
+        currentState.createdQuestions.length > 0
+          ? currentState.createdQuestions.map((question) => question.questionId).join('|')
+          : 'draft'
+      }
+      currentState={currentState}
+      formAction={formAction}
+    />
+  );
+}
 
-    setQuestionLines('');
-    setHasImported(true);
-  }, [currentState.createdQuestions.length]);
+function BulkQuestionByDomainFormFields({
+  currentState,
+  formAction,
+}: {
+  currentState: ReturnType<typeof normalizeBulkQuestionByDomainState>;
+  formAction: (payload: FormData) => void;
+}) {
+  const [questionLines, setQuestionLines] = useState(
+    currentState.createdQuestions.length > 0 ? '' : currentState.values.questionLines,
+  );
+  const [hasImported, setHasImported] = useState(currentState.createdQuestions.length > 0);
 
   const canImport = questionLines.trim().length > 0;
 
@@ -914,7 +926,6 @@ export function AdminQuestionOptionAuthoring({
               <BulkQuestionByDomainForm
                 assessmentKey={assessmentKey}
                 assessmentVersionId={assessmentVersionId}
-                domains={domains}
               />
             </>
           ) : null}

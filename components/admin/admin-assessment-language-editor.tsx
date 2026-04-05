@@ -14,19 +14,31 @@ export function AdminAssessmentLanguageEditor({
   initialValue: string | null;
   isEditableAssessmentVersion: boolean;
 }>) {
+  return (
+    <AdminAssessmentLanguageEditorFields
+      key={`${assessmentVersionId}:${initialValue ?? ''}`}
+      assessmentVersionId={assessmentVersionId}
+      initialValue={initialValue}
+      isEditableAssessmentVersion={isEditableAssessmentVersion}
+    />
+  );
+}
+
+function AdminAssessmentLanguageEditorFields({
+  assessmentVersionId,
+  initialValue,
+  isEditableAssessmentVersion,
+}: Readonly<{
+  assessmentVersionId: string;
+  initialValue: string | null;
+  isEditableAssessmentVersion: boolean;
+}>) {
   const [savedValue, setSavedValue] = useState(initialValue ?? '');
   const [draftValue, setDraftValue] = useState(initialValue ?? '');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const clearStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setSavedValue(initialValue ?? '');
-    setDraftValue(initialValue ?? '');
-    setError(null);
-    setStatusMessage(null);
-  }, [initialValue]);
 
   useEffect(() => {
     return () => {

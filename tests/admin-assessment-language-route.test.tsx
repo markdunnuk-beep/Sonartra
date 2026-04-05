@@ -710,7 +710,7 @@ test('language step component renders intro, hero header, domain chapters, signa
   assert.match(markup, /rounded-\[1\.25rem\] border border-white\/10 bg-gradient-to-b from-white\/\[0\.02\] to-transparent p-\[1px\]/);
   assert.match(markup, /rounded-\[1\.25rem\] bg-black\/30/);
   assert.match(markup, /Import report language/);
-  assert.match(markup, /Report section/);
+  assert.match(markup, /Dataset type/);
   assert.match(markup, /Hero Header Language/);
   assert.match(markup, /Format: scope \| key \| headline/);
   assert.match(markup, /Paste Hero Header rows/);
