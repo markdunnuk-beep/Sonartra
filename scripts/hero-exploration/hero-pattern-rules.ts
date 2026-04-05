@@ -493,7 +493,7 @@ export const FINAL_HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
     priority: 24,
     conditions: [
       { traitKey: 'adaptive', operator: '>=', value: 3 },
-      { traitKey: 'flexible', operator: '>=', value: 1 },
+      { traitKey: 'flexible', operator: '>=', value: 0 },
     ],
     exclusions: [
       { traitKey: 'people_led', operator: '>=', value: 4 },
