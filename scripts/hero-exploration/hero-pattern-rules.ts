@@ -494,7 +494,7 @@ export const FINAL_HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
       { traitKey: 'deliberate', operator: '>=', value: 2 },
       { traitKey: 'stable', operator: '>=', value: 2 },
     ],
-    exclusions: [{ traitKey: 'people_led', operator: '>=', value: 4 }],
+    exclusions: [{ traitKey: 'people_led', operator: '>=', value: 3 }],
   },
   {
     patternKey: 'steady_executor',
@@ -592,7 +592,7 @@ export const PATTERN_CHANGE_LOG: Readonly<Record<string, string>> = {
   exacting_controller: 'retained unchanged because it was already highly specific, low-collision, and implementation-ready.',
   flexible_mobiliser: 'retired into adaptive_mobiliser for the final consolidation.',
   forceful_driver: 'retained unchanged as the clearest high-pace high-assertive Hero lane.',
-  grounded_planner: 'retained as the stable deliberate planning identity, with a slightly lower deliberate threshold so quieter grounded profiles are captured before fallback.',
+  grounded_planner: 'retained as the stable deliberate planning identity, but now yields the more overtly relational middle to steady_steward instead of colliding there.',
   grounded_steward: 'retired into steady_steward for the final consolidation.',
   relational_catalyst: 'tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane.',
   responsive_mediator: 'retired into steady_steward for the final consolidation.',

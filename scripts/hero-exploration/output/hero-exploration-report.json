@@ -1,27 +1,27 @@
 {
   "runMode": "full_combinatorial",
   "totalProfilesProcessed": 46656,
-  "processedAt": "2026-04-05T20:59:03.476Z",
+  "processedAt": "2026-04-05T21:00:44.995Z",
   "winningPatternCounts": {
-    "balanced_operator": 12018,
+    "balanced_operator": 12062,
     "relational_catalyst": 11636,
-    "steady_steward": 7894,
-    "adaptive_mobiliser": 4023,
+    "steady_steward": 8944,
+    "adaptive_mobiliser": 4080,
     "delivery_commander": 3132,
-    "grounded_planner": 2913,
+    "grounded_planner": 1633,
+    "structured_collaborator": 1158,
     "deliberate_craftsperson": 1113,
-    "structured_collaborator": 1098,
     "exacting_controller": 920,
+    "steady_executor": 575,
     "adaptive_challenger": 539,
-    "steady_executor": 506,
     "forceful_driver": 498,
     "decisive_orchestrator": 366
   },
   "topWinningPatterns": [
     {
       "patternKey": "balanced_operator",
-      "count": 12018,
-      "share": 0.2575874485596708
+      "count": 12062,
+      "share": 0.25853052126200277
     },
     {
       "patternKey": "relational_catalyst",
@@ -30,13 +30,13 @@
     },
     {
       "patternKey": "steady_steward",
-      "count": 7894,
-      "share": 0.16919581618655694
+      "count": 8944,
+      "share": 0.19170096021947874
     },
     {
       "patternKey": "adaptive_mobiliser",
-      "count": 4023,
-      "share": 0.08622685185185185
+      "count": 4080,
+      "share": 0.0874485596707819
     },
     {
       "patternKey": "delivery_commander",
@@ -45,8 +45,13 @@
     },
     {
       "patternKey": "grounded_planner",
-      "count": 2913,
-      "share": 0.06243569958847737
+      "count": 1633,
+      "share": 0.0350008573388203
+    },
+    {
+      "patternKey": "structured_collaborator",
+      "count": 1158,
+      "share": 0.024819958847736627
     },
     {
       "patternKey": "deliberate_craftsperson",
@@ -54,41 +59,29 @@
       "share": 0.02385545267489712
     },
     {
-      "patternKey": "structured_collaborator",
-      "count": 1098,
-      "share": 0.02353395061728395
-    },
-    {
       "patternKey": "exacting_controller",
       "count": 920,
       "share": 0.019718792866941014
     },
     {
-      "patternKey": "adaptive_challenger",
-      "count": 539,
-      "share": 0.01155264060356653
+      "patternKey": "steady_executor",
+      "count": 575,
+      "share": 0.012324245541838134
     }
   ],
   "collisionSummary": {
     "totalProfiles": 46656,
-    "singleMatchProfiles": 29612,
-    "multiMatchProfiles": 5026,
-    "zeroMatchProfiles": 12018,
+    "singleMatchProfiles": 30624,
+    "multiMatchProfiles": 3970,
+    "zeroMatchProfiles": 12062,
     "worstCollisionCount": 5,
     "topCollisionSets": [
-      {
-        "patternKeys": [
-          "grounded_planner",
-          "steady_steward"
-        ],
-        "count": 1050
-      },
       {
         "patternKeys": [
           "delivery_commander",
           "steady_steward"
         ],
-        "count": 354
+        "count": 360
       },
       {
         "patternKeys": [
@@ -96,6 +89,13 @@
           "relational_catalyst"
         ],
         "count": 339
+      },
+      {
+        "patternKeys": [
+          "steady_executor",
+          "steady_steward"
+        ],
+        "count": 264
       },
       {
         "patternKeys": [
@@ -113,10 +113,18 @@
       },
       {
         "patternKeys": [
+          "delivery_commander",
           "steady_executor",
           "steady_steward"
         ],
-        "count": 196
+        "count": 221
+      },
+      {
+        "patternKeys": [
+          "adaptive_mobiliser",
+          "steady_steward"
+        ],
+        "count": 187
       },
       {
         "patternKeys": [
@@ -138,24 +146,16 @@
           "grounded_planner"
         ],
         "count": 166
-      },
-      {
-        "patternKeys": [
-          "delivery_commander",
-          "steady_executor",
-          "steady_steward"
-        ],
-        "count": 160
       }
     ],
     "beatenByHigherPriority": {
-      "steady_steward": 2440,
-      "steady_executor": 876,
-      "adaptive_mobiliser": 648,
+      "steady_steward": 1390,
+      "steady_executor": 807,
+      "adaptive_mobiliser": 591,
       "relational_catalyst": 526,
-      "grounded_planner": 508,
       "delivery_commander": 426,
-      "structured_collaborator": 345,
+      "grounded_planner": 398,
+      "structured_collaborator": 285,
       "adaptive_challenger": 117,
       "deliberate_craftsperson": 63,
       "exacting_controller": 16,
@@ -171,8 +171,8 @@
     "overDominantPatterns": [
       {
         "patternKey": "balanced_operator",
-        "winCount": 12018,
-        "winShare": 0.2575874485596708
+        "winCount": 12062,
+        "winShare": 0.25853052126200277
       },
       {
         "patternKey": "relational_catalyst",
@@ -181,8 +181,8 @@
       },
       {
         "patternKey": "steady_steward",
-        "winCount": 7894,
-        "winShare": 0.16919581618655694
+        "winCount": 8944,
+        "winShare": 0.19170096021947874
       }
     ]
   },
@@ -190,7 +190,7 @@
     {
       "patternKey": "balanced_operator",
       "matchCount": 0,
-      "winCount": 12018,
+      "winCount": 12062,
       "winRate": 0,
       "exampleProfiles": [
         "generated_00110",
@@ -224,8 +224,8 @@
     {
       "patternKey": "steady_steward",
       "matchCount": 10334,
-      "winCount": 7894,
-      "winRate": 0.7638862008902652,
+      "winCount": 8944,
+      "winRate": 0.865492548867815,
       "exampleProfiles": [
         "generated_01424",
         "generated_01435",
@@ -241,8 +241,8 @@
     {
       "patternKey": "adaptive_mobiliser",
       "matchCount": 4671,
-      "winCount": 4023,
-      "winRate": 0.861271676300578,
+      "winCount": 4080,
+      "winRate": 0.8734746307000643,
       "exampleProfiles": [
         "generated_00112",
         "generated_00136",
@@ -274,20 +274,37 @@
     },
     {
       "patternKey": "grounded_planner",
-      "matchCount": 3421,
-      "winCount": 2913,
-      "winRate": 0.8515054077755042,
+      "matchCount": 2031,
+      "winCount": 1633,
+      "winRate": 0.8040374199901527,
       "exampleProfiles": [
-        "generated_00036",
         "generated_00072",
-        "generated_00108"
+        "generated_00108",
+        "generated_00216"
       ],
       "examplePairs": [
-        "driver_influencer | achievement_influence | results_vision | compete_collaborate | clan_hierarchy | avoidance_critical",
         "driver_influencer | achievement_influence | results_vision | compete_compromise | clan_hierarchy | avoidance_critical",
-        "driver_influencer | achievement_influence | results_vision | compete_accommodate | clan_hierarchy | avoidance_critical"
+        "driver_influencer | achievement_influence | results_vision | compete_accommodate | clan_hierarchy | avoidance_critical",
+        "driver_influencer | achievement_influence | results_vision | compromise_accommodate | clan_hierarchy | avoidance_critical"
       ],
-      "changeNote": "retained as the stable deliberate planning identity, with a slightly lower deliberate threshold so quieter grounded profiles are captured before fallback."
+      "changeNote": "retained as the stable deliberate planning identity, but now yields the more overtly relational middle to steady_steward instead of colliding there."
+    },
+    {
+      "patternKey": "structured_collaborator",
+      "matchCount": 1443,
+      "winCount": 1158,
+      "winRate": 0.8024948024948025,
+      "exampleProfiles": [
+        "generated_00553",
+        "generated_00554",
+        "generated_00555"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_influence | results_process | collaborate_compromise | market_hierarchy | control_scatter",
+        "driver_influencer | achievement_influence | results_process | collaborate_compromise | market_hierarchy | control_avoidance",
+        "driver_influencer | achievement_influence | results_process | collaborate_compromise | market_hierarchy | control_critical"
+      ],
+      "changeNote": "retained as the organised people-aware lane, but still requires stronger structure so it does not reopen the broad social overlap families."
     },
     {
       "patternKey": "deliberate_craftsperson",
@@ -307,23 +324,6 @@
       "changeNote": "retained as the quality-and-method identity because it stayed clean and editorially strong."
     },
     {
-      "patternKey": "structured_collaborator",
-      "matchCount": 1443,
-      "winCount": 1098,
-      "winRate": 0.760914760914761,
-      "exampleProfiles": [
-        "generated_00553",
-        "generated_00554",
-        "generated_00555"
-      ],
-      "examplePairs": [
-        "driver_influencer | achievement_influence | results_process | collaborate_compromise | market_hierarchy | control_scatter",
-        "driver_influencer | achievement_influence | results_process | collaborate_compromise | market_hierarchy | control_avoidance",
-        "driver_influencer | achievement_influence | results_process | collaborate_compromise | market_hierarchy | control_critical"
-      ],
-      "changeNote": "retained as the organised people-aware lane, but still requires stronger structure so it does not reopen the broad social overlap families."
-    },
-    {
       "patternKey": "exacting_controller",
       "matchCount": 936,
       "winCount": 920,
@@ -341,6 +341,23 @@
       "changeNote": "retained unchanged because it was already highly specific, low-collision, and implementation-ready."
     },
     {
+      "patternKey": "steady_executor",
+      "matchCount": 1382,
+      "winCount": 575,
+      "winRate": 0.41606367583212733,
+      "exampleProfiles": [
+        "generated_00374",
+        "generated_00410",
+        "generated_01622"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_influence | results_people | collaborate_accommodate | market_hierarchy | control_avoidance",
+        "driver_influencer | achievement_influence | results_people | compromise_accommodate | market_hierarchy | control_avoidance",
+        "driver_influencer | achievement_stability | results_people | collaborate_compromise | market_adhocracy | control_avoidance"
+      ],
+      "changeNote": "retained as the dependable task-and-stability lane, distinct from the more forceful delivery patterns."
+    },
+    {
       "patternKey": "adaptive_challenger",
       "matchCount": 656,
       "winCount": 539,
@@ -356,23 +373,6 @@
         "driver_influencer | achievement_influence | results_vision | compete_collaborate | adhocracy_hierarchy | control_scatter"
       ],
       "changeNote": "retained as the adaptive force lane because it stayed behaviourally distinct after simplification."
-    },
-    {
-      "patternKey": "steady_executor",
-      "matchCount": 1382,
-      "winCount": 506,
-      "winRate": 0.3661360347322721,
-      "exampleProfiles": [
-        "generated_00374",
-        "generated_00410",
-        "generated_01622"
-      ],
-      "examplePairs": [
-        "driver_influencer | achievement_influence | results_people | collaborate_accommodate | market_hierarchy | control_avoidance",
-        "driver_influencer | achievement_influence | results_people | compromise_accommodate | market_hierarchy | control_avoidance",
-        "driver_influencer | achievement_stability | results_people | collaborate_compromise | market_adhocracy | control_avoidance"
-      ],
-      "changeNote": "retained as the dependable task-and-stability lane, distinct from the more forceful delivery patterns."
     },
     {
       "patternKey": "forceful_driver",
@@ -878,22 +878,6 @@
       },
       "matchedPatterns": [
         {
-          "patternKey": "grounded_planner",
-          "priority": 22,
-          "matchedConditions": [
-            {
-              "traitKey": "deliberate",
-              "operator": ">=",
-              "value": 2
-            },
-            {
-              "traitKey": "stable",
-              "operator": ">=",
-              "value": 2
-            }
-          ]
-        },
-        {
           "patternKey": "steady_steward",
           "priority": 32,
           "matchedConditions": [
@@ -910,13 +894,13 @@
           ]
         }
       ],
-      "winnerPatternKey": "grounded_planner",
-      "winnerPriority": 22,
+      "winnerPatternKey": "steady_steward",
+      "winnerPriority": 32,
       "winnerConditions": [
         {
-          "traitKey": "deliberate",
+          "traitKey": "people_led",
           "operator": ">=",
-          "value": 2
+          "value": 3
         },
         {
           "traitKey": "stable",
@@ -925,13 +909,13 @@
         }
       ],
       "heroCopy": {
-        "patternKey": "grounded_planner",
-        "headline": "You create steadiness through thoughtful sequencing.",
-        "subheadline": "Measured, dependable, and inclined to make the work safer by planning it properly.",
-        "summary": "This pattern fits profiles where deliberation and stability rise together into a calm planning centre.",
-        "narrative": "You are likely to protect outcomes by thinking ahead, reducing avoidable volatility, and building enough certainty for others to trust the route. The strength is dependable judgement; the risk is holding the system in planning mode longer than the moment requires.",
-        "pressureOverlay": "Under pressure, you may double down on sequence, pacing, and reducing avoidable disruption.",
-        "environmentOverlay": "You usually fit best where continuity, preparation, and considered delivery are all taken seriously."
+        "patternKey": "steady_steward",
+        "headline": "You create trust by holding people and continuity together.",
+        "subheadline": "Calm, people-aware, and more interested in keeping the system workable than making yourself dramatic inside it.",
+        "summary": "This consolidated pattern fits profiles where social awareness and stability combine into a clear stewardship identity.",
+        "narrative": "You are likely to create confidence by staying usable, reading what others need, and keeping enough continuity for the work to remain coherent through friction or change. The strength is steady containment; the risk is carrying the relational load longer than the moment really requires before naming the harder decision.",
+        "pressureOverlay": "Under pressure, you often move further toward containment, reassurance, and keeping the room workable enough to continue.",
+        "environmentOverlay": "You usually work best where trust, continuity, and relationship-sensitive judgement are treated as central to performance rather than secondary to louder forms of leadership."
       }
     },
     {
@@ -1921,25 +1905,25 @@
         "label": "fallback count",
         "round2": "16881 (36.2%)",
         "round3": "17432 (37.4%)",
-        "final": "12018 (25.8%)"
+        "final": "12062 (25.9%)"
       },
       {
         "label": "zero-match count",
         "round2": 16881,
         "round3": 17432,
-        "final": 12018
+        "final": 12062
       },
       {
         "label": "single-match count",
         "round2": 16766,
         "round3": 19626,
-        "final": 29612
+        "final": 30624
       },
       {
         "label": "multi-match count",
         "round2": 13009,
         "round3": 9598,
-        "final": 5026
+        "final": 3970
       },
       {
         "label": "worst collision count",
@@ -2064,8 +2048,8 @@
     "topWinnersFinal": [
       {
         "patternKey": "balanced_operator",
-        "count": 12018,
-        "share": 0.2575874485596708
+        "count": 12062,
+        "share": 0.25853052126200277
       },
       {
         "patternKey": "relational_catalyst",
@@ -2074,13 +2058,13 @@
       },
       {
         "patternKey": "steady_steward",
-        "count": 7894,
-        "share": 0.16919581618655694
+        "count": 8944,
+        "share": 0.19170096021947874
       },
       {
         "patternKey": "adaptive_mobiliser",
-        "count": 4023,
-        "share": 0.08622685185185185
+        "count": 4080,
+        "share": 0.0874485596707819
       },
       {
         "patternKey": "delivery_commander",
@@ -2089,8 +2073,13 @@
       },
       {
         "patternKey": "grounded_planner",
-        "count": 2913,
-        "share": 0.06243569958847737
+        "count": 1633,
+        "share": 0.0350008573388203
+      },
+      {
+        "patternKey": "structured_collaborator",
+        "count": 1158,
+        "share": 0.024819958847736627
       },
       {
         "patternKey": "deliberate_craftsperson",
@@ -2098,19 +2087,14 @@
         "share": 0.02385545267489712
       },
       {
-        "patternKey": "structured_collaborator",
-        "count": 1098,
-        "share": 0.02353395061728395
-      },
-      {
         "patternKey": "exacting_controller",
         "count": 920,
         "share": 0.019718792866941014
       },
       {
-        "patternKey": "adaptive_challenger",
-        "count": 539,
-        "share": 0.01155264060356653
+        "patternKey": "steady_executor",
+        "count": 575,
+        "share": 0.012324245541838134
       }
     ]
   },
@@ -2282,7 +2266,7 @@
       "exacting_controller: retained unchanged because it was already highly specific, low-collision, and implementation-ready.",
       "flexible_mobiliser: retired into adaptive_mobiliser for the final consolidation.",
       "forceful_driver: retained unchanged as the clearest high-pace high-assertive Hero lane.",
-      "grounded_planner: retained as the stable deliberate planning identity, with a slightly lower deliberate threshold so quieter grounded profiles are captured before fallback.",
+      "grounded_planner: retained as the stable deliberate planning identity, but now yields the more overtly relational middle to steady_steward instead of colliding there.",
       "grounded_steward: retired into steady_steward for the final consolidation.",
       "relational_catalyst: tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane.",
       "responsive_mediator: retired into steady_steward for the final consolidation.",
