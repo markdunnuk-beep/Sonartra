@@ -98,7 +98,7 @@ export const BASELINE_HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
   },
 ];
 
-export const HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
+export const ROUND2_HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
   {
     patternKey: 'forceful_driver',
     priority: 10,
@@ -244,31 +244,218 @@ export const HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
     conditions: [
       { traitKey: 'receptive', operator: '>=', value: 1 },
       { traitKey: 'tolerant', operator: '>=', value: 2 },
+      { traitKey: 'people_led', operator: '>=', value: 2 },
     ],
+  },
+];
+
+export const HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
+  {
+    patternKey: 'forceful_driver',
+    priority: 10,
+    conditions: [
+      { traitKey: 'assertive', operator: '>=', value: 5 },
+      { traitKey: 'paced', operator: '>=', value: 4 },
+    ],
+  },
+  {
+    patternKey: 'adaptive_challenger',
+    priority: 12,
+    conditions: [
+      { traitKey: 'adaptive', operator: '>=', value: 4 },
+      { traitKey: 'assertive', operator: '>=', value: 4 },
+      { traitKey: 'paced', operator: '>=', value: 3 },
+    ],
+    exclusions: [{ traitKey: 'people_led', operator: '>=', value: 4 }],
+  },
+  {
+    patternKey: 'exacting_controller',
+    priority: 14,
+    conditions: [
+      { traitKey: 'exacting', operator: '>=', value: 4 },
+      { traitKey: 'assertive', operator: '>=', value: 2 },
+    ],
+  },
+  {
+    patternKey: 'decisive_orchestrator',
+    priority: 16,
+    conditions: [
+      { traitKey: 'structured', operator: '>=', value: 3 },
+      { traitKey: 'task_led', operator: '>=', value: 3 },
+      { traitKey: 'assertive', operator: '>=', value: 2 },
+    ],
+  },
+  {
+    patternKey: 'delivery_commander',
+    priority: 18,
+    conditions: [
+      { traitKey: 'task_led', operator: '>=', value: 4 },
+      { traitKey: 'assertive', operator: '>=', value: 2 },
+    ],
+  },
+  {
+    patternKey: 'deliberate_craftsperson',
+    priority: 20,
+    conditions: [
+      { traitKey: 'deliberate', operator: '>=', value: 3 },
+      { traitKey: 'structured', operator: '>=', value: 3 },
+    ],
+  },
+  {
+    patternKey: 'steady_executor',
+    priority: 22,
+    conditions: [
+      { traitKey: 'task_led', operator: '>=', value: 4 },
+      { traitKey: 'stable', operator: '>=', value: 2 },
+    ],
+    exclusions: [
+      { traitKey: 'assertive', operator: '>=', value: 3 },
+      { traitKey: 'people_led', operator: '>=', value: 4 },
+    ],
+  },
+  {
+    patternKey: 'grounded_planner',
+    priority: 24,
+    conditions: [
+      { traitKey: 'deliberate', operator: '>=', value: 3 },
+      { traitKey: 'stable', operator: '>=', value: 2 },
+    ],
+    exclusions: [{ traitKey: 'people_led', operator: '>=', value: 5 }],
+  },
+  {
+    patternKey: 'grounded_steward',
+    priority: 26,
+    conditions: [
+      { traitKey: 'people_led', operator: '>=', value: 4 },
+      { traitKey: 'stable', operator: '>=', value: 4 },
+      { traitKey: 'deliberate', operator: '>=', value: 2 },
+    ],
+    exclusions: [{ traitKey: 'receptive', operator: '>=', value: 2 }],
+  },
+  {
+    patternKey: 'structured_collaborator',
+    priority: 28,
+    conditions: [
+      { traitKey: 'structured', operator: '>=', value: 3 },
+      { traitKey: 'people_led', operator: '>=', value: 3 },
+    ],
+    exclusions: [{ traitKey: 'adaptive', operator: '>=', value: 4 }],
+  },
+  {
+    patternKey: 'driving_integrator',
+    priority: 30,
+    conditions: [
+      { traitKey: 'paced', operator: '>=', value: 4 },
+      { traitKey: 'people_led', operator: '>=', value: 3 },
+    ],
+    exclusions: [
+      { traitKey: 'flexible', operator: '>=', value: 3 },
+      { traitKey: 'structured', operator: '>=', value: 4 },
+    ],
+  },
+  {
+    patternKey: 'relational_catalyst',
+    priority: 32,
+    conditions: [
+      { traitKey: 'people_led', operator: '>=', value: 5 },
+      { traitKey: 'paced', operator: '>=', value: 2 },
+    ],
+    exclusions: [
+      { traitKey: 'flexible', operator: '>=', value: 4 },
+      { traitKey: 'paced', operator: '>=', value: 5 },
+    ],
+  },
+  {
+    patternKey: 'steady_connector',
+    priority: 34,
+    conditions: [
+      { traitKey: 'people_led', operator: '>=', value: 3 },
+      { traitKey: 'stable', operator: '>=', value: 3 },
+    ],
+    exclusions: [{ traitKey: 'deliberate', operator: '>=', value: 3 }],
+  },
+  {
+    patternKey: 'flexible_mobiliser',
+    priority: 36,
+    conditions: [
+      { traitKey: 'people_led', operator: '>=', value: 4 },
+      { traitKey: 'flexible', operator: '>=', value: 2 },
+    ],
+    exclusions: [{ traitKey: 'paced', operator: '>=', value: 4 }],
+  },
+  {
+    patternKey: 'adaptive_catalyst',
+    priority: 38,
+    conditions: [
+      { traitKey: 'adaptive', operator: '>=', value: 4 },
+      { traitKey: 'flexible', operator: '>=', value: 2 },
+    ],
+    exclusions: [
+      { traitKey: 'people_led', operator: '>=', value: 5 },
+      { traitKey: 'structured', operator: '>=', value: 3 },
+      { traitKey: 'assertive', operator: '>=', value: 4 },
+    ],
+  },
+  {
+    patternKey: 'adaptive_orchestrator',
+    priority: 40,
+    conditions: [
+      { traitKey: 'adaptive', operator: '>=', value: 3 },
+      { traitKey: 'structured', operator: '>=', value: 2 },
+    ],
+    exclusions: [
+      { traitKey: 'flexible', operator: '>=', value: 3 },
+      { traitKey: 'people_led', operator: '>=', value: 4 },
+      { traitKey: 'assertive', operator: '>=', value: 3 },
+      { traitKey: 'stable', operator: '>=', value: 3 },
+    ],
+  },
+  {
+    patternKey: 'diplomatic_stabiliser',
+    priority: 42,
+    conditions: [
+      { traitKey: 'receptive', operator: '>=', value: 1 },
+      { traitKey: 'stable', operator: '>=', value: 3 },
+    ],
+    exclusions: [
+      { traitKey: 'people_led', operator: '>=', value: 4 },
+      { traitKey: 'tolerant', operator: '>=', value: 2 },
+      { traitKey: 'deliberate', operator: '>=', value: 3 },
+    ],
+  },
+  {
+    patternKey: 'responsive_mediator',
+    priority: 44,
+    conditions: [
+      { traitKey: 'receptive', operator: '>=', value: 1 },
+      { traitKey: 'tolerant', operator: '>=', value: 2 },
+      { traitKey: 'people_led', operator: '>=', value: 2 },
+    ],
+    exclusions: [{ traitKey: 'stable', operator: '>=', value: 4 }],
   },
 ];
 
 export const HERO_PATTERN_FALLBACK_KEY = 'balanced_operator';
 
 export const PATTERN_CHANGE_LOG: Readonly<Record<string, string>> = {
-  adaptive_catalyst: 'unchanged rule thresholds, but reprioritised later to reduce avoidable collisions with more specific patterns.',
-  adaptive_challenger: 'new pattern added for high adaptive + assertive + paced profiles that previously collapsed to fallback.',
-  adaptive_orchestrator: 'new pattern added for adaptive + structured profiles; the assertive requirement was removed to improve coverage of organised but less overtly forceful profiles.',
+  adaptive_catalyst: 'tightened with a small exclusion set against strongly social, structured, and highly assertive profiles so it keeps the adaptive-flex lane.',
+  adaptive_challenger: 'left active but lightly tightened against strongly social neighbours to keep the force/pace lane clear.',
+  adaptive_orchestrator: 'kept active as the adaptive-structured lane, but now excludes strongly social, strongly assertive, and strongly stable profiles to reduce deep overlap stacks.',
   balanced_operator: 'unchanged fallback retained as the final deterministic catch-all.',
-  calm_operator: 'removed and replaced by more specific steady_executor and grounded_planner patterns.',
-  decisive_orchestrator: 'broadened and tightened around structured task leadership so it catches clearer execution-control profiles.',
-  deliberate_craftsperson: 'broadened by removing the exacting requirement and lowering deliberate to 3; it now focuses on deliberate + structured profiles.',
-  delivery_commander: 'new pattern added for high task_led + assertive profiles, with the task threshold lowered to capture stronger mid-range execution-drive shapes.',
-  diplomatic_stabiliser: 'broadened into a clearer receptive + stable pattern so it covers mid-range steady diplomatic profiles and remains reachable under the current weight table.',
-  driving_integrator: 'new pattern added for high paced + people-led profiles.',
-  exacting_controller: 'broadened slightly by removing the structured requirement.',
-  flexible_mobiliser: 'broadened slightly but reprioritised below more specific social-pace patterns.',
-  forceful_driver: 'broadened by removing the task_led requirement so high paced + assertive profiles become reachable.',
-  grounded_planner: 'new pattern added for deliberate + stable profiles, with both thresholds lowered to improve mid-range coverage.',
-  grounded_steward: 'new pattern added for people-led + stable + deliberate stewardship profiles, with thresholds lowered to keep the pattern viable.',
-  relational_catalyst: 're-broadened slightly so clearly social fast-moving profiles do not fall back unnecessarily.',
-  responsive_mediator: 'broadened into a reachable receptive + tolerant pattern by lowering receptive to 1.',
-  steady_connector: 'new pattern added for people-led + stable mid-range profiles, with lower people-led thresholds for broader coverage.',
-  steady_executor: 'new pattern added for high task_led + stable profiles, with the task threshold lowered to catch stronger mid-range delivery shapes.',
-  structured_collaborator: 'broadened by lowering the structured threshold from 4 to 3 and the people-led threshold from 4 to 3.',
+  calm_operator: 'retired from the active refined set; its space is covered by steady_executor and grounded_planner.',
+  decisive_orchestrator: 'broadened slightly by lowering structured to 3 so more mid-range execution-control profiles avoid fallback.',
+  deliberate_craftsperson: 'left broadly available as the structured craft lane after stable exclusions proved too costly to coverage.',
+  delivery_commander: 'left in place as the task-led assertive lane; stable exclusion was removed after over-cutting strong delivery profiles.',
+  diplomatic_stabiliser: 'kept in the receptive-stable lane, but narrowed away from connector, mediator, and grounded stewardship cases.',
+  driving_integrator: 'kept active for high paced + people-led profiles, with only higher-flex and higher-structured exclusions to reduce the worst overlap families.',
+  exacting_controller: 'unchanged from round 2 because it was already clean, high-confidence, and low-collision.',
+  flexible_mobiliser: 'narrowed with a higher pace exclusion so it captures lower-pace flexible social profiles while giving faster social profiles to pace-led neighbours.',
+  forceful_driver: 'left broad so high paced + assertive profiles remain reachable even when they also carry moderate social range.',
+  grounded_planner: 'left active with only a stronger people-led exclusion after narrower variants over-cut grounded mid-range coverage.',
+  grounded_steward: 'left active but excludes receptive-heavy cases so it stays distinct from diplomacy.',
+  relational_catalyst: 'left active but excludes only the highest-flex and highest-pace cases so it reduces overlap without collapsing too much social-pace coverage.',
+  responsive_mediator: 'retained as the receptive+tolerant+people mediation lane, with only a higher-stability exclusion to stay out of connector territory.',
+  steady_connector: 'narrowed to the social-stable lane with a higher deliberate exclusion so grounded stewardship can keep its own lane.',
+  steady_executor: 'still narrowed to the task-stable lane, but stable was lowered to 2 to capture more delivery-grounded mid-range profiles.',
+  structured_collaborator: 'narrowed with a higher adaptive exclusion so it keeps the structured-social lane without overlapping adaptive_orchestrator as often.',
 };

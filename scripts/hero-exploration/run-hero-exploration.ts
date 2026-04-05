@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { HERO_PATTERN_LANGUAGE_LOOKUP } from './hero-pattern-language';
-import { BASELINE_HERO_PATTERN_RULES, HERO_PATTERN_FALLBACK_KEY, HERO_PATTERN_RULES, PATTERN_CHANGE_LOG } from './hero-pattern-rules';
+import { HERO_PATTERN_FALLBACK_KEY, HERO_PATTERN_RULES, PATTERN_CHANGE_LOG, ROUND2_HERO_PATTERN_RULES } from './hero-pattern-rules';
 import { CURATED_PROFILES, generateAllProfiles } from './profile-fixtures';
 import { PAIR_TRAIT_WEIGHT_LOOKUP } from './pair-trait-weights';
 import type {
@@ -69,6 +69,9 @@ function evaluateProfile(profile: SimulatedProfile, rules: readonly HeroPatternR
     .filter((rule) =>
       rule.conditions.every((condition) =>
         evaluateCondition(traitTotals[condition.traitKey], condition.operator, condition.value),
+      )
+      && (rule.exclusions ?? []).every((condition) =>
+        !evaluateCondition(traitTotals[condition.traitKey], condition.operator, condition.value),
       ),
     )
     .sort((left, right) => left.priority - right.priority)
@@ -336,7 +339,7 @@ function buildRuleChangeLog(): readonly string[] {
 }
 
 function buildPatternChangeLog(): readonly string[] {
-  const baselineKeys = new Set(BASELINE_HERO_PATTERN_RULES.map((rule) => rule.patternKey));
+  const baselineKeys = new Set(ROUND2_HERO_PATTERN_RULES.map((rule) => rule.patternKey));
   const refinedKeys = new Set(HERO_PATTERN_RULES.map((rule) => rule.patternKey));
 
   const added = [...refinedKeys].filter((key) => !baselineKeys.has(key)).sort();
@@ -361,20 +364,20 @@ function buildMarkdownReport(report: ExplorationReport): string {
   lines.push(`- Refined fallback share: ${(((report.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0) / report.totalProfilesProcessed) * 100).toFixed(1)}%`);
   lines.push(`- Worst collision count: ${report.collisionSummary.worstCollisionCount}`);
   lines.push('');
-  lines.push('## Before / After');
+  lines.push('## Round 2 vs Round 3');
   lines.push('');
-  lines.push('| Metric | Baseline | Refined |');
+  lines.push('| Metric | Round 2 | Round 3 |');
   lines.push('| --- | ---: | ---: |');
   for (const row of report.comparison.metrics) {
     lines.push(`| ${row.label} | ${row.baseline} | ${row.refined} |`);
   }
   lines.push('');
-  lines.push(`- Dead patterns before: ${report.comparison.deadPatternsBefore.join(', ') || 'none'}`);
-  lines.push(`- Dead patterns after: ${report.comparison.deadPatternsAfter.join(', ') || 'none'}`);
+  lines.push(`- Dead patterns in round 2: ${report.comparison.deadPatternsBefore.join(', ') || 'none'}`);
+  lines.push(`- Dead patterns in round 3: ${report.comparison.deadPatternsAfter.join(', ') || 'none'}`);
   lines.push('');
-  lines.push('## Top Winners Before / After');
+  lines.push('## Top Winners Round 2 vs Round 3');
   lines.push('');
-  lines.push('| Before | Count | Share | After | Count | Share |');
+  lines.push('| Round 2 | Count | Share | Round 3 | Count | Share |');
   lines.push('| --- | ---: | ---: | --- | ---: | ---: |');
   for (let index = 0; index < Math.max(report.comparison.topWinnersBefore.length, report.comparison.topWinnersAfter.length); index += 1) {
     const before = report.comparison.topWinnersBefore[index];
@@ -450,13 +453,13 @@ function writeArtifacts(report: ExplorationReport): void {
 }
 
 function printComparison(report: ExplorationReport): void {
-  console.log('Before / after comparison');
-  console.log('-------------------------');
+  console.log('Round 2 vs Round 3 comparison');
+  console.log('-----------------------------');
   for (const row of report.comparison.metrics) {
     console.log(`${row.label}: ${row.baseline} -> ${row.refined}`);
   }
-  console.log(`Dead patterns before: ${report.comparison.deadPatternsBefore.join(', ') || 'none'}`);
-  console.log(`Dead patterns after: ${report.comparison.deadPatternsAfter.join(', ') || 'none'}`);
+  console.log(`Dead patterns in round 2: ${report.comparison.deadPatternsBefore.join(', ') || 'none'}`);
+  console.log(`Dead patterns in round 3: ${report.comparison.deadPatternsAfter.join(', ') || 'none'}`);
   console.log('');
 }
 
@@ -553,12 +556,12 @@ function printDetailedExamples(examples: readonly ProcessedProfile[]): void {
 
 function main(): void {
   const generatedProfiles = generateAllProfiles();
-  const baselineGeneratedProfiles = generatedProfiles.map((profile) => evaluateProfile(profile, BASELINE_HERO_PATTERN_RULES));
+  const baselineGeneratedProfiles = generatedProfiles.map((profile) => evaluateProfile(profile, ROUND2_HERO_PATTERN_RULES));
   const refinedGeneratedProfiles = generatedProfiles.map((profile) => evaluateProfile(profile, HERO_PATTERN_RULES));
-  const baselineCuratedProfiles = CURATED_PROFILES.map((profile) => evaluateProfile(profile, BASELINE_HERO_PATTERN_RULES));
+  const baselineCuratedProfiles = CURATED_PROFILES.map((profile) => evaluateProfile(profile, ROUND2_HERO_PATTERN_RULES));
   const refinedCuratedProfiles = CURATED_PROFILES.map((profile) => evaluateProfile(profile, HERO_PATTERN_RULES));
 
-  const baselineCoverage = buildCoverage(baselineGeneratedProfiles, BASELINE_HERO_PATTERN_RULES);
+  const baselineCoverage = buildCoverage(baselineGeneratedProfiles, ROUND2_HERO_PATTERN_RULES);
   const refinedCoverage = buildCoverage(refinedGeneratedProfiles, HERO_PATTERN_RULES);
   const baselineCollisionSummary = buildCollisionSummary(baselineGeneratedProfiles);
   const refinedCollisionSummary = buildCollisionSummary(refinedGeneratedProfiles);
@@ -594,7 +597,7 @@ function main(): void {
     curatedComparison: buildCuratedComparison(baselineCuratedProfiles, refinedCuratedProfiles),
     changeLog: {
       rules: buildRuleChangeLog(),
-      pairTraitWeights: ['No pair-trait weight mappings changed in round 2; refinement was achieved through rule-set expansion and threshold redesign.'],
+      pairTraitWeights: ['No pair-trait weight mappings changed in round 3; refinement was achieved through rule separation, threshold tuning, and minimal exclusions.'],
       patterns: buildPatternChangeLog(),
     },
   };

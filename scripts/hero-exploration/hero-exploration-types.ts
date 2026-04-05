@@ -34,6 +34,7 @@ export type HeroPatternRule = {
   patternKey: string;
   priority: number;
   conditions: readonly HeroPatternCondition[];
+  exclusions?: readonly HeroPatternCondition[];
 };
 
 export type PairTraitWeight = {
