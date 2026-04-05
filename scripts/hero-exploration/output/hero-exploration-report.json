@@ -1,0 +1,1540 @@
+{
+  "runMode": "full_combinatorial",
+  "totalProfilesProcessed": 46656,
+  "processedAt": "2026-04-05T19:33:07.170Z",
+  "winningPatternCounts": {
+    "balanced_operator": 35422,
+    "relational_catalyst": 5456,
+    "flexible_mobiliser": 2157,
+    "adaptive_catalyst": 1399,
+    "exacting_controller": 720,
+    "diplomatic_stabiliser": 644,
+    "deliberate_craftsperson": 427,
+    "decisive_orchestrator": 243,
+    "calm_operator": 164,
+    "structured_collaborator": 24
+  },
+  "collisionSummary": {
+    "totalProfiles": 46656,
+    "singleMatchProfiles": 10638,
+    "multiMatchProfiles": 596,
+    "zeroMatchProfiles": 35422,
+    "worstCollisionCount": 2,
+    "topCollisionSets": [
+      {
+        "patternKeys": [
+          "relational_catalyst",
+          "flexible_mobiliser"
+        ],
+        "count": 278
+      },
+      {
+        "patternKeys": [
+          "relational_catalyst",
+          "diplomatic_stabiliser"
+        ],
+        "count": 94
+      },
+      {
+        "patternKeys": [
+          "adaptive_catalyst",
+          "flexible_mobiliser"
+        ],
+        "count": 85
+      },
+      {
+        "patternKeys": [
+          "adaptive_catalyst",
+          "relational_catalyst"
+        ],
+        "count": 65
+      },
+      {
+        "patternKeys": [
+          "diplomatic_stabiliser",
+          "calm_operator"
+        ],
+        "count": 33
+      },
+      {
+        "patternKeys": [
+          "exacting_controller",
+          "relational_catalyst"
+        ],
+        "count": 11
+      },
+      {
+        "patternKeys": [
+          "diplomatic_stabiliser",
+          "flexible_mobiliser"
+        ],
+        "count": 10
+      },
+      {
+        "patternKeys": [
+          "exacting_controller",
+          "flexible_mobiliser"
+        ],
+        "count": 8
+      },
+      {
+        "patternKeys": [
+          "deliberate_craftsperson",
+          "flexible_mobiliser"
+        ],
+        "count": 3
+      },
+      {
+        "patternKeys": [
+          "exacting_controller",
+          "decisive_orchestrator"
+        ],
+        "count": 3
+      }
+    ],
+    "beatenByHigherPriority": {
+      "flexible_mobiliser": 384,
+      "diplomatic_stabiliser": 94,
+      "relational_catalyst": 76,
+      "calm_operator": 34,
+      "deliberate_craftsperson": 5,
+      "decisive_orchestrator": 3
+    }
+  },
+  "deadPatternSummary": {
+    "neverSelectedAsWinner": [
+      "forceful_driver",
+      "responsive_mediator"
+    ],
+    "neverMatched": [
+      "balanced_operator",
+      "forceful_driver",
+      "responsive_mediator"
+    ],
+    "matchedButNeverWin": [],
+    "overDominantPatterns": [
+      {
+        "patternKey": "balanced_operator",
+        "winCount": 35422,
+        "winShare": 0.7592163923182441
+      }
+    ]
+  },
+  "coverage": [
+    {
+      "patternKey": "balanced_operator",
+      "matchCount": 0,
+      "winCount": 35422,
+      "winRate": 0,
+      "exampleProfiles": [
+        "generated_00001",
+        "generated_00002",
+        "generated_00003"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_influence | results_vision | compete_collaborate | market_adhocracy | control_scatter",
+        "driver_influencer | achievement_influence | results_vision | compete_collaborate | market_adhocracy | control_avoidance",
+        "driver_influencer | achievement_influence | results_vision | compete_collaborate | market_adhocracy | control_critical"
+      ]
+    },
+    {
+      "patternKey": "relational_catalyst",
+      "matchCount": 5532,
+      "winCount": 5456,
+      "winRate": 0.9862617498192335,
+      "exampleProfiles": [
+        "generated_00331",
+        "generated_00332",
+        "generated_00333"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_influence | results_people | collaborate_compromise | market_clan | control_scatter",
+        "driver_influencer | achievement_influence | results_people | collaborate_compromise | market_clan | control_avoidance",
+        "driver_influencer | achievement_influence | results_people | collaborate_compromise | market_clan | control_critical"
+      ]
+    },
+    {
+      "patternKey": "flexible_mobiliser",
+      "matchCount": 2541,
+      "winCount": 2157,
+      "winRate": 0.8488783943329398,
+      "exampleProfiles": [
+        "generated_00022",
+        "generated_00130",
+        "generated_00166"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_influence | results_vision | compete_collaborate | adhocracy_clan | scatter_avoidance",
+        "driver_influencer | achievement_influence | results_vision | collaborate_compromise | adhocracy_clan | scatter_avoidance",
+        "driver_influencer | achievement_influence | results_vision | collaborate_accommodate | adhocracy_clan | scatter_avoidance"
+      ]
+    },
+    {
+      "patternKey": "adaptive_catalyst",
+      "matchCount": 1399,
+      "winCount": 1399,
+      "winRate": 1,
+      "exampleProfiles": [
+        "generated_00688",
+        "generated_00712",
+        "generated_00901"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_influence | vision_people | compete_compromise | market_adhocracy | scatter_avoidance",
+        "driver_influencer | achievement_influence | vision_people | compete_compromise | adhocracy_hierarchy | scatter_avoidance",
+        "driver_influencer | achievement_influence | vision_process | compete_compromise | market_adhocracy | control_scatter"
+      ]
+    },
+    {
+      "patternKey": "exacting_controller",
+      "matchCount": 720,
+      "winCount": 720,
+      "winRate": 1,
+      "exampleProfiles": [
+        "generated_02607",
+        "generated_02619",
+        "generated_02643"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_mastery | results_vision | compete_collaborate | market_hierarchy | control_critical",
+        "driver_influencer | achievement_mastery | results_vision | compete_collaborate | adhocracy_hierarchy | control_critical",
+        "driver_influencer | achievement_mastery | results_vision | compete_compromise | market_hierarchy | control_critical"
+      ]
+    },
+    {
+      "patternKey": "diplomatic_stabiliser",
+      "matchCount": 738,
+      "winCount": 644,
+      "winRate": 0.8726287262872628,
+      "exampleProfiles": [
+        "generated_00176",
+        "generated_00392",
+        "generated_00608"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_influence | results_vision | collaborate_accommodate | clan_hierarchy | control_avoidance",
+        "driver_influencer | achievement_influence | results_people | collaborate_accommodate | clan_hierarchy | control_avoidance",
+        "driver_influencer | achievement_influence | results_process | collaborate_accommodate | clan_hierarchy | control_avoidance"
+      ]
+    },
+    {
+      "patternKey": "deliberate_craftsperson",
+      "matchCount": 432,
+      "winCount": 427,
+      "winRate": 0.9884259259259259,
+      "exampleProfiles": [
+        "generated_41490",
+        "generated_41502",
+        "generated_41526"
+      ],
+      "examplePairs": [
+        "operator_analyst | achievement_mastery | results_vision | compete_collaborate | market_hierarchy | avoidance_critical",
+        "operator_analyst | achievement_mastery | results_vision | compete_collaborate | adhocracy_hierarchy | avoidance_critical",
+        "operator_analyst | achievement_mastery | results_vision | compete_compromise | market_hierarchy | avoidance_critical"
+      ]
+    },
+    {
+      "patternKey": "decisive_orchestrator",
+      "matchCount": 246,
+      "winCount": 243,
+      "winRate": 0.9878048780487805,
+      "exampleProfiles": [
+        "generated_01741",
+        "generated_01742",
+        "generated_01743"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_stability | results_process | compete_collaborate | market_hierarchy | control_scatter",
+        "driver_influencer | achievement_stability | results_process | compete_collaborate | market_hierarchy | control_avoidance",
+        "driver_influencer | achievement_stability | results_process | compete_collaborate | market_hierarchy | control_critical"
+      ]
+    },
+    {
+      "patternKey": "calm_operator",
+      "matchCount": 198,
+      "winCount": 164,
+      "winRate": 0.8282828282828283,
+      "exampleProfiles": [
+        "generated_06728",
+        "generated_06764",
+        "generated_06800"
+      ],
+      "examplePairs": [
+        "driver_influencer | stability_mastery | results_people | compete_collaborate | clan_hierarchy | control_avoidance",
+        "driver_influencer | stability_mastery | results_people | compete_compromise | clan_hierarchy | control_avoidance",
+        "driver_influencer | stability_mastery | results_people | compete_accommodate | clan_hierarchy | control_avoidance"
+      ]
+    },
+    {
+      "patternKey": "structured_collaborator",
+      "matchCount": 24,
+      "winCount": 24,
+      "winRate": 1,
+      "exampleProfiles": [
+        "generated_19993",
+        "generated_19994",
+        "generated_19995"
+      ],
+      "examplePairs": [
+        "driver_analyst | influence_stability | results_process | collaborate_compromise | market_hierarchy | control_scatter",
+        "driver_analyst | influence_stability | results_process | collaborate_compromise | market_hierarchy | control_avoidance",
+        "driver_analyst | influence_stability | results_process | collaborate_compromise | market_hierarchy | control_critical"
+      ]
+    },
+    {
+      "patternKey": "forceful_driver",
+      "matchCount": 0,
+      "winCount": 0,
+      "winRate": 0,
+      "exampleProfiles": [],
+      "examplePairs": []
+    },
+    {
+      "patternKey": "responsive_mediator",
+      "matchCount": 0,
+      "winCount": 0,
+      "winRate": 0,
+      "exampleProfiles": [],
+      "examplePairs": []
+    }
+  ],
+  "detailedCuratedExamples": [
+    {
+      "profileKey": "profile_001",
+      "domainPairs": {
+        "operatingStyle": "driver_analyst",
+        "coreDrivers": "achievement_mastery",
+        "leadershipApproach": "results_process",
+        "tensionResponse": "compete_collaborate",
+        "environmentFit": "market_hierarchy",
+        "pressureResponse": "control_critical"
+      },
+      "traitTotals": {
+        "paced": 2,
+        "deliberate": 1,
+        "people_led": 1,
+        "task_led": 2,
+        "structured": 4,
+        "flexible": 0,
+        "assertive": 4,
+        "receptive": 0,
+        "stable": 0,
+        "adaptive": 0,
+        "exacting": 4,
+        "tolerant": 0
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "exacting_controller",
+          "priority": 14,
+          "matchedConditions": [
+            {
+              "traitKey": "exacting",
+              "operator": ">=",
+              "value": 4
+            },
+            {
+              "traitKey": "assertive",
+              "operator": ">=",
+              "value": 2
+            },
+            {
+              "traitKey": "structured",
+              "operator": ">=",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "exacting_controller",
+      "winnerPriority": 14,
+      "winnerConditions": [
+        {
+          "traitKey": "exacting",
+          "operator": ">=",
+          "value": 4
+        },
+        {
+          "traitKey": "assertive",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "traitKey": "structured",
+          "operator": ">=",
+          "value": 1
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "exacting_controller",
+        "headline": "You raise the standard when conditions get loose.",
+        "subheadline": "Precise, corrective, and unwilling to let weak execution pass unnoticed.",
+        "summary": "This pattern wins when accuracy, scrutiny, and directional force combine into a highly demanding but stabilising presence.",
+        "narrative": "You are likely to spot flaws quickly and respond by narrowing ambiguity, tightening expectations, and making quality visible. At your best this protects standards; overused, it can make the room feel more judged than helped.",
+        "pressureOverlay": "Pressure usually sharpens this pattern further, turning concern into corrective intensity and lower tolerance for loose thinking.",
+        "environmentOverlay": "You are often strongest in contexts that genuinely need quality control, disciplined reasoning, and clear performance edges."
+      }
+    },
+    {
+      "profileKey": "profile_002",
+      "domainPairs": {
+        "operatingStyle": "driver_operator",
+        "coreDrivers": "achievement_stability",
+        "leadershipApproach": "results_vision",
+        "tensionResponse": "compete_compromise",
+        "environmentFit": "market_hierarchy",
+        "pressureResponse": "control_critical"
+      },
+      "traitTotals": {
+        "paced": 1,
+        "deliberate": 0,
+        "people_led": 0,
+        "task_led": 6,
+        "structured": 1,
+        "flexible": 0,
+        "assertive": 5,
+        "receptive": 0,
+        "stable": 2,
+        "adaptive": 1,
+        "exacting": 2,
+        "tolerant": 0
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_003",
+      "domainPairs": {
+        "operatingStyle": "influencer_operator",
+        "coreDrivers": "influence_stability",
+        "leadershipApproach": "people_process",
+        "tensionResponse": "collaborate_accommodate",
+        "environmentFit": "clan_hierarchy",
+        "pressureResponse": "control_avoidance"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 0,
+        "people_led": 8,
+        "task_led": 0,
+        "structured": 1,
+        "flexible": 1,
+        "assertive": 0,
+        "receptive": 3,
+        "stable": 5,
+        "adaptive": 0,
+        "exacting": 0,
+        "tolerant": 0
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "diplomatic_stabiliser",
+          "priority": 22,
+          "matchedConditions": [
+            {
+              "traitKey": "receptive",
+              "operator": ">=",
+              "value": 3
+            },
+            {
+              "traitKey": "stable",
+              "operator": ">=",
+              "value": 3
+            },
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "diplomatic_stabiliser",
+      "winnerPriority": 22,
+      "winnerConditions": [
+        {
+          "traitKey": "receptive",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "traitKey": "stable",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "traitKey": "people_led",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "diplomatic_stabiliser",
+        "headline": "You calm the system without disappearing inside it.",
+        "subheadline": "Steady, receptive, and good at keeping relationships workable while the ground shifts.",
+        "summary": "This pattern wins when steadiness, listening, and social sensitivity create a reliably containing presence.",
+        "narrative": "You are likely to reduce unnecessary friction by reading what others need, lowering the emotional temperature, and protecting continuity where possible. The strength is trust and steadiness; the risk is carrying too much relational load before making the harder call.",
+        "pressureOverlay": "Pressure often increases your instinct to create safety, reduce escalation, and hold a workable rhythm for others.",
+        "environmentOverlay": "You are often strongest where stable collaboration, trust, and measured change are more useful than dramatic resets."
+      }
+    },
+    {
+      "profileKey": "profile_004",
+      "domainPairs": {
+        "operatingStyle": "operator_analyst",
+        "coreDrivers": "stability_mastery",
+        "leadershipApproach": "results_process",
+        "tensionResponse": "compromise_accommodate",
+        "environmentFit": "market_hierarchy",
+        "pressureResponse": "avoidance_critical"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 6,
+        "people_led": 0,
+        "task_led": 2,
+        "structured": 4,
+        "flexible": 1,
+        "assertive": 1,
+        "receptive": 1,
+        "stable": 0,
+        "adaptive": 0,
+        "exacting": 1,
+        "tolerant": 2
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_005",
+      "domainPairs": {
+        "operatingStyle": "influencer_analyst",
+        "coreDrivers": "influence_mastery",
+        "leadershipApproach": "vision_people",
+        "tensionResponse": "collaborate_compromise",
+        "environmentFit": "adhocracy_clan",
+        "pressureResponse": "scatter_avoidance"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 0,
+        "people_led": 8,
+        "task_led": 0,
+        "structured": 0,
+        "flexible": 4,
+        "assertive": 0,
+        "receptive": 0,
+        "stable": 0,
+        "adaptive": 5,
+        "exacting": 0,
+        "tolerant": 1
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "adaptive_catalyst",
+          "priority": 16,
+          "matchedConditions": [
+            {
+              "traitKey": "adaptive",
+              "operator": ">=",
+              "value": 5
+            },
+            {
+              "traitKey": "flexible",
+              "operator": ">=",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "patternKey": "flexible_mobiliser",
+          "priority": 26,
+          "matchedConditions": [
+            {
+              "traitKey": "flexible",
+              "operator": ">=",
+              "value": 4
+            },
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "adaptive_catalyst",
+      "winnerPriority": 16,
+      "winnerConditions": [
+        {
+          "traitKey": "adaptive",
+          "operator": ">=",
+          "value": 5
+        },
+        {
+          "traitKey": "flexible",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "adaptive_catalyst",
+        "headline": "You keep moving by changing shape quickly.",
+        "subheadline": "Responsive, experimental, and more comfortable with movement than with fixed form.",
+        "summary": "This pattern wins when flexibility and adaptation stay high enough across domains to make reinvention a visible strength.",
+        "narrative": "You are likely to make progress by trying angles, reading shifts early, and staying in motion while others are still settling on one route. That makes you useful in changing conditions, though it can frustrate people who need firmer structure before they trust the direction.",
+        "pressureOverlay": "Under pressure, you may keep scanning and reconfiguring rather than locking into a single rigid line too early.",
+        "environmentOverlay": "You usually fit best where change is normal, initiative is welcome, and adjustment is treated as capability rather than inconsistency."
+      }
+    },
+    {
+      "profileKey": "profile_006",
+      "domainPairs": {
+        "operatingStyle": "driver_influencer",
+        "coreDrivers": "achievement_influence",
+        "leadershipApproach": "results_vision",
+        "tensionResponse": "compete_collaborate",
+        "environmentFit": "market_clan",
+        "pressureResponse": "control_scatter"
+      },
+      "traitTotals": {
+        "paced": 7,
+        "deliberate": 0,
+        "people_led": 3,
+        "task_led": 0,
+        "structured": 0,
+        "flexible": 0,
+        "assertive": 6,
+        "receptive": 0,
+        "stable": 0,
+        "adaptive": 2,
+        "exacting": 0,
+        "tolerant": 0
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_007",
+      "domainPairs": {
+        "operatingStyle": "influencer_operator",
+        "coreDrivers": "influence_stability",
+        "leadershipApproach": "vision_people",
+        "tensionResponse": "collaborate_compromise",
+        "environmentFit": "adhocracy_clan",
+        "pressureResponse": "scatter_avoidance"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 0,
+        "people_led": 9,
+        "task_led": 0,
+        "structured": 0,
+        "flexible": 5,
+        "assertive": 0,
+        "receptive": 0,
+        "stable": 1,
+        "adaptive": 2,
+        "exacting": 0,
+        "tolerant": 1
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "flexible_mobiliser",
+          "priority": 26,
+          "matchedConditions": [
+            {
+              "traitKey": "flexible",
+              "operator": ">=",
+              "value": 4
+            },
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "flexible_mobiliser",
+      "winnerPriority": 26,
+      "winnerConditions": [
+        {
+          "traitKey": "flexible",
+          "operator": ">=",
+          "value": 4
+        },
+        {
+          "traitKey": "people_led",
+          "operator": ">=",
+          "value": 3
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "flexible_mobiliser",
+        "headline": "You keep progress alive by staying open and mobile.",
+        "subheadline": "Socially agile and willing to adapt the route to keep people engaged.",
+        "summary": "This pattern wins when flexibility and people orientation combine more strongly than structure or force.",
+        "narrative": "You are likely to make movement possible by adjusting approach, reading the room, and finding ways to keep others with the work even as conditions evolve. The strength is responsiveness; the risk is that constant adaptation can make your centre harder for others to read.",
+        "pressureOverlay": "Pressure may increase your tendency to keep options open and preserve room to manoeuvre rather than closing the system down too early.",
+        "environmentOverlay": "You tend to work well in settings that reward collaboration, adaptation, and relationship-sensitive progress."
+      }
+    },
+    {
+      "profileKey": "profile_008",
+      "domainPairs": {
+        "operatingStyle": "operator_analyst",
+        "coreDrivers": "stability_mastery",
+        "leadershipApproach": "people_process",
+        "tensionResponse": "compromise_accommodate",
+        "environmentFit": "clan_hierarchy",
+        "pressureResponse": "control_avoidance"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 4,
+        "people_led": 3,
+        "task_led": 0,
+        "structured": 2,
+        "flexible": 1,
+        "assertive": 0,
+        "receptive": 1,
+        "stable": 4,
+        "adaptive": 0,
+        "exacting": 1,
+        "tolerant": 2
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_009",
+      "domainPairs": {
+        "operatingStyle": "driver_analyst",
+        "coreDrivers": "achievement_stability",
+        "leadershipApproach": "results_people",
+        "tensionResponse": "compete_compromise",
+        "environmentFit": "market_hierarchy",
+        "pressureResponse": "control_scatter"
+      },
+      "traitTotals": {
+        "paced": 2,
+        "deliberate": 0,
+        "people_led": 1,
+        "task_led": 6,
+        "structured": 2,
+        "flexible": 0,
+        "assertive": 3,
+        "receptive": 0,
+        "stable": 1,
+        "adaptive": 3,
+        "exacting": 0,
+        "tolerant": 0
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_010",
+      "domainPairs": {
+        "operatingStyle": "influencer_analyst",
+        "coreDrivers": "achievement_influence",
+        "leadershipApproach": "vision_process",
+        "tensionResponse": "collaborate_compromise",
+        "environmentFit": "market_adhocracy",
+        "pressureResponse": "scatter_critical"
+      },
+      "traitTotals": {
+        "paced": 3,
+        "deliberate": 0,
+        "people_led": 5,
+        "task_led": 0,
+        "structured": 1,
+        "flexible": 2,
+        "assertive": 0,
+        "receptive": 0,
+        "stable": 0,
+        "adaptive": 5,
+        "exacting": 1,
+        "tolerant": 1
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "adaptive_catalyst",
+          "priority": 16,
+          "matchedConditions": [
+            {
+              "traitKey": "adaptive",
+              "operator": ">=",
+              "value": 5
+            },
+            {
+              "traitKey": "flexible",
+              "operator": ">=",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "patternKey": "relational_catalyst",
+          "priority": 20,
+          "matchedConditions": [
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 5
+            },
+            {
+              "traitKey": "paced",
+              "operator": ">=",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "adaptive_catalyst",
+      "winnerPriority": 16,
+      "winnerConditions": [
+        {
+          "traitKey": "adaptive",
+          "operator": ">=",
+          "value": 5
+        },
+        {
+          "traitKey": "flexible",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "adaptive_catalyst",
+        "headline": "You keep moving by changing shape quickly.",
+        "subheadline": "Responsive, experimental, and more comfortable with movement than with fixed form.",
+        "summary": "This pattern wins when flexibility and adaptation stay high enough across domains to make reinvention a visible strength.",
+        "narrative": "You are likely to make progress by trying angles, reading shifts early, and staying in motion while others are still settling on one route. That makes you useful in changing conditions, though it can frustrate people who need firmer structure before they trust the direction.",
+        "pressureOverlay": "Under pressure, you may keep scanning and reconfiguring rather than locking into a single rigid line too early.",
+        "environmentOverlay": "You usually fit best where change is normal, initiative is welcome, and adjustment is treated as capability rather than inconsistency."
+      }
+    },
+    {
+      "profileKey": "profile_011",
+      "domainPairs": {
+        "operatingStyle": "driver_operator",
+        "coreDrivers": "achievement_mastery",
+        "leadershipApproach": "results_process",
+        "tensionResponse": "compete_accommodate",
+        "environmentFit": "market_hierarchy",
+        "pressureResponse": "control_critical"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 1,
+        "people_led": 0,
+        "task_led": 4,
+        "structured": 3,
+        "flexible": 0,
+        "assertive": 4,
+        "receptive": 1,
+        "stable": 1,
+        "adaptive": 0,
+        "exacting": 4,
+        "tolerant": 0
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "exacting_controller",
+          "priority": 14,
+          "matchedConditions": [
+            {
+              "traitKey": "exacting",
+              "operator": ">=",
+              "value": 4
+            },
+            {
+              "traitKey": "assertive",
+              "operator": ">=",
+              "value": 2
+            },
+            {
+              "traitKey": "structured",
+              "operator": ">=",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "patternKey": "decisive_orchestrator",
+          "priority": 18,
+          "matchedConditions": [
+            {
+              "traitKey": "structured",
+              "operator": ">=",
+              "value": 3
+            },
+            {
+              "traitKey": "assertive",
+              "operator": ">=",
+              "value": 3
+            },
+            {
+              "traitKey": "task_led",
+              "operator": ">=",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "exacting_controller",
+      "winnerPriority": 14,
+      "winnerConditions": [
+        {
+          "traitKey": "exacting",
+          "operator": ">=",
+          "value": 4
+        },
+        {
+          "traitKey": "assertive",
+          "operator": ">=",
+          "value": 2
+        },
+        {
+          "traitKey": "structured",
+          "operator": ">=",
+          "value": 1
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "exacting_controller",
+        "headline": "You raise the standard when conditions get loose.",
+        "subheadline": "Precise, corrective, and unwilling to let weak execution pass unnoticed.",
+        "summary": "This pattern wins when accuracy, scrutiny, and directional force combine into a highly demanding but stabilising presence.",
+        "narrative": "You are likely to spot flaws quickly and respond by narrowing ambiguity, tightening expectations, and making quality visible. At your best this protects standards; overused, it can make the room feel more judged than helped.",
+        "pressureOverlay": "Pressure usually sharpens this pattern further, turning concern into corrective intensity and lower tolerance for loose thinking.",
+        "environmentOverlay": "You are often strongest in contexts that genuinely need quality control, disciplined reasoning, and clear performance edges."
+      }
+    },
+    {
+      "profileKey": "profile_012",
+      "domainPairs": {
+        "operatingStyle": "influencer_operator",
+        "coreDrivers": "achievement_influence",
+        "leadershipApproach": "vision_people",
+        "tensionResponse": "collaborate_compromise",
+        "environmentFit": "market_clan",
+        "pressureResponse": "scatter_avoidance"
+      },
+      "traitTotals": {
+        "paced": 4,
+        "deliberate": 0,
+        "people_led": 8,
+        "task_led": 0,
+        "structured": 0,
+        "flexible": 3,
+        "assertive": 0,
+        "receptive": 0,
+        "stable": 0,
+        "adaptive": 2,
+        "exacting": 0,
+        "tolerant": 1
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "relational_catalyst",
+          "priority": 20,
+          "matchedConditions": [
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 5
+            },
+            {
+              "traitKey": "paced",
+              "operator": ">=",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "relational_catalyst",
+      "winnerPriority": 20,
+      "winnerConditions": [
+        {
+          "traitKey": "people_led",
+          "operator": ">=",
+          "value": 5
+        },
+        {
+          "traitKey": "paced",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "relational_catalyst",
+        "headline": "You move people by creating energy around the work.",
+        "subheadline": "Visible, connective, and able to create momentum through engagement rather than force alone.",
+        "summary": "This pattern wins when people focus and pace rise together strongly enough to make your impact feel social as well as directional.",
+        "narrative": "You are likely to build progress by keeping people engaged, making the work feel alive, and pulling others into movement early. The benefit is momentum with connection; the risk is that pace and positivity can outrun the harder edges of detail or follow-through.",
+        "pressureOverlay": "Under pressure, you may work even harder to keep others connected, motivated, and moving rather than letting the room flatten out.",
+        "environmentOverlay": "You usually do best where visibility, collaboration, and momentum-building are valued as real levers of performance."
+      }
+    },
+    {
+      "profileKey": "profile_013",
+      "domainPairs": {
+        "operatingStyle": "operator_analyst",
+        "coreDrivers": "influence_stability",
+        "leadershipApproach": "people_process",
+        "tensionResponse": "collaborate_accommodate",
+        "environmentFit": "clan_hierarchy",
+        "pressureResponse": "avoidance_critical"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 4,
+        "people_led": 6,
+        "task_led": 0,
+        "structured": 2,
+        "flexible": 0,
+        "assertive": 0,
+        "receptive": 3,
+        "stable": 3,
+        "adaptive": 0,
+        "exacting": 0,
+        "tolerant": 0
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "diplomatic_stabiliser",
+          "priority": 22,
+          "matchedConditions": [
+            {
+              "traitKey": "receptive",
+              "operator": ">=",
+              "value": 3
+            },
+            {
+              "traitKey": "stable",
+              "operator": ">=",
+              "value": 3
+            },
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "diplomatic_stabiliser",
+      "winnerPriority": 22,
+      "winnerConditions": [
+        {
+          "traitKey": "receptive",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "traitKey": "stable",
+          "operator": ">=",
+          "value": 3
+        },
+        {
+          "traitKey": "people_led",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "diplomatic_stabiliser",
+        "headline": "You calm the system without disappearing inside it.",
+        "subheadline": "Steady, receptive, and good at keeping relationships workable while the ground shifts.",
+        "summary": "This pattern wins when steadiness, listening, and social sensitivity create a reliably containing presence.",
+        "narrative": "You are likely to reduce unnecessary friction by reading what others need, lowering the emotional temperature, and protecting continuity where possible. The strength is trust and steadiness; the risk is carrying too much relational load before making the harder call.",
+        "pressureOverlay": "Pressure often increases your instinct to create safety, reduce escalation, and hold a workable rhythm for others.",
+        "environmentOverlay": "You are often strongest where stable collaboration, trust, and measured change are more useful than dramatic resets."
+      }
+    },
+    {
+      "profileKey": "profile_014",
+      "domainPairs": {
+        "operatingStyle": "driver_analyst",
+        "coreDrivers": "achievement_mastery",
+        "leadershipApproach": "vision_people",
+        "tensionResponse": "collaborate_compromise",
+        "environmentFit": "clan_hierarchy",
+        "pressureResponse": "control_critical"
+      },
+      "traitTotals": {
+        "paced": 2,
+        "deliberate": 1,
+        "people_led": 5,
+        "task_led": 0,
+        "structured": 1,
+        "flexible": 0,
+        "assertive": 1,
+        "receptive": 0,
+        "stable": 2,
+        "adaptive": 1,
+        "exacting": 4,
+        "tolerant": 1
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "relational_catalyst",
+          "priority": 20,
+          "matchedConditions": [
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 5
+            },
+            {
+              "traitKey": "paced",
+              "operator": ">=",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "relational_catalyst",
+      "winnerPriority": 20,
+      "winnerConditions": [
+        {
+          "traitKey": "people_led",
+          "operator": ">=",
+          "value": 5
+        },
+        {
+          "traitKey": "paced",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "relational_catalyst",
+        "headline": "You move people by creating energy around the work.",
+        "subheadline": "Visible, connective, and able to create momentum through engagement rather than force alone.",
+        "summary": "This pattern wins when people focus and pace rise together strongly enough to make your impact feel social as well as directional.",
+        "narrative": "You are likely to build progress by keeping people engaged, making the work feel alive, and pulling others into movement early. The benefit is momentum with connection; the risk is that pace and positivity can outrun the harder edges of detail or follow-through.",
+        "pressureOverlay": "Under pressure, you may work even harder to keep others connected, motivated, and moving rather than letting the room flatten out.",
+        "environmentOverlay": "You usually do best where visibility, collaboration, and momentum-building are valued as real levers of performance."
+      }
+    },
+    {
+      "profileKey": "profile_015",
+      "domainPairs": {
+        "operatingStyle": "driver_influencer",
+        "coreDrivers": "influence_mastery",
+        "leadershipApproach": "results_vision",
+        "tensionResponse": "compete_collaborate",
+        "environmentFit": "market_adhocracy",
+        "pressureResponse": "scatter_critical"
+      },
+      "traitTotals": {
+        "paced": 4,
+        "deliberate": 0,
+        "people_led": 2,
+        "task_led": 0,
+        "structured": 0,
+        "flexible": 0,
+        "assertive": 5,
+        "receptive": 0,
+        "stable": 0,
+        "adaptive": 6,
+        "exacting": 1,
+        "tolerant": 0
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_016",
+      "domainPairs": {
+        "operatingStyle": "influencer_analyst",
+        "coreDrivers": "stability_mastery",
+        "leadershipApproach": "vision_process",
+        "tensionResponse": "collaborate_accommodate",
+        "environmentFit": "adhocracy_hierarchy",
+        "pressureResponse": "avoidance_critical"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 4,
+        "people_led": 3,
+        "task_led": 0,
+        "structured": 2,
+        "flexible": 2,
+        "assertive": 0,
+        "receptive": 3,
+        "stable": 0,
+        "adaptive": 3,
+        "exacting": 1,
+        "tolerant": 0
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_017",
+      "domainPairs": {
+        "operatingStyle": "driver_operator",
+        "coreDrivers": "achievement_stability",
+        "leadershipApproach": "results_people",
+        "tensionResponse": "compete_accommodate",
+        "environmentFit": "market_clan",
+        "pressureResponse": "control_avoidance"
+      },
+      "traitTotals": {
+        "paced": 2,
+        "deliberate": 0,
+        "people_led": 2,
+        "task_led": 6,
+        "structured": 0,
+        "flexible": 0,
+        "assertive": 2,
+        "receptive": 2,
+        "stable": 4,
+        "adaptive": 0,
+        "exacting": 0,
+        "tolerant": 0
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_018",
+      "domainPairs": {
+        "operatingStyle": "operator_analyst",
+        "coreDrivers": "achievement_stability",
+        "leadershipApproach": "results_process",
+        "tensionResponse": "compromise_accommodate",
+        "environmentFit": "market_hierarchy",
+        "pressureResponse": "control_avoidance"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 2,
+        "people_led": 0,
+        "task_led": 4,
+        "structured": 4,
+        "flexible": 1,
+        "assertive": 1,
+        "receptive": 1,
+        "stable": 3,
+        "adaptive": 0,
+        "exacting": 0,
+        "tolerant": 2
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_019",
+      "domainPairs": {
+        "operatingStyle": "driver_influencer",
+        "coreDrivers": "achievement_influence",
+        "leadershipApproach": "vision_people",
+        "tensionResponse": "collaborate_compromise",
+        "environmentFit": "market_clan",
+        "pressureResponse": "control_scatter"
+      },
+      "traitTotals": {
+        "paced": 6,
+        "deliberate": 0,
+        "people_led": 6,
+        "task_led": 0,
+        "structured": 0,
+        "flexible": 0,
+        "assertive": 2,
+        "receptive": 0,
+        "stable": 0,
+        "adaptive": 3,
+        "exacting": 0,
+        "tolerant": 1
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "relational_catalyst",
+          "priority": 20,
+          "matchedConditions": [
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 5
+            },
+            {
+              "traitKey": "paced",
+              "operator": ">=",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "relational_catalyst",
+      "winnerPriority": 20,
+      "winnerConditions": [
+        {
+          "traitKey": "people_led",
+          "operator": ">=",
+          "value": 5
+        },
+        {
+          "traitKey": "paced",
+          "operator": ">=",
+          "value": 2
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "relational_catalyst",
+        "headline": "You move people by creating energy around the work.",
+        "subheadline": "Visible, connective, and able to create momentum through engagement rather than force alone.",
+        "summary": "This pattern wins when people focus and pace rise together strongly enough to make your impact feel social as well as directional.",
+        "narrative": "You are likely to build progress by keeping people engaged, making the work feel alive, and pulling others into movement early. The benefit is momentum with connection; the risk is that pace and positivity can outrun the harder edges of detail or follow-through.",
+        "pressureOverlay": "Under pressure, you may work even harder to keep others connected, motivated, and moving rather than letting the room flatten out.",
+        "environmentOverlay": "You usually do best where visibility, collaboration, and momentum-building are valued as real levers of performance."
+      }
+    },
+    {
+      "profileKey": "profile_020",
+      "domainPairs": {
+        "operatingStyle": "influencer_operator",
+        "coreDrivers": "influence_mastery",
+        "leadershipApproach": "people_process",
+        "tensionResponse": "collaborate_accommodate",
+        "environmentFit": "adhocracy_clan",
+        "pressureResponse": "scatter_avoidance"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 0,
+        "people_led": 7,
+        "task_led": 0,
+        "structured": 1,
+        "flexible": 5,
+        "assertive": 0,
+        "receptive": 2,
+        "stable": 0,
+        "adaptive": 3,
+        "exacting": 0,
+        "tolerant": 0
+      },
+      "matchedPatterns": [
+        {
+          "patternKey": "flexible_mobiliser",
+          "priority": 26,
+          "matchedConditions": [
+            {
+              "traitKey": "flexible",
+              "operator": ">=",
+              "value": 4
+            },
+            {
+              "traitKey": "people_led",
+              "operator": ">=",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "winnerPatternKey": "flexible_mobiliser",
+      "winnerPriority": 26,
+      "winnerConditions": [
+        {
+          "traitKey": "flexible",
+          "operator": ">=",
+          "value": 4
+        },
+        {
+          "traitKey": "people_led",
+          "operator": ">=",
+          "value": 3
+        }
+      ],
+      "heroCopy": {
+        "patternKey": "flexible_mobiliser",
+        "headline": "You keep progress alive by staying open and mobile.",
+        "subheadline": "Socially agile and willing to adapt the route to keep people engaged.",
+        "summary": "This pattern wins when flexibility and people orientation combine more strongly than structure or force.",
+        "narrative": "You are likely to make movement possible by adjusting approach, reading the room, and finding ways to keep others with the work even as conditions evolve. The strength is responsiveness; the risk is that constant adaptation can make your centre harder for others to read.",
+        "pressureOverlay": "Pressure may increase your tendency to keep options open and preserve room to manoeuvre rather than closing the system down too early.",
+        "environmentOverlay": "You tend to work well in settings that reward collaboration, adaptation, and relationship-sensitive progress."
+      }
+    },
+    {
+      "profileKey": "profile_021",
+      "domainPairs": {
+        "operatingStyle": "operator_analyst",
+        "coreDrivers": "stability_mastery",
+        "leadershipApproach": "people_process",
+        "tensionResponse": "collaborate_compromise",
+        "environmentFit": "clan_hierarchy",
+        "pressureResponse": "control_avoidance"
+      },
+      "traitTotals": {
+        "paced": 0,
+        "deliberate": 4,
+        "people_led": 5,
+        "task_led": 0,
+        "structured": 2,
+        "flexible": 0,
+        "assertive": 0,
+        "receptive": 1,
+        "stable": 4,
+        "adaptive": 0,
+        "exacting": 1,
+        "tolerant": 1
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    },
+    {
+      "profileKey": "profile_022",
+      "domainPairs": {
+        "operatingStyle": "driver_analyst",
+        "coreDrivers": "achievement_mastery",
+        "leadershipApproach": "results_process",
+        "tensionResponse": "compete_compromise",
+        "environmentFit": "adhocracy_hierarchy",
+        "pressureResponse": "avoidance_critical"
+      },
+      "traitTotals": {
+        "paced": 2,
+        "deliberate": 3,
+        "people_led": 0,
+        "task_led": 0,
+        "structured": 4,
+        "flexible": 0,
+        "assertive": 3,
+        "receptive": 1,
+        "stable": 0,
+        "adaptive": 3,
+        "exacting": 2,
+        "tolerant": 0
+      },
+      "matchedPatterns": [],
+      "winnerPatternKey": "balanced_operator",
+      "winnerPriority": null,
+      "winnerConditions": [],
+      "heroCopy": {
+        "patternKey": "balanced_operator",
+        "headline": "You present as broadly balanced rather than sharply polarised.",
+        "subheadline": "No single Hero rule dominates, so the profile resolves to a steady central pattern.",
+        "summary": "This fallback wins when the profile spreads across several traits without crossing any stronger rule threshold cleanly.",
+        "narrative": "You are likely to show usable range across contexts, with behaviour shaped more by the situation than by one consistently dominant Hero signature. That can be an advantage in varied roles, though it also means the profile may need richer supporting sections to feel fully distinctive.",
+        "pressureOverlay": "Under pressure, the profile may borrow from several nearby styles rather than defaulting to one obvious response pattern.",
+        "environmentOverlay": "You usually fit best in environments that value versatility, role balance, and context-sensitive judgement."
+      }
+    }
+  ]
+}
