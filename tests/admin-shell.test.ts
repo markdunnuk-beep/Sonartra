@@ -30,4 +30,6 @@ test('admin shell sidebar constrains horizontal overflow at the container', () =
 
   assert.match(source, /box-border flex w-\[18\.5rem\] flex-col overflow-x-hidden/);
   assert.match(source, /overflow-y-auto overflow-x-hidden pb-4/);
+  assert.match(source, /sonartra-shell-nav-track space-y-2/);
+  assert.match(source, /min-h-12 w-full items-center/);
 });

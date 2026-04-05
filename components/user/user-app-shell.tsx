@@ -187,7 +187,7 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-12 items-center gap-3 overflow-hidden rounded-2xl border px-3 py-2.5',
+        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-12 w-full items-center gap-3 overflow-hidden rounded-2xl border px-3 py-2.5',
         collapsed ? 'justify-center px-0' : 'justify-start',
         active
           ? 'border-white/12 bg-white/[0.06] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]'
@@ -229,7 +229,7 @@ function SidebarSection({
   onNavigate?: () => void;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="sonartra-shell-nav-track space-y-2">
       {section.items.map((item) => (
         <SidebarLink collapsed={collapsed} item={item} key={item.key} onNavigate={onNavigate} />
       ))}
@@ -265,7 +265,7 @@ export function UserAppShell({
       <div className="mx-auto flex min-h-screen w-full max-w-[1560px]">
         <aside
           className={cn(
-            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 flex w-[17.5rem] flex-col bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
+            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 box-border flex w-[17.5rem] flex-col overflow-x-hidden bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
             collapsed ? 'lg:w-[5.5rem]' : 'lg:w-[17.5rem]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
             'lg:sticky',
@@ -334,7 +334,7 @@ export function UserAppShell({
             </button>
           ) : null}
 
-          <div className="mt-6 flex-1 space-y-4 overflow-y-auto pb-4">
+          <div className="mt-6 flex-1 space-y-4 overflow-y-auto overflow-x-hidden pb-4">
             {navSections.map((section) => (
               <SidebarSection
                 collapsed={collapsed}

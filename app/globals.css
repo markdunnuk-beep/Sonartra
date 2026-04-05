@@ -470,6 +470,10 @@ main {
     @apply sonartra-type-nav-meta block truncate;
   }
 
+  .sonartra-shell-nav-track {
+    padding-right: var(--sonartra-motion-distance-soft);
+  }
+
   .sonartra-shell-mobile-brand {
     @apply sonartra-type-utility;
     color: rgba(225, 232, 251, 0.68);

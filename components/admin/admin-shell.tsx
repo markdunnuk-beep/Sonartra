@@ -92,7 +92,7 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-12 items-center gap-3 overflow-hidden rounded-2xl border px-3 py-2.5',
+        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-12 w-full items-center gap-3 overflow-hidden rounded-2xl border px-3 py-2.5',
         collapsed ? 'justify-center px-0' : 'justify-start',
         active
           ? 'border-white/12 bg-white/[0.06] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]'
@@ -224,7 +224,7 @@ export function AdminShell({
           ) : null}
 
           <div className="mt-6 flex-1 space-y-3 overflow-y-auto overflow-x-hidden pb-4">
-            <div className={cn('space-y-2', collapsed && 'space-y-3')}>
+            <div className={cn('sonartra-shell-nav-track space-y-2', collapsed && 'space-y-3')}>
               {adminNavItems.map((item) => (
                 <SidebarLink
                   collapsed={collapsed}
