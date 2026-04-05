@@ -528,7 +528,7 @@ export const FINAL_HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
     ],
     exclusions: [
       { traitKey: 'structured', operator: '>=', value: 3 },
-      { traitKey: 'stable', operator: '>=', value: 3 },
+      { traitKey: 'stable', operator: '>=', value: 2 },
       { traitKey: 'assertive', operator: '>=', value: 5 },
     ],
   },
@@ -594,10 +594,10 @@ export const PATTERN_CHANGE_LOG: Readonly<Record<string, string>> = {
   forceful_driver: 'retained unchanged as the clearest high-pace high-assertive Hero lane.',
   grounded_planner: 'retained as the stable deliberate planning identity, with social-heavy cases pushed into steady_steward.',
   grounded_steward: 'retired into steady_steward for the final consolidation.',
-  relational_catalyst: 'broadened to absorb driving_integrator and the strongest flexible social profiles, so the visible people-led lane becomes one cleaner identity instead of several adjacent variants.',
+  relational_catalyst: 'tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane.',
   responsive_mediator: 'retired into steady_steward for the final consolidation.',
   steady_connector: 'retired into steady_steward for the final consolidation.',
   steady_executor: 'retained as the dependable task-and-stability lane, distinct from the more forceful delivery patterns.',
-  steady_steward: 'new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, with a lower stability threshold to reduce fallback in calm relational profiles.',
+  steady_steward: 'new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, keeping the calmer relational profiles that no longer belong in relational_catalyst.',
   structured_collaborator: 'retained as the organised people-aware lane, but now excludes stable social cases earlier so steady_steward can own social containment.',
 };

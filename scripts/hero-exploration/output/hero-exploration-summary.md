@@ -2,8 +2,8 @@
 
 - Run mode: full_combinatorial
 - Total profiles processed: 46656
-- Final fallback count: 12678
-- Final fallback share: 27.2%
+- Final fallback count: 13116
+- Final fallback share: 28.1%
 - Final worst collision count: 5
 - Implementation-ready: no
 
@@ -42,10 +42,10 @@
 | Metric | Round 2 | Round 3 | Final |
 | --- | ---: | ---: | ---: |
 | total profiles processed | 46656 | 46656 | 46656 |
-| fallback count | 16881 (36.2%) | 17432 (37.4%) | 12678 (27.2%) |
-| zero-match count | 16881 | 17432 | 12678 |
-| single-match count | 16766 | 19626 | 26521 |
-| multi-match count | 13009 | 9598 | 7457 |
+| fallback count | 16881 (36.2%) | 17432 (37.4%) | 13116 (28.1%) |
+| zero-match count | 16881 | 17432 | 13116 |
+| single-match count | 16766 | 19626 | 29503 |
+| multi-match count | 13009 | 9598 | 4037 |
 | worst collision count | 6 | 6 | 5 |
 | dead pattern count | 0 | 0 | 0 |
 
@@ -57,9 +57,9 @@
 
 | Round 2 | Count | Share | Round 3 | Count | Share | Final | Count | Share |
 | --- | ---: | ---: | --- | ---: | ---: | --- | ---: | ---: |
-| balanced_operator | 16881 | 36.2% | balanced_operator | 17432 | 37.4% | relational_catalyst | 15493 | 33.2% |
-| flexible_mobiliser | 5117 | 11.0% | flexible_mobiliser | 5410 | 11.6% | balanced_operator | 12678 | 27.2% |
-| relational_catalyst | 4220 | 9.0% | relational_catalyst | 4061 | 8.7% | steady_steward | 5233 | 11.2% |
+| balanced_operator | 16881 | 36.2% | balanced_operator | 17432 | 37.4% | balanced_operator | 13116 | 28.1% |
+| flexible_mobiliser | 5117 | 11.0% | flexible_mobiliser | 5410 | 11.6% | relational_catalyst | 11636 | 24.9% |
+| relational_catalyst | 4220 | 9.0% | relational_catalyst | 4061 | 8.7% | steady_steward | 8652 | 18.5% |
 | delivery_commander | 3450 | 7.4% | steady_connector | 3359 | 7.2% | adaptive_mobiliser | 4145 | 8.9% |
 | driving_integrator | 3405 | 7.3% | driving_integrator | 3145 | 6.7% | delivery_commander | 3132 | 6.7% |
 | steady_connector | 3074 | 6.6% | delivery_commander | 3132 | 6.7% | structured_collaborator | 1158 | 2.5% |
@@ -72,9 +72,9 @@
 
 | Pattern | Match Count | Win Count | Win Rate | Example Profiles | Change Note |
 | --- | ---: | ---: | ---: | --- | --- |
-| relational_catalyst | 16180 | 15493 | 95.8% | generated_00115, generated_00116, generated_00117 | broadened to absorb driving_integrator and the strongest flexible social profiles, so the visible people-led lane becomes one cleaner identity instead of several adjacent variants. |
-| balanced_operator | 0 | 12678 | 0.0% | generated_00110, generated_00111, generated_00113 | unchanged fallback retained as the final deterministic catch-all. |
-| steady_steward | 10334 | 5233 | 50.6% | generated_01424, generated_01435, generated_01436 | new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, with a lower stability threshold to reduce fallback in calm relational profiles. |
+| balanced_operator | 0 | 13116 | 0.0% | generated_00110, generated_00111, generated_00113 | unchanged fallback retained as the final deterministic catch-all. |
+| relational_catalyst | 12162 | 11636 | 95.7% | generated_00115, generated_00117, generated_00118 | tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane. |
+| steady_steward | 10334 | 8652 | 83.7% | generated_01424, generated_01435, generated_01436 | new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, keeping the calmer relational profiles that no longer belong in relational_catalyst. |
 | adaptive_mobiliser | 4671 | 4145 | 88.7% | generated_00112, generated_00136, generated_00148 | new consolidated adaptive identity merging flexible_mobiliser, adaptive_catalyst, and adaptive_orchestrator into one mobile change-oriented lane, with a broader adaptive threshold to reduce underfit mid-range profiles. |
 | delivery_commander | 3558 | 3132 | 88.0% | generated_00229, generated_00230, generated_00231 | retained as the direct delivery lane because it remains one of the clearest execution identities. |
 | structured_collaborator | 1443 | 1158 | 80.2% | generated_00553, generated_00554, generated_00555 | retained as the organised people-aware lane, but now excludes stable social cases earlier so steady_steward can own social containment. |
@@ -88,16 +88,16 @@
 
 ## Final Collision Summary
 
-- relational_catalyst > steady_steward: 3419
 - delivery_commander > steady_executor: 383
+- delivery_commander > steady_steward: 360
 - delivery_commander > relational_catalyst: 339
 - grounded_planner > steady_steward: 292
 - decisive_orchestrator > delivery_commander: 266
 - steady_executor > steady_steward: 259
-- delivery_commander > steady_steward: 244
 - delivery_commander > steady_executor > steady_steward: 218
 - deliberate_craftsperson > structured_collaborator: 183
 - adaptive_mobiliser > steady_steward: 181
+- delivery_commander > adaptive_mobiliser: 171
 
 ## Curated Comparison
 
@@ -109,7 +109,7 @@
 - profile_005: flexible_mobiliser -> relational_catalyst. Better. The final model prefers relational_catalyst because the consolidated taxonomy treats that behaviour as the stronger identity-level pattern.
 - profile_010: relational_catalyst -> relational_catalyst. Equally good. The final 12-pattern model kept the same identity because the round-3 winner was already a clean Hero lane.
 - profile_012: relational_catalyst -> relational_catalyst. Equally good. The final 12-pattern model kept the same identity because the round-3 winner was already a clean Hero lane.
-- profile_014: relational_catalyst -> relational_catalyst. Equally good. The final 12-pattern model kept the same identity because the round-3 winner was already a clean Hero lane.
+- profile_014: relational_catalyst -> steady_steward. Better. The final model prefers steady_steward because the consolidated taxonomy treats that behaviour as the stronger identity-level pattern.
 - profile_020: flexible_mobiliser -> relational_catalyst. Better. The final model prefers relational_catalyst because the consolidated taxonomy treats that behaviour as the stronger identity-level pattern.
 
 ## Narrative Judgement
@@ -138,11 +138,11 @@ Rule and pattern changes:
 - forceful_driver: retained unchanged as the clearest high-pace high-assertive Hero lane.
 - grounded_planner: retained as the stable deliberate planning identity, with social-heavy cases pushed into steady_steward.
 - grounded_steward: retired into steady_steward for the final consolidation.
-- relational_catalyst: broadened to absorb driving_integrator and the strongest flexible social profiles, so the visible people-led lane becomes one cleaner identity instead of several adjacent variants.
+- relational_catalyst: tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane.
 - responsive_mediator: retired into steady_steward for the final consolidation.
 - steady_connector: retired into steady_steward for the final consolidation.
 - steady_executor: retained as the dependable task-and-stability lane, distinct from the more forceful delivery patterns.
-- steady_steward: new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, with a lower stability threshold to reduce fallback in calm relational profiles.
+- steady_steward: new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, keeping the calmer relational profiles that no longer belong in relational_catalyst.
 - structured_collaborator: retained as the organised people-aware lane, but now excludes stable social cases earlier so steady_steward can own social containment.
 
 Pair-trait weight changes:

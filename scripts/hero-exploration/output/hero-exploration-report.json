@@ -1,11 +1,11 @@
 {
   "runMode": "full_combinatorial",
   "totalProfilesProcessed": 46656,
-  "processedAt": "2026-04-05T20:49:04.875Z",
+  "processedAt": "2026-04-05T20:56:11.685Z",
   "winningPatternCounts": {
-    "relational_catalyst": 15493,
-    "balanced_operator": 12678,
-    "steady_steward": 5233,
+    "balanced_operator": 13116,
+    "relational_catalyst": 11636,
+    "steady_steward": 8652,
     "adaptive_mobiliser": 4145,
     "delivery_commander": 3132,
     "structured_collaborator": 1158,
@@ -19,19 +19,19 @@
   },
   "topWinningPatterns": [
     {
-      "patternKey": "relational_catalyst",
-      "count": 15493,
-      "share": 0.3320687585733882
+      "patternKey": "balanced_operator",
+      "count": 13116,
+      "share": 0.2811213991769547
     },
     {
-      "patternKey": "balanced_operator",
-      "count": 12678,
-      "share": 0.2717335390946502
+      "patternKey": "relational_catalyst",
+      "count": 11636,
+      "share": 0.24939986282578874
     },
     {
       "patternKey": "steady_steward",
-      "count": 5233,
-      "share": 0.11216135116598079
+      "count": 8652,
+      "share": 0.18544238683127573
     },
     {
       "patternKey": "adaptive_mobiliser",
@@ -71,24 +71,24 @@
   ],
   "collisionSummary": {
     "totalProfiles": 46656,
-    "singleMatchProfiles": 26521,
-    "multiMatchProfiles": 7457,
-    "zeroMatchProfiles": 12678,
+    "singleMatchProfiles": 29503,
+    "multiMatchProfiles": 4037,
+    "zeroMatchProfiles": 13116,
     "worstCollisionCount": 5,
     "topCollisionSets": [
-      {
-        "patternKeys": [
-          "relational_catalyst",
-          "steady_steward"
-        ],
-        "count": 3419
-      },
       {
         "patternKeys": [
           "delivery_commander",
           "steady_executor"
         ],
         "count": 383
+      },
+      {
+        "patternKeys": [
+          "delivery_commander",
+          "steady_steward"
+        ],
+        "count": 360
       },
       {
         "patternKeys": [
@@ -121,13 +121,6 @@
       {
         "patternKeys": [
           "delivery_commander",
-          "steady_steward"
-        ],
-        "count": 244
-      },
-      {
-        "patternKeys": [
-          "delivery_commander",
           "steady_executor",
           "steady_steward"
         ],
@@ -146,13 +139,20 @@
           "steady_steward"
         ],
         "count": 181
+      },
+      {
+        "patternKeys": [
+          "delivery_commander",
+          "adaptive_mobiliser"
+        ],
+        "count": 171
       }
     ],
     "beatenByHigherPriority": {
-      "steady_steward": 5101,
+      "steady_steward": 1682,
       "steady_executor": 715,
-      "relational_catalyst": 687,
       "adaptive_mobiliser": 526,
+      "relational_catalyst": 526,
       "delivery_commander": 426,
       "structured_collaborator": 285,
       "grounded_planner": 238,
@@ -170,39 +170,27 @@
     "matchedButNeverWin": [],
     "overDominantPatterns": [
       {
-        "patternKey": "relational_catalyst",
-        "winCount": 15493,
-        "winShare": 0.3320687585733882
+        "patternKey": "balanced_operator",
+        "winCount": 13116,
+        "winShare": 0.2811213991769547
       },
       {
-        "patternKey": "balanced_operator",
-        "winCount": 12678,
-        "winShare": 0.2717335390946502
+        "patternKey": "relational_catalyst",
+        "winCount": 11636,
+        "winShare": 0.24939986282578874
+      },
+      {
+        "patternKey": "steady_steward",
+        "winCount": 8652,
+        "winShare": 0.18544238683127573
       }
     ]
   },
   "coverage": [
     {
-      "patternKey": "relational_catalyst",
-      "matchCount": 16180,
-      "winCount": 15493,
-      "winRate": 0.9575401730531521,
-      "exampleProfiles": [
-        "generated_00115",
-        "generated_00116",
-        "generated_00117"
-      ],
-      "examplePairs": [
-        "driver_influencer | achievement_influence | results_vision | collaborate_compromise | market_clan | control_scatter",
-        "driver_influencer | achievement_influence | results_vision | collaborate_compromise | market_clan | control_avoidance",
-        "driver_influencer | achievement_influence | results_vision | collaborate_compromise | market_clan | control_critical"
-      ],
-      "changeNote": "broadened to absorb driving_integrator and the strongest flexible social profiles, so the visible people-led lane becomes one cleaner identity instead of several adjacent variants."
-    },
-    {
       "patternKey": "balanced_operator",
       "matchCount": 0,
-      "winCount": 12678,
+      "winCount": 13116,
       "winRate": 0,
       "exampleProfiles": [
         "generated_00110",
@@ -217,10 +205,27 @@
       "changeNote": "unchanged fallback retained as the final deterministic catch-all."
     },
     {
+      "patternKey": "relational_catalyst",
+      "matchCount": 12162,
+      "winCount": 11636,
+      "winRate": 0.9567505344515704,
+      "exampleProfiles": [
+        "generated_00115",
+        "generated_00117",
+        "generated_00118"
+      ],
+      "examplePairs": [
+        "driver_influencer | achievement_influence | results_vision | collaborate_compromise | market_clan | control_scatter",
+        "driver_influencer | achievement_influence | results_vision | collaborate_compromise | market_clan | control_critical",
+        "driver_influencer | achievement_influence | results_vision | collaborate_compromise | market_clan | scatter_avoidance"
+      ],
+      "changeNote": "tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane."
+    },
+    {
       "patternKey": "steady_steward",
       "matchCount": 10334,
-      "winCount": 5233,
-      "winRate": 0.5063866847300175,
+      "winCount": 8652,
+      "winRate": 0.8372363073350106,
       "exampleProfiles": [
         "generated_01424",
         "generated_01435",
@@ -231,7 +236,7 @@
         "driver_influencer | achievement_stability | results_vision | collaborate_compromise | clan_hierarchy | control_scatter",
         "driver_influencer | achievement_stability | results_vision | collaborate_compromise | clan_hierarchy | control_avoidance"
       ],
-      "changeNote": "new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, with a lower stability threshold to reduce fallback in calm relational profiles."
+      "changeNote": "new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, keeping the calmer relational profiles that no longer belong in relational_catalyst."
     },
     {
       "patternKey": "adaptive_mobiliser",
@@ -1302,17 +1307,6 @@
       },
       "matchedPatterns": [
         {
-          "patternKey": "relational_catalyst",
-          "priority": 28,
-          "matchedConditions": [
-            {
-              "traitKey": "people_led",
-              "operator": ">=",
-              "value": 4
-            }
-          ]
-        },
-        {
           "patternKey": "steady_steward",
           "priority": 32,
           "matchedConditions": [
@@ -1329,23 +1323,28 @@
           ]
         }
       ],
-      "winnerPatternKey": "relational_catalyst",
-      "winnerPriority": 28,
+      "winnerPatternKey": "steady_steward",
+      "winnerPriority": 32,
       "winnerConditions": [
         {
           "traitKey": "people_led",
           "operator": ">=",
-          "value": 4
+          "value": 3
+        },
+        {
+          "traitKey": "stable",
+          "operator": ">=",
+          "value": 2
         }
       ],
       "heroCopy": {
-        "patternKey": "relational_catalyst",
-        "headline": "You move people by creating energy around the work.",
-        "subheadline": "Visible, connective, and able to create momentum through engagement rather than force alone.",
-        "summary": "This pattern fits profiles where people focus and pace rise together strongly enough to make your impact feel social as well as directional.",
-        "narrative": "You are likely to build progress by keeping people engaged, making the work feel alive, and pulling others into movement early. The benefit is momentum with connection; the risk is that pace and positivity can outrun the harder edges of detail or follow-through.",
-        "pressureOverlay": "Under pressure, you may work even harder to keep others connected, motivated, and moving rather than letting the room flatten out.",
-        "environmentOverlay": "You usually do best where visibility, collaboration, and momentum-building are valued as real levers of performance."
+        "patternKey": "steady_steward",
+        "headline": "You create trust by holding people and continuity together.",
+        "subheadline": "Calm, people-aware, and more interested in keeping the system workable than making yourself dramatic inside it.",
+        "summary": "This consolidated pattern fits profiles where social awareness and stability combine into a clear stewardship identity.",
+        "narrative": "You are likely to create confidence by staying usable, reading what others need, and keeping enough continuity for the work to remain coherent through friction or change. The strength is steady containment; the risk is carrying the relational load longer than the moment really requires before naming the harder decision.",
+        "pressureOverlay": "Under pressure, you often move further toward containment, reassurance, and keeping the room workable enough to continue.",
+        "environmentOverlay": "You usually work best where trust, continuity, and relationship-sensitive judgement are treated as central to performance rather than secondary to louder forms of leadership."
       }
     },
     {
@@ -1906,25 +1905,25 @@
         "label": "fallback count",
         "round2": "16881 (36.2%)",
         "round3": "17432 (37.4%)",
-        "final": "12678 (27.2%)"
+        "final": "13116 (28.1%)"
       },
       {
         "label": "zero-match count",
         "round2": 16881,
         "round3": 17432,
-        "final": 12678
+        "final": 13116
       },
       {
         "label": "single-match count",
         "round2": 16766,
         "round3": 19626,
-        "final": 26521
+        "final": 29503
       },
       {
         "label": "multi-match count",
         "round2": 13009,
         "round3": 9598,
-        "final": 7457
+        "final": 4037
       },
       {
         "label": "worst collision count",
@@ -2048,19 +2047,19 @@
     ],
     "topWinnersFinal": [
       {
-        "patternKey": "relational_catalyst",
-        "count": 15493,
-        "share": 0.3320687585733882
+        "patternKey": "balanced_operator",
+        "count": 13116,
+        "share": 0.2811213991769547
       },
       {
-        "patternKey": "balanced_operator",
-        "count": 12678,
-        "share": 0.2717335390946502
+        "patternKey": "relational_catalyst",
+        "count": 11636,
+        "share": 0.24939986282578874
       },
       {
         "patternKey": "steady_steward",
-        "count": 5233,
-        "share": 0.11216135116598079
+        "count": 8652,
+        "share": 0.18544238683127573
       },
       {
         "patternKey": "adaptive_mobiliser",
@@ -2159,9 +2158,9 @@
     {
       "profileKey": "profile_014",
       "previousWinner": "relational_catalyst",
-      "finalWinner": "relational_catalyst",
-      "changed": false,
-      "judgement": "Equally good. The final 12-pattern model kept the same identity because the round-3 winner was already a clean Hero lane."
+      "finalWinner": "steady_steward",
+      "changed": true,
+      "judgement": "Better. The final model prefers steady_steward because the consolidated taxonomy treats that behaviour as the stronger identity-level pattern."
     },
     {
       "profileKey": "profile_020",
@@ -2269,11 +2268,11 @@
       "forceful_driver: retained unchanged as the clearest high-pace high-assertive Hero lane.",
       "grounded_planner: retained as the stable deliberate planning identity, with social-heavy cases pushed into steady_steward.",
       "grounded_steward: retired into steady_steward for the final consolidation.",
-      "relational_catalyst: broadened to absorb driving_integrator and the strongest flexible social profiles, so the visible people-led lane becomes one cleaner identity instead of several adjacent variants.",
+      "relational_catalyst: tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane.",
       "responsive_mediator: retired into steady_steward for the final consolidation.",
       "steady_connector: retired into steady_steward for the final consolidation.",
       "steady_executor: retained as the dependable task-and-stability lane, distinct from the more forceful delivery patterns.",
-      "steady_steward: new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, with a lower stability threshold to reduce fallback in calm relational profiles.",
+      "steady_steward: new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, keeping the calmer relational profiles that no longer belong in relational_catalyst.",
       "structured_collaborator: retained as the organised people-aware lane, but now excludes stable social cases earlier so steady_steward can own social containment."
     ],
     "pairTraitWeights": [
