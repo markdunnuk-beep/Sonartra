@@ -576,6 +576,53 @@ main {
     box-shadow: 0 12px 32px rgba(3, 8, 20, 0.1);
   }
 
+  .sonartra-runner-stage {
+    box-shadow: 0 22px 58px rgba(0, 0, 0, 0.18);
+  }
+
+  .sonartra-runner-support-card {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0.014)),
+      rgba(8, 13, 24, 0.18);
+  }
+
+  .sonartra-runner-meta-stat {
+    @apply rounded-[1rem] border px-3.5 py-3;
+    border-color: rgba(223, 232, 255, 0.08);
+    background: rgba(255, 255, 255, 0.024);
+  }
+
+  .sonartra-runner-meta-label {
+    @apply sonartra-type-utility;
+    color: rgba(207, 218, 243, 0.42);
+  }
+
+  .sonartra-runner-meta-value {
+    @apply mt-2 text-[1rem] font-medium leading-6 tracking-[0];
+    color: rgba(236, 241, 255, 0.84);
+  }
+
+  .sonartra-runner-option {
+    transition-property: transform, border-color, background-color, color, opacity, box-shadow;
+    transition-duration: var(--sonartra-motion-duration-standard);
+    transition-timing-function: var(--sonartra-motion-ease-standard);
+  }
+
+  .sonartra-runner-option:hover:not(:disabled) {
+    transform: translateY(calc(var(--sonartra-motion-distance-micro) * -1));
+  }
+
+  .sonartra-runner-completion-card {
+    border-color: rgba(223, 232, 255, 0.09);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.018)),
+      rgba(9, 14, 24, 0.24);
+  }
+
+  .sonartra-runner-map-item {
+    min-height: 2.75rem;
+  }
+
   .sonartra-report-markdown {
     @apply sonartra-report-prose;
   }
