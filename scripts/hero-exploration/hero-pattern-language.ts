@@ -38,6 +38,15 @@ export const HERO_PATTERN_LANGUAGE: readonly HeroPatternLanguage[] = [
     environmentOverlay: 'You often do well where teams need both responsiveness and clearer operating discipline at the same time.',
   },
   {
+    patternKey: 'adaptive_mobiliser',
+    headline: 'You keep movement alive by adapting faster than the context settles.',
+    subheadline: 'Mobile, inventive, and comfortable changing shape while others are still deciding how fixed the route should be.',
+    summary: 'This consolidated pattern fits profiles where change-readiness, flexibility, and forward movement combine into a recognisable adaptive identity.',
+    narrative: 'You are likely to create progress by staying open, re-reading the terrain, and finding a next move before the system becomes rigid. That makes you valuable in live, shifting environments, though the same mobility can make your centre harder for others to predict if you do not signal the through-line clearly.',
+    pressureOverlay: 'Under pressure, you often become even more adaptive, scanning for workable openings instead of forcing premature closure.',
+    environmentOverlay: 'You usually fit best where change is frequent, experimentation is tolerated, and responsiveness counts as real capability rather than drift.',
+  },
+  {
     patternKey: 'balanced_operator',
     headline: 'You present as broadly balanced rather than sharply polarised.',
     subheadline: 'No stronger Hero rule dominates, so the profile resolves to a steady central pattern.',
@@ -162,6 +171,15 @@ export const HERO_PATTERN_LANGUAGE: readonly HeroPatternLanguage[] = [
     narrative: 'You are likely to create cohesion by staying usable, reducing unnecessary churn, and helping others feel the work is still manageable. The strength is reliable connection; the risk is staying in support mode when the context needs a stronger pivot or firmer challenge.',
     pressureOverlay: 'Pressure may increase your instinct to create steadiness for others and prevent the system from becoming fragmented.',
     environmentOverlay: 'You often do well in environments that value trust, continuity, and socially reliable coordination.',
+  },
+  {
+    patternKey: 'steady_steward',
+    headline: 'You create trust by holding people and continuity together.',
+    subheadline: 'Calm, people-aware, and more interested in keeping the system workable than making yourself dramatic inside it.',
+    summary: 'This consolidated pattern fits profiles where social awareness and stability combine into a clear stewardship identity.',
+    narrative: 'You are likely to create confidence by staying usable, reading what others need, and keeping enough continuity for the work to remain coherent through friction or change. The strength is steady containment; the risk is carrying the relational load longer than the moment really requires before naming the harder decision.',
+    pressureOverlay: 'Under pressure, you often move further toward containment, reassurance, and keeping the room workable enough to continue.',
+    environmentOverlay: 'You usually work best where trust, continuity, and relationship-sensitive judgement are treated as central to performance rather than secondary to louder forms of leadership.',
   },
   {
     patternKey: 'steady_executor',

@@ -1,7 +1,15 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { HERO_PATTERN_LANGUAGE_LOOKUP } from './hero-pattern-language';
-import { HERO_PATTERN_FALLBACK_KEY, HERO_PATTERN_RULES, PATTERN_CHANGE_LOG, ROUND2_HERO_PATTERN_RULES } from './hero-pattern-rules';
+import {
+  FINAL_ACTIVE_PATTERN_KEYS,
+  FINAL_CONSOLIDATION_MAP,
+  HERO_PATTERN_FALLBACK_KEY,
+  HERO_PATTERN_RULES,
+  PATTERN_CHANGE_LOG,
+  ROUND2_HERO_PATTERN_RULES,
+  ROUND3_HERO_PATTERN_RULES,
+} from './hero-pattern-rules';
 import { CURATED_PROFILES, generateAllProfiles } from './profile-fixtures';
 import { PAIR_TRAIT_WEIGHT_LOOKUP } from './pair-trait-weights';
 import type {
@@ -24,6 +32,18 @@ import { TRAIT_KEYS } from './hero-exploration-types';
 const OUTPUT_DIRECTORY = join(process.cwd(), 'scripts', 'hero-exploration', 'output');
 const JSON_OUTPUT_PATH = join(OUTPUT_DIRECTORY, 'hero-exploration-report.json');
 const MARKDOWN_OUTPUT_PATH = join(OUTPUT_DIRECTORY, 'hero-exploration-summary.md');
+
+type RoundSnapshot = {
+  name: 'round2' | 'round3' | 'final';
+  rules: readonly HeroPatternRule[];
+  generated: readonly ProcessedProfile[];
+  curated: readonly ProcessedProfile[];
+  coverage: readonly PatternCoverageRow[];
+  collisionSummary: CollisionSummary;
+  deadPatternSummary: DeadPatternSummary;
+  winningPatternCounts: Readonly<Record<string, number>>;
+  topWinningPatterns: readonly WinningPatternSummary[];
+};
 
 function createEmptyTraitTotals(): Record<TraitKey, number> {
   return Object.fromEntries(TRAIT_KEYS.map((traitKey) => [traitKey, 0])) as Record<TraitKey, number>;
@@ -84,7 +104,6 @@ function evaluateProfile(profile: SimulatedProfile, rules: readonly HeroPatternR
   const winner = matchedPatterns[0] ?? null;
   const winnerPatternKey = winner?.patternKey ?? HERO_PATTERN_FALLBACK_KEY;
   const heroCopy = HERO_PATTERN_LANGUAGE_LOOKUP.get(winnerPatternKey);
-
   if (!heroCopy) {
     throw new Error(`Missing Hero pattern language for ${winnerPatternKey}.`);
   }
@@ -101,12 +120,9 @@ function evaluateProfile(profile: SimulatedProfile, rules: readonly HeroPatternR
   };
 }
 
-function buildCoverage(
-  processedProfiles: readonly ProcessedProfile[],
-  ruleSet: readonly HeroPatternRule[],
-): readonly PatternCoverageRow[] {
+function buildCoverage(processedProfiles: readonly ProcessedProfile[], rules: readonly HeroPatternRule[]): readonly PatternCoverageRow[] {
   const coverage = new Map<string, PatternCoverageRow>();
-  const activePatternKeys = [...new Set([...ruleSet.map((rule) => rule.patternKey), HERO_PATTERN_FALLBACK_KEY])];
+  const activePatternKeys = [...new Set([...rules.map((rule) => rule.patternKey), HERO_PATTERN_FALLBACK_KEY])];
 
   for (const patternKey of activePatternKeys) {
     coverage.set(patternKey, {
@@ -138,17 +154,17 @@ function buildCoverage(
       }
     }
 
-    const winningRow = coverage.get(processedProfile.winnerPatternKey);
-    if (!winningRow) {
+    const winnerRow = coverage.get(processedProfile.winnerPatternKey);
+    if (!winnerRow) {
       continue;
     }
 
-    winningRow.winCount += 1;
-    if (winningRow.exampleProfiles.length < 3 && !winningRow.exampleProfiles.includes(processedProfile.profileKey)) {
-      winningRow.exampleProfiles = [...winningRow.exampleProfiles, processedProfile.profileKey];
+    winnerRow.winCount += 1;
+    if (winnerRow.exampleProfiles.length < 3 && !winnerRow.exampleProfiles.includes(processedProfile.profileKey)) {
+      winnerRow.exampleProfiles = [...winnerRow.exampleProfiles, processedProfile.profileKey];
     }
-    if (winningRow.examplePairs.length < 3 && !winningRow.examplePairs.includes(examplePairString)) {
-      winningRow.examplePairs = [...winningRow.examplePairs, examplePairString];
+    if (winnerRow.examplePairs.length < 3 && !winnerRow.examplePairs.includes(examplePairString)) {
+      winnerRow.examplePairs = [...winnerRow.examplePairs, examplePairString];
     }
   }
 
@@ -207,10 +223,7 @@ function buildCollisionSummary(processedProfiles: readonly ProcessedProfile[]): 
   };
 }
 
-function buildDeadPatternSummary(
-  coverage: readonly PatternCoverageRow[],
-  totalProfilesProcessed: number,
-): DeadPatternSummary {
+function buildDeadPatternSummary(coverage: readonly PatternCoverageRow[], totalProfilesProcessed: number): DeadPatternSummary {
   const averageWinShare = 1 / coverage.length;
 
   return {
@@ -230,7 +243,6 @@ function buildDeadPatternSummary(
 
 function buildWinningPatternCounts(processedProfiles: readonly ProcessedProfile[]): Record<string, number> {
   const counts = new Map<string, number>();
-
   for (const processedProfile of processedProfiles) {
     counts.set(processedProfile.winnerPatternKey, (counts.get(processedProfile.winnerPatternKey) ?? 0) + 1);
   }
@@ -240,10 +252,7 @@ function buildWinningPatternCounts(processedProfiles: readonly ProcessedProfile[
   );
 }
 
-function buildTopWinningPatterns(
-  winningPatternCounts: Readonly<Record<string, number>>,
-  totalProfilesProcessed: number,
-): readonly WinningPatternSummary[] {
+function buildTopWinningPatterns(winningPatternCounts: Readonly<Record<string, number>>, totalProfilesProcessed: number): readonly WinningPatternSummary[] {
   return Object.entries(winningPatternCounts)
     .map(([patternKey, count]) => ({
       patternKey,
@@ -252,6 +261,122 @@ function buildTopWinningPatterns(
     }))
     .sort((left, right) => right.count - left.count || left.patternKey.localeCompare(right.patternKey))
     .slice(0, 10);
+}
+
+function buildRoundSnapshot(
+  name: RoundSnapshot['name'],
+  rules: readonly HeroPatternRule[],
+  generatedProfiles: readonly SimulatedProfile[],
+  curatedProfiles: readonly SimulatedProfile[],
+): RoundSnapshot {
+  const generated = generatedProfiles.map((profile) => evaluateProfile(profile, rules));
+  const curated = curatedProfiles.map((profile) => evaluateProfile(profile, rules));
+  const coverage = buildCoverage(generated, rules);
+  const collisionSummary = buildCollisionSummary(generated);
+  const deadPatternSummary = buildDeadPatternSummary(coverage, generated.length);
+  const winningPatternCounts = buildWinningPatternCounts(generated);
+
+  return {
+    name,
+    rules,
+    generated,
+    curated,
+    coverage,
+    collisionSummary,
+    deadPatternSummary,
+    winningPatternCounts,
+    topWinningPatterns: buildTopWinningPatterns(winningPatternCounts, generated.length),
+  };
+}
+
+function buildComparisonMetrics(round2: RoundSnapshot, round3: RoundSnapshot, finalSnapshot: RoundSnapshot): readonly ComparisonMetricRow[] {
+  const round2FallbackCount = round2.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0;
+  const round3FallbackCount = round3.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0;
+  const finalFallbackCount = finalSnapshot.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0;
+
+  return [
+    {
+      label: 'total profiles processed',
+      round2: round2.collisionSummary.totalProfiles,
+      round3: round3.collisionSummary.totalProfiles,
+      final: finalSnapshot.collisionSummary.totalProfiles,
+    },
+    {
+      label: 'fallback count',
+      round2: `${round2FallbackCount} (${((round2FallbackCount / round2.collisionSummary.totalProfiles) * 100).toFixed(1)}%)`,
+      round3: `${round3FallbackCount} (${((round3FallbackCount / round3.collisionSummary.totalProfiles) * 100).toFixed(1)}%)`,
+      final: `${finalFallbackCount} (${((finalFallbackCount / finalSnapshot.collisionSummary.totalProfiles) * 100).toFixed(1)}%)`,
+    },
+    {
+      label: 'zero-match count',
+      round2: round2.collisionSummary.zeroMatchProfiles,
+      round3: round3.collisionSummary.zeroMatchProfiles,
+      final: finalSnapshot.collisionSummary.zeroMatchProfiles,
+    },
+    {
+      label: 'single-match count',
+      round2: round2.collisionSummary.singleMatchProfiles,
+      round3: round3.collisionSummary.singleMatchProfiles,
+      final: finalSnapshot.collisionSummary.singleMatchProfiles,
+    },
+    {
+      label: 'multi-match count',
+      round2: round2.collisionSummary.multiMatchProfiles,
+      round3: round3.collisionSummary.multiMatchProfiles,
+      final: finalSnapshot.collisionSummary.multiMatchProfiles,
+    },
+    {
+      label: 'worst collision count',
+      round2: round2.collisionSummary.worstCollisionCount,
+      round3: round3.collisionSummary.worstCollisionCount,
+      final: finalSnapshot.collisionSummary.worstCollisionCount,
+    },
+    {
+      label: 'dead pattern count',
+      round2: round2.deadPatternSummary.neverSelectedAsWinner.length,
+      round3: round3.deadPatternSummary.neverSelectedAsWinner.length,
+      final: finalSnapshot.deadPatternSummary.neverSelectedAsWinner.length,
+    },
+  ];
+}
+
+function buildCuratedComparison(round3Curated: readonly ProcessedProfile[], finalCurated: readonly ProcessedProfile[]): readonly CuratedComparisonRow[] {
+  const round3ByKey = new Map(round3Curated.map((profile) => [profile.profileKey, profile] as const));
+  const finalByKey = new Map(finalCurated.map((profile) => [profile.profileKey, profile] as const));
+  const spotlightKeys = ['profile_006', 'profile_017', 'profile_018', 'profile_021', 'profile_003', 'profile_005', 'profile_010', 'profile_012', 'profile_014', 'profile_020'];
+
+  return spotlightKeys.map((profileKey) => {
+    const round3 = round3ByKey.get(profileKey);
+    const finalSnapshot = finalByKey.get(profileKey);
+    if (!round3 || !finalSnapshot) {
+      throw new Error(`Missing curated comparison profile ${profileKey}.`);
+    }
+
+    return {
+      profileKey,
+      previousWinner: round3.winnerPatternKey,
+      finalWinner: finalSnapshot.winnerPatternKey,
+      changed: round3.winnerPatternKey !== finalSnapshot.winnerPatternKey,
+      judgement: buildCuratedJudgement(round3, finalSnapshot),
+    };
+  });
+}
+
+function buildCuratedJudgement(round3: ProcessedProfile, finalSnapshot: ProcessedProfile): string {
+  if (round3.winnerPatternKey === finalSnapshot.winnerPatternKey) {
+    return 'Equally good. The final 12-pattern model kept the same identity because the round-3 winner was already a clean Hero lane.';
+  }
+
+  const finalMergedSource = Object.entries(FINAL_CONSOLIDATION_MAP).find(([, previous]) => previous.includes(round3.winnerPatternKey));
+  if (finalMergedSource && finalMergedSource[0] === finalSnapshot.winnerPatternKey) {
+    return `Better. The final model folds ${round3.winnerPatternKey} into the broader ${finalSnapshot.winnerPatternKey} lane, which is cleaner at Hero level without losing the behavioural signal.`;
+  }
+
+  if (finalSnapshot.winnerPatternKey === HERO_PATTERN_FALLBACK_KEY) {
+    return 'Worse. The simplified model lost specificity here and fell back to balanced_operator.';
+  }
+
+  return `Better. The final model prefers ${finalSnapshot.winnerPatternKey} because the consolidated taxonomy treats that behaviour as the stronger identity-level pattern.`;
 }
 
 function formatCondition(condition: HeroPatternCondition): string {
@@ -264,74 +389,6 @@ function formatTraitTotals(traitTotals: ProcessedProfile['traitTotals']): string
     .map((traitKey) => `- ${traitKey}: ${traitTotals[traitKey]}`);
 }
 
-function buildComparisonMetrics(
-  baselineCollisionSummary: CollisionSummary,
-  refinedCollisionSummary: CollisionSummary,
-  baselineDeadPatternSummary: DeadPatternSummary,
-  refinedDeadPatternSummary: DeadPatternSummary,
-  baselineWinningPatternCounts: Readonly<Record<string, number>>,
-  refinedWinningPatternCounts: Readonly<Record<string, number>>,
-): readonly ComparisonMetricRow[] {
-  const baselineFallbackCount = baselineWinningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0;
-  const refinedFallbackCount = refinedWinningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0;
-
-  return [
-    { label: 'total profiles processed', baseline: baselineCollisionSummary.totalProfiles, refined: refinedCollisionSummary.totalProfiles },
-    {
-      label: 'fallback count',
-      baseline: `${baselineFallbackCount} (${((baselineFallbackCount / baselineCollisionSummary.totalProfiles) * 100).toFixed(1)}%)`,
-      refined: `${refinedFallbackCount} (${((refinedFallbackCount / refinedCollisionSummary.totalProfiles) * 100).toFixed(1)}%)`,
-    },
-    { label: 'zero-match count', baseline: baselineCollisionSummary.zeroMatchProfiles, refined: refinedCollisionSummary.zeroMatchProfiles },
-    { label: 'single-match count', baseline: baselineCollisionSummary.singleMatchProfiles, refined: refinedCollisionSummary.singleMatchProfiles },
-    { label: 'multi-match count', baseline: baselineCollisionSummary.multiMatchProfiles, refined: refinedCollisionSummary.multiMatchProfiles },
-    { label: 'worst collision count', baseline: baselineCollisionSummary.worstCollisionCount, refined: refinedCollisionSummary.worstCollisionCount },
-    {
-      label: 'dead pattern count',
-      baseline: baselineDeadPatternSummary.neverSelectedAsWinner.length,
-      refined: refinedDeadPatternSummary.neverSelectedAsWinner.length,
-    },
-  ];
-}
-
-function buildCuratedComparison(
-  baselineCurated: readonly ProcessedProfile[],
-  refinedCurated: readonly ProcessedProfile[],
-): readonly CuratedComparisonRow[] {
-  const baselineByKey = new Map(baselineCurated.map((profile) => [profile.profileKey, profile] as const));
-  const refinedByKey = new Map(refinedCurated.map((profile) => [profile.profileKey, profile] as const));
-  const spotlightKeys = ['profile_006', 'profile_017', 'profile_018', 'profile_021', 'profile_002', 'profile_004', 'profile_015', 'profile_022'];
-
-  return spotlightKeys.map((profileKey) => {
-    const baseline = baselineByKey.get(profileKey);
-    const refined = refinedByKey.get(profileKey);
-
-    if (!baseline || !refined) {
-      throw new Error(`Missing curated comparison profile ${profileKey}.`);
-    }
-
-    return {
-      profileKey,
-      baselineWinner: baseline.winnerPatternKey,
-      refinedWinner: refined.winnerPatternKey,
-      changed: baseline.winnerPatternKey !== refined.winnerPatternKey,
-      whyBetter: buildBetterFitNote(baseline, refined),
-    };
-  });
-}
-
-function buildBetterFitNote(baseline: ProcessedProfile, refined: ProcessedProfile): string {
-  if (baseline.winnerPatternKey === refined.winnerPatternKey) {
-    return 'The refined model kept the same winner because the original pattern was already the clearest fit.';
-  }
-
-  if (baseline.winnerPatternKey === HERO_PATTERN_FALLBACK_KEY && refined.winnerPatternKey !== HERO_PATTERN_FALLBACK_KEY) {
-    return `The refined model replaces fallback with ${refined.winnerPatternKey}, which matches the visible trait shape more specifically.`;
-  }
-
-  return `The refined model prefers ${refined.winnerPatternKey} because its thresholds fit the trait totals more narrowly than ${baseline.winnerPatternKey}.`;
-}
-
 function buildRuleChangeLog(): readonly string[] {
   return Object.entries(PATTERN_CHANGE_LOG)
     .sort((left, right) => left[0].localeCompare(right[0]))
@@ -339,18 +396,52 @@ function buildRuleChangeLog(): readonly string[] {
 }
 
 function buildPatternChangeLog(): readonly string[] {
-  const baselineKeys = new Set(ROUND2_HERO_PATTERN_RULES.map((rule) => rule.patternKey));
-  const refinedKeys = new Set(HERO_PATTERN_RULES.map((rule) => rule.patternKey));
+  const finalKeys = new Set(FINAL_ACTIVE_PATTERN_KEYS);
+  const round3Keys = new Set(ROUND3_HERO_PATTERN_RULES.map((rule) => rule.patternKey));
 
-  const added = [...refinedKeys].filter((key) => !baselineKeys.has(key)).sort();
-  const removed = [...baselineKeys].filter((key) => !refinedKeys.has(key)).sort();
-  const retained = [...refinedKeys].filter((key) => baselineKeys.has(key)).sort();
+  const retained = [...finalKeys].filter((key) => round3Keys.has(key)).sort();
+  const added = [...finalKeys].filter((key) => !round3Keys.has(key)).sort();
+  const removed = [...round3Keys].filter((key) => !finalKeys.has(key)).sort();
 
   return [
-    `added: ${added.join(', ') || 'none'}`,
-    `removed: ${removed.join(', ') || 'none'}`,
-    `retained and redefined: ${retained.join(', ') || 'none'}`,
+    `final active patterns: ${FINAL_ACTIVE_PATTERN_KEYS.join(', ')}`,
+    `added in final consolidation: ${added.join(', ') || 'none'}`,
+    `retired from round 3: ${removed.join(', ') || 'none'}`,
+    `retained into final system: ${retained.join(', ') || 'none'}`,
   ];
+}
+
+function buildImplementationReadiness(finalSnapshot: RoundSnapshot): ExplorationReport['implementationReadiness'] {
+  const fallbackShare = (finalSnapshot.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0) / finalSnapshot.generated.length;
+  const ready = fallbackShare < 0.2
+    && finalSnapshot.collisionSummary.multiMatchProfiles < 8000
+    && finalSnapshot.collisionSummary.worstCollisionCount <= 3
+    && finalSnapshot.deadPatternSummary.neverSelectedAsWinner.length === 0;
+
+  return {
+    ready,
+    judgement: ready
+      ? 'The final 12-pattern model is clean enough to move into engine and builder implementation.'
+      : 'The final 12-pattern model is cleaner editorially, but it is still not implementation-ready because fallback and collision depth remain above the target thresholds.',
+    strongestPatterns: [
+      'forceful_driver',
+      'delivery_commander',
+      'exacting_controller',
+      'deliberate_craftsperson',
+      'relational_catalyst',
+      'steady_steward',
+    ],
+    fallbackHeavyRegions: [
+      'mid-range mixed profiles that spread across task, social, and adaptive traits without a dominant lane',
+      'moderate structured + social profiles that miss structured_collaborator by one threshold',
+      'balanced adaptive profiles that are not social enough for relational_catalyst and not flexible enough for adaptive_mobiliser',
+    ],
+    remainingWeakSpots: [
+      'balanced_operator still covers too much of the combinatorial space',
+      'relational_catalyst and steady_steward still overlap on people-led profiles with moderate pace and stability',
+      'adaptive_mobiliser can still brush against structured_collaborator and relational_catalyst in mixed adaptive-social cases',
+    ],
+  };
 }
 
 function buildMarkdownReport(report: ExplorationReport): string {
@@ -360,34 +451,49 @@ function buildMarkdownReport(report: ExplorationReport): string {
   lines.push('');
   lines.push(`- Run mode: ${report.runMode}`);
   lines.push(`- Total profiles processed: ${report.totalProfilesProcessed}`);
-  lines.push(`- Refined fallback count: ${report.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0}`);
-  lines.push(`- Refined fallback share: ${(((report.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0) / report.totalProfilesProcessed) * 100).toFixed(1)}%`);
-  lines.push(`- Worst collision count: ${report.collisionSummary.worstCollisionCount}`);
+  lines.push(`- Final fallback count: ${report.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0}`);
+  lines.push(`- Final fallback share: ${(((report.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0) / report.totalProfilesProcessed) * 100).toFixed(1)}%`);
+  lines.push(`- Final worst collision count: ${report.collisionSummary.worstCollisionCount}`);
+  lines.push(`- Implementation-ready: ${report.implementationReadiness.ready ? 'yes' : 'no'}`);
   lines.push('');
-  lines.push('## Round 2 vs Round 3');
+  lines.push('## Final 12 Active Patterns');
   lines.push('');
-  lines.push('| Metric | Round 2 | Round 3 |');
-  lines.push('| --- | ---: | ---: |');
-  for (const row of report.comparison.metrics) {
-    lines.push(`| ${row.label} | ${row.baseline} | ${row.refined} |`);
+  for (const patternKey of report.finalPatternInventory) {
+    lines.push(`- ${patternKey}`);
   }
   lines.push('');
-  lines.push(`- Dead patterns in round 2: ${report.comparison.deadPatternsBefore.join(', ') || 'none'}`);
-  lines.push(`- Dead patterns in round 3: ${report.comparison.deadPatternsAfter.join(', ') || 'none'}`);
+  lines.push('## Consolidation Map');
   lines.push('');
-  lines.push('## Top Winners Round 2 vs Round 3');
+  for (const [finalPattern, previousPatterns] of Object.entries(report.consolidationMap)) {
+    lines.push(`- ${finalPattern}: ${previousPatterns.join(', ')}`);
+  }
   lines.push('');
-  lines.push('| Round 2 | Count | Share | Round 3 | Count | Share |');
-  lines.push('| --- | ---: | ---: | --- | ---: | ---: |');
-  for (let index = 0; index < Math.max(report.comparison.topWinnersBefore.length, report.comparison.topWinnersAfter.length); index += 1) {
-    const before = report.comparison.topWinnersBefore[index];
-    const after = report.comparison.topWinnersAfter[index];
+  lines.push('## Round 2 vs Round 3 vs Final');
+  lines.push('');
+  lines.push('| Metric | Round 2 | Round 3 | Final |');
+  lines.push('| --- | ---: | ---: | ---: |');
+  for (const row of report.comparison.metrics) {
+    lines.push(`| ${row.label} | ${row.round2} | ${row.round3} | ${row.final} |`);
+  }
+  lines.push('');
+  lines.push(`- Dead patterns in round 2: ${report.comparison.deadPatternsRound2.join(', ') || 'none'}`);
+  lines.push(`- Dead patterns in round 3: ${report.comparison.deadPatternsRound3.join(', ') || 'none'}`);
+  lines.push(`- Dead patterns in final model: ${report.comparison.deadPatternsFinal.join(', ') || 'none'}`);
+  lines.push('');
+  lines.push('## Top Winners by Round');
+  lines.push('');
+  lines.push('| Round 2 | Count | Share | Round 3 | Count | Share | Final | Count | Share |');
+  lines.push('| --- | ---: | ---: | --- | ---: | ---: | --- | ---: | ---: |');
+  for (let index = 0; index < Math.max(report.comparison.topWinnersRound2.length, report.comparison.topWinnersRound3.length, report.comparison.topWinnersFinal.length); index += 1) {
+    const round2 = report.comparison.topWinnersRound2[index];
+    const round3 = report.comparison.topWinnersRound3[index];
+    const finalSnapshot = report.comparison.topWinnersFinal[index];
     lines.push(
-      `| ${before?.patternKey ?? '-'} | ${before?.count ?? '-'} | ${before ? `${(before.share * 100).toFixed(1)}%` : '-'} | ${after?.patternKey ?? '-'} | ${after?.count ?? '-'} | ${after ? `${(after.share * 100).toFixed(1)}%` : '-'} |`,
+      `| ${round2?.patternKey ?? '-'} | ${round2?.count ?? '-'} | ${round2 ? `${(round2.share * 100).toFixed(1)}%` : '-'} | ${round3?.patternKey ?? '-'} | ${round3?.count ?? '-'} | ${round3 ? `${(round3.share * 100).toFixed(1)}%` : '-'} | ${finalSnapshot?.patternKey ?? '-'} | ${finalSnapshot?.count ?? '-'} | ${finalSnapshot ? `${(finalSnapshot.share * 100).toFixed(1)}%` : '-'} |`,
     );
   }
   lines.push('');
-  lines.push('## Pattern Coverage');
+  lines.push('## Final Pattern Coverage');
   lines.push('');
   lines.push('| Pattern | Match Count | Win Count | Win Rate | Example Profiles | Change Note |');
   lines.push('| --- | ---: | ---: | ---: | --- | --- |');
@@ -397,7 +503,7 @@ function buildMarkdownReport(report: ExplorationReport): string {
     );
   }
   lines.push('');
-  lines.push('## Collision Summary');
+  lines.push('## Final Collision Summary');
   lines.push('');
   for (const collisionSet of report.collisionSummary.topCollisionSets) {
     lines.push(`- ${collisionSet.patternKeys.join(' > ')}: ${collisionSet.count}`);
@@ -406,12 +512,19 @@ function buildMarkdownReport(report: ExplorationReport): string {
   lines.push('## Curated Comparison');
   lines.push('');
   for (const row of report.curatedComparison) {
-    lines.push(`- ${row.profileKey}: ${row.baselineWinner} -> ${row.refinedWinner}. ${row.whyBetter}`);
+    lines.push(`- ${row.profileKey}: ${row.previousWinner} -> ${row.finalWinner}. ${row.judgement}`);
   }
+  lines.push('');
+  lines.push('## Narrative Judgement');
+  lines.push('');
+  lines.push(`- Overall judgement: ${report.implementationReadiness.judgement}`);
+  lines.push(`- Strongest editorial patterns: ${report.implementationReadiness.strongestPatterns.join(', ')}`);
+  lines.push(`- Fallback-heavy regions: ${report.implementationReadiness.fallbackHeavyRegions.join('; ')}`);
+  lines.push(`- Remaining weak spots: ${report.implementationReadiness.remainingWeakSpots.join('; ')}`);
   lines.push('');
   lines.push('## Change Log');
   lines.push('');
-  lines.push('Rule changes:');
+  lines.push('Rule and pattern changes:');
   for (const line of report.changeLog.rules) {
     lines.push(`- ${line}`);
   }
@@ -421,7 +534,7 @@ function buildMarkdownReport(report: ExplorationReport): string {
     lines.push(`- ${line}`);
   }
   lines.push('');
-  lines.push('Pattern set changes:');
+  lines.push('Pattern inventory changes:');
   for (const line of report.changeLog.patterns) {
     lines.push(`- ${line}`);
   }
@@ -452,20 +565,21 @@ function writeArtifacts(report: ExplorationReport): void {
   writeFileSync(MARKDOWN_OUTPUT_PATH, buildMarkdownReport(report), 'utf8');
 }
 
-function printComparison(report: ExplorationReport): void {
-  console.log('Round 2 vs Round 3 comparison');
-  console.log('-----------------------------');
-  for (const row of report.comparison.metrics) {
-    console.log(`${row.label}: ${row.baseline} -> ${row.refined}`);
+function printComparison(metrics: readonly ComparisonMetricRow[], report: ExplorationReport): void {
+  console.log('Round 2 vs Round 3 vs Final comparison');
+  console.log('--------------------------------------');
+  for (const row of metrics) {
+    console.log(`${row.label}: ${row.round2} -> ${row.round3} -> ${row.final}`);
   }
-  console.log(`Dead patterns in round 2: ${report.comparison.deadPatternsBefore.join(', ') || 'none'}`);
-  console.log(`Dead patterns in round 3: ${report.comparison.deadPatternsAfter.join(', ') || 'none'}`);
+  console.log(`Dead patterns in round 2: ${report.comparison.deadPatternsRound2.join(', ') || 'none'}`);
+  console.log(`Dead patterns in round 3: ${report.comparison.deadPatternsRound3.join(', ') || 'none'}`);
+  console.log(`Dead patterns in final model: ${report.comparison.deadPatternsFinal.join(', ') || 'none'}`);
   console.log('');
 }
 
 function printCoverageTable(coverage: readonly PatternCoverageRow[]): void {
-  console.log('Pattern coverage');
-  console.log('----------------');
+  console.log('Final pattern coverage');
+  console.log('----------------------');
   console.log('patternKey | matchCount | winCount | winRate | examples | note');
   for (const row of coverage) {
     console.log(
@@ -476,8 +590,8 @@ function printCoverageTable(coverage: readonly PatternCoverageRow[]): void {
 }
 
 function printCollisionSummary(collisionSummary: CollisionSummary): void {
-  console.log('Collision summary');
-  console.log('-----------------');
+  console.log('Final collision summary');
+  console.log('-----------------------');
   console.log(`Profiles with 2+ matches: ${collisionSummary.multiMatchProfiles}`);
   console.log(`Worst collision count: ${collisionSummary.worstCollisionCount}`);
   console.log('Top 10 collision sets:');
@@ -487,20 +601,11 @@ function printCollisionSummary(collisionSummary: CollisionSummary): void {
   console.log('');
 }
 
-function printDeadPatternSummary(deadPatternSummary: DeadPatternSummary): void {
-  console.log('Dead-pattern summary');
-  console.log('--------------------');
-  console.log(`Never selected as winner: ${deadPatternSummary.neverSelectedAsWinner.join(', ') || 'none'}`);
-  console.log(`Never matched: ${deadPatternSummary.neverMatched.join(', ') || 'none'}`);
-  console.log(`Matched but never win: ${deadPatternSummary.matchedButNeverWin.join(', ') || 'none'}`);
-  console.log('');
-}
-
 function printCuratedComparison(curatedComparison: readonly CuratedComparisonRow[]): void {
   console.log('Curated comparison');
   console.log('------------------');
   for (const row of curatedComparison) {
-    console.log(`- ${row.profileKey}: ${row.baselineWinner} -> ${row.refinedWinner}. ${row.whyBetter}`);
+    console.log(`- ${row.profileKey}: ${row.previousWinner} -> ${row.finalWinner}. ${row.judgement}`);
   }
   console.log('');
 }
@@ -556,66 +661,53 @@ function printDetailedExamples(examples: readonly ProcessedProfile[]): void {
 
 function main(): void {
   const generatedProfiles = generateAllProfiles();
-  const baselineGeneratedProfiles = generatedProfiles.map((profile) => evaluateProfile(profile, ROUND2_HERO_PATTERN_RULES));
-  const refinedGeneratedProfiles = generatedProfiles.map((profile) => evaluateProfile(profile, HERO_PATTERN_RULES));
-  const baselineCuratedProfiles = CURATED_PROFILES.map((profile) => evaluateProfile(profile, ROUND2_HERO_PATTERN_RULES));
-  const refinedCuratedProfiles = CURATED_PROFILES.map((profile) => evaluateProfile(profile, HERO_PATTERN_RULES));
-
-  const baselineCoverage = buildCoverage(baselineGeneratedProfiles, ROUND2_HERO_PATTERN_RULES);
-  const refinedCoverage = buildCoverage(refinedGeneratedProfiles, HERO_PATTERN_RULES);
-  const baselineCollisionSummary = buildCollisionSummary(baselineGeneratedProfiles);
-  const refinedCollisionSummary = buildCollisionSummary(refinedGeneratedProfiles);
-  const baselineDeadPatternSummary = buildDeadPatternSummary(baselineCoverage, baselineGeneratedProfiles.length);
-  const refinedDeadPatternSummary = buildDeadPatternSummary(refinedCoverage, refinedGeneratedProfiles.length);
-  const baselineWinningPatternCounts = buildWinningPatternCounts(baselineGeneratedProfiles);
-  const refinedWinningPatternCounts = buildWinningPatternCounts(refinedGeneratedProfiles);
+  const round2 = buildRoundSnapshot('round2', ROUND2_HERO_PATTERN_RULES, generatedProfiles, CURATED_PROFILES);
+  const round3 = buildRoundSnapshot('round3', ROUND3_HERO_PATTERN_RULES, generatedProfiles, CURATED_PROFILES);
+  const finalSnapshot = buildRoundSnapshot('final', HERO_PATTERN_RULES, generatedProfiles, CURATED_PROFILES);
 
   const report: ExplorationReport = {
     runMode: 'full_combinatorial',
-    totalProfilesProcessed: refinedGeneratedProfiles.length,
+    totalProfilesProcessed: finalSnapshot.generated.length,
     processedAt: new Date().toISOString(),
-    winningPatternCounts: refinedWinningPatternCounts,
-    topWinningPatterns: buildTopWinningPatterns(refinedWinningPatternCounts, refinedGeneratedProfiles.length),
-    collisionSummary: refinedCollisionSummary,
-    deadPatternSummary: refinedDeadPatternSummary,
-    coverage: refinedCoverage,
-    detailedCuratedExamples: refinedCuratedProfiles,
+    winningPatternCounts: finalSnapshot.winningPatternCounts,
+    topWinningPatterns: finalSnapshot.topWinningPatterns,
+    collisionSummary: finalSnapshot.collisionSummary,
+    deadPatternSummary: finalSnapshot.deadPatternSummary,
+    coverage: finalSnapshot.coverage,
+    detailedCuratedExamples: finalSnapshot.curated,
     comparison: {
-      metrics: buildComparisonMetrics(
-        baselineCollisionSummary,
-        refinedCollisionSummary,
-        baselineDeadPatternSummary,
-        refinedDeadPatternSummary,
-        baselineWinningPatternCounts,
-        refinedWinningPatternCounts,
-      ),
-      deadPatternsBefore: baselineDeadPatternSummary.neverSelectedAsWinner,
-      deadPatternsAfter: refinedDeadPatternSummary.neverSelectedAsWinner,
-      topWinnersBefore: buildTopWinningPatterns(baselineWinningPatternCounts, baselineGeneratedProfiles.length),
-      topWinnersAfter: buildTopWinningPatterns(refinedWinningPatternCounts, refinedGeneratedProfiles.length),
+      metrics: buildComparisonMetrics(round2, round3, finalSnapshot),
+      deadPatternsRound2: round2.deadPatternSummary.neverSelectedAsWinner,
+      deadPatternsRound3: round3.deadPatternSummary.neverSelectedAsWinner,
+      deadPatternsFinal: finalSnapshot.deadPatternSummary.neverSelectedAsWinner,
+      topWinnersRound2: round2.topWinningPatterns,
+      topWinnersRound3: round3.topWinningPatterns,
+      topWinnersFinal: finalSnapshot.topWinningPatterns,
     },
-    curatedComparison: buildCuratedComparison(baselineCuratedProfiles, refinedCuratedProfiles),
+    curatedComparison: buildCuratedComparison(round3.curated, finalSnapshot.curated),
+    finalPatternInventory: [...FINAL_ACTIVE_PATTERN_KEYS],
+    consolidationMap: FINAL_CONSOLIDATION_MAP,
+    implementationReadiness: buildImplementationReadiness(finalSnapshot),
     changeLog: {
       rules: buildRuleChangeLog(),
-      pairTraitWeights: ['No pair-trait weight mappings changed in round 3; refinement was achieved through rule separation, threshold tuning, and minimal exclusions.'],
+      pairTraitWeights: ['No pair-trait weight mappings changed in the final 12-pattern consolidation.'],
       patterns: buildPatternChangeLog(),
     },
   };
 
   writeArtifacts(report);
 
-  console.log('Hero Pattern Refinement Harness');
-  console.log('===============================');
+  console.log('Hero Pattern Consolidation Harness');
+  console.log('=================================');
   console.log(`Run mode: ${report.runMode}`);
   console.log(`Total profiles processed: ${report.totalProfilesProcessed}`);
   console.log(`JSON artifact: ${JSON_OUTPUT_PATH}`);
   console.log(`Markdown artifact: ${MARKDOWN_OUTPUT_PATH}`);
   console.log('');
 
-  printComparison(report);
+  printComparison(report.comparison.metrics, report);
   printCoverageTable(report.coverage);
   printCollisionSummary(report.collisionSummary);
-  printDeadPatternSummary(report.deadPatternSummary);
   printCuratedComparison(report.curatedComparison);
   printDetailedExamples(report.detailedCuratedExamples);
 }

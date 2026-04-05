@@ -116,16 +116,17 @@ export type WinningPatternSummary = {
 
 export type ComparisonMetricRow = {
   label: string;
-  baseline: number | string;
-  refined: number | string;
+  round2: number | string;
+  round3: number | string;
+  final: number | string;
 };
 
 export type CuratedComparisonRow = {
   profileKey: string;
-  baselineWinner: string;
-  refinedWinner: string;
+  previousWinner: string;
+  finalWinner: string;
   changed: boolean;
-  whyBetter: string;
+  judgement: string;
 };
 
 export type ExplorationReport = {
@@ -140,12 +141,23 @@ export type ExplorationReport = {
   detailedCuratedExamples: readonly ProcessedProfile[];
   comparison: {
     metrics: readonly ComparisonMetricRow[];
-    deadPatternsBefore: readonly string[];
-    deadPatternsAfter: readonly string[];
-    topWinnersBefore: readonly WinningPatternSummary[];
-    topWinnersAfter: readonly WinningPatternSummary[];
+    deadPatternsRound2: readonly string[];
+    deadPatternsRound3: readonly string[];
+    deadPatternsFinal: readonly string[];
+    topWinnersRound2: readonly WinningPatternSummary[];
+    topWinnersRound3: readonly WinningPatternSummary[];
+    topWinnersFinal: readonly WinningPatternSummary[];
   };
   curatedComparison: readonly CuratedComparisonRow[];
+  finalPatternInventory: readonly string[];
+  consolidationMap: Readonly<Record<string, readonly string[]>>;
+  implementationReadiness: {
+    ready: boolean;
+    judgement: string;
+    strongestPatterns: readonly string[];
+    fallbackHeavyRegions: readonly string[];
+    remainingWeakSpots: readonly string[];
+  };
   changeLog: {
     rules: readonly string[];
     pairTraitWeights: readonly string[];
