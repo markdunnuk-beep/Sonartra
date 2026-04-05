@@ -11,6 +11,11 @@ import {
   importSignalBulkAction,
 } from '@/lib/server/admin-signal-bulk-import-actions';
 import type { AdminAssessmentDetailDomain } from '@/lib/server/admin-assessment-detail';
+import {
+  AdminFeedbackNotice,
+  AdminFeedbackSection,
+  AdminFeedbackStat,
+} from '@/components/admin/admin-feedback-primitives';
 import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
 
 const SIGNAL_IMPORT_FORMAT_EXAMPLE = [
@@ -50,59 +55,13 @@ function ActionButton({
   );
 }
 
-function InlineBanner({
-  tone,
-  children,
-}: Readonly<{
-  tone: 'danger' | 'warning' | 'success' | 'neutral';
-  children: React.ReactNode;
-}>) {
-  const toneClass =
-    tone === 'danger'
-      ? 'border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] text-[rgba(255,216,216,0.94)]'
-      : tone === 'warning'
-        ? 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'
-        : tone === 'success'
-          ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
-          : 'border-white/10 bg-black/10 text-white/72';
-
-  return <div className={cn('rounded-[1rem] border px-4 py-3 text-sm', toneClass)}>{children}</div>;
-}
-
-function SectionBlock({
-  title,
-  children,
-}: Readonly<{
-  title: string;
-  children: React.ReactNode;
-}>) {
-  return (
-    <section className="space-y-3">
-      <h4 className="text-sm font-semibold uppercase tracking-[0.14em] text-white/56">{title}</h4>
-      {children}
-    </section>
-  );
-}
-
 function SummaryGrid({ state }: Readonly<{ state: AdminSignalBulkImportState }>) {
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Parsed rows</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.rowCount}</p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Accepted rows</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.acceptedCount}</p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Rejected rows</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.rejectedCount}</p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Import status</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.canImport ? 'Ready' : 'Blocked'}</p>
-      </div>
+      <AdminFeedbackStat label="Parsed rows" value={String(state.summary.rowCount)} />
+      <AdminFeedbackStat label="Accepted rows" value={String(state.summary.acceptedCount)} />
+      <AdminFeedbackStat label="Rejected rows" value={String(state.summary.rejectedCount)} />
+      <AdminFeedbackStat label="Import status" value={state.canImport ? 'Ready' : 'Blocked'} />
     </div>
   );
 }
@@ -215,27 +174,27 @@ export function AdminBulkSignalImport({
         </div>
 
         {!isEditableAssessmentVersion ? (
-          <InlineBanner tone="warning">
+          <AdminFeedbackNotice tone="warning">
             Bulk import is available only for draft assessment versions.
-          </InlineBanner>
+          </AdminFeedbackNotice>
         ) : null}
 
         {!hasAuthoredDomains ? (
-          <InlineBanner tone="warning">
+          <AdminFeedbackNotice tone="warning">
             Add at least one domain before importing signals.
-          </InlineBanner>
+          </AdminFeedbackNotice>
         ) : null}
 
         {hasExistingSignals ? (
-          <InlineBanner tone="warning">
+          <AdminFeedbackNotice tone="warning">
             New signals will be added to each matched domain. Existing signals will not be changed or removed.
-          </InlineBanner>
+          </AdminFeedbackNotice>
         ) : null}
 
-        {successMessage ? <InlineBanner tone="success">{successMessage}</InlineBanner> : null}
+        {successMessage ? <AdminFeedbackNotice tone="success">{successMessage}</AdminFeedbackNotice> : null}
 
-        <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Accepted format</p>
+        <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
+          <p className="sonartra-admin-feedback-section-title">Accepted format</p>
           <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
             {SIGNAL_IMPORT_FORMAT_EXAMPLE}
           </pre>
@@ -260,7 +219,7 @@ export function AdminBulkSignalImport({
           />
         </label>
 
-        {actionErrorMessage ? <InlineBanner tone="danger">{actionErrorMessage}</InlineBanner> : null}
+        {actionErrorMessage ? <AdminFeedbackNotice tone="danger">{actionErrorMessage}</AdminFeedbackNotice> : null}
 
         <div className="flex flex-wrap items-center gap-3">
           <ActionButton disabled={!canImport} onClick={handleImport} variant="primary">
@@ -270,22 +229,22 @@ export function AdminBulkSignalImport({
 
         {resultState.hasSubmitted ? (
           <div className="space-y-5">
-            <SectionBlock title="Summary">
+            <AdminFeedbackSection title="Summary">
               <SummaryGrid state={resultState} />
-            </SectionBlock>
+            </AdminFeedbackSection>
 
             {!resultState.didImport && resultState.accepted.length === 0 ? (
-              <InlineBanner tone="warning">
+              <AdminFeedbackNotice tone="warning">
                 No valid rows were found to import. Fix the rejected rows and try again.
-              </InlineBanner>
+              </AdminFeedbackNotice>
             ) : null}
 
             {acceptedPreviewGroups.length > 0 ? (
-              <SectionBlock title="Accepted preview">
+              <AdminFeedbackSection title="Accepted preview">
                 <div className="space-y-4">
                   {acceptedPreviewGroups.map((group) => (
                     <div
-                      className="rounded-[1rem] border border-white/8 bg-black/10 p-4"
+                      className="sonartra-admin-feedback-card rounded-[1rem] border p-4"
                       key={group.domainId}
                     >
                       <div className="flex flex-wrap items-center gap-2">
@@ -300,7 +259,7 @@ export function AdminBulkSignalImport({
                       <div className="mt-4 space-y-3">
                         {group.rows.map((row) => (
                           <div
-                            className="rounded-[0.9rem] border border-white/8 bg-black/10 p-4"
+                            className="sonartra-admin-feedback-card rounded-[0.9rem] border p-4"
                             key={`${row.sourceLineNumber}-${row.signalKey}`}
                           >
                             <div className="flex flex-wrap items-center gap-2">
@@ -328,29 +287,29 @@ export function AdminBulkSignalImport({
                     </div>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.rejected.length > 0 ? (
-              <SectionBlock title="Rejected preview">
+              <AdminFeedbackSection title="Rejected preview">
                 <div className="space-y-2">
                   {resultState.rejected.map((row, index) => (
-                    <InlineBanner key={`${row.sourceLineNumber ?? 'global'}-${row.reasonCode}-${index}`} tone="danger">
+                    <AdminFeedbackNotice key={`${row.sourceLineNumber ?? 'global'}-${row.reasonCode}-${index}`} tone="danger">
                       {row.sourceLineNumber === null
                         ? row.message
                         : `Line ${row.sourceLineNumber}: ${row.message}`}
-                    </InlineBanner>
+                    </AdminFeedbackNotice>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.lastAction === 'import' && !resultState.didImport && !resultState.executionError ? (
-              <SectionBlock title="Import result">
-                <InlineBanner tone="neutral">
+              <AdminFeedbackSection title="Import result">
+                <AdminFeedbackNotice tone="neutral">
                   Import did not run. Review the messages, then try again after fixing the rows.
-                </InlineBanner>
-              </SectionBlock>
+                </AdminFeedbackNotice>
+              </AdminFeedbackSection>
             ) : null}
           </div>
         ) : null}

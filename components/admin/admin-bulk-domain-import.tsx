@@ -8,6 +8,11 @@ import {
   type AdminDomainBulkImportState,
 } from '@/lib/admin/admin-domain-bulk-import';
 import { importDomainBulkAction } from '@/lib/server/admin-domain-bulk-import-actions';
+import {
+  AdminFeedbackNotice,
+  AdminFeedbackSection,
+  AdminFeedbackStat,
+} from '@/components/admin/admin-feedback-primitives';
 import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
 
 const DOMAIN_IMPORT_FORMAT_EXAMPLE = [
@@ -46,67 +51,13 @@ function ActionButton({
   );
 }
 
-function InlineBanner({
-  tone,
-  children,
-}: Readonly<{
-  tone: 'danger' | 'warning' | 'success' | 'neutral';
-  children: React.ReactNode;
-}>) {
-  const toneClass =
-    tone === 'danger'
-      ? 'border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] text-[rgba(255,216,216,0.94)]'
-      : tone === 'warning'
-        ? 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'
-        : tone === 'success'
-          ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
-          : 'border-white/10 bg-black/10 text-white/72';
-
-  return (
-    <div
-      className={cn('sonartra-motion-banner rounded-[1rem] border px-4 py-3 text-sm', toneClass)}
-    >
-      {children}
-    </div>
-  );
-}
-
-function SectionBlock({
-  title,
-  children,
-}: Readonly<{
-  title: string;
-  children: React.ReactNode;
-}>) {
-  return (
-    <section className="space-y-3">
-      <h4 className="text-white/56 text-sm font-semibold uppercase tracking-[0.14em]">{title}</h4>
-      {children}
-    </section>
-  );
-}
-
 function SummaryGrid({ state }: Readonly<{ state: AdminDomainBulkImportState }>) {
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <div className="sonartra-motion-surface border-white/8 rounded-[1rem] border bg-black/10 p-4">
-        <p className="text-white/42 text-[11px] uppercase tracking-[0.14em]">Parsed rows</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.rowCount}</p>
-      </div>
-      <div className="sonartra-motion-surface border-white/8 rounded-[1rem] border bg-black/10 p-4">
-        <p className="text-white/42 text-[11px] uppercase tracking-[0.14em]">Accepted rows</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.acceptedCount}</p>
-      </div>
-      <div className="sonartra-motion-surface border-white/8 rounded-[1rem] border bg-black/10 p-4">
-        <p className="text-white/42 text-[11px] uppercase tracking-[0.14em]">Rejected rows</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.rejectedCount}</p>
-      </div>
-      <div className="sonartra-motion-surface border-white/8 rounded-[1rem] border bg-black/10 p-4">
-        <p className="text-white/42 text-[11px] uppercase tracking-[0.14em]">Import status</p>
-        <p className="mt-2 text-lg font-semibold text-white">
-          {state.canImport ? 'Ready' : 'Blocked'}
-        </p>
-      </div>
+      <AdminFeedbackStat label="Parsed rows" value={String(state.summary.rowCount)} />
+      <AdminFeedbackStat label="Accepted rows" value={String(state.summary.acceptedCount)} />
+      <AdminFeedbackStat label="Rejected rows" value={String(state.summary.rejectedCount)} />
+      <AdminFeedbackStat label="Import status" value={state.canImport ? 'Ready' : 'Blocked'} />
     </div>
   );
 }
@@ -181,21 +132,21 @@ export function AdminBulkDomainImport({
         </div>
 
         {!isEditableAssessmentVersion ? (
-          <InlineBanner tone="warning">
+          <AdminFeedbackNotice tone="warning">
             Bulk import is available only for draft assessment versions.
-          </InlineBanner>
+          </AdminFeedbackNotice>
         ) : null}
 
         {hasExistingDomains ? (
-          <InlineBanner tone="warning">
+          <AdminFeedbackNotice tone="warning">
             New domains will be added. Existing domains will not be changed or removed.
-          </InlineBanner>
+          </AdminFeedbackNotice>
         ) : null}
 
-        {successMessage ? <InlineBanner tone="success">{successMessage}</InlineBanner> : null}
+        {successMessage ? <AdminFeedbackNotice tone="success">{successMessage}</AdminFeedbackNotice> : null}
 
-        <div className="sonartra-motion-surface border-white/8 rounded-[1rem] border bg-black/10 p-4">
-          <p className="text-white/42 text-[11px] uppercase tracking-[0.14em]">Accepted format</p>
+        <div className="sonartra-admin-feedback-card sonartra-motion-surface rounded-[1rem] border p-4">
+          <p className="sonartra-admin-feedback-section-title">Accepted format</p>
           <pre className="text-white/78 mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7">
             {DOMAIN_IMPORT_FORMAT_EXAMPLE}
           </pre>
@@ -222,7 +173,7 @@ export function AdminBulkDomainImport({
         </label>
 
         {actionErrorMessage ? (
-          <InlineBanner tone="danger">{actionErrorMessage}</InlineBanner>
+          <AdminFeedbackNotice tone="danger">{actionErrorMessage}</AdminFeedbackNotice>
         ) : null}
 
         <div className="flex flex-wrap items-center gap-3">
@@ -233,22 +184,22 @@ export function AdminBulkDomainImport({
 
         {resultState.hasSubmitted ? (
           <div className="space-y-5">
-            <SectionBlock title="Summary">
+            <AdminFeedbackSection title="Summary">
               <SummaryGrid state={resultState} />
-            </SectionBlock>
+            </AdminFeedbackSection>
 
             {!resultState.didImport && resultState.accepted.length === 0 ? (
-              <InlineBanner tone="warning">
+              <AdminFeedbackNotice tone="warning">
                 No valid rows were found to import. Fix the rejected rows and try again.
-              </InlineBanner>
+              </AdminFeedbackNotice>
             ) : null}
 
             {resultState.accepted.length > 0 ? (
-              <SectionBlock title="Accepted preview">
+              <AdminFeedbackSection title="Accepted preview">
                 <div className="space-y-3">
                   {resultState.accepted.map((row) => (
                     <div
-                      className="sonartra-motion-surface border-white/8 rounded-[1rem] border bg-black/10 p-4"
+                      className="sonartra-admin-feedback-card sonartra-motion-surface rounded-[1rem] border p-4"
                       key={`${row.sourceLineNumber}-${row.domainKey}`}
                     >
                       <div className="flex flex-wrap items-center gap-2">
@@ -273,34 +224,34 @@ export function AdminBulkDomainImport({
                     </div>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.rejected.length > 0 ? (
-              <SectionBlock title="Rejected rows">
+              <AdminFeedbackSection title="Rejected rows">
                 <div className="space-y-2">
                   {resultState.rejected.map((row, index) => (
-                    <InlineBanner
+                    <AdminFeedbackNotice
                       key={`${row.sourceLineNumber ?? 'global'}-${row.reasonCode}-${index}`}
                       tone="danger"
                     >
                       {row.sourceLineNumber === null
                         ? row.message
                         : `Line ${row.sourceLineNumber}: ${row.message}`}
-                    </InlineBanner>
+                    </AdminFeedbackNotice>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.lastAction === 'import' &&
             !resultState.didImport &&
             !resultState.executionError ? (
-              <SectionBlock title="Import result">
-                <InlineBanner tone="neutral">
+              <AdminFeedbackSection title="Import result">
+                <AdminFeedbackNotice tone="neutral">
                   Import did not run. Review the messages, then try again after fixing the rows.
-                </InlineBanner>
-              </SectionBlock>
+                </AdminFeedbackNotice>
+              </AdminFeedbackSection>
             ) : null}
           </div>
         ) : null}

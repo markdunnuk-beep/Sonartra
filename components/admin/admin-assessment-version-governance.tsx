@@ -14,6 +14,10 @@ import {
   publishDraftVersionAction,
 } from '@/lib/server/admin-assessment-versioning';
 import {
+  AdminFeedbackNotice,
+  AdminFeedbackStat,
+} from '@/components/admin/admin-feedback-primitives';
+import {
   LabelPill,
   MetaItem,
   SectionHeader,
@@ -54,7 +58,7 @@ function VersionSummaryCard({
   emptyCopy: string;
 }) {
   return (
-    <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-4">
+    <div className="sonartra-admin-feedback-card rounded-[1.2rem] border p-4">
       <p className="sonartra-page-eyebrow">{label}</p>
       {version ? (
         <div className="mt-3 space-y-3">
@@ -89,26 +93,25 @@ function ActionNotice({
   return (
     <div className="space-y-3">
       {state.formError ? (
-        <div className="rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
+        <AdminFeedbackNotice tone="danger">
           {state.formError}
-        </div>
+        </AdminFeedbackNotice>
       ) : null}
 
       {state.formSuccess ? (
-        <div className="rounded-[1rem] border border-[rgba(116,209,177,0.22)] bg-[rgba(20,80,57,0.22)] px-4 py-3 text-sm text-[rgba(214,246,233,0.9)]">
+        <AdminFeedbackNotice tone="success">
           {state.formSuccess}
-        </div>
+        </AdminFeedbackNotice>
       ) : null}
 
       {state.formWarnings.length > 0 ? (
-        <div className="rounded-[1rem] border border-[rgba(255,184,107,0.22)] bg-[rgba(78,53,18,0.22)] px-4 py-3 text-sm text-[rgba(255,227,187,0.9)]">
-          <p className="font-medium text-[rgba(255,237,205,0.96)]">Warnings</p>
+        <AdminFeedbackNotice tone="warning" title="Warnings">
           <div className="mt-2 space-y-2">
             {state.formWarnings.map((warning) => (
               <p key={warning}>{warning}</p>
             ))}
           </div>
-        </div>
+        </AdminFeedbackNotice>
       ) : null}
     </div>
   );
@@ -295,16 +298,25 @@ function ValidationSummary({
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <MetaItem label="Fix these before publishing" value={String(validation.blockingErrors.length)} />
-          <MetaItem label="Sections to fix" value={String(failingSections.length)} />
-          <MetaItem label="Questions" value={String(validation.counts.questionCount)} />
-          <MetaItem label="Unscored responses" value={String(validation.counts.unmappedOptionCount)} />
+          <AdminFeedbackStat label="Blocking issues" value={String(validation.blockingErrors.length)} />
+          <AdminFeedbackStat label="Sections to fix" value={String(failingSections.length)} />
+          <AdminFeedbackStat label="Questions" value={String(validation.counts.questionCount)} />
+          <AdminFeedbackStat label="Unscored responses" value={String(validation.counts.unmappedOptionCount)} />
         </div>
       </div>
 
+      {validation.status === 'not_ready' ? (
+        <div className="mt-5">
+          <AdminFeedbackNotice tone="warning" title="Readiness summary">
+            Fix the blocking issues below before publishing. Warnings can remain visible without
+            stopping the publish path.
+          </AdminFeedbackNotice>
+        </div>
+      ) : null}
+
       <div className="mt-5 space-y-4">
         {validation.sections.map((section) => (
-          <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-4" key={section.key}>
+          <div className="sonartra-admin-feedback-card rounded-[1.2rem] border p-4" key={section.key}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-white">{section.label}</p>
@@ -328,12 +340,13 @@ function ValidationSummary({
             ) : (
               <div className="mt-3 space-y-2">
                 {section.issues.map((issue) => (
-                  <div
-                    className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-4 py-3 text-sm leading-6 text-white/74"
+                  <AdminFeedbackNotice
                     key={`${section.key}-${issue.code}`}
+                    title={issue.severity === 'blocking' ? 'Blocking issue' : 'Warning'}
+                    tone={issue.severity === 'blocking' ? 'warning' : 'neutral'}
                   >
                     {issue.message}
-                  </div>
+                  </AdminFeedbackNotice>
                 ))}
               </div>
             )}
@@ -397,7 +410,7 @@ export function AdminAssessmentVersionGovernance({
             </p>
           </div>
 
-          <div className="space-y-4 rounded-[1.2rem] border border-white/8 bg-black/10 p-4">
+          <div className="sonartra-admin-feedback-card space-y-4 rounded-[1.2rem] border p-4">
             <div className="space-y-2">
               <p className="sonartra-page-eyebrow">Actions</p>
               <p className="text-sm leading-7 text-white/58">

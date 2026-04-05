@@ -13,6 +13,9 @@ import {
   createDraftVersionAction,
   publishDraftVersionAction,
 } from '@/lib/server/admin-assessment-versioning';
+import {
+  AdminFeedbackNotice,
+} from '@/components/admin/admin-feedback-primitives';
 import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
 
 function ActionNotice({
@@ -23,26 +26,25 @@ function ActionNotice({
   return (
     <div className="space-y-3">
       {state.formError ? (
-        <div className="sonartra-motion-banner rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
+        <AdminFeedbackNotice tone="danger">
           {state.formError}
-        </div>
+        </AdminFeedbackNotice>
       ) : null}
 
       {state.formSuccess ? (
-        <div className="sonartra-motion-banner rounded-[1rem] border border-[rgba(116,209,177,0.22)] bg-[rgba(20,80,57,0.22)] px-4 py-3 text-sm text-[rgba(214,246,233,0.9)]">
+        <AdminFeedbackNotice tone="success">
           {state.formSuccess}
-        </div>
+        </AdminFeedbackNotice>
       ) : null}
 
       {state.formWarnings.length > 0 ? (
-        <div className="sonartra-motion-banner rounded-[1rem] border border-[rgba(255,184,107,0.22)] bg-[rgba(78,53,18,0.22)] px-4 py-3 text-sm text-[rgba(255,227,187,0.9)]">
-          <p className="font-medium text-[rgba(255,237,205,0.96)]">Warnings</p>
+        <AdminFeedbackNotice tone="warning" title="Warnings">
           <div className="mt-2 space-y-2">
             {state.formWarnings.map((warning) => (
               <p key={warning}>{warning}</p>
             ))}
           </div>
-        </div>
+        </AdminFeedbackNotice>
       ) : null}
     </div>
   );

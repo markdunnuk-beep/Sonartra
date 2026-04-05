@@ -11,6 +11,11 @@ import {
   importBulkOptionsAction,
 } from '@/lib/server/admin-bulk-option-import-actions';
 import {
+  AdminFeedbackNotice,
+  AdminFeedbackSection,
+  AdminFeedbackStat,
+} from '@/components/admin/admin-feedback-primitives';
+import {
   LabelPill,
   SurfaceCard,
   cn,
@@ -57,44 +62,6 @@ function ActionButton({
   );
 }
 
-function InlineBanner({
-  tone,
-  children,
-}: Readonly<{
-  tone: 'danger' | 'warning' | 'success' | 'neutral';
-  children: React.ReactNode;
-}>) {
-  const toneClass =
-    tone === 'danger'
-      ? 'border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] text-[rgba(255,216,216,0.94)]'
-      : tone === 'warning'
-        ? 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'
-        : tone === 'success'
-          ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
-          : 'border-white/10 bg-black/10 text-white/72';
-
-  return (
-    <div className={cn('rounded-[1rem] border px-4 py-3 text-sm', toneClass)}>
-      {children}
-    </div>
-  );
-}
-
-function SectionBlock({
-  title,
-  children,
-}: Readonly<{
-  title: string;
-  children: React.ReactNode;
-}>) {
-  return (
-    <section className="space-y-3">
-      <h4 className="text-sm font-semibold uppercase tracking-[0.14em] text-white/56">{title}</h4>
-      {children}
-    </section>
-  );
-}
-
 function IssueList({
   items,
   renderLine,
@@ -105,9 +72,9 @@ function IssueList({
   return (
     <div className="space-y-2">
       {items.map((item, index) => (
-        <InlineBanner key={index} tone="danger">
+        <AdminFeedbackNotice key={index} tone="danger">
           {renderLine(item, index)}
-        </InlineBanner>
+        </AdminFeedbackNotice>
       ))}
     </div>
   );
@@ -118,30 +85,16 @@ function SummaryGrid({ state }: Readonly<{ state: AdminBulkOptionImportState }>)
 
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Question groups</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.questionGroupCount}</p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Questions matched</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.questionsMatched}</p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">
-          {isImportResult ? 'Questions imported' : 'Options to insert'}
-        </p>
-        <p className="mt-2 text-lg font-semibold text-white">
-          {isImportResult ? state.summary.questionsImported : state.summary.optionsInserted}
-        </p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">
-          {isImportResult ? 'Options inserted' : 'Existing options to replace'}
-        </p>
-        <p className="mt-2 text-lg font-semibold text-white">
-          {isImportResult ? state.summary.optionsInserted : state.summary.existingOptionsDeleted}
-        </p>
-      </div>
+      <AdminFeedbackStat label="Question groups" value={String(state.summary.questionGroupCount)} />
+      <AdminFeedbackStat label="Questions matched" value={String(state.summary.questionsMatched)} />
+      <AdminFeedbackStat
+        label={isImportResult ? 'Questions imported' : 'Options to insert'}
+        value={String(isImportResult ? state.summary.questionsImported : state.summary.optionsInserted)}
+      />
+      <AdminFeedbackStat
+        label={isImportResult ? 'Options inserted' : 'Existing options to replace'}
+        value={String(isImportResult ? state.summary.optionsInserted : state.summary.existingOptionsDeleted)}
+      />
     </div>
   );
 }
@@ -218,13 +171,13 @@ export function AdminBulkOptionImport({
         </div>
 
         {!isEditableAssessmentVersion ? (
-          <InlineBanner tone="warning">
+          <AdminFeedbackNotice tone="warning">
             Bulk import is only available for draft assessment versions.
-          </InlineBanner>
+          </AdminFeedbackNotice>
         ) : null}
 
-        <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Expected format</p>
+        <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
+          <p className="sonartra-admin-feedback-section-title">Expected format</p>
           <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
             {BULK_OPTION_FORMAT_EXAMPLE}
           </pre>
@@ -249,7 +202,7 @@ export function AdminBulkOptionImport({
           />
         </label>
 
-        {actionErrorMessage ? <InlineBanner tone="danger">{actionErrorMessage}</InlineBanner> : null}
+        {actionErrorMessage ? <AdminFeedbackNotice tone="danger">{actionErrorMessage}</AdminFeedbackNotice> : null}
 
         <div className="flex flex-wrap items-center gap-3">
           <ActionButton disabled={!canImport} onClick={handleImport} variant="primary">
@@ -259,12 +212,12 @@ export function AdminBulkOptionImport({
 
         {showResult ? (
           <div className="space-y-5">
-            <SectionBlock title="Summary">
+            <AdminFeedbackSection title="Summary">
               <SummaryGrid state={resultState} />
-            </SectionBlock>
+            </AdminFeedbackSection>
 
             {resultState.parseErrors.length > 0 ? (
-              <SectionBlock title="Parse errors">
+              <AdminFeedbackSection title="Parse errors">
                 <IssueList
                   items={resultState.parseErrors}
                   renderLine={(item) => {
@@ -272,11 +225,11 @@ export function AdminBulkOptionImport({
                     return `Line ${issue.lineNumber}: ${issue.message}`;
                   }}
                 />
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.groupErrors.length > 0 ? (
-              <SectionBlock title="Question set errors">
+              <AdminFeedbackSection title="Question set errors">
                 <IssueList
                   items={resultState.groupErrors}
                   renderLine={(item) => {
@@ -284,11 +237,11 @@ export function AdminBulkOptionImport({
                     return `Question ${issue.questionNumber} (lines ${issue.lineNumbers.join(', ')}): ${issue.message}`;
                   }}
                 />
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.planErrors.length > 0 ? (
-              <SectionBlock title="Assessment mapping errors">
+              <AdminFeedbackSection title="Assessment mapping errors">
                 <IssueList
                   items={resultState.planErrors}
                   renderLine={(item) => {
@@ -298,30 +251,30 @@ export function AdminBulkOptionImport({
                       : `Question ${issue.questionNumber}: ${issue.message}`;
                   }}
                 />
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.warnings.length > 0 ? (
-              <SectionBlock title="Warnings">
-                <InlineBanner tone="warning">
+              <AdminFeedbackSection title="Warnings">
+                <AdminFeedbackNotice tone="warning">
                   Warnings do not block import, but you should review them before proceeding.
-                </InlineBanner>
+                </AdminFeedbackNotice>
                 <div className="space-y-2">
                   {resultState.warnings.map((warning) => (
-                    <InlineBanner key={`${warning.questionNumber}-${warning.code}`} tone="warning">
+                    <AdminFeedbackNotice key={`${warning.questionNumber}-${warning.code}`} tone="warning">
                       {`Question ${warning.questionNumber} (lines ${warning.lineNumbers.join(', ')}): ${warning.message}`}
-                    </InlineBanner>
+                    </AdminFeedbackNotice>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.plannedQuestions.length > 0 ? (
-              <SectionBlock title="Question preview">
+              <AdminFeedbackSection title="Question preview">
                 <div className="space-y-4">
                   {resultState.plannedQuestions.map((question) => (
                     <div
-                      className="rounded-[1rem] border border-white/8 bg-black/10 p-4"
+                        className="sonartra-admin-feedback-card rounded-[1rem] border p-4"
                       key={question.questionId}
                     >
                       <div className="flex flex-wrap items-center gap-2">
@@ -338,7 +291,7 @@ export function AdminBulkOptionImport({
                       <div className="mt-4 space-y-2">
                         {question.replacementOptions.map((option) => (
                           <div
-                            className="rounded-[0.9rem] border border-white/8 bg-black/10 px-3 py-2 text-sm text-white/82"
+                            className="sonartra-admin-feedback-card rounded-[0.9rem] border px-3 py-2 text-sm text-white/82"
                             key={`${question.questionId}-${option.label}`}
                           >
                             {`${option.label} — ${option.text}`}
@@ -348,23 +301,23 @@ export function AdminBulkOptionImport({
                     </div>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.lastAction === 'import' ? (
-              <SectionBlock title="Import result summary">
+              <AdminFeedbackSection title="Import result summary">
                 {resultState.success ? (
-                  <InlineBanner tone="success">
+                  <AdminFeedbackNotice tone="success">
                     {`Imported ${resultState.summary.questionsImported} questions and inserted ${resultState.summary.optionsInserted} options.`}
-                  </InlineBanner>
+                  </AdminFeedbackNotice>
                 ) : resultState.executionError ? (
-                  <InlineBanner tone="danger">{resultState.executionError}</InlineBanner>
+                  <AdminFeedbackNotice tone="danger">{resultState.executionError}</AdminFeedbackNotice>
                 ) : (
-                  <InlineBanner tone="neutral">
+                  <AdminFeedbackNotice tone="neutral">
                     Import did not run because the current input still contains blocking issues.
-                  </InlineBanner>
+                  </AdminFeedbackNotice>
                 )}
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
           </div>
         ) : null}

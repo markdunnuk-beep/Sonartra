@@ -11,6 +11,11 @@ import {
   importBulkWeightsAction,
 } from '@/lib/server/admin-bulk-weight-import-actions';
 import {
+  AdminFeedbackNotice,
+  AdminFeedbackSection,
+  AdminFeedbackStat,
+} from '@/components/admin/admin-feedback-primitives';
+import {
   LabelPill,
   SurfaceCard,
   cn,
@@ -59,44 +64,6 @@ function ActionButton({
   );
 }
 
-function InlineBanner({
-  tone,
-  children,
-}: Readonly<{
-  tone: 'danger' | 'warning' | 'success' | 'neutral';
-  children: React.ReactNode;
-}>) {
-  const toneClass =
-    tone === 'danger'
-      ? 'border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] text-[rgba(255,216,216,0.94)]'
-      : tone === 'warning'
-        ? 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'
-        : tone === 'success'
-          ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
-          : 'border-white/10 bg-black/10 text-white/72';
-
-  return (
-    <div className={cn('rounded-[1rem] border px-4 py-3 text-sm', toneClass)}>
-      {children}
-    </div>
-  );
-}
-
-function SectionBlock({
-  title,
-  children,
-}: Readonly<{
-  title: string;
-  children: React.ReactNode;
-}>) {
-  return (
-    <section className="space-y-3">
-      <h4 className="text-sm font-semibold uppercase tracking-[0.14em] text-white/56">{title}</h4>
-      {children}
-    </section>
-  );
-}
-
 function IssueList({
   items,
   renderLine,
@@ -109,9 +76,9 @@ function IssueList({
   return (
     <div className="space-y-2">
       {items.map((item, index) => (
-        <InlineBanner key={index} tone={tone}>
+        <AdminFeedbackNotice key={index} tone={tone}>
           {renderLine(item, index)}
-        </InlineBanner>
+        </AdminFeedbackNotice>
       ))}
     </div>
   );
@@ -122,30 +89,16 @@ function SummaryGrid({ state }: Readonly<{ state: AdminBulkWeightImportState }>)
 
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Option groups</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.optionGroupCount}</p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Questions matched</p>
-        <p className="mt-2 text-lg font-semibold text-white">{state.summary.questionCountMatched}</p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">
-          {isImportResult ? 'Option groups imported' : 'Option groups matched'}
-        </p>
-        <p className="mt-2 text-lg font-semibold text-white">
-          {isImportResult ? state.summary.optionGroupCountImported : state.summary.optionGroupCountMatched}
-        </p>
-      </div>
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">
-          {isImportResult ? 'Weights inserted' : 'Existing weights to replace'}
-        </p>
-        <p className="mt-2 text-lg font-semibold text-white">
-          {isImportResult ? state.summary.weightsInserted : state.summary.weightsDeleted}
-        </p>
-      </div>
+      <AdminFeedbackStat label="Option groups" value={String(state.summary.optionGroupCount)} />
+      <AdminFeedbackStat label="Questions matched" value={String(state.summary.questionCountMatched)} />
+      <AdminFeedbackStat
+        label={isImportResult ? 'Option groups imported' : 'Option groups matched'}
+        value={String(isImportResult ? state.summary.optionGroupCountImported : state.summary.optionGroupCountMatched)}
+      />
+      <AdminFeedbackStat
+        label={isImportResult ? 'Weights inserted' : 'Existing weights to replace'}
+        value={String(isImportResult ? state.summary.weightsInserted : state.summary.weightsDeleted)}
+      />
     </div>
   );
 }
@@ -222,13 +175,13 @@ export function AdminBulkWeightImport({
         </div>
 
         {!isEditableAssessmentVersion ? (
-          <InlineBanner tone="warning">
+          <AdminFeedbackNotice tone="warning">
             Bulk weight import is only available for draft assessment versions.
-          </InlineBanner>
+          </AdminFeedbackNotice>
         ) : null}
 
-        <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Expected format</p>
+        <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
+          <p className="sonartra-admin-feedback-section-title">Expected format</p>
           <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
             {BULK_WEIGHT_FORMAT_EXAMPLE}
           </pre>
@@ -253,7 +206,7 @@ export function AdminBulkWeightImport({
           />
         </label>
 
-        {actionErrorMessage ? <InlineBanner tone="danger">{actionErrorMessage}</InlineBanner> : null}
+        {actionErrorMessage ? <AdminFeedbackNotice tone="danger">{actionErrorMessage}</AdminFeedbackNotice> : null}
 
         <div className="flex flex-wrap items-center gap-3">
           <ActionButton disabled={!canImport} onClick={handleImport} variant="primary">
@@ -263,12 +216,12 @@ export function AdminBulkWeightImport({
 
         {showResult ? (
           <div className="space-y-5">
-            <SectionBlock title="Summary">
+            <AdminFeedbackSection title="Summary">
               <SummaryGrid state={resultState} />
-            </SectionBlock>
+            </AdminFeedbackSection>
 
             {resultState.parseErrors.length > 0 ? (
-              <SectionBlock title="Parse errors">
+              <AdminFeedbackSection title="Parse errors">
                 <IssueList
                   items={resultState.parseErrors}
                   renderLine={(item) => {
@@ -276,11 +229,11 @@ export function AdminBulkWeightImport({
                     return `Line ${issue.lineNumber}: ${issue.message}`;
                   }}
                 />
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.groupErrors.length > 0 ? (
-              <SectionBlock title="Weight group errors">
+              <AdminFeedbackSection title="Weight group errors">
                 <IssueList
                   items={resultState.groupErrors}
                   renderLine={(item) => {
@@ -288,11 +241,11 @@ export function AdminBulkWeightImport({
                     return `Question ${issue.questionNumber} option ${issue.optionLabel} (lines ${issue.lineNumbers.join(', ')}): ${issue.message}`;
                   }}
                 />
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.planErrors.length > 0 ? (
-              <SectionBlock title="Assessment mapping errors">
+              <AdminFeedbackSection title="Assessment mapping errors">
                 <IssueList
                   items={resultState.planErrors}
                   renderLine={(item) => {
@@ -304,14 +257,14 @@ export function AdminBulkWeightImport({
                     return `${prefix}${issue.message}`;
                   }}
                 />
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.warnings.length > 0 ? (
-              <SectionBlock title="Warnings">
-                <InlineBanner tone="warning">
+              <AdminFeedbackSection title="Warnings">
+                <AdminFeedbackNotice tone="warning">
                   Warnings do not block import, but they should be reviewed before proceeding.
-                </InlineBanner>
+                </AdminFeedbackNotice>
                 <IssueList
                   items={resultState.warnings}
                   renderLine={(item) => {
@@ -320,15 +273,15 @@ export function AdminBulkWeightImport({
                   }}
                   tone="warning"
                 />
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.plannedOptionGroups.length > 0 ? (
-              <SectionBlock title="Weight group preview">
+              <AdminFeedbackSection title="Weight group preview">
                 <div className="space-y-4">
                   {resultState.plannedOptionGroups.map((group) => (
                     <div
-                      className="rounded-[1rem] border border-white/8 bg-black/10 p-4"
+                      className="sonartra-admin-feedback-card rounded-[1rem] border p-4"
                       key={`${group.questionId}-${group.optionId}`}
                     >
                       <div className="flex flex-wrap items-center gap-2">
@@ -345,7 +298,7 @@ export function AdminBulkWeightImport({
                       <div className="mt-4 space-y-2">
                         {group.replacementWeights.map((weight) => (
                           <div
-                            className="rounded-[0.9rem] border border-white/8 bg-black/10 px-3 py-2 text-sm text-white/82"
+                            className="sonartra-admin-feedback-card rounded-[0.9rem] border px-3 py-2 text-sm text-white/82"
                             key={`${group.optionId}-${weight.signalId}`}
                           >
                             {`${weight.signalKey}: ${weight.weight}`}
@@ -355,23 +308,23 @@ export function AdminBulkWeightImport({
                     </div>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.lastAction === 'import' ? (
-              <SectionBlock title="Import result summary">
+              <AdminFeedbackSection title="Import result summary">
                 {resultState.success ? (
-                  <InlineBanner tone="success">
+                  <AdminFeedbackNotice tone="success">
                     {`Imported ${resultState.summary.optionGroupCountImported} option groups and inserted ${resultState.summary.weightsInserted} weight rows.`}
-                  </InlineBanner>
+                  </AdminFeedbackNotice>
                 ) : resultState.executionError ? (
-                  <InlineBanner tone="danger">{resultState.executionError}</InlineBanner>
+                  <AdminFeedbackNotice tone="danger">{resultState.executionError}</AdminFeedbackNotice>
                 ) : (
-                  <InlineBanner tone="neutral">
+                  <AdminFeedbackNotice tone="neutral">
                     Import did not run because the current input still contains blocking issues.
-                  </InlineBanner>
+                  </AdminFeedbackNotice>
                 )}
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
           </div>
         ) : null}

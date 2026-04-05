@@ -9,6 +9,7 @@ import {
   SurfaceCard,
   cn,
 } from '@/components/shared/user-app-ui';
+import { AdminFeedbackNotice } from '@/components/admin/admin-feedback-primitives';
 import {
   initialAdminAssessmentDeleteActionState,
   type AdminAssessmentDeleteActionState,
@@ -25,9 +26,9 @@ function ActionNotice({
   }
 
   return (
-    <div className="rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
+    <AdminFeedbackNotice tone="danger">
       {state.formError}
-    </div>
+    </AdminFeedbackNotice>
   );
 }
 
@@ -94,7 +95,7 @@ export function AdminAssessmentDeleteGovernance({
             </p>
           </div>
 
-          <div className="rounded-[1.2rem] border border-[rgba(255,120,120,0.16)] bg-[rgba(120,24,24,0.16)] p-4">
+          <div className="sonartra-admin-feedback-card rounded-[1.2rem] border p-4">
             <label className="flex items-start gap-3 text-sm leading-6 text-white/78">
               <input
                 checked={confirmed}

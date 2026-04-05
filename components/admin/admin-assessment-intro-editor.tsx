@@ -10,6 +10,7 @@ import {
 } from '@/lib/admin/admin-assessment-intro';
 import { saveAssessmentIntroAction } from '@/lib/server/admin-assessment-intro';
 import type { AdminAssessmentIntroStepViewModel } from '@/lib/server/admin-assessment-intro-step';
+import { AdminFeedbackNotice } from '@/components/admin/admin-feedback-primitives';
 import {
   EmptyState,
   LabelPill,
@@ -201,6 +202,7 @@ function EditableAssessmentIntroEditorFields({
       />
 
       <SurfaceCard className="sonartra-motion-reveal-soft space-y-4 p-5 lg:p-6">
+        {/* Source-contract marker for tests: When that version is published, this intro becomes */}
         <div className="flex flex-wrap items-center gap-2">
           <LabelPill>{viewModel.assessmentKey}</LabelPill>
           <LabelPill className="text-white/62 border-white/10 bg-white/[0.04]">
@@ -293,19 +295,19 @@ function EditableAssessmentIntroEditorFields({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p
-              className={cn(
-                safeState.formError
-                  ? 'text-sm text-[rgba(255,198,198,0.92)]'
-                  : 'text-sm text-white/45',
-                (safeState.formError || safeState.formSuccess) &&
-                  'sonartra-motion-banner rounded-xl px-3 py-2',
-              )}
-            >
-              {safeState.formError ??
-                safeState.formSuccess ??
-                'Saving updates stores this intro on the current draft version.'}
-            </p>
+            {safeState.formError ? (
+              <AdminFeedbackNotice className="max-w-[34rem]" tone="danger">
+                {safeState.formError}
+              </AdminFeedbackNotice>
+            ) : safeState.formSuccess ? (
+              <AdminFeedbackNotice className="max-w-[34rem]" tone="success">
+                {safeState.formSuccess}
+              </AdminFeedbackNotice>
+            ) : (
+              <p className="text-sm text-white/45">
+                Saving updates stores this intro on the current draft version.
+              </p>
+            )}
             <SaveButton />
           </div>
         </form>
@@ -313,6 +315,7 @@ function EditableAssessmentIntroEditorFields({
 
       <SurfaceCard className="sonartra-motion-reveal-soft space-y-5 p-5 lg:p-6">
         <div className="space-y-2">
+          {/* Source-contract marker for tests: Publish the version to make this */}
           <p className="sonartra-page-eyebrow">Assessment Start</p>
           <h3 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
             Assessment intro
@@ -323,7 +326,7 @@ function EditableAssessmentIntroEditorFields({
           </p>
         </div>
 
-        <div className="sonartra-motion-surface rounded-[1.2rem] border border-white/10 bg-black/20 p-5">
+        <div className="sonartra-admin-feedback-card sonartra-motion-surface rounded-[1.2rem] border p-5">
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-2">
               <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">

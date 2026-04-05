@@ -9,6 +9,11 @@ import {
 } from '@/lib/admin/admin-language-dataset-import';
 import { REPORT_ALIGNED_AUTHORING_NOTE } from '@/lib/admin/report-language-import';
 import { importLanguageDatasetAction } from '@/lib/server/admin-language-dataset-import-actions';
+import {
+  AdminFeedbackNotice,
+  AdminFeedbackSection,
+  AdminFeedbackStat,
+} from '@/components/admin/admin-feedback-primitives';
 import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
 
 type DatasetOption = {
@@ -116,39 +121,6 @@ function ActionButton({
   );
 }
 
-function InlineBanner({
-  tone,
-  children,
-}: Readonly<{
-  tone: 'danger' | 'warning' | 'success' | 'neutral';
-  children: React.ReactNode;
-}>) {
-  const toneClass =
-    tone === 'danger'
-      ? 'border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] text-[rgba(255,216,216,0.94)]'
-      : tone === 'warning'
-        ? 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'
-        : tone === 'success'
-          ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
-          : 'border-white/10 bg-black/10 text-white/72';
-
-  return <div className={cn('rounded-[1rem] border px-4 py-3 text-sm', toneClass)}>{children}</div>;
-}
-
-function SectionBlock({
-  title,
-  children,
-}: Readonly<{
-  title: string;
-  children: React.ReactNode;
-}>) {
-  return (
-    <section className="space-y-3">
-      <h4 className="text-sm font-semibold uppercase tracking-[0.14em] text-white/56">{title}</h4>
-      {children}
-    </section>
-  );
-}
 
 export function AdminLanguageDatasetImport({
   assessmentVersionId,
@@ -246,13 +218,13 @@ export function AdminLanguageDatasetImport({
         </div>
 
         {!isEditableAssessmentVersion ? (
-          <InlineBanner tone="warning">
+          <AdminFeedbackNotice tone="warning">
             Language datasets are only editable for draft assessment versions.
-          </InlineBanner>
+          </AdminFeedbackNotice>
         ) : null}
 
         <div className="space-y-3">
-          <p className="text-sm font-medium text-white">Report section</p>
+          <p className="text-sm font-medium text-white">Dataset type</p>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {DATASET_OPTIONS.map((option) => {
               const isSelected = option.key === selectedDataset;
@@ -277,7 +249,7 @@ export function AdminLanguageDatasetImport({
           </div>
         </div>
 
-        <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+        <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
           <div className="flex flex-wrap items-center gap-2">
             <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
               {selectedOption.currentRowsLabel}: {existingRowCount}
@@ -288,7 +260,7 @@ export function AdminLanguageDatasetImport({
           </div>
           <p className="mt-3 text-sm leading-7 text-white/62">{selectedOption.description}</p>
           <p className="max-w-3xl text-sm leading-7 text-white/62">{selectedOption.detail}</p>
-          <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-white/42">Example</p>
+          <p className="sonartra-admin-feedback-section-title mt-3">Example</p>
           <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
             {selectedOption.formatExample}
           </pre>
@@ -331,82 +303,68 @@ export function AdminLanguageDatasetImport({
           Boolean(resultState.executionError) ||
           Boolean(resultState.formError)) ? (
           <div className="space-y-5">
-            <SectionBlock title="Summary">
+            <AdminFeedbackSection title="Summary">
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Pasted rows</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{resultState.summary.rowCount}</p>
-                </div>
-                <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">Targets in batch</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{resultState.summary.targetCount}</p>
-                </div>
-                <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">
-                    {resultState.success ? 'Rows imported' : 'Existing rows to replace'}
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-white">
-                    {resultState.success ? resultState.summary.importedRowCount : resultState.summary.existingRowCount}
-                  </p>
-                </div>
-                <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">
-                    {resultState.success ? 'Targets imported' : 'Current stored rows'}
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-white">
-                    {resultState.success ? resultState.summary.importedTargetCount : existingRowCount}
-                  </p>
-                </div>
+                <AdminFeedbackStat label="Pasted rows" value={String(resultState.summary.rowCount)} />
+                <AdminFeedbackStat label="Targets in batch" value={String(resultState.summary.targetCount)} />
+                <AdminFeedbackStat
+                  label={resultState.success ? 'Rows imported' : 'Existing rows to replace'}
+                  value={String(resultState.success ? resultState.summary.importedRowCount : resultState.summary.existingRowCount)}
+                />
+                <AdminFeedbackStat
+                  label={resultState.success ? 'Targets imported' : 'Current stored rows'}
+                  value={String(resultState.success ? resultState.summary.importedTargetCount : existingRowCount)}
+                />
               </div>
-            </SectionBlock>
+            </AdminFeedbackSection>
 
             {resultState.success ? (
-              <InlineBanner tone="success">
+              <AdminFeedbackNotice tone="success">
                 {`Imported ${resultState.summary.importedRowCount} rows across ${resultState.summary.importedTargetCount} targets.`}
-              </InlineBanner>
+              </AdminFeedbackNotice>
             ) : null}
 
             {resultState.parseErrors.length > 0 ? (
-              <SectionBlock title="Validation errors">
+              <AdminFeedbackSection title="Validation errors">
                 <div className="space-y-2">
                   {resultState.parseErrors.map((issue) => (
-                    <InlineBanner key={issue.key} tone="danger">
+                    <AdminFeedbackNotice key={issue.key} tone="danger">
                       {issue.message}
-                    </InlineBanner>
+                    </AdminFeedbackNotice>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.validationErrors.length > 0 ? (
-              <SectionBlock title="Row errors">
+              <AdminFeedbackSection title="Row errors">
                 <div className="space-y-2">
                   {resultState.validationErrors.map((issue) => (
-                    <InlineBanner key={issue.key} tone="danger">
+                    <AdminFeedbackNotice key={issue.key} tone="danger">
                       {issue.message}
-                    </InlineBanner>
+                    </AdminFeedbackNotice>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.planErrors.length > 0 ? (
-              <SectionBlock title="Assessment mapping errors">
+              <AdminFeedbackSection title="Assessment mapping errors">
                 <div className="space-y-2">
                   {resultState.planErrors.map((issue) => (
-                    <InlineBanner key={issue.key} tone="danger">
+                    <AdminFeedbackNotice key={issue.key} tone="danger">
                       {issue.message}
-                    </InlineBanner>
+                    </AdminFeedbackNotice>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
 
             {resultState.previewGroups.length > 0 ? (
-              <SectionBlock title="Imported dataset">
+              <AdminFeedbackSection title="Imported dataset">
                 <div className="space-y-4">
                   {resultState.previewGroups.map((group) => (
-                    <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4" key={group.targetKey}>
+                    <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4" key={group.targetKey}>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-white">{group.targetLabel}</p>
                         <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
@@ -416,10 +374,10 @@ export function AdminLanguageDatasetImport({
                       <div className="mt-4 space-y-2">
                         {group.entries.map((entry) => (
                           <div
-                            className="rounded-[0.9rem] border border-white/8 bg-black/10 px-3 py-3"
+                            className="sonartra-admin-feedback-card rounded-[0.9rem] border px-3 py-3"
                             key={`${group.targetKey}-${entry.label}-${entry.lineNumber}`}
                           >
-                            <p className="text-[11px] uppercase tracking-[0.14em] text-white/42">
+                            <p className="sonartra-admin-feedback-section-title">
                               {entry.label}
                             </p>
                             <p className="mt-2 text-sm leading-6 text-white/82">{entry.content}</p>
@@ -429,7 +387,7 @@ export function AdminLanguageDatasetImport({
                     </div>
                   ))}
                 </div>
-              </SectionBlock>
+              </AdminFeedbackSection>
             ) : null}
           </div>
         ) : null}
