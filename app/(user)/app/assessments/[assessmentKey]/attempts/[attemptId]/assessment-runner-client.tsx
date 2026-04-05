@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
-import { getResumeQuestionIndex, shouldShowAssessmentIntro } from '@/lib/assessment-runner/runner-ux';
+import {
+  getResumeQuestionIndex,
+  shouldShowAssessmentIntro,
+} from '@/lib/assessment-runner/runner-ux';
 import type { AssessmentRunnerViewModel } from '@/lib/server/assessment-runner-types';
 
 type AssessmentRunnerClientProps = {
@@ -27,10 +30,7 @@ type CompletionResponseBody = {
 
 type CompletionUiState = 'idle' | 'submitting' | 'processing' | 'redirecting';
 
-export function AssessmentRunnerClient({
-  userId,
-  runner,
-}: AssessmentRunnerClientProps) {
+export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClientProps) {
   const router = useRouter();
   const initialQuestionIndex = getResumeQuestionIndex(runner.questions);
   const initialIntroVisible = shouldShowAssessmentIntro({
@@ -62,10 +62,7 @@ export function AssessmentRunnerClient({
     ? selectedByQuestionId[currentQuestion.questionId] !== null
     : false;
   const canSubmit =
-    answeredQuestions === totalQuestions &&
-    !isSaving &&
-    completionState === 'idle' &&
-    !saveError;
+    answeredQuestions === totalQuestions && !isSaving && completionState === 'idle' && !saveError;
   const interactionLocked = completionState !== 'idle';
   const resumedAwayFromStart = initialQuestionIndex > 0;
   const showCompleteAction = isFinalQuestion || completionState !== 'idle' || submitError !== null;
@@ -215,11 +212,14 @@ export function AssessmentRunnerClient({
   if (!currentQuestion) {
     return (
       <section className="sonartra-panel space-y-3">
-        <h2 className="text-xl font-semibold text-white">No questions available</h2>
-        <p className="text-sm text-white/65">
+        <h2 className="sonartra-type-card-title">No questions available</h2>
+        <p className="sonartra-type-body-secondary max-w-[44rem]">
           This attempt has no persisted question set loaded for the current assessment version.
         </p>
-        <Link href="/app/assessments" className="text-sm font-medium text-white/70 transition hover:text-white">
+        <Link
+          href="/app/assessments"
+          className="sonartra-type-nav text-white/72 transition hover:text-white"
+        >
           Back to workspace
         </Link>
       </section>
@@ -232,37 +232,33 @@ export function AssessmentRunnerClient({
         <div className="space-y-6 lg:space-y-7">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.82fr)] xl:gap-8">
             <div className="space-y-5">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">
+              <div className="sonartra-type-eyebrow flex flex-wrap items-center gap-x-3 gap-y-2 text-white/40">
                 <span>Assessment Intro</span>
-                <span className="hidden h-1 w-1 rounded-full bg-white/18 sm:inline-block" />
+                <span className="bg-white/18 hidden h-1 w-1 rounded-full sm:inline-block" />
                 <span>{runner.assessmentTitle}</span>
               </div>
 
               <div className="space-y-3">
-                <p className="text-[0.82rem] font-medium tracking-[-0.01em] text-white/54">
-                  {runner.assessmentTitle}
-                </p>
-                <h2 className="max-w-[14ch] text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.65rem] lg:text-[3.15rem]">
+                <p className="sonartra-type-caption text-white/54">{runner.assessmentTitle}</p>
+                <h2 className="sonartra-type-page-title max-w-[16ch] text-[2.15rem] sm:text-[2.55rem] lg:text-[2.9rem]">
                   {runner.assessmentIntro.introTitle || runner.assessmentTitle}
                 </h2>
               </div>
 
               {runner.assessmentIntro.introSummary ? (
-                <p className="max-w-[60ch] text-[0.98rem] leading-7 text-white/72 sm:text-[1rem]">
+                <p className="sonartra-type-body text-white/76 max-w-[58ch]">
                   {runner.assessmentIntro.introSummary}
                 </p>
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-4 border-t border-white/8 pt-5 xl:border-l xl:border-t-0 xl:pl-7 xl:pt-0">
-              <div className="rounded-[1.15rem] border border-white/8 bg-white/[0.03] p-4">
-                <div className="space-y-3">
+            <div className="border-white/8 flex flex-col gap-4 border-t pt-5 xl:border-l xl:border-t-0 xl:pl-7 xl:pt-0">
+              <div className="border-white/8 rounded-[1.15rem] border bg-white/[0.03] p-4 sm:p-5">
+                <div className="space-y-4">
                   {runner.assessmentIntro.estimatedTimeOverride ? (
                     <div className="space-y-1">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
-                        Estimated duration
-                      </p>
-                      <p className="text-[0.95rem] font-medium tracking-[-0.02em] text-white/82">
+                      <p className="sonartra-type-eyebrow text-white/38">Estimated duration</p>
+                      <p className="sonartra-type-nav text-white/84">
                         {runner.assessmentIntro.estimatedTimeOverride}
                       </p>
                     </div>
@@ -270,10 +266,8 @@ export function AssessmentRunnerClient({
 
                   {runner.assessmentIntro.instructions ? (
                     <div className="space-y-1">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
-                        Instructions
-                      </p>
-                      <p className="text-sm leading-6 text-white/62">
+                      <p className="sonartra-type-eyebrow text-white/38">Instructions</p>
+                      <p className="sonartra-type-body-secondary max-w-[38ch] leading-6">
                         {runner.assessmentIntro.instructions}
                       </p>
                     </div>
@@ -281,10 +275,8 @@ export function AssessmentRunnerClient({
 
                   {runner.assessmentIntro.introHowItWorks ? (
                     <div className="space-y-1">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/36">
-                        How It Works
-                      </p>
-                      <p className="text-sm leading-6 text-white/62">
+                      <p className="sonartra-type-eyebrow text-white/38">How it works</p>
+                      <p className="sonartra-type-body-secondary max-w-[38ch] leading-6">
                         {runner.assessmentIntro.introHowItWorks}
                       </p>
                     </div>
@@ -293,7 +285,7 @@ export function AssessmentRunnerClient({
                   <button
                     type="button"
                     onClick={() => setShowIntro(false)}
-                    className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
+                    className="sonartra-type-button inline-flex h-11 w-full items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-neutral-950 transition hover:bg-white/90"
                   >
                     Start Assessment
                   </button>
@@ -312,28 +304,28 @@ export function AssessmentRunnerClient({
         <section className="sonartra-panel space-y-4 p-5 lg:p-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">
+              <div className="sonartra-type-eyebrow text-white/46 flex flex-wrap items-center gap-2">
                 <span>Assessment Runner</span>
                 <span className="text-white/22">/</span>
                 <span>{runner.assessmentTitle}</span>
               </div>
               <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
-                <h2 className="text-[1.55rem] font-semibold tracking-[-0.03em] text-white lg:text-[1.8rem]">
+                <h2 className="sonartra-type-section-title text-[1.55rem] lg:text-[1.8rem]">
                   Question {currentQuestionIndex + 1}
                 </h2>
-                <p className="pb-0.5 text-sm text-white/58">of {totalQuestions}</p>
+                <p className="sonartra-type-caption text-white/58 pb-0.5">of {totalQuestions}</p>
               </div>
-              <p className="text-sm text-white/65">
+              <p className="sonartra-type-body-secondary text-white/65">
                 {answeredQuestions} complete, {unansweredQuestions} remaining. Progress{' '}
                 {completionPercentage}%.
               </p>
               {resumedAwayFromStart ? (
-                <p className="text-sm text-white/46">
+                <p className="sonartra-type-caption text-white/46">
                   Resume opened at the next unanswered question from your saved progress.
                 </p>
               ) : null}
             </div>
-            <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-white/58">
+            <div className="sonartra-type-caption border-white/8 text-white/58 rounded-2xl border bg-white/[0.03] px-4 py-3">
               {completionState === 'idle'
                 ? isSaving
                   ? 'Saving latest selection...'
@@ -343,11 +335,11 @@ export function AssessmentRunnerClient({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-medium text-white/44">
+            <div className="text-white/44 flex items-center justify-between text-xs font-medium">
               <span>Completion</span>
               <span>{completionPercentage}%</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-white/8">
+            <div className="bg-white/8 h-2.5 overflow-hidden rounded-full">
               <div
                 className="h-full rounded-full bg-white transition-all"
                 style={{ width: `${completionPercentage}%` }}
@@ -359,20 +351,20 @@ export function AssessmentRunnerClient({
         <section className="sonartra-panel space-y-5 p-5 lg:p-6">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/58">
+              <span className="sonartra-status sonartra-status-neutral">
                 {currentQuestion.domainTitle}
               </span>
               <span
-                className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                className={`sonartra-status ${
                   currentQuestionAnswered
                     ? 'border-emerald-400/18 bg-emerald-400/10 text-emerald-100'
-                    : 'border-white/10 bg-white/[0.03] text-white/52'
+                    : 'text-white/52 border-white/10 bg-white/[0.03]'
                 }`}
               >
                 {currentQuestionAnswered ? 'Answered' : 'Awaiting response'}
               </span>
             </div>
-            <h3 className="max-w-4xl text-[1.8rem] font-semibold tracking-[-0.03em] text-white lg:text-[2rem]">
+            <h3 className="sonartra-type-section-title max-w-[34ch] text-[1.8rem] leading-[1.08] lg:text-[2rem]">
               {currentQuestion.prompt}
             </h3>
           </div>
@@ -390,7 +382,7 @@ export function AssessmentRunnerClient({
                   className={`rounded-[1.1rem] border px-4 py-3.5 text-left transition ${
                     selected
                       ? 'border-white bg-white text-neutral-950 shadow-[0_14px_30px_rgba(255,255,255,0.08)]'
-                      : 'border-white/10 bg-white/[0.03] text-white hover:border-white/24 hover:bg-white/[0.055]'
+                      : 'hover:border-white/24 border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.055]'
                   } disabled:cursor-not-allowed disabled:opacity-70`}
                 >
                   <div className="flex items-start gap-3">
@@ -403,7 +395,9 @@ export function AssessmentRunnerClient({
                         {option.label}
                       </span>
                     ) : null}
-                    <span className="text-sm leading-6 lg:text-[0.95rem]">{option.text}</span>
+                    <span className="sonartra-type-body max-w-[54ch] text-sm leading-6 text-inherit lg:text-[0.95rem]">
+                      {option.text}
+                    </span>
                   </div>
                 </button>
               );
@@ -411,19 +405,19 @@ export function AssessmentRunnerClient({
           </div>
 
           {saveError ? (
-            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            <p className="sonartra-type-body-secondary rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-100">
               {saveError}
             </p>
           ) : null}
 
           {submitError ? (
-            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            <p className="sonartra-type-body-secondary rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-100">
               {submitError}
             </p>
           ) : null}
 
           {getCompletionMessage() ? (
-            <p className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/72">
+            <p className="sonartra-type-body-secondary text-white/72 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
               {getCompletionMessage()}
             </p>
           ) : null}
@@ -434,7 +428,7 @@ export function AssessmentRunnerClient({
                 type="button"
                 onClick={() => goToQuestion(currentQuestionIndex - 1)}
                 disabled={currentQuestionIndex === 0 || interactionLocked}
-                className="inline-flex h-12 min-w-[7rem] items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] px-5 text-sm font-semibold text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:text-white/35"
+                className="sonartra-type-button inline-flex h-12 min-w-[7rem] items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] px-5 text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:text-white/35"
               >
                 Back
               </button>
@@ -443,7 +437,7 @@ export function AssessmentRunnerClient({
                   type="button"
                   onClick={() => goToQuestion(currentQuestionIndex + 1)}
                   disabled={interactionLocked}
-                  className="inline-flex h-12 min-w-[8rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
+                  className="sonartra-type-button inline-flex h-12 min-w-[8rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
                 >
                   Next
                 </button>
@@ -452,7 +446,7 @@ export function AssessmentRunnerClient({
                   type="button"
                   onClick={goToFirstUnanswered}
                   disabled={interactionLocked}
-                  className="inline-flex h-12 min-w-[10.5rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
+                  className="sonartra-type-button inline-flex h-12 min-w-[10.5rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
                 >
                   Next Unanswered
                 </button>
@@ -464,7 +458,7 @@ export function AssessmentRunnerClient({
                 type="button"
                 onClick={handleSubmit}
                 disabled={!canSubmit}
-                className="inline-flex h-12 min-w-[12rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-sm font-semibold text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
+                className="sonartra-type-button inline-flex h-12 min-w-[12rem] items-center justify-center rounded-xl border border-white/15 bg-white px-5 text-neutral-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/20 disabled:text-white/45"
               >
                 {completionState === 'submitting'
                   ? 'Submitting...'
@@ -478,7 +472,7 @@ export function AssessmentRunnerClient({
           </div>
 
           {showCompleteAction && !canSubmit && completionState === 'idle' ? (
-            <p className="text-sm text-white/52">
+            <p className="sonartra-type-body-secondary text-white/52">
               {unansweredQuestions > 0
                 ? `Complete the remaining ${unansweredQuestions} question${unansweredQuestions === 1 ? '' : 's'} before submitting.`
                 : 'Completion is available once every question has a saved answer and no save is pending.'}
@@ -490,26 +484,24 @@ export function AssessmentRunnerClient({
       <aside className="xl:sticky xl:top-6">
         <section className="sonartra-panel space-y-4 p-4">
           <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">
-              Question Map
-            </p>
+            <p className="sonartra-type-eyebrow text-white/46">Question Map</p>
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="text-2xl font-semibold tracking-[-0.03em] text-white">
+                <p className="sonartra-type-section-title text-2xl">
                   {answeredQuestions}/{totalQuestions}
                 </p>
-                <p className="text-sm text-white/58">Questions completed</p>
+                <p className="sonartra-type-body-secondary text-white/58">Questions completed</p>
               </div>
-              <p className="text-sm text-white/46">{unansweredQuestions} remaining</p>
+              <p className="sonartra-type-caption text-white/46">{unansweredQuestions} remaining</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 text-[11px] text-white/48">
+          <div className="sonartra-type-utility text-white/48 flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1">
               <span className="h-2 w-2 rounded-full bg-white" />
               Current
             </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/18 bg-emerald-400/10 px-2.5 py-1 text-emerald-100">
+            <span className="border-emerald-400/18 inline-flex items-center gap-2 rounded-full border bg-emerald-400/10 px-2.5 py-1 text-emerald-100">
               <span className="h-2 w-2 rounded-full bg-emerald-200" />
               Complete
             </span>
@@ -531,22 +523,18 @@ export function AssessmentRunnerClient({
                   onClick={() => goToQuestion(index)}
                   disabled={interactionLocked}
                   aria-label={`Question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
-                  className={`relative rounded-xl border px-2 py-2.5 text-center text-sm font-medium transition ${
+                  className={`sonartra-type-nav relative rounded-xl border px-2 py-2.5 text-center transition ${
                     active
                       ? 'border-white bg-white text-neutral-950 shadow-[0_12px_24px_rgba(255,255,255,0.08)]'
                       : answered
-                        ? 'border-emerald-400/18 bg-emerald-400/10 text-white hover:border-emerald-300/28 hover:bg-emerald-400/14'
-                        : 'border-white/10 bg-white/[0.03] text-white/58 hover:border-white/18 hover:bg-white/[0.05]'
+                        ? 'border-emerald-400/18 hover:border-emerald-300/28 hover:bg-emerald-400/14 bg-emerald-400/10 text-white'
+                        : 'text-white/58 hover:border-white/18 border-white/10 bg-white/[0.03] hover:bg-white/[0.05]'
                   } disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   <span>{index + 1}</span>
                   <span
                     className={`absolute right-2 top-2 h-1.5 w-1.5 rounded-full ${
-                      active
-                        ? 'bg-neutral-950/45'
-                        : answered
-                          ? 'bg-emerald-200'
-                          : 'bg-white/28'
+                      active ? 'bg-neutral-950/45' : answered ? 'bg-emerald-200' : 'bg-white/28'
                     }`}
                   />
                 </button>

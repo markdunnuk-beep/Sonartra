@@ -319,4 +319,79 @@ main {
     @apply sonartra-type-utility;
     color: rgba(225, 232, 251, 0.68);
   }
+
+  .sonartra-report-kicker {
+    @apply sonartra-type-eyebrow;
+    color: rgba(207, 218, 243, 0.44);
+  }
+
+  .sonartra-report-title {
+    @apply sonartra-type-card-title;
+    color: rgba(236, 241, 255, 0.9);
+  }
+
+  .sonartra-report-body {
+    @apply sonartra-type-body;
+    color: rgba(222, 231, 251, 0.74);
+  }
+
+  .sonartra-report-body-soft {
+    @apply sonartra-type-body-secondary;
+    color: rgba(207, 218, 243, 0.56);
+  }
+
+  .sonartra-report-summary {
+    @apply text-[1rem] font-normal leading-8 tracking-[0];
+    color: rgba(228, 236, 255, 0.74);
+  }
+
+  .sonartra-report-prose {
+    @apply max-w-[68ch];
+  }
+
+  .sonartra-report-markdown {
+    @apply sonartra-report-prose;
+  }
+
+  .sonartra-report-markdown > h1 {
+    @apply sonartra-type-section-title mb-5;
+  }
+
+  .sonartra-report-markdown > h2 {
+    @apply sonartra-type-card-title mb-3 mt-9;
+  }
+
+  .sonartra-report-markdown > h3 {
+    @apply mb-2 mt-6 text-[15px] font-semibold leading-[1.35] tracking-[-0.01em];
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .sonartra-report-markdown > p {
+    @apply sonartra-report-body my-0 whitespace-pre-line;
+  }
+
+  .sonartra-report-markdown > p + p {
+    @apply mt-6;
+  }
+
+  .sonartra-report-markdown > ul,
+  .sonartra-report-markdown > ol {
+    @apply sonartra-report-body my-5 space-y-2 pl-5;
+  }
+
+  .sonartra-report-markdown > hr {
+    @apply my-7 h-px border-0;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .sonartra-report-markdown > blockquote {
+    @apply my-6 border-l pl-4;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.68);
+  }
+
+  .sonartra-report-markdown strong {
+    @apply font-semibold;
+    color: rgba(255, 255, 255, 0.94);
+  }
 }

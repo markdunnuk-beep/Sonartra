@@ -164,7 +164,11 @@ export function activateDomainSignalRingSignalByKeyboard(params: {
     return params.currentSignalKey;
   }
 
-  return selectDomainSignalRingSignal(params.domain, params.currentSignalKey, params.requestedSignalKey);
+  return selectDomainSignalRingSignal(
+    params.domain,
+    params.currentSignalKey,
+    params.requestedSignalKey,
+  );
 }
 
 export function resolveDomainSignalRingActiveSignal(params: {
@@ -173,9 +177,9 @@ export function resolveDomainSignalRingActiveSignal(params: {
   highlightedSignalKey: string | null;
 }): DomainSignalRingViewModel['signals'][number] | null {
   return (
-    getSignalByKey(params.domain, params.highlightedSignalKey)
-    ?? getSignalByKey(params.domain, params.selectedSignalKey)
-    ?? getSignalByKey(params.domain, getDomainSignalRingInitialSelectedSignalKey(params.domain))
+    getSignalByKey(params.domain, params.highlightedSignalKey) ??
+    getSignalByKey(params.domain, params.selectedSignalKey) ??
+    getSignalByKey(params.domain, getDomainSignalRingInitialSelectedSignalKey(params.domain))
   );
 }
 
@@ -253,7 +257,7 @@ function SignalBarRow({
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
               <span
                 className={cn(
-                  'min-w-0 flex-1 text-[0.97rem] font-medium leading-6 tracking-[-0.02em]',
+                  'sonartra-type-nav min-w-0 flex-1 text-[0.97rem] leading-6',
                   isSelectedState || isHighlighted ? 'text-white' : tone.labelClassName,
                   signal.isTopSignal ? 'font-semibold' : null,
                 )}
@@ -263,7 +267,7 @@ function SignalBarRow({
               {tone.markerLabel ? (
                 <span
                   className={cn(
-                    'inline-flex rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em]',
+                    'sonartra-type-utility inline-flex rounded-full border px-1.5 py-0.5 text-[9px]',
                     tone.markerClassName,
                   )}
                 >
@@ -276,7 +280,7 @@ function SignalBarRow({
           <div className="shrink-0 text-right">
             <p
               className={cn(
-                'text-[0.94rem] font-medium tracking-[-0.02em] sm:text-[0.98rem]',
+                'sonartra-type-nav text-[0.94rem] sm:text-[0.98rem]',
                 isSelectedState || isHighlighted ? 'text-white' : tone.valueClassName,
               )}
             >
@@ -289,7 +293,11 @@ function SignalBarRow({
           <div
             className={cn(
               'w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.05)] transition duration-200 ease-out',
-              isSelectedState ? 'h-[0.68rem] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]' : isHighlighted ? 'h-[0.64rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.05)]' : 'h-[0.52rem]',
+              isSelectedState
+                ? 'h-[0.68rem] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
+                : isHighlighted
+                  ? 'h-[0.64rem] shadow-[inset_0_0_0_1px_rgba(180,206,255,0.05)]'
+                  : 'h-[0.52rem]',
             )}
             aria-hidden="true"
             data-bar-track="true"
@@ -334,7 +342,10 @@ export function DomainSignalRing({
   initialSelectedSignalKey?: string | null;
 }>) {
   const signals = domain.signals;
-  const initialSelection = getDomainSignalRingInitialSelectedSignalKey(domain, initialSelectedSignalKey);
+  const initialSelection = getDomainSignalRingInitialSelectedSignalKey(
+    domain,
+    initialSelectedSignalKey,
+  );
   const [selectedSignalKey, setSelectedSignalKey] = useState<string | null>(initialSelection);
   const [highlightedSignalKey, setHighlightedSignalKey] = useState<string | null>(null);
   const activeSignal = resolveDomainSignalRingActiveSignal({
@@ -347,7 +358,7 @@ export function DomainSignalRing({
   return (
     <section
       className={cn(
-        'overflow-hidden rounded-[1.2rem] border border-white/7 bg-[linear-gradient(180deg,rgba(11,18,30,0.38),rgba(8,12,22,0.54))] p-4 shadow-[0_14px_36px_rgba(3,8,20,0.12)] sm:p-5',
+        'border-white/7 overflow-hidden rounded-[1.2rem] border bg-[linear-gradient(180deg,rgba(11,18,30,0.38),rgba(8,12,22,0.54))] p-4 shadow-[0_14px_36px_rgba(3,8,20,0.12)] sm:p-5',
         className,
       )}
       aria-label={`${domain.domainLabel} signal bars`}
@@ -377,17 +388,21 @@ export function DomainSignalRing({
                     isSelected={selectedSignalKey === signal.signalKey}
                     onSelect={(signalKey) => {
                       setSelectedSignalKey((currentSignalKey) =>
-                        selectDomainSignalRingSignal(domain, currentSignalKey, signalKey));
+                        selectDomainSignalRingSignal(domain, currentSignalKey, signalKey),
+                      );
                     }}
                     onHighlight={(signalKey) => setHighlightedSignalKey(signalKey)}
-                    onClearHighlight={(signalKey) => setHighlightedSignalKey((currentSignalKey) =>
-                      currentSignalKey === signalKey ? null : currentSignalKey)}
+                    onClearHighlight={(signalKey) =>
+                      setHighlightedSignalKey((currentSignalKey) =>
+                        currentSignalKey === signalKey ? null : currentSignalKey,
+                      )
+                    }
                   />
                 );
               })}
             </ol>
           ) : (
-            <div className="rounded-[1rem] border border-dashed border-white/8 bg-white/[0.018] px-4 py-5 text-[0.92rem] leading-7 text-white/48">
+            <div className="sonartra-type-body-secondary border-white/8 text-white/48 rounded-[1rem] border border-dashed bg-white/[0.018] px-4 py-5">
               No signal balance is available for this area yet.
             </div>
           )}
@@ -405,26 +420,26 @@ export function DomainSignalRing({
             <div className="space-y-3">
               <div className="flex flex-wrap items-start justify-between gap-2.5">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
-                  <p className="min-w-0 flex-1 text-[0.92rem] font-medium leading-6 tracking-[-0.02em] text-white/88 sm:text-[0.95rem]">
+                  <p className="sonartra-type-nav text-white/88 min-w-0 flex-1 sm:text-[0.95rem]">
                     {activeSignal.signalLabel}
                   </p>
                   {activeSignal.isTopSignal ? (
-                    <span className="inline-flex rounded-full border border-white/12 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/72">
+                    <span className="sonartra-type-utility border-white/12 text-white/72 inline-flex rounded-full border bg-white/[0.04] px-1.5 py-0.5 text-[9px]">
                       Top
                     </span>
                   ) : activeSignal.isSecondSignal ? (
-                    <span className="inline-flex rounded-full border border-[#8eb1ff]/18 bg-[#8eb1ff]/[0.05] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#d4def2]">
+                    <span className="sonartra-type-utility border-[#8eb1ff]/18 inline-flex rounded-full border bg-[#8eb1ff]/[0.05] px-1.5 py-0.5 text-[9px] text-[#d4def2]">
                       2nd
                     </span>
                   ) : null}
                 </div>
-                <p className="shrink-0 pt-0.5 text-[0.94rem] font-medium tracking-[-0.03em] text-white/76 sm:text-[0.98rem]">
+                <p className="sonartra-type-nav text-white/76 shrink-0 pt-0.5 sm:text-[0.98rem]">
                   {formatPercent(activeSignal.withinDomainPercent)}
                 </p>
               </div>
 
               {activeSignalInsight ? (
-                <p className="max-w-[42rem] text-[0.96rem] leading-7 text-white/66">
+                <p className="sonartra-type-body-secondary text-white/66 max-w-[42rem]">
                   {activeSignalInsight}
                 </p>
               ) : null}
@@ -432,11 +447,13 @@ export function DomainSignalRing({
           </div>
         ) : (
           <div
-            className="rounded-[1rem] border border-white/8 bg-white/[0.018] px-4 py-3.5"
+            className="border-white/8 rounded-[1rem] border bg-white/[0.018] px-4 py-3.5"
             aria-live="polite"
             data-active-detail-key=""
           >
-            <p className="text-[0.82rem] leading-6 text-white/46">No signal reading is available for this area yet.</p>
+            <p className="sonartra-type-caption text-white/46">
+              No signal reading is available for this area yet.
+            </p>
           </div>
         )}
       </div>

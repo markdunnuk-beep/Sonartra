@@ -7,9 +7,7 @@ import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 import { buildDomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
-import type {
-  AssessmentResultDetailViewModel,
-} from '@/lib/server/result-read-model-types';
+import type { AssessmentResultDetailViewModel } from '@/lib/server/result-read-model-types';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
@@ -70,11 +68,7 @@ function getVisibleItems<T>(items: readonly T[]): {
 }
 
 function SectionEyebrow({ children }: { children: ReactNode }) {
-  return (
-    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">
-      {children}
-    </p>
-  );
+  return <p className="sonartra-report-kicker">{children}</p>;
 }
 
 function buildResultDetailDomainItems(params: {
@@ -96,13 +90,7 @@ function buildResultDetailDomainItems(params: {
   }));
 }
 
-function ActionList({
-  title,
-  items,
-}: {
-  title: string;
-  items: readonly VisibleActionItem[];
-}) {
+function ActionList({ title, items }: { title: string; items: readonly VisibleActionItem[] }) {
   const typedItems: readonly VisibleActionItem[] = items;
   const { visible, overflow } = getVisibleItems<VisibleActionItem>(typedItems);
 
@@ -110,36 +98,32 @@ function ActionList({
     <article className="space-y-6 border-t border-white/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12">
       <div className="grid gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] md:gap-7">
         <SectionEyebrow>{title}</SectionEyebrow>
-        <h3 className="text-[1.12rem] font-medium tracking-[-0.025em] text-white/78 md:text-[1.18rem]">{title}</h3>
+        <h3 className="sonartra-report-title">{title}</h3>
       </div>
 
       <ul className="space-y-6 md:space-y-7">
         {visible.length > 0 ? (
           visible.map((item) => (
             <li key={item.key} className="space-y-2.5">
-              <p className="text-[0.95rem] font-medium tracking-[-0.01em] text-white/84">
-                {item.title}
-              </p>
-              <p className="max-w-[45rem] text-[0.99rem] leading-8 text-white/64">
-                {item.detail}
-              </p>
+              <p className="sonartra-report-title text-[1rem]">{item.title}</p>
+              <p className="sonartra-report-body max-w-[46rem]">{item.detail}</p>
             </li>
           ))
         ) : (
-          <li className="text-sm leading-7 text-white/45">No items available in this section.</li>
+          <li className="sonartra-report-body-soft">No items available in this section.</li>
         )}
       </ul>
 
       {overflow.length > 0 ? (
-        <details className="max-w-[45rem] pt-2">
-          <summary className="cursor-pointer list-none text-[0.92rem] font-medium text-white/54 marker:hidden">
+        <details className="max-w-[46rem] pt-2">
+          <summary className="sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
             Show {overflow.length} more
           </summary>
-          <ul className="mt-4 space-y-5 border-l border-white/6 pl-4">
+          <ul className="border-white/6 mt-4 space-y-5 border-l pl-4">
             {overflow.map((item) => (
               <li key={item.key} className="space-y-2.5">
-                <p className="text-sm font-medium text-white/80">{item.title}</p>
-                <p className="max-w-[42rem] text-sm leading-7 text-white/56">{item.detail}</p>
+                <p className="sonartra-type-nav text-white/82">{item.title}</p>
+                <p className="sonartra-report-body-soft max-w-[42rem]">{item.detail}</p>
               </li>
             ))}
           </ul>
@@ -157,16 +141,15 @@ function toVisibleActionItems(items: readonly CanonicalActionItem[]): readonly V
   }));
 }
 
-function ActionSection({
-  actions,
-}: {
-  actions: AssessmentResultDetailViewModel['actions'];
-}) {
+function ActionSection({ actions }: { actions: AssessmentResultDetailViewModel['actions'] }) {
   return (
     <div className="mx-auto max-w-[56rem] px-1 md:px-2">
       <ActionList title="Strengths" items={toVisibleActionItems(actions.strengths)} />
       <ActionList title="Watchouts" items={toVisibleActionItems(actions.watchouts)} />
-      <ActionList title="Development Focus" items={toVisibleActionItems(actions.developmentFocus)} />
+      <ActionList
+        title="Development Focus"
+        items={toVisibleActionItems(actions.developmentFocus)}
+      />
     </div>
   );
 }
@@ -183,7 +166,7 @@ function DomainChapter({
   const title = domain.domainLabel.trim();
 
   return (
-    <article className="space-y-9 border-t border-white/6 pt-14 first:border-t-0 first:pt-0 md:space-y-11 md:pt-16">
+    <article className="border-white/6 space-y-9 border-t pt-14 first:border-t-0 first:pt-0 md:space-y-11 md:pt-16">
       <div className="grid gap-6 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:gap-10">
         <div className="space-y-4">
           <SectionEyebrow>Domain</SectionEyebrow>
@@ -194,19 +177,13 @@ function DomainChapter({
 
         <div className="space-y-7 md:space-y-8">
           {domain.summary ? (
-            <p className="max-w-[45rem] text-[1.02rem] leading-8 text-white/70 md:text-[1.08rem] md:leading-9">
-              {domain.summary}
-            </p>
+            <p className="sonartra-report-summary max-w-[46rem]">{domain.summary}</p>
           ) : null}
 
           {domain.focus || domain.pressure || domain.environment ? (
             <div className="grid gap-x-8 gap-y-4 sm:grid-cols-3">
-              {domain.focus ? (
-                <EditorialAside label="Focus" text={domain.focus} />
-              ) : null}
-              {domain.pressure ? (
-                <EditorialAside label="Pressure" text={domain.pressure} />
-              ) : null}
+              {domain.focus ? <EditorialAside label="Focus" text={domain.focus} /> : null}
+              {domain.pressure ? <EditorialAside label="Pressure" text={domain.pressure} /> : null}
               {domain.environment ? (
                 <EditorialAside label="Environment" text={domain.environment} />
               ) : null}
@@ -233,31 +210,25 @@ function DomainChapter({
           ) : null}
 
           {domain.pairSummary?.text ? (
-            <p className="max-w-[45rem] text-[0.97rem] leading-8 text-white/50 italic">
+            <p className="text-[0.97rem] leading-8 text-white/50 italic sonartra-report-body-soft max-w-[46rem]">
               {domain.pairSummary.text}
             </p>
           ) : null}
 
           {ringModel ? (
-            <DomainSignalRing
-              domain={ringModel}
-              className="max-w-[45rem] md:max-w-[47rem]"
-            />
+            <DomainSignalRing domain={ringModel} className="max-w-[45rem] md:max-w-[47rem]" />
           ) : null}
 
           {hiddenSignals.length > 0 ? (
-            <details className="max-w-[40rem] pt-1">
-              <summary className="cursor-pointer list-none text-[0.92rem] font-medium text-white/58 marker:hidden">
+            <details className="max-w-[42rem] pt-1">
+              <summary className="sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
                 Additional signal context
               </summary>
-              <div className="mt-3 space-y-3 border-l border-white/8 pl-4">
+              <div className="border-white/8 mt-3 space-y-3 border-l pl-4">
                 {hiddenSignals.map((signal) => (
-                  <div key={signal.signalKey} className="text-sm leading-7 text-white/52">
-                    <span className="font-medium text-white/76">{signal.signalLabel}</span>
-                    <span className="text-white/40">
-                      {' '}
-                      also appears in this area.
-                    </span>
+                  <div key={signal.signalKey} className="sonartra-report-body-soft">
+                    <span className="sonartra-type-nav text-white/76">{signal.signalLabel}</span>
+                    <span className="text-white/40"> also appears in this area.</span>
                   </div>
                 ))}
               </div>
@@ -265,7 +236,7 @@ function DomainChapter({
           ) : null}
 
           {visibleSignals.length === 0 ? (
-            <p className="max-w-[40rem] text-sm leading-7 text-white/45">
+            <p className="sonartra-report-body-soft max-w-[42rem]">
               No persisted domain signals are available for this area.
             </p>
           ) : null}
@@ -285,7 +256,7 @@ function DomainSection({
 }) {
   if (domainItems.length === 0) {
     return (
-      <SurfaceCard className="p-6 text-sm text-white/55">
+      <SurfaceCard className="sonartra-report-body-soft p-6">
         No persisted domain summaries are available for this result.
       </SurfaceCard>
     );
@@ -300,17 +271,11 @@ function DomainSection({
   );
 }
 
-function EditorialAside({
-  label,
-  text,
-}: {
-  label: string;
-  text: string;
-}) {
+function EditorialAside({ label, text }: { label: string; text: string }) {
   return (
     <div className="max-w-[16rem] space-y-1.5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/38">{label}</p>
-      <p className="text-[0.94rem] leading-7 text-white/54">{text}</p>
+      <p className="sonartra-report-kicker">{label}</p>
+      <p className="sonartra-report-body-soft">{text}</p>
     </div>
   );
 }
@@ -326,11 +291,9 @@ function SignalEditorialBlock({
 }) {
   return (
     <div className="space-y-2.5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/38">{title}</p>
-      <p className="text-[1.04rem] font-medium tracking-[-0.025em] text-white/88">{signalLabel}</p>
-      {summary ? (
-        <p className="max-w-[32rem] text-[0.95rem] leading-7 text-white/56">{summary}</p>
-      ) : null}
+      <p className="sonartra-report-kicker">{title}</p>
+      <p className="sonartra-report-title text-[1.05rem]">{signalLabel}</p>
+      {summary ? <p className="sonartra-report-body-soft max-w-[34rem]">{summary}</p> : null}
     </div>
   );
 }
@@ -350,15 +313,11 @@ function HeroDomainHighlights({
         {highlights.map((highlight) => (
           <article key={highlight.domainKey} className="space-y-1.5">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
-                {highlight.domainLabel}
-              </p>
-              <p className="text-[1rem] font-medium tracking-[-0.02em] text-white/82">
-                {highlight.primarySignalLabel}
-              </p>
+              <p className="sonartra-report-kicker">{highlight.domainLabel}</p>
+              <p className="sonartra-report-title text-[1rem]">{highlight.primarySignalLabel}</p>
             </div>
             {highlight.summary ? (
-              <p className="max-w-[45rem] text-[0.95rem] leading-7 text-white/52">{highlight.summary}</p>
+              <p className="sonartra-report-body-soft max-w-[46rem]">{highlight.summary}</p>
             ) : null}
           </article>
         ))}
@@ -409,10 +368,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     <PageFrame className="space-y-16 md:space-y-20">
       {hasAssessmentDescription ? (
         <section className="rounded-[1.9rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_10px_28px_rgba(0,0,0,0.08)] md:px-10 md:py-10">
-          <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/40">
-            About this report
-          </p>
-          <div className="max-w-[72ch] [&>h1]:mb-5 [&>h1]:text-[28px] [&>h1]:font-semibold [&>h1]:leading-[1.08] [&>h1]:tracking-[-0.02em] [&>h1]:text-white/96 [&>h2]:mt-9 [&>h2]:mb-3 [&>h2]:text-[19px] [&>h2]:font-semibold [&>h2]:leading-tight [&>h2]:tracking-[-0.01em] [&>h2]:text-white/94 [&>h3]:mt-6 [&>h3]:mb-2 [&>h3]:text-[16px] [&>h3]:font-semibold [&>h3]:leading-tight [&>h3]:text-white/90 [&>p]:my-0 [&>p]:whitespace-pre-line [&>p]:text-[17px] [&>p]:leading-[1.95] [&>p]:tracking-[-0.005em] [&>p]:text-white/72 [&>p+p]:mt-6 [&_strong]:font-semibold [&_strong]:text-white/94 [&>hr]:my-7 [&>hr]:h-px [&>hr]:border-0 [&>hr]:bg-white/8 [&>ul]:my-5 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-[17px] [&>ul]:leading-[1.9] [&>ul]:text-white/72 [&>ol]:my-5 [&>ol]:space-y-2 [&>ol]:pl-5 [&>ol]:text-[17px] [&>ol]:leading-[1.9] [&>ol]:text-white/72 [&>blockquote]:my-6 [&>blockquote]:border-l [&>blockquote]:border-white/8 [&>blockquote]:pl-4 [&>blockquote]:text-white/68">
+          <p className="sonartra-report-kicker mb-6">About this report</p>
+          <div className="max-w-[72ch] sonartra-report-markdown">
             <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
               {assessmentDescription}
             </ReactMarkdown>
@@ -422,23 +379,23 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
       <section className="rounded-[2rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] px-7 py-10 shadow-[0_16px_48px_rgba(0,0,0,0.14)] sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14">
         <div className="max-w-[74rem] space-y-9 md:space-y-11">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/38">
+          <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
             <SectionEyebrow>Hero</SectionEyebrow>
-            <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
+            <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
             <span>{result.assessmentTitle}</span>
-            <span className="hidden h-1 w-1 rounded-full bg-white/18 md:inline-block" />
+            <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
             <span>{completionTimestamp.date}</span>
           </div>
 
           <div className="space-y-8 md:space-y-10">
             {heroHeadline ? (
-              <h1 className="max-w-[14ch] text-[3rem] font-semibold leading-[0.96] tracking-[-0.055em] text-white sm:text-[4rem] md:text-[5rem]">
+              <h1 className="sonartra-type-display max-w-[13ch] text-[3rem] md:text-[4.75rem]">
                 {heroHeadline}
               </h1>
             ) : null}
-            <div className="max-w-[60ch] space-y-7">
+            <div className="sonartra-report-prose space-y-7">
               {heroNarrative ? (
-                <p className="max-w-[60ch] text-[1.04rem] leading-[1.95] text-white/72 sm:text-[1.08rem] md:text-[1.16rem]">
+                <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
                   {heroNarrative}
                 </p>
               ) : null}
