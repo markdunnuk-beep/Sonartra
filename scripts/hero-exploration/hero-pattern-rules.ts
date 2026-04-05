@@ -491,7 +491,7 @@ export const FINAL_HERO_PATTERN_RULES: readonly HeroPatternRule[] = [
     patternKey: 'grounded_planner',
     priority: 22,
     conditions: [
-      { traitKey: 'deliberate', operator: '>=', value: 3 },
+      { traitKey: 'deliberate', operator: '>=', value: 2 },
       { traitKey: 'stable', operator: '>=', value: 2 },
     ],
     exclusions: [{ traitKey: 'people_led', operator: '>=', value: 4 }],
@@ -592,12 +592,12 @@ export const PATTERN_CHANGE_LOG: Readonly<Record<string, string>> = {
   exacting_controller: 'retained unchanged because it was already highly specific, low-collision, and implementation-ready.',
   flexible_mobiliser: 'retired into adaptive_mobiliser for the final consolidation.',
   forceful_driver: 'retained unchanged as the clearest high-pace high-assertive Hero lane.',
-  grounded_planner: 'retained as the stable deliberate planning identity, with social-heavy cases pushed into steady_steward.',
+  grounded_planner: 'retained as the stable deliberate planning identity, with a slightly lower deliberate threshold so quieter grounded profiles are captured before fallback.',
   grounded_steward: 'retired into steady_steward for the final consolidation.',
   relational_catalyst: 'tightened so moderately stable social profiles now resolve to steady_steward instead of the broader relational lane.',
   responsive_mediator: 'retired into steady_steward for the final consolidation.',
   steady_connector: 'retired into steady_steward for the final consolidation.',
   steady_executor: 'retained as the dependable task-and-stability lane, distinct from the more forceful delivery patterns.',
   steady_steward: 'new consolidated stable social identity merging connector, mediator, diplomat, and grounded stewardship into one broader but clearer people-stability lane, keeping the calmer relational profiles that no longer belong in relational_catalyst.',
-  structured_collaborator: 'retained as the organised people-aware lane, but now excludes stable social cases earlier so steady_steward can own social containment.',
+  structured_collaborator: 'retained as the organised people-aware lane, but still requires stronger structure so it does not reopen the broad social overlap families.',
 };
