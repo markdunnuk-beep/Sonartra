@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: dark;
+  --font-sonartra-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --sonartra-bg: #09111f;
   --sonartra-bg-elevated: #0d1627;
   --sonartra-panel: rgba(15, 24, 40, 0.82);
@@ -33,14 +35,7 @@ body {
     radial-gradient(circle at top, rgba(96, 119, 255, 0.08), transparent 30%),
     linear-gradient(180deg, #0a1020 0%, #09111f 44%, #08101c 100%);
   color: var(--sonartra-text);
-  font-family:
-    'Segoe UI',
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-sonartra-sans);
 }
 
 main {
@@ -75,6 +70,59 @@ main {
 }
 
 @layer components {
+  .sonartra-type-display {
+    @apply text-[2.65rem] font-semibold leading-[0.96] tracking-[-0.05em] text-white sm:text-[3.2rem] lg:text-[4rem];
+  }
+
+  .sonartra-type-page-title {
+    @apply text-[2rem] font-semibold leading-[1.04] tracking-[-0.032em] text-white sm:text-[2.35rem];
+  }
+
+  .sonartra-type-section-title {
+    @apply text-[1.45rem] font-semibold leading-[1.12] tracking-[-0.022em] text-white;
+  }
+
+  .sonartra-type-card-title {
+    @apply text-[1.22rem] font-semibold leading-[1.2] tracking-[-0.016em] text-white;
+  }
+
+  .sonartra-type-eyebrow {
+    @apply text-[11px] font-semibold uppercase leading-[1.35] tracking-[0.16em];
+    color: var(--sonartra-text-soft);
+  }
+
+  .sonartra-type-body {
+    @apply text-[15px] font-normal leading-7 tracking-[0];
+    color: rgba(233, 239, 255, 0.84);
+  }
+
+  .sonartra-type-body-secondary {
+    @apply text-sm font-normal leading-7 tracking-[0];
+    color: var(--sonartra-text-muted);
+  }
+
+  .sonartra-type-caption {
+    @apply text-[12px] font-medium leading-5 tracking-[0.01em];
+    color: rgba(207, 218, 243, 0.58);
+  }
+
+  .sonartra-type-utility {
+    @apply text-[11px] font-medium uppercase leading-[1.3] tracking-[0.1em];
+  }
+
+  .sonartra-type-button {
+    @apply text-sm font-semibold leading-none tracking-[0.01em];
+  }
+
+  .sonartra-type-nav {
+    @apply text-sm font-medium leading-[1.25] tracking-[0.005em];
+  }
+
+  .sonartra-type-nav-meta {
+    @apply text-[12px] font-normal leading-[1.35] tracking-[0.005em];
+    color: rgba(207, 218, 243, 0.42);
+  }
+
   .sonartra-page {
     @apply space-y-10;
   }
@@ -84,17 +132,15 @@ main {
   }
 
   .sonartra-page-eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-[0.22em];
-    color: var(--sonartra-text-soft);
+    @apply sonartra-type-eyebrow;
   }
 
   .sonartra-page-title {
-    @apply text-[2rem] font-semibold tracking-[-0.03em] text-white sm:text-[2.35rem];
+    @apply sonartra-type-page-title;
   }
 
   .sonartra-page-description {
-    @apply max-w-3xl text-[15px] leading-7;
-    color: var(--sonartra-text-muted);
+    @apply sonartra-type-body-secondary max-w-3xl;
   }
 
   .sonartra-section {
@@ -106,12 +152,11 @@ main {
   }
 
   .sonartra-section-title {
-    @apply text-[1.45rem] font-semibold tracking-[-0.025em] text-white;
+    @apply sonartra-type-section-title;
   }
 
   .sonartra-section-description {
-    @apply max-w-3xl text-sm leading-7;
-    color: var(--sonartra-text-muted);
+    @apply sonartra-type-body-secondary max-w-3xl;
   }
 
   .sonartra-card {
@@ -154,17 +199,17 @@ main {
   }
 
   .sonartra-meta-label {
-    @apply text-[11px] font-semibold uppercase tracking-[0.18em];
+    @apply sonartra-type-utility;
     color: var(--sonartra-text-soft);
   }
 
   .sonartra-meta-value {
-    @apply mt-2 text-sm font-medium;
+    @apply sonartra-type-body mt-2;
     color: rgba(231, 237, 255, 0.8);
   }
 
   .sonartra-button {
-    @apply inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium leading-none transition;
+    @apply sonartra-type-button inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2.5 transition;
     transition-duration: var(--sonartra-transition-fast);
   }
 
@@ -198,7 +243,7 @@ main {
   }
 
   .sonartra-status {
-    @apply inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em];
+    @apply sonartra-type-utility inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1;
   }
 
   .sonartra-status-neutral {
@@ -220,7 +265,7 @@ main {
   }
 
   .sonartra-chip {
-    @apply inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em];
+    @apply sonartra-type-utility inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1;
     border-color: rgba(223, 232, 255, 0.1);
     background: rgba(255, 255, 255, 0.045);
     color: rgba(225, 232, 251, 0.72);
@@ -231,11 +276,47 @@ main {
   }
 
   .sonartra-empty-title {
-    @apply text-xl font-semibold tracking-[-0.02em] text-white;
+    @apply sonartra-type-card-title;
   }
 
   .sonartra-empty-copy {
-    @apply max-w-2xl text-sm leading-7;
-    color: var(--sonartra-text-muted);
+    @apply sonartra-type-body-secondary max-w-2xl;
+  }
+
+  .sonartra-shell-brand-mark {
+    @apply text-sm font-semibold leading-none tracking-[0.12em] text-white;
+  }
+
+  .sonartra-shell-brand-kicker {
+    @apply sonartra-type-eyebrow;
+    color: rgba(207, 218, 243, 0.42);
+  }
+
+  .sonartra-shell-brand-title {
+    @apply sonartra-type-nav;
+    color: rgba(236, 241, 255, 0.86);
+  }
+
+  .sonartra-shell-session-label {
+    @apply sonartra-type-eyebrow;
+    color: rgba(207, 218, 243, 0.4);
+  }
+
+  .sonartra-shell-session-value {
+    @apply sonartra-type-nav;
+    color: rgba(236, 241, 255, 0.78);
+  }
+
+  .sonartra-shell-nav-label {
+    @apply sonartra-type-nav block truncate;
+  }
+
+  .sonartra-shell-nav-meta {
+    @apply sonartra-type-nav-meta block truncate;
+  }
+
+  .sonartra-shell-mobile-brand {
+    @apply sonartra-type-utility;
+    color: rgba(225, 232, 251, 0.68);
   }
 }

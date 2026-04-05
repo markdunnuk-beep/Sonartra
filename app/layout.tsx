@@ -1,5 +1,13 @@
 import type { Metadata } from 'next';
+import { Instrument_Sans } from 'next/font/google';
+
 import './globals.css';
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sonartra-sans',
+});
 
 export const metadata: Metadata = {
   title: 'Sonartra MVP',
@@ -13,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={instrumentSans.variable}>{children}</body>
     </html>
   );
 }

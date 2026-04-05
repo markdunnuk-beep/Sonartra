@@ -13,17 +13,11 @@ import {
 
 const SHELL_COLLAPSE_STORAGE_KEY = 'sonartra:user-shell-collapsed';
 
-function SessionAvatar({
-  userLabel,
-  className,
-}: {
-  userLabel: string;
-  className?: string;
-}) {
+function SessionAvatar({ userLabel, className }: { userLabel: string; className?: string }) {
   return (
     <span
       className={cn(
-        'flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.06] text-sm font-semibold text-white',
+        'sonartra-shell-brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.06]',
         className,
       )}
     >
@@ -60,13 +54,13 @@ function SessionFooter({
       <div className="flex flex-col items-center gap-2">
         <div title={userLabel}>
           <SessionAvatar
-            className="border-white/8 bg-white/[0.03] text-white/76"
+            className="border-white/8 text-white/76 bg-white/[0.03]"
             userLabel={userLabel}
           />
         </div>
         <Link
           aria-label="Log out"
-          className="sonartra-focus-ring border-white/8 text-white/60 hover:border-white/12 hover:bg-white/[0.06] hover:text-white mx-auto flex h-10 w-10 items-center justify-center rounded-[1rem] border bg-white/[0.03] transition duration-200"
+          className="sonartra-focus-ring border-white/8 hover:border-white/12 mx-auto flex h-10 w-10 items-center justify-center rounded-[1rem] border bg-white/[0.03] text-white/60 transition duration-200 hover:bg-white/[0.06] hover:text-white"
           href="/"
           onClick={onNavigate}
           title="Log out"
@@ -82,14 +76,12 @@ function SessionFooter({
       <div className="flex items-center gap-3">
         <SessionAvatar userLabel={userLabel} />
         <div className="min-w-0 flex-1">
-          <p className="text-white/34 text-[11px] font-semibold uppercase tracking-[0.18em]">
-            Workspace session
-          </p>
-          <p className="text-white/78 mt-1 truncate text-sm">{userLabel}</p>
+          <p className="sonartra-shell-session-label">Workspace session</p>
+          <p className="sonartra-shell-session-value mt-1 truncate">{userLabel}</p>
         </div>
         <Link
           aria-label="Log out"
-          className="sonartra-focus-ring border-white/8 text-white/60 hover:border-white/12 hover:bg-white/[0.06] hover:text-white flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border bg-white/[0.03] transition duration-200"
+          className="sonartra-focus-ring border-white/8 hover:border-white/12 flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border bg-white/[0.03] text-white/60 transition duration-200 hover:bg-white/[0.06] hover:text-white"
           href="/"
           onClick={onNavigate}
           title="Log out"
@@ -195,7 +187,7 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'sonartra-focus-ring group flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm font-medium transition duration-200',
+        'sonartra-focus-ring sonartra-type-nav group flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 transition duration-200',
         collapsed ? 'justify-center px-0' : 'justify-start',
         active
           ? 'border-white/12 bg-white/[0.06] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]'
@@ -215,7 +207,7 @@ function SidebarLink({
       >
         <NavIcon active={active} icon={item.icon} />
       </span>
-      {!collapsed ? <span className="truncate">{item.label}</span> : null}
+      {!collapsed ? <span className="sonartra-shell-nav-label">{item.label}</span> : null}
     </Link>
   );
 }
@@ -266,7 +258,7 @@ export function UserAppShell({
       <div className="mx-auto flex min-h-screen w-full max-w-[1560px]">
         <aside
           className={cn(
-            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 flex w-[17.5rem] flex-col bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:rounded-[2rem] lg:border lg:translate-x-0',
+            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 flex w-[17.5rem] flex-col bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
             collapsed ? 'lg:w-[5.5rem]' : 'lg:w-[17.5rem]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
             'lg:sticky',
@@ -285,15 +277,13 @@ export function UserAppShell({
               )}
               href="/app/workspace"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-accent/15 text-sm font-semibold tracking-[0.2em] text-white">
+              <span className="sonartra-shell-brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-accent/15">
                 S
               </span>
               {!collapsed ? (
                 <span className="space-y-1">
-                  <span className="text-white/36 block text-[11px] font-semibold uppercase tracking-[0.22em]">
-                    Sonartra
-                  </span>
-                  <span className="text-white/86 block text-sm font-medium">Workspace</span>
+                  <span className="sonartra-shell-brand-kicker block">Sonartra</span>
+                  <span className="sonartra-shell-brand-title block">Workspace</span>
                 </span>
               ) : null}
             </Link>
@@ -381,10 +371,7 @@ export function UserAppShell({
                 />
               </svg>
             </button>
-            <Link
-              className="text-white/68 text-sm font-semibold tracking-[0.22em]"
-              href="/app/workspace"
-            >
+            <Link className="sonartra-shell-mobile-brand" href="/app/workspace">
               SONARTRA
             </Link>
             <div className="w-11" />

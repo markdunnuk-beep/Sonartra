@@ -172,3 +172,33 @@ export function EmptyState({
     </SurfaceCard>
   );
 }
+
+export function CardTitle({
+  children,
+  className,
+}: Readonly<{
+  children: ReactNode;
+  className?: string;
+}>) {
+  return <h3 className={cn('sonartra-type-card-title', className)}>{children}</h3>;
+}
+
+export function BodyText({
+  children,
+  className,
+}: Readonly<{
+  children: ReactNode;
+  className?: string;
+}>) {
+  return <p className={cn('sonartra-type-body', className)}>{children}</p>;
+}
+
+export function SecondaryText({
+  children,
+  className,
+}: Readonly<{
+  children: ReactNode;
+  className?: string;
+}>) {
+  return <p className={cn('sonartra-type-body-secondary', className)}>{children}</p>;
+}

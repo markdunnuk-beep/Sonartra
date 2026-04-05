@@ -10,17 +10,11 @@ import { adminNavItems, type AdminNavItem } from './admin-shell-nav';
 
 const ADMIN_SHELL_COLLAPSE_STORAGE_KEY = 'sonartra:admin-shell-collapsed';
 
-function SessionAvatar({
-  userLabel,
-  className,
-}: {
-  userLabel: string;
-  className?: string;
-}) {
+function SessionAvatar({ userLabel, className }: { userLabel: string; className?: string }) {
   return (
     <span
       className={cn(
-        'flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.06] text-sm font-semibold text-white',
+        'sonartra-shell-brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.06]',
         className,
       )}
     >
@@ -104,11 +98,11 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'sonartra-focus-ring group flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm font-medium transition duration-200',
+        'sonartra-focus-ring sonartra-type-nav group flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 transition duration-200',
         collapsed ? 'justify-center px-0' : 'justify-start',
         active
           ? 'border-white/12 bg-white/[0.06] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]'
-          : 'border-transparent text-white/58 hover:border-white/8 hover:bg-white/[0.035] hover:text-white/88',
+          : 'text-white/58 hover:border-white/8 hover:text-white/88 border-transparent hover:bg-white/[0.035]',
       )}
       href={item.href}
       onClick={onNavigate}
@@ -119,17 +113,15 @@ function SidebarLink({
           'flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border transition duration-200',
           active
             ? 'border-white/12 bg-white/[0.08]'
-            : 'border-white/6 bg-black/10 group-hover:border-white/8 group-hover:bg-white/[0.04]',
+            : 'border-white/6 group-hover:border-white/8 bg-black/10 group-hover:bg-white/[0.04]',
         )}
       >
         <NavIcon active={active} itemKey={item.key} />
       </span>
       {!collapsed ? (
         <span className="min-w-0 space-y-1">
-          <span className="block truncate text-sm">{item.label}</span>
-          <span className="block truncate text-[11px] font-normal text-white/36">
-            {item.description}
-          </span>
+          <span className="sonartra-shell-nav-label">{item.label}</span>
+          <span className="sonartra-shell-nav-meta">{item.description}</span>
         </span>
       ) : null}
     </Link>
@@ -161,13 +153,18 @@ export function AdminShell({
       <div className="mx-auto flex min-h-screen w-full max-w-[1680px]">
         <aside
           className={cn(
-            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 flex w-[18.5rem] flex-col bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:rounded-[2rem] lg:border lg:translate-x-0',
+            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 flex w-[18.5rem] flex-col bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
             collapsed ? 'lg:w-[5.75rem]' : 'lg:w-[18.5rem]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
             'lg:sticky',
           )}
         >
-          <div className={cn('flex items-center', collapsed ? 'justify-center' : 'justify-between gap-3')}>
+          <div
+            className={cn(
+              'flex items-center',
+              collapsed ? 'justify-center' : 'justify-between gap-3',
+            )}
+          >
             <Link
               className={cn(
                 'sonartra-focus-ring border-white/8 flex items-center gap-3 rounded-[1.25rem] border bg-white/[0.03] px-3 py-3 transition duration-200 hover:bg-white/[0.045]',
@@ -175,15 +172,13 @@ export function AdminShell({
               )}
               href="/admin"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-accent/15 text-sm font-semibold tracking-[0.2em] text-white">
+              <span className="sonartra-shell-brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-accent/15">
                 A
               </span>
               {!collapsed ? (
                 <span className="space-y-1">
-                  <span className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-white/36">
-                    Sonartra
-                  </span>
-                  <span className="block text-sm font-medium text-white/86">Admin workspace</span>
+                  <span className="sonartra-shell-brand-kicker block">Sonartra</span>
+                  <span className="sonartra-shell-brand-title block">Admin workspace</span>
                 </span>
               ) : null}
             </Link>
@@ -249,7 +244,7 @@ export function AdminShell({
             {collapsed ? (
               <div title={userLabel}>
                 <SessionAvatar
-                  className="mx-auto border-white/8 bg-white/[0.03] text-white/76"
+                  className="border-white/8 text-white/76 mx-auto bg-white/[0.03]"
                   userLabel={userLabel}
                 />
               </div>
@@ -257,10 +252,8 @@ export function AdminShell({
               <div className="flex items-center gap-3">
                 <SessionAvatar userLabel={userLabel} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/34">
-                    Admin session
-                  </p>
-                  <p className="mt-1 truncate text-sm text-white/78">{userLabel}</p>
+                  <p className="sonartra-shell-session-label">Admin session</p>
+                  <p className="sonartra-shell-session-value mt-1 truncate">{userLabel}</p>
                 </div>
               </div>
             )}
@@ -293,7 +286,7 @@ export function AdminShell({
                 />
               </svg>
             </button>
-            <Link className="text-sm font-semibold tracking-[0.22em] text-white/68" href="/admin">
+            <Link className="sonartra-shell-mobile-brand" href="/admin">
               SONARTRA ADMIN
             </Link>
             <div className="w-11" />
@@ -303,15 +296,11 @@ export function AdminShell({
             <div className="border-white/6 min-h-full rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl">
               <div className="border-white/6 flex items-center justify-between gap-4 border-b px-5 py-4 lg:px-8 lg:py-5">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/34">
-                    Phase 5
-                  </p>
-                  <p className="mt-1 truncate text-sm text-white/72">
-                    Assessment admin
-                  </p>
+                  <p className="sonartra-shell-session-label">Phase 5</p>
+                  <p className="sonartra-shell-session-value mt-1 truncate">Assessment admin</p>
                 </div>
                 <Link
-                  className="sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/76 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white"
+                  className="sonartra-focus-ring text-white/76 hover:border-white/14 inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium transition duration-200 hover:bg-white/[0.06] hover:text-white"
                   href="/app/workspace"
                 >
                   Open user app
