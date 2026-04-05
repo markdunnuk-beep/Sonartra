@@ -49,7 +49,14 @@ export type AdminAssessmentLanguageStepViewModel = {
   counts: AdminAssessmentLanguageDatasetCounts;
 };
 
-function isMissingLanguageSchemaError(error: unknown): boolean {
+const RECOVERABLE_LANGUAGE_STEP_SCHEMA_TABLES = [
+  'assessment_version_language_',
+  'assessment_version_pair_trait_weights',
+  'assessment_version_hero_pattern_rules',
+  'assessment_version_hero_pattern_language',
+] as const;
+
+function isRecoverableLanguageStepSchemaError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
     return false;
   }
@@ -60,7 +67,7 @@ function isMissingLanguageSchemaError(error: unknown): boolean {
   return (
     code === '42P01' &&
     typeof message === 'string' &&
-    message.includes('assessment_version_language_')
+    RECOVERABLE_LANGUAGE_STEP_SCHEMA_TABLES.some((tableName) => message.includes(tableName))
   );
 }
 
@@ -163,7 +170,7 @@ export async function getAdminAssessmentLanguageStepViewModel(
       },
     };
   } catch (error) {
-    if (!isMissingLanguageSchemaError(error)) {
+    if (!isRecoverableLanguageStepSchemaError(error)) {
       throw error;
     }
 

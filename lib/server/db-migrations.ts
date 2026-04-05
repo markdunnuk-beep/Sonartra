@@ -239,6 +239,21 @@ export async function reconcileKnownMigrations(params: {
       continue;
     }
 
+    if (migration.filename === '202604040001_assessment_version_language_hero_headers.sql') {
+      const hasHeroHeaderTable = await tableExists(
+        params.db,
+        'assessment_version_language_hero_headers',
+      );
+
+      if (hasHeroHeaderTable) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
+
+      continue;
+    }
+
     if (migration.filename === '202604040002_assessment_version_intro.sql') {
       const hasAssessmentVersionIntroTable = await tableExists(
         params.db,
@@ -246,6 +261,25 @@ export async function reconcileKnownMigrations(params: {
       );
 
       if (hasAssessmentVersionIntroTable) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
+
+      continue;
+    }
+
+    if (migration.filename === '202604050001_assessment_version_hero_engine.sql') {
+      const heroTablesExist: boolean[] = [];
+      for (const tableName of [
+        'assessment_version_pair_trait_weights',
+        'assessment_version_hero_pattern_rules',
+        'assessment_version_hero_pattern_language',
+      ]) {
+        heroTablesExist.push(await tableExists(params.db, tableName));
+      }
+
+      if (heroTablesExist.every(Boolean)) {
         await recordAppliedMigration(params.db, migration.filename);
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);

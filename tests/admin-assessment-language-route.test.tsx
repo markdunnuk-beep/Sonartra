@@ -30,6 +30,7 @@ type AssessmentRow = {
 type LanguageFixture = {
   baseRows: AssessmentRow[];
   throwMissingLanguageTables?: boolean;
+  missingTables?: string[];
   assessment?: Array<{
     assessmentVersionId: string;
     section: 'assessment_description';
@@ -85,6 +86,16 @@ type LanguageFixture = {
 };
 
 function createFakeDb(fixture: LanguageFixture): Queryable {
+  const missingTables = new Set(fixture.missingTables ?? []);
+
+  function throwMissingTable(tableName: string): never {
+    const error = new Error(`relation "${tableName}" does not exist`) as Error & {
+      code?: string;
+    };
+    error.code = '42P01';
+    throw error;
+  }
+
   return {
     async query<T>(text: string, params?: readonly unknown[]) {
       if (text.includes('FROM assessments a') && text.includes('LEFT JOIN assessment_versions av')) {
@@ -175,12 +186,8 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_signals')) {
-        if (fixture.throwMissingLanguageTables) {
-          const error = new Error('relation "assessment_version_language_signals" does not exist') as Error & {
-            code?: string;
-          };
-          error.code = '42P01';
-          throw error;
+        if (fixture.throwMissingLanguageTables || missingTables.has('assessment_version_language_signals')) {
+          throwMissingTable('assessment_version_language_signals');
         }
 
         const assessmentVersionId = params?.[0] as string;
@@ -200,12 +207,8 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_assessment')) {
-        if (fixture.throwMissingLanguageTables) {
-          const error = new Error('relation "assessment_version_language_assessment" does not exist') as Error & {
-            code?: string;
-          };
-          error.code = '42P01';
-          throw error;
+        if (fixture.throwMissingLanguageTables || missingTables.has('assessment_version_language_assessment')) {
+          throwMissingTable('assessment_version_language_assessment');
         }
 
         const assessmentVersionId = params?.[0] as string;
@@ -220,12 +223,8 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_pairs')) {
-        if (fixture.throwMissingLanguageTables) {
-          const error = new Error('relation "assessment_version_language_pairs" does not exist') as Error & {
-            code?: string;
-          };
-          error.code = '42P01';
-          throw error;
+        if (fixture.throwMissingLanguageTables || missingTables.has('assessment_version_language_pairs')) {
+          throwMissingTable('assessment_version_language_pairs');
         }
 
         const assessmentVersionId = params?.[0] as string;
@@ -245,12 +244,8 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_domains')) {
-        if (fixture.throwMissingLanguageTables) {
-          const error = new Error('relation "assessment_version_language_domains" does not exist') as Error & {
-            code?: string;
-          };
-          error.code = '42P01';
-          throw error;
+        if (fixture.throwMissingLanguageTables || missingTables.has('assessment_version_language_domains')) {
+          throwMissingTable('assessment_version_language_domains');
         }
 
         const assessmentVersionId = params?.[0] as string;
@@ -270,12 +265,8 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_language_overview')) {
-        if (fixture.throwMissingLanguageTables) {
-          const error = new Error('relation "assessment_version_language_overview" does not exist') as Error & {
-            code?: string;
-          };
-          error.code = '42P01';
-          throw error;
+        if (fixture.throwMissingLanguageTables || missingTables.has('assessment_version_language_overview')) {
+          throwMissingTable('assessment_version_language_overview');
         }
 
         const assessmentVersionId = params?.[0] as string;
@@ -295,12 +286,8 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('SELECT') && text.includes('FROM assessment_version_language_hero_headers')) {
-        if (fixture.throwMissingLanguageTables) {
-          const error = new Error('relation "assessment_version_language_hero_headers" does not exist') as Error & {
-            code?: string;
-          };
-          error.code = '42P01';
-          throw error;
+        if (fixture.throwMissingLanguageTables || missingTables.has('assessment_version_language_hero_headers')) {
+          throwMissingTable('assessment_version_language_hero_headers');
         }
 
         const assessmentVersionId = params?.[0] as string;
@@ -319,6 +306,10 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_pair_trait_weights')) {
+        if (missingTables.has('assessment_version_pair_trait_weights')) {
+          throwMissingTable('assessment_version_pair_trait_weights');
+        }
+
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: (fixture.pairTraitWeights ?? [])
@@ -327,6 +318,10 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_hero_pattern_rules')) {
+        if (missingTables.has('assessment_version_hero_pattern_rules')) {
+          throwMissingTable('assessment_version_hero_pattern_rules');
+        }
+
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: (fixture.heroPatternRules ?? [])
@@ -335,6 +330,10 @@ function createFakeDb(fixture: LanguageFixture): Queryable {
       }
 
       if (text.includes('FROM assessment_version_hero_pattern_language')) {
+        if (missingTables.has('assessment_version_hero_pattern_language')) {
+          throwMissingTable('assessment_version_hero_pattern_language');
+        }
+
         const assessmentVersionId = params?.[0] as string;
         return {
           rows: (fixture.heroPatternLanguage ?? [])
@@ -1018,6 +1017,54 @@ test('language step view model degrades safely when language tables are unavaila
   assert.equal(viewModel?.activeVersion?.assessmentVersionId, 'version-draft');
   assert.equal(viewModel?.languageSchemaStatus, 'unavailable');
   assert.match(viewModel?.languageSchemaMessage ?? '', /Language datasets are unavailable/);
+  assert.deepEqual(viewModel?.counts, {
+    assessment: { entryCount: 0 },
+    heroHeaders: { entryCount: 0 },
+    signals: { entryCount: 0 },
+    pairs: { entryCount: 0 },
+    domains: { entryCount: 0 },
+    pairTraitWeights: { entryCount: 0 },
+    heroPatternRules: { entryCount: 0 },
+    heroPatternLanguage: { entryCount: 0 },
+  });
+});
+
+test('language step view model degrades safely when hero tables are unavailable at runtime', async () => {
+  const viewModel = await getAdminAssessmentLanguageStepViewModel(
+    createFakeDb({
+      baseRows: [buildAssessmentRow()],
+      missingTables: ['assessment_version_pair_trait_weights'],
+    }),
+    'wplp80',
+  );
+
+  assert.ok(viewModel);
+  assert.equal(viewModel?.activeVersion?.assessmentVersionId, 'version-draft');
+  assert.equal(viewModel?.languageSchemaStatus, 'unavailable');
+  assert.match(viewModel?.languageSchemaMessage ?? '', /Language datasets are unavailable/);
+  assert.deepEqual(viewModel?.counts, {
+    assessment: { entryCount: 0 },
+    heroHeaders: { entryCount: 0 },
+    signals: { entryCount: 0 },
+    pairs: { entryCount: 0 },
+    domains: { entryCount: 0 },
+    pairTraitWeights: { entryCount: 0 },
+    heroPatternRules: { entryCount: 0 },
+    heroPatternLanguage: { entryCount: 0 },
+  });
+});
+
+test('brand-new assessment with zero dataset rows still loads the language step', async () => {
+  const viewModel = await getAdminAssessmentLanguageStepViewModel(
+    createFakeDb({
+      baseRows: [buildAssessmentRow()],
+    }),
+    'wplp80',
+  );
+
+  assert.ok(viewModel);
+  assert.equal(viewModel?.languageSchemaStatus, 'available');
+  assert.equal(viewModel?.assessmentLanguageDescription, null);
   assert.deepEqual(viewModel?.counts, {
     assessment: { entryCount: 0 },
     heroHeaders: { entryCount: 0 },
