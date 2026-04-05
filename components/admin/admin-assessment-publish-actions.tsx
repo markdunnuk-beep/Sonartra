@@ -7,9 +7,7 @@ import {
   initialAdminAssessmentVersionActionState,
   type AdminAssessmentVersionActionState,
 } from '@/lib/admin/admin-assessment-versioning';
-import type {
-  AdminAssessmentDetailVersion,
-} from '@/lib/server/admin-assessment-detail';
+import type { AdminAssessmentDetailVersion } from '@/lib/server/admin-assessment-detail';
 import type { AdminAssessmentValidationResult } from '@/lib/server/admin-assessment-validation';
 import {
   createDraftVersionAction,
@@ -25,19 +23,19 @@ function ActionNotice({
   return (
     <div className="space-y-3">
       {state.formError ? (
-        <div className="rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
+        <div className="sonartra-motion-banner rounded-[1rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]">
           {state.formError}
         </div>
       ) : null}
 
       {state.formSuccess ? (
-        <div className="rounded-[1rem] border border-[rgba(116,209,177,0.22)] bg-[rgba(20,80,57,0.22)] px-4 py-3 text-sm text-[rgba(214,246,233,0.9)]">
+        <div className="sonartra-motion-banner rounded-[1rem] border border-[rgba(116,209,177,0.22)] bg-[rgba(20,80,57,0.22)] px-4 py-3 text-sm text-[rgba(214,246,233,0.9)]">
           {state.formSuccess}
         </div>
       ) : null}
 
       {state.formWarnings.length > 0 ? (
-        <div className="rounded-[1rem] border border-[rgba(255,184,107,0.22)] bg-[rgba(78,53,18,0.22)] px-4 py-3 text-sm text-[rgba(255,227,187,0.9)]">
+        <div className="sonartra-motion-banner rounded-[1rem] border border-[rgba(255,184,107,0.22)] bg-[rgba(78,53,18,0.22)] px-4 py-3 text-sm text-[rgba(255,227,187,0.9)]">
           <p className="font-medium text-[rgba(255,237,205,0.96)]">Warnings</p>
           <div className="mt-2 space-y-2">
             {state.formWarnings.map((warning) => (
@@ -69,7 +67,7 @@ function SubmitButton({
       className={cn(
         'sonartra-button sonartra-focus-ring',
         isDisabled
-          ? 'cursor-wait border-white/8 bg-white/[0.05] text-white/48'
+          ? 'border-white/8 text-white/48 cursor-wait bg-white/[0.05]'
           : variant === 'primary'
             ? 'sonartra-button-primary'
             : 'sonartra-button-secondary',
@@ -102,11 +100,7 @@ function PublishDraftForm({
   return (
     <form action={formAction} className="space-y-3">
       <ActionNotice state={state} />
-      <SubmitButton
-        disabled={disabled}
-        idleLabel="Publish"
-        pendingLabel="Publishing..."
-      />
+      <SubmitButton disabled={disabled} idleLabel="Publish" pendingLabel="Publishing..." />
     </form>
   );
 }
@@ -145,7 +139,7 @@ export function AdminAssessmentPublishActions({
   draftValidation: AdminAssessmentValidationResult;
 }>) {
   return (
-    <SurfaceCard className="p-5 lg:p-6">
+    <SurfaceCard className="sonartra-motion-reveal-soft p-5 lg:p-6">
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <p className="sonartra-page-eyebrow">Publish</p>
@@ -160,7 +154,7 @@ export function AdminAssessmentPublishActions({
           </LabelPill>
         </div>
 
-        <p className="text-sm leading-7 text-white/62">
+        <p className="text-white/62 text-sm leading-7">
           {latestDraftVersion
             ? `You are editing draft ${latestDraftVersion.versionTag}. Publish when you are ready.`
             : 'No draft yet. Create one to keep building.'}

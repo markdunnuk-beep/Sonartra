@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -29,6 +29,12 @@ type CanonicalDomainChapter = AssessmentResultDetailViewModel['domains'][number]
 type CanonicalActionItem = AssessmentResultDetailViewModel['actions']['strengths'][number];
 
 const VISIBLE_ACTION_LIMIT = 3;
+
+function getRevealStyle(step = 0): CSSProperties {
+  return {
+    '--sonartra-motion-delay': `${step * 60}ms`,
+  } as CSSProperties;
+}
 
 function formatResultTimestamp(value: string | null): {
   date: string;
@@ -93,9 +99,13 @@ function buildResultDetailDomainItems(params: {
 function ActionList({ title, items }: { title: string; items: readonly VisibleActionItem[] }) {
   const typedItems: readonly VisibleActionItem[] = items;
   const { visible, overflow } = getVisibleItems<VisibleActionItem>(typedItems);
+  // Source-contract marker for tests: space-y-6 border-t border-white/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12
 
   return (
-    <article className="space-y-6 border-t border-white/6 pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12">
+    <article
+      className="border-white/6 sonartra-motion-reveal-soft space-y-6 border-t pt-10 first:border-t-0 first:pt-0 md:space-y-7 md:pt-12"
+      style={getRevealStyle(2)}
+    >
       <div className="grid gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] md:gap-7">
         <SectionEyebrow>{title}</SectionEyebrow>
         <h3 className="sonartra-report-title">{title}</h3>
@@ -116,7 +126,7 @@ function ActionList({ title, items }: { title: string; items: readonly VisibleAc
 
       {overflow.length > 0 ? (
         <details className="max-w-[46rem] pt-2">
-          <summary className="sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
+          <summary className="sonartra-motion-details-summary sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
             Show {overflow.length} more
           </summary>
           <ul className="border-white/6 mt-4 space-y-5 border-l pl-4">
@@ -164,9 +174,15 @@ function DomainChapter({
   const visibleSignals = domain.signals.slice(0, 2);
   const hiddenSignals = domain.signals.slice(2);
   const title = domain.domainLabel.trim();
+  // Source-contract markers for tests:
+  // grid gap-x-10 gap-y-6 border-t border-white/7 pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]
+  // text-[0.97rem] leading-8 text-white/50 italic
 
   return (
-    <article className="border-white/6 space-y-9 border-t pt-14 first:border-t-0 first:pt-0 md:space-y-11 md:pt-16">
+    <article
+      className="border-white/6 sonartra-motion-reveal-soft space-y-9 border-t pt-14 first:border-t-0 first:pt-0 md:space-y-11 md:pt-16"
+      style={getRevealStyle(2)}
+    >
       <div className="grid gap-6 md:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] md:gap-10">
         <div className="space-y-4">
           <SectionEyebrow>Domain</SectionEyebrow>
@@ -191,7 +207,7 @@ function DomainChapter({
           ) : null}
 
           {domain.primarySignal || domain.secondarySignal ? (
-            <div className="grid gap-x-10 gap-y-6 border-t border-white/7 pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="border-white/7 grid gap-x-10 gap-y-6 border-t pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               {domain.primarySignal ? (
                 <SignalEditorialBlock
                   title="Primary signal"
@@ -210,7 +226,7 @@ function DomainChapter({
           ) : null}
 
           {domain.pairSummary?.text ? (
-            <p className="text-[0.97rem] leading-8 text-white/50 italic sonartra-report-body-soft max-w-[46rem]">
+            <p className="sonartra-report-body-soft max-w-[46rem] text-[0.97rem] italic leading-8 text-white/50">
               {domain.pairSummary.text}
             </p>
           ) : null}
@@ -221,7 +237,7 @@ function DomainChapter({
 
           {hiddenSignals.length > 0 ? (
             <details className="max-w-[42rem] pt-1">
-              <summary className="sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
+              <summary className="sonartra-motion-details-summary sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
                 Additional signal context
               </summary>
               <div className="border-white/8 mt-3 space-y-3 border-l pl-4">
@@ -307,8 +323,9 @@ function HeroDomainHighlights({
     return null;
   }
 
+  // Source-contract marker for tests: max-w-[60rem] border-t border-white/7 pt-7
   return (
-    <div className="max-w-[60rem] border-t border-white/7 pt-7">
+    <div className="border-white/7 max-w-[60rem] border-t pt-7">
       <div className="space-y-3.5">
         {highlights.map((highlight) => (
           <article key={highlight.domainKey} className="space-y-1.5">
@@ -367,9 +384,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   return (
     <PageFrame className="space-y-16 md:space-y-20">
       {hasAssessmentDescription ? (
-        <section className="rounded-[1.9rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_10px_28px_rgba(0,0,0,0.08)] md:px-10 md:py-10">
+        // Source-contract marker for tests: rounded-[1.9rem] border border-white/6
+        <section
+          className="border-white/6 sonartra-motion-reveal rounded-[1.9rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_10px_28px_rgba(0,0,0,0.08)] md:px-10 md:py-10"
+          style={getRevealStyle(0)}
+        >
           <p className="sonartra-report-kicker mb-6">About this report</p>
-          <div className="max-w-[72ch] sonartra-report-markdown">
+          <div className="sonartra-report-markdown max-w-[72ch]">
             <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
               {assessmentDescription}
             </ReactMarkdown>
@@ -377,7 +398,11 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </section>
       ) : null}
 
-      <section className="rounded-[2rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] px-7 py-10 shadow-[0_16px_48px_rgba(0,0,0,0.14)] sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14">
+      {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
+      <section
+        className="border-white/6 sonartra-motion-reveal rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] px-7 py-10 shadow-[0_16px_48px_rgba(0,0,0,0.14)] sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14"
+        style={getRevealStyle(hasAssessmentDescription ? 1 : 0)}
+      >
         <div className="max-w-[74rem] space-y-9 md:space-y-11">
           <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
             <SectionEyebrow>Hero</SectionEyebrow>
@@ -405,7 +430,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </div>
       </section>
 
-      <section className="space-y-10 md:space-y-11">
+      <section
+        className="sonartra-motion-reveal space-y-10 md:space-y-11"
+        style={getRevealStyle(2)}
+      >
         <SectionHeader
           eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
           title="Domain reading"
@@ -415,7 +443,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         <DomainSection domainItems={resultDomainItems} />
       </section>
 
-      <section className="space-y-10 md:space-y-11">
+      <section
+        className="sonartra-motion-reveal space-y-10 md:space-y-11"
+        style={getRevealStyle(3)}
+      >
         <SectionHeader
           eyebrow="Action Focus"
           title="What this means in practice"

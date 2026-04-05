@@ -98,7 +98,7 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'sonartra-focus-ring sonartra-type-nav group flex min-h-12 items-center gap-3 rounded-2xl border px-3 py-2.5 transition duration-200',
+        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-12 items-center gap-3 overflow-hidden rounded-2xl border px-3 py-2.5',
         collapsed ? 'justify-center px-0' : 'justify-start',
         active
           ? 'border-white/12 bg-white/[0.06] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]'
@@ -109,8 +109,15 @@ function SidebarLink({
       title={collapsed ? item.label : undefined}
     >
       <span
+        aria-hidden="true"
         className={cn(
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border transition duration-200',
+          'sonartra-motion-active-bar absolute left-0 top-1/2 h-8 w-[3px] -translate-y-1/2 rounded-r-full bg-white/70',
+          active ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0',
+        )}
+      />
+      <span
+        className={cn(
+          'sonartra-motion-nav-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border',
           active
             ? 'border-white/12 bg-white/[0.08]'
             : 'border-white/6 group-hover:border-white/8 bg-black/10 group-hover:bg-white/[0.04]',
@@ -167,7 +174,7 @@ export function AdminShell({
           >
             <Link
               className={cn(
-                'sonartra-focus-ring border-white/8 flex items-center gap-3 rounded-[1.25rem] border bg-white/[0.03] px-3 py-3 transition duration-200 hover:bg-white/[0.045]',
+                'sonartra-focus-ring sonartra-motion-button border-white/8 flex items-center gap-3 rounded-[1.25rem] border bg-white/[0.03] px-3 py-3 hover:bg-white/[0.045]',
                 collapsed ? 'h-12 w-12 justify-center px-0 py-0' : 'flex-1',
               )}
               href="/admin"
@@ -186,7 +193,7 @@ export function AdminShell({
             {!collapsed ? (
               <button
                 aria-label="Collapse sidebar"
-                className="sonartra-focus-ring border-white/8 hover:border-white/12 hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white/[0.03] text-white/55 transition duration-200 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
+                className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-white/12 hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white/[0.03] text-white/55 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
                 onClick={() => setCollapsed(true)}
                 type="button"
               >
@@ -206,7 +213,7 @@ export function AdminShell({
           {collapsed ? (
             <button
               aria-label="Expand sidebar"
-              className="sonartra-focus-ring border-white/8 hover:border-white/12 mt-4 hidden h-9 w-9 self-center rounded-xl border bg-white/[0.03] text-white/55 transition duration-200 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
+              className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-white/12 mt-4 hidden h-9 w-9 self-center rounded-xl border bg-white/[0.03] text-white/55 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
               onClick={() => setCollapsed(false)}
               type="button"
             >
@@ -273,7 +280,7 @@ export function AdminShell({
           <div className="border-white/6 flex items-center justify-between border-b px-4 py-4 lg:hidden">
             <button
               aria-label="Open sidebar"
-              className="sonartra-focus-ring border-white/8 text-white/62 hover:border-white/12 inline-flex h-11 w-11 items-center justify-center rounded-xl border bg-white/[0.03] transition duration-200 hover:bg-white/[0.06] hover:text-white"
+              className="sonartra-focus-ring sonartra-motion-button border-white/8 text-white/62 hover:border-white/12 inline-flex h-11 w-11 items-center justify-center rounded-xl border bg-white/[0.03] hover:bg-white/[0.06] hover:text-white"
               onClick={() => setMobileOpen(true)}
               type="button"
             >
@@ -300,7 +307,7 @@ export function AdminShell({
                   <p className="sonartra-shell-session-value mt-1 truncate">Assessment admin</p>
                 </div>
                 <Link
-                  className="sonartra-focus-ring text-white/76 hover:border-white/14 inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium transition duration-200 hover:bg-white/[0.06] hover:text-white"
+                  className="sonartra-focus-ring sonartra-motion-button text-white/76 hover:border-white/14 inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium hover:bg-white/[0.06] hover:text-white"
                   href="/app/workspace"
                 >
                   Open user app

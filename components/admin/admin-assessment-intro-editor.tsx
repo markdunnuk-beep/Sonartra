@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useState } from 'react';
+import { useActionState, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -31,7 +31,7 @@ function FieldShell({
     <label className="block space-y-2">
       <div className="space-y-1">
         <span className="block text-sm font-medium text-white">{label}</span>
-        <span className="block text-sm leading-6 text-white/54">{hint}</span>
+        <span className="text-white/54 block text-sm leading-6">{hint}</span>
       </div>
       {children}
     </label>
@@ -51,7 +51,7 @@ function TextInput({
 }>) {
   return (
     <input
-      className="sonartra-focus-ring min-h-12 w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]"
+      className="sonartra-focus-ring sonartra-motion-input placeholder:text-white/28 hover:border-white/14 min-h-12 w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white focus:border-[rgba(142,162,255,0.36)]"
       name={name}
       onChange={onChange}
       placeholder={placeholder}
@@ -77,7 +77,8 @@ function TextArea({
   return (
     <textarea
       className={cn(
-        'sonartra-focus-ring w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm leading-7 text-white placeholder:text-white/28 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
+        'sonartra-focus-ring placeholder:text-white/28 hover:border-white/14 w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm leading-7 text-white focus:border-[rgba(142,162,255,0.36)]',
+        'sonartra-motion-input',
         minHeightClassName,
       )}
       name={name}
@@ -95,7 +96,9 @@ function SaveButton() {
     <button
       className={cn(
         'sonartra-button sonartra-focus-ring min-w-[140px]',
-        pending ? 'cursor-wait border-white/8 bg-white/[0.05] text-white/48' : 'sonartra-button-primary',
+        pending
+          ? 'border-white/8 text-white/48 cursor-wait bg-white/[0.05]'
+          : 'sonartra-button-primary',
       )}
       disabled={pending}
       type="submit"
@@ -116,8 +119,8 @@ function PreviewField({
 }>) {
   return (
     <div className="space-y-2">
-      <p className="text-xs uppercase tracking-[0.18em] text-white/42">{label}</p>
-      <p className={value ? 'text-sm leading-7 text-white/82' : 'text-sm leading-7 text-white/42'}>
+      <p className="text-white/42 text-xs uppercase tracking-[0.18em]">{label}</p>
+      <p className={value ? 'text-white/82 text-sm leading-7' : 'text-white/42 text-sm leading-7'}>
         {value || emptyCopy}
       </p>
     </div>
@@ -151,11 +154,33 @@ function EditableAssessmentIntroEditor({
     formSuccess: state?.formSuccess ?? null,
     values: state?.values ?? viewModel.intro,
   };
-  const [values, setValues] = useState(safeState.values);
+  const formStateKey = JSON.stringify(safeState.values);
 
-  useEffect(() => {
-    setValues(safeState.values);
-  }, [safeState.values]);
+  return (
+    <EditableAssessmentIntroEditorFields
+      key={formStateKey}
+      formAction={formAction}
+      safeState={safeState}
+      viewModel={viewModel}
+    />
+  );
+}
+
+function EditableAssessmentIntroEditorFields({
+  viewModel,
+  safeState,
+  formAction,
+}: Readonly<{
+  viewModel: AdminAssessmentIntroStepViewModel & {
+    draftVersion: {
+      assessmentVersionId: string;
+      versionTag: string;
+    };
+  };
+  safeState: AdminAssessmentIntroFormState;
+  formAction: (payload: FormData) => void;
+}>) {
+  const [values, setValues] = useState(safeState.values);
 
   function updateValue<Key extends keyof AdminAssessmentIntroFormValues>(
     key: Key,
@@ -175,20 +200,20 @@ function EditableAssessmentIntroEditor({
         description="Set the opening content shown before Question 1 for this assessment version."
       />
 
-      <SurfaceCard className="space-y-4 p-5 lg:p-6">
+      <SurfaceCard className="sonartra-motion-reveal-soft space-y-4 p-5 lg:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <LabelPill>{viewModel.assessmentKey}</LabelPill>
-          <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+          <LabelPill className="text-white/62 border-white/10 bg-white/[0.04]">
             Editing draft {viewModel.draftVersion.versionTag}
           </LabelPill>
         </div>
-        <p className="max-w-3xl text-sm leading-7 text-white/62">
-          This content belongs to the current draft version. When that version is published, this intro becomes
-          the live start of the assessment for participants.
+        <p className="text-white/62 max-w-3xl text-sm leading-7">
+          This content belongs to the current draft version. When that version is published, this
+          intro becomes the live start of the assessment for participants.
         </p>
       </SurfaceCard>
 
-      <SurfaceCard className="p-5 lg:p-6">
+      <SurfaceCard className="sonartra-motion-reveal-soft p-5 lg:p-6">
         <form action={formAction} className="space-y-6">
           <div className="grid gap-6 xl:grid-cols-2">
             <FieldShell
@@ -209,7 +234,9 @@ function EditableAssessmentIntroEditor({
             >
               <TextInput
                 name="estimatedTimeOverride"
-                onChange={(event) => updateValue('estimatedTimeOverride', event.currentTarget.value)}
+                onChange={(event) =>
+                  updateValue('estimatedTimeOverride', event.currentTarget.value)
+                }
                 placeholder="Approx. 20 minutes"
                 value={values.estimatedTimeOverride}
               />
@@ -241,10 +268,7 @@ function EditableAssessmentIntroEditor({
           </FieldShell>
 
           <div className="grid gap-6 xl:grid-cols-2">
-            <FieldShell
-              hint="Optional instructions shown before Question 1."
-              label="Instructions"
-            >
+            <FieldShell hint="Optional instructions shown before Question 1." label="Instructions">
               <TextArea
                 minHeightClassName="min-h-[156px]"
                 name="instructions"
@@ -269,34 +293,44 @@ function EditableAssessmentIntroEditor({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className={safeState.formError ? 'text-sm text-[rgba(255,198,198,0.92)]' : 'text-sm text-white/45'}>
-              {safeState.formError ?? safeState.formSuccess ?? 'Saving updates stores this intro on the current draft version.'}
+            <p
+              className={cn(
+                safeState.formError
+                  ? 'text-sm text-[rgba(255,198,198,0.92)]'
+                  : 'text-sm text-white/45',
+                (safeState.formError || safeState.formSuccess) &&
+                  'sonartra-motion-banner rounded-xl px-3 py-2',
+              )}
+            >
+              {safeState.formError ??
+                safeState.formSuccess ??
+                'Saving updates stores this intro on the current draft version.'}
             </p>
             <SaveButton />
           </div>
         </form>
       </SurfaceCard>
 
-      <SurfaceCard className="space-y-5 p-5 lg:p-6">
+      <SurfaceCard className="sonartra-motion-reveal-soft space-y-5 p-5 lg:p-6">
         <div className="space-y-2">
           <p className="sonartra-page-eyebrow">Assessment Start</p>
           <h3 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
             Assessment intro
           </h3>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">
-            This is how the opening intro reads for the current draft version. Publish the version to make this
-            content live for participants.
+          <p className="text-white/62 max-w-3xl text-sm leading-7">
+            This is how the opening intro reads for the current draft version. Publish the version
+            to make this content live for participants.
           </p>
         </div>
 
-        <div className="rounded-[1.2rem] border border-white/10 bg-black/20 p-5">
+        <div className="sonartra-motion-surface rounded-[1.2rem] border border-white/10 bg-black/20 p-5">
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-2">
               <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
                 Draft version
               </LabelPill>
               {values.estimatedTimeOverride ? (
-                <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+                <LabelPill className="text-white/62 border-white/10 bg-white/[0.04]">
                   {values.estimatedTimeOverride}
                 </LabelPill>
               ) : null}
@@ -306,7 +340,13 @@ function EditableAssessmentIntroEditor({
               <h4 className="text-[1.7rem] font-semibold tracking-[-0.03em] text-white">
                 {values.introTitle || 'Intro title not added yet'}
               </h4>
-              <p className={values.introSummary ? 'max-w-3xl text-sm leading-7 text-white/78' : 'max-w-3xl text-sm leading-7 text-white/42'}>
+              <p
+                className={
+                  values.introSummary
+                    ? 'text-white/78 max-w-3xl text-sm leading-7'
+                    : 'text-white/42 max-w-3xl text-sm leading-7'
+                }
+              >
                 {values.introSummary || 'Intro summary not added yet.'}
               </p>
             </div>

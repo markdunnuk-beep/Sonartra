@@ -27,7 +27,7 @@ export function PageHeader({
   description: string;
 }>) {
   return (
-    <header className="sonartra-page-header">
+    <header className="sonartra-page-header sonartra-motion-reveal">
       <p className="sonartra-page-eyebrow">{eyebrow}</p>
       <h1 className="sonartra-page-title">{title}</h1>
       <p className="sonartra-page-description">{description}</p>
@@ -45,7 +45,7 @@ export function SectionHeader({
   description?: string;
 }>) {
   return (
-    <div className="sonartra-section-header">
+    <div className="sonartra-section-header sonartra-motion-reveal-soft">
       <p className="sonartra-page-eyebrow">{eyebrow}</p>
       <h2 className="sonartra-section-title">{title}</h2>
       {description ? <p className="sonartra-section-description">{description}</p> : null}
@@ -163,7 +163,11 @@ export function EmptyState({
   className?: string;
 }>) {
   return (
-    <SurfaceCard dashed muted className={cn('sonartra-empty-state p-6', className)}>
+    <SurfaceCard
+      dashed
+      muted
+      className={cn('sonartra-empty-state sonartra-motion-reveal-soft p-6', className)}
+    >
       <div className="space-y-2">
         <h2 className="sonartra-empty-title">{title}</h2>
         <p className="sonartra-empty-copy">{description}</p>
