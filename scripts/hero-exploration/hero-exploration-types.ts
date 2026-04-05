@@ -80,6 +80,7 @@ export type PatternCoverageRow = {
   winRate: number;
   exampleProfiles: readonly string[];
   examplePairs: readonly string[];
+  changeNote: string;
 };
 
 export type CollisionSummary = {
@@ -106,15 +107,49 @@ export type DeadPatternSummary = {
   }>;
 };
 
+export type WinningPatternSummary = {
+  patternKey: string;
+  count: number;
+  share: number;
+};
+
+export type ComparisonMetricRow = {
+  label: string;
+  baseline: number | string;
+  refined: number | string;
+};
+
+export type CuratedComparisonRow = {
+  profileKey: string;
+  baselineWinner: string;
+  refinedWinner: string;
+  changed: boolean;
+  whyBetter: string;
+};
+
 export type ExplorationReport = {
   runMode: 'full_combinatorial';
   totalProfilesProcessed: number;
   processedAt: string;
   winningPatternCounts: Readonly<Record<string, number>>;
+  topWinningPatterns: readonly WinningPatternSummary[];
   collisionSummary: CollisionSummary;
   deadPatternSummary: DeadPatternSummary;
   coverage: readonly PatternCoverageRow[];
   detailedCuratedExamples: readonly ProcessedProfile[];
+  comparison: {
+    metrics: readonly ComparisonMetricRow[];
+    deadPatternsBefore: readonly string[];
+    deadPatternsAfter: readonly string[];
+    topWinnersBefore: readonly WinningPatternSummary[];
+    topWinnersAfter: readonly WinningPatternSummary[];
+  };
+  curatedComparison: readonly CuratedComparisonRow[];
+  changeLog: {
+    rules: readonly string[];
+    pairTraitWeights: readonly string[];
+    patterns: readonly string[];
+  };
 };
 
 export const TRAIT_KEYS: readonly TraitKey[] = [

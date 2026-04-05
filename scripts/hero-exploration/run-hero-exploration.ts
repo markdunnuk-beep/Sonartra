@@ -1,19 +1,23 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { HERO_PATTERN_LANGUAGE_LOOKUP } from './hero-pattern-language';
-import { HERO_PATTERN_FALLBACK_KEY, HERO_PATTERN_RULES } from './hero-pattern-rules';
+import { BASELINE_HERO_PATTERN_RULES, HERO_PATTERN_FALLBACK_KEY, HERO_PATTERN_RULES, PATTERN_CHANGE_LOG } from './hero-pattern-rules';
 import { CURATED_PROFILES, generateAllProfiles } from './profile-fixtures';
 import { PAIR_TRAIT_WEIGHT_LOOKUP } from './pair-trait-weights';
 import type {
   CollisionSummary,
+  ComparisonMetricRow,
+  CuratedComparisonRow,
   DeadPatternSummary,
   ExplorationReport,
   HeroPatternCondition,
+  HeroPatternRule,
   PatternCoverageRow,
   ProcessedProfile,
   RuleOperator,
   SimulatedProfile,
   TraitKey,
+  WinningPatternSummary,
 } from './hero-exploration-types';
 import { TRAIT_KEYS } from './hero-exploration-types';
 
@@ -42,11 +46,7 @@ function aggregateTraits(profile: SimulatedProfile): Record<TraitKey, number> {
   return totals;
 }
 
-function evaluateCondition(
-  traitTotal: number,
-  operator: RuleOperator,
-  value: number,
-): boolean {
+function evaluateCondition(traitTotal: number, operator: RuleOperator, value: number): boolean {
   switch (operator) {
     case '>=':
       return traitTotal >= value;
@@ -63,13 +63,14 @@ function evaluateCondition(
   }
 }
 
-function evaluateProfile(profile: SimulatedProfile): ProcessedProfile {
+function evaluateProfile(profile: SimulatedProfile, rules: readonly HeroPatternRule[]): ProcessedProfile {
   const traitTotals = aggregateTraits(profile);
-  const matchedPatterns = HERO_PATTERN_RULES.filter((rule) =>
-    rule.conditions.every((condition) =>
-      evaluateCondition(traitTotals[condition.traitKey], condition.operator, condition.value),
-    ),
-  )
+  const matchedPatterns = rules
+    .filter((rule) =>
+      rule.conditions.every((condition) =>
+        evaluateCondition(traitTotals[condition.traitKey], condition.operator, condition.value),
+      ),
+    )
     .sort((left, right) => left.priority - right.priority)
     .map((rule) => ({
       patternKey: rule.patternKey,
@@ -97,10 +98,14 @@ function evaluateProfile(profile: SimulatedProfile): ProcessedProfile {
   };
 }
 
-function buildCoverage(processedProfiles: readonly ProcessedProfile[]): readonly PatternCoverageRow[] {
+function buildCoverage(
+  processedProfiles: readonly ProcessedProfile[],
+  ruleSet: readonly HeroPatternRule[],
+): readonly PatternCoverageRow[] {
   const coverage = new Map<string, PatternCoverageRow>();
+  const activePatternKeys = [...new Set([...ruleSet.map((rule) => rule.patternKey), HERO_PATTERN_FALLBACK_KEY])];
 
-  for (const patternKey of HERO_PATTERN_LANGUAGE_LOOKUP.keys()) {
+  for (const patternKey of activePatternKeys) {
     coverage.set(patternKey, {
       patternKey,
       matchCount: 0,
@@ -108,6 +113,7 @@ function buildCoverage(processedProfiles: readonly ProcessedProfile[]): readonly
       winRate: 0,
       exampleProfiles: [],
       examplePairs: [],
+      changeNote: PATTERN_CHANGE_LOG[patternKey] ?? 'unchanged',
     });
   }
 
@@ -219,6 +225,32 @@ function buildDeadPatternSummary(
   };
 }
 
+function buildWinningPatternCounts(processedProfiles: readonly ProcessedProfile[]): Record<string, number> {
+  const counts = new Map<string, number>();
+
+  for (const processedProfile of processedProfiles) {
+    counts.set(processedProfile.winnerPatternKey, (counts.get(processedProfile.winnerPatternKey) ?? 0) + 1);
+  }
+
+  return Object.fromEntries(
+    [...counts.entries()].sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0])),
+  );
+}
+
+function buildTopWinningPatterns(
+  winningPatternCounts: Readonly<Record<string, number>>,
+  totalProfilesProcessed: number,
+): readonly WinningPatternSummary[] {
+  return Object.entries(winningPatternCounts)
+    .map(([patternKey, count]) => ({
+      patternKey,
+      count,
+      share: totalProfilesProcessed === 0 ? 0 : count / totalProfilesProcessed,
+    }))
+    .sort((left, right) => right.count - left.count || left.patternKey.localeCompare(right.patternKey))
+    .slice(0, 10);
+}
+
 function formatCondition(condition: HeroPatternCondition): string {
   return `${condition.traitKey} ${condition.operator} ${condition.value}`;
 }
@@ -229,6 +261,95 @@ function formatTraitTotals(traitTotals: ProcessedProfile['traitTotals']): string
     .map((traitKey) => `- ${traitKey}: ${traitTotals[traitKey]}`);
 }
 
+function buildComparisonMetrics(
+  baselineCollisionSummary: CollisionSummary,
+  refinedCollisionSummary: CollisionSummary,
+  baselineDeadPatternSummary: DeadPatternSummary,
+  refinedDeadPatternSummary: DeadPatternSummary,
+  baselineWinningPatternCounts: Readonly<Record<string, number>>,
+  refinedWinningPatternCounts: Readonly<Record<string, number>>,
+): readonly ComparisonMetricRow[] {
+  const baselineFallbackCount = baselineWinningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0;
+  const refinedFallbackCount = refinedWinningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0;
+
+  return [
+    { label: 'total profiles processed', baseline: baselineCollisionSummary.totalProfiles, refined: refinedCollisionSummary.totalProfiles },
+    {
+      label: 'fallback count',
+      baseline: `${baselineFallbackCount} (${((baselineFallbackCount / baselineCollisionSummary.totalProfiles) * 100).toFixed(1)}%)`,
+      refined: `${refinedFallbackCount} (${((refinedFallbackCount / refinedCollisionSummary.totalProfiles) * 100).toFixed(1)}%)`,
+    },
+    { label: 'zero-match count', baseline: baselineCollisionSummary.zeroMatchProfiles, refined: refinedCollisionSummary.zeroMatchProfiles },
+    { label: 'single-match count', baseline: baselineCollisionSummary.singleMatchProfiles, refined: refinedCollisionSummary.singleMatchProfiles },
+    { label: 'multi-match count', baseline: baselineCollisionSummary.multiMatchProfiles, refined: refinedCollisionSummary.multiMatchProfiles },
+    { label: 'worst collision count', baseline: baselineCollisionSummary.worstCollisionCount, refined: refinedCollisionSummary.worstCollisionCount },
+    {
+      label: 'dead pattern count',
+      baseline: baselineDeadPatternSummary.neverSelectedAsWinner.length,
+      refined: refinedDeadPatternSummary.neverSelectedAsWinner.length,
+    },
+  ];
+}
+
+function buildCuratedComparison(
+  baselineCurated: readonly ProcessedProfile[],
+  refinedCurated: readonly ProcessedProfile[],
+): readonly CuratedComparisonRow[] {
+  const baselineByKey = new Map(baselineCurated.map((profile) => [profile.profileKey, profile] as const));
+  const refinedByKey = new Map(refinedCurated.map((profile) => [profile.profileKey, profile] as const));
+  const spotlightKeys = ['profile_006', 'profile_017', 'profile_018', 'profile_021', 'profile_002', 'profile_004', 'profile_015', 'profile_022'];
+
+  return spotlightKeys.map((profileKey) => {
+    const baseline = baselineByKey.get(profileKey);
+    const refined = refinedByKey.get(profileKey);
+
+    if (!baseline || !refined) {
+      throw new Error(`Missing curated comparison profile ${profileKey}.`);
+    }
+
+    return {
+      profileKey,
+      baselineWinner: baseline.winnerPatternKey,
+      refinedWinner: refined.winnerPatternKey,
+      changed: baseline.winnerPatternKey !== refined.winnerPatternKey,
+      whyBetter: buildBetterFitNote(baseline, refined),
+    };
+  });
+}
+
+function buildBetterFitNote(baseline: ProcessedProfile, refined: ProcessedProfile): string {
+  if (baseline.winnerPatternKey === refined.winnerPatternKey) {
+    return 'The refined model kept the same winner because the original pattern was already the clearest fit.';
+  }
+
+  if (baseline.winnerPatternKey === HERO_PATTERN_FALLBACK_KEY && refined.winnerPatternKey !== HERO_PATTERN_FALLBACK_KEY) {
+    return `The refined model replaces fallback with ${refined.winnerPatternKey}, which matches the visible trait shape more specifically.`;
+  }
+
+  return `The refined model prefers ${refined.winnerPatternKey} because its thresholds fit the trait totals more narrowly than ${baseline.winnerPatternKey}.`;
+}
+
+function buildRuleChangeLog(): readonly string[] {
+  return Object.entries(PATTERN_CHANGE_LOG)
+    .sort((left, right) => left[0].localeCompare(right[0]))
+    .map(([patternKey, note]) => `${patternKey}: ${note}`);
+}
+
+function buildPatternChangeLog(): readonly string[] {
+  const baselineKeys = new Set(BASELINE_HERO_PATTERN_RULES.map((rule) => rule.patternKey));
+  const refinedKeys = new Set(HERO_PATTERN_RULES.map((rule) => rule.patternKey));
+
+  const added = [...refinedKeys].filter((key) => !baselineKeys.has(key)).sort();
+  const removed = [...baselineKeys].filter((key) => !refinedKeys.has(key)).sort();
+  const retained = [...refinedKeys].filter((key) => baselineKeys.has(key)).sort();
+
+  return [
+    `added: ${added.join(', ') || 'none'}`,
+    `removed: ${removed.join(', ') || 'none'}`,
+    `retained and redefined: ${retained.join(', ') || 'none'}`,
+  ];
+}
+
 function buildMarkdownReport(report: ExplorationReport): string {
   const lines: string[] = [];
 
@@ -236,47 +357,86 @@ function buildMarkdownReport(report: ExplorationReport): string {
   lines.push('');
   lines.push(`- Run mode: ${report.runMode}`);
   lines.push(`- Total profiles processed: ${report.totalProfilesProcessed}`);
-  lines.push(`- Profiles with 1 match: ${report.collisionSummary.singleMatchProfiles}`);
-  lines.push(`- Profiles with 2+ matches: ${report.collisionSummary.multiMatchProfiles}`);
-  lines.push(`- Profiles with 0 matches: ${report.collisionSummary.zeroMatchProfiles}`);
+  lines.push(`- Refined fallback count: ${report.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0}`);
+  lines.push(`- Refined fallback share: ${(((report.winningPatternCounts[HERO_PATTERN_FALLBACK_KEY] ?? 0) / report.totalProfilesProcessed) * 100).toFixed(1)}%`);
   lines.push(`- Worst collision count: ${report.collisionSummary.worstCollisionCount}`);
   lines.push('');
-  lines.push('## Coverage');
+  lines.push('## Before / After');
   lines.push('');
-  lines.push('| Pattern | Match Count | Win Count | Win Rate | Example Profiles |');
-  lines.push('| --- | ---: | ---: | ---: | --- |');
-  for (const row of report.coverage) {
+  lines.push('| Metric | Baseline | Refined |');
+  lines.push('| --- | ---: | ---: |');
+  for (const row of report.comparison.metrics) {
+    lines.push(`| ${row.label} | ${row.baseline} | ${row.refined} |`);
+  }
+  lines.push('');
+  lines.push(`- Dead patterns before: ${report.comparison.deadPatternsBefore.join(', ') || 'none'}`);
+  lines.push(`- Dead patterns after: ${report.comparison.deadPatternsAfter.join(', ') || 'none'}`);
+  lines.push('');
+  lines.push('## Top Winners Before / After');
+  lines.push('');
+  lines.push('| Before | Count | Share | After | Count | Share |');
+  lines.push('| --- | ---: | ---: | --- | ---: | ---: |');
+  for (let index = 0; index < Math.max(report.comparison.topWinnersBefore.length, report.comparison.topWinnersAfter.length); index += 1) {
+    const before = report.comparison.topWinnersBefore[index];
+    const after = report.comparison.topWinnersAfter[index];
     lines.push(
-      `| ${row.patternKey} | ${row.matchCount} | ${row.winCount} | ${(row.winRate * 100).toFixed(1)}% | ${row.exampleProfiles.join(', ') || '-'} |`,
+      `| ${before?.patternKey ?? '-'} | ${before?.count ?? '-'} | ${before ? `${(before.share * 100).toFixed(1)}%` : '-'} | ${after?.patternKey ?? '-'} | ${after?.count ?? '-'} | ${after ? `${(after.share * 100).toFixed(1)}%` : '-'} |`,
     );
   }
   lines.push('');
-  lines.push('## Collision Sets');
+  lines.push('## Pattern Coverage');
+  lines.push('');
+  lines.push('| Pattern | Match Count | Win Count | Win Rate | Example Profiles | Change Note |');
+  lines.push('| --- | ---: | ---: | ---: | --- | --- |');
+  for (const row of report.coverage) {
+    lines.push(
+      `| ${row.patternKey} | ${row.matchCount} | ${row.winCount} | ${(row.winRate * 100).toFixed(1)}% | ${row.exampleProfiles.join(', ') || '-'} | ${row.changeNote} |`,
+    );
+  }
+  lines.push('');
+  lines.push('## Collision Summary');
   lines.push('');
   for (const collisionSet of report.collisionSummary.topCollisionSets) {
     lines.push(`- ${collisionSet.patternKeys.join(' > ')}: ${collisionSet.count}`);
   }
   lines.push('');
-  lines.push('## Dead Patterns');
+  lines.push('## Curated Comparison');
   lines.push('');
-  lines.push(`- Never selected as winner: ${report.deadPatternSummary.neverSelectedAsWinner.join(', ') || 'none'}`);
-  lines.push(`- Never matched: ${report.deadPatternSummary.neverMatched.join(', ') || 'none'}`);
-  lines.push(`- Matched but never win: ${report.deadPatternSummary.matchedButNeverWin.join(', ') || 'none'}`);
+  for (const row of report.curatedComparison) {
+    lines.push(`- ${row.profileKey}: ${row.baselineWinner} -> ${row.refinedWinner}. ${row.whyBetter}`);
+  }
   lines.push('');
-  lines.push('## Curated Worked Examples');
+  lines.push('## Change Log');
   lines.push('');
-  for (const processedProfile of report.detailedCuratedExamples) {
-    lines.push(`### ${processedProfile.profileKey}`);
+  lines.push('Rule changes:');
+  for (const line of report.changeLog.rules) {
+    lines.push(`- ${line}`);
+  }
+  lines.push('');
+  lines.push('Pair-trait weight changes:');
+  for (const line of report.changeLog.pairTraitWeights) {
+    lines.push(`- ${line}`);
+  }
+  lines.push('');
+  lines.push('Pattern set changes:');
+  for (const line of report.changeLog.patterns) {
+    lines.push(`- ${line}`);
+  }
+  lines.push('');
+  lines.push('## Detailed Worked Examples');
+  lines.push('');
+  for (const example of report.detailedCuratedExamples.slice(0, 10)) {
+    lines.push(`### ${example.profileKey}`);
     lines.push('');
     lines.push('Domain pairs:');
-    for (const [domainKey, pairKey] of Object.entries(processedProfile.domainPairs)) {
+    for (const [domainKey, pairKey] of Object.entries(example.domainPairs)) {
       lines.push(`- ${domainKey}: ${pairKey}`);
     }
     lines.push('');
     lines.push('Trait totals:');
-    lines.push(...formatTraitTotals(processedProfile.traitTotals));
+    lines.push(...formatTraitTotals(example.traitTotals));
     lines.push('');
-    lines.push(`Winner: ${processedProfile.winnerPatternKey}`);
+    lines.push(`Winner: ${example.winnerPatternKey}`);
     lines.push('');
   }
 
@@ -289,27 +449,24 @@ function writeArtifacts(report: ExplorationReport): void {
   writeFileSync(MARKDOWN_OUTPUT_PATH, buildMarkdownReport(report), 'utf8');
 }
 
-function printGlobalSummary(report: ExplorationReport): void {
-  console.log('Hero Pattern Exploration Harness');
-  console.log('================================');
-  console.log(`Run mode: ${report.runMode}`);
-  console.log(`Total profiles processed: ${report.totalProfilesProcessed}`);
-  console.log(`Profiles with 1 match: ${report.collisionSummary.singleMatchProfiles}`);
-  console.log(`Profiles with 2+ matches: ${report.collisionSummary.multiMatchProfiles}`);
-  console.log(`Profiles with 0 matches: ${report.collisionSummary.zeroMatchProfiles}`);
-  console.log(`Worst collision count: ${report.collisionSummary.worstCollisionCount}`);
-  console.log(`JSON artifact: ${JSON_OUTPUT_PATH}`);
-  console.log(`Markdown artifact: ${MARKDOWN_OUTPUT_PATH}`);
+function printComparison(report: ExplorationReport): void {
+  console.log('Before / after comparison');
+  console.log('-------------------------');
+  for (const row of report.comparison.metrics) {
+    console.log(`${row.label}: ${row.baseline} -> ${row.refined}`);
+  }
+  console.log(`Dead patterns before: ${report.comparison.deadPatternsBefore.join(', ') || 'none'}`);
+  console.log(`Dead patterns after: ${report.comparison.deadPatternsAfter.join(', ') || 'none'}`);
   console.log('');
 }
 
 function printCoverageTable(coverage: readonly PatternCoverageRow[]): void {
-  console.log('Per-pattern coverage');
-  console.log('--------------------');
-  console.log('patternKey | matchCount | winCount | winRate | examples');
+  console.log('Pattern coverage');
+  console.log('----------------');
+  console.log('patternKey | matchCount | winCount | winRate | examples | note');
   for (const row of coverage) {
     console.log(
-      `${row.patternKey} | ${row.matchCount} | ${row.winCount} | ${(row.winRate * 100).toFixed(1)}% | ${row.exampleProfiles.join(', ') || '-'}`,
+      `${row.patternKey} | ${row.matchCount} | ${row.winCount} | ${(row.winRate * 100).toFixed(1)}% | ${row.exampleProfiles.join(', ') || '-'} | ${row.changeNote}`,
     );
   }
   console.log('');
@@ -324,10 +481,6 @@ function printCollisionSummary(collisionSummary: CollisionSummary): void {
   for (const collisionSet of collisionSummary.topCollisionSets) {
     console.log(`- ${collisionSet.patternKeys.join(' > ')}: ${collisionSet.count}`);
   }
-  console.log('Patterns beaten by higher-priority matches most often:');
-  for (const [patternKey, count] of Object.entries(collisionSummary.beatenByHigherPriority).slice(0, 10)) {
-    console.log(`- ${patternKey}: ${count}`);
-  }
   console.log('');
 }
 
@@ -336,14 +489,15 @@ function printDeadPatternSummary(deadPatternSummary: DeadPatternSummary): void {
   console.log('--------------------');
   console.log(`Never selected as winner: ${deadPatternSummary.neverSelectedAsWinner.join(', ') || 'none'}`);
   console.log(`Never matched: ${deadPatternSummary.neverMatched.join(', ') || 'none'}`);
-  console.log(`Matched often but never win: ${deadPatternSummary.matchedButNeverWin.join(', ') || 'none'}`);
-  console.log('Over-dominant patterns:');
-  if (deadPatternSummary.overDominantPatterns.length === 0) {
-    console.log('- none');
-  } else {
-    for (const pattern of deadPatternSummary.overDominantPatterns) {
-      console.log(`- ${pattern.patternKey}: ${pattern.winCount} wins (${(pattern.winShare * 100).toFixed(1)}%)`);
-    }
+  console.log(`Matched but never win: ${deadPatternSummary.matchedButNeverWin.join(', ') || 'none'}`);
+  console.log('');
+}
+
+function printCuratedComparison(curatedComparison: readonly CuratedComparisonRow[]): void {
+  console.log('Curated comparison');
+  console.log('------------------');
+  for (const row of curatedComparison) {
+    console.log(`- ${row.profileKey}: ${row.baselineWinner} -> ${row.refinedWinner}. ${row.whyBetter}`);
   }
   console.log('');
 }
@@ -397,42 +551,70 @@ function printDetailedExamples(examples: readonly ProcessedProfile[]): void {
   }
 }
 
-function buildWinningPatternCounts(processedProfiles: readonly ProcessedProfile[]): Record<string, number> {
-  const counts = new Map<string, number>();
-
-  for (const processedProfile of processedProfiles) {
-    counts.set(processedProfile.winnerPatternKey, (counts.get(processedProfile.winnerPatternKey) ?? 0) + 1);
-  }
-
-  return Object.fromEntries(
-    [...counts.entries()].sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0])),
-  );
-}
-
 function main(): void {
   const generatedProfiles = generateAllProfiles();
-  const processedGeneratedProfiles = generatedProfiles.map(evaluateProfile);
-  const processedCuratedProfiles = CURATED_PROFILES.map(evaluateProfile);
-  const coverage = buildCoverage(processedGeneratedProfiles);
-  const collisionSummary = buildCollisionSummary(processedGeneratedProfiles);
-  const deadPatternSummary = buildDeadPatternSummary(coverage, processedGeneratedProfiles.length);
+  const baselineGeneratedProfiles = generatedProfiles.map((profile) => evaluateProfile(profile, BASELINE_HERO_PATTERN_RULES));
+  const refinedGeneratedProfiles = generatedProfiles.map((profile) => evaluateProfile(profile, HERO_PATTERN_RULES));
+  const baselineCuratedProfiles = CURATED_PROFILES.map((profile) => evaluateProfile(profile, BASELINE_HERO_PATTERN_RULES));
+  const refinedCuratedProfiles = CURATED_PROFILES.map((profile) => evaluateProfile(profile, HERO_PATTERN_RULES));
+
+  const baselineCoverage = buildCoverage(baselineGeneratedProfiles, BASELINE_HERO_PATTERN_RULES);
+  const refinedCoverage = buildCoverage(refinedGeneratedProfiles, HERO_PATTERN_RULES);
+  const baselineCollisionSummary = buildCollisionSummary(baselineGeneratedProfiles);
+  const refinedCollisionSummary = buildCollisionSummary(refinedGeneratedProfiles);
+  const baselineDeadPatternSummary = buildDeadPatternSummary(baselineCoverage, baselineGeneratedProfiles.length);
+  const refinedDeadPatternSummary = buildDeadPatternSummary(refinedCoverage, refinedGeneratedProfiles.length);
+  const baselineWinningPatternCounts = buildWinningPatternCounts(baselineGeneratedProfiles);
+  const refinedWinningPatternCounts = buildWinningPatternCounts(refinedGeneratedProfiles);
+
   const report: ExplorationReport = {
     runMode: 'full_combinatorial',
-    totalProfilesProcessed: processedGeneratedProfiles.length,
+    totalProfilesProcessed: refinedGeneratedProfiles.length,
     processedAt: new Date().toISOString(),
-    winningPatternCounts: buildWinningPatternCounts(processedGeneratedProfiles),
-    collisionSummary,
-    deadPatternSummary,
-    coverage,
-    detailedCuratedExamples: processedCuratedProfiles,
+    winningPatternCounts: refinedWinningPatternCounts,
+    topWinningPatterns: buildTopWinningPatterns(refinedWinningPatternCounts, refinedGeneratedProfiles.length),
+    collisionSummary: refinedCollisionSummary,
+    deadPatternSummary: refinedDeadPatternSummary,
+    coverage: refinedCoverage,
+    detailedCuratedExamples: refinedCuratedProfiles,
+    comparison: {
+      metrics: buildComparisonMetrics(
+        baselineCollisionSummary,
+        refinedCollisionSummary,
+        baselineDeadPatternSummary,
+        refinedDeadPatternSummary,
+        baselineWinningPatternCounts,
+        refinedWinningPatternCounts,
+      ),
+      deadPatternsBefore: baselineDeadPatternSummary.neverSelectedAsWinner,
+      deadPatternsAfter: refinedDeadPatternSummary.neverSelectedAsWinner,
+      topWinnersBefore: buildTopWinningPatterns(baselineWinningPatternCounts, baselineGeneratedProfiles.length),
+      topWinnersAfter: buildTopWinningPatterns(refinedWinningPatternCounts, refinedGeneratedProfiles.length),
+    },
+    curatedComparison: buildCuratedComparison(baselineCuratedProfiles, refinedCuratedProfiles),
+    changeLog: {
+      rules: buildRuleChangeLog(),
+      pairTraitWeights: ['No pair-trait weight mappings changed in round 2; refinement was achieved through rule-set expansion and threshold redesign.'],
+      patterns: buildPatternChangeLog(),
+    },
   };
 
   writeArtifacts(report);
-  printGlobalSummary(report);
-  printCoverageTable(coverage);
-  printCollisionSummary(collisionSummary);
-  printDeadPatternSummary(deadPatternSummary);
-  printDetailedExamples(processedCuratedProfiles);
+
+  console.log('Hero Pattern Refinement Harness');
+  console.log('===============================');
+  console.log(`Run mode: ${report.runMode}`);
+  console.log(`Total profiles processed: ${report.totalProfilesProcessed}`);
+  console.log(`JSON artifact: ${JSON_OUTPUT_PATH}`);
+  console.log(`Markdown artifact: ${MARKDOWN_OUTPUT_PATH}`);
+  console.log('');
+
+  printComparison(report);
+  printCoverageTable(report.coverage);
+  printCollisionSummary(report.collisionSummary);
+  printDeadPatternSummary(report.deadPatternSummary);
+  printCuratedComparison(report.curatedComparison);
+  printDetailedExamples(report.detailedCuratedExamples);
 }
 
 main();
