@@ -36,3 +36,13 @@ export const adminNavItems: readonly AdminNavItem[] = [
     match: ['/admin/users'],
   },
 ];
+
+export function isAdminNavItemActive(pathname: string, item: AdminNavItem): boolean {
+  return item.match.some((candidate) => {
+    if (candidate === '/admin') {
+      return pathname === candidate;
+    }
+
+    return pathname === candidate || pathname.startsWith(`${candidate}/`);
+  });
+}

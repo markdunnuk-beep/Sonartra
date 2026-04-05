@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 import { cn } from '@/components/shared/user-app-ui';
 
-import { adminNavItems, type AdminNavItem } from './admin-shell-nav';
+import { adminNavItems, isAdminNavItemActive, type AdminNavItem } from './admin-shell-nav';
 
 const ADMIN_SHELL_COLLAPSE_STORAGE_KEY = 'sonartra:admin-shell-collapsed';
 
@@ -76,12 +76,6 @@ function NavIcon({ itemKey, active }: { itemKey: AdminNavItem['key']; active: bo
   }
 }
 
-function isItemActive(pathname: string, item: AdminNavItem): boolean {
-  return item.match.some(
-    (candidate) => pathname === candidate || pathname.startsWith(`${candidate}/`),
-  );
-}
-
 function SidebarLink({
   item,
   collapsed,
@@ -92,7 +86,7 @@ function SidebarLink({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const active = isItemActive(pathname, item);
+  const active = isAdminNavItemActive(pathname, item);
 
   return (
     <Link
@@ -160,7 +154,7 @@ export function AdminShell({
       <div className="mx-auto flex min-h-screen w-full max-w-[1680px]">
         <aside
           className={cn(
-            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 flex w-[18.5rem] flex-col bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
+            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 box-border flex w-[18.5rem] flex-col overflow-x-hidden bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
             collapsed ? 'lg:w-[5.75rem]' : 'lg:w-[18.5rem]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
             'lg:sticky',
@@ -229,7 +223,7 @@ export function AdminShell({
             </button>
           ) : null}
 
-          <div className="mt-6 flex-1 space-y-3 overflow-y-auto pb-4">
+          <div className="mt-6 flex-1 space-y-3 overflow-y-auto overflow-x-hidden pb-4">
             <div className={cn('space-y-2', collapsed && 'space-y-3')}>
               {adminNavItems.map((item) => (
                 <SidebarLink
