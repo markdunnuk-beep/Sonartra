@@ -112,6 +112,112 @@ function buildDefinition(params?: {
   };
 }
 
+function buildLiveHeroDefinition(params?: {
+  assessmentKey?: string;
+  assessmentVersionId?: string;
+  versionTag?: string;
+}): RuntimeAssessmentDefinition {
+  const definition = buildDefinition(params);
+
+  definition.heroDefinition = {
+    fallbackPatternKey: 'balanced_operator',
+    pairTraitWeights: [
+      { profileDomainKey: 'operatingStyle', pairKey: 'driver_influencer', traitKey: 'adaptive', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'operatingStyle', pairKey: 'driver_influencer', traitKey: 'assertive', weight: 1, orderIndex: 2 },
+      { profileDomainKey: 'coreDrivers', pairKey: 'purpose_reward', traitKey: 'adaptive', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'leadershipApproach', pairKey: 'directive_inclusive', traitKey: 'people_led', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'tensionResponse', pairKey: 'accommodate_compete', traitKey: 'adaptive', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'environmentFit', pairKey: 'autonomy_collaboration', traitKey: 'flexible', weight: 1, orderIndex: 1 },
+      { profileDomainKey: 'pressureResponse', pairKey: 'critical_scatter', traitKey: 'adaptive', weight: 1, orderIndex: 1 },
+    ],
+    patternRules: [
+      {
+        patternKey: 'adaptive_mobiliser',
+        priority: 24,
+        conditions: [
+          { traitKey: 'adaptive', operator: '>=', value: 3 },
+          { traitKey: 'flexible', operator: '>=', value: 1 },
+        ],
+        exclusions: [],
+      },
+    ],
+    patternLanguage: [
+      {
+        patternKey: 'adaptive_mobiliser',
+        headline: 'Adaptive Mobiliser',
+        subheadline: 'Fast and flexible across shifting conditions.',
+        summary: 'You adapt quickly while keeping people moving.',
+        narrative: 'You tend to reorient in motion and keep momentum alive.',
+        pressureOverlay: 'Under pressure you may accelerate adaptation.',
+        environmentOverlay: 'You do best where room to adjust remains visible.',
+      },
+      {
+        patternKey: 'balanced_operator',
+        headline: 'Balanced Operator',
+        subheadline: null,
+        summary: null,
+        narrative: 'No single Hero pattern dominates strongly.',
+        pressureOverlay: null,
+        environmentOverlay: null,
+      },
+    ],
+  };
+
+  definition.domains = [
+    { id: 'domain-style', key: 'operating-style', title: 'Operating Style', description: null, source: 'signal_group', orderIndex: 1 },
+    { id: 'domain-mot', key: 'core-drivers', title: 'Core Drivers', description: null, source: 'signal_group', orderIndex: 2 },
+    { id: 'domain-lead', key: 'leadership-approach', title: 'Leadership Approach', description: null, source: 'signal_group', orderIndex: 3 },
+    { id: 'domain-conflict', key: 'tension-response', title: 'Tension Response', description: null, source: 'signal_group', orderIndex: 4 },
+    { id: 'domain-culture', key: 'environment-fit', title: 'Environment Fit', description: null, source: 'signal_group', orderIndex: 5 },
+    { id: 'domain-stress', key: 'pressure-response', title: 'Pressure Response', description: null, source: 'signal_group', orderIndex: 6 },
+    { id: 'domain-section', key: 'section_a', title: 'Section A', description: null, source: 'question_section', orderIndex: 7 },
+  ];
+
+  definition.signals = [
+    { id: 'style-driver', key: 'style_driver', title: 'Driver', description: null, domainId: 'domain-style', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'style-influencer', key: 'style_influencer', title: 'Influencer', description: null, domainId: 'domain-style', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'mot-purpose', key: 'mot_purpose', title: 'Purpose', description: null, domainId: 'domain-mot', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'mot-reward', key: 'mot_reward', title: 'Reward', description: null, domainId: 'domain-mot', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'lead-directive', key: 'lead_directive', title: 'Directive', description: null, domainId: 'domain-lead', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'lead-inclusive', key: 'lead_inclusive', title: 'Inclusive', description: null, domainId: 'domain-lead', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'conflict-compete', key: 'conflict_compete', title: 'Compete', description: null, domainId: 'domain-conflict', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'conflict-accommodate', key: 'conflict_accommodate', title: 'Accommodate', description: null, domainId: 'domain-conflict', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'culture-autonomy', key: 'culture_autonomy', title: 'Autonomy', description: null, domainId: 'domain-culture', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'culture-collaboration', key: 'culture_collaboration', title: 'Collaboration', description: null, domainId: 'domain-culture', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+    { id: 'stress-criticality', key: 'stress_criticality', title: 'Criticality', description: null, domainId: 'domain-stress', orderIndex: 1, isOverlay: false, overlayType: 'none' },
+    { id: 'stress-scatter', key: 'stress_scatter', title: 'Scatter', description: null, domainId: 'domain-stress', orderIndex: 2, isOverlay: false, overlayType: 'none' },
+  ];
+
+  definition.questions = [
+    {
+      id: 'hero-question-1',
+      key: 'hero_q1',
+      prompt: 'Hero fixture question?',
+      description: null,
+      domainId: 'domain-section',
+      orderIndex: 1,
+      options: [
+        {
+          id: 'hero-option-1',
+          key: 'hero_q1_a',
+          label: 'Hero option',
+          description: 'Fixture',
+          questionId: 'hero-question-1',
+          orderIndex: 1,
+          signalWeights: definition.signals.map((signal, index) => ({
+            signalId: signal.id,
+            weight: index + 1,
+            reverseFlag: false,
+            sourceWeightKey: `hero|${index + 1}`,
+          })),
+        },
+      ],
+    },
+  ];
+
+  return definition;
+}
+
 function createEmptyLanguageBundle(): EngineLanguageBundle {
   return {
     signals: {},
@@ -614,6 +720,81 @@ test('completion path persists the canonical payload unchanged through the real 
   assert.equal(payload?.actions.strengths[0]?.text, 'Persisted strength language.');
   assert.equal(payload?.metadata.assessmentDescription, null);
   assert.equal(payload?.metadata.attemptId, 'attempt-2');
+});
+
+test('completion path succeeds with live Sonartra Hero domain keys and persists the canonical hero payload', async () => {
+  const db = createFakeDb({
+    attempts: [{
+      attemptId: 'attempt-hero',
+      userId: 'user-1',
+      assessmentId: 'assessment-1',
+      assessmentVersionId: 'version-hero',
+      assessmentKey: 'sonartra-signals',
+      versionTag: '2026.04',
+      lifecycleStatus: 'IN_PROGRESS',
+      startedAt: '2026-01-01T00:00:01.000Z',
+      submittedAt: null,
+      completedAt: null,
+      lastActivityAt: '2026-01-01T00:00:05.000Z',
+      createdAt: '2026-01-01T00:00:01.000Z',
+      updatedAt: '2026-01-01T00:00:05.000Z',
+    }],
+    responses: [{
+      responseId: 'response-hero-1',
+      attemptId: 'attempt-hero',
+      questionId: 'hero-question-1',
+      selectedOptionId: 'hero-option-1',
+      respondedAt: '2026-01-01T00:00:03.000Z',
+      updatedAt: '2026-01-01T00:00:03.000Z',
+    }],
+  });
+
+  const service = createAssessmentCompletionService({
+    db,
+    repository: {
+      async getPublishedAssessmentDefinitionByKey() {
+        return buildLiveHeroDefinition({
+          assessmentKey: 'sonartra-signals',
+          assessmentVersionId: 'version-hero',
+          versionTag: '2026.04',
+        });
+      },
+      async getAssessmentDefinitionByVersion() {
+        return buildLiveHeroDefinition({
+          assessmentKey: 'sonartra-signals',
+          assessmentVersionId: 'version-hero',
+          versionTag: '2026.04',
+        });
+      },
+      async getAssessmentVersionLanguageBundle() {
+        return createEmptyLanguageBundle();
+      },
+    },
+    executeEngine: async (params) =>
+      runAssessmentEngine({
+        ...params,
+        loadAssessmentLanguage: async () => ({ assessment_description: null }),
+      }),
+  });
+
+  const completion = await service.completeAssessmentAttempt({ attemptId: 'attempt-hero', userId: 'user-1' });
+  const payload = await loadPersistedResultPayload(db, 'attempt-hero');
+
+  assert.equal(completion.resultStatus, 'ready');
+  assert.ok(payload);
+  assert.equal(payload?.hero.heroPattern?.patternKey, 'adaptive_mobiliser');
+  assert.deepEqual(
+    payload?.hero.domainPairWinners.map((winner) => winner.sourceDomainKey),
+    [
+      'operating-style',
+      'core-drivers',
+      'leadership-approach',
+      'tension-response',
+      'environment-fit',
+      'pressure-response',
+    ],
+  );
+  assert.equal(payload?.diagnostics.readinessStatus, 'processing');
 });
 
 test('completion path persists assessmentDescription in the canonical payload when sourced by the engine', async () => {

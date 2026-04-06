@@ -96,7 +96,7 @@ function buildHeroDomainSummaries(): readonly ResultDomainSummary[] {
   return [
     buildDomainSummary({
       domainId: 'style',
-      domainKey: 'signal_style',
+      domainKey: 'operating-style',
       domainTitle: 'Operating Style',
       signals: [
         { signalId: 'style-driver', signalKey: 'style_driver', signalTitle: 'Driver', percentage: 56, rank: 1 },
@@ -105,7 +105,7 @@ function buildHeroDomainSummaries(): readonly ResultDomainSummary[] {
     }),
     buildDomainSummary({
       domainId: 'mot',
-      domainKey: 'signal_mot',
+      domainKey: 'core-drivers',
       domainTitle: 'Core Drivers',
       signals: [
         { signalId: 'mot-purpose', signalKey: 'mot_purpose', signalTitle: 'Purpose', percentage: 61, rank: 1 },
@@ -114,7 +114,7 @@ function buildHeroDomainSummaries(): readonly ResultDomainSummary[] {
     }),
     buildDomainSummary({
       domainId: 'lead',
-      domainKey: 'signal_lead',
+      domainKey: 'leadership-approach',
       domainTitle: 'Leadership Approach',
       signals: [
         { signalId: 'lead-directive', signalKey: 'lead_directive', signalTitle: 'Directive', percentage: 57, rank: 1 },
@@ -123,7 +123,7 @@ function buildHeroDomainSummaries(): readonly ResultDomainSummary[] {
     }),
     buildDomainSummary({
       domainId: 'conflict',
-      domainKey: 'signal_conflict',
+      domainKey: 'tension-response',
       domainTitle: 'Tension Response',
       signals: [
         { signalId: 'conflict-compete', signalKey: 'conflict_compete', signalTitle: 'Compete', percentage: 59, rank: 1 },
@@ -132,7 +132,7 @@ function buildHeroDomainSummaries(): readonly ResultDomainSummary[] {
     }),
     buildDomainSummary({
       domainId: 'culture',
-      domainKey: 'signal_culture',
+      domainKey: 'environment-fit',
       domainTitle: 'Environment Fit',
       signals: [
         { signalId: 'culture-autonomy', signalKey: 'culture_autonomy', signalTitle: 'Autonomy', percentage: 52, rank: 1 },
@@ -141,7 +141,7 @@ function buildHeroDomainSummaries(): readonly ResultDomainSummary[] {
     }),
     buildDomainSummary({
       domainId: 'stress',
-      domainKey: 'signal_stress',
+      domainKey: 'pressure-response',
       domainTitle: 'Pressure Response',
       signals: [
         { signalId: 'stress-criticality', signalKey: 'stress_criticality', signalTitle: 'Criticality', percentage: 55, rank: 1 },
@@ -188,4 +188,25 @@ test('hero engine falls back to balanced_operator when no pattern rules match', 
   assert.equal(result.priority, null);
   assert.equal(result.isFallback, true);
   assert.equal(result.headline, 'Balanced Operator');
+});
+
+test('hero engine prefers live canonical domain keys when legacy summaries are also present', () => {
+  const result = evaluateHeroPattern({
+    heroDefinition: buildHeroDefinition(),
+    domainSummaries: [
+      ...buildHeroDomainSummaries(),
+      buildDomainSummary({
+        domainId: 'legacy-style',
+        domainKey: 'signal_style',
+        domainTitle: 'Operating Style Legacy',
+        signals: [
+          { signalId: 'style-operator', signalKey: 'style_operator', signalTitle: 'Operator', percentage: 70, rank: 1 },
+          { signalId: 'style-analyst', signalKey: 'style_analyst', signalTitle: 'Analyst', percentage: 30, rank: 2 },
+        ],
+      }),
+    ],
+  });
+
+  assert.equal(result.domainPairWinners[0]?.sourceDomainKey, 'operating-style');
+  assert.equal(result.domainPairWinners[0]?.pairKey, 'driver_influencer');
 });

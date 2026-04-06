@@ -1379,12 +1379,12 @@ test('hero runtime definition persists canonical hero pattern output in the payl
     ],
   };
   definition.domains = [
-    { id: 'domain-style', key: 'signal_style', title: 'Operating Style', description: null, source: 'signal_group', orderIndex: 1 },
-    { id: 'domain-mot', key: 'signal_mot', title: 'Core Drivers', description: null, source: 'signal_group', orderIndex: 2 },
-    { id: 'domain-lead', key: 'signal_lead', title: 'Leadership Approach', description: null, source: 'signal_group', orderIndex: 3 },
-    { id: 'domain-conflict', key: 'signal_conflict', title: 'Tension Response', description: null, source: 'signal_group', orderIndex: 4 },
-    { id: 'domain-culture', key: 'signal_culture', title: 'Environment Fit', description: null, source: 'signal_group', orderIndex: 5 },
-    { id: 'domain-stress', key: 'signal_stress', title: 'Pressure Response', description: null, source: 'signal_group', orderIndex: 6 },
+    { id: 'domain-style', key: 'operating-style', title: 'Operating Style', description: null, source: 'signal_group', orderIndex: 1 },
+    { id: 'domain-mot', key: 'core-drivers', title: 'Core Drivers', description: null, source: 'signal_group', orderIndex: 2 },
+    { id: 'domain-lead', key: 'leadership-approach', title: 'Leadership Approach', description: null, source: 'signal_group', orderIndex: 3 },
+    { id: 'domain-conflict', key: 'tension-response', title: 'Tension Response', description: null, source: 'signal_group', orderIndex: 4 },
+    { id: 'domain-culture', key: 'environment-fit', title: 'Environment Fit', description: null, source: 'signal_group', orderIndex: 5 },
+    { id: 'domain-stress', key: 'pressure-response', title: 'Pressure Response', description: null, source: 'signal_group', orderIndex: 6 },
     { id: 'domain-section', key: 'section_a', title: 'Section A', description: null, source: 'question_section', orderIndex: 7 },
   ];
   definition.signals = [
@@ -1442,6 +1442,17 @@ test('hero runtime definition persists canonical hero pattern output in the payl
   assert.equal(payload.hero.heroPattern?.patternKey, 'adaptive_mobiliser');
   assert.equal(payload.hero.heroPattern?.isFallback, false);
   assert.equal(payload.hero.domainPairWinners.length, 6);
+  assert.deepEqual(
+    payload.hero.domainPairWinners.map((winner) => winner.sourceDomainKey),
+    [
+      'operating-style',
+      'core-drivers',
+      'leadership-approach',
+      'tension-response',
+      'environment-fit',
+      'pressure-response',
+    ],
+  );
   assert.equal(payload.hero.traitTotals[0]?.traitKey, 'adaptive');
   assert.equal(payload.hero.traitTotals[0]?.value, 4);
   assert.deepEqual(payload.hero.matchedPatterns, [{ patternKey: 'adaptive_mobiliser', priority: 24 }]);

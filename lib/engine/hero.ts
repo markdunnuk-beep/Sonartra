@@ -6,13 +6,15 @@ import type {
   RuntimeHeroDefinition,
 } from '@/lib/engine/types';
 
-const HERO_SOURCE_DOMAIN_KEYS: Readonly<Record<HeroProfileDomainKey, string>> = Object.freeze({
-  operatingStyle: 'signal_style',
-  coreDrivers: 'signal_mot',
-  leadershipApproach: 'signal_lead',
-  tensionResponse: 'signal_conflict',
-  environmentFit: 'signal_culture',
-  pressureResponse: 'signal_stress',
+const HERO_SOURCE_DOMAIN_KEYS: Readonly<
+  Record<HeroProfileDomainKey, { primary: string; legacy: string }>
+> = Object.freeze({
+  operatingStyle: { primary: 'operating-style', legacy: 'signal_style' },
+  coreDrivers: { primary: 'core-drivers', legacy: 'signal_mot' },
+  leadershipApproach: { primary: 'leadership-approach', legacy: 'signal_lead' },
+  tensionResponse: { primary: 'tension-response', legacy: 'signal_conflict' },
+  environmentFit: { primary: 'environment-fit', legacy: 'signal_culture' },
+  pressureResponse: { primary: 'pressure-response', legacy: 'signal_stress' },
 });
 
 const HERO_TRAIT_KEYS: readonly HeroTraitKey[] = Object.freeze([
@@ -105,6 +107,25 @@ function evaluateCondition(traitTotal: number, operator: string, value: number):
   }
 }
 
+function resolveHeroDomainSummary(
+  domainSummaries: readonly ResultDomainSummary[],
+  profileDomainKey: HeroProfileDomainKey,
+): ResultDomainSummary {
+  const lookup = HERO_SOURCE_DOMAIN_KEYS[profileDomainKey];
+
+  const primaryMatch = domainSummaries.find((entry) => entry.domainKey === lookup.primary);
+  if (primaryMatch) {
+    return primaryMatch;
+  }
+
+  const legacyMatch = domainSummaries.find((entry) => entry.domainKey === lookup.legacy);
+  if (legacyMatch) {
+    return legacyMatch;
+  }
+
+  throw new Error(`Hero domain ${lookup.primary} is missing from the normalized result.`);
+}
+
 export function evaluateHeroPattern(params: {
   heroDefinition: RuntimeHeroDefinition;
   domainSummaries: readonly ResultDomainSummary[];
@@ -117,19 +138,16 @@ export function evaluateHeroPattern(params: {
     pairWeightsByKey.set(lookupKey, [...existing, pairWeight]);
   }
 
-  const domainPairWinners = (Object.entries(HERO_SOURCE_DOMAIN_KEYS) as Array<[HeroProfileDomainKey, string]>).map(
-    ([profileDomainKey, sourceDomainKey]) => {
-      const domainSummary = params.domainSummaries.find((entry) => entry.domainKey === sourceDomainKey);
-      if (!domainSummary) {
-        throw new Error(`Hero domain ${sourceDomainKey} is missing from the normalized result.`);
-      }
+  const domainPairWinners = (Object.keys(HERO_SOURCE_DOMAIN_KEYS) as HeroProfileDomainKey[]).map(
+    (profileDomainKey) => {
+      const domainSummary = resolveHeroDomainSummary(params.domainSummaries, profileDomainKey);
 
       const rankedSignals = sortDomainSignalsForDisplay(domainSummary.signalScores);
       const primarySignal = rankedSignals[0];
       const secondarySignal = rankedSignals[1];
 
       if (!primarySignal || !secondarySignal) {
-        throw new Error(`Hero domain ${sourceDomainKey} requires two ranked signals.`);
+        throw new Error(`Hero domain ${domainSummary.domainKey} requires two ranked signals.`);
       }
 
       return {
@@ -138,7 +156,7 @@ export function evaluateHeroPattern(params: {
           getSignalLookupToken(primarySignal.signalKey),
           getSignalLookupToken(secondarySignal.signalKey),
         ),
-        sourceDomainKey,
+        sourceDomainKey: domainSummary.domainKey,
         sourceDomainLabel: domainSummary.domainTitle,
         primarySignalKey: primarySignal.signalKey,
         primarySignalLabel: primarySignal.signalTitle,
