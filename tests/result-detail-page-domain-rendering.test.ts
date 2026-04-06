@@ -206,10 +206,11 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /const heroPatternLabel = result\.hero\.heroPattern\?\.label\?\.trim\(\) \?\? '';/);
   assert.match(source, /const pressureOverlay = result\.hero\.pressureOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /const environmentOverlay = result\.hero\.environmentOverlay\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const introMetadataItems = \[/);
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
   assert.match(source, /<PageFrame className="space-y-16 md:space-y-20">/);
-  assert.match(source, /<SonartraIntroduction \/>/);
+  assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
   assert.match(source, /<HeroDomainHighlights highlights=\{result\.hero\.domainHighlights\} \/>/);
   assert.match(source, /<EditorialAside label="Pressure" text=\{pressureOverlay\} \/>/);
   assert.match(source, /<EditorialAside label="Environment" text=\{environmentOverlay\} \/>/);
@@ -225,8 +226,9 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.doesNotMatch(source, /<ActionSection result=\{result\} \/>/);
   assert.doesNotMatch(source, /reportIntroduction/);
   assert.doesNotMatch(source, /introCopy/);
+  assert.doesNotMatch(source, /sonartra-report-hero-meta-grid/);
 
-  const introIndex = source.indexOf('<SonartraIntroduction />');
+  const introIndex = source.indexOf('<SonartraIntroduction metadataItems={introMetadataItems} />');
   const heroIndex = source.indexOf('<section className="rounded-[2rem] border border-white/6');
   const domainIndex = source.indexOf('title="Domain reading"');
   const actionIndex = source.indexOf('title="What this means in practice"');
@@ -298,9 +300,8 @@ test('result detail page renders actions from canonical action blocks only', () 
 test('result detail page removes payload-driven intro rendering in favor of the system introduction layer', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.match(source, /<SonartraIntroduction \/>/);
+  assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
   assert.match(source, /sonartra-report-hero/);
-  assert.match(source, /sonartra-report-hero-meta-grid/);
   assert.match(source, /mx-auto max-w-\[61rem\] px-1 md:px-2/);
   assert.doesNotMatch(source, /import ReactMarkdown from 'react-markdown';/);
   assert.doesNotMatch(source, /import remarkGfm from 'remark-gfm';/);

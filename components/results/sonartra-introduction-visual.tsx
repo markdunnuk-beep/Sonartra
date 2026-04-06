@@ -1,7 +1,7 @@
 import { cn } from '@/components/shared/user-app-ui';
 
 function ExampleTerm({ children }: Readonly<{ children: string }>) {
-  return <strong className="font-semibold text-white/86">{children}</strong>;
+  return <strong className="font-bold text-white">{children}</strong>;
 }
 
 const SIGNAL_NODES = [

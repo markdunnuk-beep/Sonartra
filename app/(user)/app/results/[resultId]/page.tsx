@@ -76,21 +76,6 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
   return <p className="sonartra-report-kicker">{children}</p>;
 }
 
-function ReportMetaItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="sonartra-report-meta-item">
-      <p className="sonartra-report-meta-label">{label}</p>
-      <p className="sonartra-report-meta-value">{value}</p>
-    </div>
-  );
-}
-
 function EditorialDivider({
   title,
   className,
@@ -448,10 +433,16 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const heroPatternLabel = result.hero.heroPattern?.label?.trim() ?? '';
   const pressureOverlay = result.hero.pressureOverlay?.trim() ?? '';
   const environmentOverlay = result.hero.environmentOverlay?.trim() ?? '';
+  const introMetadataItems = [
+    { label: 'Completed', value: completionTimestamp.date },
+    ...(completionTimestamp.time ? [{ label: 'Time', value: completionTimestamp.time }] : []),
+    { label: 'Assessment', value: result.assessmentTitle },
+    { label: 'Version', value: result.version },
+  ] as const;
 
   return (
     <PageFrame className="space-y-16 md:space-y-20">
-      <SonartraIntroduction />
+      <SonartraIntroduction metadataItems={introMetadataItems} />
 
       {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
       <section
@@ -459,7 +450,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         style={getRevealStyle(1)}
       >
         <div className="max-w-[74rem] space-y-10 md:space-y-12">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start">
+          <div className="space-y-10">
             <div className="space-y-8 md:space-y-10">
               <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
                 <SectionEyebrow>Results report</SectionEyebrow>
@@ -502,15 +493,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                 </div>
               </div>
             </div>
-
-            <aside className="sonartra-report-hero-meta-grid">
-              <ReportMetaItem label="Completed" value={completionTimestamp.date} />
-              {completionTimestamp.time ? (
-                <ReportMetaItem label="Time" value={completionTimestamp.time} />
-              ) : null}
-              <ReportMetaItem label="Assessment" value={result.assessmentTitle} />
-              <ReportMetaItem label="Version" value={result.version} />
-            </aside>
           </div>
         </div>
       </section>

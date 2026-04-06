@@ -21,9 +21,19 @@ const visualComponentPath = join(
   'sonartra-introduction-visual.tsx',
 );
 
-test('sonartra introduction renders the fixed heading and lead without props', () => {
-  const markup = renderToStaticMarkup(<SonartraIntroduction />);
+const INTRO_METADATA = [
+  { label: 'Completed', value: '06 Apr 2026' },
+  { label: 'Time', value: '14:30' },
+  { label: 'Assessment', value: 'Signals Flex' },
+  { label: 'Version', value: '1.0.0' },
+] as const;
 
+test('sonartra introduction renders the fixed heading and lead without props', () => {
+  const markup = renderToStaticMarkup(<SonartraIntroduction metadataItems={INTRO_METADATA} />);
+
+  assert.match(markup, /data-sonartra-introduction-meta="true"/);
+  assert.match(markup, />Completed</);
+  assert.match(markup, />Signals Flex</);
   assert.match(markup, /How to read this report/);
   assert.match(markup, /Understand the patterns behind your results/);
   assert.match(markup, /This report is designed to help you see how you naturally think, respond, and operate\./);
@@ -39,18 +49,18 @@ test('sonartra introduction renders the fixed heading and lead without props', (
 test('sonartra introduction stays a static system layer with no props or server coupling', () => {
   const source = readFileSync(introductionComponentPath, 'utf8');
 
-  assert.match(source, /export function SonartraIntroduction\(\)/);
+  assert.match(source, /export function SonartraIntroduction\(/);
+  assert.match(source, /metadataItems: readonly SonartraIntroductionMetaItem\[\]/);
   assert.match(source, /<SonartraIntroductionVisual className="sonartra-intro-reveal mx-auto w-full max-w-\[34rem\]" \/>/);
+  assert.match(source, /data-sonartra-intro-reveal="meta"/);
   assert.match(source, /data-sonartra-intro-reveal="header"/);
   assert.match(source, /data-sonartra-intro-reveal="supporting"/);
-  assert.doesNotMatch(source, /Readonly<\{/);
-  assert.doesNotMatch(source, /props/);
   assert.doesNotMatch(source, /getDbPool|getRequestUserId|createResultReadModelService/);
   assert.doesNotMatch(source, /admin|featureFlag|flag/i);
 });
 
 test('sonartra introduction renders the three-step explainer and removes redundant guidance', () => {
-  const markup = renderToStaticMarkup(<SonartraIntroduction />);
+  const markup = renderToStaticMarkup(<SonartraIntroduction metadataItems={INTRO_METADATA} />);
 
   assert.match(markup, />How your results are built</);
   assert.match(markup, /Your results are not based on one answer or one moment\./);
@@ -71,15 +81,18 @@ test('sonartra introduction renders the three-step explainer and removes redunda
 });
 
 test('sonartra introduction renders the concept sequence before the model overview visual', () => {
-  const markup = renderToStaticMarkup(<SonartraIntroduction />);
+  const markup = renderToStaticMarkup(<SonartraIntroduction metadataItems={INTRO_METADATA} />);
 
+  const metaIndex = markup.indexOf('data-sonartra-introduction-meta="true"');
   const stepsContainerIndex = markup.indexOf('data-sonartra-introduction-steps="true"');
   const domainsIndex = markup.indexOf('>Domains<');
   const signalsIndex = markup.indexOf('>Signals<');
   const pairsIndex = markup.indexOf('>Signal Pairs<');
   const visualIndex = markup.indexOf('data-sonartra-introduction-visual="true"');
 
+  assert.ok(metaIndex >= 0);
   assert.ok(stepsContainerIndex >= 0);
+  assert.ok(stepsContainerIndex > metaIndex);
   assert.ok(domainsIndex >= 0);
   assert.ok(signalsIndex > domainsIndex);
   assert.ok(pairsIndex > signalsIndex);
@@ -109,6 +122,7 @@ test('sonartra introduction visual renders the generic behaviour flow diagram', 
   assert.doesNotMatch(markup, /Static visual/i);
   assert.match(markup, /data-sonartra-visual-reveal="domain"/);
   assert.match(markup, /data-sonartra-visual-reveal="pair"/);
+  assert.match(source, /font-bold text-white/);
   assert.match(source, /prefers-reduced-motion: no-preference/);
   assert.match(source, /prefers-reduced-motion: reduce/);
   assert.match(source, /sonartra-flow-line-vertical/);
@@ -116,4 +130,13 @@ test('sonartra introduction visual renders the generic behaviour flow diagram', 
   assert.doesNotMatch(source, /24 signals|6 domains|wplp80|Sonartra Signals/i);
   assert.doesNotMatch(markup, /24 signals/i);
   assert.doesNotMatch(markup, /6 domains/i);
+});
+
+test('sonartra introduction source includes stronger explainer connector scaffolding with reduced-motion fallback', () => {
+  const source = readFileSync(introductionComponentPath, 'utf8');
+
+  assert.match(source, /data-sonartra-intro-connector="true"/);
+  assert.match(source, /sonartra-intro-connector-flow/);
+  assert.match(source, /prefers-reduced-motion: no-preference/);
+  assert.match(source, /prefers-reduced-motion: reduce/);
 });
