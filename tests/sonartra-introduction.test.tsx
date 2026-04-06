@@ -26,10 +26,12 @@ test('sonartra introduction renders the fixed heading and lead without props', (
 
   assert.match(markup, /How to read this report/);
   assert.match(markup, /Understand the patterns behind your results/);
+  assert.match(markup, /This report is designed to help you see how you naturally think, respond, and operate\./);
   assert.match(
     markup,
-    /This report is designed to help you understand how you tend to think, respond, and operate across the areas measured by this assessment\./,
+    /Rather than placing you into a single label, Sonartra reveals the patterns that consistently show up in your behaviour\./,
   );
+  assert.match(markup, /Once you can see them clearly, you can work with them rather than against them\./);
   assert.match(markup, /data-sonartra-introduction="true"/);
   assert.match(markup, /data-sonartra-introduction-steps="true"/);
 });
@@ -48,12 +50,20 @@ test('sonartra introduction stays a static system layer with no props or server 
 test('sonartra introduction renders the three-step explainer and removes redundant guidance', () => {
   const markup = renderToStaticMarkup(<SonartraIntroduction />);
 
+  assert.match(markup, />How your results are built</);
+  assert.match(markup, /Your results are not based on one answer or one moment\./);
+  assert.match(markup, /They are built from consistent signals that appear across the assessment\./);
+  assert.match(markup, /We break this down into three simple layers:/);
   assert.match(markup, />Domains</);
   assert.match(markup, />Signals</);
   assert.match(markup, />Signal Pairs</);
-  assert.match(markup, /Broad areas being measured in the assessment\./);
-  assert.match(markup, /Specific behavioural patterns being read within a Domain\./);
-  assert.match(markup, /The strongest signals in a Domain read together to show how behaviour combines in practice\./);
+  assert.match(markup, /Broad areas of behaviour being measured\./);
+  assert.match(markup, /These represent the key parts of how you operate\./);
+  assert.match(markup, /Specific behavioural patterns within each Domain\./);
+  assert.match(markup, /These are the traits that show how you tend to operate\./);
+  assert.match(markup, /The strongest Signals in a Domain, read together\./);
+  assert.match(markup, /Because behaviour rarely shows up in isolation\./);
+  assert.match(markup, /This is where your results become more accurate and more useful\./);
   assert.doesNotMatch(markup, />How to use this report</);
   assert.doesNotMatch(markup, /Start with the overall picture, then move into the detail\./);
 });
@@ -61,15 +71,17 @@ test('sonartra introduction renders the three-step explainer and removes redunda
 test('sonartra introduction renders the concept sequence before the model overview visual', () => {
   const markup = renderToStaticMarkup(<SonartraIntroduction />);
 
+  const stepsContainerIndex = markup.indexOf('data-sonartra-introduction-steps="true"');
   const domainsIndex = markup.indexOf('>Domains<');
   const signalsIndex = markup.indexOf('>Signals<');
   const pairsIndex = markup.indexOf('>Signal Pairs<');
-  const visualHeadingIndex = markup.indexOf('How your results are built');
+  const visualIndex = markup.indexOf('data-sonartra-introduction-visual="true"');
 
+  assert.ok(stepsContainerIndex >= 0);
   assert.ok(domainsIndex >= 0);
   assert.ok(signalsIndex > domainsIndex);
   assert.ok(pairsIndex > signalsIndex);
-  assert.ok(visualHeadingIndex > pairsIndex);
+  assert.ok(visualIndex > stepsContainerIndex);
 });
 
 test('sonartra introduction visual renders the generic behaviour flow diagram', () => {
@@ -83,12 +95,13 @@ test('sonartra introduction visual renders the generic behaviour flow diagram', 
   assert.match(markup, /How your results are built/);
   assert.match(markup, /Signal 1/);
   assert.match(markup, /Signal 2/);
-  assert.match(markup, /Broad area being measured\. For example, <strong[^>]*>Leadership Style<\/strong>\./);
-  assert.match(markup, /Specific pattern being read\. For example, <strong[^>]*>Vision<\/strong>\./);
-  assert.match(markup, /Specific pattern being read\. For example, <strong[^>]*>Process<\/strong>\./);
-  assert.match(markup, /Strongest signals in that Domain\. For example, <strong[^>]*>Vision-Process<\/strong>\./);
+  assert.match(markup, /A broad area of behaviour\. For example: <strong[^>]*>Leadership Approach<\/strong>\./);
+  assert.match(markup, /A dominant pattern\. For example: <strong[^>]*>Vision<\/strong>\./);
+  assert.match(markup, /A dominant pattern\. For example: <strong[^>]*>Process<\/strong>\./);
+  assert.match(markup, /How those patterns combine\. <strong[^>]*>Vision-Process<\/strong>\./);
   assert.match(markup, /Behaviour in practice/);
-  assert.match(markup, /Strategic thinking with structured workable plans\./);
+  assert.match(markup, /What this actually looks like in the real world\./);
+  assert.match(markup, /You think strategically, but you also translate ideas into structured, workable plans\./);
   assert.ok(domainLabelCount >= 1);
   assert.ok(signalLabelCount >= 2);
   assert.doesNotMatch(markup, /Static visual/i);

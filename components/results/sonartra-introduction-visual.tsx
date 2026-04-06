@@ -62,7 +62,7 @@ export function SonartraIntroductionVisual({
           >
             <p className="sonartra-type-nav text-[0.98rem] text-white/94">Domain</p>
             <p className="sonartra-type-caption mt-1.5 text-white/56">
-              Broad area being measured. For example, <ExampleTerm>Leadership Style</ExampleTerm>.
+              A broad area of behaviour. For example: <ExampleTerm>Leadership Approach</ExampleTerm>.
             </p>
           </section>
 
@@ -77,7 +77,7 @@ export function SonartraIntroductionVisual({
               >
                 <p className="sonartra-type-nav text-sm text-white/86">{signal.title}</p>
                 <p className="sonartra-type-caption mt-1.5 text-white/44">
-                  Specific pattern being read. For example, <ExampleTerm>{signal.example}</ExampleTerm>.
+                  A dominant pattern. For example: <ExampleTerm>{signal.example}</ExampleTerm>.
                 </p>
               </div>
             ))}
@@ -91,7 +91,7 @@ export function SonartraIntroductionVisual({
             <div className="relative">
               <p className="sonartra-type-nav text-[1rem] text-white">Signal Pair</p>
               <p className="sonartra-type-caption mt-1.5 text-[#d5e0f4]">
-                Strongest signals in that Domain. For example, <ExampleTerm>Vision-Process</ExampleTerm>.
+                How those patterns combine. <ExampleTerm>Vision-Process</ExampleTerm>.
               </p>
             </div>
           </section>
@@ -100,7 +100,8 @@ export function SonartraIntroductionVisual({
             <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-3 shadow-[0_12px_36px_rgba(0,0,0,0.18)]">
               <p className="sonartra-type-nav text-sm text-white/84">Behaviour in practice</p>
               <p className="sonartra-type-caption mt-1 text-white/48">
-                Strategic thinking with structured workable plans.
+                What this actually looks like in the real world. You think strategically, but you also translate ideas
+                into structured, workable plans.
               </p>
             </div>
           </section>

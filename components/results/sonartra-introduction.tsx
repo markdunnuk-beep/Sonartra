@@ -3,15 +3,21 @@ import { SonartraIntroductionVisual } from '@/components/results/sonartra-introd
 const INTRODUCTION_SECTIONS = [
   {
     title: 'Domains',
-    body: 'Broad areas being measured in the assessment.',
+    body: 'Broad areas of behaviour being measured.',
+    detail:
+      'These represent the key parts of how you operate. For example, how you lead, how you respond under pressure, or the environments where you do your best work.',
   },
   {
     title: 'Signals',
-    body: 'Specific behavioural patterns being read within a Domain.',
+    body: 'Specific behavioural patterns within each Domain.',
+    detail:
+      'These are the traits that show how you tend to operate. For example, being more visionary, structured, people-focused, or results-driven.',
   },
   {
     title: 'Signal Pairs',
-    body: 'The strongest signals in a Domain read together to show how behaviour combines in practice.',
+    body: 'The strongest Signals in a Domain, read together.',
+    detail:
+      'Because behaviour rarely shows up in isolation. It shows up in combinations. This is where your results become more accurate and more useful.',
   },
 ] as const;
 
@@ -35,13 +41,34 @@ export function SonartraIntroduction() {
               >
                 Understand the patterns behind your results
               </h2>
-              <p className="sonartra-report-body max-w-[68ch] text-[1rem] leading-8 sm:text-[1.04rem] md:text-[1.08rem] md:leading-9">
-                This report is designed to help you understand how you tend to think, respond, and operate across the
-                areas measured by this assessment. Rather than reducing you to a single label, Sonartra shows the
-                behavioural patterns that are most consistently coming through in your responses.
-              </p>
+              <div className="max-w-[68ch] space-y-4">
+                <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.04rem] md:text-[1.08rem] md:leading-9">
+                  This report is designed to help you see how you naturally think, respond, and operate.
+                </p>
+                <p className="sonartra-report-body text-[1rem] leading-8 text-white/70 sm:text-[1.04rem] md:text-[1.08rem] md:leading-9">
+                  Rather than placing you into a single label, Sonartra reveals the patterns that consistently show up
+                  in your behaviour. These patterns shape how you make decisions, interact with others, and perform
+                  across different situations.
+                </p>
+                <p className="sonartra-report-body text-[1rem] leading-8 text-white/70 sm:text-[1.04rem] md:text-[1.08rem] md:leading-9">
+                  Once you can see them clearly, you can work with them rather than against them.
+                </p>
+              </div>
             </div>
           </header>
+        </div>
+
+        <div className="max-w-[44rem] space-y-3">
+          <h3 className="sonartra-report-title text-[1.06rem] text-white sm:text-[1.1rem]">How your results are built</h3>
+          <div className="space-y-2">
+            <p className="sonartra-report-body-soft text-[0.98rem] leading-7 text-white/68 sm:text-[1rem]">
+              Your results are not based on one answer or one moment. They are built from consistent signals that
+              appear across the assessment.
+            </p>
+            <p className="sonartra-report-body-soft text-[0.98rem] leading-7 text-white/62 sm:text-[1rem]">
+              We break this down into three simple layers:
+            </p>
+          </div>
         </div>
 
         <div
@@ -65,7 +92,8 @@ export function SonartraIntroduction() {
                   <p className="sonartra-type-utility text-white/36">{`0${index + 1}`}</p>
                   <div className="flex flex-1 flex-col space-y-2">
                     <h3 className="sonartra-report-title text-[1rem] sm:text-[1.06rem]">{section.title}</h3>
-                    <p className="sonartra-report-body-soft text-[0.96rem] leading-7 text-white/64">{section.body}</p>
+                    <p className="sonartra-report-body-soft text-[0.96rem] leading-7 text-white/68">{section.body}</p>
+                    <p className="sonartra-report-body-soft text-[0.95rem] leading-7 text-white/56">{section.detail}</p>
                   </div>
                 </div>
               </article>
