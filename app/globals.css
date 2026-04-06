@@ -89,6 +89,50 @@ main {
   }
 }
 
+@keyframes hero-pattern-medallion-settle {
+  0% {
+    opacity: 0;
+    transform: scale(0.955) rotate(-7deg);
+  }
+
+  64% {
+    opacity: 1;
+    transform: scale(1.015) rotate(1.6deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes hero-pattern-medallion-symbol-settle {
+  0% {
+    transform: scale(0.98) rotate(6deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes hero-pattern-medallion-bloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+
+  48% {
+    opacity: 0.5;
+    transform: scale(1.06);
+  }
+
+  100% {
+    opacity: 0.18;
+    transform: scale(1);
+  }
+}
+
 @layer components {
   .sonartra-motion-surface {
     transition-property: transform, border-color, background-color, color, opacity, box-shadow;
@@ -200,6 +244,30 @@ main {
     animation: sonartra-fade-slide-in var(--sonartra-motion-duration-enter)
       var(--sonartra-motion-ease-enter) both;
     animation-delay: var(--sonartra-motion-delay);
+  }
+
+  .hero-pattern-medallion-shell,
+  .hero-pattern-medallion-glow,
+  .hero-pattern-medallion-svg {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-pattern-medallion-shell {
+      animation: hero-pattern-medallion-settle 760ms cubic-bezier(0.2, 0.82, 0.24, 1) both;
+      transform-origin: 50% 50%;
+    }
+
+    .hero-pattern-medallion-glow {
+      animation: hero-pattern-medallion-bloom 860ms cubic-bezier(0.18, 0.82, 0.22, 1) both;
+    }
+
+    .hero-pattern-medallion-svg {
+      animation:
+        hero-pattern-medallion-symbol-settle 780ms cubic-bezier(0.16, 0.84, 0.22, 1) both;
+      transform-origin: 50% 50%;
+    }
   }
 
   .sonartra-motion-stage-2 {
@@ -759,5 +827,13 @@ main {
   .sonartra-motion-banner {
     opacity: 1;
     transform: none;
+  }
+
+  .hero-pattern-medallion-shell,
+  .hero-pattern-medallion-glow,
+  .hero-pattern-medallion-svg {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }

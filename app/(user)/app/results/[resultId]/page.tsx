@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { CSSProperties, ReactNode } from 'react';
 
 import { DomainSignalRing } from '@/components/results/domain-signal-ring';
+import { HeroPatternMedallion } from '@/components/results/hero-pattern-medallion';
 import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
 import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
@@ -437,6 +438,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const heroSubheadline = result.hero.subheadline?.trim() ?? '';
   const heroSummary = result.hero.summary?.trim() ?? '';
   const heroNarrative = result.hero.narrative?.trim() ?? '';
+  const heroPatternKey = result.hero.heroPattern?.patternKey ?? null;
   const heroPatternLabel = result.hero.heroPattern?.label?.trim() ?? '';
   const pressureOverlay = result.hero.pressureOverlay?.trim() ?? '';
   const environmentOverlay = result.hero.environmentOverlay?.trim() ?? '';
@@ -468,7 +470,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           style={getRevealStyle(1)}
         >
           <div className="max-w-[68rem] space-y-11 md:space-y-14">
-            <div className="space-y-9 md:space-y-11">
+            <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
               <div className="space-y-9 md:space-y-11">
                 <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
                   <SectionEyebrow>Results report</SectionEyebrow>
@@ -512,6 +514,12 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                   </div>
                 </div>
               </div>
+
+              <HeroPatternMedallion
+                patternKey={heroPatternKey}
+                label={heroPatternLabel}
+                className="mx-auto md:mx-0 md:mt-1"
+              />
             </div>
           </div>
         </section>

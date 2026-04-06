@@ -199,11 +199,13 @@ test('result detail page renders the system introduction above hero and keeps ca
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /import \{ SonartraIntroduction \} from '@\/components\/results\/sonartra-introduction';/);
+  assert.match(source, /import \{ HeroPatternMedallion \} from '@\/components\/results\/hero-pattern-medallion';/);
   assert.match(source, /function NarrativeBridge\(/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroSubheadline = result\.hero\.subheadline\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroSummary = result\.hero\.summary\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroNarrative = result\.hero\.narrative\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const heroPatternKey = result\.hero\.heroPattern\?\.patternKey \?\? null;/);
   assert.match(source, /const heroPatternLabel = result\.hero\.heroPattern\?\.label\?\.trim\(\) \?\? '';/);
   assert.match(source, /const pressureOverlay = result\.hero\.pressureOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /const environmentOverlay = result\.hero\.environmentOverlay\?\.trim\(\) \?\? '';/);
@@ -223,6 +225,8 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /sonartra-report-prose max-w-\[50rem\] space-y-6 border-l border-white\/8 pl-5 md:space-y-7 md:pl-7/);
   assert.match(source, /sonartra-report-summary text-\[1\.08rem\] leading-8 text-white\/82 sm:text-\[1\.13rem\] md:text-\[1\.22rem\] md:leading-10/);
   assert.match(source, /sonartra-report-body max-w-\[46rem\] text-\[1rem\] leading-8 text-white\/78 sm:text-\[1\.05rem\] md:text-\[1\.1rem\] md:leading-9/);
+  assert.match(source, /grid gap-9 md:grid-cols-\[minmax\(0,1fr\)_auto\] md:items-start md:gap-11/);
+  assert.match(source, /<HeroPatternMedallion\s+patternKey=\{heroPatternKey\}\s+label=\{heroPatternLabel\}/);
   assert.match(source, /<NarrativeBridge className="max-w-\[38rem\]">/);
   assert.match(source, /heroPatternLabel/);
   assert.match(source, /heroSummary/);
