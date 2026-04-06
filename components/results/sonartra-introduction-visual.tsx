@@ -4,20 +4,14 @@ const SIGNAL_NODES = [
   {
     key: 'signal-1',
     title: 'Signal',
-    description: 'Specific pattern being read',
+    description: 'Specific pattern being read. For example, Vision.',
     className: 'justify-self-start sm:ml-5',
   },
   {
     key: 'signal-2',
     title: 'Signal',
-    description: 'Specific pattern being read',
+    description: 'Specific pattern being read. For example, Process.',
     className: 'justify-self-end sm:mr-5',
-  },
-  {
-    key: 'signal-3',
-    title: 'Signal',
-    description: 'Additional context when relevant',
-    className: 'col-span-full justify-self-center',
   },
 ] as const;
 
@@ -42,23 +36,22 @@ export function SonartraIntroductionVisual({
       <div className="relative space-y-6">
         <header className="space-y-1.5">
           <p className="sonartra-report-kicker">How your results are built</p>
-          <p className="sonartra-type-caption max-w-[28rem] text-white/48">
-            Domains vary by assessment, but the interpretation path stays consistent.
-          </p>
         </header>
 
-        <div className="relative mx-auto flex max-w-[26rem] flex-col items-center pb-2 pt-1">
+        <div className="relative mx-auto flex max-w-[28rem] flex-col items-center pb-2 pt-1">
           <div className="pointer-events-none absolute left-1/2 top-[5.45rem] h-14 w-px -translate-x-1/2 bg-[linear-gradient(180deg,rgba(198,212,240,0.46),rgba(198,212,240,0.08))]" />
-          <div className="pointer-events-none absolute left-[29%] top-[15.2rem] hidden h-16 w-px rotate-[32deg] bg-[linear-gradient(180deg,rgba(198,212,240,0.28),rgba(198,212,240,0.04))] sm:block" />
-          <div className="pointer-events-none absolute right-[29%] top-[15.2rem] hidden h-16 w-px -rotate-[32deg] bg-[linear-gradient(180deg,rgba(198,212,240,0.28),rgba(198,212,240,0.04))] sm:block" />
-          <div className="pointer-events-none absolute left-1/2 top-[25.35rem] h-12 w-px -translate-x-1/2 bg-[linear-gradient(180deg,rgba(198,212,240,0.38),rgba(198,212,240,0.04))]" />
+          <div className="pointer-events-none absolute left-[30%] top-[15.4rem] hidden h-16 w-px rotate-[32deg] bg-[linear-gradient(180deg,rgba(198,212,240,0.28),rgba(198,212,240,0.04))] sm:block" />
+          <div className="pointer-events-none absolute right-[30%] top-[15.4rem] hidden h-16 w-px -rotate-[32deg] bg-[linear-gradient(180deg,rgba(198,212,240,0.28),rgba(198,212,240,0.04))] sm:block" />
+          <div className="pointer-events-none absolute left-1/2 top-[23.7rem] h-12 w-px -translate-x-1/2 bg-[linear-gradient(180deg,rgba(198,212,240,0.38),rgba(198,212,240,0.04))]" />
 
           <section
             className="relative z-10 w-full max-w-[15rem] rounded-[1.5rem] border border-[#b6caef]/18 bg-[linear-gradient(180deg,rgba(182,202,239,0.16),rgba(255,255,255,0.045))] px-5 py-4 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_18px_60px_rgba(4,8,20,0.34)]"
             aria-label="Generic domain"
           >
             <p className="sonartra-type-nav text-[0.98rem] text-white/94">Domain</p>
-            <p className="sonartra-type-caption mt-1.5 text-white/56">Broad area being measured</p>
+            <p className="sonartra-type-caption mt-1.5 text-white/56">
+              Broad area being measured. For example, Leadership Style.
+            </p>
           </section>
 
           <section className="relative z-10 mt-14 grid w-full grid-cols-2 gap-x-3 gap-y-2.5 sm:gap-x-5" aria-label="Generic signals">
@@ -66,12 +59,12 @@ export function SonartraIntroductionVisual({
               <div
                 key={signal.key}
                 className={cn(
-                  'min-w-[8.5rem] rounded-full border border-white/8 bg-white/[0.04] px-4 py-3 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur-sm',
+                  'min-w-[10rem] rounded-[1.15rem] border border-white/8 bg-white/[0.04] px-4 py-3 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur-sm',
                   signal.className,
                 )}
               >
                 <p className="sonartra-type-nav text-sm text-white/86">{signal.title}</p>
-                <p className="sonartra-type-caption mt-1 text-white/44">{signal.description}</p>
+                <p className="sonartra-type-caption mt-1.5 text-white/44">{signal.description}</p>
               </div>
             ))}
           </section>
@@ -83,7 +76,9 @@ export function SonartraIntroductionVisual({
             <div className="pointer-events-none absolute inset-x-5 inset-y-2 rounded-[1.4rem] bg-[#a9c1ec]/8 blur-2xl" />
             <div className="relative">
               <p className="sonartra-type-nav text-[1rem] text-white">Signal Pair</p>
-              <p className="sonartra-type-caption mt-1.5 text-[#d5e0f4]">Patterns read together</p>
+              <p className="sonartra-type-caption mt-1.5 text-[#d5e0f4]">
+                Strongest signals in that Domain. For example, Vision-Process.
+              </p>
             </div>
           </section>
 
@@ -91,7 +86,7 @@ export function SonartraIntroductionVisual({
             <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-3 shadow-[0_12px_36px_rgba(0,0,0,0.18)]">
               <p className="sonartra-type-nav text-sm text-white/84">Behaviour in practice</p>
               <p className="sonartra-type-caption mt-1 text-white/48">
-                How patterns show up in real situations
+                Strategic thinking with structured workable plans.
               </p>
             </div>
           </section>

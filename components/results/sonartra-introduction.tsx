@@ -3,19 +3,15 @@ import { SonartraIntroductionVisual } from '@/components/results/sonartra-introd
 const INTRODUCTION_SECTIONS = [
   {
     title: 'Domains',
-    body: 'Domains are the broad areas being measured. They give the report its structure and help organise the different parts of your behaviour into clear, readable themes. Depending on the assessment, the number and focus of Domains may vary.',
+    body: 'Broad areas being measured in the assessment.',
   },
   {
     title: 'Signals',
-    body: 'Within each Domain are Signals. Signals are the distinct behavioural patterns identified by the assessment. They show the tendencies, preferences, and operating styles that are most likely to shape how you approach situations in practice.',
+    body: 'Specific behavioural patterns being read within a Domain.',
   },
   {
     title: 'Signal Pairs',
-    body: 'Signals become more useful when read together. Sonartra looks not only at individual Signals, but also at the way Signals combine into Signal Pairs. This reveals how different tendencies interact, reinforce each other, or create tension in real-world situations.',
-  },
-  {
-    title: 'How to use this report',
-    body: 'Use this report as a practical guide, not a fixed judgement. It is best read as a map of likely patterns: where you may naturally add value, where pressure or friction may appear, and where greater awareness can improve how you work, lead, and relate to others.',
+    body: 'The strongest signals in a Domain read together to reveal how behaviour combines in practice.',
   },
 ] as const;
 
@@ -28,7 +24,7 @@ export function SonartraIntroduction() {
     >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_24%,transparent_76%,rgba(255,255,255,0.012))]" />
 
-      <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(19rem,25rem)] lg:gap-12 lg:items-start">
+      <div className="relative mx-auto max-w-[61rem] space-y-8 md:space-y-10">
         <div className="max-w-[46rem] space-y-7 md:space-y-8">
           <header className="space-y-4 md:space-y-5">
             <p className="sonartra-report-kicker">How to read this report</p>
@@ -46,28 +42,38 @@ export function SonartraIntroduction() {
               </p>
             </div>
           </header>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            {INTRODUCTION_SECTIONS.map((section) => (
-              <article
-                key={section.title}
-                className="rounded-[1.2rem] border border-white/7 bg-white/[0.022] px-4 py-4 sm:px-5 sm:py-5"
-              >
-                <div className="space-y-2.5">
-                  <h3 className="sonartra-report-title text-[1rem] sm:text-[1.06rem]">{section.title}</h3>
-                  <p className="sonartra-report-body-soft text-[0.98rem] leading-7 text-white/66">{section.body}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <p className="sonartra-report-body-soft max-w-[68ch] border-t border-white/7 pt-5 text-[0.98rem] leading-8 text-white/62 sm:text-[1rem]">
-            Start with the overall picture, then move into the detail. The sections that follow will show your
-            strongest patterns, how they combine, and what they may mean in practice.
-          </p>
         </div>
 
-        <SonartraIntroductionVisual className="lg:sticky lg:top-8" />
+        <div
+          className="grid gap-3.5 md:grid-cols-3 md:gap-4"
+          aria-label="Sonartra concept sequence"
+          data-sonartra-introduction-steps="true"
+        >
+          {INTRODUCTION_SECTIONS.map((section, index) => (
+            <div key={section.title} className="relative">
+              {index < INTRODUCTION_SECTIONS.length - 1 ? (
+                <div
+                  className="pointer-events-none absolute left-6 top-full h-5 w-px bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.04))] md:left-auto md:right-[-0.55rem] md:top-1/2 md:h-px md:w-5 md:-translate-y-1/2 md:bg-[linear-gradient(90deg,rgba(255,255,255,0.18),rgba(255,255,255,0.04))]"
+                  aria-hidden="true"
+                />
+              ) : null}
+              <article
+                className="relative rounded-[1.25rem] border border-white/7 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.018))] px-4 py-4 shadow-[0_12px_36px_rgba(0,0,0,0.14)] sm:px-5 sm:py-5"
+                data-sonartra-introduction-step={section.title}
+              >
+                <div className="space-y-3">
+                  <p className="sonartra-type-utility text-white/36">{`0${index + 1}`}</p>
+                  <div className="space-y-2">
+                    <h3 className="sonartra-report-title text-[1rem] sm:text-[1.06rem]">{section.title}</h3>
+                    <p className="sonartra-report-body-soft text-[0.96rem] leading-7 text-white/64">{section.body}</p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          ))}
+        </div>
+
+        <SonartraIntroductionVisual className="mx-auto w-full max-w-[34rem]" />
       </div>
     </section>
   );

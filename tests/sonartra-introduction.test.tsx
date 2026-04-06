@@ -31,29 +31,45 @@ test('sonartra introduction renders the fixed heading and lead without props', (
     /This report is designed to help you understand how you tend to think, respond, and operate across the areas measured by this assessment\./,
   );
   assert.match(markup, /data-sonartra-introduction="true"/);
-  assert.match(markup, /lg:grid-cols-\[minmax\(0,1\.1fr\)_minmax\(19rem,25rem\)\]/);
+  assert.match(markup, /data-sonartra-introduction-steps="true"/);
 });
 
 test('sonartra introduction stays a static system layer with no props or server coupling', () => {
   const source = readFileSync(introductionComponentPath, 'utf8');
 
   assert.match(source, /export function SonartraIntroduction\(\)/);
-  assert.match(source, /<SonartraIntroductionVisual className="lg:sticky lg:top-8" \/>/);
+  assert.match(source, /<SonartraIntroductionVisual className="mx-auto w-full max-w-\[34rem\]" \/>/);
   assert.doesNotMatch(source, /Readonly<\{/);
   assert.doesNotMatch(source, /props/);
   assert.doesNotMatch(source, /getDbPool|getRequestUserId|createResultReadModelService/);
   assert.doesNotMatch(source, /admin|featureFlag|flag/i);
 });
 
-test('sonartra introduction renders the explanatory sections and closing guidance', () => {
+test('sonartra introduction renders the three-step explainer and removes redundant guidance', () => {
   const markup = renderToStaticMarkup(<SonartraIntroduction />);
 
   assert.match(markup, />Domains</);
   assert.match(markup, />Signals</);
   assert.match(markup, />Signal Pairs</);
-  assert.match(markup, />How to use this report</);
-  assert.match(markup, /Depending on the assessment, the number and focus of Domains may vary\./);
-  assert.match(markup, /Start with the overall picture, then move into the detail\./);
+  assert.match(markup, /Broad areas being measured in the assessment\./);
+  assert.match(markup, /Specific behavioural patterns being read within a Domain\./);
+  assert.match(markup, /The strongest signals in a Domain read together to reveal how behaviour combines in practice\./);
+  assert.doesNotMatch(markup, />How to use this report</);
+  assert.doesNotMatch(markup, /Start with the overall picture, then move into the detail\./);
+});
+
+test('sonartra introduction renders the concept sequence before the model overview visual', () => {
+  const markup = renderToStaticMarkup(<SonartraIntroduction />);
+
+  const domainsIndex = markup.indexOf('>Domains<');
+  const signalsIndex = markup.indexOf('>Signals<');
+  const pairsIndex = markup.indexOf('>Signal Pairs<');
+  const visualHeadingIndex = markup.indexOf('How your results are built');
+
+  assert.ok(domainsIndex >= 0);
+  assert.ok(signalsIndex > domainsIndex);
+  assert.ok(pairsIndex > signalsIndex);
+  assert.ok(visualHeadingIndex > pairsIndex);
 });
 
 test('sonartra introduction visual renders the generic behaviour flow diagram', () => {
@@ -65,12 +81,14 @@ test('sonartra introduction visual renders the generic behaviour flow diagram', 
 
   assert.match(markup, /data-sonartra-introduction-visual="true"/);
   assert.match(markup, /How your results are built/);
-  assert.match(markup, /Domains vary by assessment, but the interpretation path stays consistent\./);
-  assert.match(markup, /Patterns read together/);
+  assert.match(markup, /Broad area being measured\. For example, Leadership Style\./);
+  assert.match(markup, /Specific pattern being read\. For example, Vision\./);
+  assert.match(markup, /Specific pattern being read\. For example, Process\./);
+  assert.match(markup, /Strongest signals in that Domain\. For example, Vision-Process\./);
   assert.match(markup, /Behaviour in practice/);
-  assert.match(markup, /How patterns show up in real situations/);
+  assert.match(markup, /Strategic thinking with structured workable plans\./);
   assert.ok(domainLabelCount >= 1);
-  assert.ok(signalLabelCount >= 3);
+  assert.ok(signalLabelCount >= 2);
   assert.doesNotMatch(markup, /Static visual/i);
   assert.doesNotMatch(source, /24 signals|6 domains|wplp80|Sonartra Signals/i);
   assert.doesNotMatch(markup, /24 signals/i);
