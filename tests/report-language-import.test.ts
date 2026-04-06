@@ -27,7 +27,6 @@ test('report-aligned rows parse correctly', () => {
 test('blank lines are ignored in report-aligned input', () => {
   const result = parseReportLanguageRows(
     [
-      'intro|assessment|assessmentDescription|Intro copy',
       '',
       ' ',
       'signal|style_driver|summary|Driver summary',
@@ -35,13 +34,12 @@ test('blank lines are ignored in report-aligned input', () => {
   );
 
   assert.equal(result.success, true);
-  assert.deepEqual(result.records.map((row) => row.lineNumber), [1, 4]);
+  assert.deepEqual(result.records.map((row) => row.lineNumber), [3]);
 });
 
-test('report-aligned validation maps intro, hero, domain, signal, and pair rows into current storage DTOs', () => {
+test('report-aligned validation maps hero, domain, signal, and pair rows into current storage DTOs', () => {
   const parsed = parseReportLanguageRows(
     [
-      'intro|assessment|assessmentDescription|Assessment-owned description.',
       'hero|analyst_driver|headline|Fast, structured, decisive.',
       'hero|driver_analyst|narrative|You combine pace with logic.',
       'domain|signal_style|summary|Custom domain summary.',
@@ -61,11 +59,6 @@ test('report-aligned validation maps intro, hero, domain, signal, and pair rows 
   assert.equal(validation.success, true);
 
   const plan = buildReportAlignedLanguageStoragePlan(validation.validRows);
-
-  assert.deepEqual(plan.intro, {
-    section: 'assessment_description',
-    content: 'Assessment-owned description.',
-  });
 
   assert.deepEqual(plan.hero, [
     {
@@ -113,11 +106,6 @@ test('report-aligned validation maps intro, hero, domain, signal, and pair rows 
       content: 'Driver plus Analyst pair summary.',
     },
   ]);
-
-  assert.deepEqual(plan.storage.assessment, {
-    section: 'assessment_description',
-    content: 'Assessment-owned description.',
-  });
   assert.deepEqual(plan.storage.overview, [
     {
       patternKey: 'analyst_driver',

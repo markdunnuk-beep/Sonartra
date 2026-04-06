@@ -8,11 +8,9 @@ import type {
   AssessmentVersionLanguageSignalSection,
 } from '@/lib/server/assessment-version-language-types';
 
-export type ReportLanguageSection = 'intro' | 'hero' | 'domain' | 'signal' | 'pair';
-
+export type ReportLanguageSection = 'hero' | 'domain' | 'signal' | 'pair';
 type RecognizedReportLanguageSection = ReportLanguageSection | 'actions';
-
-export type ImportableReportLanguageSection = Exclude<ReportLanguageSection, 'intro'>;
+export type ImportableReportLanguageSection = ReportLanguageSection;
 
 export type ReportLanguageParseErrorCode =
   | 'INVALID_COLUMN_COUNT'
@@ -37,7 +35,6 @@ export type ReportLanguageParseError = {
   message: string;
 };
 
-type ValidIntroField = 'assessmentDescription';
 type ValidHeroField = 'headline' | 'narrative';
 type ValidDomainField = 'summary' | 'focus' | 'pressure' | 'environment';
 type ValidSignalField = AssessmentVersionLanguageSignalSection;
@@ -65,14 +62,6 @@ export type ReportLanguageValidationError = {
 };
 
 export type ValidatedReportLanguageRow =
-  | {
-      lineNumber: number;
-      rawLine: string;
-      section: 'intro';
-      target: 'assessment';
-      field: ValidIntroField;
-      content: string;
-    }
   | {
       lineNumber: number;
       rawLine: string;
@@ -117,10 +106,6 @@ export type ReportLanguageValidationResult = {
 };
 
 export type ReportAlignedLanguageStoragePlan = {
-  intro: {
-    section: 'assessment_description';
-    content: string;
-  } | null;
   hero: readonly {
     patternKey: string;
     field: ValidHeroField;
@@ -142,10 +127,6 @@ export type ReportAlignedLanguageStoragePlan = {
     content: string;
   }[];
   storage: {
-    assessment: {
-      section: 'assessment_description';
-      content: string;
-    } | null;
     overview: readonly AssessmentVersionLanguageOverviewInput[];
     domains: readonly AssessmentVersionLanguageDomainInput[];
     signals: readonly AssessmentVersionLanguageSignalInput[];
@@ -210,8 +191,6 @@ export function normalizeReportLanguageSection(
   const normalized = value.trim().toLowerCase();
 
   switch (normalized) {
-    case 'intro':
-      return 'intro';
     case 'hero':
       return 'hero';
     case 'domain':
@@ -324,7 +303,7 @@ export function validateReportLanguageRows(params: {
         createValidationError(
           row,
           'INVALID_SECTION',
-          'Section must be one of intro, hero, domain, signal, or pair.',
+          'Section must be one of hero, domain, signal, or pair.',
         ),
       );
       continue;
@@ -338,41 +317,6 @@ export function validateReportLanguageRows(params: {
           'Actions are derived in the engine and are not part of the supported report-language authoring surface.',
         ),
       );
-      continue;
-    }
-
-    if (section === 'intro') {
-      if (row.target !== 'assessment') {
-        errors.push(
-          createValidationError(
-            row,
-            'INVALID_TARGET',
-            'Intro rows must use the target "assessment".',
-          ),
-        );
-        continue;
-      }
-
-      if (row.field !== 'assessmentDescription') {
-        errors.push(
-          createValidationError(
-            row,
-            row.field === 'primaryPattern' ? 'DERIVED_FIELD_NOT_AUTHORABLE' : 'INVALID_FIELD',
-            'Intro field must be assessmentDescription.',
-          ),
-        );
-        continue;
-      }
-
-      validRows.push({
-        lineNumber: row.lineNumber,
-        rawLine: row.rawLine,
-        section: 'intro',
-        target: 'assessment',
-        field: 'assessmentDescription',
-        content: row.content,
-      });
-      trackDuplicate(duplicateTracker, validRows[validRows.length - 1]);
       continue;
     }
 
@@ -682,8 +626,6 @@ export function validateReportLanguageRows(params: {
 export function buildReportAlignedLanguageStoragePlan(
   rows: readonly ValidatedReportLanguageRow[],
 ): ReportAlignedLanguageStoragePlan {
-  const introRow = rows.find((row) => row.section === 'intro') ?? null;
-
   const hero = rows
     .filter((row): row is Extract<ValidatedReportLanguageRow, { section: 'hero' }> => row.section === 'hero')
     .map((row) => ({
@@ -717,23 +659,11 @@ export function buildReportAlignedLanguageStoragePlan(
     }));
 
   return {
-    intro: introRow
-      ? {
-          section: 'assessment_description',
-          content: introRow.content,
-        }
-      : null,
     hero,
     domainChapters,
     signals,
     pairs,
     storage: {
-      assessment: introRow
-        ? {
-            section: 'assessment_description',
-            content: introRow.content,
-          }
-        : null,
       // Hero authoring remains overview-backed until storage is formally renamed.
       overview: hero.map((row) => ({
         patternKey: row.patternKey,
@@ -854,8 +784,6 @@ function trackDuplicate(
 
 function getDuplicateKey(row: ValidatedReportLanguageRow): string {
   switch (row.section) {
-    case 'intro':
-      return `intro::${row.target}::${row.field}`;
     case 'hero':
       return `hero::${row.canonicalPatternKey}::${row.field}`;
     case 'domain':

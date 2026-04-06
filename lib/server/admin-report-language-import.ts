@@ -441,8 +441,6 @@ function buildPreviewGroups(
         targetKey = row.canonicalSignalPair;
         targetLabel = row.canonicalSignalPair;
         break;
-      case 'intro':
-        continue;
     }
 
     const entries = grouped.get(targetKey) ?? [];

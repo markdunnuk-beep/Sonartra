@@ -1,4 +1,3 @@
-import { AdminAssessmentLanguageEditor } from '@/components/admin/admin-assessment-language-editor';
 import { AdminHeroDatasetImport } from '@/components/admin/admin-hero-dataset-import';
 import { AdminLanguageDatasetImport } from '@/components/admin/admin-language-dataset-import';
 import {
@@ -71,7 +70,7 @@ export function AdminAssessmentLanguageStep({
       <SectionHeader
         eyebrow="Language"
         title="Language"
-        description="Author the report language used in results, separate from the Assessment Intro shown before questions."
+        description="Author the report language used in results."
       />
 
       <SurfaceCard className="space-y-4 p-5 lg:p-6">
@@ -82,28 +81,10 @@ export function AdminAssessmentLanguageStep({
           </LabelPill>
         </div>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          Use this step for report-facing copy only. The Assessment Intro introduces the assessment before Question 1;
-          the sections here shape the language participants see in their results.
+          Use this step for report-facing copy only. The sections here shape the language participants see in their
+          results.
         </p>
       </SurfaceCard>
-
-      <div className="space-y-6">
-        <SectionHeader
-          eyebrow="Report Introduction"
-          title="Report Introduction"
-          description="Opening report copy shown in the results experience, separate from the Assessment Intro shown before questions."
-        />
-
-        <div className="rounded-[1.25rem] border border-white/10 bg-gradient-to-b from-white/[0.02] to-transparent p-[1px]">
-          <div className="rounded-[1.25rem] bg-black/30">
-            <AdminAssessmentLanguageEditor
-              assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-              initialValue={viewModel.assessmentLanguageDescription}
-              isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-            />
-          </div>
-        </div>
-      </div>
 
       <div className="space-y-6">
         <SectionHeader
@@ -137,8 +118,7 @@ export function AdminAssessmentLanguageStep({
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-8">
-        <MetaItem label="Report introduction" value={formatEntryCount(viewModel.counts.assessment.entryCount)} />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-7">
         <MetaItem label="Hero Header" value={formatEntryCount(viewModel.counts.heroHeaders.entryCount)} />
         <MetaItem label="Domain Chapters" value={formatEntryCount(viewModel.counts.domains.entryCount)} />
         <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
