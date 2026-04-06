@@ -11,7 +11,7 @@ const INTRODUCTION_SECTIONS = [
   },
   {
     title: 'Signal Pairs',
-    body: 'The strongest signals in a Domain read together to reveal how behaviour combines in practice.',
+    body: 'The strongest signals in a Domain read together to show how behaviour combines in practice.',
   },
 ] as const;
 
@@ -45,12 +45,12 @@ export function SonartraIntroduction() {
         </div>
 
         <div
-          className="grid gap-3.5 md:grid-cols-3 md:gap-4"
+          className="grid gap-3.5 md:auto-rows-fr md:grid-cols-3 md:gap-4"
           aria-label="Sonartra concept sequence"
           data-sonartra-introduction-steps="true"
         >
           {INTRODUCTION_SECTIONS.map((section, index) => (
-            <div key={section.title} className="relative">
+            <div key={section.title} className="relative h-full">
               {index < INTRODUCTION_SECTIONS.length - 1 ? (
                 <div
                   className="pointer-events-none absolute left-6 top-full h-5 w-px bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.04))] md:left-auto md:right-[-0.55rem] md:top-1/2 md:h-px md:w-5 md:-translate-y-1/2 md:bg-[linear-gradient(90deg,rgba(255,255,255,0.18),rgba(255,255,255,0.04))]"
@@ -58,12 +58,12 @@ export function SonartraIntroduction() {
                 />
               ) : null}
               <article
-                className="relative rounded-[1.25rem] border border-white/7 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.018))] px-4 py-4 shadow-[0_12px_36px_rgba(0,0,0,0.14)] sm:px-5 sm:py-5"
+                className="relative flex h-full min-h-[12.4rem] flex-col rounded-[1.25rem] border border-white/7 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.018))] px-4 py-4 shadow-[0_12px_36px_rgba(0,0,0,0.14)] sm:px-5 sm:py-5"
                 data-sonartra-introduction-step={section.title}
               >
-                <div className="space-y-3">
+                <div className="flex h-full flex-col space-y-3">
                   <p className="sonartra-type-utility text-white/36">{`0${index + 1}`}</p>
-                  <div className="space-y-2">
+                  <div className="flex flex-1 flex-col space-y-2">
                     <h3 className="sonartra-report-title text-[1rem] sm:text-[1.06rem]">{section.title}</h3>
                     <p className="sonartra-report-body-soft text-[0.96rem] leading-7 text-white/64">{section.body}</p>
                   </div>

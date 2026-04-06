@@ -53,7 +53,7 @@ test('sonartra introduction renders the three-step explainer and removes redunda
   assert.match(markup, />Signal Pairs</);
   assert.match(markup, /Broad areas being measured in the assessment\./);
   assert.match(markup, /Specific behavioural patterns being read within a Domain\./);
-  assert.match(markup, /The strongest signals in a Domain read together to reveal how behaviour combines in practice\./);
+  assert.match(markup, /The strongest signals in a Domain read together to show how behaviour combines in practice\./);
   assert.doesNotMatch(markup, />How to use this report</);
   assert.doesNotMatch(markup, /Start with the overall picture, then move into the detail\./);
 });
@@ -77,19 +77,24 @@ test('sonartra introduction visual renders the generic behaviour flow diagram', 
   const source = readFileSync(visualComponentPath, 'utf8');
 
   const domainLabelCount = markup.match(/>Domain</g)?.length ?? 0;
-  const signalLabelCount = markup.match(/>Signal</g)?.length ?? 0;
+  const signalLabelCount = markup.match(/>Signal [12]</g)?.length ?? 0;
 
   assert.match(markup, /data-sonartra-introduction-visual="true"/);
   assert.match(markup, /How your results are built/);
-  assert.match(markup, /Broad area being measured\. For example, Leadership Style\./);
-  assert.match(markup, /Specific pattern being read\. For example, Vision\./);
-  assert.match(markup, /Specific pattern being read\. For example, Process\./);
-  assert.match(markup, /Strongest signals in that Domain\. For example, Vision-Process\./);
+  assert.match(markup, /Signal 1/);
+  assert.match(markup, /Signal 2/);
+  assert.match(markup, /Broad area being measured\. For example, <strong[^>]*>Leadership Style<\/strong>\./);
+  assert.match(markup, /Specific pattern being read\. For example, <strong[^>]*>Vision<\/strong>\./);
+  assert.match(markup, /Specific pattern being read\. For example, <strong[^>]*>Process<\/strong>\./);
+  assert.match(markup, /Strongest signals in that Domain\. For example, <strong[^>]*>Vision-Process<\/strong>\./);
   assert.match(markup, /Behaviour in practice/);
   assert.match(markup, /Strategic thinking with structured workable plans\./);
   assert.ok(domainLabelCount >= 1);
   assert.ok(signalLabelCount >= 2);
   assert.doesNotMatch(markup, /Static visual/i);
+  assert.match(source, /prefers-reduced-motion: no-preference/);
+  assert.match(source, /prefers-reduced-motion: reduce/);
+  assert.match(source, /sonartra-flow-line-vertical/);
   assert.doesNotMatch(source, /24 signals|6 domains|wplp80|Sonartra Signals/i);
   assert.doesNotMatch(markup, /24 signals/i);
   assert.doesNotMatch(markup, /6 domains/i);

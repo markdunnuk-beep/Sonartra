@@ -1,16 +1,20 @@
 import { cn } from '@/components/shared/user-app-ui';
 
+function ExampleTerm({ children }: Readonly<{ children: string }>) {
+  return <strong className="font-semibold text-white/86">{children}</strong>;
+}
+
 const SIGNAL_NODES = [
   {
     key: 'signal-1',
-    title: 'Signal',
-    description: 'Specific pattern being read. For example, Vision.',
+    title: 'Signal 1',
+    example: 'Vision',
     className: 'justify-self-start sm:ml-5',
   },
   {
     key: 'signal-2',
-    title: 'Signal',
-    description: 'Specific pattern being read. For example, Process.',
+    title: 'Signal 2',
+    example: 'Process',
     className: 'justify-self-end sm:mr-5',
   },
 ] as const;
@@ -39,10 +43,18 @@ export function SonartraIntroductionVisual({
         </header>
 
         <div className="relative mx-auto flex max-w-[28rem] flex-col items-center pb-2 pt-1">
-          <div className="pointer-events-none absolute left-1/2 top-[5.45rem] h-14 w-px -translate-x-1/2 bg-[linear-gradient(180deg,rgba(198,212,240,0.46),rgba(198,212,240,0.08))]" />
-          <div className="pointer-events-none absolute left-[30%] top-[15.4rem] hidden h-16 w-px rotate-[32deg] bg-[linear-gradient(180deg,rgba(198,212,240,0.28),rgba(198,212,240,0.04))] sm:block" />
-          <div className="pointer-events-none absolute right-[30%] top-[15.4rem] hidden h-16 w-px -rotate-[32deg] bg-[linear-gradient(180deg,rgba(198,212,240,0.28),rgba(198,212,240,0.04))] sm:block" />
-          <div className="pointer-events-none absolute left-1/2 top-[23.7rem] h-12 w-px -translate-x-1/2 bg-[linear-gradient(180deg,rgba(198,212,240,0.38),rgba(198,212,240,0.04))]" />
+          <div className="pointer-events-none absolute left-1/2 top-[5.45rem] h-14 w-px -translate-x-1/2 overflow-hidden rounded-full bg-[linear-gradient(180deg,rgba(198,212,240,0.34),rgba(198,212,240,0.08))]">
+            <span className="sonartra-flow-line sonartra-flow-line-vertical absolute inset-x-0 top-[-35%] h-8 rounded-full bg-[linear-gradient(180deg,rgba(228,236,249,0),rgba(228,236,249,0.75),rgba(228,236,249,0))] motion-safe:opacity-100" />
+          </div>
+          <div className="pointer-events-none absolute left-[30%] top-[15.4rem] hidden h-16 w-px rotate-[32deg] overflow-hidden rounded-full bg-[linear-gradient(180deg,rgba(198,212,240,0.22),rgba(198,212,240,0.04))] sm:block">
+            <span className="sonartra-flow-line sonartra-flow-line-diagonal absolute inset-x-0 top-[-35%] h-7 rounded-full bg-[linear-gradient(180deg,rgba(228,236,249,0),rgba(228,236,249,0.62),rgba(228,236,249,0))] motion-safe:opacity-100" />
+          </div>
+          <div className="pointer-events-none absolute right-[30%] top-[15.4rem] hidden h-16 w-px -rotate-[32deg] overflow-hidden rounded-full bg-[linear-gradient(180deg,rgba(198,212,240,0.22),rgba(198,212,240,0.04))] sm:block">
+            <span className="sonartra-flow-line sonartra-flow-line-diagonal absolute inset-x-0 top-[-35%] h-7 rounded-full bg-[linear-gradient(180deg,rgba(228,236,249,0),rgba(228,236,249,0.62),rgba(228,236,249,0))] motion-safe:opacity-100" />
+          </div>
+          <div className="pointer-events-none absolute left-1/2 top-[23.7rem] h-12 w-px -translate-x-1/2 overflow-hidden rounded-full bg-[linear-gradient(180deg,rgba(198,212,240,0.28),rgba(198,212,240,0.04))]">
+            <span className="sonartra-flow-line sonartra-flow-line-vertical absolute inset-x-0 top-[-35%] h-7 rounded-full bg-[linear-gradient(180deg,rgba(228,236,249,0),rgba(228,236,249,0.68),rgba(228,236,249,0))] motion-safe:opacity-100" />
+          </div>
 
           <section
             className="relative z-10 w-full max-w-[15rem] rounded-[1.5rem] border border-[#b6caef]/18 bg-[linear-gradient(180deg,rgba(182,202,239,0.16),rgba(255,255,255,0.045))] px-5 py-4 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_18px_60px_rgba(4,8,20,0.34)]"
@@ -50,7 +62,7 @@ export function SonartraIntroductionVisual({
           >
             <p className="sonartra-type-nav text-[0.98rem] text-white/94">Domain</p>
             <p className="sonartra-type-caption mt-1.5 text-white/56">
-              Broad area being measured. For example, Leadership Style.
+              Broad area being measured. For example, <ExampleTerm>Leadership Style</ExampleTerm>.
             </p>
           </section>
 
@@ -64,7 +76,9 @@ export function SonartraIntroductionVisual({
                 )}
               >
                 <p className="sonartra-type-nav text-sm text-white/86">{signal.title}</p>
-                <p className="sonartra-type-caption mt-1.5 text-white/44">{signal.description}</p>
+                <p className="sonartra-type-caption mt-1.5 text-white/44">
+                  Specific pattern being read. For example, <ExampleTerm>{signal.example}</ExampleTerm>.
+                </p>
               </div>
             ))}
           </section>
@@ -77,7 +91,7 @@ export function SonartraIntroductionVisual({
             <div className="relative">
               <p className="sonartra-type-nav text-[1rem] text-white">Signal Pair</p>
               <p className="sonartra-type-caption mt-1.5 text-[#d5e0f4]">
-                Strongest signals in that Domain. For example, Vision-Process.
+                Strongest signals in that Domain. For example, <ExampleTerm>Vision-Process</ExampleTerm>.
               </p>
             </div>
           </section>
@@ -92,6 +106,68 @@ export function SonartraIntroductionVisual({
           </section>
         </div>
       </div>
+
+      <style>{`
+        .sonartra-flow-line {
+          opacity: 0.7;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+          .sonartra-flow-line-vertical {
+            animation: sonartra-flow-vertical 5.8s ease-in-out infinite;
+          }
+
+          .sonartra-flow-line-diagonal {
+            animation: sonartra-flow-diagonal 6.2s ease-in-out infinite;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .sonartra-flow-line {
+            opacity: 0.3;
+          }
+        }
+
+        @keyframes sonartra-flow-vertical {
+          0% {
+            transform: translateY(-165%);
+            opacity: 0;
+          }
+
+          18% {
+            opacity: 0.24;
+          }
+
+          52% {
+            opacity: 0.68;
+          }
+
+          100% {
+            transform: translateY(250%);
+            opacity: 0;
+          }
+        }
+
+        @keyframes sonartra-flow-diagonal {
+          0% {
+            transform: translateY(-155%);
+            opacity: 0;
+          }
+
+          20% {
+            opacity: 0.2;
+          }
+
+          50% {
+            opacity: 0.56;
+          }
+
+          100% {
+            transform: translateY(235%);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
