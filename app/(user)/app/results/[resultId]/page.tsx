@@ -27,8 +27,6 @@ type VisibleActionItem = {
 type CanonicalDomainChapter = AssessmentResultDetailViewModel['domains'][number];
 type CanonicalActionItem = AssessmentResultDetailViewModel['actions']['strengths'][number];
 
-const VISIBLE_ACTION_LIMIT = 3;
-
 function getRevealStyle(step = 0): CSSProperties {
   return {
     '--sonartra-motion-delay': `${step * 60}ms`,
@@ -59,16 +57,6 @@ function formatResultTimestamp(value: string | null): {
       minute: '2-digit',
       hour12: false,
     }),
-  };
-}
-
-function getVisibleItems<T>(items: readonly T[]): {
-  visible: readonly T[];
-  overflow: readonly T[];
-} {
-  return {
-    visible: items.slice(0, VISIBLE_ACTION_LIMIT),
-    overflow: items.slice(VISIBLE_ACTION_LIMIT),
   };
 }
 
@@ -131,66 +119,71 @@ function buildResultDetailDomainItems(params: {
 }
 
 function ActionList({ title, items }: { title: string; items: readonly VisibleActionItem[] }) {
-  const typedItems: readonly VisibleActionItem[] = items;
-  const { visible, overflow } = getVisibleItems<VisibleActionItem>(typedItems);
   const sectionLead =
-    title === 'Strengths'
-      ? 'Where this pattern already adds steadiness, clarity, or forward movement.'
-      : title === 'Watchouts'
-        ? 'Where the same pattern can become narrow, heavy, or harder for others to work with.'
+    title === 'What to keep doing'
+      ? 'The parts of the pattern that already create traction and are worth reinforcing deliberately.'
+      : title === 'Where to be careful'
+        ? 'The places where the same strengths can become heavier, narrower, or harder to work around.'
         : 'Where a small shift in attention is most likely to improve the overall pattern.';
-  // Source-contract marker for tests: grid gap-6 border-t border-white/6 pt-12 first:border-t-0 first:pt-0 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] md:gap-8 md:pt-14
+  // Source-contract marker for tests: grid gap-7 border-t border-white/6 pt-12 first:border-t-0 first:pt-0 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] md:gap-10 md:pt-14
 
   return (
     <article
-      className="border-white/6 sonartra-motion-reveal-soft grid gap-6 border-t pt-12 first:border-t-0 first:pt-0 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] md:gap-8 md:pt-14"
+      className="border-white/6 sonartra-motion-reveal-soft grid gap-7 border-t pt-12 first:border-t-0 first:pt-0 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] md:gap-10 md:pt-14"
       style={getRevealStyle(2)}
     >
-      <div className="space-y-3 md:sticky md:top-24 md:self-start">
+      <div className="space-y-3.5 md:sticky md:top-24 md:self-start">
         <SectionEyebrow>Action</SectionEyebrow>
-        <div className="space-y-2">
-          <h3 className="sonartra-report-title text-[1.08rem] md:text-[1.18rem]">{title}</h3>
-          <p className="sonartra-report-body-soft max-w-[15rem] text-[0.95rem] leading-7">
+        <div className="space-y-2.5">
+          <h3 className="sonartra-report-title max-w-[12rem] text-[1.12rem] md:text-[1.24rem]">
+            {title}
+          </h3>
+          <p className="sonartra-report-body-soft max-w-[16rem] text-[0.96rem] leading-7">
             {sectionLead}
           </p>
         </div>
       </div>
 
-      <div className="space-y-6 md:space-y-7">
-        <ul className="space-y-4 md:space-y-5">
-          {visible.length > 0 ? (
-            visible.map((item, index) => (
+      <div className="space-y-6 md:space-y-8">
+        <ul className="space-y-5 md:space-y-6">
+          {items.length > 0 ? (
+            items.map((item, index) => (
               <li
                 key={item.key}
-                className="sonartra-report-action-item space-y-2.5 rounded-[1.15rem] px-0 py-0"
+                className={[
+                  'sonartra-report-action-item rounded-[1.2rem] border border-white/7 bg-white/[0.015] px-5 py-5 md:px-6 md:py-6',
+                  index === 0 ? 'space-y-3.5' : 'space-y-3',
+                ].join(' ')}
               >
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="sonartra-report-step text-white/32">0{index + 1}</span>
-                  <p className="sonartra-report-title text-[1rem]">{item.title}</p>
+                  <span className={index === 0 ? 'sonartra-report-step text-white/46' : 'sonartra-report-step text-white/28'}>
+                    0{index + 1}
+                  </span>
+                  <p
+                    className={
+                      index === 0
+                        ? 'sonartra-report-title text-[1.08rem] text-white'
+                        : 'sonartra-report-title text-[1rem] text-white/88'
+                    }
+                  >
+                    {item.title}
+                  </p>
                 </div>
-                <p className="sonartra-report-body max-w-[46rem]">{item.detail}</p>
+                <p
+                  className={
+                    index === 0
+                      ? 'sonartra-report-body max-w-[46rem] text-white/82'
+                      : 'sonartra-report-body-soft max-w-[44rem] text-white/68'
+                  }
+                >
+                  {item.detail}
+                </p>
               </li>
             ))
           ) : (
             <li className="sonartra-report-body-soft">No items available in this section.</li>
           )}
         </ul>
-
-        {overflow.length > 0 ? (
-          <details className="max-w-[46rem] pt-1">
-            <summary className="sonartra-motion-details-summary sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
-              Show {overflow.length} more
-            </summary>
-            <ul className="border-white/6 mt-4 space-y-5 border-l pl-4">
-              {overflow.map((item) => (
-                <li key={item.key} className="space-y-2.5">
-                  <p className="sonartra-type-nav text-white/82">{item.title}</p>
-                  <p className="sonartra-report-body-soft max-w-[42rem]">{item.detail}</p>
-                </li>
-              ))}
-            </ul>
-          </details>
-        ) : null}
       </div>
     </article>
   );
@@ -204,13 +197,35 @@ function toVisibleActionItems(items: readonly CanonicalActionItem[]): readonly V
   }));
 }
 
-function ActionSection({ actions }: { actions: AssessmentResultDetailViewModel['actions'] }) {
+function ActionSection({
+  actions,
+  conclusionHeadline,
+  conclusionNarrative,
+}: {
+  actions: AssessmentResultDetailViewModel['actions'];
+  conclusionHeadline: string;
+  conclusionNarrative: string;
+}) {
   return (
-    <div className="mx-auto max-w-[61rem] px-1 md:px-2">
-      <ActionList title="Strengths" items={toVisibleActionItems(actions.strengths)} />
-      <ActionList title="Watchouts" items={toVisibleActionItems(actions.watchouts)} />
+    <div className="mx-auto max-w-[61rem] space-y-10 px-1 md:space-y-12 md:px-2">
+      {conclusionHeadline || conclusionNarrative ? (
+        <div className="max-w-[52rem] space-y-4 border-l border-white/8 pl-5 md:space-y-5 md:pl-7">
+          <SectionEyebrow>Closing reading</SectionEyebrow>
+          {conclusionHeadline ? (
+            <p className="sonartra-report-title max-w-[30rem] text-[1.28rem] leading-8 text-white/94 md:text-[1.45rem] md:leading-9">
+              {conclusionHeadline}
+            </p>
+          ) : null}
+          {conclusionNarrative ? (
+            <p className="sonartra-report-body max-w-[46rem] text-white/76">{conclusionNarrative}</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <ActionList title="What to keep doing" items={toVisibleActionItems(actions.strengths)} />
+      <ActionList title="Where to be careful" items={toVisibleActionItems(actions.watchouts)} />
       <ActionList
-        title="Development Focus"
+        title="Where to focus next"
         items={toVisibleActionItems(actions.developmentFocus)}
       />
     </div>
@@ -425,6 +440,12 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const heroPatternLabel = result.hero.heroPattern?.label?.trim() ?? '';
   const pressureOverlay = result.hero.pressureOverlay?.trim() ?? '';
   const environmentOverlay = result.hero.environmentOverlay?.trim() ?? '';
+  const overviewHeadline = result.overviewSummary.headline?.trim() ?? '';
+  const overviewNarrative = result.overviewSummary.narrative?.trim() ?? '';
+  const actionConclusionHeadline =
+    overviewHeadline && overviewHeadline !== heroHeadline ? overviewHeadline : '';
+  const actionConclusionNarrative =
+    overviewNarrative && overviewNarrative !== heroNarrative ? overviewNarrative : '';
   const introMetadataItems = [
     { label: 'Completed', value: completionTimestamp.date },
     ...(completionTimestamp.time ? [{ label: 'Time', value: completionTimestamp.time }] : []),
@@ -532,7 +553,11 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             description="Start with the immediate implications. This pulls the main report pattern into practical terms after the chapter-by-chapter reading."
           />
 
-          <ActionSection actions={result.actions} />
+          <ActionSection
+            actions={result.actions}
+            conclusionHeadline={actionConclusionHeadline}
+            conclusionNarrative={actionConclusionNarrative}
+          />
         </section>
       </div>
     </PageFrame>

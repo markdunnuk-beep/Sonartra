@@ -207,6 +207,8 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /const heroPatternLabel = result\.hero\.heroPattern\?\.label\?\.trim\(\) \?\? '';/);
   assert.match(source, /const pressureOverlay = result\.hero\.pressureOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /const environmentOverlay = result\.hero\.environmentOverlay\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const overviewHeadline = result\.overviewSummary\.headline\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const overviewNarrative = result\.overviewSummary\.narrative\?\.trim\(\) \?\? '';/);
   assert.match(source, /const introMetadataItems = \[/);
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
@@ -228,12 +230,10 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /<EditorialAside label="Pressure" text=\{pressureOverlay\} \/>/);
   assert.match(source, /<EditorialAside label="Environment" text=\{environmentOverlay\} \/>/);
   assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
-  assert.match(source, /<ActionSection actions=\{result\.actions\} \/>/);
+  assert.match(source, /<ActionSection\s+actions=\{result\.actions\}\s+conclusionHeadline=\{actionConclusionHeadline\}\s+conclusionNarrative=\{actionConclusionNarrative\}\s+\/>/);
 
   assert.doesNotMatch(source, /result\.intro\.assessmentDescription/);
   assert.doesNotMatch(source, /result\.metadata\.assessmentDescription/);
-  assert.doesNotMatch(source, /result\.overviewSummary\.headline/);
-  assert.doesNotMatch(source, /result\.overviewSummary\.narrative/);
   assert.doesNotMatch(source, /result\.bridge/);
   assert.doesNotMatch(source, /result\.sections/);
   assert.doesNotMatch(source, /result\.hero\.domainHighlights/);
@@ -308,17 +308,25 @@ test('result detail page renders actions from canonical action blocks only', () 
   assert.match(source, /function toVisibleActionItems\(/);
   assert.match(source, /detail: item\.text/);
   assert.match(source, /title: item\.signalLabel/);
+  assert.match(source, /function ActionSection\(\{\s*actions,\s*conclusionHeadline,\s*conclusionNarrative,/);
+  assert.match(source, /<SectionEyebrow>Closing reading<\/SectionEyebrow>/);
+  assert.match(source, /What to keep doing/);
+  assert.match(source, /Where to be careful/);
+  assert.match(source, /Where to focus next/);
+  assert.match(source, /items\.map\(\(item, index\) => \(/);
   assert.match(source, /items=\{toVisibleActionItems\(actions\.strengths\)\}/);
   assert.match(source, /items=\{toVisibleActionItems\(actions\.watchouts\)\}/);
   assert.match(source, /items=\{toVisibleActionItems\(actions\.developmentFocus\)\}/);
   assert.match(source, /title="What this means in practice"/);
-  assert.match(source, /mx-auto max-w-\[61rem\] px-1 md:px-2/);
-  assert.match(source, /grid gap-6 border-t border-white\/6 pt-12 first:border-t-0 first:pt-0 md:grid-cols-\[minmax\(0,13rem\)_minmax\(0,1fr\)\] md:gap-8 md:pt-14/);
-  assert.match(source, /sonartra-report-step text-white\/32/);
+  assert.match(source, /mx-auto max-w-\[61rem\] space-y-10 px-1 md:space-y-12 md:px-2/);
+  assert.match(source, /grid gap-7 border-t border-white\/6 pt-12 first:border-t-0 first:pt-0 md:grid-cols-\[minmax\(0,15rem\)_minmax\(0,1fr\)\] md:gap-10 md:pt-14/);
+  assert.match(source, /sonartra-report-action-item rounded-\[1\.2rem\] border border-white\/7 bg-white\/\[0\.015\] px-5 py-5 md:px-6 md:py-6/);
 
   assert.doesNotMatch(source, /items=\{result\.strengths\}/);
   assert.doesNotMatch(source, /items=\{result\.watchouts\}/);
   assert.doesNotMatch(source, /items=\{result\.developmentFocus\}/);
+  assert.doesNotMatch(source, /Show \{overflow\.length\} more/);
+  assert.doesNotMatch(source, /<details className="max-w-\[46rem\] pt-1">/);
 });
 
 test('result detail page removes payload-driven intro rendering in favor of the system introduction layer', () => {
