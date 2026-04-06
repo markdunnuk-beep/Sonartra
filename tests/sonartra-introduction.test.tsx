@@ -40,7 +40,9 @@ test('sonartra introduction stays a static system layer with no props or server 
   const source = readFileSync(introductionComponentPath, 'utf8');
 
   assert.match(source, /export function SonartraIntroduction\(\)/);
-  assert.match(source, /<SonartraIntroductionVisual className="mx-auto w-full max-w-\[34rem\]" \/>/);
+  assert.match(source, /<SonartraIntroductionVisual className="sonartra-intro-reveal mx-auto w-full max-w-\[34rem\]" \/>/);
+  assert.match(source, /data-sonartra-intro-reveal="header"/);
+  assert.match(source, /data-sonartra-intro-reveal="supporting"/);
   assert.doesNotMatch(source, /Readonly<\{/);
   assert.doesNotMatch(source, /props/);
   assert.doesNotMatch(source, /getDbPool|getRequestUserId|createResultReadModelService/);
@@ -105,9 +107,12 @@ test('sonartra introduction visual renders the generic behaviour flow diagram', 
   assert.ok(domainLabelCount >= 1);
   assert.ok(signalLabelCount >= 2);
   assert.doesNotMatch(markup, /Static visual/i);
+  assert.match(markup, /data-sonartra-visual-reveal="domain"/);
+  assert.match(markup, /data-sonartra-visual-reveal="pair"/);
   assert.match(source, /prefers-reduced-motion: no-preference/);
   assert.match(source, /prefers-reduced-motion: reduce/);
   assert.match(source, /sonartra-flow-line-vertical/);
+  assert.match(source, /sonartra-visual-reveal/);
   assert.doesNotMatch(source, /24 signals|6 domains|wplp80|Sonartra Signals/i);
   assert.doesNotMatch(markup, /24 signals/i);
   assert.doesNotMatch(markup, /6 domains/i);

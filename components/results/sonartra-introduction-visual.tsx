@@ -57,8 +57,9 @@ export function SonartraIntroductionVisual({
           </div>
 
           <section
-            className="relative z-10 w-full max-w-[15rem] rounded-[1.5rem] border border-[#b6caef]/18 bg-[linear-gradient(180deg,rgba(182,202,239,0.16),rgba(255,255,255,0.045))] px-5 py-4 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_18px_60px_rgba(4,8,20,0.34)]"
+            className="sonartra-visual-reveal relative z-10 w-full max-w-[15rem] rounded-[1.5rem] border border-[#b6caef]/18 bg-[linear-gradient(180deg,rgba(182,202,239,0.16),rgba(255,255,255,0.045))] px-5 py-4 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_18px_60px_rgba(4,8,20,0.34)]"
             aria-label="Generic domain"
+            data-sonartra-visual-reveal="domain"
           >
             <p className="sonartra-type-nav text-[0.98rem] text-white/94">Domain</p>
             <p className="sonartra-type-caption mt-1.5 text-white/56">
@@ -71,9 +72,10 @@ export function SonartraIntroductionVisual({
               <div
                 key={signal.key}
                 className={cn(
-                  'min-w-[10rem] rounded-[1.15rem] border border-white/8 bg-white/[0.04] px-4 py-3 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur-sm',
+                  'sonartra-visual-reveal min-w-[10rem] rounded-[1.15rem] border border-white/8 bg-white/[0.04] px-4 py-3 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur-sm',
                   signal.className,
                 )}
+                data-sonartra-visual-reveal={signal.key}
               >
                 <p className="sonartra-type-nav text-sm text-white/86">{signal.title}</p>
                 <p className="sonartra-type-caption mt-1.5 text-white/44">
@@ -84,8 +86,9 @@ export function SonartraIntroductionVisual({
           </section>
 
           <section
-            className="relative z-10 mt-10 w-full max-w-[16.5rem] rounded-[1.6rem] border border-[#c8d6ef]/20 bg-[radial-gradient(circle_at_top,rgba(200,214,239,0.16),transparent_60%),linear-gradient(180deg,rgba(157,181,226,0.15),rgba(255,255,255,0.03))] px-5 py-4 text-center shadow-[0_0_0_1px_rgba(200,214,239,0.08),0_22px_70px_rgba(5,9,24,0.38)]"
+            className="sonartra-visual-reveal relative z-10 mt-10 w-full max-w-[16.5rem] rounded-[1.6rem] border border-[#c8d6ef]/20 bg-[radial-gradient(circle_at_top,rgba(200,214,239,0.16),transparent_60%),linear-gradient(180deg,rgba(157,181,226,0.15),rgba(255,255,255,0.03))] px-5 py-4 text-center shadow-[0_0_0_1px_rgba(200,214,239,0.08),0_22px_70px_rgba(5,9,24,0.38)]"
             aria-label="Signal pair convergence"
+            data-sonartra-visual-reveal="pair"
           >
             <div className="pointer-events-none absolute inset-x-5 inset-y-2 rounded-[1.4rem] bg-[#a9c1ec]/8 blur-2xl" />
             <div className="relative">
@@ -96,7 +99,11 @@ export function SonartraIntroductionVisual({
             </div>
           </section>
 
-          <section className="relative z-10 mt-10 w-full max-w-[14.5rem] text-center" aria-label="Behaviour outcome">
+          <section
+            className="sonartra-visual-reveal relative z-10 mt-10 w-full max-w-[14.5rem] text-center"
+            aria-label="Behaviour outcome"
+            data-sonartra-visual-reveal="behaviour"
+          >
             <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-3 shadow-[0_12px_36px_rgba(0,0,0,0.18)]">
               <p className="sonartra-type-nav text-sm text-white/84">Behaviour in practice</p>
               <p className="sonartra-type-caption mt-1 text-white/48">
@@ -109,11 +116,40 @@ export function SonartraIntroductionVisual({
       </div>
 
       <style>{`
+        .sonartra-visual-reveal {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
         .sonartra-flow-line {
           opacity: 0.7;
         }
 
         @media (prefers-reduced-motion: no-preference) {
+          .sonartra-visual-reveal {
+            animation: sonartra-visual-reveal 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+          }
+
+          [data-sonartra-visual-reveal='domain'] {
+            animation-delay: 420ms;
+          }
+
+          [data-sonartra-visual-reveal='signal-1'] {
+            animation-delay: 500ms;
+          }
+
+          [data-sonartra-visual-reveal='signal-2'] {
+            animation-delay: 560ms;
+          }
+
+          [data-sonartra-visual-reveal='pair'] {
+            animation-delay: 640ms;
+          }
+
+          [data-sonartra-visual-reveal='behaviour'] {
+            animation-delay: 720ms;
+          }
+
           .sonartra-flow-line-vertical {
             animation: sonartra-flow-vertical 5.8s ease-in-out infinite;
           }
@@ -166,6 +202,18 @@ export function SonartraIntroductionVisual({
           100% {
             transform: translateY(235%);
             opacity: 0;
+          }
+        }
+
+        @keyframes sonartra-visual-reveal {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+
+          to {
+            opacity: 1;
+            transform: translateY(0);
           }
         }
       `}</style>
