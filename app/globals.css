@@ -119,16 +119,16 @@ main {
 @keyframes hero-pattern-medallion-bloom {
   0% {
     opacity: 0;
-    transform: scale(0.82);
+    transform: scale(0.9);
   }
 
   48% {
-    opacity: 0.5;
-    transform: scale(1.06);
+    opacity: 0.24;
+    transform: scale(1.03);
   }
 
   100% {
-    opacity: 0.18;
+    opacity: 0.1;
     transform: scale(1);
   }
 }

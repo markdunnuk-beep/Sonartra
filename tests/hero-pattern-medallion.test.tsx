@@ -63,8 +63,8 @@ test('hero pattern medallion renders the shared shell and selected pattern asset
   assert.match(markup, /role="img"/);
   assert.match(markup, /aria-label="Adaptive Mobiliser"/);
   assert.match(markup, /hero-pattern-bg-adaptive_mobiliser/);
-  assert.match(markup, /hero-pattern-frame-adaptive_mobiliser/);
-  assert.match(markup, /hero-pattern-inner-adaptive_mobiliser/);
+  assert.match(markup, /rounded-full border border-white\/10/);
+  assert.match(markup, /rgba\(152,113,255,0\.22\)/);
 });
 
 test('hero pattern medallion returns nothing when the persisted key is missing or unsupported', () => {
@@ -86,7 +86,7 @@ test('hero pattern medallion source includes first-appearance animation and redu
   assert.match(globalsSource, /animation: none !important;/);
 });
 
-test('delivery commander and steady steward medallions use abstract structured seals rather than literal icon silhouettes', () => {
+test('hero pattern medallions use the flatter two-tone brand field and simplified geometry', () => {
   const assetsSource = readFileSync(medallionAssetsPath, 'utf8');
   const deliveryMarkup = renderToStaticMarkup(
     <HeroPatternMedallionSvg patternKey="delivery_commander" title="Delivery Commander" />,
@@ -94,15 +94,20 @@ test('delivery commander and steady steward medallions use abstract structured s
   const stewardMarkup = renderToStaticMarkup(
     <HeroPatternMedallionSvg patternKey="steady_steward" title="Steady Steward" />,
   );
+  const driverMarkup = renderToStaticMarkup(
+    <HeroPatternMedallionSvg patternKey="forceful_driver" title="Forceful Driver" />,
+  );
 
-  assert.match(deliveryMarkup, /M56 100h48/);
-  assert.match(deliveryMarkup, /M64 84h40/);
-  assert.match(deliveryMarkup, /M72 68h32/);
-  assert.doesNotMatch(deliveryMarkup, /M50 100 70 80l14 14 28-32/);
+  assert.match(deliveryMarkup, /M56 98h48/);
+  assert.match(deliveryMarkup, /M104 60v44/);
+  assert.match(deliveryMarkup, /stroke="#f7f4ff"/);
 
-  assert.match(stewardMarkup, /M80 50c18 0 31 14 31 32s-13 32-31 32-31-14-31-32 13-32 31-32Z/);
-  assert.match(stewardMarkup, /M80 58c13 0 22 10 22 24s-9 24-22 24-22-10-22-24 9-24 22-24Z/);
-  assert.doesNotMatch(stewardMarkup, /M80 52 106 62v20c0 18-10 31-26 38-16-7-26-20-26-38V62z/);
+  assert.match(stewardMarkup, /circle cx="80" cy="80" r="28"/);
+  assert.match(stewardMarkup, /circle cx="80" cy="80" r="18"/);
+  assert.match(stewardMarkup, /M62 80h36/);
+  assert.match(driverMarkup, /#8f63ff/);
+  assert.doesNotMatch(assetsSource, /hero-pattern-frame-/);
+  assert.doesNotMatch(assetsSource, /hero-pattern-inner-/);
 
   assert.match(assetsSource, /delivery_commander/);
   assert.match(assetsSource, /steady_steward/);

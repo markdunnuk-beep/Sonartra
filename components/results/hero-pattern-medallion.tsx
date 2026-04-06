@@ -26,10 +26,10 @@ export function HeroPatternMedallion({
       data-hero-pattern-medallion={patternKey}
     >
       <div
-        className="hero-pattern-medallion-glow absolute inset-[11%] rounded-full bg-[radial-gradient(circle,rgba(201,214,236,0.22),rgba(117,135,170,0.08)_46%,transparent_74%)] blur-[18px]"
+        className="hero-pattern-medallion-glow absolute inset-[10%] rounded-full bg-[radial-gradient(circle,rgba(152,113,255,0.22),rgba(112,72,223,0.08)_48%,transparent_74%)] blur-[14px]"
         aria-hidden="true"
       />
-      <div className="relative rounded-full border border-white/7 bg-[radial-gradient(circle_at_30%_24%,rgba(255,255,255,0.09),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.014))] p-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.06)] sm:p-3 md:p-3.5">
+      <div className="relative rounded-full border border-white/10 bg-[linear-gradient(180deg,rgba(157,118,255,0.08),rgba(99,56,208,0.03))] p-2.5 shadow-[0_18px_40px_rgba(24,8,58,0.22)] sm:p-3 md:p-3.5">
         <HeroPatternMedallionSvg
           patternKey={patternKey}
           title={label?.trim() || undefined}
