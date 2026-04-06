@@ -215,7 +215,13 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
   assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
   assert.match(source, /So what does this mean in practice\?/);
-  assert.match(source, /sonartra-report-prose space-y-7/);
+  assert.match(source, /sonartra-report-hero rounded-\[2rem\] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14/);
+  assert.match(source, /sonartra-type-display max-w-\[11ch\] text-\[3\.15rem\] tracking-\[-0\.055em\] md:text-\[5rem\]/);
+  assert.match(source, /sonartra-report-body-soft max-w-\[42rem\] text-\[1rem\] leading-8 text-white\/68/);
+  assert.match(source, /sonartra-report-prose max-w-\[50rem\] space-y-6 border-l border-white\/8 pl-5 md:space-y-7 md:pl-7/);
+  assert.match(source, /sonartra-report-summary text-\[1\.08rem\] leading-8 text-white\/82 sm:text-\[1\.13rem\] md:text-\[1\.22rem\] md:leading-10/);
+  assert.match(source, /sonartra-report-body max-w-\[46rem\] text-\[1rem\] leading-8 text-white\/78 sm:text-\[1\.05rem\] md:text-\[1\.1rem\] md:leading-9/);
+  assert.match(source, /<NarrativeBridge className="max-w-\[38rem\]">/);
   assert.match(source, /heroPatternLabel/);
   assert.match(source, /heroSummary/);
   assert.match(source, /heroNarrative/);

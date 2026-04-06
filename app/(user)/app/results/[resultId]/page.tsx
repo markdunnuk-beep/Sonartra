@@ -443,43 +443,45 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
         {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
         <section
-          className="border-white/6 sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-10 sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14"
+          className="border-white/6 sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14"
           style={getRevealStyle(1)}
         >
-          <div className="max-w-[74rem] space-y-10 md:space-y-12">
-            <div className="space-y-10">
-              <div className="space-y-8 md:space-y-10">
+          <div className="max-w-[68rem] space-y-11 md:space-y-14">
+            <div className="space-y-9 md:space-y-11">
+              <div className="space-y-9 md:space-y-11">
                 <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
                   <SectionEyebrow>Results report</SectionEyebrow>
                   <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
                   <span>{result.assessmentTitle}</span>
                 </div>
 
-                <div className="space-y-7 md:space-y-8">
+                <div className="space-y-8 md:space-y-10">
                   {heroHeadline ? (
-                    <h1 className="sonartra-type-display max-w-[13ch] text-[3rem] md:text-[4.75rem]">
+                    <h1 className="sonartra-type-display max-w-[11ch] text-[3.15rem] tracking-[-0.055em] md:text-[5rem]">
                       {heroHeadline}
                     </h1>
                   ) : null}
                   {heroSubheadline ? (
-                    <p className="sonartra-report-body-soft max-w-[46rem] text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                    <p className="sonartra-report-body-soft max-w-[42rem] text-[1rem] leading-8 text-white/68 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
                       {heroSubheadline}
                     </p>
                   ) : null}
-                  <div className="sonartra-report-prose space-y-7">
-                    {heroPatternLabel ? <p className="sonartra-report-kicker">{heroPatternLabel}</p> : null}
+                  <div className="sonartra-report-prose max-w-[50rem] space-y-6 border-l border-white/8 pl-5 md:space-y-7 md:pl-7">
+                    {heroPatternLabel ? (
+                      <p className="sonartra-report-kicker text-white/58">{heroPatternLabel}</p>
+                    ) : null}
                     {heroSummary ? (
-                      <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                      <p className="sonartra-report-summary text-[1.08rem] leading-8 text-white/82 sm:text-[1.13rem] md:text-[1.22rem] md:leading-10">
                         {heroSummary}
                       </p>
                     ) : null}
                     {heroNarrative ? (
-                      <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                      <p className="sonartra-report-body max-w-[46rem] text-[1rem] leading-8 text-white/78 sm:text-[1.05rem] md:text-[1.1rem] md:leading-9">
                         {heroNarrative}
                       </p>
                     ) : null}
                     {pressureOverlay || environmentOverlay ? (
-                      <div className="grid gap-x-8 gap-y-5 border-white/6 border-y py-5 sm:grid-cols-2">
+                      <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
                         {pressureOverlay ? <EditorialAside label="Pressure" text={pressureOverlay} /> : null}
                         {environmentOverlay ? (
                           <EditorialAside label="Environment" text={environmentOverlay} />
@@ -494,8 +496,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </section>
       </div>
 
-      <div className="space-y-6 pt-4 md:space-y-7 md:pt-7">
-        <NarrativeBridge>
+      <div className="space-y-7 pt-5 md:space-y-8 md:pt-9">
+        <NarrativeBridge className="max-w-[38rem]">
           Here&apos;s how these patterns show up across each domain.
         </NarrativeBridge>
 
