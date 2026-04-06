@@ -199,6 +199,7 @@ test('result detail page renders the system introduction above hero and keeps ca
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /import \{ SonartraIntroduction \} from '@\/components\/results\/sonartra-introduction';/);
+  assert.match(source, /function NarrativeBridge\(/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroSubheadline = result\.hero\.subheadline\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroSummary = result\.hero\.summary\?\.trim\(\) \?\? '';/);
@@ -209,8 +210,11 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /const introMetadataItems = \[/);
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
-  assert.match(source, /<PageFrame className="space-y-16 md:space-y-20">/);
+  assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
+  assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
+  assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
+  assert.match(source, /So what does this mean in practice\?/);
   assert.match(source, /<HeroDomainHighlights highlights=\{result\.hero\.domainHighlights\} \/>/);
   assert.match(source, /<EditorialAside label="Pressure" text=\{pressureOverlay\} \/>/);
   assert.match(source, /<EditorialAside label="Environment" text=\{environmentOverlay\} \/>/);
@@ -221,6 +225,8 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.doesNotMatch(source, /result\.metadata\.assessmentDescription/);
   assert.doesNotMatch(source, /result\.overviewSummary\.headline/);
   assert.doesNotMatch(source, /result\.overviewSummary\.narrative/);
+  assert.doesNotMatch(source, /result\.bridge/);
+  assert.doesNotMatch(source, /result\.sections/);
   assert.doesNotMatch(source, DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN);
   assert.doesNotMatch(source, /getResultDetailDomains/);
   assert.doesNotMatch(source, /<ActionSection result=\{result\} \/>/);
@@ -229,17 +235,26 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.doesNotMatch(source, /sonartra-report-hero-meta-grid/);
 
   const introIndex = source.indexOf('<SonartraIntroduction metadataItems={introMetadataItems} />');
-  const heroIndex = source.indexOf('<section className="rounded-[2rem] border border-white/6');
+  const introBridgeIndex = source.indexOf('With that context, here&apos;s what your patterns are showing.');
+  const heroIndex = source.indexOf('sonartra-report-hero rounded-[2rem] border');
+  const domainBridgeIndex = source.indexOf('Here&apos;s how these patterns show up across each domain.');
   const domainIndex = source.indexOf('title="Domain reading"');
+  const actionBridgeIndex = source.indexOf('So what does this mean in practice?');
   const actionIndex = source.indexOf('title="What this means in practice"');
 
   assert.ok(introIndex >= 0);
+  assert.ok(introBridgeIndex >= 0);
   assert.ok(heroIndex >= 0);
+  assert.ok(domainBridgeIndex >= 0);
   assert.ok(domainIndex >= 0);
+  assert.ok(actionBridgeIndex >= 0);
   assert.ok(actionIndex >= 0);
-  assert.ok(introIndex < heroIndex);
-  assert.ok(heroIndex < domainIndex);
-  assert.ok(domainIndex < actionIndex);
+  assert.ok(introIndex < introBridgeIndex);
+  assert.ok(introBridgeIndex < heroIndex);
+  assert.ok(heroIndex < domainBridgeIndex);
+  assert.ok(domainBridgeIndex < domainIndex);
+  assert.ok(domainIndex < actionBridgeIndex);
+  assert.ok(actionBridgeIndex < actionIndex);
 });
 
 test('result detail page renders canonical hero domain highlights beneath the hero narrative', () => {

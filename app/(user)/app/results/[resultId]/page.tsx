@@ -90,6 +90,27 @@ function EditorialDivider({
   );
 }
 
+function NarrativeBridge({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <p
+      className={[
+        'sonartra-report-body-soft mx-auto max-w-[42rem] text-center text-[0.92rem] leading-7 text-white/52 md:text-[0.97rem]',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </p>
+  );
+}
+
 function buildResultDetailDomainItems(params: {
   domains: readonly CanonicalDomainChapter[];
   ringModels: readonly DomainSignalRingViewModel[];
@@ -441,89 +462,107 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   ] as const;
 
   return (
-    <PageFrame className="space-y-16 md:space-y-20">
+    <PageFrame className="space-y-12 md:space-y-14">
       <SonartraIntroduction metadataItems={introMetadataItems} />
 
-      {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
-      <section
-        className="border-white/6 sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-10 sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14"
-        style={getRevealStyle(1)}
-      >
-        <div className="max-w-[74rem] space-y-10 md:space-y-12">
-          <div className="space-y-10">
-            <div className="space-y-8 md:space-y-10">
-              <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
-                <SectionEyebrow>Results report</SectionEyebrow>
-                <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
-                <span>{result.assessmentTitle}</span>
-              </div>
+      <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
+        <NarrativeBridge>
+          With that context, here&apos;s what your patterns are showing.
+        </NarrativeBridge>
 
-              <div className="space-y-7 md:space-y-8">
-                {heroHeadline ? (
-                  <h1 className="sonartra-type-display max-w-[13ch] text-[3rem] md:text-[4.75rem]">
-                    {heroHeadline}
-                  </h1>
-                ) : null}
-                {heroSubheadline ? (
-                  <p className="sonartra-report-body-soft max-w-[46rem] text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
-                    {heroSubheadline}
-                  </p>
-                ) : null}
-                <div className="sonartra-report-prose space-y-7">
-                  {heroPatternLabel ? <p className="sonartra-report-kicker">{heroPatternLabel}</p> : null}
-                  {heroSummary ? (
-                    <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
-                      {heroSummary}
+        {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
+        <section
+          className="border-white/6 sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-10 sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14"
+          style={getRevealStyle(1)}
+        >
+          <div className="max-w-[74rem] space-y-10 md:space-y-12">
+            <div className="space-y-10">
+              <div className="space-y-8 md:space-y-10">
+                <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <SectionEyebrow>Results report</SectionEyebrow>
+                  <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
+                  <span>{result.assessmentTitle}</span>
+                </div>
+
+                <div className="space-y-7 md:space-y-8">
+                  {heroHeadline ? (
+                    <h1 className="sonartra-type-display max-w-[13ch] text-[3rem] md:text-[4.75rem]">
+                      {heroHeadline}
+                    </h1>
+                  ) : null}
+                  {heroSubheadline ? (
+                    <p className="sonartra-report-body-soft max-w-[46rem] text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                      {heroSubheadline}
                     </p>
                   ) : null}
-                  {heroNarrative ? (
-                    <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
-                      {heroNarrative}
-                    </p>
-                  ) : null}
-                  {pressureOverlay || environmentOverlay ? (
-                    <div className="grid gap-x-8 gap-y-5 border-white/6 border-y py-5 sm:grid-cols-2">
-                      {pressureOverlay ? <EditorialAside label="Pressure" text={pressureOverlay} /> : null}
-                      {environmentOverlay ? (
-                        <EditorialAside label="Environment" text={environmentOverlay} />
-                      ) : null}
-                    </div>
-                  ) : null}
-                  <HeroDomainHighlights highlights={result.hero.domainHighlights} />
+                  <div className="sonartra-report-prose space-y-7">
+                    {heroPatternLabel ? <p className="sonartra-report-kicker">{heroPatternLabel}</p> : null}
+                    {heroSummary ? (
+                      <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                        {heroSummary}
+                      </p>
+                    ) : null}
+                    {heroNarrative ? (
+                      <p className="sonartra-report-body text-[1rem] leading-8 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                        {heroNarrative}
+                      </p>
+                    ) : null}
+                    {pressureOverlay || environmentOverlay ? (
+                      <div className="grid gap-x-8 gap-y-5 border-white/6 border-y py-5 sm:grid-cols-2">
+                        {pressureOverlay ? <EditorialAside label="Pressure" text={pressureOverlay} /> : null}
+                        {environmentOverlay ? (
+                          <EditorialAside label="Environment" text={environmentOverlay} />
+                        ) : null}
+                      </div>
+                    ) : null}
+                    <HeroDomainHighlights highlights={result.hero.domainHighlights} />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <section
-        className="sonartra-motion-reveal space-y-10 md:space-y-11"
-        style={getRevealStyle(2)}
-      >
-        <EditorialDivider title="Detailed reading" />
-        <SectionHeader
-          eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
-          title="Domain reading"
-          description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
-        />
+      <div className="space-y-6 pt-4 md:space-y-7 md:pt-7">
+        <NarrativeBridge>
+          Here&apos;s how these patterns show up across each domain.
+        </NarrativeBridge>
 
-        <DomainSection domainItems={resultDomainItems} />
-      </section>
+        <section
+          className="sonartra-motion-reveal space-y-10 md:space-y-11"
+          style={getRevealStyle(2)}
+        >
+          <EditorialDivider title="Detailed reading" />
+          <SectionHeader
+            eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
+            title="Domain reading"
+            description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
+          />
 
-      <section
-        className="sonartra-motion-reveal space-y-10 md:space-y-11"
-        style={getRevealStyle(3)}
-      >
-        <EditorialDivider title="Application" />
-        <SectionHeader
-          eyebrow="Action Focus"
-          title="What this means in practice"
-          description="Start with the immediate implications. This pulls the main report pattern into practical terms after the chapter-by-chapter reading."
-        />
+          <DomainSection domainItems={resultDomainItems} />
+        </section>
+      </div>
 
-        <ActionSection actions={result.actions} />
-      </section>
+      <div className="space-y-7 pt-6 md:space-y-8 md:pt-10">
+        <NarrativeBridge>
+          So what does this mean in practice?
+        </NarrativeBridge>
+
+        <section
+          className="sonartra-motion-reveal space-y-10 md:space-y-11"
+          style={getRevealStyle(3)}
+        >
+          <EditorialDivider title="Application" />
+          <SectionHeader
+            eyebrow="Action Focus"
+            title="What this means in practice"
+            description="Start with the immediate implications. This pulls the main report pattern into practical terms after the chapter-by-chapter reading."
+          />
+
+          <ActionSection actions={result.actions} />
+        </section>
+      </div>
     </PageFrame>
   );
 }
