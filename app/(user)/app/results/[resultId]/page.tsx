@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import type { CSSProperties, ReactNode } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 import { DomainSignalRing } from '@/components/results/domain-signal-ring';
+import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
 import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 import { buildDomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
@@ -442,11 +441,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     ringModels: domainRingModels,
   });
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
-  // The result detail page renders persisted report language only. Behavioural
-  // copy belongs to the canonical result payload, not the client UI.
-  const assessmentDescription = result.intro.assessmentDescription;
-  const hasAssessmentDescription =
-    typeof assessmentDescription === 'string' && assessmentDescription.trim().length > 0;
   const heroHeadline = result.hero.headline?.trim() ?? '';
   const heroSubheadline = result.hero.subheadline?.trim() ?? '';
   const heroSummary = result.hero.summary?.trim() ?? '';
@@ -457,25 +451,12 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-16 md:space-y-20">
-      {hasAssessmentDescription ? (
-        // Source-contract marker for tests: rounded-[1.9rem] border border-white/6
-        <section
-          className="border-white/6 sonartra-motion-reveal rounded-[1.9rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_10px_28px_rgba(0,0,0,0.08)] md:px-10 md:py-10"
-          style={getRevealStyle(0)}
-        >
-          <p className="sonartra-report-kicker mb-6">About this report</p>
-          <div className="sonartra-report-markdown max-w-[72ch]">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
-              {assessmentDescription}
-            </ReactMarkdown>
-          </div>
-        </section>
-      ) : null}
+      <SonartraIntroduction />
 
       {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
       <section
         className="border-white/6 sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-10 sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14"
-        style={getRevealStyle(hasAssessmentDescription ? 1 : 0)}
+        style={getRevealStyle(1)}
       >
         <div className="max-w-[74rem] space-y-10 md:space-y-12">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start">
@@ -538,20 +519,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         className="sonartra-motion-reveal space-y-10 md:space-y-11"
         style={getRevealStyle(2)}
       >
-        <EditorialDivider title="Application" />
-        <SectionHeader
-          eyebrow="Action Focus"
-          title="What this means in practice"
-          description="Start with the immediate implications. This pulls the main report pattern into practical terms before the chapter-by-chapter reading that follows."
-        />
-
-        <ActionSection actions={result.actions} />
-      </section>
-
-      <section
-        className="sonartra-motion-reveal space-y-10 md:space-y-11"
-        style={getRevealStyle(3)}
-      >
         <EditorialDivider title="Detailed reading" />
         <SectionHeader
           eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
@@ -560,6 +527,20 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         />
 
         <DomainSection domainItems={resultDomainItems} />
+      </section>
+
+      <section
+        className="sonartra-motion-reveal space-y-10 md:space-y-11"
+        style={getRevealStyle(3)}
+      >
+        <EditorialDivider title="Application" />
+        <SectionHeader
+          eyebrow="Action Focus"
+          title="What this means in practice"
+          description="Start with the immediate implications. This pulls the main report pattern into practical terms after the chapter-by-chapter reading."
+        />
+
+        <ActionSection actions={result.actions} />
       </section>
     </PageFrame>
   );

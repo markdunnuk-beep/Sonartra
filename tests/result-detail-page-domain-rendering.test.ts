@@ -195,10 +195,10 @@ test('domain signal ring mapper can build rings directly from canonical domains 
   assert.deepEqual(ringModels[1]?.signals, []);
 });
 
-test('result detail page reads intro, hero, domains, and actions from canonical payload sections in final order', () => {
+test('result detail page renders the system introduction above hero and keeps canonical result sections below it', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.match(source, /const assessmentDescription = result\.intro\.assessmentDescription;/);
+  assert.match(source, /import \{ SonartraIntroduction \} from '@\/components\/results\/sonartra-introduction';/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroSubheadline = result\.hero\.subheadline\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroSummary = result\.hero\.summary\?\.trim\(\) \?\? '';/);
@@ -208,31 +208,36 @@ test('result detail page reads intro, hero, domains, and actions from canonical 
   assert.match(source, /const environmentOverlay = result\.hero\.environmentOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
+  assert.match(source, /<PageFrame className="space-y-16 md:space-y-20">/);
+  assert.match(source, /<SonartraIntroduction \/>/);
   assert.match(source, /<HeroDomainHighlights highlights=\{result\.hero\.domainHighlights\} \/>/);
   assert.match(source, /<EditorialAside label="Pressure" text=\{pressureOverlay\} \/>/);
   assert.match(source, /<EditorialAside label="Environment" text=\{environmentOverlay\} \/>/);
   assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
   assert.match(source, /<ActionSection actions=\{result\.actions\} \/>/);
 
+  assert.doesNotMatch(source, /result\.intro\.assessmentDescription/);
   assert.doesNotMatch(source, /result\.metadata\.assessmentDescription/);
   assert.doesNotMatch(source, /result\.overviewSummary\.headline/);
   assert.doesNotMatch(source, /result\.overviewSummary\.narrative/);
   assert.doesNotMatch(source, DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN);
   assert.doesNotMatch(source, /getResultDetailDomains/);
   assert.doesNotMatch(source, /<ActionSection result=\{result\} \/>/);
+  assert.doesNotMatch(source, /reportIntroduction/);
+  assert.doesNotMatch(source, /introCopy/);
 
-  const introIndex = source.indexOf('const assessmentDescription = result.intro.assessmentDescription;');
+  const introIndex = source.indexOf('<SonartraIntroduction />');
   const heroIndex = source.indexOf('<section className="rounded-[2rem] border border-white/6');
-  const actionIndex = source.indexOf('title="What this means in practice"');
   const domainIndex = source.indexOf('title="Domain reading"');
+  const actionIndex = source.indexOf('title="What this means in practice"');
 
   assert.ok(introIndex >= 0);
   assert.ok(heroIndex >= 0);
-  assert.ok(actionIndex >= 0);
   assert.ok(domainIndex >= 0);
+  assert.ok(actionIndex >= 0);
   assert.ok(introIndex < heroIndex);
-  assert.ok(heroIndex < actionIndex);
-  assert.ok(actionIndex < domainIndex);
+  assert.ok(heroIndex < domainIndex);
+  assert.ok(domainIndex < actionIndex);
 });
 
 test('result detail page renders canonical hero domain highlights beneath the hero narrative', () => {
@@ -290,19 +295,17 @@ test('result detail page renders actions from canonical action blocks only', () 
   assert.doesNotMatch(source, /items=\{result\.developmentFocus\}/);
 });
 
-test('result detail page keeps markdown intro rendering and editorial shell for canonical intro copy', () => {
+test('result detail page removes payload-driven intro rendering in favor of the system introduction layer', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.match(source, /import ReactMarkdown from 'react-markdown';/);
-  assert.match(source, /import remarkGfm from 'remark-gfm';/);
-  assert.match(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
-  assert.match(source, /\{assessmentDescription\}/);
-  assert.match(source, /About this report/);
-  assert.match(source, /<PageFrame className="space-y-16 md:space-y-20">/);
-  assert.match(source, /rounded-\[1\.9rem\] border border-white\/6/);
+  assert.match(source, /<SonartraIntroduction \/>/);
   assert.match(source, /sonartra-report-hero/);
   assert.match(source, /sonartra-report-hero-meta-grid/);
-  assert.match(source, /max-w-\[72ch\]/);
   assert.match(source, /mx-auto max-w-\[61rem\] px-1 md:px-2/);
+  assert.doesNotMatch(source, /import ReactMarkdown from 'react-markdown';/);
+  assert.doesNotMatch(source, /import remarkGfm from 'remark-gfm';/);
+  assert.doesNotMatch(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
+  assert.doesNotMatch(source, /About this report/);
+  assert.doesNotMatch(source, /rounded-\[1\.9rem\] border border-white\/6/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
 });
