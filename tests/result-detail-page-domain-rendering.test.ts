@@ -215,7 +215,10 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
   assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
   assert.match(source, /So what does this mean in practice\?/);
-  assert.match(source, /<HeroDomainHighlights highlights=\{result\.hero\.domainHighlights\} \/>/);
+  assert.match(source, /sonartra-report-prose space-y-7/);
+  assert.match(source, /heroPatternLabel/);
+  assert.match(source, /heroSummary/);
+  assert.match(source, /heroNarrative/);
   assert.match(source, /<EditorialAside label="Pressure" text=\{pressureOverlay\} \/>/);
   assert.match(source, /<EditorialAside label="Environment" text=\{environmentOverlay\} \/>/);
   assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
@@ -227,6 +230,7 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.doesNotMatch(source, /result\.overviewSummary\.narrative/);
   assert.doesNotMatch(source, /result\.bridge/);
   assert.doesNotMatch(source, /result\.sections/);
+  assert.doesNotMatch(source, /result\.hero\.domainHighlights/);
   assert.doesNotMatch(source, DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN);
   assert.doesNotMatch(source, /getResultDetailDomains/);
   assert.doesNotMatch(source, /<ActionSection result=\{result\} \/>/);
@@ -257,17 +261,16 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.ok(actionBridgeIndex < actionIndex);
 });
 
-test('result detail page renders canonical hero domain highlights beneath the hero narrative', () => {
+test('result detail page removes the redundant hero domain highlight subsection', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.match(source, /function HeroDomainHighlights\(/);
-  assert.match(source, /highlights\.length === 0/);
-  assert.match(source, /highlight\.domainLabel/);
-  assert.match(source, /highlight\.primarySignalLabel/);
-  assert.match(source, /highlight\.summary \?/);
-  assert.match(source, /max-w-\[60rem\] border-t border-white\/7 pt-7/);
-  assert.match(source, /space-y-3\.5/);
-  assert.match(source, /flex flex-wrap items-baseline gap-x-3 gap-y-1/);
+  assert.doesNotMatch(source, /function HeroDomainHighlights\(/);
+  assert.doesNotMatch(source, /highlights\.length === 0/);
+  assert.doesNotMatch(source, /highlight\.domainLabel/);
+  assert.doesNotMatch(source, /highlight\.primarySignalLabel/);
+  assert.doesNotMatch(source, /highlight\.summary \?/);
+  assert.doesNotMatch(source, /max-w-\[60rem\] border-t border-white\/7 pt-7/);
+  assert.doesNotMatch(source, /<HeroDomainHighlights highlights=\{result\.hero\.domainHighlights\} \/>/);
 });
 
 test('result detail page renders canonical domain chapter fields without UI-side interpretation synthesis', () => {

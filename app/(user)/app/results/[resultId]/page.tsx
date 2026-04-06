@@ -388,35 +388,6 @@ function SignalEditorialBlock({
   );
 }
 
-function HeroDomainHighlights({
-  highlights,
-}: {
-  highlights: AssessmentResultDetailViewModel['hero']['domainHighlights'];
-}) {
-  if (highlights.length === 0) {
-    return null;
-  }
-
-  // Source-contract marker for tests: max-w-[60rem] border-t border-white/7 pt-7
-  return (
-    <div className="border-white/7 max-w-[60rem] border-t pt-7">
-      <div className="space-y-3.5">
-        {highlights.map((highlight) => (
-          <article key={highlight.domainKey} className="space-y-1.5">
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <p className="sonartra-report-kicker">{highlight.domainLabel}</p>
-              <p className="sonartra-report-title text-[1rem]">{highlight.primarySignalLabel}</p>
-            </div>
-            {highlight.summary ? (
-              <p className="sonartra-report-body-soft max-w-[46rem]">{highlight.summary}</p>
-            ) : null}
-          </article>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default async function ResultDetailPage({ params }: ResultDetailPageProps) {
   const { resultId } = await params;
   const userId = await getRequestUserId();
@@ -515,7 +486,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                         ) : null}
                       </div>
                     ) : null}
-                    <HeroDomainHighlights highlights={result.hero.domainHighlights} />
                   </div>
                 </div>
               </div>
