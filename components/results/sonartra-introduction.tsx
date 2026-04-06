@@ -1,5 +1,4 @@
 import { SonartraIntroductionVisual } from '@/components/results/sonartra-introduction-visual';
-import { cn } from '@/components/shared/user-app-ui';
 
 const INTRODUCTION_SECTIONS = [
   {
@@ -20,17 +19,10 @@ const INTRODUCTION_SECTIONS = [
   },
 ] as const;
 
-export function SonartraIntroduction({
-  className,
-}: Readonly<{
-  className?: string;
-}>) {
+export function SonartraIntroduction() {
   return (
     <section
-      className={cn(
-        'border-white/7 relative overflow-hidden rounded-[2rem] border bg-[radial-gradient(circle_at_top_left,rgba(145,168,214,0.12),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.028),rgba(255,255,255,0.014))] px-6 py-7 shadow-[0_20px_60px_rgba(0,0,0,0.18)] sm:px-8 sm:py-9 md:px-10 md:py-11 lg:px-12 lg:py-12',
-        className,
-      )}
+      className="border-white/7 relative overflow-hidden rounded-[2rem] border bg-[radial-gradient(circle_at_top_left,rgba(145,168,214,0.12),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.028),rgba(255,255,255,0.014))] px-6 py-7 shadow-[0_20px_60px_rgba(0,0,0,0.18)] sm:px-8 sm:py-9 md:px-10 md:py-11 lg:px-12 lg:py-12"
       aria-labelledby="sonartra-introduction-title"
       data-sonartra-introduction="true"
     >

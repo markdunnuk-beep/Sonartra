@@ -1,9 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
 import { SonartraIntroductionVisual } from '@/components/results/sonartra-introduction-visual';
+
+const introductionComponentPath = join(
+  process.cwd(),
+  'components',
+  'results',
+  'sonartra-introduction.tsx',
+);
+
+const visualComponentPath = join(
+  process.cwd(),
+  'components',
+  'results',
+  'sonartra-introduction-visual.tsx',
+);
 
 test('sonartra introduction renders the fixed heading and lead without props', () => {
   const markup = renderToStaticMarkup(<SonartraIntroduction />);
@@ -16,6 +32,17 @@ test('sonartra introduction renders the fixed heading and lead without props', (
   );
   assert.match(markup, /data-sonartra-introduction="true"/);
   assert.match(markup, /lg:grid-cols-\[minmax\(0,1\.1fr\)_minmax\(19rem,25rem\)\]/);
+});
+
+test('sonartra introduction stays a static system layer with no props or server coupling', () => {
+  const source = readFileSync(introductionComponentPath, 'utf8');
+
+  assert.match(source, /export function SonartraIntroduction\(\)/);
+  assert.match(source, /<SonartraIntroductionVisual className="lg:sticky lg:top-8" \/>/);
+  assert.doesNotMatch(source, /Readonly<\{/);
+  assert.doesNotMatch(source, /props/);
+  assert.doesNotMatch(source, /getDbPool|getRequestUserId|createResultReadModelService/);
+  assert.doesNotMatch(source, /admin|featureFlag|flag/i);
 });
 
 test('sonartra introduction renders the explanatory sections and closing guidance', () => {
@@ -31,6 +58,7 @@ test('sonartra introduction renders the explanatory sections and closing guidanc
 
 test('sonartra introduction visual renders generic model labels and pair example', () => {
   const markup = renderToStaticMarkup(<SonartraIntroductionVisual />);
+  const source = readFileSync(visualComponentPath, 'utf8');
 
   const domainLabelCount = markup.match(/>Domain</g)?.length ?? 0;
   const signalLabelCount = markup.match(/>Signal</g)?.length ?? 0;
@@ -41,6 +69,7 @@ test('sonartra introduction visual renders generic model labels and pair example
   assert.match(markup, /Signal Pair relationship/);
   assert.ok(domainLabelCount >= 3);
   assert.ok(signalLabelCount >= 4);
+  assert.doesNotMatch(source, /24 signals|6 domains|wplp80|Sonartra Signals/i);
   assert.doesNotMatch(markup, /24 signals/i);
   assert.doesNotMatch(markup, /6 domains/i);
 });
