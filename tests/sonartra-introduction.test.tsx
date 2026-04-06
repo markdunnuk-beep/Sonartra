@@ -56,7 +56,7 @@ test('sonartra introduction renders the explanatory sections and closing guidanc
   assert.match(markup, /Start with the overall picture, then move into the detail\./);
 });
 
-test('sonartra introduction visual renders generic model labels and pair example', () => {
+test('sonartra introduction visual renders the generic behaviour flow diagram', () => {
   const markup = renderToStaticMarkup(<SonartraIntroductionVisual />);
   const source = readFileSync(visualComponentPath, 'utf8');
 
@@ -64,11 +64,14 @@ test('sonartra introduction visual renders generic model labels and pair example
   const signalLabelCount = markup.match(/>Signal</g)?.length ?? 0;
 
   assert.match(markup, /data-sonartra-introduction-visual="true"/);
-  assert.match(markup, /Model overview/);
-  assert.match(markup, /Domains vary by assessment/);
-  assert.match(markup, /Signal Pair relationship/);
-  assert.ok(domainLabelCount >= 3);
-  assert.ok(signalLabelCount >= 4);
+  assert.match(markup, /How your results are built/);
+  assert.match(markup, /Domains vary by assessment, but the interpretation path stays consistent\./);
+  assert.match(markup, /Patterns read together/);
+  assert.match(markup, /Behaviour in practice/);
+  assert.match(markup, /How patterns show up in real situations/);
+  assert.ok(domainLabelCount >= 1);
+  assert.ok(signalLabelCount >= 3);
+  assert.doesNotMatch(markup, /Static visual/i);
   assert.doesNotMatch(source, /24 signals|6 domains|wplp80|Sonartra Signals/i);
   assert.doesNotMatch(markup, /24 signals/i);
   assert.doesNotMatch(markup, /6 domains/i);
