@@ -5,6 +5,7 @@ import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { HeroPatternMedallion } from '@/components/results/hero-pattern-medallion';
 import { ResultLinkedInShare } from '@/components/results/result-linkedin-share';
 import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
+import { buildResultsLinkedInShareAnalytics } from '@/lib/results/linkedin-share-analytics';
 import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
 import { formatLinkedInSharePost } from '@/lib/results/linkedin-share';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
@@ -469,6 +470,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     hero: result.hero,
     rankedSignals: result.rankedSignals,
   });
+  const linkedinShareAnalytics = buildResultsLinkedInShareAnalytics(result);
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   const heroHeadline = result.hero.headline?.trim() ?? '';
   const heroSubheadline = result.hero.subheadline?.trim() ?? '';
@@ -508,7 +510,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           <div className="max-w-[68rem] space-y-11 md:space-y-14">
             {linkedinShare.canShare ? (
               <div className="flex justify-end">
-                <ResultLinkedInShare postBody={linkedinShare.postBody} />
+                <ResultLinkedInShare
+                  postBody={linkedinShare.postBody}
+                  analytics={linkedinShareAnalytics}
+                />
               </div>
             ) : null}
 

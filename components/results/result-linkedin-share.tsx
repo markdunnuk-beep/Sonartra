@@ -2,10 +2,18 @@
 
 import { useId, useState } from 'react';
 
+import {
+  copyResultsLinkedInSharePost,
+  trackResultsLinkedInOpenClicked,
+  trackResultsLinkedInSharePanelVisibility,
+  type ResultsLinkedInShareAnalytics,
+} from '@/lib/results/linkedin-share-analytics';
+
 const LINKEDIN_SHARE_URL = 'https://www.linkedin.com/feed/';
 
 export type ResultLinkedInShareProps = {
   postBody: string;
+  analytics: ResultsLinkedInShareAnalytics;
 };
 
 function LinkedInGlyph() {
@@ -21,7 +29,7 @@ function LinkedInGlyph() {
   );
 }
 
-export function ResultLinkedInShare({ postBody }: ResultLinkedInShareProps) {
+export function ResultLinkedInShare({ postBody, analytics }: ResultLinkedInShareProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState('');
   const titleId = useId();
@@ -29,15 +37,23 @@ export function ResultLinkedInShare({ postBody }: ResultLinkedInShareProps) {
   const previewId = useId();
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(postBody);
+    const copied = await copyResultsLinkedInSharePost({
+      postBody,
+      analytics,
+      clipboard: navigator.clipboard,
+    });
+
+    if (copied) {
       setCopyFeedback('Copied to clipboard');
-    } catch {
+    } else {
       setCopyFeedback('Copy failed');
     }
   }
 
   function handleOpenLinkedIn() {
+    trackResultsLinkedInOpenClicked({
+      analytics,
+    });
     window.open(LINKEDIN_SHARE_URL, '_blank', 'noopener,noreferrer');
   }
 
@@ -49,7 +65,12 @@ export function ResultLinkedInShare({ postBody }: ResultLinkedInShareProps) {
         aria-expanded={isOpen}
         aria-controls={previewId}
         onClick={() => {
-          setIsOpen((current) => !current);
+          const nextOpen = !isOpen;
+          trackResultsLinkedInSharePanelVisibility({
+            nextOpen,
+            analytics,
+          });
+          setIsOpen(nextOpen);
           setCopyFeedback('');
         }}
         className="sonartra-motion-button sonartra-focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold tracking-[0.01em] text-white/88 shadow-[0_12px_28px_rgba(0,0,0,0.14)] backdrop-blur"
