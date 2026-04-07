@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { loadWplp80Seeds } from '@/db/seed/wplp80';
+import { runAssessmentEngine } from '@/lib/engine/engine-runner';
 import { createAssessmentDefinitionRepository } from '@/lib/engine/repository';
 import type {
   AssessmentRow,
@@ -293,6 +294,42 @@ function createPublishedRuntimeHarness(): PublishedRuntimeHarness {
         const versionId = params?.[0] as string;
         const version = [publishedVersion, draftVersion].find((entry) => entry.id === versionId);
         return { rows: (version ? [{ a: assessment, v: version }] : []) as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_intro WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_pair_trait_weights WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_hero_pattern_rules WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_hero_pattern_language WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_signals WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_pairs WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_domains WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_overview WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_hero_headers WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
       }
 
       if (sql.includes('FROM domains WHERE assessment_version_id = $1 ORDER BY order_index ASC, id ASC')) {
@@ -815,7 +852,19 @@ test('published runtime regression proves publish to ready persisted retrieval f
   const harness = createPublishedRuntimeHarness();
   const repository = createAssessmentDefinitionRepository({ db: harness.db });
   const lifecycleService = createAssessmentAttemptLifecycleService({ db: harness.db });
-  const completionService = createAssessmentCompletionService({ db: harness.db, repository });
+  const completionService = createAssessmentCompletionService({
+    db: harness.db,
+    repository,
+    executeEngine: (params) =>
+      runAssessmentEngine({
+        repository: params.repository,
+        assessmentVersionId: params.assessmentVersionId,
+        responses: params.responses,
+        loadAssessmentLanguage: async () => ({
+          assessment_description: null,
+        }),
+      }),
+  });
   const runnerService = createAssessmentRunnerService({
     db: harness.db,
     lifecycleService,
