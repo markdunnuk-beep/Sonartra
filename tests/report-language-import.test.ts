@@ -29,7 +29,7 @@ test('blank lines are ignored in report-aligned input', () => {
     [
       '',
       ' ',
-      'signal|style_driver|summary|Driver summary',
+      'signal|style_driver|chapterSummary|Driver summary',
     ].join('\n'),
   );
 
@@ -43,7 +43,7 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
       'hero|analyst_driver|headline|Fast, structured, decisive.',
       'hero|driver_analyst|narrative|You combine pace with logic.',
       'domain|signal_style|chapterOpening|Custom domain chapter opening.',
-      'signal|style_driver|summary|Driver summary.',
+      'signal|style_driver|chapterSummary|Driver summary.',
       'signal|style_driver|strength|Driver strength.',
       'pair|driver_analyst|summary|Driver plus Analyst pair summary.',
     ].join('\n'),
@@ -83,7 +83,7 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
   assert.deepEqual(plan.signals, [
     {
       signalKey: 'style_driver',
-      field: 'summary',
+      field: 'chapterSummary',
       content: 'Driver summary.',
     },
     {
@@ -122,7 +122,7 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
   assert.deepEqual(plan.storage.signals, [
     {
       signalKey: 'style_driver',
-      section: 'summary',
+      section: 'chapterSummary',
       content: 'Driver summary.',
     },
     {
@@ -136,6 +136,37 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
       signalPair: 'analyst_driver',
       section: 'summary',
       content: 'Driver plus Analyst pair summary.',
+    },
+  ]);
+});
+
+test('report-aligned validation normalizes legacy signal summary rows to canonical chapterSummary storage', () => {
+  const parsed = parseReportLanguageRows(
+    'signal|style_driver|summary|Legacy summary alias.',
+  );
+
+  const validation = validateReportLanguageRows({
+    rows: parsed.records,
+    validSignalKeys: ['style_driver', 'style_analyst'],
+    validDomainKeys: ['signal_style'],
+  });
+
+  assert.equal(validation.success, true);
+
+  const plan = buildReportAlignedLanguageStoragePlan(validation.validRows);
+
+  assert.deepEqual(plan.signals, [
+    {
+      signalKey: 'style_driver',
+      field: 'chapterSummary',
+      content: 'Legacy summary alias.',
+    },
+  ]);
+  assert.deepEqual(plan.storage.signals, [
+    {
+      signalKey: 'style_driver',
+      section: 'chapterSummary',
+      content: 'Legacy summary alias.',
     },
   ]);
 });

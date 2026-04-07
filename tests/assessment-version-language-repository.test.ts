@@ -19,7 +19,7 @@ type StoredSignalRow = {
   id: string;
   assessmentVersionId: string;
   signalKey: string;
-  section: 'summary' | 'strength' | 'watchout' | 'development';
+  section: 'chapterSummary' | 'summary' | 'strength' | 'watchout' | 'development';
   content: string;
   createdAt: string;
   updatedAt: string;
@@ -99,8 +99,8 @@ function createFakeLanguageDb(seed?: {
     [...rows].sort(
       (left, right) =>
         left.signalKey.localeCompare(right.signalKey)
-        || ['summary', 'strength', 'watchout', 'development'].indexOf(left.section)
-          - ['summary', 'strength', 'watchout', 'development'].indexOf(right.section)
+        || ['chapterSummary', 'summary', 'strength', 'watchout', 'development'].indexOf(left.section)
+          - ['chapterSummary', 'summary', 'strength', 'watchout', 'development'].indexOf(right.section)
         || left.id.localeCompare(right.id),
     );
   const sortPairs = (rows: StoredPairRow[]) =>
@@ -426,8 +426,8 @@ test('writing and then reading signal language round-trips correctly', async () 
     assessmentVersionId: 'version-1',
     inputs: [
       { signalKey: ' signal_b ', section: 'watchout', content: ' watch out ' },
-      { signalKey: 'signal_a', section: 'summary', content: 'summary a' },
-      { signalKey: 'signal_b', section: 'summary', content: 'summary b' },
+      { signalKey: 'signal_a', section: 'chapterSummary', content: 'summary a' },
+      { signalKey: 'signal_b', section: 'chapterSummary', content: 'summary b' },
     ],
   });
 
@@ -440,8 +440,8 @@ test('writing and then reading signal language round-trips correctly', async () 
       content: row.content,
     })),
     [
-      { signalKey: 'signal_a', section: 'summary', content: 'summary a' },
-      { signalKey: 'signal_b', section: 'summary', content: 'summary b' },
+      { signalKey: 'signal_a', section: 'chapterSummary', content: 'summary a' },
+      { signalKey: 'signal_b', section: 'chapterSummary', content: 'summary b' },
       { signalKey: 'signal_b', section: 'watchout', content: 'watch out' },
     ],
   );
@@ -553,7 +553,7 @@ test('bundle loader groups content correctly by key and section', async () => {
         id: 's1',
         assessmentVersionId: 'version-1',
         signalKey: 'signal_style',
-        section: 'summary',
+        section: 'chapterSummary',
         content: 'style summary',
         createdAt: '2026-04-01T00:00:01.000Z',
         updatedAt: '2026-04-01T00:00:01.000Z',
@@ -618,7 +618,7 @@ test('bundle loader groups content correctly by key and section', async () => {
   assert.deepEqual(bundle, {
     signals: {
       signal_style: {
-        summary: 'style summary',
+        chapterSummary: 'style summary',
         strength: 'style strength',
       },
     },
@@ -652,7 +652,7 @@ test('replace operations only affect their own table and dataset type', async ()
         id: 's1',
         assessmentVersionId: 'version-1',
         signalKey: 'signal_a',
-        section: 'summary',
+        section: 'chapterSummary',
         content: 'signal old',
         createdAt: '2026-04-01T00:00:01.000Z',
         updatedAt: '2026-04-01T00:00:01.000Z',
@@ -695,7 +695,7 @@ test('replace operations only affect their own table and dataset type', async ()
 
   await replaceAssessmentVersionLanguageSignals(fake.db, {
     assessmentVersionId: 'version-1',
-    inputs: [{ signalKey: 'signal_b', section: 'summary', content: 'signal new' }],
+    inputs: [{ signalKey: 'signal_b', section: 'chapterSummary', content: 'signal new' }],
   });
 
   assert.deepEqual(fake.state.signals.map((row) => row.signalKey), ['signal_b']);

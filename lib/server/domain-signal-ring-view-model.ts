@@ -224,7 +224,7 @@ function mapCanonicalDomainSignalRing(
   const signalDetailsByKey = new Map<
     string,
     {
-      summary: string | null;
+      chapterSummary: string | null;
       strength: string | null;
       watchout: string | null;
       development: string | null;
@@ -237,7 +237,7 @@ function mapCanonicalDomainSignalRing(
     }
 
     signalDetailsByKey.set(signal.signalKey, {
-      summary: signal.summary,
+      chapterSummary: signal.chapterSummary,
       strength: signal.strength,
       watchout: signal.watchout,
       development: signal.development,
@@ -253,8 +253,8 @@ function mapCanonicalDomainSignalRing(
     isTopSignal: signal.isPrimary,
     isSecondSignal: signal.isSecondary,
     summary:
-      signalDetailsByKey.get(signal.signalKey)?.summary
-      ?? signal.summary
+      signalDetailsByKey.get(signal.signalKey)?.chapterSummary
+      ?? signal.chapterSummary
       ?? resolveDomainSignalDescriptor({
         signalKey: signal.signalKey,
         signalTitle: signal.signalLabel,

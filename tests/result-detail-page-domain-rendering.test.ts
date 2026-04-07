@@ -164,7 +164,7 @@ test('domain signal ring mapper can build rings directly from canonical domains 
             rank: 1,
             isPrimary: true,
             isSecondary: false,
-            summary: null,
+            chapterSummary: null,
           },
         ],
       },
@@ -294,6 +294,8 @@ test('result detail page renders canonical domain chapter fields without UI-side
   assert.match(source, /domain\.environmentFocus/);
   assert.match(source, /domain\.primarySignal/);
   assert.match(source, /domain\.secondarySignal/);
+  assert.match(source, /domain\.primarySignal\.chapterSummary/);
+  assert.match(source, /domain\.secondarySignal\.chapterSummary/);
   assert.match(source, /domain\.signalPair\?\.summary/);
   assert.match(source, /const visibleSignals = domain\.signalBalance\.items\.slice\(0, 2\);/);
   assert.match(source, /const hiddenSignals = domain\.signalBalance\.items\.slice\(2\);/);

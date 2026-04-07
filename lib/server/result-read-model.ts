@@ -39,7 +39,44 @@ function parseCanonicalPayload(record: PersistedReadyResultRecord) {
     );
   }
 
-  return record.canonicalResultPayload;
+  return normalizeCanonicalPayload(record.canonicalResultPayload);
+}
+
+function normalizeCanonicalPayload(payload: CanonicalResultPayload): CanonicalResultPayload {
+  return {
+    ...payload,
+    domains: Object.freeze(
+      payload.domains.map((domain) => ({
+        ...domain,
+        signalBalance: {
+          items: Object.freeze(
+            domain.signalBalance.items.map((signal) => ({
+              ...signal,
+              chapterSummary:
+                signal.chapterSummary
+                ?? ('summary' in signal ? signal.summary ?? null : null),
+            })),
+          ),
+        },
+        primarySignal: domain.primarySignal
+          ? {
+              ...domain.primarySignal,
+              chapterSummary:
+                domain.primarySignal.chapterSummary
+                ?? ('summary' in domain.primarySignal ? domain.primarySignal.summary ?? null : null),
+            }
+          : null,
+        secondarySignal: domain.secondarySignal
+          ? {
+              ...domain.secondarySignal,
+              chapterSummary:
+                domain.secondarySignal.chapterSummary
+                ?? ('summary' in domain.secondarySignal ? domain.secondarySignal.summary ?? null : null),
+            }
+          : null,
+      })),
+    ),
+  };
 }
 
 function toActionItems(

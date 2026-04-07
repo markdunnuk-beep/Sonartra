@@ -340,7 +340,7 @@ test('interpretation boundary receives language bundle context even when unused'
     languageBundle: {
       signals: {
         style_driver: {
-          summary: 'Unused custom summary',
+          chapterSummary: 'Unused custom summary',
         },
       },
       pairs: {
@@ -688,7 +688,7 @@ test('hero domain highlight summary uses primary signal summary only and stays n
       languageBundle: {
         signals: {
           style_driver: {
-            summary: 'Signal-authored summary for the Driver signal.',
+            chapterSummary: 'Signal-authored summary for the Driver signal.',
           },
         },
         pairs: {},
@@ -813,13 +813,13 @@ test('domains expand to structured report chapters in authored order with author
       languageBundle: {
         signals: {
           style_driver: {
-            summary: 'Driver summary.',
+            chapterSummary: 'Driver summary.',
             strength: 'Driver strength.',
             watchout: 'Driver watchout.',
             development: 'Driver development.',
           },
           style_analyst: {
-            summary: 'Analyst summary.',
+            chapterSummary: 'Analyst summary.',
             strength: 'Analyst strength.',
           },
         },
@@ -873,7 +873,7 @@ test('domains expand to structured report chapters in authored order with author
           rank: 1,
           isPrimary: true,
           isSecondary: false,
-          summary: 'Driver summary.',
+          chapterSummary: 'Driver summary.',
         },
         {
           signalKey: 'style_analyst',
@@ -882,14 +882,14 @@ test('domains expand to structured report chapters in authored order with author
           rank: 2,
           isPrimary: false,
           isSecondary: true,
-          summary: 'Analyst summary.',
+          chapterSummary: 'Analyst summary.',
         },
       ],
     },
     primarySignal: {
       signalKey: 'style_driver',
       signalLabel: 'Driver',
-      summary: 'Driver summary.',
+      chapterSummary: 'Driver summary.',
       strength: 'Driver strength.',
       watchout: 'Driver watchout.',
       development: 'Driver development.',
@@ -897,7 +897,7 @@ test('domains expand to structured report chapters in authored order with author
     secondarySignal: {
       signalKey: 'style_analyst',
       signalLabel: 'Analyst',
-      summary: 'Analyst summary.',
+      chapterSummary: 'Analyst summary.',
       strength: 'Analyst strength.',
       watchout: null,
       development: null,
@@ -921,7 +921,7 @@ test('domains expand to structured report chapters in authored order with author
   assert.deepEqual(payload.domains[2]?.primarySignal, {
     signalKey: 'decision_evidence',
     signalLabel: 'Evidence',
-    summary: null,
+    chapterSummary: null,
     strength: null,
     watchout: null,
     development: null,
@@ -936,7 +936,7 @@ test('domains expand to structured report chapters in authored order with author
       rank: 3,
       isPrimary: true,
       isSecondary: false,
-      summary: null,
+      chapterSummary: null,
     },
   ]);
 });
@@ -2446,7 +2446,7 @@ test('signal language fallback remains unchanged when required entries are missi
       languageBundle: {
         signals: {
           style_driver: {
-            summary: 'Present but irrelevant for this task.',
+            chapterSummary: 'Present but irrelevant for this task.',
           },
         },
         pairs: {},

@@ -1,10 +1,16 @@
 import type { AssessmentVersionId } from '@/lib/engine/types';
 
 export type AssessmentVersionLanguageSignalSection =
-  | 'summary'
+  | 'chapterSummary'
   | 'strength'
   | 'watchout'
   | 'development';
+
+export type AssessmentVersionLanguageLegacySignalSection = 'summary';
+
+export type AssessmentVersionLanguageStoredSignalSection =
+  | AssessmentVersionLanguageSignalSection
+  | AssessmentVersionLanguageLegacySignalSection;
 
 export type AssessmentVersionLanguagePairSection =
   | 'summary'
@@ -43,7 +49,7 @@ export type AssessmentVersionLanguageSignalRow = {
   id: string;
   assessmentVersionId: AssessmentVersionId;
   signalKey: string;
-  section: AssessmentVersionLanguageSignalSection;
+  section: AssessmentVersionLanguageStoredSignalSection;
   content: string;
   createdAt: string;
   updatedAt: string;

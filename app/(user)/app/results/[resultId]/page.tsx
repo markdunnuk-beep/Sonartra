@@ -299,14 +299,14 @@ function DomainChapter({
                   <SignalEditorialBlock
                     title="Primary signal"
                     signalLabel={domain.primarySignal.signalLabel}
-                    summary={domain.primarySignal.summary}
+                    summary={domain.primarySignal.chapterSummary}
                   />
                 ) : null}
                 {domain.secondarySignal ? (
                   <SignalEditorialBlock
                     title="Secondary signal"
                     signalLabel={domain.secondarySignal.signalLabel}
-                    summary={domain.secondarySignal.summary}
+                    summary={domain.secondarySignal.chapterSummary}
                   />
                 ) : null}
               </div>

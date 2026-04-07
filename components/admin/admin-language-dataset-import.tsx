@@ -65,15 +65,15 @@ const DATASET_OPTIONS: readonly DatasetOption[] = [
     key: 'signal',
     label: 'Signal',
     title: 'Signal Language',
-    description: 'Author summary, strength, watchout, and development language by signal.',
+    description: 'Author chapterSummary, strength, watchout, and development language by signal.',
     detail:
       'These are reusable report building blocks. The engine decides where each signal sentence appears.',
     currentRowsLabel: 'Current Signal rows',
     rowFormatLabel: 'section | target | field | content',
     textareaLabel: 'Paste signal rows',
-    placeholder: 'signal | style_driver | summary | You tend to move quickly and take initiative.',
+    placeholder: 'signal | style_driver | chapterSummary | You tend to move quickly and take initiative.',
     formatExample: [
-      'signal | style_driver | summary | You tend to move quickly and take initiative.',
+      'signal | style_driver | chapterSummary | You tend to move quickly and take initiative.',
       'signal | style_driver | strength | You bring momentum and energy to delivery.',
       'signal | style_driver | watchout | You may move ahead before others are ready.',
       'signal | style_driver | development | Pause slightly longer before committing to direction.',

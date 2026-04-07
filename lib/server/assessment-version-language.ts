@@ -22,6 +22,7 @@ import type {
   AssessmentVersionLanguageSignalInput,
   AssessmentVersionLanguageSignalRow,
   AssessmentVersionLanguageSignalSection,
+  AssessmentVersionLanguageStoredSignalSection,
   AssessmentVersionLanguageSignalsByKey,
 } from '@/lib/server/assessment-version-language-types';
 
@@ -37,7 +38,7 @@ type AssessmentVersionLanguageSignalDbRow = {
   id: string;
   assessment_version_id: string;
   signal_key: string;
-  section: AssessmentVersionLanguageSignalSection;
+  section: AssessmentVersionLanguageStoredSignalSection;
   content: string;
   created_at: string;
   updated_at: string;
@@ -83,7 +84,7 @@ type AssessmentVersionLanguageHeroHeaderDbRow = {
 };
 
 const SIGNAL_SECTION_ORDER: readonly AssessmentVersionLanguageSignalSection[] = Object.freeze([
-  'summary',
+  'chapterSummary',
   'strength',
   'watchout',
   'development',
@@ -229,7 +230,7 @@ function mapSignalRow(row: AssessmentVersionLanguageSignalDbRow): AssessmentVers
     id: row.id,
     assessmentVersionId: row.assessment_version_id,
     signalKey: row.signal_key,
-    section: row.section,
+    section: row.section === 'summary' ? 'chapterSummary' : row.section,
     content: row.content,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -321,7 +322,40 @@ function buildSectionBundle<TRow extends { section: TSection; content: string },
 export function buildAssessmentVersionLanguageSignalsBundle(
   rows: readonly AssessmentVersionLanguageSignalRow[],
 ): AssessmentVersionLanguageSignalsByKey {
-  return buildSectionBundle(rows, (row) => row.signalKey, 'signal');
+  const grouped: Record<string, Partial<Record<AssessmentVersionLanguageSignalSection, string>>> = {};
+
+  for (const row of rows) {
+    const key = row.signalKey;
+    const section = row.section === 'summary' ? 'chapterSummary' : row.section;
+    const sectionMap = grouped[key] ?? {};
+
+    if (section === 'chapterSummary' && row.section === 'summary' && sectionMap.chapterSummary !== undefined) {
+      grouped[key] = sectionMap;
+      continue;
+    }
+
+    if (section === 'chapterSummary' && row.section === 'chapterSummary' && sectionMap.chapterSummary !== undefined) {
+      sectionMap.chapterSummary = row.content;
+      grouped[key] = sectionMap;
+      continue;
+    }
+
+    if (sectionMap[section] !== undefined) {
+      throw new DuplicateAssessmentVersionLanguageEntryError(
+        `Duplicate signal language entry detected for key "${key}" and section "${section}"`,
+      );
+    }
+
+    sectionMap[section] = row.content;
+    grouped[key] = sectionMap;
+  }
+
+  const result: Record<string, AssessmentVersionLanguageSectionMap<AssessmentVersionLanguageSignalSection>> = {};
+  for (const key of Object.keys(grouped)) {
+    result[key] = Object.freeze({ ...grouped[key] });
+  }
+
+  return Object.freeze(result);
 }
 
 export function buildAssessmentVersionLanguagePairsBundle(
@@ -420,6 +454,7 @@ export async function getAssessmentVersionLanguageSignals(
     ORDER BY
       signal_key ASC,
       CASE section
+        WHEN 'chapterSummary' THEN 0
         WHEN 'summary' THEN 0
         WHEN 'strength' THEN 1
         WHEN 'watchout' THEN 2

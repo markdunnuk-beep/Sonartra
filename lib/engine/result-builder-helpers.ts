@@ -120,11 +120,11 @@ export function buildNormalizedScores(normalizedResult: NormalizedResult): reado
   return Object.freeze([...normalizedResult.signalScores]);
 }
 
-function getSignalLanguageSummary(
+function getSignalLanguageChapterSummary(
   signalKey: string,
   context: ResultInterpretationContext,
 ): string | null {
-  return context.languageBundle.signals[signalKey]?.summary ?? null;
+  return context.languageBundle.signals[signalKey]?.chapterSummary ?? null;
 }
 
 function getSignalLanguageStrength(
@@ -169,13 +169,13 @@ function resolveSignalLanguageBundle(
   signalKey: string,
   interpretationContext: ResultInterpretationContext,
 ): {
-  summary: string | null;
+  chapterSummary: string | null;
   strength: string | null;
   watchout: string | null;
   development: string | null;
 } {
   return {
-    summary: getSignalLanguageSummary(signalKey, interpretationContext),
+    chapterSummary: getSignalLanguageChapterSummary(signalKey, interpretationContext),
     strength: getSignalLanguageStrength(signalKey, interpretationContext),
     watchout: getSignalLanguageWatchout(signalKey, interpretationContext),
     development: getSignalLanguageDevelopment(signalKey, interpretationContext),
@@ -316,7 +316,7 @@ function buildDomainSignalBalanceItem(
     rank: signalScore.rank,
     isPrimary: index === 0,
     isSecondary: index === 1,
-    summary: language.summary,
+    chapterSummary: language.chapterSummary,
   };
 }
 
@@ -333,7 +333,7 @@ function buildDomainChapterSignal(
   return {
     signalKey: signalScore.signalKey,
     signalLabel: signalScore.signalTitle,
-    summary: language.summary,
+    chapterSummary: language.chapterSummary,
     strength: language.strength,
     watchout: language.watchout,
     development: language.development,
@@ -359,7 +359,7 @@ export function buildHero(params: {
         domainLabel: domainSummary.domainTitle,
         primarySignalKey: primarySignal.signalKey,
         primarySignalLabel: primarySignal.signalTitle,
-        summary: getSignalLanguageSummary(primarySignal.signalKey, params.interpretationContext),
+        summary: getSignalLanguageChapterSummary(primarySignal.signalKey, params.interpretationContext),
       },
     ];
   });

@@ -53,7 +53,7 @@ type StoredSignalLanguageRow = {
   id: string;
   assessmentVersionId: string;
   signalKey: string;
-  section: 'summary' | 'strength' | 'watchout' | 'development';
+  section: 'chapterSummary' | 'summary' | 'strength' | 'watchout' | 'development';
   content: string;
 };
 

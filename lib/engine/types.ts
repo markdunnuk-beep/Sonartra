@@ -642,7 +642,7 @@ export type ResultDomainSignal = {
 export type ResultDomainChapterSignal = {
   signalKey: string;
   signalLabel: string;
-  summary: string | null;
+  chapterSummary: string | null;
   strength: string | null;
   watchout: string | null;
   development: string | null;
@@ -655,7 +655,7 @@ export type ResultDomainSignalBalanceItem = {
   rank: number;
   isPrimary: boolean;
   isSecondary: boolean;
-  summary: string | null;
+  chapterSummary: string | null;
 };
 
 export type ResultDomainSignalPair = {

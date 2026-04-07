@@ -88,7 +88,7 @@ function isCanonicalDomainChapterSignal(value: unknown): boolean {
     isRecord(value)
     && hasRequiredStringField(value, 'signalKey')
     && hasRequiredStringField(value, 'signalLabel')
-    && isNullableString(value.summary)
+    && (isNullableString(value.chapterSummary) || isNullableString(value.summary))
     && isNullableString(value.strength)
     && isNullableString(value.watchout)
     && isNullableString(value.development)
@@ -116,7 +116,7 @@ function isCanonicalDomainSignalBalanceItem(value: unknown): boolean {
     && isFiniteNumber(value.rank)
     && typeof value.isPrimary === 'boolean'
     && typeof value.isSecondary === 'boolean'
-    && isNullableString(value.summary)
+    && (isNullableString(value.chapterSummary) || isNullableString(value.summary))
   );
 }
 

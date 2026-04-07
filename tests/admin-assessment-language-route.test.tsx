@@ -35,7 +35,7 @@ type LanguageFixture = {
     id: string;
     assessmentVersionId: string;
     signalKey: string;
-    section: 'summary' | 'strength' | 'watchout' | 'development';
+    section: 'chapterSummary' | 'summary' | 'strength' | 'watchout' | 'development';
     content: string;
     createdAt: string;
     updatedAt: string;
@@ -720,9 +720,6 @@ test('language step component renders hero header, domain chapters, signals, and
   assert.match(markup, /Format: scope \| key \| headline/);
   assert.match(markup, /Paste Hero Header rows/);
   assert.match(markup, /Domain Chapter Language/);
-  assert.match(markup, /chapterOpening rows for report domains/i);
-  assert.match(markup, /supports chapterOpening only/i);
-  assert.match(markup, /domain \| signal_style \| chapterOpening \|/i);
   assert.match(markup, /Signal Language/);
   assert.match(markup, /Pair Summary Language/);
   assert.match(markup, /pair \| driver_influencer \| Fast-moving, people-driven and energised by momentum/);

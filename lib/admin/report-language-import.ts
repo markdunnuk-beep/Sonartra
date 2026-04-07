@@ -140,7 +140,7 @@ export const REPORT_ALIGNED_AUTHORING_NOTE =
   'This is the supported authoring path for report language. Derived report sections remain engine-resolved.' as const;
 
 const SIGNAL_FIELDS = new Set<ValidSignalField>([
-  'summary',
+  'chapterSummary',
   'strength',
   'watchout',
   'development',
@@ -509,12 +509,17 @@ export function validateReportLanguageRows(params: {
         continue;
       }
 
-      if (!SIGNAL_FIELDS.has(row.field as ValidSignalField)) {
+      const normalizedSignalField =
+        row.field === 'summary'
+          ? 'chapterSummary'
+          : row.field;
+
+      if (!SIGNAL_FIELDS.has(normalizedSignalField as ValidSignalField)) {
         errors.push(
           createValidationError(
             row,
             'INVALID_FIELD',
-            'Signal field must be summary, strength, watchout, or development.',
+            'Signal field must be chapterSummary, strength, watchout, or development.',
           ),
         );
         continue;
@@ -525,7 +530,7 @@ export function validateReportLanguageRows(params: {
         rawLine: row.rawLine,
         section: 'signal',
         target: row.target,
-        field: row.field as ValidSignalField,
+        field: normalizedSignalField as ValidSignalField,
         content: row.content,
       };
       validRows.push(validatedRow);
