@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import {
   copyResultsLinkedInSharePost,
@@ -35,6 +35,78 @@ export function ResultLinkedInShare({ postBody, analytics }: ResultLinkedInShare
   const titleId = useId();
   const descriptionId = useId();
   const previewId = useId();
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  function closePanel() {
+    if (!isOpen) {
+      return;
+    }
+
+    trackResultsLinkedInSharePanelVisibility({
+      nextOpen: false,
+      analytics,
+    });
+    setIsOpen(false);
+    setCopyFeedback('');
+  }
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (panelRef.current?.contains(target)) {
+        return;
+      }
+
+      trackResultsLinkedInSharePanelVisibility({
+        nextOpen: false,
+        analytics,
+      });
+      setIsOpen(false);
+      setCopyFeedback('');
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        trackResultsLinkedInSharePanelVisibility({
+          nextOpen: false,
+          analytics,
+        });
+        setIsOpen(false);
+        setCopyFeedback('');
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [analytics, isOpen]);
+
+  useEffect(() => {
+    if (!copyFeedback) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setCopyFeedback('');
+    }, 2400);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [copyFeedback]);
 
   async function handleCopy() {
     const copied = await copyResultsLinkedInSharePost({
@@ -58,25 +130,38 @@ export function ResultLinkedInShare({ postBody, analytics }: ResultLinkedInShare
   }
 
   return (
-    <div className="relative shrink-0">
+    <div ref={panelRef} className="relative shrink-0">
       <button
         type="button"
         aria-label="Share on LinkedIn"
         aria-expanded={isOpen}
         aria-controls={previewId}
         onClick={() => {
-          const nextOpen = !isOpen;
+          if (isOpen) {
+            closePanel();
+            return;
+          }
+
           trackResultsLinkedInSharePanelVisibility({
-            nextOpen,
+            nextOpen: true,
             analytics,
           });
-          setIsOpen(nextOpen);
+          setIsOpen(true);
           setCopyFeedback('');
         }}
-        className="sonartra-motion-button sonartra-focus-ring inline-flex min-h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-semibold tracking-[0.01em] text-white/88 shadow-[0_12px_28px_rgba(0,0,0,0.14)] backdrop-blur"
+        className="sonartra-button sonartra-share-trigger sonartra-focus-ring min-h-[2.9rem] rounded-full px-3.5 py-2 sm:px-4"
       >
-        <LinkedInGlyph />
-        <span>Share on LinkedIn</span>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.055] text-white/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <LinkedInGlyph />
+        </span>
+        <span className="flex flex-col items-start leading-none">
+          <span className="text-[0.64rem] font-medium uppercase tracking-[0.16em] text-white/44">
+            Share
+          </span>
+          <span className="mt-1 text-[0.92rem] font-semibold tracking-[0.005em] text-white/92">
+            On LinkedIn
+          </span>
+        </span>
       </button>
 
       {isOpen ? (
@@ -86,52 +171,78 @@ export function ResultLinkedInShare({ postBody, analytics }: ResultLinkedInShare
           aria-modal="false"
           aria-labelledby={titleId}
           aria-describedby={descriptionId}
-          className="sonartra-motion-reveal-soft absolute right-0 top-[calc(100%+0.9rem)] z-20 w-[min(30rem,calc(100vw-2rem))] rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,29,49,0.96),rgba(10,17,31,0.96))] p-5 shadow-[0_28px_64px_rgba(0,0,0,0.34)] backdrop-blur md:p-6"
+          className="sonartra-motion-reveal-soft sonartra-share-panel absolute left-0 right-auto top-[calc(100%+0.85rem)] z-20 w-[min(32rem,calc(100vw-2.5rem))] rounded-[1.55rem] border p-4 sm:left-auto sm:right-0 sm:w-[31rem] sm:p-5 md:p-6"
         >
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <p className="sonartra-report-kicker">LinkedIn share</p>
-              <h2 id={titleId} className="sonartra-report-title text-[1.12rem] text-white">
+          <div className="space-y-5 md:space-y-6">
+            <div className="space-y-2.5">
+              <p className="sonartra-report-kicker text-white/46">LinkedIn share</p>
+              <h2 id={titleId} className="sonartra-report-title text-[1.12rem] leading-7 text-white md:text-[1.2rem]">
                 Share your Sonartra result
               </h2>
-              <p id={descriptionId} className="sonartra-report-body-soft max-w-[26rem] text-sm leading-7">
-                This creates a ready-to-copy LinkedIn post based on your persisted Sonartra result.
+              <p
+                id={descriptionId}
+                className="sonartra-report-body-soft max-w-[27rem] text-[0.94rem] leading-7 text-white/60"
+              >
+                A considered LinkedIn post, prepared from your persisted Sonartra result and ready
+                to take with you.
               </p>
             </div>
 
-            <div className="rounded-[1.15rem] border border-white/8 bg-black/10 p-4">
-              <textarea
-                readOnly
-                aria-label="LinkedIn post preview"
-                value={postBody}
-                className="sonartra-scrollbar min-h-[14rem] w-full resize-none bg-transparent text-sm leading-7 text-white/84 outline-none"
-              />
+            <div className="sonartra-share-panel-divider border-t pt-4 md:pt-5">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="sonartra-report-kicker text-white/44">Post preview</p>
+                  <p className="sonartra-type-caption text-white/42">Read only</p>
+                </div>
+
+                <div className="sonartra-share-preview rounded-[1.2rem] border p-4 md:p-5">
+                  <textarea
+                    readOnly
+                    aria-label="LinkedIn post preview"
+                    value={postBody}
+                    className="sonartra-scrollbar min-h-[15rem] w-full resize-none bg-transparent text-[0.95rem] leading-7 text-white/84 outline-none md:min-h-[15.5rem]"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-3">
+            <div className="sonartra-share-panel-divider flex flex-col gap-3 border-t pt-4 md:gap-3.5 md:pt-5">
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="sonartra-button sonartra-button-primary sonartra-focus-ring"
+                  className="sonartra-button sonartra-button-primary sonartra-focus-ring min-w-[11.5rem] justify-center"
                 >
                   Copy LinkedIn Post
                 </button>
                 <button
                   type="button"
                   onClick={handleOpenLinkedIn}
-                  className="sonartra-button sonartra-button-secondary sonartra-focus-ring"
+                  className="sonartra-button sonartra-button-secondary sonartra-focus-ring min-w-[9.5rem] justify-center"
                 >
                   Open LinkedIn
                 </button>
               </div>
 
-              <p
-                className="sonartra-type-caption min-h-5 text-left text-white/62 sm:text-right"
-                aria-live="polite"
-              >
-                {copyFeedback}
-              </p>
+              <div className="min-h-6">
+                {copyFeedback ? (
+                  <p
+                    className={[
+                      'inline-flex items-center rounded-full border px-3 py-1 text-[0.72rem] font-medium tracking-[0.08em] uppercase',
+                      copyFeedback === 'Copied to clipboard'
+                        ? 'sonartra-share-feedback'
+                        : 'sonartra-share-feedback-muted',
+                    ].join(' ')}
+                    aria-live="polite"
+                  >
+                    {copyFeedback}
+                  </p>
+                ) : (
+                  <p className="sonartra-type-caption text-white/38" aria-live="polite">
+                    Copy the post first, then continue into LinkedIn.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>

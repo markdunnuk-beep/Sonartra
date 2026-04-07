@@ -44,6 +44,8 @@ test('share control renders a branded linkedin trigger with the panel closed by 
 
   assert.match(markup, /Share on LinkedIn/);
   assert.match(markup, /aria-label="Share on LinkedIn"/);
+  assert.match(markup, /On LinkedIn/);
+  assert.match(markup, /Share/);
   assert.doesNotMatch(markup, /Share your Sonartra result/);
   assert.doesNotMatch(markup, /Copy LinkedIn Post/);
 });
@@ -59,6 +61,15 @@ test('share component source includes copy feedback and linkedin open behavior',
   assert.match(source, /trackResultsLinkedInSharePanelVisibility/);
   assert.match(source, /copyResultsLinkedInSharePost/);
   assert.match(source, /trackResultsLinkedInOpenClicked/);
+  assert.match(source, /document\.addEventListener\('pointerdown'/);
+  assert.match(source, /document\.addEventListener\('keydown'/);
+  assert.match(source, /event\.key === 'Escape'/);
+  assert.match(source, /window\.setTimeout/);
+  assert.match(source, /Post preview/);
+  assert.match(source, /Copy the post first, then continue into LinkedIn\./);
+  assert.match(source, /sonartra-share-trigger/);
+  assert.match(source, /sonartra-share-panel/);
+  assert.match(source, /sonartra-share-preview/);
   assert.match(source, /Share your Sonartra result/);
   assert.match(source, /Copy LinkedIn Post/);
   assert.match(source, /Open LinkedIn/);
@@ -77,5 +88,5 @@ test('results page wires the share formatter and suppresses the share ui when he
   assert.match(source, /linkedinShare\.canShare \? \(/);
   assert.match(source, /analytics=\{linkedinShareAnalytics\}/);
   assert.match(source, /<ResultLinkedInShare/);
-  assert.match(source, /className="flex flex-wrap items-center justify-between gap-4"/);
+  assert.match(source, /className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"/);
 });

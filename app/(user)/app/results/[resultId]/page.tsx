@@ -510,7 +510,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           <div className="max-w-[68rem] space-y-11 md:space-y-14">
             <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
               <div className="space-y-9 md:space-y-11">
-                <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
                     <SectionEyebrow>Results report</SectionEyebrow>
                     <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
