@@ -379,6 +379,171 @@ test('detail load returns canonical payload sections alongside compatibility pro
   assert.equal(detail.strengths[0]?.detail, 'Core Focus strength.');
 });
 
+test('detail load normalizes legacy signal chapter summaries to string or null only', async () => {
+  const service = createResultReadModelService({
+    db: createFakeDb([
+      {
+        resultId: 'result-legacy',
+        attemptId: 'attempt-legacy',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.0.0',
+        userId: 'user-1',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:05:00.000Z',
+        createdAt: '2026-01-01T00:05:00.000Z',
+        canonicalResultPayload: {
+          metadata: {
+            assessmentKey: 'wplp80',
+            assessmentTitle: 'WPLP-80',
+            version: '1.0.0',
+            attemptId: 'attempt-legacy',
+            completedAt: '2026-01-01T00:05:00.000Z',
+          },
+          intro: {
+            assessmentDescription: null,
+          },
+          hero: {
+            headline: 'Legacy compatibility',
+            subheadline: null,
+            summary: null,
+            narrative: 'Legacy compatibility narrative.',
+            pressureOverlay: null,
+            environmentOverlay: null,
+            primaryPattern: {
+              label: 'Core Focus',
+              signalKey: 'core_focus',
+              signalLabel: 'Core Focus',
+            },
+            heroPattern: null,
+            domainPairWinners: [],
+            traitTotals: [],
+            matchedPatterns: [],
+            domainHighlights: [],
+          },
+          domains: [
+            {
+              domainKey: 'signals',
+              domainLabel: 'Signals',
+              chapterOpening: 'Legacy chapter opening',
+              signalBalance: {
+                items: [
+                  {
+                    signalKey: 'core_focus',
+                    signalLabel: 'Core Focus',
+                    withinDomainPercent: 70,
+                    rank: 1,
+                    isPrimary: true,
+                    isSecondary: false,
+                    chapterSummary: {},
+                    summary: null,
+                  },
+                  {
+                    signalKey: 'role_executor',
+                    signalLabel: 'Role Executor',
+                    withinDomainPercent: 30,
+                    rank: 2,
+                    isPrimary: false,
+                    isSecondary: true,
+                    chapterSummary: 42,
+                    summary: 'Legacy summary fallback',
+                  },
+                ],
+              },
+              primarySignal: {
+                signalKey: 'core_focus',
+                signalLabel: 'Core Focus',
+                chapterSummary: [],
+                summary: null,
+                strength: null,
+                watchout: null,
+                development: null,
+              },
+              secondarySignal: {
+                signalKey: 'role_executor',
+                signalLabel: 'Role Executor',
+                chapterSummary: false,
+                summary: 'Secondary legacy summary',
+                strength: null,
+                watchout: null,
+                development: null,
+              },
+              signalPair: {
+                pairKey: 'executor_focus',
+                primarySignalKey: 'core_focus',
+                primarySignalLabel: 'Core Focus',
+                secondarySignalKey: 'role_executor',
+                secondarySignalLabel: 'Role Executor',
+                summary: '   ',
+              },
+              pressureFocus: '   ',
+              environmentFocus: '   ',
+            },
+          ],
+          actions: {
+            strengths: [],
+            watchouts: [],
+            developmentFocus: [],
+          },
+          diagnostics: {
+            readinessStatus: 'ready',
+            scoring: {
+              scoringMethod: 'option_signal_weights_only',
+              totalQuestions: 1,
+              answeredQuestions: 1,
+              unansweredQuestions: 0,
+              totalResponsesProcessed: 1,
+              totalWeightsApplied: 1,
+              totalScoreMass: 10,
+              zeroScoreSignalCount: 0,
+              zeroAnswerSubmission: false,
+              warnings: [],
+              generatedAt: '2026-01-01T00:05:00.000Z',
+            },
+            normalization: {
+              normalizationMethod: 'largest_remainder_integer_percentages',
+              totalScoreMass: 10,
+              zeroMass: false,
+              globalPercentageSum: 100,
+              domainPercentageSums: {
+                signals: 100,
+              },
+              roundingAdjustmentsApplied: 0,
+              zeroScoreSignalCount: 0,
+              warnings: [],
+              generatedAt: '2026-01-01T00:05:00.000Z',
+            },
+            answeredQuestionCount: 1,
+            totalQuestionCount: 1,
+            missingQuestionIds: [],
+            topSignalSelectionBasis: 'normalized_rank',
+            rankedSignalCount: 2,
+            domainCount: 1,
+            zeroMass: false,
+            zeroMassTopSignalFallbackApplied: false,
+            warnings: [],
+            generatedAt: '2026-01-01T00:05:00.000Z',
+          },
+        },
+      },
+    ]),
+  });
+
+  const detail = await service.getAssessmentResultDetail({
+    userId: 'user-1',
+    resultId: 'result-legacy',
+  });
+
+  assert.equal(detail.domains[0]?.signalBalance.items[0]?.chapterSummary, null);
+  assert.equal(detail.domains[0]?.signalBalance.items[1]?.chapterSummary, 'Legacy summary fallback');
+  assert.equal(detail.domains[0]?.primarySignal?.chapterSummary, null);
+  assert.equal(detail.domains[0]?.secondarySignal?.chapterSummary, 'Secondary legacy summary');
+  assert.equal(detail.domains[0]?.signalPair?.summary, null);
+  assert.equal(detail.domains[0]?.pressureFocus, null);
+  assert.equal(detail.domains[0]?.environmentFocus, null);
+});
+
 test('malformed payload triggers explicit payload error', async () => {
   const service = createResultReadModelService({
     db: createFakeDb([

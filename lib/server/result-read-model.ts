@@ -42,19 +42,38 @@ function parseCanonicalPayload(record: PersistedReadyResultRecord) {
   return normalizeCanonicalPayload(record.canonicalResultPayload);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function normalizeNullableText(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0
+    ? value
+    : null;
+}
+
+function readLegacyNullableText(record: unknown, key: string): string | null {
+  if (!isRecord(record) || !(key in record)) {
+    return null;
+  }
+
+  return normalizeNullableText(record[key]);
+}
+
 function normalizeCanonicalPayload(payload: CanonicalResultPayload): CanonicalResultPayload {
   return {
     ...payload,
     domains: Object.freeze(
       payload.domains.map((domain) => ({
         ...domain,
+        chapterOpening: normalizeNullableText(domain.chapterOpening),
         signalBalance: {
           items: Object.freeze(
             domain.signalBalance.items.map((signal) => ({
               ...signal,
               chapterSummary:
-                signal.chapterSummary
-                ?? ('summary' in signal ? signal.summary ?? null : null),
+                normalizeNullableText(signal.chapterSummary)
+                ?? readLegacyNullableText(signal, 'summary'),
             })),
           ),
         },
@@ -62,18 +81,26 @@ function normalizeCanonicalPayload(payload: CanonicalResultPayload): CanonicalRe
           ? {
               ...domain.primarySignal,
               chapterSummary:
-                domain.primarySignal.chapterSummary
-                ?? ('summary' in domain.primarySignal ? domain.primarySignal.summary ?? null : null),
+                normalizeNullableText(domain.primarySignal.chapterSummary)
+                ?? readLegacyNullableText(domain.primarySignal, 'summary'),
             }
           : null,
         secondarySignal: domain.secondarySignal
           ? {
               ...domain.secondarySignal,
               chapterSummary:
-                domain.secondarySignal.chapterSummary
-                ?? ('summary' in domain.secondarySignal ? domain.secondarySignal.summary ?? null : null),
+                normalizeNullableText(domain.secondarySignal.chapterSummary)
+                ?? readLegacyNullableText(domain.secondarySignal, 'summary'),
             }
           : null,
+        signalPair: domain.signalPair
+          ? {
+              ...domain.signalPair,
+              summary: normalizeNullableText(domain.signalPair.summary),
+            }
+          : null,
+        pressureFocus: normalizeNullableText(domain.pressureFocus),
+        environmentFocus: normalizeNullableText(domain.environmentFocus),
       })),
     ),
   };
