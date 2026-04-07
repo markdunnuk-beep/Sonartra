@@ -121,15 +121,15 @@ function ActionButton({
 
 
 export function AdminLanguageDatasetImport({
+  dataset,
   assessmentVersionId,
   counts,
   isEditableAssessmentVersion,
-  datasetKeys,
-  defaultDataset,
-  sectionEyebrow = 'Report Language',
-  sectionTitle = 'Import report language',
-  sectionDescription = 'Select the section you want to replace, paste the rows, and run a single import action.',
+  sectionEyebrow,
+  sectionTitle,
+  sectionDescription,
 }: Readonly<{
+  dataset: LanguageImportDataset;
   assessmentVersionId: string;
   counts: {
     heroHeaders: { entryCount: number };
@@ -138,24 +138,14 @@ export function AdminLanguageDatasetImport({
     pairs: { entryCount: number };
   };
   isEditableAssessmentVersion: boolean;
-  datasetKeys?: readonly LanguageImportDataset[];
-  defaultDataset?: LanguageImportDataset;
   sectionEyebrow?: string;
   sectionTitle?: string;
   sectionDescription?: string;
 }>) {
-  const availableOptions = DATASET_OPTIONS.filter((option) =>
-    datasetKeys ? datasetKeys.includes(option.key) : true,
-  );
-  const initialDataset =
-    (defaultDataset && availableOptions.some((option) => option.key === defaultDataset)
-      ? defaultDataset
-      : availableOptions[0]?.key) ?? 'heroHeader';
   const action = useMemo(
     () => importLanguageDatasetAction.bind(null, { assessmentVersionId }),
     [assessmentVersionId],
   );
-  const [selectedDataset, setSelectedDataset] = useState<LanguageImportDataset>(initialDataset);
   const [rawInput, setRawInput] = useState('');
   const [resultState, setResultState] = useState<AdminLanguageDatasetImportState>(
     initialAdminLanguageDatasetImportState,
@@ -163,18 +153,21 @@ export function AdminLanguageDatasetImport({
   const [hasImported, setHasImported] = useState(false);
   const [isImportPending, startImportTransition] = useTransition();
 
-  const selectedOption =
-    availableOptions.find((option) => option.key === selectedDataset) ?? availableOptions[0];
+  const selectedOption = DATASET_OPTIONS.find((option) => option.key === dataset) ?? DATASET_OPTIONS[0];
+  const resolvedSectionEyebrow = sectionEyebrow ?? selectedOption.title;
+  const resolvedSectionTitle = sectionTitle ?? selectedOption.title;
+  const resolvedSectionDescription =
+    sectionDescription ?? selectedOption.description;
   const existingRowCount =
-    selectedDataset === 'heroHeader'
+    dataset === 'heroHeader'
       ? counts.heroHeaders.entryCount
-      : selectedDataset === 'domain'
+      : dataset === 'domain'
         ? counts.domains.entryCount
-        : selectedDataset === 'signal'
+        : dataset === 'signal'
           ? counts.signals.entryCount
           : counts.pairs.entryCount;
   const inlineError =
-    resultState.dataset === selectedDataset
+    resultState.dataset === dataset
       ? resultState.formError ??
         resultState.executionError ??
         resultState.parseErrors[0]?.message ??
@@ -191,16 +184,10 @@ export function AdminLanguageDatasetImport({
     });
   }
 
-  function handleDatasetChange(nextDataset: LanguageImportDataset) {
-    setSelectedDataset(nextDataset);
-    setHasImported(false);
-    resetResult(nextDataset, rawInput);
-  }
-
   function handleInputChange(nextValue: string) {
     setRawInput(nextValue);
     setHasImported(false);
-    resetResult(selectedDataset, nextValue);
+    resetResult(dataset, nextValue);
   }
 
   function handleImport() {
@@ -209,7 +196,7 @@ export function AdminLanguageDatasetImport({
     }
 
     startImportTransition(async () => {
-      const nextState = await action({ dataset: selectedDataset, rawInput });
+      const nextState = await action({ dataset, rawInput });
       setResultState(nextState);
 
       if (nextState.success) {
@@ -225,9 +212,9 @@ export function AdminLanguageDatasetImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">{sectionEyebrow}</p>
-          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">{sectionTitle}</h3>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">{sectionDescription}</p>
+          <p className="sonartra-page-eyebrow">{resolvedSectionEyebrow}</p>
+          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">{resolvedSectionTitle}</h3>
+          <p className="max-w-3xl text-sm leading-7 text-white/62">{resolvedSectionDescription}</p>
           <p className="max-w-3xl text-sm leading-7 text-white/62">{REPORT_ALIGNED_AUTHORING_NOTE}</p>
         </div>
 
@@ -235,34 +222,6 @@ export function AdminLanguageDatasetImport({
           <AdminFeedbackNotice tone="warning">
             Language datasets are only editable for draft assessment versions.
           </AdminFeedbackNotice>
-        ) : null}
-
-        {availableOptions.length > 1 ? (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-white">Dataset type</p>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {availableOptions.map((option) => {
-                const isSelected = option.key === selectedDataset;
-                return (
-                  <button
-                    aria-pressed={isSelected}
-                    className={cn(
-                      'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
-                      isSelected
-                        ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
-                        : 'border-white/8 bg-black/10 hover:border-white/14',
-                    )}
-                    key={option.key}
-                    onClick={() => handleDatasetChange(option.key)}
-                    type="button"
-                  >
-                    <p className="text-sm font-semibold text-white">{option.label}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/54">{option.title}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         ) : null}
 
         <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
@@ -311,7 +270,7 @@ export function AdminLanguageDatasetImport({
           </ActionButton>
         </div>
 
-        {resultState.dataset === selectedDataset &&
+        {resultState.dataset === dataset &&
         (resultState.success ||
           resultState.parseErrors.length > 0 ||
           resultState.validationErrors.length > 0 ||

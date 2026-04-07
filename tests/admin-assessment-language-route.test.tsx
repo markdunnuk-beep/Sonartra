@@ -716,15 +716,11 @@ test('language step component renders assessment introduction, hero pattern lang
   assert.match(markup, /Replace the hero headline rows shown at the top of the results page from a dedicated, version-scoped import surface\./);
   assert.match(markup, /Domain Chapters/);
   assert.match(markup, /Manage the chapter-owned language used throughout the domain reading in the same order it appears on the results page\./);
-  assert.match(markup, /Import report language/);
-  assert.match(markup, /Legacy shared import surface retained temporarily/);
   assert.match(markup, /Import Hero engine datasets/);
   assert.match(markup, /Pair Trait Weights/);
   assert.match(markup, /Hero Pattern Rules/);
   assert.match(markup, /Hero Pattern Language/);
   assert.match(markup, /Current rows: 12/);
-  assert.match(markup, /Dataset type/);
-  assert.match(markup, /Hero Header Language/);
   assert.match(markup, /Format: scope \| key \| headline/);
   assert.match(markup, /Paste Hero Header rows/);
   assert.match(markup, /Domain Chapter Language/);
@@ -745,11 +741,12 @@ test('language step component renders assessment introduction, hero pattern lang
   assert.match(markup, /Pair Traits/);
   assert.match(markup, /Hero Rules/);
   assert.match(markup, /Hero Language/);
+  assert.doesNotMatch(markup, /Import report language/);
+  assert.doesNotMatch(markup, /Legacy shared import surface retained temporarily/);
 
   const assessmentIntroIndex = markup.indexOf('Assessment Introduction');
   const heroPatternIndex = markup.indexOf('Hero Pattern Language');
   const domainChaptersIndex = markup.indexOf('Domain Chapters');
-  const legacyImportIndex = markup.indexOf('Import report language');
   const heroEngineIndex = markup.indexOf('Import Hero engine datasets');
   const domainChapterIndex = markup.indexOf('Domain Chapter Language');
   const signalChapterIndex = markup.indexOf('Signal Chapter Language');
@@ -761,8 +758,7 @@ test('language step component renders assessment introduction, hero pattern lang
   assert.ok(domainChapterIndex > domainChaptersIndex);
   assert.ok(signalChapterIndex > domainChapterIndex);
   assert.ok(pairChapterIndex > signalChapterIndex);
-  assert.ok(legacyImportIndex > pairChapterIndex);
-  assert.ok(heroEngineIndex > legacyImportIndex);
+  assert.ok(heroEngineIndex > pairChapterIndex);
 });
 
 test('language step component shows a safe empty state when no usable version context exists', () => {

@@ -9,12 +9,10 @@ function readSource(): string {
   return readFileSync(componentPath, 'utf8');
 }
 
-test('language dataset import uses a selector-driven single-action flow', () => {
+test('language dataset import is a dedicated single-dataset module', () => {
   const source = readSource();
 
-  assert.match(source, /datasetKeys\?: readonly LanguageImportDataset\[];/);
-  assert.match(source, /sectionTitle = 'Import report language'/);
-  assert.match(source, /Dataset type/);
+  assert.match(source, /dataset: LanguageImportDataset;/);
   assert.match(source, /Hero Header Language/);
   assert.match(source, /Domain Chapter Language/);
   assert.match(source, /chapterOpening rows for report domains/);
@@ -23,13 +21,15 @@ test('language dataset import uses a selector-driven single-action flow', () => 
   assert.match(source, /supports chapterSummary only/);
   assert.match(source, /Signal Pair Chapter Language/);
   assert.match(source, /supports chapterSummary, pressureFocus, and environmentFocus only/);
-  assert.match(source, /availableOptions\.length > 1/);
+  assert.match(source, /const selectedOption = DATASET_OPTIONS\.find\(\(option\) => option\.key === dataset\)/);
+  assert.match(source, /resolvedSectionTitle = sectionTitle \?\? selectedOption\.title/);
   assert.match(source, /isImportPending \? 'Importing\.\.\.' : hasImported \? 'Imported' : 'Import'/);
   assert.match(source, /setHasImported\(false\)/);
   assert.match(source, /window\.location\.reload\(\)/);
-  assert.doesNotMatch(source, /Preview import/);
-  assert.doesNotMatch(source, /Import Hero Header language/);
-  assert.doesNotMatch(source, /Import domain chapter language/);
-  assert.doesNotMatch(source, /Import signal language/);
-  assert.doesNotMatch(source, /Import pair chapter language/);
+  assert.doesNotMatch(source, /Dataset type/);
+  assert.doesNotMatch(source, /datasetKeys\?: readonly LanguageImportDataset\[];/);
+  assert.doesNotMatch(source, /defaultDataset\?: LanguageImportDataset;/);
+  assert.doesNotMatch(source, /selectedDataset/);
+  assert.doesNotMatch(source, /availableOptions/);
+  assert.doesNotMatch(source, /Import report language/);
 });
