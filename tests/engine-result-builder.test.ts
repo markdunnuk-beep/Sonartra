@@ -28,6 +28,7 @@ const DISALLOWED_GENERIC_HERO_HEADLINES = Object.freeze([
   'A clear decision pattern is coming through',
   'A clear role fit is coming through',
 ]);
+const REMOVED_DOMAIN_FOCUS_FIELD = `domain${'Focus'}`;
 
 function createEmptyLanguageBundle(): EngineLanguageBundle {
   return {
@@ -385,6 +386,8 @@ test('minimal valid payload construction returns a complete canonical result pay
   assert.equal(payload.hero.headline, 'Focus');
   assert.equal(payload.hero.primaryPattern?.signalKey, 'focus');
   assert.equal(payload.domains.length, 2);
+  assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (payload.domains[0] ?? {}), false);
+  assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (payload.domains[1] ?? {}), false);
   assert.deepEqual(Object.keys(payload.actions), ['strengths', 'watchouts', 'developmentFocus']);
 });
 

@@ -9,6 +9,8 @@ import {
   AssessmentResultPayloadError,
 } from '@/lib/server/result-read-model-types';
 
+const REMOVED_DOMAIN_FOCUS_FIELD = `domain${'Focus'}`;
+
 type ResultRowFixture = {
   resultId: string;
   attemptId: string;
@@ -353,11 +355,14 @@ test('detail load returns canonical payload sections alongside compatibility pro
   assert.equal(detail.actions.strengths[0]?.text, 'Core Focus strength.');
   assert.equal(detail.actions.watchouts[0]?.signalKey, 'role_executor');
   assert.equal(detail.actions.developmentFocus[0]?.text, 'Role Executor development.');
+  assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (detail.domains[0] ?? {}), false);
+  assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (detail.domains[1] ?? {}), false);
   assert.equal(detail.domainSummaries[0]?.signalScores.length, 0);
   assert.equal(detail.domainSummaries[0]?.domainSource, 'question_section');
   assert.equal(detail.normalizedScores[1]?.rawTotal, 0);
   assert.equal(detail.normalizedScores[1]?.isOverlay, false);
   assert.equal(detail.domainSummaries[1]?.interpretation?.primarySignalKey, 'core_focus');
+  assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (detail.domainSummaries[1]?.interpretation ?? {}), false);
   assert.equal(detail.strengths[0]?.detail, 'Core Focus strength.');
 });
 

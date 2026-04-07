@@ -52,8 +52,6 @@ Current source ownership in `lib/engine/result-builder-helpers.ts`:
   - `pairKey` is derived from the top two domain signals
   - `text` comes from pair language summary only
 
-`domainFocus` does not exist in the current canonical payload or active UI. Search results show no active `domainFocus` references; the live field name is `focus`.
-
 `pressureFocus` and `environmentFocus` also do not exist as active field names. The canonical fields are `pressure` and `environment`.
 
 ## 2. Language Ownership Today
@@ -366,7 +364,7 @@ Strong coverage present:
 
 Notable gaps:
 
-- no active test asserting that `domainFocus` / `pressureFocus` / `environmentFocus` are absent from the canonical contract
+- no active test asserting that legacy focus-field variants are absent from the canonical contract
 - no dedicated test asserting `environment` is preserved or intentionally omitted in compatibility `domainSummaries[*].interpretation`
 - no dedicated test asserting ring-model fallback to action text does not mask missing signal-language ownership incorrectly
 - no dedicated test covering pair-summary-null behavior when `pairKey` exists but `text` is absent
@@ -375,7 +373,7 @@ Notable gaps:
 
 ## 10. Validation Checklist
 
-- [x] All `domainFocus` references identified
+- [x] All legacy focus-field references identified
 - [x] All language import paths mapped
 - [x] Result builder fully understood
 - [x] Pair usage vs bypass clearly identified

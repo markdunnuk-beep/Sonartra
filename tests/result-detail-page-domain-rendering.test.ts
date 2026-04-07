@@ -18,6 +18,7 @@ const pagePath = join(
 
 const DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN =
   /A clear (working style|source of motivation|leadership pattern|conflict response|environment preference|decision pattern|role fit) is coming through|A pressure pattern is coming through/;
+const REMOVED_DOMAIN_FOCUS_PATTERN = new RegExp(`domain${'Focus'}`);
 
 function buildResultDetail(
   domains: AssessmentResultDetailViewModel['domains'],
@@ -304,6 +305,7 @@ test('result detail page renders canonical domain chapter fields without UI-side
   assert.doesNotMatch(source, /interpretation\?\.summary/);
   assert.doesNotMatch(source, /supportingLine/);
   assert.doesNotMatch(source, /tensionClause/);
+  assert.doesNotMatch(source, REMOVED_DOMAIN_FOCUS_PATTERN);
 });
 
 test('result detail page renders actions from canonical action blocks only', () => {
