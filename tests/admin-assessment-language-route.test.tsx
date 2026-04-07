@@ -673,7 +673,7 @@ test('language step view model returns null for a missing assessment and empty v
   });
 });
 
-test('language step component renders hero header, domain chapters, signals, and pairs in report order', () => {
+test('language step component renders assessment introduction, hero pattern language, and first-class domain chapter modules', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentLanguageStep
       viewModel={{
@@ -709,7 +709,15 @@ test('language step component renders hero header, domain chapters, signals, and
   );
 
   assert.match(markup, /Language/);
+  assert.match(markup, /Assessment Introduction/);
+  assert.match(markup, /This step controls report-facing language only\./);
+  assert.match(markup, /Hero Pattern Language/);
+  assert.match(markup, /Replace the opening hero headline language from its own dedicated import surface\./);
+  assert.match(markup, /Replace the hero headline rows shown at the top of the results page from a dedicated, version-scoped import surface\./);
+  assert.match(markup, /Domain Chapters/);
+  assert.match(markup, /Manage the chapter-owned language used throughout the domain reading in the same order it appears on the results page\./);
   assert.match(markup, /Import report language/);
+  assert.match(markup, /Legacy shared import surface retained temporarily/);
   assert.match(markup, /Import Hero engine datasets/);
   assert.match(markup, /Pair Trait Weights/);
   assert.match(markup, /Hero Pattern Rules/);
@@ -720,19 +728,41 @@ test('language step component renders hero header, domain chapters, signals, and
   assert.match(markup, /Format: scope \| key \| headline/);
   assert.match(markup, /Paste Hero Header rows/);
   assert.match(markup, /Domain Chapter Language/);
-  assert.match(markup, /Signal Language/);
-  assert.match(markup, /Pair Chapter Language/);
+  assert.match(markup, /Signal Chapter Language/);
+  assert.match(markup, /Signal Pair Chapter Language/);
+  assert.match(markup, /Domain Chapter Language supports chapterOpening only\./);
+  assert.match(markup, /Signal Chapter Language supports chapterSummary only\./);
+  assert.match(markup, /Signal Pair Chapter Language supports chapterSummary, pressureFocus, and environmentFocus only\./);
   assert.match(markup, /pair \| driver_influencer \| Fast-moving, people-driven and energised by momentum/);
   assert.match(markup, /supported authoring path for report language/i);
   assert.doesNotMatch(markup, /Actions<\/h3>/);
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
   assert.match(markup, /Current Hero Header rows: 2/);
+  assert.match(markup, /Current Domain rows: 1/);
+  assert.match(markup, /Current Signal rows: 2/);
+  assert.match(markup, /Current Pair rows: 1/);
   assert.match(markup, /Pair Traits/);
   assert.match(markup, /Hero Rules/);
   assert.match(markup, /Hero Language/);
-  assert.doesNotMatch(markup, /Report Introduction/);
-  assert.doesNotMatch(markup, /Report introduction/);
+
+  const assessmentIntroIndex = markup.indexOf('Assessment Introduction');
+  const heroPatternIndex = markup.indexOf('Hero Pattern Language');
+  const domainChaptersIndex = markup.indexOf('Domain Chapters');
+  const legacyImportIndex = markup.indexOf('Import report language');
+  const heroEngineIndex = markup.indexOf('Import Hero engine datasets');
+  const domainChapterIndex = markup.indexOf('Domain Chapter Language');
+  const signalChapterIndex = markup.indexOf('Signal Chapter Language');
+  const pairChapterIndex = markup.indexOf('Signal Pair Chapter Language');
+
+  assert.ok(assessmentIntroIndex >= 0);
+  assert.ok(heroPatternIndex > assessmentIntroIndex);
+  assert.ok(domainChaptersIndex > heroPatternIndex);
+  assert.ok(domainChapterIndex > domainChaptersIndex);
+  assert.ok(signalChapterIndex > domainChapterIndex);
+  assert.ok(pairChapterIndex > signalChapterIndex);
+  assert.ok(legacyImportIndex > pairChapterIndex);
+  assert.ok(heroEngineIndex > legacyImportIndex);
 });
 
 test('language step component shows a safe empty state when no usable version context exists', () => {
@@ -1072,6 +1102,6 @@ test('language step component shows a safe schema-unavailable state instead of r
   assert.match(markup, /Apply the assessment version language migration before using this step\./);
   assert.doesNotMatch(markup, /Hero Header Language/);
   assert.doesNotMatch(markup, /Domain Chapter Language/);
-  assert.doesNotMatch(markup, /Signal Language/);
-  assert.doesNotMatch(markup, /Pair Chapter Language/);
+  assert.doesNotMatch(markup, /Signal Chapter Language/);
+  assert.doesNotMatch(markup, /Signal Pair Chapter Language/);
 });

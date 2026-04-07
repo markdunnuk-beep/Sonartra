@@ -12,13 +12,18 @@ function readSource(): string {
 test('language dataset import uses a selector-driven single-action flow', () => {
   const source = readSource();
 
+  assert.match(source, /datasetKeys\?: readonly LanguageImportDataset\[];/);
+  assert.match(source, /sectionTitle = 'Import report language'/);
   assert.match(source, /Dataset type/);
   assert.match(source, /Hero Header Language/);
   assert.match(source, /Domain Chapter Language/);
   assert.match(source, /chapterOpening rows for report domains/);
   assert.match(source, /supports chapterOpening only/);
-  assert.match(source, /Signal Language/);
-  assert.match(source, /Pair Chapter Language/);
+  assert.match(source, /Signal Chapter Language/);
+  assert.match(source, /supports chapterSummary only/);
+  assert.match(source, /Signal Pair Chapter Language/);
+  assert.match(source, /supports chapterSummary, pressureFocus, and environmentFocus only/);
+  assert.match(source, /availableOptions\.length > 1/);
   assert.match(source, /isImportPending \? 'Importing\.\.\.' : hasImported \? 'Imported' : 'Import'/);
   assert.match(source, /setHasImported\(false\)/);
   assert.match(source, /window\.location\.reload\(\)/);

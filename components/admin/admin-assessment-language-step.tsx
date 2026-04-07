@@ -88,9 +88,79 @@ export function AdminAssessmentLanguageStep({
 
       <div className="space-y-6">
         <SectionHeader
-          eyebrow="Imports"
+          eyebrow="Assessment Introduction"
+          title="Assessment Introduction"
+          description="This step controls report-facing language only. Use the dedicated sections below to update the persisted copy each results layer reads from."
+        />
+      </div>
+
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Hero Pattern Language"
+          title="Hero Pattern Language"
+          description="Replace the opening hero headline language from its own dedicated import surface."
+        />
+
+        <AdminLanguageDatasetImport
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          counts={viewModel.counts}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+          datasetKeys={['heroHeader']}
+          defaultDataset="heroHeader"
+          sectionEyebrow="Hero Pattern Language"
+          sectionTitle="Hero Pattern Language"
+          sectionDescription="Replace the hero headline rows shown at the top of the results page from a dedicated, version-scoped import surface."
+        />
+      </div>
+
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Domain Chapters"
+          title="Domain Chapters"
+          description="Manage the chapter-owned language used throughout the domain reading in the same order it appears on the results page."
+        />
+
+        <div className="grid gap-6 xl:grid-cols-3">
+          <AdminLanguageDatasetImport
+            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+            counts={viewModel.counts}
+            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+            datasetKeys={['domain']}
+            defaultDataset="domain"
+            sectionEyebrow="Domain Chapters"
+            sectionTitle="Domain Chapter Language"
+            sectionDescription="Replace the chapterOpening copy for each domain chapter from its own dedicated import surface."
+          />
+
+          <AdminLanguageDatasetImport
+            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+            counts={viewModel.counts}
+            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+            datasetKeys={['signal']}
+            defaultDataset="signal"
+            sectionEyebrow="Domain Chapters"
+            sectionTitle="Signal Chapter Language"
+            sectionDescription="Replace the persisted primary and secondary signal summaries from their own dedicated import surface."
+          />
+
+          <AdminLanguageDatasetImport
+            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+            counts={viewModel.counts}
+            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+            datasetKeys={['pair']}
+            defaultDataset="pair"
+            sectionEyebrow="Domain Chapters"
+            sectionTitle="Signal Pair Chapter Language"
+            sectionDescription="Replace the pair summary, pressure, and environment language from their own dedicated import surface."
+          />
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Legacy Import"
           title="Import report language"
-          description="Replace hero header, domain chapter, signal, and pair language from one shared import surface."
+          description="Legacy shared import surface retained temporarily while the new dedicated language sections bed in. Use the dedicated sections above as the primary authoring path."
         />
 
         <AdminLanguageDatasetImport

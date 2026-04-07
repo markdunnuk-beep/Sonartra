@@ -63,32 +63,29 @@ const DATASET_OPTIONS: readonly DatasetOption[] = [
   },
   {
     key: 'signal',
-    label: 'Signal',
-    title: 'Signal Language',
-    description: 'Author chapterSummary, strength, watchout, and development language by signal.',
+    label: 'Signal Chapter',
+    title: 'Signal Chapter Language',
+    description: 'Author chapterSummary rows for the primary and secondary signal readings.',
     detail:
-      'These are reusable report building blocks. The engine decides where each signal sentence appears.',
+      'Signal Chapter Language supports chapterSummary only. The results page reads these summaries directly from the canonical signal chapter payload.',
     currentRowsLabel: 'Current Signal rows',
     rowFormatLabel: 'section | target | field | content',
-    textareaLabel: 'Paste signal rows',
+    textareaLabel: 'Paste signal chapter rows',
     placeholder: 'signal | style_driver | chapterSummary | You tend to move quickly and take initiative.',
     formatExample: [
       'signal | style_driver | chapterSummary | You tend to move quickly and take initiative.',
-      'signal | style_driver | strength | You bring momentum and energy to delivery.',
-      'signal | style_driver | watchout | You may move ahead before others are ready.',
-      'signal | style_driver | development | Pause slightly longer before committing to direction.',
     ].join('\n'),
   },
   {
     key: 'pair',
-    label: 'Pair Chapter',
-    title: 'Pair Chapter Language',
-    description: 'Author chapterSummary, pressureFocus, and environmentFocus language by signal pair.',
+    label: 'Signal Pair Chapter',
+    title: 'Signal Pair Chapter Language',
+    description: 'Author chapterSummary, pressureFocus, and environmentFocus rows for the pair-owned reading.',
     detail:
-      'Pair keys remain canonicalized under the hood so report-shaped inputs still round-trip into the current storage model safely. Pair strength/watchout rows remain legacy-only and are not part of the active authoring path.',
+      'Signal Pair Chapter Language supports chapterSummary, pressureFocus, and environmentFocus only. Pair keys remain canonicalized under the hood so report-shaped inputs still land in the canonical pair-owned fields safely.',
     currentRowsLabel: 'Current Pair rows',
     rowFormatLabel: 'section | target | field | content',
-    textareaLabel: 'Paste pair chapter rows',
+    textareaLabel: 'Paste signal pair chapter rows',
     placeholder: 'pair | driver_analyst | chapterSummary | You combine forward momentum with structured thinking.',
     formatExample: [
       'pair | driver_analyst | chapterSummary | You combine forward momentum with structured thinking.',
@@ -127,6 +124,11 @@ export function AdminLanguageDatasetImport({
   assessmentVersionId,
   counts,
   isEditableAssessmentVersion,
+  datasetKeys,
+  defaultDataset,
+  sectionEyebrow = 'Report Language',
+  sectionTitle = 'Import report language',
+  sectionDescription = 'Select the section you want to replace, paste the rows, and run a single import action.',
 }: Readonly<{
   assessmentVersionId: string;
   counts: {
@@ -136,12 +138,24 @@ export function AdminLanguageDatasetImport({
     pairs: { entryCount: number };
   };
   isEditableAssessmentVersion: boolean;
+  datasetKeys?: readonly LanguageImportDataset[];
+  defaultDataset?: LanguageImportDataset;
+  sectionEyebrow?: string;
+  sectionTitle?: string;
+  sectionDescription?: string;
 }>) {
+  const availableOptions = DATASET_OPTIONS.filter((option) =>
+    datasetKeys ? datasetKeys.includes(option.key) : true,
+  );
+  const initialDataset =
+    (defaultDataset && availableOptions.some((option) => option.key === defaultDataset)
+      ? defaultDataset
+      : availableOptions[0]?.key) ?? 'heroHeader';
   const action = useMemo(
     () => importLanguageDatasetAction.bind(null, { assessmentVersionId }),
     [assessmentVersionId],
   );
-  const [selectedDataset, setSelectedDataset] = useState<LanguageImportDataset>('heroHeader');
+  const [selectedDataset, setSelectedDataset] = useState<LanguageImportDataset>(initialDataset);
   const [rawInput, setRawInput] = useState('');
   const [resultState, setResultState] = useState<AdminLanguageDatasetImportState>(
     initialAdminLanguageDatasetImportState,
@@ -149,7 +163,8 @@ export function AdminLanguageDatasetImport({
   const [hasImported, setHasImported] = useState(false);
   const [isImportPending, startImportTransition] = useTransition();
 
-  const selectedOption = DATASET_OPTIONS.find((option) => option.key === selectedDataset) ?? DATASET_OPTIONS[0];
+  const selectedOption =
+    availableOptions.find((option) => option.key === selectedDataset) ?? availableOptions[0];
   const existingRowCount =
     selectedDataset === 'heroHeader'
       ? counts.heroHeaders.entryCount
@@ -210,11 +225,9 @@ export function AdminLanguageDatasetImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Report Language</p>
-          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">Import report language</h3>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Select the section you want to replace, paste the rows, and run a single import action.
-          </p>
+          <p className="sonartra-page-eyebrow">{sectionEyebrow}</p>
+          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">{sectionTitle}</h3>
+          <p className="max-w-3xl text-sm leading-7 text-white/62">{sectionDescription}</p>
           <p className="max-w-3xl text-sm leading-7 text-white/62">{REPORT_ALIGNED_AUTHORING_NOTE}</p>
         </div>
 
@@ -224,31 +237,33 @@ export function AdminLanguageDatasetImport({
           </AdminFeedbackNotice>
         ) : null}
 
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-white">Dataset type</p>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {DATASET_OPTIONS.map((option) => {
-              const isSelected = option.key === selectedDataset;
-              return (
-                <button
-                  aria-pressed={isSelected}
-                  className={cn(
-                    'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
-                    isSelected
-                      ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
-                      : 'border-white/8 bg-black/10 hover:border-white/14',
-                  )}
-                  key={option.key}
-                  onClick={() => handleDatasetChange(option.key)}
-                  type="button"
-                >
-                  <p className="text-sm font-semibold text-white">{option.label}</p>
-                  <p className="mt-2 text-sm leading-6 text-white/54">{option.title}</p>
-                </button>
-              );
-            })}
+        {availableOptions.length > 1 ? (
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-white">Dataset type</p>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {availableOptions.map((option) => {
+                const isSelected = option.key === selectedDataset;
+                return (
+                  <button
+                    aria-pressed={isSelected}
+                    className={cn(
+                      'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
+                      isSelected
+                        ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
+                        : 'border-white/8 bg-black/10 hover:border-white/14',
+                    )}
+                    key={option.key}
+                    onClick={() => handleDatasetChange(option.key)}
+                    type="button"
+                  >
+                    <p className="text-sm font-semibold text-white">{option.label}</p>
+                    <p className="mt-2 text-sm leading-6 text-white/54">{option.title}</p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
           <div className="flex flex-wrap items-center gap-2">
