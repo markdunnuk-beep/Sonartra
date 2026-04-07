@@ -16,7 +16,8 @@ declare global {
   }
 }
 
-type BrowserAnalyticsTarget = Pick<Window, 'dispatchEvent' | 'CustomEvent'> & {
+type BrowserAnalyticsTarget = {
+  dispatchEvent: (event: Event) => boolean;
   sonartraAnalytics?: Window['sonartraAnalytics'];
 };
 
@@ -27,7 +28,6 @@ export function trackClientEvent(
     ? null
     : ({
         dispatchEvent: window.dispatchEvent.bind(window),
-        CustomEvent: window.CustomEvent,
         sonartraAnalytics: window.sonartraAnalytics,
       } satisfies BrowserAnalyticsTarget),
 ): void {
@@ -37,7 +37,7 @@ export function trackClientEvent(
 
   target.sonartraAnalytics?.track?.(event, payload);
   target.dispatchEvent(
-    new target.CustomEvent<ClientAnalyticsEventDetail>(SONARTRA_ANALYTICS_EVENT, {
+    new CustomEvent<ClientAnalyticsEventDetail>(SONARTRA_ANALYTICS_EVENT, {
       detail: {
         event,
         payload,
