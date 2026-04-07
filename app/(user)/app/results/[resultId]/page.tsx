@@ -3,8 +3,10 @@ import type { CSSProperties, ReactNode } from 'react';
 
 import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { HeroPatternMedallion } from '@/components/results/hero-pattern-medallion';
+import { ResultLinkedInShare } from '@/components/results/result-linkedin-share';
 import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
 import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
+import { formatLinkedInSharePost } from '@/lib/results/linkedin-share';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 import { buildDomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
 import type { AssessmentResultDetailViewModel } from '@/lib/server/result-read-model-types';
@@ -463,6 +465,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     domains: result.domains,
     ringModels: domainRingModels,
   });
+  const linkedinShare = formatLinkedInSharePost({
+    hero: result.hero,
+    rankedSignals: result.rankedSignals,
+  });
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   const heroHeadline = result.hero.headline?.trim() ?? '';
   const heroSubheadline = result.hero.subheadline?.trim() ?? '';
@@ -500,6 +506,12 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           style={getRevealStyle(1)}
         >
           <div className="max-w-[68rem] space-y-11 md:space-y-14">
+            {linkedinShare.canShare ? (
+              <div className="flex justify-end">
+                <ResultLinkedInShare postBody={linkedinShare.postBody} />
+              </div>
+            ) : null}
+
             <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
               <div className="space-y-9 md:space-y-11">
                 <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
