@@ -467,7 +467,7 @@ test('domain language summary overrides fallback domain summary text when presen
       pairs: {},
       domains: {
         signal_style: {
-          summary: 'Assessment-owned domain summary for behaviour style.',
+          chapterOpening: 'Assessment-owned domain summary for behaviour style.',
         },
       },
       overview: {},
@@ -520,7 +520,7 @@ test('domain summary falls back unchanged when domain language summary is missin
       pairs: {},
       domains: {
         signal_style: {
-          focus: 'Present but out of scope.',
+          pressure: 'Present but out of scope.',
         },
       },
       overview: {},

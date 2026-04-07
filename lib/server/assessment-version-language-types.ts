@@ -11,11 +11,17 @@ export type AssessmentVersionLanguagePairSection =
   | 'strength'
   | 'watchout';
 
-export type AssessmentVersionLanguageDomainSection =
+export type AssessmentVersionLanguageDomainSection = 'chapterOpening';
+
+export type AssessmentVersionLanguageLegacyDomainSection =
   | 'summary'
   | 'focus'
   | 'pressure'
   | 'environment';
+
+export type AssessmentVersionLanguageStoredDomainSection =
+  | AssessmentVersionLanguageDomainSection
+  | AssessmentVersionLanguageLegacyDomainSection;
 
 export type AssessmentVersionLanguageOverviewSection =
   | 'summary'
@@ -57,7 +63,7 @@ export type AssessmentVersionLanguageDomainRow = {
   id: string;
   assessmentVersionId: AssessmentVersionId;
   domainKey: string;
-  section: AssessmentVersionLanguageDomainSection;
+  section: AssessmentVersionLanguageStoredDomainSection;
   content: string;
   createdAt: string;
   updatedAt: string;
@@ -112,7 +118,7 @@ export type AssessmentVersionLanguagePairsByKey =
   Readonly<Record<string, AssessmentVersionLanguageSectionMap<AssessmentVersionLanguagePairSection>>>;
 
 export type AssessmentVersionLanguageDomainsByKey =
-  Readonly<Record<string, AssessmentVersionLanguageSectionMap<AssessmentVersionLanguageDomainSection>>>;
+  Readonly<Record<string, AssessmentVersionLanguageSectionMap<AssessmentVersionLanguageStoredDomainSection>>>;
 
 export type AssessmentVersionLanguageOverviewByKey =
   Readonly<Record<string, AssessmentVersionLanguageSectionMap<AssessmentVersionLanguageOverviewSection>>>;

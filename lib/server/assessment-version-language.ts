@@ -5,6 +5,7 @@ import type {
   AssessmentVersionLanguageDomainInput,
   AssessmentVersionLanguageDomainRow,
   AssessmentVersionLanguageDomainSection,
+  AssessmentVersionLanguageStoredDomainSection,
   AssessmentVersionLanguageDomainsByKey,
   AssessmentVersionLanguageHeroHeaderInput,
   AssessmentVersionLanguageHeroHeaderRow,
@@ -56,7 +57,7 @@ type AssessmentVersionLanguageDomainDbRow = {
   id: string;
   assessment_version_id: string;
   domain_key: string;
-  section: AssessmentVersionLanguageDomainSection;
+  section: AssessmentVersionLanguageStoredDomainSection;
   content: string;
   created_at: string;
   updated_at: string;
@@ -95,10 +96,7 @@ const PAIR_SECTION_ORDER: readonly AssessmentVersionLanguagePairSection[] = Obje
 ]);
 
 const DOMAIN_SECTION_ORDER: readonly AssessmentVersionLanguageDomainSection[] = Object.freeze([
-  'summary',
-  'focus',
-  'pressure',
-  'environment',
+  'chapterOpening',
 ]);
 
 const OVERVIEW_SECTION_ORDER: readonly AssessmentVersionLanguageOverviewSection[] = Object.freeze([
@@ -262,6 +260,12 @@ function mapDomainRow(row: AssessmentVersionLanguageDomainDbRow): AssessmentVers
   };
 }
 
+function toBundleDomainSection(
+  section: AssessmentVersionLanguageStoredDomainSection,
+): AssessmentVersionLanguageStoredDomainSection {
+  return section === 'summary' ? 'chapterOpening' : section;
+}
+
 function mapOverviewRow(row: AssessmentVersionLanguageOverviewDbRow): AssessmentVersionLanguageOverviewRow {
   return {
     id: row.id,
@@ -329,7 +333,40 @@ export function buildAssessmentVersionLanguagePairsBundle(
 export function buildAssessmentVersionLanguageDomainsBundle(
   rows: readonly AssessmentVersionLanguageDomainRow[],
 ): AssessmentVersionLanguageDomainsByKey {
-  return buildSectionBundle(rows, (row) => row.domainKey, 'domain');
+  const grouped: Record<string, Partial<Record<AssessmentVersionLanguageStoredDomainSection, string>>> = {};
+
+  for (const row of rows) {
+    const key = row.domainKey;
+    const section = toBundleDomainSection(row.section);
+    const sectionMap = grouped[key] ?? {};
+
+    if (section === 'chapterOpening' && row.section === 'summary' && sectionMap.chapterOpening !== undefined) {
+      grouped[key] = sectionMap;
+      continue;
+    }
+
+    if (section === 'chapterOpening' && row.section === 'chapterOpening' && sectionMap.chapterOpening !== undefined) {
+      sectionMap.chapterOpening = row.content;
+      grouped[key] = sectionMap;
+      continue;
+    }
+
+    if (sectionMap[section] !== undefined) {
+      throw new DuplicateAssessmentVersionLanguageEntryError(
+        `Duplicate domain language entry detected for key "${key}" and section "${section}"`,
+      );
+    }
+
+    sectionMap[section] = row.content;
+    grouped[key] = sectionMap;
+  }
+
+  const result: Record<string, AssessmentVersionLanguageSectionMap<AssessmentVersionLanguageStoredDomainSection>> = {};
+  for (const key of Object.keys(grouped)) {
+    result[key] = Object.freeze({ ...grouped[key] });
+  }
+
+  return Object.freeze(result);
 }
 
 export function buildAssessmentVersionLanguageOverviewBundle(
@@ -448,6 +485,7 @@ export async function getAssessmentVersionLanguageDomains(
     ORDER BY
       domain_key ASC,
       CASE section
+        WHEN 'chapterOpening' THEN 0
         WHEN 'summary' THEN 0
         WHEN 'focus' THEN 1
         WHEN 'pressure' THEN 2

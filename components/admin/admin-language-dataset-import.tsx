@@ -49,19 +49,16 @@ const DATASET_OPTIONS: readonly DatasetOption[] = [
     key: 'domain',
     label: 'Chapter',
     title: 'Domain Chapter Language',
-    description: 'Author summary override, focus, pressure, and environment rows for report domains.',
+    description: 'Author chapterOpening rows for report domains.',
     detail:
-      'Signal ordering, primary and secondary signal selection, and pair selection remain engine-resolved.',
+      'Domain Chapter Language supports chapterOpening only. Signal ordering, primary and secondary signal selection, and pair selection remain engine-resolved.',
     currentRowsLabel: 'Current Domain rows',
     rowFormatLabel: 'section | target | field | content',
     textareaLabel: 'Paste domain chapter rows',
     placeholder:
-      'domain | signal_style | focus | Your strongest contribution in this area is how you bring direction and consistency.',
+      'domain | signal_style | chapterOpening | You tend to operate with visible pace, structure, and interpersonal impact.',
     formatExample: [
-      'domain | signal_style | summary | You tend to operate with visible pace, structure, and interpersonal impact.',
-      'domain | signal_style | focus | Your strongest contribution in this area is how you bring direction and consistency.',
-      'domain | signal_style | pressure | Under pressure, you may narrow your attention or become more forceful in your style.',
-      'domain | signal_style | environment | You perform best where expectations, pace, and collaboration are clear.',
+      'domain | signal_style | chapterOpening | You tend to operate with visible pace, structure, and interpersonal impact.',
     ].join('\n'),
   },
   {

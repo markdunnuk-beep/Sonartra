@@ -15,6 +15,8 @@ test('language dataset import uses a selector-driven single-action flow', () => 
   assert.match(source, /Dataset type/);
   assert.match(source, /Hero Header Language/);
   assert.match(source, /Domain Chapter Language/);
+  assert.match(source, /chapterOpening rows for report domains/);
+  assert.match(source, /supports chapterOpening only/);
   assert.match(source, /Signal Language/);
   assert.match(source, /Pair Summary Language/);
   assert.match(source, /isImportPending \? 'Importing\.\.\.' : hasImported \? 'Imported' : 'Import'/);

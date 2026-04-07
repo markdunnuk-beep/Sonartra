@@ -42,8 +42,7 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
     [
       'hero|analyst_driver|headline|Fast, structured, decisive.',
       'hero|driver_analyst|narrative|You combine pace with logic.',
-      'domain|signal_style|summary|Custom domain summary.',
-      'domain|signal_style|focus|Custom focus section.',
+      'domain|signal_style|chapterOpening|Custom domain chapter opening.',
       'signal|style_driver|summary|Driver summary.',
       'signal|style_driver|strength|Driver strength.',
       'pair|driver_analyst|summary|Driver plus Analyst pair summary.',
@@ -76,13 +75,8 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
   assert.deepEqual(plan.domainChapters, [
     {
       domainKey: 'signal_style',
-      field: 'summary',
-      content: 'Custom domain summary.',
-    },
-    {
-      domainKey: 'signal_style',
-      field: 'focus',
-      content: 'Custom focus section.',
+      field: 'chapterOpening',
+      content: 'Custom domain chapter opening.',
     },
   ]);
 
@@ -121,13 +115,8 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
   assert.deepEqual(plan.storage.domains, [
     {
       domainKey: 'signal_style',
-      section: 'summary',
-      content: 'Custom domain summary.',
-    },
-    {
-      domainKey: 'signal_style',
-      section: 'focus',
-      content: 'Custom focus section.',
+      section: 'chapterOpening',
+      content: 'Custom domain chapter opening.',
     },
   ]);
   assert.deepEqual(plan.storage.signals, [
@@ -149,6 +138,74 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
       content: 'Driver plus Analyst pair summary.',
     },
   ]);
+});
+
+test('report-aligned validation rejects legacy domain summary rows explicitly', () => {
+  const parsed = parseReportLanguageRows(
+    'domain|signal_style|summary|Legacy summary alias.',
+  );
+
+  const validation = validateReportLanguageRows({
+    rows: parsed.records,
+    validSignalKeys: ['style_driver', 'style_analyst'],
+    validDomainKeys: ['signal_style'],
+  });
+
+  assert.equal(validation.success, false);
+  assert.equal(validation.errors[0]?.code, 'UNSUPPORTED_LEGACY_FIELD');
+  assert.match(validation.errors[0]?.message ?? '', /chapterOpening/i);
+  assert.equal(validation.errors[0]?.lineNumber, 1);
+});
+
+test('report-aligned validation rejects unsupported domain focus rows explicitly', () => {
+  const parsed = parseReportLanguageRows(
+    'domain|signal_style|focus|Unsupported domain focus section.',
+  );
+
+  const validation = validateReportLanguageRows({
+    rows: parsed.records,
+    validSignalKeys: ['style_driver', 'style_analyst'],
+    validDomainKeys: ['signal_style'],
+  });
+
+  assert.equal(validation.success, false);
+  assert.equal(validation.errors[0]?.code, 'UNSUPPORTED_LEGACY_FIELD');
+  assert.match(validation.errors[0]?.message ?? '', /chapterOpening only/i);
+  assert.equal(validation.errors[0]?.lineNumber, 1);
+});
+
+test('report-aligned validation rejects unsupported domain pressure rows explicitly', () => {
+  const parsed = parseReportLanguageRows(
+    'domain|signal_style|pressure|Unsupported domain pressure section.',
+  );
+
+  const validation = validateReportLanguageRows({
+    rows: parsed.records,
+    validSignalKeys: ['style_driver', 'style_analyst'],
+    validDomainKeys: ['signal_style'],
+  });
+
+  assert.equal(validation.success, false);
+  assert.equal(validation.errors[0]?.code, 'UNSUPPORTED_LEGACY_FIELD');
+  assert.match(validation.errors[0]?.message ?? '', /chapterOpening only/i);
+  assert.equal(validation.errors[0]?.lineNumber, 1);
+});
+
+test('report-aligned validation rejects unsupported domain environment rows explicitly', () => {
+  const parsed = parseReportLanguageRows(
+    'domain|signal_style|environment|Unsupported domain environment section.',
+  );
+
+  const validation = validateReportLanguageRows({
+    rows: parsed.records,
+    validSignalKeys: ['style_driver', 'style_analyst'],
+    validDomainKeys: ['signal_style'],
+  });
+
+  assert.equal(validation.success, false);
+  assert.equal(validation.errors[0]?.code, 'UNSUPPORTED_LEGACY_FIELD');
+  assert.match(validation.errors[0]?.message ?? '', /chapterOpening only/i);
+  assert.equal(validation.errors[0]?.lineNumber, 1);
 });
 
 test('report-aligned validation rejects hero.primaryPattern authoring explicitly', () => {

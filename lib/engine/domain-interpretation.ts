@@ -13,8 +13,8 @@ import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking'
 
 /**
  * Current domain-language ownership for persisted domain chapters:
- * - Active: Domain_Language.summary -> domainSummaries[*].interpretation.summary
- * - Active elsewhere in the canonical payload: Domain_Language.focus / pressure / environment -> domains[*]
+ * - Active: Domain_Language.chapterOpening -> domainSummaries[*].interpretation.summary
+ * - Legacy read compatibility: Domain_Language.summary -> domainSummaries[*].interpretation.summary
  *
  * Supporting and tension lines remain deterministic engine output. Domain summary
  * is the only authored override applied inside interpretation assembly itself.
@@ -625,8 +625,14 @@ function resolveDomainSummaryOverride(
   domainKey: string,
   interpretationContext?: ResultInterpretationContext,
 ): string | null {
-  const summary = interpretationContext?.languageBundle.domains[domainKey]?.summary?.trim();
-  return summary ? summary : null;
+  const chapterOpening =
+    interpretationContext?.languageBundle.domains[domainKey]?.chapterOpening?.trim();
+  if (chapterOpening) {
+    return chapterOpening;
+  }
+
+  const legacySummary = interpretationContext?.languageBundle.domains[domainKey]?.summary?.trim();
+  return legacySummary ? legacySummary : null;
 }
 
 function buildGenericInterpretation(domainSummary: NormalizedDomainSummary): DomainInterpretationOutput | null {

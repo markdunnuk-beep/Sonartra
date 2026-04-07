@@ -45,7 +45,7 @@ type StoredDomainLanguageRow = {
   id: string;
   assessmentVersionId: string;
   domainKey: string;
-  section: 'summary' | 'focus' | 'pressure' | 'environment';
+  section: 'chapterOpening' | 'summary' | 'focus' | 'pressure' | 'environment';
   content: string;
 };
 
@@ -412,6 +412,78 @@ test('pair report-language import accepts summary only and preserves canonical p
       content: 'You combine forward momentum with structured thinking.',
     },
   ]);
+});
+
+test('domain report-language import accepts chapterOpening only and persists only that field', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [{ id: 'version-a', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+    domains: [{ id: 'domain-a', assessmentVersionId: 'version-a', domainKey: 'signal_style', domainType: 'SIGNAL_GROUP', orderIndex: 0 }],
+    signals: [
+      { id: 'signal-driver', assessmentVersionId: 'version-a', domainId: 'domain-a', signalKey: 'style_driver', orderIndex: 0 },
+      { id: 'signal-analyst', assessmentVersionId: 'version-a', domainId: 'domain-a', signalKey: 'style_analyst', orderIndex: 1 },
+    ],
+  });
+
+  const result = await importReportLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-a',
+      reportSection: 'domain',
+      rawInput: 'domain|signal_style|chapterOpening|Custom domain chapter opening.',
+    },
+    { db: fake.client, revalidatePath() {} },
+  );
+
+  assert.equal(result.success, true);
+  assert.deepEqual(fake.state.domainLanguage, [
+    {
+      id: 'domain-1',
+      assessmentVersionId: 'version-a',
+      domainKey: 'signal_style',
+      section: 'chapterOpening',
+      content: 'Custom domain chapter opening.',
+    },
+  ]);
+});
+
+test('domain report-language import rejects unsupported legacy fields with row-specific errors', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [{ id: 'version-a', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+    domains: [{ id: 'domain-a', assessmentVersionId: 'version-a', domainKey: 'signal_style', domainType: 'SIGNAL_GROUP', orderIndex: 0 }],
+    signals: [
+      { id: 'signal-driver', assessmentVersionId: 'version-a', domainId: 'domain-a', signalKey: 'style_driver', orderIndex: 0 },
+      { id: 'signal-analyst', assessmentVersionId: 'version-a', domainId: 'domain-a', signalKey: 'style_analyst', orderIndex: 1 },
+    ],
+  });
+
+  const result = await previewReportLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-a',
+      reportSection: 'domain',
+      rawInput: [
+        'domain|signal_style|focus|Legacy focus row.',
+        'domain|signal_style|pressure|Legacy pressure row.',
+        'domain|signal_style|environment|Legacy environment row.',
+      ].join('\n'),
+    },
+    { db: fake.client },
+  );
+
+  assert.equal(result.success, false);
+  assert.deepEqual(
+    result.validationErrors.map((error) => error.code),
+    ['UNSUPPORTED_LEGACY_FIELD', 'UNSUPPORTED_LEGACY_FIELD', 'UNSUPPORTED_LEGACY_FIELD'],
+  );
+  assert.deepEqual(
+    result.validationErrors.map((error) => error.message),
+    [
+      'Domain field focus is no longer supported. Domain chapter language supports chapterOpening only.',
+      'Domain field pressure is no longer supported. Domain chapter language supports chapterOpening only.',
+      'Domain field environment is no longer supported. Domain chapter language supports chapterOpening only.',
+    ],
+  );
+  assert.deepEqual(fake.state.domainLanguage, []);
 });
 
 test('report-language section imports reject rows for the wrong report section', async () => {

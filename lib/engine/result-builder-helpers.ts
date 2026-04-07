@@ -32,7 +32,7 @@ import {
 import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 import { evaluateHeroPattern, getHeroPatternLabel } from '@/lib/engine/hero';
 import type {
-  AssessmentVersionLanguageDomainSection,
+  AssessmentVersionLanguageStoredDomainSection,
 } from '@/lib/server/assessment-version-language-types';
 
 export type CanonicalResultBuilderInput = NormalizedResult & {
@@ -159,7 +159,7 @@ function trimToNull(value: string | null | undefined): string | null {
 
 function resolveDomainLanguageSection(
   domainKey: string,
-  section: AssessmentVersionLanguageDomainSection,
+  section: AssessmentVersionLanguageStoredDomainSection,
   interpretationContext: ResultInterpretationContext,
 ): string | null {
   return trimToNull(interpretationContext.languageBundle.domains[domainKey]?.[section]);

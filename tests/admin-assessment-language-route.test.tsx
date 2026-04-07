@@ -53,7 +53,7 @@ type LanguageFixture = {
     id: string;
     assessmentVersionId: string;
     domainKey: string;
-    section: 'summary' | 'focus' | 'pressure' | 'environment';
+    section: 'chapterOpening' | 'summary' | 'focus' | 'pressure' | 'environment';
     content: string;
     createdAt: string;
     updatedAt: string;
@@ -556,7 +556,7 @@ test('language step view model resolves the latest draft version and derives cou
           id: 'domain-language-1',
           assessmentVersionId: 'version-draft',
           domainKey: 'leadership',
-          section: 'summary',
+          section: 'chapterOpening',
           content: 'Domain summary',
           createdAt: '2026-04-01T00:00:04.000Z',
           updatedAt: '2026-04-01T00:00:04.000Z',
@@ -720,7 +720,9 @@ test('language step component renders hero header, domain chapters, signals, and
   assert.match(markup, /Format: scope \| key \| headline/);
   assert.match(markup, /Paste Hero Header rows/);
   assert.match(markup, /Domain Chapter Language/);
-  assert.match(markup, /Domain Chapter Language/);
+  assert.match(markup, /chapterOpening rows for report domains/i);
+  assert.match(markup, /supports chapterOpening only/i);
+  assert.match(markup, /domain \| signal_style \| chapterOpening \|/i);
   assert.match(markup, /Signal Language/);
   assert.match(markup, /Pair Summary Language/);
   assert.match(markup, /pair \| driver_influencer \| Fast-moving, people-driven and energised by momentum/);

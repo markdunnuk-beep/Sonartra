@@ -36,7 +36,7 @@ export type ReportLanguageParseError = {
 };
 
 type ValidHeroField = 'headline' | 'narrative';
-type ValidDomainField = 'summary' | 'focus' | 'pressure' | 'environment';
+type ValidDomainField = 'chapterOpening';
 type ValidSignalField = AssessmentVersionLanguageSignalSection;
 type ValidPairField = 'summary';
 
@@ -147,10 +147,7 @@ const SIGNAL_FIELDS = new Set<ValidSignalField>([
 ]);
 
 const DOMAIN_FIELDS = new Set<ValidDomainField>([
-  'summary',
-  'focus',
-  'pressure',
-  'environment',
+  'chapterOpening',
 ]);
 
 const HERO_FIELDS = new Set<ValidHeroField>(['headline', 'narrative']);
@@ -450,12 +447,38 @@ export function validateReportLanguageRows(params: {
         continue;
       }
 
+      if (row.field === 'summary') {
+        errors.push(
+          createValidationError(
+            row,
+            'UNSUPPORTED_LEGACY_FIELD',
+            'Domain field summary is legacy-only. Use chapterOpening for domain chapter language.',
+          ),
+        );
+        continue;
+      }
+
+      if (
+        row.field === 'focus'
+        || row.field === 'pressure'
+        || row.field === 'environment'
+      ) {
+        errors.push(
+          createValidationError(
+            row,
+            'UNSUPPORTED_LEGACY_FIELD',
+            `Domain field ${row.field} is no longer supported. Domain chapter language supports chapterOpening only.`,
+          ),
+        );
+        continue;
+      }
+
       if (!DOMAIN_FIELDS.has(row.field as ValidDomainField)) {
         errors.push(
           createValidationError(
             row,
             'INVALID_FIELD',
-            'Domain field must be summary, focus, pressure, or environment.',
+            'Domain field must be chapterOpening.',
           ),
         );
         continue;

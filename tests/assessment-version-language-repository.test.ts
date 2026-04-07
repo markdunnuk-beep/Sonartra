@@ -39,7 +39,7 @@ type StoredDomainRow = {
   id: string;
   assessmentVersionId: string;
   domainKey: string;
-  section: 'summary' | 'focus' | 'pressure' | 'environment';
+  section: 'chapterOpening' | 'summary' | 'focus' | 'pressure' | 'environment';
   content: string;
   createdAt: string;
   updatedAt: string;
@@ -115,8 +115,8 @@ function createFakeLanguageDb(seed?: {
     [...rows].sort(
       (left, right) =>
         left.domainKey.localeCompare(right.domainKey)
-        || ['summary', 'focus', 'pressure', 'environment'].indexOf(left.section)
-          - ['summary', 'focus', 'pressure', 'environment'].indexOf(right.section)
+        || ['chapterOpening', 'summary', 'focus', 'pressure', 'environment'].indexOf(left.section)
+          - ['chapterOpening', 'summary', 'focus', 'pressure', 'environment'].indexOf(right.section)
         || left.id.localeCompare(right.id),
     );
   const sortOverview = (rows: StoredOverviewRow[]) =>
@@ -479,8 +479,7 @@ test('writing and then reading domain language round-trips correctly', async () 
   await replaceAssessmentVersionLanguageDomains(fake.db, {
     assessmentVersionId: 'version-1',
     inputs: [
-      { domainKey: 'signal_conflict', section: 'pressure', content: 'under strain' },
-      { domainKey: 'signal_conflict', section: 'summary', content: 'conflict summary' },
+      { domainKey: 'signal_conflict', section: 'chapterOpening', content: 'conflict summary' },
     ],
   });
 
@@ -493,8 +492,7 @@ test('writing and then reading domain language round-trips correctly', async () 
       content: row.content,
     })),
     [
-      { domainKey: 'signal_conflict', section: 'summary', content: 'conflict summary' },
-      { domainKey: 'signal_conflict', section: 'pressure', content: 'under strain' },
+      { domainKey: 'signal_conflict', section: 'chapterOpening', content: 'conflict summary' },
     ],
   );
 });
@@ -586,7 +584,7 @@ test('bundle loader groups content correctly by key and section', async () => {
         id: 'd1',
         assessmentVersionId: 'version-1',
         domainKey: 'signal_style',
-        section: 'environment',
+        section: 'chapterOpening',
         content: 'best fit',
         createdAt: '2026-04-01T00:00:04.000Z',
         updatedAt: '2026-04-01T00:00:04.000Z',
@@ -631,7 +629,7 @@ test('bundle loader groups content correctly by key and section', async () => {
     },
     domains: {
       signal_style: {
-        environment: 'best fit',
+        chapterOpening: 'best fit',
       },
     },
     overview: {
@@ -676,7 +674,7 @@ test('replace operations only affect their own table and dataset type', async ()
         id: 'd1',
         assessmentVersionId: 'version-1',
         domainKey: 'domain_a',
-        section: 'summary',
+        section: 'chapterOpening',
         content: 'domain old',
         createdAt: '2026-04-01T00:00:03.000Z',
         updatedAt: '2026-04-01T00:00:03.000Z',
@@ -704,6 +702,63 @@ test('replace operations only affect their own table and dataset type', async ()
   assert.deepEqual(fake.state.pairs.map((row) => row.signalPair), ['pair_a']);
   assert.deepEqual(fake.state.domains.map((row) => row.domainKey), ['domain_a']);
   assert.deepEqual(fake.state.overview.map((row) => row.patternKey), ['overview_a']);
+});
+
+test('legacy domain summary rows read back as chapterOpening for bundle consumers', async () => {
+  const fake = createFakeLanguageDb({
+    domains: [
+      {
+        id: 'd1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'signal_style',
+        section: 'summary',
+        content: 'legacy domain summary',
+        createdAt: '2026-04-01T00:00:04.000Z',
+        updatedAt: '2026-04-01T00:00:04.000Z',
+      },
+    ],
+  });
+
+  const bundle = await getAssessmentVersionLanguageBundle(fake.db, 'version-1');
+
+  assert.deepEqual(bundle.domains, {
+    signal_style: {
+      chapterOpening: 'legacy domain summary',
+    },
+  });
+});
+
+test('stored chapterOpening rows take precedence over legacy domain summary rows', async () => {
+  const fake = createFakeLanguageDb({
+    domains: [
+      {
+        id: 'd1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'signal_style',
+        section: 'summary',
+        content: 'legacy domain summary',
+        createdAt: '2026-04-01T00:00:04.000Z',
+        updatedAt: '2026-04-01T00:00:04.000Z',
+      },
+      {
+        id: 'd2',
+        assessmentVersionId: 'version-1',
+        domainKey: 'signal_style',
+        section: 'chapterOpening',
+        content: 'canonical chapter opening',
+        createdAt: '2026-04-01T00:00:05.000Z',
+        updatedAt: '2026-04-01T00:00:05.000Z',
+      },
+    ],
+  });
+
+  const bundle = await getAssessmentVersionLanguageBundle(fake.db, 'version-1');
+
+  assert.deepEqual(bundle.domains, {
+    signal_style: {
+      chapterOpening: 'canonical chapter opening',
+    },
+  });
 });
 
 test('stable ordering and grouping are preserved', async () => {
