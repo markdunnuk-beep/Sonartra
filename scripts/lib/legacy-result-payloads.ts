@@ -243,64 +243,82 @@ export function validateCanonicalPayload(value: unknown): readonly string[] {
       if (!hasStringField(domain, 'domainLabel')) {
         errors.push(`domains[${index}].domainLabel must be a non-empty string`);
       }
-      if (!isNullableString(domain.summary)) {
-        errors.push(`domains[${index}].summary must be a string or null`);
+      if (!isNullableString(domain.chapterOpening)) {
+        errors.push(`domains[${index}].chapterOpening must be a string or null`);
       }
-      if (!isNullableString(domain.focus)) {
-        errors.push(`domains[${index}].focus must be a string or null`);
+      if (!isNullableString(domain.pressureFocus)) {
+        errors.push(`domains[${index}].pressureFocus must be a string or null`);
       }
-      if (!isNullableString(domain.pressure)) {
-        errors.push(`domains[${index}].pressure must be a string or null`);
+      if (!isNullableString(domain.environmentFocus)) {
+        errors.push(`domains[${index}].environmentFocus must be a string or null`);
       }
-      if (!isNullableString(domain.environment)) {
-        errors.push(`domains[${index}].environment must be a string or null`);
+      if (!isRecord(domain.signalBalance)) {
+        errors.push(`domains[${index}].signalBalance must be an object`);
+      } else if (!Array.isArray(domain.signalBalance.items)) {
+        errors.push(`domains[${index}].signalBalance.items must be an array`);
       }
 
       errors.push(...validateSignalLanguageNode(domain.primarySignal, `domains[${index}].primarySignal`));
       errors.push(...validateSignalLanguageNode(domain.secondarySignal, `domains[${index}].secondarySignal`));
 
-      if (domain.pairSummary !== null) {
-        if (!isRecord(domain.pairSummary)) {
-          errors.push(`domains[${index}].pairSummary must be an object or null`);
+      if (domain.signalPair !== null) {
+        if (!isRecord(domain.signalPair)) {
+          errors.push(`domains[${index}].signalPair must be an object or null`);
         } else {
-          if (!hasStringField(domain.pairSummary, 'pairKey')) {
-            errors.push(`domains[${index}].pairSummary.pairKey must be a non-empty string`);
+          if (!hasStringField(domain.signalPair, 'pairKey')) {
+            errors.push(`domains[${index}].signalPair.pairKey must be a non-empty string`);
           }
-          if (!isNullableString(domain.pairSummary.text)) {
-            errors.push(`domains[${index}].pairSummary.text must be a string or null`);
+          if (!hasStringField(domain.signalPair, 'primarySignalKey')) {
+            errors.push(`domains[${index}].signalPair.primarySignalKey must be a non-empty string`);
+          }
+          if (!hasStringField(domain.signalPair, 'primarySignalLabel')) {
+            errors.push(`domains[${index}].signalPair.primarySignalLabel must be a non-empty string`);
+          }
+          if (!hasStringField(domain.signalPair, 'secondarySignalKey')) {
+            errors.push(`domains[${index}].signalPair.secondarySignalKey must be a non-empty string`);
+          }
+          if (!hasStringField(domain.signalPair, 'secondarySignalLabel')) {
+            errors.push(`domains[${index}].signalPair.secondarySignalLabel must be a non-empty string`);
+          }
+          if (!isNullableString(domain.signalPair.summary)) {
+            errors.push(`domains[${index}].signalPair.summary must be a string or null`);
           }
         }
       }
 
-      if (!Array.isArray(domain.signals)) {
-        errors.push(`domains[${index}].signals must be an array`);
+      const signalBalanceItems = isRecord(domain.signalBalance) && Array.isArray(domain.signalBalance.items)
+        ? domain.signalBalance.items
+        : null;
+
+      if (!signalBalanceItems) {
+        errors.push(`domains[${index}].signalBalance.items must be an array`);
       } else {
-        domain.signals.forEach((signal, signalIndex) => {
+        signalBalanceItems.forEach((signal, signalIndex) => {
           if (!isRecord(signal)) {
-            errors.push(`domains[${index}].signals[${signalIndex}] must be an object`);
+            errors.push(`domains[${index}].signalBalance.items[${signalIndex}] must be an object`);
             return;
           }
 
           if (!hasStringField(signal, 'signalKey')) {
-            errors.push(`domains[${index}].signals[${signalIndex}].signalKey must be a non-empty string`);
+            errors.push(`domains[${index}].signalBalance.items[${signalIndex}].signalKey must be a non-empty string`);
           }
           if (!hasStringField(signal, 'signalLabel')) {
-            errors.push(`domains[${index}].signals[${signalIndex}].signalLabel must be a non-empty string`);
-          }
-          if (!isFiniteNumber(signal.score)) {
-            errors.push(`domains[${index}].signals[${signalIndex}].score must be a finite number`);
+            errors.push(`domains[${index}].signalBalance.items[${signalIndex}].signalLabel must be a non-empty string`);
           }
           if (!isFiniteNumber(signal.withinDomainPercent)) {
-            errors.push(`domains[${index}].signals[${signalIndex}].withinDomainPercent must be a finite number`);
+            errors.push(`domains[${index}].signalBalance.items[${signalIndex}].withinDomainPercent must be a finite number`);
           }
           if (!isFiniteNumber(signal.rank)) {
-            errors.push(`domains[${index}].signals[${signalIndex}].rank must be a finite number`);
+            errors.push(`domains[${index}].signalBalance.items[${signalIndex}].rank must be a finite number`);
           }
           if (typeof signal.isPrimary !== 'boolean') {
-            errors.push(`domains[${index}].signals[${signalIndex}].isPrimary must be a boolean`);
+            errors.push(`domains[${index}].signalBalance.items[${signalIndex}].isPrimary must be a boolean`);
           }
           if (typeof signal.isSecondary !== 'boolean') {
-            errors.push(`domains[${index}].signals[${signalIndex}].isSecondary must be a boolean`);
+            errors.push(`domains[${index}].signalBalance.items[${signalIndex}].isSecondary must be a boolean`);
+          }
+          if (!isNullableString(signal.summary)) {
+            errors.push(`domains[${index}].signalBalance.items[${signalIndex}].summary must be a string or null`);
           }
         });
       }
@@ -406,11 +424,11 @@ function extractPayloadSignalKeys(payload: unknown): readonly string[] {
 
   return toSortedUniqueStrings(
     payload.domains.flatMap((domain) => {
-      if (!isRecord(domain) || !Array.isArray(domain.signals)) {
+      if (!isRecord(domain) || !isRecord(domain.signalBalance) || !Array.isArray(domain.signalBalance.items)) {
         return [];
       }
 
-      return domain.signals.flatMap((signal) => {
+      return domain.signalBalance.items.flatMap((signal) => {
         if (!isRecord(signal) || typeof signal.signalKey !== 'string' || signal.signalKey.trim().length === 0) {
           return [];
         }
@@ -647,4 +665,3 @@ export async function findLegacyReadyResultPayloads(
       .filter((row): row is LegacyPayloadAuditFinding => row !== null),
   );
 }
-

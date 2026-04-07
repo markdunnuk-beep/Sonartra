@@ -154,36 +154,38 @@ test('domain signal ring mapper can build rings directly from canonical domains 
     {
       domainKey: 'zeta_custom',
       domainLabel: 'Zeta Custom',
-      summary: 'Zeta summary.',
-      focus: null,
-      pressure: null,
-      environment: null,
+      chapterOpening: 'Zeta summary.',
+      signalBalance: {
+        items: [
+          {
+            signalKey: 'horizon',
+            signalLabel: 'Horizon',
+            withinDomainPercent: 80,
+            rank: 1,
+            isPrimary: true,
+            isSecondary: false,
+            summary: null,
+          },
+        ],
+      },
       primarySignal: null,
       secondarySignal: null,
-      pairSummary: null,
-      signals: [
-        {
-          signalKey: 'horizon',
-          signalLabel: 'Horizon',
-          score: 80,
-          withinDomainPercent: 80,
-          rank: 1,
-          isPrimary: true,
-          isSecondary: false,
-        },
-      ],
+      signalPair: null,
+      pressureFocus: null,
+      environmentFocus: null,
     },
     {
       domainKey: 'adaptive_focus',
       domainLabel: 'Adaptive Focus',
-      summary: 'Adaptive summary.',
-      focus: null,
-      pressure: null,
-      environment: null,
+      chapterOpening: 'Adaptive summary.',
+      signalBalance: {
+        items: [],
+      },
       primarySignal: null,
       secondarySignal: null,
-      pairSummary: null,
-      signals: [],
+      signalPair: null,
+      pressureFocus: null,
+      environmentFocus: null,
     },
   ]);
 
@@ -287,15 +289,14 @@ test('result detail page removes the redundant hero domain highlight subsection'
 test('result detail page renders canonical domain chapter fields without UI-side interpretation synthesis', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.match(source, /domain\.summary/);
-  assert.match(source, /domain\.focus/);
-  assert.match(source, /domain\.pressure/);
-  assert.match(source, /domain\.environment/);
+  assert.match(source, /domain\.chapterOpening/);
+  assert.match(source, /domain\.pressureFocus/);
+  assert.match(source, /domain\.environmentFocus/);
   assert.match(source, /domain\.primarySignal/);
   assert.match(source, /domain\.secondarySignal/);
-  assert.match(source, /domain\.pairSummary\?\.text/);
-  assert.match(source, /const visibleSignals = domain\.signals\.slice\(0, 2\);/);
-  assert.match(source, /const hiddenSignals = domain\.signals\.slice\(2\);/);
+  assert.match(source, /domain\.signalPair\?\.summary/);
+  assert.match(source, /const visibleSignals = domain\.signalBalance\.items\.slice\(0, 2\);/);
+  assert.match(source, /const hiddenSignals = domain\.signalBalance\.items\.slice\(2\);/);
   assert.match(source, /chapterNumber: number;/);
   assert.match(source, /Chapter \$\{chapterNumber\.toString\(\)\.padStart\(2, '0'\)\}/);
   assert.match(source, /signal\.signalLabel/);

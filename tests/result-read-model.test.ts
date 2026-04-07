@@ -46,12 +46,20 @@ function buildPayload(params?: {
     },
     hero: {
       headline: 'Core Focus leads the current pattern',
+      subheadline: null,
+      summary: null,
       narrative: 'concentrated profile with Core Focus leading and Signals holding the strongest domain share.',
+      pressureOverlay: null,
+      environmentOverlay: null,
       primaryPattern: {
         label: 'Core Focus',
         signalKey: 'core_focus',
         signalLabel: 'Core Focus',
       },
+      heroPattern: null,
+      domainPairWinners: [],
+      traitTotals: [],
+      matchedPatterns: [],
       domainHighlights: [{
         domainKey: 'signals',
         domainLabel: 'Signals',
@@ -65,23 +73,45 @@ function buildPayload(params?: {
         ? [{
             domainKey: 'section_a',
             domainLabel: 'Section A',
-            summary: null,
-            focus: null,
-            pressure: null,
-            environment: null,
+            chapterOpening: null,
+            signalBalance: {
+              items: Object.freeze([]),
+            },
             primarySignal: null,
             secondarySignal: null,
-            pairSummary: null,
-            signals: Object.freeze([]),
+            signalPair: null,
+            pressureFocus: null,
+            environmentFocus: null,
           }]
         : []),
       {
         domainKey: 'signals',
         domainLabel: 'Signals',
-        summary: 'Core Focus leads this domain, with Role Executor adding a secondary influence.',
-        focus: null,
-        pressure: null,
-        environment: null,
+        chapterOpening: 'Core Focus leads this domain, with Role Executor adding a secondary influence.',
+        signalBalance: {
+          items: Object.freeze([
+            {
+              signalKey: 'core_focus',
+              signalLabel: 'Core Focus',
+              withinDomainPercent: 70,
+              rank: 1,
+              isPrimary: true,
+              isSecondary: false,
+              summary: null,
+            },
+            ...(includeZeroSignal
+              ? [{
+                  signalKey: 'role_executor',
+                  signalLabel: 'Role Executor',
+                  withinDomainPercent: 0,
+                  rank: 2,
+                  isPrimary: false,
+                  isSecondary: true,
+                  summary: null,
+                }]
+              : []),
+          ]),
+        },
         primarySignal: {
           signalKey: 'core_focus',
           signalLabel: 'Core Focus',
@@ -100,34 +130,18 @@ function buildPayload(params?: {
               development: null,
             }
           : null,
-        pairSummary: includeZeroSignal
+        signalPair: includeZeroSignal
           ? {
               pairKey: 'executor_focus',
-              text: null,
+              primarySignalKey: 'core_focus',
+              primarySignalLabel: 'Core Focus',
+              secondarySignalKey: 'role_executor',
+              secondarySignalLabel: 'Role Executor',
+              summary: null,
             }
           : null,
-        signals: Object.freeze([
-          {
-            signalKey: 'core_focus',
-            signalLabel: 'Core Focus',
-            score: 70,
-            withinDomainPercent: 70,
-            rank: 1,
-            isPrimary: true,
-            isSecondary: false,
-          },
-          ...(includeZeroSignal
-            ? [{
-                signalKey: 'role_executor',
-                signalLabel: 'Role Executor',
-                score: 0,
-                withinDomainPercent: 0,
-                rank: 2,
-                isPrimary: false,
-                isSecondary: true,
-              }]
-            : []),
-        ]),
+        pressureFocus: null,
+        environmentFocus: null,
       },
     ]),
     actions: {
@@ -166,7 +180,6 @@ function buildPayload(params?: {
         normalizationMethod: 'largest_remainder_integer_percentages',
         totalScoreMass: 7,
         zeroMass: false,
-        percentage: 70,
         globalPercentageSum: 70,
         domainPercentageSums: Object.freeze({
           'domain-section': 0,
@@ -350,7 +363,7 @@ test('detail load returns canonical payload sections alongside compatibility pro
   assert.equal(detail.domains[0]?.domainKey, 'section_a');
   assert.equal(detail.domains[1]?.primarySignal?.signalKey, 'core_focus');
   assert.equal(detail.domains[1]?.secondarySignal?.signalKey, 'role_executor');
-  assert.equal(detail.domains[1]?.pairSummary?.pairKey, 'executor_focus');
+  assert.equal(detail.domains[1]?.signalPair?.pairKey, 'executor_focus');
   assert.equal(detail.actions.strengths[0]?.signalKey, 'core_focus');
   assert.equal(detail.actions.strengths[0]?.text, 'Core Focus strength.');
   assert.equal(detail.actions.watchouts[0]?.signalKey, 'role_executor');

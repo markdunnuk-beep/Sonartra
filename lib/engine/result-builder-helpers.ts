@@ -8,7 +8,8 @@ import type {
   ResultActionBlockItem,
   ResultActionBlocks,
   ResultDomainChapter,
-  ResultDomainSignal,
+  ResultDomainChapterSignal,
+  ResultDomainSignalBalanceItem,
   ResultInterpretationContext,
   ResultDomainSummary,
   ResultDiagnostics,
@@ -301,25 +302,28 @@ export function buildIntro(metadata: ResultMetadata): ResultIntro {
   };
 }
 
-function buildDomainSignal(
+function buildDomainSignalBalanceItem(
   signalScore: NormalizedSignalScore,
   index: number,
-): ResultDomainSignal {
+  interpretationContext: ResultInterpretationContext,
+): ResultDomainSignalBalanceItem {
+  const language = resolveSignalLanguageBundle(signalScore.signalKey, interpretationContext);
+
   return {
     signalKey: signalScore.signalKey,
     signalLabel: signalScore.signalTitle,
-    score: signalScore.percentage,
     withinDomainPercent: signalScore.domainPercentage,
     rank: signalScore.rank,
     isPrimary: index === 0,
     isSecondary: index === 1,
+    summary: language.summary,
   };
 }
 
 function buildDomainChapterSignal(
   signalScore: NormalizedSignalScore | null,
   interpretationContext: ResultInterpretationContext,
-): ResultDomainChapter['primarySignal'] {
+): ResultDomainChapterSignal | null {
   if (!signalScore) {
     return null;
   }
@@ -416,26 +420,33 @@ export function buildDomains(
       primarySignal && secondarySignal
         ? buildCanonicalSignalPairKey(primarySignal.signalKey, secondarySignal.signalKey)
         : null;
-    const pairText = pairKey
+    const pairSummary = pairKey
       ? trimToNull(interpretationContext.languageBundle.pairs[pairKey]?.summary)
       : null;
 
     return {
       domainKey: domainSummary.domainKey,
       domainLabel: domainSummary.domainTitle,
-      summary: domainSummary.interpretation?.summary ?? null,
-      focus: resolveDomainLanguageSection(domainSummary.domainKey, 'focus', interpretationContext),
-      pressure: resolveDomainLanguageSection(domainSummary.domainKey, 'pressure', interpretationContext),
-      environment: resolveDomainLanguageSection(domainSummary.domainKey, 'environment', interpretationContext),
+      chapterOpening: domainSummary.interpretation?.summary ?? null,
+      signalBalance: {
+        items: domainSummary.signalScores.map((signalScore, index) =>
+          buildDomainSignalBalanceItem(signalScore, index, interpretationContext),
+        ),
+      },
       primarySignal: buildDomainChapterSignal(primarySignal, interpretationContext),
       secondarySignal: buildDomainChapterSignal(secondarySignal, interpretationContext),
-      pairSummary: pairKey
+      signalPair: pairKey && primarySignal && secondarySignal
         ? {
-            pairKey,
-            text: pairText,
-          }
+          pairKey,
+          primarySignalKey: primarySignal.signalKey,
+          primarySignalLabel: primarySignal.signalTitle,
+          secondarySignalKey: secondarySignal.signalKey,
+          secondarySignalLabel: secondarySignal.signalTitle,
+          summary: pairSummary,
+        }
         : null,
-      signals: domainSummary.signalScores.map((signalScore, index) => buildDomainSignal(signalScore, index)),
+      pressureFocus: resolveDomainLanguageSection(domainSummary.domainKey, 'pressure', interpretationContext),
+      environmentFocus: resolveDomainLanguageSection(domainSummary.domainKey, 'environment', interpretationContext),
     };
   });
 }

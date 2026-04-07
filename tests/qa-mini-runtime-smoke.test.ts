@@ -90,9 +90,12 @@ test('qa-mini fixture runs through the canonical published runtime path determin
   assert.equal(payload.metadata.assessmentKey, 'qa-mini');
   assert.equal(payload.metadata.version, fixture.publishedVersion.version);
   assert.equal(payload.metadata.attemptId, started.attemptId);
-  assert.equal(payload.topSignal?.signalKey, expected.topSignalKey);
+  assert.equal(payload.hero.primaryPattern?.signalKey, expected.topSignalKey);
   assert.deepEqual(
-    payload.rankedSignals.map((signal) => signal.signalKey),
+    payload.domains
+      .flatMap((domain) => domain.signalBalance.items)
+      .sort((left, right) => left.rank - right.rank)
+      .map((signal) => signal.signalKey),
     expected.rankedSignalKeys,
   );
 
@@ -128,7 +131,7 @@ test('qa-mini fixture runs through the canonical published runtime path determin
 
   assert.equal(dashboard.readyResultCount, 1);
   assert.equal(dashboard.latestReadyResult?.resultId, persisted?.resultId);
-  assert.equal(dashboard.latestReadyResult?.topSignalTitle, payload.topSignal?.title ?? null);
+  assert.equal(dashboard.latestReadyResult?.topSignalTitle, payload.hero.primaryPattern?.signalLabel ?? null);
 
   const detailRepeat = await resultReadModel.getAssessmentResultDetail({
     userId,

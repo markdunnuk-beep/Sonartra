@@ -60,18 +60,18 @@ function toActionItems(
 function toDomainSummaries(payload: CanonicalResultPayload): readonly AssessmentResultDomainViewModel[] {
   return Object.freeze(
     payload.domains.map((domain) => {
-      const signalScores: AssessmentResultSignalScoreViewModel[] = domain.signals.map((signal) => ({
+      const signalScores: AssessmentResultSignalScoreViewModel[] = domain.signalBalance.items.map((signal) => ({
         signalId: signal.signalKey,
         signalKey: signal.signalKey,
         signalTitle: signal.signalLabel,
         domainId: domain.domainKey,
         domainKey: domain.domainKey,
-        domainSource: domain.signals.length > 0 ? ('signal_group' as const) : ('question_section' as const),
+        domainSource: domain.signalBalance.items.length > 0 ? ('signal_group' as const) : ('question_section' as const),
         isOverlay: false,
         overlayType: 'none',
-        rawTotal: signal.score,
-        normalizedValue: signal.score,
-        percentage: signal.score,
+        rawTotal: signal.withinDomainPercent,
+        normalizedValue: signal.withinDomainPercent,
+        percentage: signal.withinDomainPercent,
         domainPercentage: signal.withinDomainPercent,
         rank: signal.rank,
       }));
@@ -88,7 +88,7 @@ function toDomainSummaries(payload: CanonicalResultPayload): readonly Assessment
         signalCount: signalScores.length,
         answeredQuestionCount: 0,
         rankedSignalIds: Object.freeze(signalScores.map((signal) => signal.signalId)),
-        interpretation: domain.summary
+        interpretation: domain.chapterOpening
           ? {
               domainKey: domain.domainKey,
               primarySignalKey: domain.primarySignal?.signalKey ?? null,
@@ -101,9 +101,9 @@ function toDomainSummaries(payload: CanonicalResultPayload): readonly Assessment
                 domain.secondarySignal?.signalKey
                   ? signalScores.find((signal) => signal.signalKey === domain.secondarySignal?.signalKey)?.domainPercentage ?? null
                   : null,
-              summary: domain.summary,
-              supportingLine: domain.focus ?? null,
-              tensionClause: domain.pressure ?? null,
+              summary: domain.chapterOpening,
+              supportingLine: null,
+              tensionClause: null,
             }
           : null,
       };
@@ -113,15 +113,15 @@ function toDomainSummaries(payload: CanonicalResultPayload): readonly Assessment
 
 function toRankedSignals(payload: CanonicalResultPayload): readonly AssessmentResultRankedSignalViewModel[] {
   const signals = payload.domains.flatMap((domain) =>
-    domain.signals.map((signal) => ({
+    domain.signalBalance.items.map((signal) => ({
       signalId: signal.signalKey,
       signalKey: signal.signalKey,
       title: signal.signalLabel,
       domainId: domain.domainKey,
       domainKey: domain.domainKey,
-      normalizedValue: signal.score,
-      rawTotal: signal.score,
-      percentage: signal.score,
+      normalizedValue: signal.withinDomainPercent,
+      rawTotal: signal.withinDomainPercent,
+      percentage: signal.withinDomainPercent,
       domainPercentage: signal.withinDomainPercent,
       isOverlay: false,
       overlayType: 'none' as const,

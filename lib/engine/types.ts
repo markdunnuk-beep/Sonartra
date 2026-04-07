@@ -590,7 +590,7 @@ export type ResultHeroSummary = {
     priority: number | null;
     isFallback: boolean;
   } | null;
-  domainPairWinners: Array<{
+  domainPairWinners: ReadonlyArray<{
     profileDomainKey: HeroProfileDomainKey;
     pairKey: string;
     sourceDomainKey: string;
@@ -600,15 +600,15 @@ export type ResultHeroSummary = {
     secondarySignalKey: string;
     secondarySignalLabel: string;
   }>;
-  traitTotals: Array<{
+  traitTotals: ReadonlyArray<{
     traitKey: HeroTraitKey;
     value: number;
   }>;
-  matchedPatterns: Array<{
+  matchedPatterns: ReadonlyArray<{
     patternKey: string;
     priority: number;
   }>;
-  domainHighlights: Array<{
+  domainHighlights: ReadonlyArray<{
     domainKey: string;
     domainLabel: string;
     primarySignalKey: string;
@@ -624,9 +624,9 @@ export type ResultActionBlockItem = {
 };
 
 export type ResultActionBlocks = {
-  strengths: ResultActionBlockItem[];
-  watchouts: ResultActionBlockItem[];
-  developmentFocus: ResultActionBlockItem[];
+  strengths: readonly ResultActionBlockItem[];
+  watchouts: readonly ResultActionBlockItem[];
+  developmentFocus: readonly ResultActionBlockItem[];
 };
 
 export type ResultDomainSignal = {
@@ -639,34 +639,46 @@ export type ResultDomainSignal = {
   isSecondary: boolean;
 };
 
+export type ResultDomainChapterSignal = {
+  signalKey: string;
+  signalLabel: string;
+  summary: string | null;
+  strength: string | null;
+  watchout: string | null;
+  development: string | null;
+};
+
+export type ResultDomainSignalBalanceItem = {
+  signalKey: string;
+  signalLabel: string;
+  withinDomainPercent: number;
+  rank: number;
+  isPrimary: boolean;
+  isSecondary: boolean;
+  summary: string | null;
+};
+
+export type ResultDomainSignalPair = {
+  pairKey: string;
+  primarySignalKey: string;
+  primarySignalLabel: string;
+  secondarySignalKey: string;
+  secondarySignalLabel: string;
+  summary: string | null;
+};
+
 export type ResultDomainChapter = {
   domainKey: string;
   domainLabel: string;
-  summary: string | null;
-  focus: string | null;
-  pressure: string | null;
-  environment: string | null;
-  primarySignal: {
-    signalKey: string;
-    signalLabel: string;
-    summary: string | null;
-    strength: string | null;
-    watchout: string | null;
-    development: string | null;
-  } | null;
-  secondarySignal: {
-    signalKey: string;
-    signalLabel: string;
-    summary: string | null;
-    strength: string | null;
-    watchout: string | null;
-    development: string | null;
-  } | null;
-  pairSummary: {
-    pairKey: string;
-    text: string | null;
-  } | null;
-  signals: ResultDomainSignal[];
+  chapterOpening: string | null;
+  signalBalance: {
+    items: readonly ResultDomainSignalBalanceItem[];
+  };
+  primarySignal: ResultDomainChapterSignal | null;
+  secondarySignal: ResultDomainChapterSignal | null;
+  signalPair: ResultDomainSignalPair | null;
+  pressureFocus: string | null;
+  environmentFocus: string | null;
 };
 
 export type ResultDiagnostics = {
@@ -689,7 +701,7 @@ export type CanonicalResultPayload = {
   metadata: ResultMetadata;
   intro: ResultIntro;
   hero: ResultHeroSummary;
-  domains: ResultDomainChapter[];
+  domains: readonly ResultDomainChapter[];
   actions: ResultActionBlocks;
   diagnostics: ResultDiagnostics;
 };

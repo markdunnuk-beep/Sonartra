@@ -244,7 +244,7 @@ function mapCanonicalDomainSignalRing(
     });
   }
 
-  const signals = domain.signals.map((signal) => ({
+  const signals = domain.signalBalance.items.map((signal) => ({
     signalKey: signal.signalKey,
     signalLabel: signal.signalLabel,
     withinDomainPercent: signal.withinDomainPercent,
@@ -254,6 +254,7 @@ function mapCanonicalDomainSignalRing(
     isSecondSignal: signal.isSecondary,
     summary:
       signalDetailsByKey.get(signal.signalKey)?.summary
+      ?? signal.summary
       ?? resolveDomainSignalDescriptor({
         signalKey: signal.signalKey,
         signalTitle: signal.signalLabel,

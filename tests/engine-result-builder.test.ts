@@ -849,23 +849,43 @@ test('domains expand to structured report chapters in authored order with author
   assert.deepEqual(payload.domains[0], {
     domainKey: 'section_a',
     domainLabel: 'Section A',
-    summary: null,
-    focus: null,
-    pressure: null,
-    environment: null,
+    chapterOpening: null,
+    signalBalance: {
+      items: [],
+    },
     primarySignal: null,
     secondarySignal: null,
-    pairSummary: null,
-    signals: [],
+    signalPair: null,
+    pressureFocus: null,
+    environmentFocus: null,
   });
 
   assert.deepEqual(payload.domains[1], {
     domainKey: 'signal_style',
     domainLabel: 'Behaviour Style',
-    summary: 'Authored behaviour style summary.',
-    focus: 'Authored focus.',
-    pressure: 'Authored pressure.',
-    environment: 'Authored environment.',
+    chapterOpening: 'Authored behaviour style summary.',
+    signalBalance: {
+      items: [
+        {
+          signalKey: 'style_driver',
+          signalLabel: 'Driver',
+          withinDomainPercent: 60,
+          rank: 1,
+          isPrimary: true,
+          isSecondary: false,
+          summary: 'Driver summary.',
+        },
+        {
+          signalKey: 'style_analyst',
+          signalLabel: 'Analyst',
+          withinDomainPercent: 40,
+          rank: 2,
+          isPrimary: false,
+          isSecondary: true,
+          summary: 'Analyst summary.',
+        },
+      ],
+    },
     primarySignal: {
       signalKey: 'style_driver',
       signalLabel: 'Driver',
@@ -882,37 +902,22 @@ test('domains expand to structured report chapters in authored order with author
       watchout: null,
       development: null,
     },
-    pairSummary: {
+    signalPair: {
       pairKey: 'analyst_driver',
-      text: 'Driver and Analyst pair summary.',
+      primarySignalKey: 'style_driver',
+      primarySignalLabel: 'Driver',
+      secondarySignalKey: 'style_analyst',
+      secondarySignalLabel: 'Analyst',
+      summary: 'Driver and Analyst pair summary.',
     },
-    signals: [
-      {
-        signalKey: 'style_driver',
-        signalLabel: 'Driver',
-        score: 38,
-        withinDomainPercent: 60,
-        rank: 1,
-        isPrimary: true,
-        isSecondary: false,
-      },
-      {
-        signalKey: 'style_analyst',
-        signalLabel: 'Analyst',
-        score: 24,
-        withinDomainPercent: 40,
-        rank: 2,
-        isPrimary: false,
-        isSecondary: true,
-      },
-    ],
+    pressureFocus: 'Authored pressure.',
+    environmentFocus: 'Authored environment.',
   });
 
   assert.equal(payload.domains[2]?.domainKey, 'signal_decision');
-  assert.ok(payload.domains[2]?.summary);
-  assert.equal(payload.domains[2]?.focus, null);
-  assert.equal(payload.domains[2]?.pressure, null);
-  assert.equal(payload.domains[2]?.environment, null);
+  assert.ok(payload.domains[2]?.chapterOpening);
+  assert.equal(payload.domains[2]?.pressureFocus, null);
+  assert.equal(payload.domains[2]?.environmentFocus, null);
   assert.deepEqual(payload.domains[2]?.primarySignal, {
     signalKey: 'decision_evidence',
     signalLabel: 'Evidence',
@@ -922,16 +927,16 @@ test('domains expand to structured report chapters in authored order with author
     development: null,
   });
   assert.equal(payload.domains[2]?.secondarySignal, null);
-  assert.equal(payload.domains[2]?.pairSummary, null);
-  assert.deepEqual(payload.domains[2]?.signals, [
+  assert.equal(payload.domains[2]?.signalPair, null);
+  assert.deepEqual(payload.domains[2]?.signalBalance.items, [
     {
       signalKey: 'decision_evidence',
       signalLabel: 'Evidence',
-      score: 20,
       withinDomainPercent: 100,
       rank: 3,
       isPrimary: true,
       isSecondary: false,
+      summary: null,
     },
   ]);
 });

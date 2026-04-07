@@ -86,12 +86,20 @@ function buildPayload(params?: {
     },
     hero: {
       headline: `${topSignalTitle} leads the current pattern`,
+      subheadline: null,
+      summary: null,
       narrative: `${topSignalTitle} leads the persisted result summary.`,
+      pressureOverlay: null,
+      environmentOverlay: null,
       primaryPattern: {
         label: topSignalTitle,
         signalKey: 'core_focus',
         signalLabel: topSignalTitle,
       },
+      heroPattern: null,
+      domainPairWinners: [],
+      traitTotals: [],
+      matchedPatterns: [],
       domainHighlights: [{
         domainKey: 'signals',
         domainLabel: 'Signals',
@@ -103,10 +111,18 @@ function buildPayload(params?: {
     domains: [{
       domainKey: 'signals',
       domainLabel: 'Signals',
-      summary: `${topSignalTitle} is the clearest signal in this domain.`,
-      focus: null,
-      pressure: null,
-      environment: null,
+      chapterOpening: `${topSignalTitle} is the clearest signal in this domain.`,
+      signalBalance: {
+        items: [{
+          signalKey: 'core_focus',
+          signalLabel: topSignalTitle,
+          withinDomainPercent: topSignalPercentage,
+          rank: 1,
+          isPrimary: true,
+          isSecondary: false,
+          summary: null,
+        }],
+      },
       primarySignal: {
         signalKey: 'core_focus',
         signalLabel: topSignalTitle,
@@ -116,16 +132,9 @@ function buildPayload(params?: {
         development: null,
       },
       secondarySignal: null,
-      pairSummary: null,
-      signals: [{
-        signalKey: 'core_focus',
-        signalLabel: topSignalTitle,
-        score: 7,
-        withinDomainPercent: topSignalPercentage,
-        rank: 1,
-        isPrimary: true,
-        isSecondary: false,
-      }],
+      signalPair: null,
+      pressureFocus: null,
+      environmentFocus: null,
     }],
     actions: {
       strengths: [],

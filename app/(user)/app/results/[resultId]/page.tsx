@@ -242,8 +242,8 @@ function DomainChapter({
   ringModel: DomainSignalRingViewModel | null;
   chapterNumber: number;
 }) {
-  const visibleSignals = domain.signals.slice(0, 2);
-  const hiddenSignals = domain.signals.slice(2);
+  const visibleSignals = domain.signalBalance.items.slice(0, 2);
+  const hiddenSignals = domain.signalBalance.items.slice(2);
   const title = domain.domainLabel.trim();
   // Source-contract markers for tests:
   // grid gap-x-10 gap-y-6 border-t border-white/7 pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]
@@ -268,19 +268,18 @@ function DomainChapter({
         </div>
 
         <div className="space-y-8 md:space-y-9">
-          {domain.summary ? (
+          {domain.chapterOpening ? (
             <div className="space-y-5">
               <EditorialDivider title="Chapter opening" />
-              <p className="sonartra-report-summary max-w-[46rem]">{domain.summary}</p>
+              <p className="sonartra-report-summary max-w-[46rem]">{domain.chapterOpening}</p>
             </div>
           ) : null}
 
-          {domain.focus || domain.pressure || domain.environment ? (
-            <div className="grid gap-x-8 gap-y-5 border-white/6 border-y py-5 sm:grid-cols-3">
-              {domain.focus ? <EditorialAside label="Focus" text={domain.focus} /> : null}
-              {domain.pressure ? <EditorialAside label="Pressure" text={domain.pressure} /> : null}
-              {domain.environment ? (
-                <EditorialAside label="Environment" text={domain.environment} />
+          {domain.pressureFocus || domain.environmentFocus ? (
+            <div className="grid gap-x-8 gap-y-5 border-white/6 border-y py-5 sm:grid-cols-2">
+              {domain.pressureFocus ? <EditorialAside label="Pressure" text={domain.pressureFocus} /> : null}
+              {domain.environmentFocus ? (
+                <EditorialAside label="Environment" text={domain.environmentFocus} />
               ) : null}
             </div>
           ) : null}
@@ -314,9 +313,9 @@ function DomainChapter({
             </div>
           ) : null}
 
-          {domain.pairSummary?.text ? (
+          {domain.signalPair?.summary ? (
             <p className="sonartra-report-body-soft max-w-[46rem] text-[0.97rem] italic leading-8 text-white/50">
-              {domain.pairSummary.text}
+              {domain.signalPair.summary}
             </p>
           ) : null}
 

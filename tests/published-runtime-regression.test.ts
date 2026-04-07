@@ -923,14 +923,13 @@ test('published runtime regression proves publish to ready persisted retrieval f
   assert.equal(payload.metadata.assessmentKey, 'wplp80');
   assert.equal(payload.metadata.version, harness.publishedVersion.version);
   assert.equal(payload.metadata.attemptId, started.attemptId);
-  assert.ok(payload.topSignal);
-  assert.ok(payload.rankedSignals.length > 0);
-  assert.ok(payload.normalizedScores.length > 0);
-  assert.ok(payload.domainSummaries.length > 0);
-  assert.ok(typeof payload.overviewSummary.headline === 'string' && payload.overviewSummary.headline.length > 0);
-  assert.ok(Array.isArray(payload.strengths));
-  assert.ok(Array.isArray(payload.watchouts));
-  assert.ok(Array.isArray(payload.developmentFocus));
+  assert.ok(payload.hero.primaryPattern?.signalKey);
+  assert.ok(payload.domains.length > 0);
+  assert.ok(payload.domains.some((domain) => domain.signalBalance.items.length > 0));
+  assert.ok(typeof payload.hero.headline === 'string' && payload.hero.headline.length > 0);
+  assert.ok(Array.isArray(payload.actions.strengths));
+  assert.ok(Array.isArray(payload.actions.watchouts));
+  assert.ok(Array.isArray(payload.actions.developmentFocus));
   assert.ok(payload.diagnostics);
 
   const latestLifecycle = await lifecycleService.getAssessmentAttemptLifecycle({
@@ -958,24 +957,24 @@ test('published runtime regression proves publish to ready persisted retrieval f
   assert.equal(workspace.assessments.length, 1);
   assert.equal(workspace.assessments[0]?.status, 'ready');
   assert.equal(workspace.assessments[0]?.latestReadyResultId, persistedResult?.resultId);
-  assert.equal(workspace.assessments[0]?.latestTopSignalTitle, payload.topSignal?.title ?? null);
+  assert.equal(workspace.assessments[0]?.latestTopSignalTitle, payload.hero.primaryPattern?.signalLabel ?? null);
 
   assert.equal(dashboard.readyResultCount, 1);
   assert.equal(dashboard.processingCount, 0);
   assert.equal(dashboard.latestReadyResult?.resultId, persistedResult?.resultId);
-  assert.equal(dashboard.latestReadyResult?.topSignalTitle, payload.topSignal?.title ?? null);
+  assert.equal(dashboard.latestReadyResult?.topSignalTitle, payload.hero.primaryPattern?.signalLabel ?? null);
 
   assert.equal(resultList.length, 1);
   assert.equal(resultList[0]?.resultId, persistedResult?.resultId);
   assert.equal(resultList[0]?.attemptId, started.attemptId);
-  assert.equal(resultList[0]?.topSignal?.title, payload.topSignal?.title ?? null);
+  assert.equal(resultList[0]?.topSignal?.title, payload.hero.primaryPattern?.signalLabel ?? null);
 
   assert.equal(resultDetail.resultId, persistedResult!.resultId);
   assert.equal(resultDetail.attemptId, started.attemptId);
   assert.equal(resultDetail.metadata.assessmentKey, 'wplp80');
   assert.equal(resultDetail.metadata.version, harness.publishedVersion.version);
   assert.equal(resultDetail.metadata.attemptId, started.attemptId);
-  assert.equal(resultDetail.topSignal?.signalId, payload.topSignal?.signalId ?? null);
+  assert.equal(resultDetail.topSignal?.signalKey, payload.hero.primaryPattern?.signalKey ?? null);
 
   harness.mutateDefinitionWeights();
 

@@ -60,10 +60,20 @@ function buildReadyRow(overrides?: Partial<Parameters<typeof analyzeReadyResultR
         {
           domainKey: 'signal_stress',
           domainLabel: 'Stress',
-          summary: 'Summary',
-          focus: null,
-          pressure: null,
-          environment: null,
+          chapterOpening: 'Summary',
+          signalBalance: {
+            items: [
+              {
+                signalKey: 'stress_scatter',
+                signalLabel: 'Scatter',
+                withinDomainPercent: 44,
+                rank: 1,
+                isPrimary: true,
+                isSecondary: false,
+                summary: 'Summary',
+              },
+            ],
+          },
           primarySignal: {
             signalKey: 'stress_scatter',
             signalLabel: 'Scatter',
@@ -73,18 +83,9 @@ function buildReadyRow(overrides?: Partial<Parameters<typeof analyzeReadyResultR
             development: 'Development',
           },
           secondarySignal: null,
-          pairSummary: null,
-          signals: [
-            {
-              signalKey: 'stress_scatter',
-              signalLabel: 'Scatter',
-              score: 44,
-              withinDomainPercent: 44,
-              rank: 1,
-              isPrimary: true,
-              isSecondary: false,
-            },
-          ],
+          signalPair: null,
+          pressureFocus: null,
+          environmentFocus: null,
         },
       ],
       actions: {
@@ -161,10 +162,20 @@ test('analyzeReadyResultRow flags exact legacy headline and unprefixed taxonomy 
         {
           domainKey: 'pressure-response',
           domainLabel: 'Pressure Response',
-          summary: 'Summary',
-          focus: null,
-          pressure: null,
-          environment: null,
+          chapterOpening: 'Summary',
+          signalBalance: {
+            items: [
+              {
+                signalKey: 'scatter',
+                signalLabel: 'Scatter',
+                withinDomainPercent: 44,
+                rank: 1,
+                isPrimary: true,
+                isSecondary: false,
+                summary: 'Summary',
+              },
+            ],
+          },
           primarySignal: {
             signalKey: 'scatter',
             signalLabel: 'Scatter',
@@ -174,18 +185,9 @@ test('analyzeReadyResultRow flags exact legacy headline and unprefixed taxonomy 
             development: 'Development',
           },
           secondarySignal: null,
-          pairSummary: null,
-          signals: [
-            {
-              signalKey: 'scatter',
-              signalLabel: 'Scatter',
-              score: 44,
-              withinDomainPercent: 44,
-              rank: 1,
-              isPrimary: true,
-              isSecondary: false,
-            },
-          ],
+          signalPair: null,
+          pressureFocus: null,
+          environmentFocus: null,
         },
       ],
       actions: {
@@ -225,4 +227,3 @@ test('analyzeReadyResultRow flags exact legacy headline and unprefixed taxonomy 
   assert.equal(finding?.signatures.missingOverviewLanguageRows, true);
   assert.equal(finding?.remediationClass, 'rebuildable');
 });
-

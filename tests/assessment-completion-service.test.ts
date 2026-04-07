@@ -270,21 +270,30 @@ function buildPayload(signalId: string): CanonicalResultPayload {
     domains: [{
       domainKey: 'section_a',
       domainLabel: 'Section A',
-      summary: null,
-      focus: null,
-      pressure: null,
-      environment: null,
+      chapterOpening: null,
+      signalBalance: {
+        items: [],
+      },
       primarySignal: null,
       secondarySignal: null,
-      pairSummary: null,
-      signals: [],
+      signalPair: null,
+      pressureFocus: null,
+      environmentFocus: null,
     }, {
       domainKey: 'signals',
       domainLabel: 'Signals',
-      summary: `${title} is the clearest signal in this domain.`,
-      focus: null,
-      pressure: null,
-      environment: null,
+      chapterOpening: `${title} is the clearest signal in this domain.`,
+      signalBalance: {
+        items: [{
+          signalKey,
+          signalLabel: title,
+          withinDomainPercent: 100,
+          rank: 1,
+          isPrimary: true,
+          isSecondary: false,
+          summary: null,
+        }],
+      },
       primarySignal: {
         signalKey,
         signalLabel: title,
@@ -294,16 +303,9 @@ function buildPayload(signalId: string): CanonicalResultPayload {
         development: null,
       },
       secondarySignal: null,
-      pairSummary: null,
-      signals: [{
-        signalKey,
-        signalLabel: title,
-        score: 100,
-        withinDomainPercent: 100,
-        rank: 1,
-        isPrimary: true,
-        isSecondary: false,
-      }],
+      signalPair: null,
+      pressureFocus: null,
+      environmentFocus: null,
     }],
     actions: {
       strengths: [],
@@ -434,7 +436,7 @@ function createFakeDb(config?: FakeDbConfig): Queryable {
   };
 }
 
-function createRepository() {
+function createRepository(): import('@/lib/engine/repository').AssessmentDefinitionRepository {
   return {
     async getPublishedAssessmentDefinitionByKey() { return buildDefinition(); },
     async getAssessmentDefinitionByVersion() { return buildDefinition(); },
@@ -584,10 +586,14 @@ test('completion resolves the runtime definition by the attempt assessmentVersio
         capturedLanguageVersionId = assessmentVersionId;
         return createEmptyLanguageBundle();
       },
-    },
+    } as import('@/lib/engine/repository').AssessmentDefinitionRepository,
     executeEngine: async (params) =>
       runAssessmentEngine({
-        ...params,
+        repository: params.repository as import('@/lib/engine/repository').AssessmentDefinitionRepository,
+        assessmentKey: params.assessmentKey,
+        assessmentVersionId: params.assessmentVersionId,
+        versionKey: params.versionKey,
+        responses: params.responses,
         loadAssessmentLanguage: async () => ({ assessment_description: null }),
       }),
   });
@@ -662,7 +668,6 @@ test('completion path persists the canonical payload unchanged through the real 
           domains: {
             signals: {
               summary: 'Persisted domain summary.',
-              focus: 'Persisted focus section.',
               pressure: 'Persisted pressure section.',
               environment: 'Persisted environment section.',
             },
@@ -675,10 +680,14 @@ test('completion path persists the canonical payload unchanged through the real 
           },
         };
       },
-    },
+    } as import('@/lib/engine/repository').AssessmentDefinitionRepository,
     executeEngine: async (params) =>
       runAssessmentEngine({
-        ...params,
+        repository: params.repository as import('@/lib/engine/repository').AssessmentDefinitionRepository,
+        assessmentKey: params.assessmentKey,
+        assessmentVersionId: params.assessmentVersionId,
+        versionKey: params.versionKey,
+        responses: params.responses,
         loadAssessmentLanguage: async () => ({ assessment_description: null }),
       }),
   });
@@ -699,10 +708,9 @@ test('completion path persists the canonical payload unchanged through the real 
     primarySignalLabel: 'Role Executor',
     summary: 'Persisted signal summary.',
   }]);
-  assert.equal(payload?.domains[1]?.summary, 'Persisted domain summary.');
-  assert.equal(payload?.domains[1]?.focus, 'Persisted focus section.');
-  assert.equal(payload?.domains[1]?.pressure, 'Persisted pressure section.');
-  assert.equal(payload?.domains[1]?.environment, 'Persisted environment section.');
+  assert.equal(payload?.domains[1]?.chapterOpening, 'Persisted domain summary.');
+  assert.equal(payload?.domains[1]?.pressureFocus, 'Persisted pressure section.');
+  assert.equal(payload?.domains[1]?.environmentFocus, 'Persisted environment section.');
   assert.deepEqual(payload?.domains[1]?.secondarySignal, {
     signalKey: 'core_focus',
     signalLabel: 'Core Focus',
@@ -711,9 +719,13 @@ test('completion path persists the canonical payload unchanged through the real 
     watchout: null,
     development: null,
   });
-  assert.deepEqual(payload?.domains[1]?.pairSummary, {
+  assert.deepEqual(payload?.domains[1]?.signalPair, {
     pairKey: 'executor_focus',
-    text: 'Persisted pair summary.',
+    primarySignalKey: 'role_executor',
+    primarySignalLabel: 'Role Executor',
+    secondarySignalKey: 'core_focus',
+    secondarySignalLabel: 'Core Focus',
+    summary: 'Persisted pair summary.',
   });
   assert.deepEqual(Object.keys(payload?.actions ?? {}), ['strengths', 'watchouts', 'developmentFocus']);
   assert.deepEqual(Object.keys(payload?.actions.strengths[0] ?? {}), ['signalKey', 'signalLabel', 'text']);
@@ -769,10 +781,14 @@ test('completion path succeeds with live Sonartra Hero domain keys and persists 
       async getAssessmentVersionLanguageBundle() {
         return createEmptyLanguageBundle();
       },
-    },
+    } as import('@/lib/engine/repository').AssessmentDefinitionRepository,
     executeEngine: async (params) =>
       runAssessmentEngine({
-        ...params,
+        repository: params.repository as import('@/lib/engine/repository').AssessmentDefinitionRepository,
+        assessmentKey: params.assessmentKey,
+        assessmentVersionId: params.assessmentVersionId,
+        versionKey: params.versionKey,
+        responses: params.responses,
         loadAssessmentLanguage: async () => ({ assessment_description: null }),
       }),
   });

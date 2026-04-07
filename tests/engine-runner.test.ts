@@ -25,7 +25,7 @@ const DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN =
   /A clear (working style|source of motivation|leadership pattern|conflict response|environment preference|decision pattern|role fit) is coming through|A pressure pattern is coming through/;
 
 function getAllDomainSignals(payload: CanonicalResultPayload) {
-  return payload.domains.flatMap((domain) => domain.signals);
+  return payload.domains.flatMap((domain) => domain.signalBalance.items);
 }
 
 function getDomain(payload: CanonicalResultPayload, domainKey: string) {
@@ -551,13 +551,12 @@ test('engine path uses pair summaries for hero narrative only when available', a
   assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
   assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
   assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
-  assert.equal(getDomain(payload, 'signals')?.pairSummary?.pairKey, 'drive_focus');
-  assert.equal(getDomain(payload, 'signals')?.pairSummary?.text, 'Custom pair summary from the assessment version.');
-  assert.equal(getDomain(baseline, 'signals')?.pairSummary?.text, null);
-  assert.equal(getDomain(payload, 'signals')?.summary, getDomain(baseline, 'signals')?.summary);
-  assert.equal(getDomain(payload, 'signals')?.focus, getDomain(baseline, 'signals')?.focus);
-  assert.equal(getDomain(payload, 'signals')?.pressure, getDomain(baseline, 'signals')?.pressure);
-  assert.equal(getDomain(payload, 'signals')?.environment, getDomain(baseline, 'signals')?.environment);
+  assert.equal(getDomain(payload, 'signals')?.signalPair?.pairKey, 'drive_focus');
+  assert.equal(getDomain(payload, 'signals')?.signalPair?.summary, 'Custom pair summary from the assessment version.');
+  assert.equal(getDomain(baseline, 'signals')?.signalPair?.summary, null);
+  assert.equal(getDomain(payload, 'signals')?.chapterOpening, getDomain(baseline, 'signals')?.chapterOpening);
+  assert.equal(getDomain(payload, 'signals')?.pressureFocus, getDomain(baseline, 'signals')?.pressureFocus);
+  assert.equal(getDomain(payload, 'signals')?.environmentFocus, getDomain(baseline, 'signals')?.environmentFocus);
 });
 
 test('engine path uses pair hero headers for hero headline only when available', async () => {
@@ -625,13 +624,12 @@ test('engine path uses pair hero headers for hero headline only when available',
   assert.deepEqual(payload.actions.strengths, baseline.actions.strengths);
   assert.deepEqual(payload.actions.watchouts, baseline.actions.watchouts);
   assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
-  assert.equal(getDomain(payload, 'signals')?.pairSummary?.pairKey, 'drive_focus');
-  assert.equal(getDomain(payload, 'signals')?.pairSummary?.text, 'Custom pair summary from the assessment version.');
-  assert.equal(getDomain(baseline, 'signals')?.pairSummary?.text, null);
-  assert.equal(getDomain(payload, 'signals')?.summary, getDomain(baseline, 'signals')?.summary);
-  assert.equal(getDomain(payload, 'signals')?.focus, getDomain(baseline, 'signals')?.focus);
-  assert.equal(getDomain(payload, 'signals')?.pressure, getDomain(baseline, 'signals')?.pressure);
-  assert.equal(getDomain(payload, 'signals')?.environment, getDomain(baseline, 'signals')?.environment);
+  assert.equal(getDomain(payload, 'signals')?.signalPair?.pairKey, 'drive_focus');
+  assert.equal(getDomain(payload, 'signals')?.signalPair?.summary, 'Custom pair summary from the assessment version.');
+  assert.equal(getDomain(baseline, 'signals')?.signalPair?.summary, null);
+  assert.equal(getDomain(payload, 'signals')?.chapterOpening, getDomain(baseline, 'signals')?.chapterOpening);
+  assert.equal(getDomain(payload, 'signals')?.pressureFocus, getDomain(baseline, 'signals')?.pressureFocus);
+  assert.equal(getDomain(payload, 'signals')?.environmentFocus, getDomain(baseline, 'signals')?.environmentFocus);
 });
 
 test('engine path falls back to the top signal title instead of generic prefix hero prose', async () => {
@@ -776,7 +774,7 @@ test('engine path uses signal-language sections for strengths watchouts and deve
   assert.equal(payload.actions.watchouts[0]?.text, 'Custom watchout for Support Drive.');
   assert.equal(payload.actions.developmentFocus[0]?.text, 'Custom development for Role Executor.');
   assert.deepEqual(payload.hero, baseline.hero);
-  assert.equal(getDomain(payload, 'signals')?.summary, getDomain(baseline, 'signals')?.summary);
+  assert.equal(getDomain(payload, 'signals')?.chapterOpening, getDomain(baseline, 'signals')?.chapterOpening);
   assert.equal(payload.actions.strengths.length, baseline.actions.strengths.length);
   assert.equal(payload.actions.watchouts.length, baseline.actions.watchouts.length);
   assert.equal(payload.actions.developmentFocus.length, baseline.actions.developmentFocus.length);
@@ -839,9 +837,9 @@ test('engine path uses domain-language summary for domain summaries only when av
   const payloadSignalsDomain = getDomain(payload, 'signals');
   const baselineSignalsDomain = getDomain(baseline, 'signals');
 
-  assert.equal(payloadSignalsDomain?.summary, 'Custom domain summary for the Signals domain.');
-  assert.equal(payloadSignalsDomain?.focus, baselineSignalsDomain?.focus);
-  assert.equal(payloadSignalsDomain?.pressure, baselineSignalsDomain?.pressure);
+  assert.equal(payloadSignalsDomain?.chapterOpening, 'Custom domain summary for the Signals domain.');
+  assert.equal(payloadSignalsDomain?.pressureFocus, baselineSignalsDomain?.pressureFocus);
+  assert.equal(payloadSignalsDomain?.environmentFocus, baselineSignalsDomain?.environmentFocus);
   assert.equal(payload.hero.headline, baseline.hero.headline);
   assert.equal(payload.hero.narrative, baseline.hero.narrative);
   assert.equal(payload.hero.primaryPattern?.signalKey, baseline.hero.primaryPattern?.signalKey);
@@ -904,12 +902,11 @@ test('engine path expands domains into structured chapters with pair summaries a
   const sectionDomain = getDomain(payload, 'section_a');
 
   assert.deepEqual(payload.domains.map((domain) => domain.domainKey), ['section_a', 'signals']);
-  assert.equal(sectionDomain?.summary, null);
+  assert.equal(sectionDomain?.chapterOpening, null);
   assert.equal(sectionDomain?.primarySignal, null);
-  assert.equal(sectionDomain?.pairSummary, null);
-  assert.equal(signalsDomain?.focus, 'Custom focus section.');
-  assert.equal(signalsDomain?.pressure, 'Custom pressure section.');
-  assert.equal(signalsDomain?.environment, 'Custom environment section.');
+  assert.equal(sectionDomain?.signalPair, null);
+  assert.equal(signalsDomain?.pressureFocus, 'Custom pressure section.');
+  assert.equal(signalsDomain?.environmentFocus, 'Custom environment section.');
   assert.deepEqual(signalsDomain?.primarySignal, {
     signalKey: 'support_drive',
     signalLabel: 'Support Drive',
@@ -926,37 +923,41 @@ test('engine path expands domains into structured chapters with pair summaries a
     watchout: null,
     development: null,
   });
-  assert.deepEqual(signalsDomain?.pairSummary, {
+  assert.deepEqual(signalsDomain?.signalPair, {
     pairKey: 'drive_focus',
-    text: 'Drive and Focus pair summary.',
+    primarySignalKey: 'support_drive',
+    primarySignalLabel: 'Support Drive',
+    secondarySignalKey: 'core_focus',
+    secondarySignalLabel: 'Core Focus',
+    summary: 'Drive and Focus pair summary.',
   });
-  assert.deepEqual(signalsDomain?.signals, [
+  assert.deepEqual(signalsDomain?.signalBalance.items, [
     {
       signalKey: 'support_drive',
       signalLabel: 'Support Drive',
-      score: 50,
       withinDomainPercent: 50,
       rank: 1,
       isPrimary: true,
       isSecondary: false,
+      summary: 'Support Drive summary.',
     },
     {
       signalKey: 'core_focus',
       signalLabel: 'Core Focus',
-      score: 38,
       withinDomainPercent: 38,
       rank: 2,
       isPrimary: false,
       isSecondary: true,
+      summary: 'Core Focus summary.',
     },
     {
       signalKey: 'role_executor',
       signalLabel: 'Role Executor',
-      score: 12,
       withinDomainPercent: 12,
       rank: 3,
       isPrimary: false,
       isSecondary: false,
+      summary: null,
     },
   ]);
 });
@@ -984,7 +985,7 @@ test('engine language regression matrix preserves the canonical payload contract
         strength: baseline.actions.strengths[0]?.text,
         watchout: baseline.actions.watchouts[0]?.text,
         development: baseline.actions.developmentFocus[0]?.text,
-        domainSummary: getDomain(baseline, 'signals')?.summary,
+        domainSummary: getDomain(baseline, 'signals')?.chapterOpening,
       },
     },
     {
@@ -1005,7 +1006,7 @@ test('engine language regression matrix preserves the canonical payload contract
         strength: baseline.actions.strengths[0]?.text,
         watchout: baseline.actions.watchouts[0]?.text,
         development: baseline.actions.developmentFocus[0]?.text,
-        domainSummary: getDomain(baseline, 'signals')?.summary,
+        domainSummary: getDomain(baseline, 'signals')?.chapterOpening,
       },
     },
     {
@@ -1030,7 +1031,7 @@ test('engine language regression matrix preserves the canonical payload contract
         strength: 'Signal-only strength.',
         watchout: 'Signal-only watchout.',
         development: 'Signal-only development.',
-        domainSummary: getDomain(baseline, 'signals')?.summary,
+        domainSummary: getDomain(baseline, 'signals')?.chapterOpening,
       },
     },
     {
@@ -1073,7 +1074,7 @@ test('engine language regression matrix preserves the canonical payload contract
         strength: baseline.actions.strengths[0]?.text,
         watchout: baseline.actions.watchouts[0]?.text,
         development: baseline.actions.developmentFocus[0]?.text,
-        domainSummary: getDomain(baseline, 'signals')?.summary,
+        domainSummary: getDomain(baseline, 'signals')?.chapterOpening,
       },
     },
     {
@@ -1103,7 +1104,7 @@ test('engine language regression matrix preserves the canonical payload contract
         strength: 'Mixed strength.',
         watchout: baseline.actions.watchouts[0]?.text,
         development: baseline.actions.developmentFocus[0]?.text,
-        domainSummary: getDomain(baseline, 'signals')?.summary,
+        domainSummary: getDomain(baseline, 'signals')?.chapterOpening,
       },
     },
     {
@@ -1162,7 +1163,7 @@ test('engine language regression matrix preserves the canonical payload contract
     assert.equal(payload.actions.watchouts[0]?.text, scenario.expected.watchout, `${scenario.name} watchout`);
     assert.equal(payload.actions.developmentFocus[0]?.text, scenario.expected.development, `${scenario.name} development`);
     assert.equal(
-      getDomain(payload, 'signals')?.summary,
+      getDomain(payload, 'signals')?.chapterOpening,
       scenario.expected.domainSummary,
       `${scenario.name} domain summary`,
     );
@@ -1304,7 +1305,7 @@ test('empty domains are preserved through the full pipeline', async () => {
 
   const emptyDomain = getDomain(payload, 'section_a');
   assert.ok(emptyDomain);
-  assert.equal(emptyDomain?.signals.length, 0);
+  assert.equal(emptyDomain?.signalBalance.items.length, 0);
 });
 
 test('engine attaches assessmentDescription from the assessment language repository when present', async () => {
