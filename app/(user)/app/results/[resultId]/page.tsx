@@ -100,6 +100,27 @@ function NarrativeBridge({
   );
 }
 
+function DomainTransition({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <p
+      className={[
+        'sonartra-report-body-soft max-w-[42rem] text-[0.97rem] italic leading-8 text-white/50',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {children}
+    </p>
+  );
+}
+
 function buildResultDetailDomainItems(params: {
   domains: readonly CanonicalDomainChapter[];
   ringModels: readonly DomainSignalRingViewModel[];
@@ -242,9 +263,11 @@ function DomainChapter({
   ringModel: DomainSignalRingViewModel | null;
   chapterNumber: number;
 }) {
-  const visibleSignals = domain.signalBalance.items.slice(0, 2);
-  const hiddenSignals = domain.signalBalance.items.slice(2);
   const title = domain.domainLabel.trim();
+  const hasSignalReading = Boolean(ringModel || domain.primarySignal || domain.secondarySignal);
+  const hasPairReading = Boolean(
+    domain.signalPair?.summary || domain.pressureFocus || domain.environmentFocus,
+  );
   // Source-contract markers for tests:
   // grid gap-x-10 gap-y-6 border-t border-white/7 pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]
   // text-[0.97rem] leading-8 text-white/50 italic
@@ -275,13 +298,10 @@ function DomainChapter({
             </div>
           ) : null}
 
-          {domain.pressureFocus || domain.environmentFocus ? (
-            <div className="grid gap-x-8 gap-y-5 border-white/6 border-y py-5 sm:grid-cols-2">
-              {domain.pressureFocus ? <EditorialAside label="Pressure" text={domain.pressureFocus} /> : null}
-              {domain.environmentFocus ? (
-                <EditorialAside label="Environment" text={domain.environmentFocus} />
-              ) : null}
-            </div>
+          {hasSignalReading ? (
+            <DomainTransition>
+              This becomes most visible in the patterns you rely on day to day.
+            </DomainTransition>
           ) : null}
 
           {ringModel ? (
@@ -313,29 +333,40 @@ function DomainChapter({
             </div>
           ) : null}
 
-          {domain.signalPair?.summary ? (
-            <p className="sonartra-report-body-soft max-w-[46rem] text-[0.97rem] italic leading-8 text-white/50">
-              {domain.signalPair.summary}
-            </p>
+          {hasPairReading ? (
+            <DomainTransition>
+              When these patterns come together, they shape a more consistent way of operating.
+            </DomainTransition>
           ) : null}
 
-          {hiddenSignals.length > 0 ? (
-            <details className="max-w-[42rem] pt-1">
-              <summary className="sonartra-motion-details-summary sonartra-type-nav text-white/62 cursor-pointer list-none marker:hidden">
-                Additional signal context
-              </summary>
-              <div className="border-white/8 mt-3 space-y-3 border-l pl-4">
-                {hiddenSignals.map((signal) => (
-                  <div key={signal.signalKey} className="sonartra-report-body-soft">
-                    <span className="sonartra-type-nav text-white/76">{signal.signalLabel}</span>
-                    <span className="text-white/40"> also appears in this area.</span>
-                  </div>
-                ))}
-              </div>
-            </details>
+          {hasPairReading ? (
+            <div className="space-y-6 rounded-[1.6rem] border border-white/7 bg-white/[0.02] px-5 py-5 md:space-y-7 md:px-7 md:py-7">
+              {domain.signalPair?.summary ? (
+                <div className="space-y-3">
+                  <EditorialDivider title="Signal pair" />
+                  <p className="sonartra-report-body max-w-[46rem] text-white/80">
+                    {domain.signalPair.summary}
+                  </p>
+                </div>
+              ) : null}
+
+              {domain.pressureFocus || domain.environmentFocus ? (
+                <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
+                  {domain.pressureFocus ? (
+                    <EditorialAside label="Pressure within the pair" text={domain.pressureFocus} />
+                  ) : null}
+                  {domain.environmentFocus ? (
+                    <EditorialAside
+                      label="Environment within the pair"
+                      text={domain.environmentFocus}
+                    />
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
           ) : null}
 
-          {visibleSignals.length === 0 ? (
+          {!ringModel && !domain.primarySignal && !domain.secondarySignal && !hasPairReading ? (
             <p className="sonartra-report-body-soft max-w-[42rem]">
               No persisted domain signals are available for this area.
             </p>

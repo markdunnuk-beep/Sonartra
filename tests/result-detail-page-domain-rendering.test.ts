@@ -288,6 +288,19 @@ test('result detail page removes the redundant hero domain highlight subsection'
 
 test('result detail page renders canonical domain chapter fields without UI-side interpretation synthesis', () => {
   const source = readFileSync(pagePath, 'utf8');
+  const chapterOpeningIndex = source.indexOf('domain.chapterOpening');
+  const firstTransitionIndex = source.indexOf(
+    'This becomes most visible in the patterns you rely on day to day.',
+  );
+  const signalBalanceIndex = source.indexOf('<EditorialDivider title="Signal balance" />');
+  const primarySignalIndex = source.indexOf('title="Primary signal"');
+  const secondarySignalIndex = source.indexOf('title="Secondary signal"');
+  const secondTransitionIndex = source.indexOf(
+    'When these patterns come together, they shape a more consistent way of operating.',
+  );
+  const pairSummaryIndex = source.indexOf('<EditorialDivider title="Signal pair" />');
+  const pressureFocusIndex = source.indexOf('label="Pressure within the pair"');
+  const environmentFocusIndex = source.indexOf('label="Environment within the pair"');
 
   assert.match(source, /domain\.chapterOpening/);
   assert.match(source, /domain\.pressureFocus/);
@@ -297,17 +310,36 @@ test('result detail page renders canonical domain chapter fields without UI-side
   assert.match(source, /domain\.primarySignal\.chapterSummary/);
   assert.match(source, /domain\.secondarySignal\.chapterSummary/);
   assert.match(source, /domain\.signalPair\?\.summary/);
-  assert.match(source, /const visibleSignals = domain\.signalBalance\.items\.slice\(0, 2\);/);
-  assert.match(source, /const hiddenSignals = domain\.signalBalance\.items\.slice\(2\);/);
+  assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
+  assert.match(
+    source,
+    /This becomes most visible in the patterns you rely on day to day\./,
+  );
+  assert.match(
+    source,
+    /When these patterns come together, they shape a more consistent way of operating\./,
+  );
+  assert.match(source, /label="Pressure within the pair"/);
+  assert.match(source, /label="Environment within the pair"/);
   assert.match(source, /chapterNumber: number;/);
   assert.match(source, /Chapter \$\{chapterNumber\.toString\(\)\.padStart\(2, '0'\)\}/);
-  assert.match(source, /signal\.signalLabel/);
   assert.match(source, /grid gap-x-10 gap-y-6 border-t border-white\/7 pt-6 md:grid-cols-\[minmax\(0,1fr\)_minmax\(0,1fr\)\]/);
   assert.match(source, /text-\[0\.97rem\] leading-8 text-white\/50 italic/);
+
+  assert.ok(chapterOpeningIndex >= 0);
+  assert.ok(firstTransitionIndex > chapterOpeningIndex);
+  assert.ok(signalBalanceIndex > firstTransitionIndex);
+  assert.ok(primarySignalIndex > signalBalanceIndex);
+  assert.ok(secondarySignalIndex > primarySignalIndex);
+  assert.ok(secondTransitionIndex > secondarySignalIndex);
+  assert.ok(pairSummaryIndex > secondTransitionIndex);
+  assert.ok(pressureFocusIndex > pairSummaryIndex);
+  assert.ok(environmentFocusIndex > pressureFocusIndex);
 
   assert.doesNotMatch(source, /interpretation\?\.summary/);
   assert.doesNotMatch(source, /supportingLine/);
   assert.doesNotMatch(source, /tensionClause/);
+  assert.doesNotMatch(source, /Additional signal context/);
   assert.doesNotMatch(source, REMOVED_DOMAIN_FOCUS_PATTERN);
 });
 
