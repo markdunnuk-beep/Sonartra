@@ -58,7 +58,7 @@ export function ResultLinkedInShare({ postBody, analytics }: ResultLinkedInShare
   }
 
   return (
-    <div className="relative flex justify-end">
+    <div className="relative shrink-0">
       <button
         type="button"
         aria-label="Share on LinkedIn"

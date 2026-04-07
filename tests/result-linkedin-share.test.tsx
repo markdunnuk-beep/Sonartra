@@ -77,4 +77,5 @@ test('results page wires the share formatter and suppresses the share ui when he
   assert.match(source, /linkedinShare\.canShare \? \(/);
   assert.match(source, /analytics=\{linkedinShareAnalytics\}/);
   assert.match(source, /<ResultLinkedInShare/);
+  assert.match(source, /className="flex flex-wrap items-center justify-between gap-4"/);
 });

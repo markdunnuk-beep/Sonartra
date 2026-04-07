@@ -508,21 +508,21 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           style={getRevealStyle(1)}
         >
           <div className="max-w-[68rem] space-y-11 md:space-y-14">
-            {linkedinShare.canShare ? (
-              <div className="flex justify-end">
-                <ResultLinkedInShare
-                  postBody={linkedinShare.postBody}
-                  analytics={linkedinShareAnalytics}
-                />
-              </div>
-            ) : null}
-
             <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
               <div className="space-y-9 md:space-y-11">
-                <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <SectionEyebrow>Results report</SectionEyebrow>
-                  <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
-                  <span>{result.assessmentTitle}</span>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <SectionEyebrow>Results report</SectionEyebrow>
+                    <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
+                    <span>{result.assessmentTitle}</span>
+                  </div>
+
+                  {linkedinShare.canShare ? (
+                    <ResultLinkedInShare
+                      postBody={linkedinShare.postBody}
+                      analytics={linkedinShareAnalytics}
+                    />
+                  ) : null}
                 </div>
 
                 <div className="space-y-8 md:space-y-10">
