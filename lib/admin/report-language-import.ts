@@ -1,4 +1,3 @@
-import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 import type {
   AssessmentVersionLanguageDomainInput,
   AssessmentVersionLanguageDomainSection,
@@ -44,6 +43,7 @@ type ValidPairField = AssessmentVersionLanguagePairSection;
 export type ReportLanguageValidationErrorCode =
   | 'INVALID_SECTION'
   | 'INVALID_TARGET'
+  | 'NON_CANONICAL_PAIR_KEY'
   | 'INVALID_FIELD'
   | 'DERIVED_FIELD_NOT_AUTHORABLE'
   | 'UNSUPPORTED_LEGACY_FIELD'
@@ -292,8 +292,8 @@ export function validateReportLanguageRows(params: {
 }): ReportLanguageValidationResult {
   const validSignalKeys = new Set(params.validSignalKeys);
   const validDomainKeys = new Set(params.validDomainKeys);
-  const validSignalLookupTokens = new Set(
-    params.validSignalKeys.map((signalKey) => getSignalLookupToken(signalKey)),
+  const signalKeyOrder = new Map(
+    params.validSignalKeys.map((signalKey, index) => [signalKey, index] as const),
   );
   const duplicateTracker = new Map<string, number[]>();
   const errors: ReportLanguageValidationError[] = [];
@@ -383,35 +383,35 @@ export function validateReportLanguageRows(params: {
         continue;
       }
 
-      const canonicalized = canonicalizeSignalPairKey(row.target);
-      if (!canonicalized.success) {
+      const pairValidation = validateCanonicalPairTarget(row.target, signalKeyOrder);
+      if (!pairValidation.success) {
         errors.push(
           createValidationError(
             row,
-            'INVALID_TARGET',
-            'Hero rows must target a canonical pattern key containing exactly two signal keys.',
+            pairValidation.code,
+            pairValidation.message,
           ),
         );
         continue;
       }
 
-      const [leftSignalKey, rightSignalKey] = canonicalized.signalKeys;
-      if (!validSignalLookupTokens.has(leftSignalKey)) {
+      const [leftSignalKey, rightSignalKey] = pairValidation.signalKeys;
+      if (!validSignalKeys.has(leftSignalKey)) {
         errors.push(
           createValidationError(
             row,
             'UNKNOWN_SIGNAL_KEY',
-            `Signal token ${leftSignalKey} does not resolve to a signal in the active assessment version.`,
+            `Signal key ${leftSignalKey} does not exist in the active assessment version.`,
           ),
         );
       }
 
-      if (!validSignalLookupTokens.has(rightSignalKey)) {
+      if (!validSignalKeys.has(rightSignalKey)) {
         errors.push(
           createValidationError(
             row,
             'UNKNOWN_SIGNAL_KEY',
-            `Signal token ${rightSignalKey} does not resolve to a signal in the active assessment version.`,
+            `Signal key ${rightSignalKey} does not exist in the active assessment version.`,
           ),
         );
       }
@@ -433,8 +433,8 @@ export function validateReportLanguageRows(params: {
         target: row.target,
         field: row.field as ValidHeroField,
         content: row.content,
-        canonicalPatternKey: canonicalized.canonicalSignalPair,
-        signalKeys: canonicalized.signalKeys,
+        canonicalPatternKey: pairValidation.canonicalSignalPair,
+        signalKeys: pairValidation.signalKeys,
       };
       validRows.push(validatedRow);
       trackDuplicate(duplicateTracker, validatedRow);
@@ -571,35 +571,35 @@ export function validateReportLanguageRows(params: {
       continue;
     }
 
-    const canonicalized = canonicalizeSignalPairKey(row.target);
-    if (!canonicalized.success) {
+    const pairValidation = validateCanonicalPairTarget(row.target, signalKeyOrder);
+    if (!pairValidation.success) {
       errors.push(
         createValidationError(
           row,
-          'INVALID_TARGET',
-          'Pair rows must target a signal pair containing exactly two signal keys.',
+          pairValidation.code,
+          pairValidation.message,
         ),
       );
       continue;
     }
 
-    const [leftSignalKey, rightSignalKey] = canonicalized.signalKeys;
-    if (!validSignalLookupTokens.has(leftSignalKey)) {
+    const [leftSignalKey, rightSignalKey] = pairValidation.signalKeys;
+    if (!validSignalKeys.has(leftSignalKey)) {
       errors.push(
         createValidationError(
           row,
           'UNKNOWN_SIGNAL_KEY',
-          `Signal token ${leftSignalKey} does not resolve to a signal in the active assessment version.`,
+          `Signal key ${leftSignalKey} does not exist in the active assessment version.`,
         ),
       );
     }
 
-    if (!validSignalLookupTokens.has(rightSignalKey)) {
+    if (!validSignalKeys.has(rightSignalKey)) {
       errors.push(
         createValidationError(
           row,
           'UNKNOWN_SIGNAL_KEY',
-          `Signal token ${rightSignalKey} does not resolve to a signal in the active assessment version.`,
+          `Signal key ${rightSignalKey} does not exist in the active assessment version.`,
         ),
       );
     }
@@ -621,8 +621,8 @@ export function validateReportLanguageRows(params: {
       target: row.target,
       field: normalizedPairField as ValidPairField,
       content: row.content,
-      canonicalSignalPair: canonicalized.canonicalSignalPair,
-      signalKeys: canonicalized.signalKeys,
+      canonicalSignalPair: pairValidation.canonicalSignalPair,
+      signalKeys: pairValidation.signalKeys,
     };
     validRows.push(validatedRow);
     trackDuplicate(duplicateTracker, validatedRow);
@@ -841,7 +841,55 @@ function sortValidationErrors(
   );
 }
 
-function getSignalLookupToken(signalKey: string): string {
-  const segments = signalKey.split('_').filter((segment) => segment.length > 0);
-  return segments[segments.length - 1] ?? signalKey;
+function validateCanonicalPairTarget(
+  value: string,
+  signalKeyOrder: ReadonlyMap<string, number>,
+):
+  | {
+      success: true;
+      signalKeys: readonly [string, string];
+      canonicalSignalPair: string;
+    }
+  | {
+      success: false;
+      code: 'INVALID_TARGET' | 'NON_CANONICAL_PAIR_KEY';
+      message: string;
+    } {
+  const normalizedValue = value.trim();
+  const parts = normalizedValue.split('_');
+
+  if (parts.length !== 2) {
+    return {
+      success: false,
+      code: 'INVALID_TARGET',
+      message: 'Pair rows must target a canonical pair key containing exactly two signal keys.',
+    };
+  }
+
+  const left = parts[0]?.trim() ?? '';
+  const right = parts[1]?.trim() ?? '';
+  if (!left || !right) {
+    return {
+      success: false,
+      code: 'INVALID_TARGET',
+      message: 'Pair rows must target a canonical pair key containing exactly two signal keys.',
+    };
+  }
+
+  const leftOrder = signalKeyOrder.get(left);
+  const rightOrder = signalKeyOrder.get(right);
+
+  if (leftOrder !== undefined && rightOrder !== undefined && leftOrder > rightOrder) {
+    return {
+      success: false,
+      code: 'NON_CANONICAL_PAIR_KEY',
+      message: `Pair key ${normalizedValue} is not in canonical order. Use ${right}_${left}.`,
+    };
+  }
+
+  return {
+    success: true,
+    signalKeys: [left, right],
+    canonicalSignalPair: `${left}_${right}`,
+  };
 }

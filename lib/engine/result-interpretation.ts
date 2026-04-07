@@ -5,7 +5,6 @@ import type {
   ResultInterpretationContext,
   ResultOverviewSummary,
 } from '@/lib/engine/types';
-import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 
 /**
  * Canonical result-language ownership for the persisted report fields.
@@ -401,10 +400,14 @@ function resolveCanonicalHeroPatternKey(
     return null;
   }
 
-  const canonicalPair = canonicalizeSignalPairKey(
-    `${getSignalPairLookupToken(topSignal.signalKey)}_${getSignalPairLookupToken(secondSignal.signalKey)}`,
-  );
-  return canonicalPair.success ? canonicalPair.canonicalSignalPair : null;
+  const topToken = getSignalPairLookupToken(topSignal.signalKey);
+  const secondToken = getSignalPairLookupToken(secondSignal.signalKey);
+
+  if (!topToken || !secondToken || topToken === secondToken) {
+    return null;
+  }
+
+  return `${topToken}_${secondToken}`;
 }
 
 function resolveHeroPairKey(

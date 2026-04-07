@@ -29,7 +29,6 @@ import {
   buildStrengths,
   buildWatchouts,
 } from '@/lib/engine/result-interpretation';
-import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 import { evaluateHeroPattern, getHeroPatternLabel } from '@/lib/engine/hero';
 import type {
   AssessmentVersionLanguageDomainSection,
@@ -204,11 +203,14 @@ function buildCanonicalSignalPairKey(
   primarySignalKey: string,
   secondarySignalKey: string,
 ): string | null {
-  const canonicalPair = canonicalizeSignalPairKey(
-    `${getSignalPairLookupToken(primarySignalKey)}_${getSignalPairLookupToken(secondarySignalKey)}`,
-  );
+  const primaryToken = getSignalPairLookupToken(primarySignalKey);
+  const secondaryToken = getSignalPairLookupToken(secondarySignalKey);
 
-  return canonicalPair.success ? canonicalPair.canonicalSignalPair : null;
+  if (!primaryToken || !secondaryToken || primaryToken === secondaryToken) {
+    return null;
+  }
+
+  return `${primaryToken}_${secondaryToken}`;
 }
 
 function selectPrimaryAndSecondaryDomainSignals(

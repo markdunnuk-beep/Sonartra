@@ -673,7 +673,7 @@ test('language step view model returns null for a missing assessment and empty v
   });
 });
 
-test('language step component renders assessment introduction, hero pattern language, and first-class domain chapter modules', () => {
+test('language step component renders assessment introduction and first-class domain chapter modules without a top-level hero pattern language panel', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentLanguageStep
       viewModel={{
@@ -711,9 +711,6 @@ test('language step component renders assessment introduction, hero pattern lang
   assert.match(markup, /Language/);
   assert.match(markup, /Assessment Introduction/);
   assert.match(markup, /This step controls report-facing language only\./);
-  assert.match(markup, /Hero Pattern Language/);
-  assert.match(markup, /Replace the opening hero headline language from its own dedicated import surface\./);
-  assert.match(markup, /Replace the hero headline rows shown at the top of the results page from a dedicated, version-scoped import surface\./);
   assert.match(markup, /Domain Chapters/);
   assert.match(markup, /Manage the chapter-owned language used throughout the domain reading in the same order it appears on the results page\./);
   assert.match(markup, /Import Hero engine datasets/);
@@ -721,20 +718,19 @@ test('language step component renders assessment introduction, hero pattern lang
   assert.match(markup, /Hero Pattern Rules/);
   assert.match(markup, /Hero Pattern Language/);
   assert.match(markup, /Current rows: 12/);
-  assert.match(markup, /Format: scope \| key \| headline/);
-  assert.match(markup, /Paste Hero Header rows/);
   assert.match(markup, /Domain Chapter Language/);
   assert.match(markup, /Signal Chapter Language/);
   assert.match(markup, /Signal Pair Chapter Language/);
   assert.match(markup, /Domain Chapter Language supports chapterOpening only\./);
   assert.match(markup, /Signal Chapter Language supports chapterSummary only\./);
   assert.match(markup, /Signal Pair Chapter Language supports chapterSummary, pressureFocus, and environmentFocus only\./);
-  assert.match(markup, /pair \| driver_influencer \| Fast-moving, people-driven and energised by momentum/);
+  assert.match(markup, /domain \| operating-style \| chapterOpening \|/);
+  assert.match(markup, /signal \| driver \| chapterSummary \|/);
+  assert.match(markup, /pair \| driver_analyst \| chapterSummary \|/);
   assert.match(markup, /supported authoring path for report language/i);
   assert.doesNotMatch(markup, /Actions<\/h3>/);
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
-  assert.match(markup, /Current Hero Header rows: 2/);
   assert.match(markup, /Current Domain rows: 1/);
   assert.match(markup, /Current Signal rows: 2/);
   assert.match(markup, /Current Pair rows: 1/);
@@ -743,9 +739,12 @@ test('language step component renders assessment introduction, hero pattern lang
   assert.match(markup, /Hero Language/);
   assert.doesNotMatch(markup, /Import report language/);
   assert.doesNotMatch(markup, /Legacy shared import surface retained temporarily/);
+  assert.doesNotMatch(markup, /Replace the opening hero headline language from its own dedicated import surface\./);
+  assert.doesNotMatch(markup, /Replace the hero headline rows shown at the top of the results page from a dedicated, version-scoped import surface\./);
+  assert.doesNotMatch(markup, /Current Hero Header rows:/);
+  assert.doesNotMatch(markup, /Paste Hero Header rows/);
 
   const assessmentIntroIndex = markup.indexOf('Assessment Introduction');
-  const heroPatternIndex = markup.indexOf('Hero Pattern Language');
   const domainChaptersIndex = markup.indexOf('Domain Chapters');
   const heroEngineIndex = markup.indexOf('Import Hero engine datasets');
   const domainChapterIndex = markup.indexOf('Domain Chapter Language');
@@ -753,8 +752,7 @@ test('language step component renders assessment introduction, hero pattern lang
   const pairChapterIndex = markup.indexOf('Signal Pair Chapter Language');
 
   assert.ok(assessmentIntroIndex >= 0);
-  assert.ok(heroPatternIndex > assessmentIntroIndex);
-  assert.ok(domainChaptersIndex > heroPatternIndex);
+  assert.ok(domainChaptersIndex > assessmentIntroIndex);
   assert.ok(domainChapterIndex > domainChaptersIndex);
   assert.ok(signalChapterIndex > domainChapterIndex);
   assert.ok(pairChapterIndex > signalChapterIndex);

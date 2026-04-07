@@ -56,9 +56,9 @@ const DATASET_OPTIONS: readonly DatasetOption[] = [
     rowFormatLabel: 'section | target | field | content',
     textareaLabel: 'Paste domain chapter rows',
     placeholder:
-      'domain | signal_style | chapterOpening | You tend to operate with visible pace, structure, and interpersonal impact.',
+      'domain | operating-style | chapterOpening | You tend to operate with visible pace, structure, and interpersonal impact.',
     formatExample: [
-      'domain | signal_style | chapterOpening | You tend to operate with visible pace, structure, and interpersonal impact.',
+      'domain | operating-style | chapterOpening | You tend to operate with visible pace, structure, and interpersonal impact.',
     ].join('\n'),
   },
   {
@@ -71,9 +71,9 @@ const DATASET_OPTIONS: readonly DatasetOption[] = [
     currentRowsLabel: 'Current Signal rows',
     rowFormatLabel: 'section | target | field | content',
     textareaLabel: 'Paste signal chapter rows',
-    placeholder: 'signal | style_driver | chapterSummary | You tend to move quickly and take initiative.',
+    placeholder: 'signal | driver | chapterSummary | You tend to move quickly and take initiative.',
     formatExample: [
-      'signal | style_driver | chapterSummary | You tend to move quickly and take initiative.',
+      'signal | driver | chapterSummary | You tend to move quickly and take initiative.',
     ].join('\n'),
   },
   {

@@ -17,10 +17,13 @@ test('language dataset import is a dedicated single-dataset module', () => {
   assert.match(source, /Domain Chapter Language/);
   assert.match(source, /chapterOpening rows for report domains/);
   assert.match(source, /supports chapterOpening only/);
+  assert.match(source, /domain \| operating-style \| chapterOpening \|/);
   assert.match(source, /Signal Chapter Language/);
   assert.match(source, /supports chapterSummary only/);
+  assert.match(source, /signal \| driver \| chapterSummary \|/);
   assert.match(source, /Signal Pair Chapter Language/);
   assert.match(source, /supports chapterSummary, pressureFocus, and environmentFocus only/);
+  assert.match(source, /pair \| driver_analyst \| chapterSummary \|/);
   assert.match(source, /const selectedOption = DATASET_OPTIONS\.find\(\(option\) => option\.key === dataset\)/);
   assert.match(source, /resolvedSectionTitle = sectionTitle \?\? selectedOption\.title/);
   assert.match(source, /isImportPending \? 'Importing\.\.\.' : hasImported \? 'Imported' : 'Import'/);
@@ -32,4 +35,6 @@ test('language dataset import is a dedicated single-dataset module', () => {
   assert.doesNotMatch(source, /selectedDataset/);
   assert.doesNotMatch(source, /availableOptions/);
   assert.doesNotMatch(source, /Import report language/);
+  assert.doesNotMatch(source, /signal_style/);
+  assert.doesNotMatch(source, /style_driver/);
 });

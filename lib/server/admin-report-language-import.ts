@@ -259,12 +259,12 @@ export async function importReportLanguageForAssessmentVersionWithDependencies(
         importedTargetCount: countTargetsForSection(command.reportSection, filteredRows),
       },
     };
-  } catch {
+  } catch (error) {
     return {
       ...preview,
       success: false,
       canImport: false,
-      executionError: `${toSectionLabel(command.reportSection)} import could not be saved. Try again.`,
+      executionError: getReportLanguageImportExecutionError(command.reportSection, error),
     };
   }
 }
@@ -523,4 +523,18 @@ function buildResult(params: {
 
 function toSectionLabel(reportSection: ImportableReportLanguageSection): string {
   return getReportSectionLabel(reportSection);
+}
+
+function getReportLanguageImportExecutionError(
+  reportSection: ImportableReportLanguageSection,
+  error: unknown,
+): string {
+  if (error instanceof Error) {
+    const message = error.message.trim();
+    if (message.length > 0) {
+      return `${toSectionLabel(reportSection)} import could not be saved: ${message}`;
+    }
+  }
+
+  return `${toSectionLabel(reportSection)} import could not be saved because the write failed. Review the import rows and try again.`;
 }
