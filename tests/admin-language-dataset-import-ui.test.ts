@@ -4,9 +4,14 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const componentPath = join(process.cwd(), 'components', 'admin', 'admin-language-dataset-import.tsx');
+const languageStepPath = join(process.cwd(), 'components', 'admin', 'admin-assessment-language-step.tsx');
 
 function readSource(): string {
   return readFileSync(componentPath, 'utf8');
+}
+
+function readLanguageStepSource(): string {
+  return readFileSync(languageStepPath, 'utf8');
 }
 
 test('language dataset import is a dedicated single-dataset module', () => {
@@ -37,4 +42,31 @@ test('language dataset import is a dedicated single-dataset module', () => {
   assert.doesNotMatch(source, /Import report language/);
   assert.doesNotMatch(source, /signal_style/);
   assert.doesNotMatch(source, /style_driver/);
+});
+
+test('language step renders hero datasets first and drives chapter imports from a local tab state', () => {
+  const source = readLanguageStepSource();
+
+  assert.match(source, /'use client';/);
+  assert.match(source, /const \[activeDomainTab, setActiveDomainTab\] = useState<DomainChapterTab>\('domain'\);/);
+  assert.match(source, /title="Import Hero engine datasets"/);
+  assert.match(source, /title="Domain Chapters"/);
+  assert.match(source, /label: 'Domain Chapter'/);
+  assert.match(source, /label: 'Signal Chapter'/);
+  assert.match(source, /label: 'Signal Pair'/);
+  assert.match(source, /aria-pressed=\{isSelected\}/);
+  assert.match(source, /onClick=\{\(\) => setActiveDomainTab\(tab\.key\)\}/);
+  assert.match(source, /dataset=\{\s*activeDomainTab === 'domain'/);
+  assert.match(source, /\? 'domain'/);
+  assert.match(source, /\? 'signal'/);
+  assert.match(source, /: 'pair'/);
+
+  const heroIndex = source.indexOf('title="Import Hero engine datasets"');
+  const domainIndex = source.indexOf('title="Domain Chapters"');
+
+  assert.ok(heroIndex >= 0);
+  assert.ok(domainIndex > heroIndex);
+  assert.doesNotMatch(source, /dataset="domain"/);
+  assert.doesNotMatch(source, /dataset="signal"/);
+  assert.doesNotMatch(source, /dataset="pair"/);
 });

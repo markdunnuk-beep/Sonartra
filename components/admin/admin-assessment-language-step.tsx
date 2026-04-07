@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+
 import { AdminLanguageDatasetImport } from '@/components/admin/admin-language-dataset-import';
 import { AdminHeroDatasetImport } from '@/components/admin/admin-hero-dataset-import';
 import {
@@ -6,8 +10,33 @@ import {
   MetaItem,
   SectionHeader,
   SurfaceCard,
+  cn,
 } from '@/components/shared/user-app-ui';
 import type { AdminAssessmentLanguageStepViewModel } from '@/lib/server/admin-assessment-language-step';
+
+type DomainChapterTab = 'domain' | 'signal' | 'pair';
+
+const DOMAIN_CHAPTER_TABS: readonly {
+  key: DomainChapterTab;
+  label: string;
+  title: string;
+}[] = [
+  {
+    key: 'domain',
+    label: 'Domain Chapter',
+    title: 'Domain Chapter Language',
+  },
+  {
+    key: 'signal',
+    label: 'Signal Chapter',
+    title: 'Signal Chapter Language',
+  },
+  {
+    key: 'pair',
+    label: 'Signal Pair',
+    title: 'Signal Pair Chapter Language',
+  },
+] as const;
 
 function getVersionSummary(viewModel: AdminAssessmentLanguageStepViewModel): string {
   if (!viewModel.activeVersion) {
@@ -28,6 +57,8 @@ export function AdminAssessmentLanguageStep({
 }: Readonly<{
   viewModel: AdminAssessmentLanguageStepViewModel;
 }>) {
+  const [activeDomainTab, setActiveDomainTab] = useState<DomainChapterTab>('domain');
+
   if (!viewModel.activeVersion) {
     return (
       <EmptyState
@@ -96,46 +127,6 @@ export function AdminAssessmentLanguageStep({
 
       <div className="space-y-6">
         <SectionHeader
-          eyebrow="Domain Chapters"
-          title="Domain Chapters"
-          description="Manage the chapter-owned language used throughout the domain reading in the same order it appears on the results page."
-        />
-
-        <div className="grid gap-6 xl:grid-cols-3">
-          <AdminLanguageDatasetImport
-            dataset="domain"
-            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-            counts={viewModel.counts}
-            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-            sectionEyebrow="Domain Chapters"
-            sectionTitle="Domain Chapter Language"
-            sectionDescription="Replace the chapterOpening copy for each domain chapter from its own dedicated import surface."
-          />
-
-          <AdminLanguageDatasetImport
-            dataset="signal"
-            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-            counts={viewModel.counts}
-            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-            sectionEyebrow="Domain Chapters"
-            sectionTitle="Signal Chapter Language"
-            sectionDescription="Replace the persisted primary and secondary signal summaries from their own dedicated import surface."
-          />
-
-          <AdminLanguageDatasetImport
-            dataset="pair"
-            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-            counts={viewModel.counts}
-            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-            sectionEyebrow="Domain Chapters"
-            sectionTitle="Signal Pair Chapter Language"
-            sectionDescription="Replace the pair summary, pressure, and environment language from their own dedicated import surface."
-          />
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        <SectionHeader
           eyebrow="Hero Engine"
           title="Import Hero engine datasets"
           description="Replace the version-scoped pair traits, pattern rules, and pattern language used by the canonical Hero engine."
@@ -150,6 +141,67 @@ export function AdminAssessmentLanguageStep({
           }}
           isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
         />
+      </div>
+
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Domain Chapters"
+          title="Domain Chapters"
+          description="Manage the chapter-owned language used throughout the domain reading in the same order it appears on the results page."
+        />
+
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {DOMAIN_CHAPTER_TABS.map((tab) => {
+              const isSelected = tab.key === activeDomainTab;
+              return (
+                <button
+                  aria-pressed={isSelected}
+                  className={cn(
+                    'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
+                    isSelected
+                      ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
+                      : 'border-white/8 bg-black/10 hover:border-white/14',
+                  )}
+                  key={tab.key}
+                  onClick={() => setActiveDomainTab(tab.key)}
+                  type="button"
+                >
+                  <p className="text-sm font-semibold text-white">{tab.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/54">{tab.title}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          <AdminLanguageDatasetImport
+            dataset={
+              activeDomainTab === 'domain'
+                ? 'domain'
+                : activeDomainTab === 'signal'
+                  ? 'signal'
+                  : 'pair'
+            }
+            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+            counts={viewModel.counts}
+            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+            sectionEyebrow="Domain Chapters"
+            sectionTitle={
+              activeDomainTab === 'domain'
+                ? 'Domain Chapter Language'
+                : activeDomainTab === 'signal'
+                  ? 'Signal Chapter Language'
+                  : 'Signal Pair Chapter Language'
+            }
+            sectionDescription={
+              activeDomainTab === 'domain'
+                ? 'Replace the chapterOpening copy for each domain chapter from its own dedicated import surface.'
+                : activeDomainTab === 'signal'
+                  ? 'Replace the persisted primary and secondary signal summaries from their own dedicated import surface.'
+                  : 'Replace the pair summary, pressure, and environment language from their own dedicated import surface.'
+            }
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
