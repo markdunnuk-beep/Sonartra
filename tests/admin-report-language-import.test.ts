@@ -67,6 +67,7 @@ function createFakeDb(seed?: {
   pairLanguage?: StoredPairLanguageRow[];
 }, config?: {
   failInsertTable?: 'domains' | 'signals' | 'pairs';
+  allowedDomainSections?: readonly StoredDomainLanguageRow['section'][];
 }) {
   const state = {
     assessments: [...(seed?.assessments ?? [])],
@@ -230,6 +231,11 @@ function createFakeDb(seed?: {
         }
 
         const [assessmentVersionId, domainKey, section, content] = params as [string, string, StoredDomainLanguageRow['section'], string];
+        if (config?.allowedDomainSections && !config.allowedDomainSections.includes(section)) {
+          throw new Error(
+            'new row for relation "assessment_version_language_domains" violates check constraint "assessment_version_language_domains_section_check"',
+          );
+        }
         state.domainLanguage.push({
           id: `domain-${state.domainLanguage.length + 1}`,
           assessmentVersionId,
@@ -421,6 +427,33 @@ test('domain report-language import accepts canonical domain keys only and persi
   );
 
   assert.equal(result.success, true);
+  assert.deepEqual(fake.state.domainLanguage, [
+    {
+      id: 'domain-1',
+      assessmentVersionId: 'version-a',
+      domainKey: 'operating-style',
+      section: 'chapterOpening',
+      content: 'Custom domain chapter opening.',
+    },
+  ]);
+});
+
+test('domain report-language import no longer fails the domains section constraint for chapterOpening rows', async () => {
+  const fake = createFakeDb(buildSeed(), {
+    allowedDomainSections: ['chapterOpening', 'summary'],
+  });
+
+  const result = await importReportLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-a',
+      reportSection: 'domain',
+      rawInput: 'domain|operating-style|chapterOpening|Custom domain chapter opening.',
+    },
+    { db: fake.client, revalidatePath() {} },
+  );
+
+  assert.equal(result.success, true);
+  assert.equal(result.executionError, null);
   assert.deepEqual(fake.state.domainLanguage, [
     {
       id: 'domain-1',

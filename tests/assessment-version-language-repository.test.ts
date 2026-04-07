@@ -481,7 +481,7 @@ test('writing and then reading domain language round-trips correctly', async () 
   await replaceAssessmentVersionLanguageDomains(fake.db, {
     assessmentVersionId: 'version-1',
     inputs: [
-      { domainKey: 'signal_conflict', section: 'chapterOpening', content: 'conflict summary' },
+      { domainKey: 'operating-style', section: 'chapterOpening', content: 'Custom domain chapter opening.' },
     ],
   });
 
@@ -494,7 +494,7 @@ test('writing and then reading domain language round-trips correctly', async () 
       content: row.content,
     })),
     [
-      { domainKey: 'signal_conflict', section: 'chapterOpening', content: 'conflict summary' },
+      { domainKey: 'operating-style', section: 'chapterOpening', content: 'Custom domain chapter opening.' },
     ],
   );
 });
@@ -722,9 +722,9 @@ test('legacy domain summary rows read back as chapterOpening for bundle consumer
       {
         id: 'd1',
         assessmentVersionId: 'version-1',
-        domainKey: 'signal_style',
+        domainKey: 'operating-style',
         section: 'summary',
-        content: 'legacy domain summary',
+        content: 'legacy domain chapter opening',
         createdAt: '2026-04-01T00:00:04.000Z',
         updatedAt: '2026-04-01T00:00:04.000Z',
       },
@@ -734,8 +734,8 @@ test('legacy domain summary rows read back as chapterOpening for bundle consumer
   const bundle = await getAssessmentVersionLanguageBundle(fake.db, 'version-1');
 
   assert.deepEqual(bundle.domains, {
-    signal_style: {
-      chapterOpening: 'legacy domain summary',
+    'operating-style': {
+      chapterOpening: 'legacy domain chapter opening',
     },
   });
 });
