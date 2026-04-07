@@ -54,9 +54,9 @@ function buildEmptyInputState(dataset: LanguageImportDataset, rawInput: string):
       ? 'Hero Header'
       : dataset === 'domain'
         ? 'domain chapter'
-        : dataset === 'signal'
+      : dataset === 'signal'
           ? 'signal'
-          : 'pair summary';
+          : 'pair chapter';
 
   return {
     ...initialAdminLanguageDatasetImportState,

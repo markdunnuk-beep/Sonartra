@@ -29,7 +29,7 @@ type StoredPairRow = {
   id: string;
   assessmentVersionId: string;
   signalPair: string;
-  section: 'summary' | 'strength' | 'watchout';
+  section: 'chapterSummary' | 'pressureFocus' | 'environmentFocus' | 'summary' | 'strength' | 'watchout';
   content: string;
   createdAt: string;
   updatedAt: string;
@@ -107,8 +107,8 @@ function createFakeLanguageDb(seed?: {
     [...rows].sort(
       (left, right) =>
         left.signalPair.localeCompare(right.signalPair)
-        || ['summary', 'strength', 'watchout'].indexOf(left.section)
-          - ['summary', 'strength', 'watchout'].indexOf(right.section)
+        || ['chapterSummary', 'summary', 'pressureFocus', 'environmentFocus', 'strength', 'watchout'].indexOf(left.section)
+          - ['chapterSummary', 'summary', 'pressureFocus', 'environmentFocus', 'strength', 'watchout'].indexOf(right.section)
         || left.id.localeCompare(right.id),
     );
   const sortDomains = (rows: StoredDomainRow[]) =>
@@ -453,8 +453,9 @@ test('writing and then reading pair language round-trips correctly', async () =>
   await replaceAssessmentVersionLanguagePairs(fake.db, {
     assessmentVersionId: 'version-1',
     inputs: [
-      { signalPair: 'driver_operator', section: 'strength', content: 'stable execution' },
-      { signalPair: 'driver_operator', section: 'summary', content: 'pair summary' },
+      { signalPair: 'driver_operator', section: 'environmentFocus', content: 'best with clear structure' },
+      { signalPair: 'driver_operator', section: 'chapterSummary', content: 'pair summary' },
+      { signalPair: 'driver_operator', section: 'pressureFocus', content: 'pace can outrun reflection' },
     ],
   });
 
@@ -467,8 +468,9 @@ test('writing and then reading pair language round-trips correctly', async () =>
       content: row.content,
     })),
     [
-      { signalPair: 'driver_operator', section: 'summary', content: 'pair summary' },
-      { signalPair: 'driver_operator', section: 'strength', content: 'stable execution' },
+      { signalPair: 'driver_operator', section: 'chapterSummary', content: 'pair summary' },
+      { signalPair: 'driver_operator', section: 'pressureFocus', content: 'pace can outrun reflection' },
+      { signalPair: 'driver_operator', section: 'environmentFocus', content: 'best with clear structure' },
     ],
   );
 });
@@ -573,10 +575,19 @@ test('bundle loader groups content correctly by key and section', async () => {
         id: 'p1',
         assessmentVersionId: 'version-1',
         signalPair: 'driver_analyst',
-        section: 'summary',
+        section: 'chapterSummary',
         content: 'pair summary',
         createdAt: '2026-04-01T00:00:03.000Z',
         updatedAt: '2026-04-01T00:00:03.000Z',
+      },
+      {
+        id: 'p2',
+        assessmentVersionId: 'version-1',
+        signalPair: 'driver_analyst',
+        section: 'pressureFocus',
+        content: 'pair pressure',
+        createdAt: '2026-04-01T00:00:03.500Z',
+        updatedAt: '2026-04-01T00:00:03.500Z',
       },
     ],
     domains: [
@@ -624,7 +635,8 @@ test('bundle loader groups content correctly by key and section', async () => {
     },
     pairs: {
       driver_analyst: {
-        summary: 'pair summary',
+        chapterSummary: 'pair summary',
+        pressureFocus: 'pair pressure',
       },
     },
     domains: {
@@ -761,6 +773,48 @@ test('stored chapterOpening rows take precedence over legacy domain summary rows
   });
 });
 
+test('legacy pair summary rows read back as chapterSummary and legacy pair action rows stay out of the active bundle', async () => {
+  const fake = createFakeLanguageDb({
+    pairs: [
+      {
+        id: 'p1',
+        assessmentVersionId: 'version-1',
+        signalPair: 'driver_analyst',
+        section: 'summary',
+        content: 'legacy pair summary',
+        createdAt: '2026-04-01T00:00:04.000Z',
+        updatedAt: '2026-04-01T00:00:04.000Z',
+      },
+      {
+        id: 'p2',
+        assessmentVersionId: 'version-1',
+        signalPair: 'driver_analyst',
+        section: 'strength',
+        content: 'legacy pair strength',
+        createdAt: '2026-04-01T00:00:05.000Z',
+        updatedAt: '2026-04-01T00:00:05.000Z',
+      },
+      {
+        id: 'p3',
+        assessmentVersionId: 'version-1',
+        signalPair: 'driver_analyst',
+        section: 'watchout',
+        content: 'legacy pair watchout',
+        createdAt: '2026-04-01T00:00:06.000Z',
+        updatedAt: '2026-04-01T00:00:06.000Z',
+      },
+    ],
+  });
+
+  const bundle = await getAssessmentVersionLanguageBundle(fake.db, 'version-1');
+
+  assert.deepEqual(bundle.pairs, {
+    driver_analyst: {
+      chapterSummary: 'legacy pair summary',
+    },
+  });
+});
+
 test('stable ordering and grouping are preserved', async () => {
   const fake = createFakeLanguageDb();
 
@@ -797,7 +851,7 @@ test('replace operations roll back on failure with no partial dataset replacemen
           id: 'p1',
           assessmentVersionId: 'version-1',
           signalPair: 'driver_operator',
-          section: 'summary',
+          section: 'chapterSummary',
           content: 'existing pair summary',
           createdAt: '2026-04-01T00:00:01.000Z',
           updatedAt: '2026-04-01T00:00:01.000Z',
@@ -811,7 +865,7 @@ test('replace operations roll back on failure with no partial dataset replacemen
     () =>
       replaceAssessmentVersionLanguagePairs(fake.db, {
         assessmentVersionId: 'version-1',
-        inputs: [{ signalPair: 'driver_operator', section: 'strength', content: 'new strength' }],
+        inputs: [{ signalPair: 'driver_operator', section: 'pressureFocus', content: 'new pressure' }],
       }),
     /PAIR_INSERT_FAILED/,
   );
@@ -825,7 +879,7 @@ test('replace operations roll back on failure with no partial dataset replacemen
     [
       {
         signalPair: 'driver_operator',
-        section: 'summary',
+        section: 'chapterSummary',
         content: 'existing pair summary',
       },
     ],

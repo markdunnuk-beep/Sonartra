@@ -44,7 +44,7 @@ type LanguageFixture = {
     id: string;
     assessmentVersionId: string;
     signalPair: string;
-    section: 'summary' | 'strength' | 'watchout';
+    section: 'chapterSummary' | 'pressureFocus' | 'environmentFocus' | 'summary' | 'strength' | 'watchout';
     content: string;
     createdAt: string;
     updatedAt: string;
@@ -721,7 +721,7 @@ test('language step component renders hero header, domain chapters, signals, and
   assert.match(markup, /Paste Hero Header rows/);
   assert.match(markup, /Domain Chapter Language/);
   assert.match(markup, /Signal Language/);
-  assert.match(markup, /Pair Summary Language/);
+  assert.match(markup, /Pair Chapter Language/);
   assert.match(markup, /pair \| driver_influencer \| Fast-moving, people-driven and energised by momentum/);
   assert.match(markup, /supported authoring path for report language/i);
   assert.doesNotMatch(markup, /Actions<\/h3>/);
@@ -1073,5 +1073,5 @@ test('language step component shows a safe schema-unavailable state instead of r
   assert.doesNotMatch(markup, /Hero Header Language/);
   assert.doesNotMatch(markup, /Domain Chapter Language/);
   assert.doesNotMatch(markup, /Signal Language/);
-  assert.doesNotMatch(markup, /Pair Summary Language/);
+  assert.doesNotMatch(markup, /Pair Chapter Language/);
 });

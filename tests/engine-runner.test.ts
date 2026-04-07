@@ -456,7 +456,7 @@ test('hero domain highlights use authored domain order and primary signal summar
       return {
         signals: {
           support_drive: {
-            summary: 'Support Drive summary from signal language.',
+            chapterSummary: 'Support Drive summary from signal language.',
           },
         },
         pairs: {},
@@ -505,7 +505,7 @@ test('engine path uses pair summaries for hero narrative only when available', a
         signals: {},
         pairs: {
           drive_focus: {
-            summary: 'Custom pair summary from the assessment version.',
+            chapterSummary: 'Custom pair summary from the assessment version.',
           },
         },
         domains: {},
@@ -573,7 +573,7 @@ test('engine path uses pair hero headers for hero headline only when available',
         signals: {},
         pairs: {
           drive_focus: {
-            summary: 'Custom pair summary from the assessment version.',
+            chapterSummary: 'Custom pair summary from the assessment version.',
           },
         },
         domains: {},
@@ -862,26 +862,24 @@ test('engine path expands domains into structured chapters with pair summaries a
       return {
         signals: {
           support_drive: {
-            summary: 'Support Drive summary.',
+            chapterSummary: 'Support Drive summary.',
             strength: 'Support Drive strength.',
             watchout: 'Support Drive watchout.',
             development: 'Support Drive development.',
           },
           core_focus: {
-            summary: 'Core Focus summary.',
+            chapterSummary: 'Core Focus summary.',
           },
         },
         pairs: {
           drive_focus: {
-            summary: 'Drive and Focus pair summary.',
+            chapterSummary: 'Drive and Focus pair summary.',
+            pressureFocus: 'Custom pressure section.',
+            environmentFocus: 'Custom environment section.',
           },
         },
         domains: {
-          signals: {
-            focus: 'Custom focus section.',
-            pressure: 'Custom pressure section.',
-            environment: 'Custom environment section.',
-          },
+          signals: {},
         },
         overview: {},
       };
@@ -910,7 +908,7 @@ test('engine path expands domains into structured chapters with pair summaries a
   assert.deepEqual(signalsDomain?.primarySignal, {
     signalKey: 'support_drive',
     signalLabel: 'Support Drive',
-    summary: 'Support Drive summary.',
+    chapterSummary: 'Support Drive summary.',
     strength: 'Support Drive strength.',
     watchout: 'Support Drive watchout.',
     development: 'Support Drive development.',
@@ -918,7 +916,7 @@ test('engine path expands domains into structured chapters with pair summaries a
   assert.deepEqual(signalsDomain?.secondarySignal, {
     signalKey: 'core_focus',
     signalLabel: 'Core Focus',
-    summary: 'Core Focus summary.',
+    chapterSummary: 'Core Focus summary.',
     strength: null,
     watchout: null,
     development: null,
@@ -939,7 +937,7 @@ test('engine path expands domains into structured chapters with pair summaries a
       rank: 1,
       isPrimary: true,
       isSecondary: false,
-      summary: 'Support Drive summary.',
+      chapterSummary: 'Support Drive summary.',
     },
     {
       signalKey: 'core_focus',
@@ -948,7 +946,7 @@ test('engine path expands domains into structured chapters with pair summaries a
       rank: 2,
       isPrimary: false,
       isSecondary: true,
-      summary: 'Core Focus summary.',
+      chapterSummary: 'Core Focus summary.',
     },
     {
       signalKey: 'role_executor',
@@ -957,7 +955,7 @@ test('engine path expands domains into structured chapters with pair summaries a
       rank: 3,
       isPrimary: false,
       isSecondary: false,
-      summary: null,
+      chapterSummary: null,
     },
   ]);
 });
@@ -994,7 +992,7 @@ test('engine language regression matrix preserves the canonical payload contract
         signals: {},
         pairs: {
           drive_focus: {
-            summary: 'Pair-only hero narrative.',
+            chapterSummary: 'Pair-only hero narrative.',
           },
         },
         domains: {},
@@ -1087,7 +1085,7 @@ test('engine language regression matrix preserves the canonical payload contract
         },
         pairs: {
           drive_focus: {
-            summary: 'Mixed narrative.',
+            chapterSummary: 'Mixed narrative.',
           },
         },
         domains: {},
@@ -1121,7 +1119,7 @@ test('engine language regression matrix preserves the canonical payload contract
         },
         pairs: {
           drive_focus: {
-            summary: 'Full narrative.',
+            chapterSummary: 'Full narrative.',
           },
         },
         domains: {

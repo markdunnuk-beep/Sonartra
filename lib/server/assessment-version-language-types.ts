@@ -13,9 +13,18 @@ export type AssessmentVersionLanguageStoredSignalSection =
   | AssessmentVersionLanguageLegacySignalSection;
 
 export type AssessmentVersionLanguagePairSection =
+  | 'chapterSummary'
+  | 'pressureFocus'
+  | 'environmentFocus';
+
+export type AssessmentVersionLanguageLegacyPairSection =
   | 'summary'
   | 'strength'
   | 'watchout';
+
+export type AssessmentVersionLanguageStoredPairSection =
+  | AssessmentVersionLanguagePairSection
+  | AssessmentVersionLanguageLegacyPairSection;
 
 export type AssessmentVersionLanguageDomainSection = 'chapterOpening';
 
@@ -59,7 +68,7 @@ export type AssessmentVersionLanguagePairRow = {
   id: string;
   assessmentVersionId: AssessmentVersionId;
   signalPair: string;
-  section: AssessmentVersionLanguagePairSection;
+  section: AssessmentVersionLanguageStoredPairSection;
   content: string;
   createdAt: string;
   updatedAt: string;

@@ -4,6 +4,7 @@ import type {
   AssessmentVersionLanguageDomainSection,
   AssessmentVersionLanguageOverviewInput,
   AssessmentVersionLanguagePairInput,
+  AssessmentVersionLanguagePairSection,
   AssessmentVersionLanguageSignalInput,
   AssessmentVersionLanguageSignalSection,
 } from '@/lib/server/assessment-version-language-types';
@@ -38,7 +39,7 @@ export type ReportLanguageParseError = {
 type ValidHeroField = 'headline' | 'narrative';
 type ValidDomainField = 'chapterOpening';
 type ValidSignalField = AssessmentVersionLanguageSignalSection;
-type ValidPairField = 'summary';
+type ValidPairField = AssessmentVersionLanguagePairSection;
 
 export type ReportLanguageValidationErrorCode =
   | 'INVALID_SECTION'
@@ -151,6 +152,11 @@ const DOMAIN_FIELDS = new Set<ValidDomainField>([
 ]);
 
 const HERO_FIELDS = new Set<ValidHeroField>(['headline', 'narrative']);
+const PAIR_FIELDS = new Set<ValidPairField>([
+  'chapterSummary',
+  'pressureFocus',
+  'environmentFocus',
+]);
 
 const REPORT_SECTION_METADATA: Record<
   ImportableReportLanguageSection,
@@ -177,7 +183,7 @@ const REPORT_SECTION_METADATA: Record<
   },
   pair: {
     label: 'Pairs',
-    emptyInputNoun: 'pair summary',
+    emptyInputNoun: 'pair chapter',
     rowSectionName: 'pair',
   },
 };
@@ -543,18 +549,23 @@ export function validateReportLanguageRows(params: {
         createValidationError(
           row,
           'UNSUPPORTED_LEGACY_FIELD',
-          'Pair strength/watchout rows are legacy-only and not supported. Only pair summary is authorable in the report-language path.',
+          'Pair strength/watchout rows are legacy-only and not supported. Pair chapter language supports chapterSummary, pressureFocus, and environmentFocus only.',
         ),
       );
       continue;
     }
 
-    if (row.field !== 'summary') {
+    const normalizedPairField =
+      row.field === 'summary'
+        ? 'chapterSummary'
+        : row.field;
+
+    if (!PAIR_FIELDS.has(normalizedPairField as ValidPairField)) {
       errors.push(
         createValidationError(
           row,
           'INVALID_FIELD',
-          'Pair field must be summary.',
+          'Pair field must be chapterSummary, pressureFocus, or environmentFocus.',
         ),
       );
       continue;
@@ -608,7 +619,7 @@ export function validateReportLanguageRows(params: {
       rawLine: row.rawLine,
       section: 'pair',
       target: row.target,
-      field: 'summary',
+      field: normalizedPairField as ValidPairField,
       content: row.content,
       canonicalSignalPair: canonicalized.canonicalSignalPair,
       signalKeys: canonicalized.signalKeys,
@@ -710,7 +721,7 @@ export function buildReportAlignedLanguageStoragePlan(
       })),
       pairs: pairs.map((row) => ({
         signalPair: row.signalPair,
-        section: 'summary',
+        section: row.field,
         content: row.content,
       })),
     },

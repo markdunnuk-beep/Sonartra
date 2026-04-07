@@ -653,23 +653,23 @@ test('completion path persists the canonical payload unchanged through the real 
         return {
           signals: {
             role_executor: {
-              summary: 'Persisted signal summary.',
+              chapterSummary: 'Persisted signal summary.',
               strength: 'Persisted strength language.',
             },
             core_focus: {
-              summary: 'Persisted secondary summary.',
+              chapterSummary: 'Persisted secondary summary.',
             },
           },
           pairs: {
             executor_focus: {
-              summary: 'Persisted pair summary.',
+              chapterSummary: 'Persisted pair summary.',
+              pressureFocus: 'Persisted pressure section.',
+              environmentFocus: 'Persisted environment section.',
             },
           },
           domains: {
             signals: {
               summary: 'Persisted domain summary.',
-              pressure: 'Persisted pressure section.',
-              environment: 'Persisted environment section.',
             },
           },
           overview: {},
@@ -714,7 +714,7 @@ test('completion path persists the canonical payload unchanged through the real 
   assert.deepEqual(payload?.domains[1]?.secondarySignal, {
     signalKey: 'core_focus',
     signalLabel: 'Core Focus',
-    summary: 'Persisted secondary summary.',
+    chapterSummary: 'Persisted secondary summary.',
     strength: null,
     watchout: null,
     development: null,

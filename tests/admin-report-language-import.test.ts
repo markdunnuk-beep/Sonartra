@@ -61,7 +61,7 @@ type StoredPairLanguageRow = {
   id: string;
   assessmentVersionId: string;
   signalPair: string;
-  section: 'summary' | 'strength' | 'watchout';
+  section: 'chapterSummary' | 'pressureFocus' | 'environmentFocus' | 'summary' | 'strength' | 'watchout';
   content: string;
 };
 
@@ -382,7 +382,7 @@ test('hero report-language preview and import route through the compatibility la
   );
 });
 
-test('pair report-language import accepts summary only and preserves canonical pair storage', async () => {
+test('pair report-language import accepts canonical chapter fields and preserves canonical pair storage', async () => {
   const fake = createFakeDb({
     assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
     versions: [{ id: 'version-a', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
@@ -397,7 +397,11 @@ test('pair report-language import accepts summary only and preserves canonical p
     {
       assessmentVersionId: 'version-a',
       reportSection: 'pair',
-      rawInput: 'pair|driver_analyst|summary|You combine forward momentum with structured thinking.',
+      rawInput: [
+        'pair|driver_analyst|chapterSummary|You combine forward momentum with structured thinking.',
+        'pair|driver_analyst|pressureFocus|Under strain, pace can outrun reflection.',
+        'pair|driver_analyst|environmentFocus|Best in environments that reward momentum with structure.',
+      ].join('\n'),
     },
     { db: fake.client, revalidatePath() {} },
   );
@@ -408,9 +412,85 @@ test('pair report-language import accepts summary only and preserves canonical p
       id: 'pair-1',
       assessmentVersionId: 'version-a',
       signalPair: 'analyst_driver',
-      section: 'summary',
+      section: 'chapterSummary',
       content: 'You combine forward momentum with structured thinking.',
     },
+    {
+      id: 'pair-2',
+      assessmentVersionId: 'version-a',
+      signalPair: 'analyst_driver',
+      section: 'pressureFocus',
+      content: 'Under strain, pace can outrun reflection.',
+    },
+    {
+      id: 'pair-3',
+      assessmentVersionId: 'version-a',
+      signalPair: 'analyst_driver',
+      section: 'environmentFocus',
+      content: 'Best in environments that reward momentum with structure.',
+    },
+  ]);
+});
+
+test('pair report-language import normalizes legacy summary rows into canonical pair chapter storage', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [{ id: 'version-a', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+    domains: [{ id: 'domain-a', assessmentVersionId: 'version-a', domainKey: 'signal_style', domainType: 'SIGNAL_GROUP', orderIndex: 0 }],
+    signals: [
+      { id: 'signal-driver', assessmentVersionId: 'version-a', domainId: 'domain-a', signalKey: 'style_driver', orderIndex: 0 },
+      { id: 'signal-analyst', assessmentVersionId: 'version-a', domainId: 'domain-a', signalKey: 'style_analyst', orderIndex: 1 },
+    ],
+  });
+
+  const result = await importReportLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-a',
+      reportSection: 'pair',
+      rawInput: 'pair|driver_analyst|summary|Legacy pair summary alias.',
+    },
+    { db: fake.client, revalidatePath() {} },
+  );
+
+  assert.equal(result.success, true);
+  assert.deepEqual(fake.state.pairLanguage, [
+    {
+      id: 'pair-1',
+      assessmentVersionId: 'version-a',
+      signalPair: 'analyst_driver',
+      section: 'chapterSummary',
+      content: 'Legacy pair summary alias.',
+    },
+  ]);
+});
+
+test('pair report-language import rejects unsupported pair strength and watchout rows explicitly', async () => {
+  const fake = createFakeDb({
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    versions: [{ id: 'version-a', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+    domains: [{ id: 'domain-a', assessmentVersionId: 'version-a', domainKey: 'signal_style', domainType: 'SIGNAL_GROUP', orderIndex: 0 }],
+    signals: [
+      { id: 'signal-driver', assessmentVersionId: 'version-a', domainId: 'domain-a', signalKey: 'style_driver', orderIndex: 0 },
+      { id: 'signal-analyst', assessmentVersionId: 'version-a', domainId: 'domain-a', signalKey: 'style_analyst', orderIndex: 1 },
+    ],
+  });
+
+  const preview = await previewReportLanguageForAssessmentVersionWithDependencies(
+    {
+      assessmentVersionId: 'version-a',
+      reportSection: 'pair',
+      rawInput: [
+        'pair|driver_analyst|strength|Legacy pair strength.',
+        'pair|driver_analyst|watchout|Legacy pair watchout.',
+      ].join('\n'),
+    },
+    { db: fake.client },
+  );
+
+  assert.equal(preview.success, false);
+  assert.deepEqual(preview.validationErrors.map((error) => error.code), [
+    'UNSUPPORTED_LEGACY_FIELD',
+    'UNSUPPORTED_LEGACY_FIELD',
   ]);
 });
 

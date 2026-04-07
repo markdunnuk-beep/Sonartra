@@ -46,6 +46,8 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
       'signal|style_driver|chapterSummary|Driver summary.',
       'signal|style_driver|strength|Driver strength.',
       'pair|driver_analyst|summary|Driver plus Analyst pair summary.',
+      'pair|driver_analyst|pressureFocus|Under strain, pace can outrun reflection.',
+      'pair|driver_analyst|environmentFocus|Best in environments that reward momentum with structure.',
     ].join('\n'),
   );
 
@@ -96,8 +98,18 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
   assert.deepEqual(plan.pairs, [
     {
       signalPair: 'analyst_driver',
-      field: 'summary',
+      field: 'chapterSummary',
       content: 'Driver plus Analyst pair summary.',
+    },
+    {
+      signalPair: 'analyst_driver',
+      field: 'pressureFocus',
+      content: 'Under strain, pace can outrun reflection.',
+    },
+    {
+      signalPair: 'analyst_driver',
+      field: 'environmentFocus',
+      content: 'Best in environments that reward momentum with structure.',
     },
   ]);
   assert.deepEqual(plan.storage.overview, [
@@ -134,8 +146,49 @@ test('report-aligned validation maps hero, domain, signal, and pair rows into cu
   assert.deepEqual(plan.storage.pairs, [
     {
       signalPair: 'analyst_driver',
-      section: 'summary',
+      section: 'chapterSummary',
       content: 'Driver plus Analyst pair summary.',
+    },
+    {
+      signalPair: 'analyst_driver',
+      section: 'pressureFocus',
+      content: 'Under strain, pace can outrun reflection.',
+    },
+    {
+      signalPair: 'analyst_driver',
+      section: 'environmentFocus',
+      content: 'Best in environments that reward momentum with structure.',
+    },
+  ]);
+});
+
+test('report-aligned validation normalizes legacy pair summary rows to canonical chapterSummary storage', () => {
+  const parsed = parseReportLanguageRows(
+    'pair|driver_analyst|summary|Legacy pair summary alias.',
+  );
+
+  const validation = validateReportLanguageRows({
+    rows: parsed.records,
+    validSignalKeys: ['style_driver', 'style_analyst'],
+    validDomainKeys: ['signal_style'],
+  });
+
+  assert.equal(validation.success, true);
+
+  const plan = buildReportAlignedLanguageStoragePlan(validation.validRows);
+
+  assert.deepEqual(plan.pairs, [
+    {
+      signalPair: 'analyst_driver',
+      field: 'chapterSummary',
+      content: 'Legacy pair summary alias.',
+    },
+  ]);
+  assert.deepEqual(plan.storage.pairs, [
+    {
+      signalPair: 'analyst_driver',
+      section: 'chapterSummary',
+      content: 'Legacy pair summary alias.',
     },
   ]);
 });
@@ -315,6 +368,22 @@ test('report-aligned validation does not elevate legacy pair strength/watchout f
 
   assert.equal(validation.success, false);
   assert.equal(validation.errors[0]?.code, 'UNSUPPORTED_LEGACY_FIELD');
+});
+
+test('report-aligned validation rejects unsupported pair fields explicitly', () => {
+  const parsed = parseReportLanguageRows(
+    'pair|driver_analyst|headline|Unsupported pair field.',
+  );
+
+  const validation = validateReportLanguageRows({
+    rows: parsed.records,
+    validSignalKeys: ['style_driver', 'style_analyst'],
+    validDomainKeys: ['signal_style'],
+  });
+
+  assert.equal(validation.success, false);
+  assert.equal(validation.errors[0]?.code, 'INVALID_FIELD');
+  assert.match(validation.errors[0]?.message ?? '', /chapterSummary, pressureFocus, or environmentFocus/i);
 });
 
 test('report-aligned validation rejects duplicate canonical hero rows', () => {

@@ -12,15 +12,16 @@ import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
  *
  * Active:
  * - Hero_Header_Language.headline -> hero.headline
- * - Pair_Language.summary -> hero.narrative
+ * - Pair_Language.chapterSummary -> hero.narrative
  * - Signal_Language.strength -> strengths[]
  * - Signal_Language.watchout -> watchouts[]
  * - Signal_Language.development -> developmentFocus[]
  *
  * Reserved / inactive for future wiring:
  * - Signal_Language.summary
- * - Pair_Language.strength
- * - Pair_Language.watchout
+ * - Pair_Language.summary (legacy compatibility only)
+ * - Pair_Language.strength (legacy compatibility only)
+ * - Pair_Language.watchout (legacy compatibility only)
  * - Overview_Language.strengths
  * - Overview_Language.watchouts
  * - Overview_Language.development
@@ -431,7 +432,7 @@ function resolveHeroPairSummary(
   context?: ResultInterpretationContext,
 ): string | null {
   const pairKey = resolveHeroPairKey(signalScores, context);
-  const content = pairKey ? context?.languageBundle.pairs[pairKey]?.summary?.trim() : null;
+  const content = pairKey ? context?.languageBundle.pairs[pairKey]?.chapterSummary?.trim() : null;
   return content ? content : null;
 }
 

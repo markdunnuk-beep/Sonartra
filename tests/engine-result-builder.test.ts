@@ -345,7 +345,7 @@ test('interpretation boundary receives language bundle context even when unused'
       },
       pairs: {
         analyst_driver: {
-          summary: 'Unused pair summary',
+          chapterSummary: 'Unused pair summary',
         },
       },
       domains: {
@@ -825,15 +825,14 @@ test('domains expand to structured report chapters in authored order with author
         },
         pairs: {
           analyst_driver: {
-            summary: 'Driver and Analyst pair summary.',
+            chapterSummary: 'Driver and Analyst pair summary.',
+            pressureFocus: 'Authored pressure.',
+            environmentFocus: 'Authored environment.',
           },
         },
         domains: {
           signal_style: {
             summary: 'Authored behaviour style summary.',
-            focus: 'Authored focus.',
-            pressure: 'Authored pressure.',
-            environment: 'Authored environment.',
           },
         },
         overview: {},
@@ -939,6 +938,99 @@ test('domains expand to structured report chapters in authored order with author
       chapterSummary: null,
     },
   ]);
+});
+
+test('pair-owned pressure and environment fields do not fall back to domain language when pair language is missing them', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 38,
+          domainPercentage: 60,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-analyst',
+          signalKey: 'style_analyst',
+          title: 'Analyst',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 3,
+          percentage: 24,
+          domainPercentage: 40,
+          rank: 2,
+        }),
+      ]),
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-driver',
+              signalKey: 'style_driver',
+              title: 'Driver',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 5,
+              percentage: 38,
+              domainPercentage: 60,
+              rank: 1,
+            }),
+            buildNormalizedSignal({
+              signalId: 'signal-analyst',
+              signalKey: 'style_analyst',
+              title: 'Analyst',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 3,
+              percentage: 24,
+              domainPercentage: 40,
+              rank: 2,
+            }),
+          ]),
+          answeredQuestionCount: 3,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {
+          style_driver: {
+            chapterSummary: 'Driver summary.',
+          },
+          style_analyst: {
+            chapterSummary: 'Analyst summary.',
+          },
+        },
+        pairs: {
+          analyst_driver: {
+            chapterSummary: 'Driver and Analyst pair summary.',
+          },
+        },
+        domains: {
+          signal_style: {
+            summary: 'Domain-authored chapter opening.',
+            pressure: 'Legacy domain pressure that should not leak into pair-owned output.',
+            environment: 'Legacy domain environment that should not leak into pair-owned output.',
+          },
+        },
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.domains[0]?.signalPair?.summary, 'Driver and Analyst pair summary.');
+  assert.equal(payload.domains[0]?.pressureFocus, null);
+  assert.equal(payload.domains[0]?.environmentFocus, null);
 });
 
 test('top signal projection matches normalization ranking', () => {
@@ -1501,7 +1593,7 @@ test('hero narrative uses pair summary when the resolved canonical pair has one'
         signals: {},
         pairs: {
           analyst_driver: {
-            summary: 'Pair-language summary for the dominant analyst-driver combination.',
+            chapterSummary: 'Pair-language summary for the dominant analyst-driver combination.',
           },
         },
         domains: {},
@@ -1576,7 +1668,7 @@ test('hero headline uses pair hero header when the resolved canonical pair has o
         signals: {},
         pairs: {
           analyst_driver: {
-            summary: 'Pair-language summary.',
+            chapterSummary: 'Pair-language summary.',
           },
         },
         domains: {},
@@ -1693,7 +1785,7 @@ test('hero headline falls back to deterministic signal path when pair hero heade
         signals: {},
         pairs: {
           analyst_driver: {
-            summary: 'Pair summary without a hero header.',
+            chapterSummary: 'Pair summary without a hero header.',
           },
         },
         domains: {},
@@ -1782,7 +1874,7 @@ test('pair summary lookup is canonical even when the top two signals resolve in 
         signals: {},
         pairs: {
           analyst_driver: {
-            summary: 'Canonical pair summary.',
+            chapterSummary: 'Canonical pair summary.',
           },
         },
         domains: {},
@@ -2620,7 +2712,7 @@ test('repeated runs with pair summaries remain byte-stable', () => {
       signals: {},
       pairs: {
         drive_focus: {
-          summary: 'Consistent pair summary.',
+          chapterSummary: 'Consistent pair summary.',
         },
       },
       domains: {},
@@ -2667,7 +2759,7 @@ test('repeated runs with pair hero headers remain byte-stable', () => {
       signals: {},
       pairs: {
         drive_focus: {
-          summary: 'Consistent pair summary.',
+          chapterSummary: 'Consistent pair summary.',
         },
       },
       domains: {},

@@ -81,16 +81,20 @@ const DATASET_OPTIONS: readonly DatasetOption[] = [
   },
   {
     key: 'pair',
-    label: 'Pair Summary',
-    title: 'Pair Summary Language',
-    description: 'Author pair summaries only. Pair strength and watchout are legacy-only and are not surfaced here.',
+    label: 'Pair Chapter',
+    title: 'Pair Chapter Language',
+    description: 'Author chapterSummary, pressureFocus, and environmentFocus language by signal pair.',
     detail:
-      'Pair keys remain canonicalized under the hood so report-shaped inputs still round-trip into the current storage model safely.',
+      'Pair keys remain canonicalized under the hood so report-shaped inputs still round-trip into the current storage model safely. Pair strength/watchout rows remain legacy-only and are not part of the active authoring path.',
     currentRowsLabel: 'Current Pair rows',
     rowFormatLabel: 'section | target | field | content',
-    textareaLabel: 'Paste pair summary rows',
-    placeholder: 'pair | driver_analyst | summary | You combine forward momentum with structured thinking.',
-    formatExample: 'pair | driver_analyst | summary | You combine forward momentum with structured thinking.',
+    textareaLabel: 'Paste pair chapter rows',
+    placeholder: 'pair | driver_analyst | chapterSummary | You combine forward momentum with structured thinking.',
+    formatExample: [
+      'pair | driver_analyst | chapterSummary | You combine forward momentum with structured thinking.',
+      'pair | driver_analyst | pressureFocus | Under strain, pace can outrun reflection.',
+      'pair | driver_analyst | environmentFocus | Best in environments that reward momentum with clear structure.',
+    ].join('\n'),
   },
 ] as const;
 

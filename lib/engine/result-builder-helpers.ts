@@ -32,6 +32,7 @@ import {
 import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 import { evaluateHeroPattern, getHeroPatternLabel } from '@/lib/engine/hero';
 import type {
+  AssessmentVersionLanguagePairSection,
   AssessmentVersionLanguageStoredDomainSection,
 } from '@/lib/server/assessment-version-language-types';
 
@@ -163,6 +164,18 @@ function resolveDomainLanguageSection(
   interpretationContext: ResultInterpretationContext,
 ): string | null {
   return trimToNull(interpretationContext.languageBundle.domains[domainKey]?.[section]);
+}
+
+function resolvePairLanguageSection(
+  pairKey: string | null,
+  section: AssessmentVersionLanguagePairSection,
+  interpretationContext: ResultInterpretationContext,
+): string | null {
+  if (!pairKey) {
+    return null;
+  }
+
+  return trimToNull(interpretationContext.languageBundle.pairs[pairKey]?.[section]);
 }
 
 function resolveSignalLanguageBundle(
@@ -420,9 +433,7 @@ export function buildDomains(
       primarySignal && secondarySignal
         ? buildCanonicalSignalPairKey(primarySignal.signalKey, secondarySignal.signalKey)
         : null;
-    const pairSummary = pairKey
-      ? trimToNull(interpretationContext.languageBundle.pairs[pairKey]?.summary)
-      : null;
+    const pairSummary = resolvePairLanguageSection(pairKey, 'chapterSummary', interpretationContext);
 
     return {
       domainKey: domainSummary.domainKey,
@@ -445,8 +456,8 @@ export function buildDomains(
           summary: pairSummary,
         }
         : null,
-      pressureFocus: resolveDomainLanguageSection(domainSummary.domainKey, 'pressure', interpretationContext),
-      environmentFocus: resolveDomainLanguageSection(domainSummary.domainKey, 'environment', interpretationContext),
+      pressureFocus: resolvePairLanguageSection(pairKey, 'pressureFocus', interpretationContext),
+      environmentFocus: resolvePairLanguageSection(pairKey, 'environmentFocus', interpretationContext),
     };
   });
 }

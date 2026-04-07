@@ -17,6 +17,7 @@ import type {
   AssessmentVersionLanguagePairInput,
   AssessmentVersionLanguagePairRow,
   AssessmentVersionLanguagePairSection,
+  AssessmentVersionLanguageStoredPairSection,
   AssessmentVersionLanguagePairsByKey,
   AssessmentVersionLanguageSectionMap,
   AssessmentVersionLanguageSignalInput,
@@ -48,7 +49,7 @@ type AssessmentVersionLanguagePairDbRow = {
   id: string;
   assessment_version_id: string;
   signal_pair: string;
-  section: AssessmentVersionLanguagePairSection;
+  section: AssessmentVersionLanguageStoredPairSection;
   content: string;
   created_at: string;
   updated_at: string;
@@ -91,9 +92,9 @@ const SIGNAL_SECTION_ORDER: readonly AssessmentVersionLanguageSignalSection[] = 
 ]);
 
 const PAIR_SECTION_ORDER: readonly AssessmentVersionLanguagePairSection[] = Object.freeze([
-  'summary',
-  'strength',
-  'watchout',
+  'chapterSummary',
+  'pressureFocus',
+  'environmentFocus',
 ]);
 
 const DOMAIN_SECTION_ORDER: readonly AssessmentVersionLanguageDomainSection[] = Object.freeze([
@@ -361,7 +362,44 @@ export function buildAssessmentVersionLanguageSignalsBundle(
 export function buildAssessmentVersionLanguagePairsBundle(
   rows: readonly AssessmentVersionLanguagePairRow[],
 ): AssessmentVersionLanguagePairsByKey {
-  return buildSectionBundle(rows, (row) => row.signalPair, 'pair');
+  const grouped: Record<string, Partial<Record<AssessmentVersionLanguagePairSection, string>>> = {};
+
+  for (const row of rows) {
+    if (row.section === 'strength' || row.section === 'watchout') {
+      continue;
+    }
+
+    const key = row.signalPair;
+    const section = row.section === 'summary' ? 'chapterSummary' : row.section;
+    const sectionMap = grouped[key] ?? {};
+
+    if (section === 'chapterSummary' && row.section === 'summary' && sectionMap.chapterSummary !== undefined) {
+      grouped[key] = sectionMap;
+      continue;
+    }
+
+    if (section === 'chapterSummary' && row.section === 'chapterSummary' && sectionMap.chapterSummary !== undefined) {
+      sectionMap.chapterSummary = row.content;
+      grouped[key] = sectionMap;
+      continue;
+    }
+
+    if (sectionMap[section] !== undefined) {
+      throw new DuplicateAssessmentVersionLanguageEntryError(
+        `Duplicate pair language entry detected for key "${key}" and section "${section}"`,
+      );
+    }
+
+    sectionMap[section] = row.content;
+    grouped[key] = sectionMap;
+  }
+
+  const result: Record<string, AssessmentVersionLanguageSectionMap<AssessmentVersionLanguagePairSection>> = {};
+  for (const key of Object.keys(grouped)) {
+    result[key] = Object.freeze({ ...grouped[key] });
+  }
+
+  return Object.freeze(result);
 }
 
 export function buildAssessmentVersionLanguageDomainsBundle(
@@ -488,9 +526,12 @@ export async function getAssessmentVersionLanguagePairs(
     ORDER BY
       signal_pair ASC,
       CASE section
+        WHEN 'chapterSummary' THEN 0
         WHEN 'summary' THEN 0
-        WHEN 'strength' THEN 1
-        WHEN 'watchout' THEN 2
+        WHEN 'pressureFocus' THEN 1
+        WHEN 'environmentFocus' THEN 2
+        WHEN 'strength' THEN 3
+        WHEN 'watchout' THEN 4
         ELSE 99
       END ASC,
       id ASC
