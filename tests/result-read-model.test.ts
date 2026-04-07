@@ -441,6 +441,90 @@ test('list view skips malformed persisted payloads without breaking other ready 
   assert.deepEqual(results.map((result) => result.resultId), ['result-2']);
 });
 
+test('list view skips legacy-shaped payloads that only satisfy the shallow top-level contract', async () => {
+  const service = createResultReadModelService({
+    db: createFakeDb([
+      {
+        resultId: 'result-1',
+        attemptId: 'attempt-1',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.0.0',
+        userId: 'user-1',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:02:00.000Z',
+        createdAt: '2026-01-01T00:02:00.000Z',
+        canonicalResultPayload: {
+          metadata: {
+            assessmentKey: 'wplp80',
+            assessmentTitle: 'WPLP-80',
+            version: '1.0.0',
+            attemptId: 'attempt-1',
+            completedAt: '2026-01-01T00:02:00.000Z',
+          },
+          intro: {
+            assessmentDescription: null,
+          },
+          hero: {
+            headline: 'Legacy row',
+            primaryPattern: {
+              label: 'Core Focus',
+              signalKey: 'core_focus',
+              signalLabel: 'Core Focus',
+            },
+            domainHighlights: [],
+          },
+          domains: [
+            {
+              domainKey: 'signals',
+              domainLabel: 'Signals',
+              chapterOpening: 'Legacy chapter opening',
+            },
+          ],
+          actions: {
+            strengths: [],
+            watchouts: [],
+            developmentFocus: [],
+          },
+          diagnostics: {
+            readinessStatus: 'ready',
+            scoring: {},
+            normalization: {},
+            answeredQuestionCount: 1,
+            totalQuestionCount: 1,
+            missingQuestionIds: [],
+            topSignalSelectionBasis: 'normalized_rank',
+            rankedSignalCount: 1,
+            domainCount: 1,
+            zeroMass: false,
+            zeroMassTopSignalFallbackApplied: false,
+            warnings: [],
+            generatedAt: '2026-01-01T00:02:00.000Z',
+          },
+        },
+      },
+      {
+        resultId: 'result-2',
+        attemptId: 'attempt-2',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.0.1',
+        userId: 'user-1',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:01:00.000Z',
+        createdAt: '2026-01-01T00:01:00.000Z',
+        canonicalResultPayload: buildPayload({ resultAttemptId: 'attempt-2' }),
+      },
+    ]),
+  });
+
+  const results = await service.listAssessmentResults({ userId: 'user-1' });
+
+  assert.deepEqual(results.map((result) => result.resultId), ['result-2']);
+});
+
 test('missing or non-owned result triggers not found', async () => {
   const service = createResultReadModelService({
     db: createFakeDb([

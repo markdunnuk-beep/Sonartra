@@ -735,3 +735,118 @@ test('workspace and dashboard skip malformed ready payload rows instead of crash
   assert.equal(dashboard.readyResultCount, 0);
   assert.equal(dashboard.latestReadyResult, null);
 });
+
+test('workspace and dashboard skip legacy-shaped ready payload rows that used to pass the shallow contract check', async () => {
+  const db = createFakeDb({
+    inventory: [
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        title: 'WPLP-80',
+        description: 'Signals assessment',
+        assessmentVersionId: 'version-1',
+        versionTag: '1.0.0',
+        publishedAt: '2026-01-01T00:00:00.000Z',
+      },
+    ],
+    attempts: [
+      {
+        attemptId: 'attempt-1',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        lifecycleStatus: 'RESULT_READY',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        submittedAt: '2026-01-01T00:15:00.000Z',
+        completedAt: '2026-01-01T00:16:00.000Z',
+        lastActivityAt: '2026-01-01T00:16:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:16:00.000Z',
+      },
+    ],
+    results: [
+      {
+        resultId: 'result-bad',
+        attemptId: 'attempt-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.0.0',
+        userId: 'user-1',
+        pipelineStatus: 'COMPLETED',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:16:00.000Z',
+        failureReason: null,
+        hasCanonicalResultPayload: true,
+        createdAt: '2026-01-01T00:16:00.000Z',
+        updatedAt: '2026-01-01T00:16:00.000Z',
+        canonicalResultPayload: {
+          metadata: {
+            assessmentKey: 'wplp80',
+            assessmentTitle: 'WPLP-80',
+            version: '1.0.0',
+            attemptId: 'attempt-1',
+            completedAt: '2026-01-01T00:16:00.000Z',
+          },
+          intro: {
+            assessmentDescription: null,
+          },
+          hero: {
+            headline: 'Legacy row',
+            primaryPattern: {
+              label: 'Core Focus',
+              signalKey: 'core_focus',
+              signalLabel: 'Core Focus',
+            },
+            domainHighlights: [],
+          },
+          domains: [
+            {
+              domainKey: 'signals',
+              domainLabel: 'Signals',
+              chapterOpening: 'Legacy chapter opening',
+            },
+          ],
+          actions: {
+            strengths: [],
+            watchouts: [],
+            developmentFocus: [],
+          },
+          diagnostics: {
+            readinessStatus: 'ready',
+            scoring: {},
+            normalization: {},
+            answeredQuestionCount: 1,
+            totalQuestionCount: 1,
+            missingQuestionIds: [],
+            topSignalSelectionBasis: 'normalized_rank',
+            rankedSignalCount: 1,
+            domainCount: 1,
+            zeroMass: false,
+            zeroMassTopSignalFallbackApplied: false,
+            warnings: [],
+            generatedAt: '2026-01-01T00:16:00.000Z',
+          },
+        },
+      },
+    ],
+    questionCountByVersionId: {
+      'version-1': 80,
+    },
+  });
+
+  const workspace = await buildAssessmentWorkspaceViewModel({
+    db,
+    userId: 'user-1',
+  });
+  const dashboard = await buildDashboardViewModel({
+    db,
+    userId: 'user-1',
+  });
+
+  assert.equal(workspace.assessments[0]?.status, 'completed_processing');
+  assert.equal(workspace.assessments[0]?.latestReadyResultId, null);
+  assert.equal(dashboard.readyResultCount, 0);
+  assert.equal(dashboard.latestReadyResult, null);
+});
