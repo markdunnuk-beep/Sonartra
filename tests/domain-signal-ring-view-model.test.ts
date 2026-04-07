@@ -83,7 +83,7 @@ test('domain signal ring mapper accepts canonical domains payload directly', () 
         primarySignal: {
           signalKey: 'core_focus',
           signalLabel: 'Core Focus',
-          chapterSummary: 'Core Focus summary.',
+          chapterSummary: 'Primary summary should not override signal balance summary.',
           strength: null,
           watchout: null,
           development: null,
@@ -221,7 +221,7 @@ test('domain signal ring mapper carries canonical signal insight fields from exi
   assert.equal(rings[0]?.signals[1]?.strength, 'Secondary strength.');
   assert.equal(rings[0]?.signals[2]?.watchout, 'People watchout.');
   assert.equal(rings[0]?.signals[2]?.development, 'People development.');
-  assert.equal(rings[0]?.signals[2]?.summary, 'Leads through trust, support, and development');
+  assert.equal(rings[0]?.signals[2]?.summary, null);
 });
 
 test('domain signal ring mapper preserves authored signal order while deriving top flags', () => {

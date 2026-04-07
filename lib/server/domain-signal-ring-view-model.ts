@@ -221,28 +221,11 @@ function mapCanonicalDomainSignalRing(
     development: ReadonlyMap<string, string>;
   },
 ): DomainSignalRingViewModel {
-  const signalDetailsByKey = new Map<
-    string,
-    {
-      chapterSummary: string | null;
-      strength: string | null;
-      watchout: string | null;
-      development: string | null;
-    }
-  >();
-
-  for (const signal of [domain.primarySignal, domain.secondarySignal]) {
-    if (!signal) {
-      continue;
-    }
-
-    signalDetailsByKey.set(signal.signalKey, {
-      chapterSummary: signal.chapterSummary,
-      strength: signal.strength,
-      watchout: signal.watchout,
-      development: signal.development,
-    });
-  }
+  const chapterSignalsByKey = new Map(
+    [domain.primarySignal, domain.secondarySignal]
+      .filter((signal): signal is NonNullable<typeof domain.primarySignal> => signal !== null)
+      .map((signal) => [signal.signalKey, signal]),
+  );
 
   const signals = domain.signalBalance.items.map((signal) => ({
     signalKey: signal.signalKey,
@@ -252,23 +235,17 @@ function mapCanonicalDomainSignalRing(
     rankWithinDomain: signal.rank,
     isTopSignal: signal.isPrimary,
     isSecondSignal: signal.isSecondary,
-    summary:
-      signalDetailsByKey.get(signal.signalKey)?.chapterSummary
-      ?? signal.chapterSummary
-      ?? resolveDomainSignalDescriptor({
-        signalKey: signal.signalKey,
-        signalTitle: signal.signalLabel,
-      }),
+    summary: signal.chapterSummary,
     strength:
-      signalDetailsByKey.get(signal.signalKey)?.strength
+      chapterSignalsByKey.get(signal.signalKey)?.strength
       ?? actionTextBySignalKey.strengths.get(signal.signalKey)
       ?? null,
     watchout:
-      signalDetailsByKey.get(signal.signalKey)?.watchout
+      chapterSignalsByKey.get(signal.signalKey)?.watchout
       ?? actionTextBySignalKey.watchouts.get(signal.signalKey)
       ?? null,
     development:
-      signalDetailsByKey.get(signal.signalKey)?.development
+      chapterSignalsByKey.get(signal.signalKey)?.development
       ?? actionTextBySignalKey.development.get(signal.signalKey)
       ?? null,
   }));

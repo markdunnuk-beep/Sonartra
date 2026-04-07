@@ -932,7 +932,7 @@ test('domains expand to structured report chapters in authored order with author
       signalKey: 'decision_evidence',
       signalLabel: 'Evidence',
       withinDomainPercent: 100,
-      rank: 3,
+      rank: 1,
       isPrimary: true,
       isSecondary: false,
       chapterSummary: null,

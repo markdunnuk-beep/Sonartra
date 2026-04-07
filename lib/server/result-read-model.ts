@@ -176,7 +176,7 @@ function toDomainSummaries(payload: CanonicalResultPayload): readonly Assessment
 }
 
 function toRankedSignals(payload: CanonicalResultPayload): readonly AssessmentResultRankedSignalViewModel[] {
-  const signals = payload.domains.flatMap((domain) =>
+  return Object.freeze(payload.domains.flatMap((domain) =>
     domain.signalBalance.items.map((signal) => ({
       signalId: signal.signalKey,
       signalKey: signal.signalKey,
@@ -191,9 +191,7 @@ function toRankedSignals(payload: CanonicalResultPayload): readonly AssessmentRe
       overlayType: 'none' as const,
       rank: signal.rank,
     })),
-  );
-
-  return Object.freeze(signals.sort((left, right) => left.rank - right.rank));
+  ));
 }
 
 function toTopSignal(payload: CanonicalResultPayload): AssessmentResultTopSignalViewModel | null {

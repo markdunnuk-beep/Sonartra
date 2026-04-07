@@ -915,6 +915,42 @@ export function createQaMiniPublishedAssessmentFixture(): QaMiniFixture {
         };
       }
 
+      if (sql.includes('FROM assessment_version_intro WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_pair_trait_weights WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_hero_pattern_rules WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_hero_pattern_language WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_signals WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_pairs WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_domains WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_overview WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_language_hero_headers WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
       if (sql.includes('FROM results r INNER JOIN attempts t ON t.id = r.attempt_id INNER JOIN assessments a ON a.id = r.assessment_id INNER JOIN assessment_versions av ON av.id = r.assessment_version_id WHERE t.user_id = $1 AND r.readiness_status = \'READY\' AND r.canonical_result_payload IS NOT NULL ORDER BY COALESCE(r.generated_at, r.created_at) DESC, r.id DESC')) {
         const userId = params?.[0] as string;
         const rows = results

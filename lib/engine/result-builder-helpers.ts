@@ -321,14 +321,15 @@ function buildDomainSignalBalanceItem(
   interpretationContext: ResultInterpretationContext,
 ): ResultDomainSignalBalanceItem {
   const language = resolveSignalLanguageBundle(signalScore.signalKey, interpretationContext);
+  const rankWithinDomain = index + 1;
 
   return {
     signalKey: signalScore.signalKey,
     signalLabel: signalScore.signalTitle,
     withinDomainPercent: signalScore.domainPercentage,
-    rank: signalScore.rank,
-    isPrimary: index === 0,
-    isSecondary: index === 1,
+    rank: rankWithinDomain,
+    isPrimary: rankWithinDomain === 1,
+    isSecondary: rankWithinDomain === 2,
     chapterSummary: language.chapterSummary,
   };
 }
