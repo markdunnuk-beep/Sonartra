@@ -832,7 +832,7 @@ test('domains expand to structured report chapters in authored order with author
         },
         domains: {
           signal_style: {
-            summary: 'Authored behaviour style summary.',
+            chapterOpening: 'Authored behaviour style summary.',
           },
         },
         overview: {},
@@ -914,7 +914,7 @@ test('domains expand to structured report chapters in authored order with author
   });
 
   assert.equal(payload.domains[2]?.domainKey, 'signal_decision');
-  assert.ok(payload.domains[2]?.chapterOpening);
+  assert.equal(payload.domains[2]?.chapterOpening, null);
   assert.equal(payload.domains[2]?.pressureFocus, null);
   assert.equal(payload.domains[2]?.environmentFocus, null);
   assert.deepEqual(payload.domains[2]?.primarySignal, {
@@ -1031,6 +1031,95 @@ test('pair-owned pressure and environment fields do not fall back to domain lang
   assert.equal(payload.domains[0]?.signalPair?.summary, 'Driver and Analyst pair summary.');
   assert.equal(payload.domains[0]?.pressureFocus, null);
   assert.equal(payload.domains[0]?.environmentFocus, null);
+});
+
+test('signal chapter summaries stay null when only signal action fields are authored', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 39,
+          domainPercentage: 39,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-analyst',
+          signalKey: 'style_analyst',
+          title: 'Analyst',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 3,
+          percentage: 24,
+          domainPercentage: 24,
+          rank: 2,
+        }),
+      ]),
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-driver',
+              signalKey: 'style_driver',
+              title: 'Driver',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 5,
+              percentage: 39,
+              domainPercentage: 39,
+              rank: 1,
+            }),
+            buildNormalizedSignal({
+              signalId: 'signal-analyst',
+              signalKey: 'style_analyst',
+              title: 'Analyst',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 3,
+              percentage: 24,
+              domainPercentage: 24,
+              rank: 2,
+            }),
+          ]),
+          answeredQuestionCount: 8,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {
+          style_driver: {
+            strength: 'Driver strength only.',
+            watchout: 'Driver watchout only.',
+            development: 'Driver development only.',
+          },
+          style_analyst: {
+            strength: 'Analyst strength only.',
+          },
+        },
+        pairs: {},
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.domains[0]?.primarySignal?.chapterSummary, null);
+  assert.equal(payload.domains[0]?.secondarySignal?.chapterSummary, null);
+  assert.equal(payload.domains[0]?.signalBalance.items[0]?.chapterSummary, null);
+  assert.equal(payload.domains[0]?.signalBalance.items[1]?.chapterSummary, null);
+  assert.equal(payload.domains[0]?.primarySignal?.strength, 'Driver strength only.');
+  assert.equal(payload.domains[0]?.primarySignal?.watchout, 'Driver watchout only.');
+  assert.equal(payload.domains[0]?.primarySignal?.development, 'Driver development only.');
 });
 
 test('top signal projection matches normalization ranking', () => {
@@ -1209,7 +1298,7 @@ test('domain summaries persist signal scores in canonical display order and alig
   assert.ok((domain?.interpretation?.primaryPercent ?? 0) >= (domain?.interpretation?.secondaryPercent ?? 0));
 });
 
-test('domain language summary overrides persisted domain interpretation summary only', () => {
+test('domain chapter language overrides persisted domain interpretation summary only', () => {
   const domainSignals = Object.freeze([
     buildNormalizedSignal({
       signalId: 'signal-driver',
@@ -1273,7 +1362,7 @@ test('domain language summary overrides persisted domain interpretation summary 
         pairs: {},
         domains: {
           signal_style: {
-            summary: 'Assessment-owned domain summary for Behaviour Style.',
+            chapterOpening: 'Assessment-owned domain summary for Behaviour Style.',
           },
         },
         overview: {},
@@ -1297,7 +1386,7 @@ test('domain language summary overrides persisted domain interpretation summary 
   assert.deepEqual(payload.actions.developmentFocus, baseline.actions.developmentFocus);
 });
 
-test('domain summary fallback remains unchanged when domain language summary is missing', () => {
+test('domain interpretation stays unchanged when no canonical chapterOpening is authored', () => {
   const domainSignals = Object.freeze([
     buildNormalizedSignal({
       signalId: 'signal-driver',

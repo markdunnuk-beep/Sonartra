@@ -420,7 +420,7 @@ test('engine path loads language bundle for a valid assessment version and leave
       return {
         signals: {
           core_focus: {
-            summary: 'Unused summary',
+            chapterSummary: 'Unused chapter summary',
           },
         },
         pairs: {},
@@ -462,7 +462,7 @@ test('hero domain highlights use authored domain order and primary signal summar
         pairs: {},
         domains: {
           signals: {
-            summary: 'Domain summary that should not be used in hero.',
+            chapterOpening: 'Domain chapter opening that should not be used in hero.',
           },
         },
         overview: {},
@@ -780,7 +780,7 @@ test('engine path uses signal-language sections for strengths watchouts and deve
   assert.equal(payload.actions.developmentFocus.length, baseline.actions.developmentFocus.length);
 });
 
-test('engine path uses domain-language summary for domain summaries only when available', async () => {
+test('engine path uses canonical domain chapter language for chapterOpening only when available', async () => {
   const definition = buildDefinition();
   const repository: AssessmentDefinitionRepository = {
     async getPublishedAssessmentDefinitionByKey() {
@@ -795,7 +795,7 @@ test('engine path uses domain-language summary for domain summaries only when av
         pairs: {},
         domains: {
           signals: {
-            summary: 'Custom domain summary for the Signals domain.',
+            chapterOpening: 'Custom domain summary for the Signals domain.',
           },
         },
         overview: {},
@@ -1033,13 +1033,13 @@ test('engine language regression matrix preserves the canonical payload contract
       },
     },
     {
-      name: 'domain language only',
+      name: 'domain chapter language only',
       languageBundle: {
         signals: {},
         pairs: {},
         domains: {
           signals: {
-            summary: 'Domain-only summary.',
+            chapterOpening: 'Domain-only summary.',
           },
         },
         overview: {},
@@ -1124,7 +1124,7 @@ test('engine language regression matrix preserves the canonical payload contract
         },
         domains: {
           signals: {
-            summary: 'Full domain summary.',
+            chapterOpening: 'Full domain summary.',
           },
         },
         overview: {},
@@ -1141,6 +1141,27 @@ test('engine language regression matrix preserves the canonical payload contract
         watchout: 'Full watchout.',
         development: 'Full development.',
         domainSummary: 'Full domain summary.',
+      },
+    },
+    {
+      name: 'legacy domain summary row only',
+      languageBundle: {
+        signals: {},
+        pairs: {},
+        domains: {
+          signals: {
+            summary: 'Legacy domain summary that should stay out of the canonical builder.',
+          },
+        },
+        overview: {},
+      },
+      expected: {
+        headline: baseline.hero.headline,
+        narrative: baseline.hero.narrative,
+        strength: baseline.actions.strengths[0]?.text,
+        watchout: baseline.actions.watchouts[0]?.text,
+        development: baseline.actions.developmentFocus[0]?.text,
+        domainSummary: getDomain(baseline, 'signals')?.chapterOpening,
       },
     },
   ] as const;

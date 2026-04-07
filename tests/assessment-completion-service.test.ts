@@ -291,13 +291,13 @@ function buildPayload(signalId: string): CanonicalResultPayload {
           rank: 1,
           isPrimary: true,
           isSecondary: false,
-          summary: null,
+          chapterSummary: null,
         }],
       },
       primarySignal: {
         signalKey,
         signalLabel: title,
-        summary: null,
+        chapterSummary: null,
         strength: null,
         watchout: null,
         development: null,
@@ -669,7 +669,7 @@ test('completion path persists the canonical payload unchanged through the real 
           },
           domains: {
             signals: {
-              summary: 'Persisted domain summary.',
+              chapterOpening: 'Persisted domain summary.',
             },
           },
           overview: {},

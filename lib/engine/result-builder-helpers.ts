@@ -32,8 +32,8 @@ import {
 import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 import { evaluateHeroPattern, getHeroPatternLabel } from '@/lib/engine/hero';
 import type {
+  AssessmentVersionLanguageDomainSection,
   AssessmentVersionLanguagePairSection,
-  AssessmentVersionLanguageStoredDomainSection,
 } from '@/lib/server/assessment-version-language-types';
 
 export type CanonicalResultBuilderInput = NormalizedResult & {
@@ -160,7 +160,7 @@ function trimToNull(value: string | null | undefined): string | null {
 
 function resolveDomainLanguageSection(
   domainKey: string,
-  section: AssessmentVersionLanguageStoredDomainSection,
+  section: AssessmentVersionLanguageDomainSection,
   interpretationContext: ResultInterpretationContext,
 ): string | null {
   return trimToNull(interpretationContext.languageBundle.domains[domainKey]?.[section]);
@@ -438,7 +438,7 @@ export function buildDomains(
     return {
       domainKey: domainSummary.domainKey,
       domainLabel: domainSummary.domainTitle,
-      chapterOpening: domainSummary.interpretation?.summary ?? null,
+      chapterOpening: resolveDomainLanguageSection(domainSummary.domainKey, 'chapterOpening', interpretationContext),
       signalBalance: {
         items: domainSummary.signalScores.map((signalScore, index) =>
           buildDomainSignalBalanceItem(signalScore, index, interpretationContext),
