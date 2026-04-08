@@ -73,6 +73,21 @@ type InsertedWeightRow = {
   id: string;
 };
 
+type PlannedImportLookupMaps = {
+  questionKeyByQuestionId: Map<string, string>;
+  optionByOptionId: Map<
+    string,
+    {
+      optionKey: string;
+      optionLabel: string;
+      questionId: string;
+      questionNumber: number;
+    }
+  >;
+  signalKeyBySignalId: Map<string, string>;
+  lineNumberByRowKey: Map<string, number>;
+};
+
 export type BulkWeightImportCommand = {
   assessmentVersionId: string;
   rawInput: string;
@@ -131,6 +146,108 @@ export type BulkWeightImportExecutionResult = {
 
 function authoringPath(assessmentKey: string): string {
   return `/admin/assessments/${assessmentKey}`;
+}
+
+function logWeightBulkImport(event: string, payload: Record<string, unknown>): void {
+  console.log('[admin-weight-bulk-import]', JSON.stringify({ event, ...payload }));
+}
+
+function logWeightBulkImportFailure(event: string, payload: Record<string, unknown>): void {
+  console.error('[admin-weight-bulk-import]', JSON.stringify({ event, ...payload }));
+}
+
+function getWeightImportErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    const candidate = error as {
+      message?: string;
+      detail?: string;
+      code?: string;
+      constraint?: string;
+    };
+
+    if (typeof candidate.detail === 'string' && candidate.detail.trim().length > 0) {
+      return candidate.detail;
+    }
+
+    if (typeof candidate.message === 'string' && candidate.message.trim().length > 0) {
+      return candidate.message;
+    }
+  }
+
+  return 'Weight import failed.';
+}
+
+function getWeightImportPostgresDiagnostics(error: unknown): Record<string, string> {
+  if (typeof error !== 'object' || error === null) {
+    return {};
+  }
+
+  const candidate = error as {
+    message?: string;
+    detail?: string;
+    code?: string;
+    constraint?: string;
+  };
+  const diagnostics: Record<string, string> = {};
+
+  if (typeof candidate.code === 'string' && candidate.code.length > 0) {
+    diagnostics.postgresCode = candidate.code;
+  }
+  if (typeof candidate.message === 'string' && candidate.message.length > 0) {
+    diagnostics.postgresMessage = candidate.message;
+  }
+  if (typeof candidate.detail === 'string' && candidate.detail.length > 0) {
+    diagnostics.postgresDetail = candidate.detail;
+  }
+  if (typeof candidate.constraint === 'string' && candidate.constraint.length > 0) {
+    diagnostics.postgresConstraint = candidate.constraint;
+  }
+
+  return diagnostics;
+}
+
+function buildPlannedImportLookupMaps(params: {
+  questions: readonly BulkWeightImportTargetQuestion[];
+  options: readonly BulkWeightImportTargetOption[];
+  signals: readonly BulkWeightImportTargetSignal[];
+  weightGroups: ReturnType<typeof buildBulkWeightImportPreview>['weightGroups'];
+}): PlannedImportLookupMaps {
+  const questionKeyByQuestionId = new Map(
+    params.questions.map((question) => [question.questionId, question.questionKey]),
+  );
+  const optionByOptionId = new Map(
+    params.options.map((option) => [
+      option.optionId,
+      {
+        optionKey: option.optionKey,
+        optionLabel: option.optionLabel,
+        questionId: option.questionId,
+        questionNumber: option.questionNumber,
+      },
+    ]),
+  );
+  const signalKeyBySignalId = new Map(params.signals.map((signal) => [signal.signalId, signal.signalKey]));
+  const lineNumberByRowKey = new Map<string, number>();
+
+  for (const group of params.weightGroups) {
+    for (const row of group.weights) {
+      lineNumberByRowKey.set(
+        `${group.questionNumber}|${group.optionLabel}|${row.signalKey}`,
+        row.lineNumber,
+      );
+    }
+  }
+
+  return {
+    questionKeyByQuestionId,
+    optionByOptionId,
+    signalKeyBySignalId,
+    lineNumberByRowKey,
+  };
 }
 
 export async function previewBulkWeightsForAssessmentVersion(
@@ -220,6 +337,11 @@ export async function importBulkWeightsForAssessmentVersionWithDependencies(
   command: BulkWeightImportCommand,
   dependencies: BulkWeightImportDependencies,
 ): Promise<BulkWeightImportExecutionResult> {
+  logWeightBulkImport('bulk-import-handler-entered', {
+    assessmentVersionId: command.assessmentVersionId,
+    rawInputLength: command.rawInput.length,
+  });
+
   const preview = buildBulkWeightImportPreview(command.rawInput);
 
   if (preview.parseErrors.length > 0 || preview.groupErrors.length > 0) {
@@ -241,7 +363,6 @@ export async function importBulkWeightsForAssessmentVersionWithDependencies(
 
   try {
     client = await dependencies.connect();
-    await client.query('BEGIN');
 
     const assessmentVersion = await loadAssessmentVersionForImport(client, command.assessmentVersionId);
     const questions = await loadTargetQuestionsForImport(client, command.assessmentVersionId);
@@ -256,7 +377,6 @@ export async function importBulkWeightsForAssessmentVersionWithDependencies(
     });
 
     if (!plan.success || !assessmentVersion) {
-      await client.query('ROLLBACK');
       return buildFailedExecutionResult({
         assessmentVersionId: command.assessmentVersionId,
         parseErrors: preview.parseErrors,
@@ -271,13 +391,19 @@ export async function importBulkWeightsForAssessmentVersionWithDependencies(
       });
     }
 
+    const lookupMaps = buildPlannedImportLookupMaps({
+      questions,
+      options,
+      signals,
+      weightGroups: preview.weightGroups,
+    });
+
     const executionSummary = await executeBulkWeightImportPlan({
       db: client,
       assessmentVersionId: assessmentVersion.assessmentVersionId,
       plannedOptionGroups: plan.plannedOptionGroups,
+      lookupMaps,
     });
-
-    await client.query('COMMIT');
 
     dependencies.revalidatePath('/admin/assessments');
     dependencies.revalidatePath(authoringPath(assessmentVersion.assessmentKey));
@@ -300,11 +426,12 @@ export async function importBulkWeightsForAssessmentVersionWithDependencies(
       deletedWeightCount: executionSummary.weightsDeleted,
       executionError: null,
     };
-  } catch {
-    if (client) {
-      await client.query('ROLLBACK').catch(() => undefined);
-    }
-
+  } catch (error) {
+    logWeightBulkImportFailure('bulk-save-error', {
+      assessmentVersionId: command.assessmentVersionId,
+      errorMessage: getWeightImportErrorMessage(error),
+      ...getWeightImportPostgresDiagnostics(error),
+    });
     return buildFailedExecutionResult({
       assessmentVersionId: command.assessmentVersionId,
       parseErrors: preview.parseErrors,
@@ -315,7 +442,7 @@ export async function importBulkWeightsForAssessmentVersionWithDependencies(
       plannedOptionGroups: [],
       optionGroupCount: preview.weightGroups.length,
       questionCountMatched: 0,
-      executionError: 'Bulk weight import could not be saved. Try again.',
+      executionError: getWeightImportErrorMessage(error),
     });
   } finally {
     client?.release();
@@ -465,11 +592,42 @@ async function executeBulkWeightImportPlan(params: {
   db: Queryable;
   assessmentVersionId: string;
   plannedOptionGroups: readonly PlannedBulkWeightGroupImport[];
+  lookupMaps: PlannedImportLookupMaps;
 }): Promise<BulkWeightImportExecutionSummary> {
   let weightsDeleted = 0;
   let weightsInserted = 0;
 
   for (const optionGroup of params.plannedOptionGroups) {
+    const questionKey = params.lookupMaps.questionKeyByQuestionId.get(optionGroup.questionId) ?? null;
+
+    logWeightBulkImport('question-lookup-start', {
+      assessmentVersionId: params.assessmentVersionId,
+      questionKey,
+      questionNumber: optionGroup.questionNumber,
+    });
+    logWeightBulkImport('question-lookup-success', {
+      assessmentVersionId: params.assessmentVersionId,
+      questionKey,
+      questionNumber: optionGroup.questionNumber,
+      questionId: optionGroup.questionId,
+    });
+
+    logWeightBulkImport('option-lookup-start', {
+      assessmentVersionId: params.assessmentVersionId,
+      questionKey,
+      questionNumber: optionGroup.questionNumber,
+      optionKey: optionGroup.optionKey,
+      optionLabel: optionGroup.optionLabel,
+    });
+    logWeightBulkImport('option-lookup-success', {
+      assessmentVersionId: params.assessmentVersionId,
+      questionKey,
+      questionNumber: optionGroup.questionNumber,
+      optionId: optionGroup.optionId,
+      optionKey: optionGroup.optionKey,
+      optionLabel: optionGroup.optionLabel,
+    });
+
     const deletedWeights = await params.db.query<DeletedWeightRow>(
       `
       DELETE FROM option_signal_weights
@@ -482,29 +640,90 @@ async function executeBulkWeightImportPlan(params: {
     weightsDeleted += deletedWeights.rows.length;
 
     for (const replacementWeight of optionGroup.replacementWeights) {
-      const insertedWeight = await params.db.query<InsertedWeightRow>(
-        `
-        INSERT INTO option_signal_weights (
-          option_id,
-          signal_id,
-          weight,
-          source_weight_key
+      const signalKey =
+        params.lookupMaps.signalKeyBySignalId.get(replacementWeight.signalId) ?? replacementWeight.signalKey;
+      const lineNumber =
+        params.lookupMaps.lineNumberByRowKey.get(
+          `${optionGroup.questionNumber}|${optionGroup.optionLabel}|${signalKey}`,
+        ) ?? null;
+      const lineIndex = lineNumber === null ? null : lineNumber - 1;
+
+      logWeightBulkImport('row-start', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        signalKey,
+        weight: replacementWeight.weight,
+      });
+      logWeightBulkImport('weight-insert-start', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        signalKey,
+        weight: replacementWeight.weight,
+      });
+
+      const insertedWeight = await params.db
+        .query<InsertedWeightRow>(
+          `
+          INSERT INTO option_signal_weights (
+            option_id,
+            signal_id,
+            weight,
+            source_weight_key
+          )
+          VALUES ($1, $2, $3::numeric(12, 4), $4)
+          RETURNING id
+          `,
+          [
+            optionGroup.optionId,
+            replacementWeight.signalId,
+            formatWeightForStorage(replacementWeight.weight),
+            `${optionGroup.questionNumber}|${optionGroup.optionLabel}`,
+          ],
         )
-        VALUES ($1, $2, $3::numeric(12, 4), $4)
-        RETURNING id
-        `,
-        [
-          optionGroup.optionId,
-          replacementWeight.signalId,
-          formatWeightForStorage(replacementWeight.weight),
-          `${optionGroup.questionNumber}|${optionGroup.optionLabel}`,
-        ],
-      );
+        .catch((error: unknown) => {
+          logWeightBulkImportFailure('row-failure', {
+            assessmentVersionId: params.assessmentVersionId,
+            step: 'weight-insert',
+            lineIndex,
+            questionKey,
+            optionKey: optionGroup.optionKey,
+            signalKey,
+            weight: replacementWeight.weight,
+            errorMessage: getWeightImportErrorMessage(error),
+            ...getWeightImportPostgresDiagnostics(error),
+          });
+          throw error;
+        });
 
       if (!insertedWeight.rows[0]?.id) {
-        throw new Error('WEIGHT_INSERT_FAILED');
+        const error = new Error(
+          `Weight import failed at weight insert: no row returned for ${questionKey ?? optionGroup.questionNumber}/${optionGroup.optionKey}/${signalKey}.`,
+        );
+        logWeightBulkImportFailure('row-failure', {
+          assessmentVersionId: params.assessmentVersionId,
+          step: 'weight-insert',
+          lineIndex,
+          questionKey,
+          optionKey: optionGroup.optionKey,
+          signalKey,
+          weight: replacementWeight.weight,
+          errorMessage: error.message,
+        });
+        throw error;
       }
 
+      logWeightBulkImport('weight-insert-success', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        signalKey,
+        weight: replacementWeight.weight,
+      });
       weightsInserted += 1;
     }
   }

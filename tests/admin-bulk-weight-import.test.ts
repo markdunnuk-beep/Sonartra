@@ -339,6 +339,29 @@ function createFakeDb(
   };
 }
 
+async function captureWeightImportLogs<T>(run: () => Promise<T>) {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+  const events: Array<Record<string, unknown>> = [];
+
+  const capture = (...args: unknown[]) => {
+    if (args[0] === '[admin-weight-bulk-import]' && typeof args[1] === 'string') {
+      events.push(JSON.parse(args[1]));
+    }
+  };
+
+  console.log = capture;
+  console.error = capture;
+
+  try {
+    const result = await run();
+    return { result, events };
+  } finally {
+    console.log = originalConsoleLog;
+    console.error = originalConsoleError;
+  }
+}
+
 test('builds plan for one valid option group', () => {
   const result = buildBulkWeightImportPlan({
     assessmentVersion: createAssessmentVersion(),
@@ -745,7 +768,7 @@ test('replaces existing weights for multiple option groups in one transaction', 
   assert.equal(result.summary.weightsInserted, 4);
 });
 
-test('rolls back everything if one insert fails', async () => {
+test('surfaces the first failing insert step and logs row failure details', async () => {
   const fake = createFakeDb(
     {
       assessments: [{ id: 'assessment-1', assessmentKey: 'signals' }],
@@ -772,23 +795,29 @@ test('rolls back everything if one insert fails', async () => {
     },
   );
 
-  const result = await importBulkWeightsForAssessmentVersionWithDependencies(
-    {
-      assessmentVersionId: 'version-1',
-      rawInput: [
-        '1|A|driver|3',
-        '1|A|analyst|2',
-        '2|B|driver|1',
-      ].join('\n'),
-    },
-    {
-      connect: async () => fake.client,
-      revalidatePath() {},
-    },
+  const { result, events } = await captureWeightImportLogs(() =>
+    importBulkWeightsForAssessmentVersionWithDependencies(
+      {
+        assessmentVersionId: 'version-1',
+        rawInput: [
+          '1|A|driver|3',
+          '1|A|analyst|2',
+          '2|B|driver|1',
+        ].join('\n'),
+      },
+      {
+        connect: async () => fake.client,
+        revalidatePath() {},
+      },
+    ),
   );
 
   assert.equal(result.success, false);
-  assert.equal(result.executionError, 'Bulk weight import could not be saved. Try again.');
+  assert.equal(result.executionError, 'WEIGHT_INSERT_FAILED');
+  assert.notEqual(
+    result.executionError,
+    'current transaction is aborted, commands ignored until end of transaction block',
+  );
   assert.deepEqual(
     fake.state.weights.map((weight) => ({
       optionId: weight.optionId,
@@ -796,10 +825,27 @@ test('rolls back everything if one insert fails', async () => {
       weight: weight.weight,
     })),
     [
-      { optionId: 'option-1', signalId: 'signal-driver', weight: '1.0000' },
-      { optionId: 'option-2', signalId: 'signal-analyst', weight: '1.0000' },
+      { optionId: 'option-1', signalId: 'signal-analyst', weight: '2.0000' },
+      { optionId: 'option-1', signalId: 'signal-driver', weight: '3.0000' },
     ],
   );
+
+  const handlerEnteredEvent = events.find((event) => event.event === 'bulk-import-handler-entered');
+  assert.equal(handlerEnteredEvent?.assessmentVersionId, 'version-1');
+
+  const rowFailureEvent = events.find((event) => event.event === 'row-failure');
+  assert.deepEqual(rowFailureEvent, {
+    event: 'row-failure',
+    assessmentVersionId: 'version-1',
+    step: 'weight-insert',
+    lineIndex: 2,
+    questionKey: 'q02',
+    optionKey: 'q02_b',
+    signalKey: 'driver',
+    weight: 1,
+    errorMessage: 'WEIGHT_INSERT_FAILED',
+    postgresMessage: 'WEIGHT_INSERT_FAILED',
+  });
 });
 
 test('does not persist anything when planner errors exist', async () => {
