@@ -80,6 +80,52 @@ type StoredWeight = {
   sourceWeightKey: string | null;
 };
 
+type StoredApplicationThesis = {
+  heroPatternKey: string;
+  headline: string;
+  summary: string;
+};
+
+type StoredApplicationPrompt = {
+  sourceType: 'hero_pattern';
+  sourceKey: string;
+  keepDoing: string;
+  watchFor: string;
+  practiceNext: string;
+  askOthers: string;
+};
+
+const REQUIRED_HERO_PATTERNS = [
+  'forceful_driver',
+  'exacting_controller',
+  'delivery_commander',
+  'deliberate_craftsperson',
+  'grounded_planner',
+  'relational_catalyst',
+  'adaptive_mobiliser',
+  'steady_steward',
+  'balanced_operator',
+] as const;
+
+function buildCompleteApplicationThesis(): StoredApplicationThesis[] {
+  return REQUIRED_HERO_PATTERNS.map((patternKey) => ({
+    heroPatternKey: patternKey,
+    headline: `${patternKey} headline`,
+    summary: `${patternKey} summary`,
+  }));
+}
+
+function buildCompleteApplicationPrompts(): StoredApplicationPrompt[] {
+  return REQUIRED_HERO_PATTERNS.map((patternKey) => ({
+    sourceType: 'hero_pattern',
+    sourceKey: patternKey,
+    keepDoing: `${patternKey} keep doing`,
+    watchFor: `${patternKey} watch for`,
+    practiceNext: `${patternKey} practice next`,
+    askOthers: `${patternKey} ask others`,
+  }));
+}
+
 function createFakeDb(seed?: {
   assessments?: StoredAssessment[];
   versions?: StoredVersion[];
@@ -88,6 +134,8 @@ function createFakeDb(seed?: {
   questions?: StoredQuestion[];
   options?: StoredOption[];
   weights?: StoredWeight[];
+  applicationThesis?: StoredApplicationThesis[];
+  applicationPrompts?: StoredApplicationPrompt[];
 }) {
   const state = {
     assessments: [...(seed?.assessments ?? [])],
@@ -97,6 +145,8 @@ function createFakeDb(seed?: {
     questions: [...(seed?.questions ?? [])],
     options: [...(seed?.options ?? [])],
     weights: [...(seed?.weights ?? [])],
+    applicationThesis: [...(seed?.applicationThesis ?? buildCompleteApplicationThesis())],
+    applicationPrompts: [...(seed?.applicationPrompts ?? buildCompleteApplicationPrompts())],
   };
 
   function nextId(prefix: string, length: number) {
@@ -305,6 +355,49 @@ function createFakeDb(seed?: {
               },
             ] as T[],
           };
+        }
+
+        if (text.includes('FROM assessment_version_application_thesis')) {
+          const assessmentVersionId = params?.[0] as string;
+          const rows = state.applicationThesis.map((row, index) => ({
+            id: `application-thesis-${index + 1}`,
+            assessment_version_id: assessmentVersionId,
+            hero_pattern_key: row.heroPatternKey,
+            headline: row.headline,
+            summary: row.summary,
+            created_at: '2026-03-01T00:00:00.000Z',
+            updated_at: '2026-03-01T00:00:00.000Z',
+          }));
+          return { rows: rows as T[] };
+        }
+
+        if (text.includes('FROM assessment_version_application_contribution')) {
+          return { rows: [] as T[] };
+        }
+
+        if (text.includes('FROM assessment_version_application_risk')) {
+          return { rows: [] as T[] };
+        }
+
+        if (text.includes('FROM assessment_version_application_development')) {
+          return { rows: [] as T[] };
+        }
+
+        if (text.includes('FROM assessment_version_application_action_prompts')) {
+          const assessmentVersionId = params?.[0] as string;
+          const rows = state.applicationPrompts.map((row, index) => ({
+            id: `application-prompt-${index + 1}`,
+            assessment_version_id: assessmentVersionId,
+            source_type: row.sourceType,
+            source_key: row.sourceKey,
+            keep_doing: row.keepDoing,
+            watch_for: row.watchFor,
+            practice_next: row.practiceNext,
+            ask_others: row.askOthers,
+            created_at: '2026-03-01T00:00:00.000Z',
+            updated_at: '2026-03-01T00:00:00.000Z',
+          }));
+          return { rows: rows as T[] };
         }
 
         if (text.includes("UPDATE assessment_versions") && text.includes("lifecycle_status = 'ARCHIVED'")) {

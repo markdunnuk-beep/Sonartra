@@ -32,16 +32,6 @@ export type ResultReadModelService = {
   }): Promise<AssessmentResultDetailViewModel>;
 };
 
-function parseCanonicalPayload(record: PersistedReadyResultRecord) {
-  if (!isCanonicalResultPayload(record.canonicalResultPayload)) {
-    throw new AssessmentResultPayloadError(
-      `Persisted result payload is malformed for result ${record.resultId}`,
-    );
-  }
-
-  return normalizeCanonicalPayload(record.canonicalResultPayload);
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -103,6 +93,83 @@ function normalizeCanonicalPayload(payload: CanonicalResultPayload): CanonicalRe
         environmentFocus: normalizeNullableText(domain.environmentFocus),
       })),
     ),
+  };
+}
+
+type ReadableResultPayload = Omit<CanonicalResultPayload, 'application'> & {
+  application?: CanonicalResultPayload['application'];
+};
+
+type ParsedReadablePayload = {
+  payload: ReadableResultPayload;
+  hasApplicationPlan: boolean;
+};
+
+function createEmptyApplicationSection(): CanonicalResultPayload['application'] {
+  return {
+    thesis: {
+      headline: '',
+      summary: '',
+      sourceKeys: {
+        heroPatternKey: '',
+      },
+    },
+    signatureContribution: {
+      title: '',
+      summary: '',
+      items: [],
+    },
+    patternRisks: {
+      title: '',
+      summary: '',
+      items: [],
+    },
+    rangeBuilder: {
+      title: '',
+      summary: '',
+      items: [],
+    },
+    actionPlan30: {
+      keepDoing: '',
+      watchFor: '',
+      practiceNext: '',
+      askOthers: '',
+    },
+  };
+}
+
+function isReadableLegacyPayload(value: unknown): value is ReadableResultPayload {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  if ('application' in value) {
+    return false;
+  }
+
+  return isCanonicalResultPayload({
+    ...value,
+    application: createEmptyApplicationSection(),
+  });
+}
+
+function parseCanonicalPayload(record: PersistedReadyResultRecord): ParsedReadablePayload {
+  if (isCanonicalResultPayload(record.canonicalResultPayload)) {
+    return {
+      payload: normalizeCanonicalPayload(record.canonicalResultPayload),
+      hasApplicationPlan: true,
+    };
+  }
+
+  if (!isReadableLegacyPayload(record.canonicalResultPayload)) {
+    throw new AssessmentResultPayloadError(
+      `Persisted result payload is malformed for result ${record.resultId}`,
+    );
+  }
+
+  return {
+    payload: record.canonicalResultPayload,
+    hasApplicationPlan: false,
   };
 }
 
@@ -220,7 +287,7 @@ function toTopSignal(payload: CanonicalResultPayload): AssessmentResultTopSignal
 }
 
 function toListItem(record: PersistedReadyResultRecord): AssessmentResultListItem {
-  const payload = parseCanonicalPayload(record);
+  const payload = parseCanonicalPayload(record).payload as CanonicalResultPayload;
   const topSignal = toTopSignal(payload);
 
   return {
@@ -252,7 +319,8 @@ function tryToListItem(record: PersistedReadyResultRecord): AssessmentResultList
 }
 
 function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResultDetailViewModel {
-  const payload = parseCanonicalPayload(record);
+  const parsed = parseCanonicalPayload(record);
+  const payload = parsed.payload as CanonicalResultPayload;
   const rankedSignals = toRankedSignals(payload);
   const domainSummaries = toDomainSummaries(payload);
   const topSignal = toTopSignal(payload);
@@ -272,7 +340,8 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     hero: payload.hero,
     domains: payload.domains,
     actions: payload.actions,
-    application: payload.application,
+    application: payload.application ?? null,
+    hasApplicationPlan: parsed.hasApplicationPlan,
     topSignal,
     rankedSignals,
     normalizedScores,

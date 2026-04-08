@@ -1,4 +1,9 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
+import {
+  APPLICATION_PLAN_WARNING_THRESHOLD,
+  summarizeApplicationPlanCoverage,
+} from '@/lib/server/application-plan-governance';
+import { getAssessmentVersionApplicationLanguage } from '@/lib/server/assessment-version-application-language';
 
 export type AdminAssessmentValidationStatus = 'ready' | 'not_ready' | 'no_draft' | 'missing_assessment';
 export type AdminAssessmentValidationSectionKey =
@@ -6,6 +11,7 @@ export type AdminAssessmentValidationSectionKey =
   | 'domainsSignals'
   | 'questionsOptions'
   | 'weights'
+  | 'applicationPlan'
   | 'overallSummary';
 export type AdminAssessmentValidationSeverity = 'blocking' | 'warning';
 
@@ -30,6 +36,11 @@ export type AdminAssessmentValidationCounts = {
   weightedOptionCount: number;
   unmappedOptionCount: number;
   weightMappingCount: number;
+  applicationThesisCount: number;
+  applicationContributionCount: number;
+  applicationRiskCount: number;
+  applicationDevelopmentCount: number;
+  applicationActionPromptsCount: number;
 };
 
 export type AdminAssessmentValidationResult = {
@@ -118,6 +129,11 @@ function emptyCounts(): AdminAssessmentValidationCounts {
     weightedOptionCount: 0,
     unmappedOptionCount: 0,
     weightMappingCount: 0,
+    applicationThesisCount: 0,
+    applicationContributionCount: 0,
+    applicationRiskCount: 0,
+    applicationDevelopmentCount: 0,
+    applicationActionPromptsCount: 0,
   };
 }
 
@@ -395,6 +411,7 @@ export async function validateLatestDraftAssessmentVersion(
         createSection('domainsSignals', 'Domains / signals', []),
         createSection('questionsOptions', 'Questions / options', []),
         createSection('weights', 'Weights', []),
+        createSection('applicationPlan', 'Application Plan', []),
         createSection('overallSummary', 'Overall summary', [
           createIssue('validation_unavailable', 'No canonical assessment record is available for validation.'),
         ]),
@@ -416,6 +433,7 @@ export async function validateLatestDraftAssessmentVersion(
         createSection('domainsSignals', 'Domains / signals', []),
         createSection('questionsOptions', 'Questions / options', []),
         createSection('weights', 'Weights', []),
+        createSection('applicationPlan', 'Application Plan', []),
         createSection('overallSummary', 'Overall summary', [
           createIssue('publish_readiness_unavailable', 'Publish readiness cannot be computed until an editable draft exists.'),
         ]),
@@ -423,11 +441,13 @@ export async function validateLatestDraftAssessmentVersion(
     });
   }
 
-  const [domainsSignals, questionsOptions, weights] = await Promise.all([
+  const [domainsSignals, questionsOptions, weights, applicationLanguage] = await Promise.all([
     loadDomainsSignalsMetrics(db, context.draft_version_id),
     loadQuestionsOptionsMetrics(db, context.draft_version_id),
     loadWeightMetrics(db, context.draft_version_id),
+    getAssessmentVersionApplicationLanguage(db, context.draft_version_id),
   ]);
+  const applicationCoverage = summarizeApplicationPlanCoverage(applicationLanguage);
 
   const counts: AdminAssessmentValidationCounts = {
     domainCount: toCount(domainsSignals.domain_count),
@@ -437,11 +457,17 @@ export async function validateLatestDraftAssessmentVersion(
     weightedOptionCount: toCount(weights.weighted_option_count),
     unmappedOptionCount: toCount(weights.unmapped_option_count),
     weightMappingCount: toCount(weights.weight_mapping_count),
+    applicationThesisCount: applicationCoverage.thesisCount,
+    applicationContributionCount: applicationCoverage.contributionCount,
+    applicationRiskCount: applicationCoverage.riskCount,
+    applicationDevelopmentCount: applicationCoverage.developmentCount,
+    applicationActionPromptsCount: applicationCoverage.actionPromptsCount,
   };
 
   const domainsSignalsIssues: AdminAssessmentValidationIssue[] = [];
   const questionsOptionsIssues: AdminAssessmentValidationIssue[] = [];
   const weightIssues: AdminAssessmentValidationIssue[] = [];
+  const applicationPlanIssues: AdminAssessmentValidationIssue[] = [];
 
   if (counts.domainCount === 0) {
     domainsSignalsIssues.push(createIssue('missing_domains', 'At least one domain must exist on the current draft version.'));
@@ -582,12 +608,65 @@ export async function validateLatestDraftAssessmentVersion(
     weightIssues.push(createIssue('missing_weight_mappings', 'Draft options exist, but no option to signal weight mappings have been authored yet.'));
   }
 
-  const blockingIssueCount = domainsSignalsIssues.length + questionsOptionsIssues.length + weightIssues.length;
+  if (applicationCoverage.missingThesisHeroPatterns.length > 0) {
+    applicationPlanIssues.push(
+      createIssue(
+        'application_thesis_incomplete',
+        `Application Thesis is incomplete. Missing hero pattern rows: ${applicationCoverage.missingThesisHeroPatterns.join(', ')}.`,
+      ),
+    );
+  }
+
+  if (applicationCoverage.missingActionPromptHeroPatterns.length > 0) {
+    applicationPlanIssues.push(
+      createIssue(
+        'application_action_prompts_incomplete',
+        `Application Action Prompts are incomplete. Missing hero pattern rows: ${applicationCoverage.missingActionPromptHeroPatterns.join(', ')}.`,
+      ),
+    );
+  }
+
+  if (applicationCoverage.contributionCount < APPLICATION_PLAN_WARNING_THRESHOLD) {
+    applicationPlanIssues.push(
+      createIssue(
+        'application_contribution_low_coverage',
+        `Application Contribution coverage is low (${applicationCoverage.contributionCount} rows).`,
+        'warning',
+      ),
+    );
+  }
+
+  if (applicationCoverage.riskCount < APPLICATION_PLAN_WARNING_THRESHOLD) {
+    applicationPlanIssues.push(
+      createIssue(
+        'application_risk_low_coverage',
+        `Application Risk coverage is low (${applicationCoverage.riskCount} rows).`,
+        'warning',
+      ),
+    );
+  }
+
+  if (applicationCoverage.developmentCount < APPLICATION_PLAN_WARNING_THRESHOLD) {
+    applicationPlanIssues.push(
+      createIssue(
+        'application_development_low_coverage',
+        `Application Development coverage is low (${applicationCoverage.developmentCount} rows).`,
+        'warning',
+      ),
+    );
+  }
+
+  const blockingIssueCount =
+    domainsSignalsIssues.length
+    + questionsOptionsIssues.length
+    + weightIssues.length
+    + applicationPlanIssues.filter((issue) => issue.severity === 'blocking').length;
   const sections = [
     createSection('assessmentVersionContext', 'Assessment / version context', []),
     createSection('domainsSignals', 'Domains / signals', domainsSignalsIssues),
     createSection('questionsOptions', 'Questions / options', questionsOptionsIssues),
     createSection('weights', 'Weights', weightIssues),
+    createSection('applicationPlan', 'Application Plan', applicationPlanIssues),
     createSection(
       'overallSummary',
       'Overall summary',

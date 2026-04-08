@@ -400,6 +400,7 @@ test('detail load returns canonical payload sections alongside compatibility pro
   assert.equal(detail.actions.developmentFocus[0]?.text, 'Role Executor development.');
   assert.equal(detail.application.signatureContribution.title, 'Where you create the most value');
   assert.equal(detail.application.actionPlan30.keepDoing, '');
+  assert.equal(detail.hasApplicationPlan, true);
   assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (detail.domains[0] ?? {}), false);
   assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (detail.domains[1] ?? {}), false);
   assert.equal(detail.domainSummaries[0]?.signalScores.length, 0);

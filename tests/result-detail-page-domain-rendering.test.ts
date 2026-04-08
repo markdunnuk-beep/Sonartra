@@ -134,6 +134,7 @@ function buildResultDetail(
       headline: 'Legacy hero headline',
       narrative: 'Legacy hero narrative.',
     },
+    hasApplicationPlan: true,
     strengths: Object.freeze([]),
     watchouts: Object.freeze([]),
     developmentFocus: Object.freeze([]),

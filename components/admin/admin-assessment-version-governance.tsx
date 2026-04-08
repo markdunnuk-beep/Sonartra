@@ -302,6 +302,8 @@ function ValidationSummary({
           <AdminFeedbackStat label="Sections to fix" value={String(failingSections.length)} />
           <AdminFeedbackStat label="Questions" value={String(validation.counts.questionCount)} />
           <AdminFeedbackStat label="Unscored responses" value={String(validation.counts.unmappedOptionCount)} />
+          <AdminFeedbackStat label="Application thesis" value={String(validation.counts.applicationThesisCount)} />
+          <AdminFeedbackStat label="Action prompts" value={String(validation.counts.applicationActionPromptsCount)} />
         </div>
       </div>
 
@@ -334,6 +336,16 @@ function ValidationSummary({
                 {section.status}
               </LabelPill>
             </div>
+
+            {section.key === 'applicationPlan' ? (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <AdminFeedbackStat label="Thesis" value={String(validation.counts.applicationThesisCount)} />
+                <AdminFeedbackStat label="Contribution" value={String(validation.counts.applicationContributionCount)} />
+                <AdminFeedbackStat label="Risk" value={String(validation.counts.applicationRiskCount)} />
+                <AdminFeedbackStat label="Development" value={String(validation.counts.applicationDevelopmentCount)} />
+                <AdminFeedbackStat label="Action Prompts" value={String(validation.counts.applicationActionPromptsCount)} />
+              </div>
+            ) : null}
 
             {section.issues.length === 0 ? (
               <p className="mt-3 text-sm leading-7 text-white/54">No issues in this section.</p>

@@ -26,9 +26,14 @@ test('review governance surfaces separate readiness summary, blocking counts, an
 
   assert.match(source, /label="Blocking issues"/);
   assert.match(source, /label="Sections to fix"/);
+  assert.match(source, /label="Application thesis"/);
+  assert.match(source, /label="Action prompts"/);
   assert.match(source, /title="Readiness summary"/);
   assert.match(source, /title=\{issue\.severity === 'blocking' \? 'Blocking issue' : 'Warning'\}/);
   assert.match(source, /tone=\{issue\.severity === 'blocking' \? 'warning' : 'neutral'\}/);
+  assert.match(source, /section\.key === 'applicationPlan'/);
+  assert.match(source, /label="Contribution"/);
+  assert.match(source, /label="Development"/);
 });
 
 test('publish actions use shared calm feedback notices for errors, success, and warnings', () => {
