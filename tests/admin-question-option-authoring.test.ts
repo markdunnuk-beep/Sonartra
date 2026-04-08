@@ -1346,6 +1346,56 @@ test('multi-domain bulk import accepts a one-line import by exact domain name', 
     fake.state.questions.map((question) => ({ prompt: question.prompt, domainId: question.domainId })),
     [{ prompt: 'First question', domainId: 'domain-1' }],
   );
+  assert.equal(fake.state.questions[0]?.questionKey, 'q01');
+  assert.equal(fake.state.questions[0]?.orderIndex, 0);
+});
+
+test('multi-domain bulk import accepts a one-line import by domain key', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        semanticKey: 'operating_style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating-style|First question'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.createdQuestions?.length, 1);
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({
+      prompt: question.prompt,
+      domainId: question.domainId,
+      questionKey: question.questionKey,
+      orderIndex: question.orderIndex,
+    })),
+    [
+      {
+        prompt: 'First question',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        orderIndex: 0,
+      },
+    ],
+  );
 });
 
 test('multi-domain bulk import accepts a one-line import by semantic key', async () => {
@@ -1393,6 +1443,59 @@ test('multi-domain bulk import accepts a one-line import by semantic key', async
   );
 });
 
+test('multi-domain bulk import generates the next order index and key after existing questions', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        semanticKey: 'operating_style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing one',
+        orderIndex: 0,
+      },
+      {
+        id: 'question-2',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q02',
+        prompt: 'Existing two',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating-style|First question'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.createdQuestions?.[0]?.key, 'q03');
+  assert.equal(result.createdQuestions?.[0]?.orderIndex, 2);
+  assert.equal(fake.state.questions[2]?.questionKey, 'q03');
+  assert.equal(fake.state.questions[2]?.orderIndex, 2);
+});
+
 test('multi-domain bulk import only writes to the active latest draft version', async () => {
   const fake = createFakeDb(
     {
@@ -1429,6 +1532,47 @@ test('multi-domain bulk import only writes to the active latest draft version', 
   );
 
   assert.equal(result.formError, 'The latest draft version is no longer available for question imports.');
+  assert.equal(fake.state.questions.length, 0);
+  assert.equal(fake.state.options.length, 0);
+});
+
+test('multi-domain bulk import surfaces the real save-path error when option scaffolding fails', async () => {
+  const fake = createFakeDb(
+    {
+      domains: [
+        {
+          id: 'domain-1',
+          assessmentVersionId: 'version-1',
+          domainKey: 'operating-style',
+          semanticKey: 'operating_style',
+          label: 'Operating Style',
+          domainType: 'SIGNAL_GROUP',
+          orderIndex: 0,
+        },
+      ],
+    },
+    {
+      failOptionKey: 'q01_a',
+    },
+  );
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating-style|First question'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'OPTION_INSERT_FAILED',
+  );
   assert.equal(fake.state.questions.length, 0);
   assert.equal(fake.state.options.length, 0);
 });
