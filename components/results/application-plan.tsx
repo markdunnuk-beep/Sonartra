@@ -10,11 +10,19 @@ type ApplicationItemProps = {
   label: string;
   narrative: string;
   aside?: string;
+  delayClassName?: string;
 };
 
-function ApplicationItem({ label, narrative, aside }: ApplicationItemProps) {
+function ApplicationItem({ label, narrative, aside, delayClassName }: ApplicationItemProps) {
   return (
-    <article className="space-y-3 rounded-[1.4rem] border border-white/7 bg-white/[0.02] px-5 py-5 md:px-6 md:py-6">
+    <article
+      className={[
+        'sonartra-motion-reveal-soft space-y-3 rounded-[1.35rem] border border-white/7 bg-white/[0.015] p-3 transition-colors duration-200 hover:bg-white/[0.02] focus-within:bg-white/[0.02] md:p-4',
+        delayClassName ?? '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <p className="sonartra-report-title text-[1.02rem] text-white/92">{label}</p>
       <p className="sonartra-report-body-soft max-w-[34rem] text-white/70">{narrative}</p>
       {aside ? <p className="sonartra-report-kicker text-white/45">{aside}</p> : null}
@@ -28,12 +36,20 @@ export function ApplicationPlan({ application }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-[61rem] space-y-10 px-1 md:space-y-12 md:px-2">
-      <div className="max-w-[52rem] space-y-4 border-l border-white/8 pl-5 md:space-y-5 md:pl-7">
+    <section
+      id="application"
+      className="mx-auto max-w-[61rem] space-y-8 px-1 md:space-y-12 md:px-2"
+    >
+      <div className="border-t border-neutral-800 pt-12" />
+
+      <div className="max-w-[52rem] space-y-6 border-l border-white/8 pl-5 md:space-y-6 md:pl-7">
         <p className="sonartra-report-kicker">Application</p>
         <h2 className="sonartra-report-title max-w-[24rem] text-[1.45rem] leading-8 text-white/94 md:text-[1.62rem] md:leading-9">
           Turning insight into impact
         </h2>
+        <p className="sonartra-report-body-soft max-w-[42rem] text-white/58">
+          This final section brings your patterns together into practical terms.
+        </p>
         <p className="sonartra-report-body-soft max-w-[42rem] text-white/58">
           This section brings your patterns together into a clear view of how you
           create value, where they can work against you, and what to do next.
@@ -41,7 +57,7 @@ export function ApplicationPlan({ application }: Props) {
       </div>
 
       {(application.thesis.headline || application.thesis.summary) ? (
-        <section className="space-y-4">
+        <section className="space-y-6">
           {application.thesis.headline ? (
             <h3 className="sonartra-report-title max-w-[34rem] text-[1.28rem] leading-8 text-white/92 md:text-[1.42rem] md:leading-9">
               {application.thesis.headline}
@@ -65,13 +81,14 @@ export function ApplicationPlan({ application }: Props) {
           ) : null}
         </div>
         {application.signatureContribution.items.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {application.signatureContribution.items.map((item, index) => (
               <ApplicationItem
                 key={`${item.sourceType}-${item.sourceKey}-${index}`}
                 label={item.label}
                 narrative={item.narrative}
                 aside={`Works best when ${item.bestWhen}`}
+                delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
               />
             ))}
           </div>
@@ -88,13 +105,14 @@ export function ApplicationPlan({ application }: Props) {
           ) : null}
         </div>
         {application.patternRisks.items.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {application.patternRisks.items.map((item, index) => (
               <ApplicationItem
                 key={`${item.sourceType}-${item.sourceKey}-${index}`}
                 label={item.label}
                 narrative={item.narrative}
                 aside={item.earlyWarning}
+                delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
               />
             ))}
           </div>
@@ -111,44 +129,57 @@ export function ApplicationPlan({ application }: Props) {
           ) : null}
         </div>
         {application.rangeBuilder.items.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {application.rangeBuilder.items.map((item, index) => (
               <ApplicationItem
                 key={`${item.sourceType}-${item.sourceKey}-${index}`}
                 label={item.label}
                 narrative={item.narrative}
                 aside={`Try this: ${item.practice}`}
+                delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
               />
             ))}
           </div>
         ) : null}
       </section>
 
-      <section className="space-y-5">
+      <section className="space-y-6">
         <p className="sonartra-report-kicker">What to do next</p>
-        <div className="max-w-[46rem] space-y-4 rounded-[1.5rem] border border-white/7 bg-white/[0.02] px-5 py-5 md:px-6 md:py-6">
+        <div className="max-w-[48rem] space-y-6 rounded-[1.5rem] border border-white/7 bg-white/[0.02] px-5 py-5 md:px-6 md:py-6">
           {application.actionPlan30.keepDoing ? (
-            <p className="sonartra-report-body-soft text-white/72">
-              <span className="text-white/92">Keep doing:</span> {application.actionPlan30.keepDoing}
-            </p>
+            <div className="space-y-2">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Keep doing
+              </p>
+              <p className="sonartra-report-body text-white/82">{application.actionPlan30.keepDoing}</p>
+            </div>
           ) : null}
           {application.actionPlan30.watchFor ? (
-            <p className="sonartra-report-body-soft text-white/72">
-              <span className="text-white/92">Watch for:</span> {application.actionPlan30.watchFor}
-            </p>
+            <div className="space-y-2">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Watch for
+              </p>
+              <p className="sonartra-report-body text-white/82">{application.actionPlan30.watchFor}</p>
+            </div>
           ) : null}
           {application.actionPlan30.practiceNext ? (
-            <p className="sonartra-report-body-soft text-white/72">
-              <span className="text-white/92">Try this:</span> {application.actionPlan30.practiceNext}
-            </p>
+            <div className="space-y-2">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Try this
+              </p>
+              <p className="sonartra-report-body text-white/82">{application.actionPlan30.practiceNext}</p>
+            </div>
           ) : null}
           {application.actionPlan30.askOthers ? (
-            <p className="sonartra-report-body-soft text-white/72">
-              <span className="text-white/92">Ask others:</span> {application.actionPlan30.askOthers}
-            </p>
+            <div className="space-y-2">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Ask others
+              </p>
+              <p className="sonartra-report-body text-white/82">{application.actionPlan30.askOthers}</p>
+            </div>
           ) : null}
         </div>
       </section>
-    </div>
+    </section>
   );
 }
