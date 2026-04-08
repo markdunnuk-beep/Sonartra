@@ -443,13 +443,13 @@ function createFakeDb(
           optionText: params?.[index + 4] as string,
           orderIndex: params?.[index + 5] as number,
         };
-        state.options.push(record);
         if (config?.failOptionKey && optionKey === config.failOptionKey) {
           if (config.simulateTransactionAbortAfterOptionInsertFailure) {
             transactionAborted = true;
           }
           throw new Error('OPTION_INSERT_FAILED');
         }
+        state.options.push(record);
         rows.push({
           id,
           assessment_version_id: record.assessmentVersionId,
@@ -466,7 +466,7 @@ function createFakeDb(
     if (text.includes('INSERT INTO options') && text.includes('RETURNING id')) {
       const optionKey = params?.[2] as string;
       const id = nextId('option', state.options.length);
-      state.options.push({
+      const record: StoredOption = {
         id,
         assessmentVersionId: params?.[0] as string,
         questionId: params?.[1] as string,
@@ -474,13 +474,14 @@ function createFakeDb(
         optionLabel: (params?.[3] as string | null) ?? null,
         optionText: params?.[4] as string,
         orderIndex: params?.[5] as number,
-      });
+      };
       if (config?.failOptionKey && optionKey === config.failOptionKey) {
         if (config.simulateTransactionAbortAfterOptionInsertFailure) {
           transactionAborted = true;
         }
         throw new Error('OPTION_INSERT_FAILED');
       }
+      state.options.push(record);
       return { rows: ([{ id }] as unknown) as T[] };
     }
 
@@ -657,6 +658,24 @@ function buildBulkByDomainFormData(questionLines: string) {
   const formData = new FormData();
   formData.set('questionLines', questionLines);
   return formData;
+}
+
+async function captureBulkImportLogs<T>(run: () => Promise<T>) {
+  const originalConsoleInfo = console.info;
+  const events: Array<Record<string, unknown>> = [];
+
+  console.info = (...args: unknown[]) => {
+    if (args[0] === '[admin-question-bulk-import]' && typeof args[1] === 'string') {
+      events.push(JSON.parse(args[1]));
+    }
+  };
+
+  try {
+    const result = await run();
+    return { result, events };
+  } finally {
+    console.info = originalConsoleInfo;
+  }
 }
 
 test('creates questions and options with deterministic appended order indexes', async () => {
@@ -1572,29 +1591,48 @@ test('multi-domain bulk import surfaces the real save-path error when option sca
     },
   );
 
-  const result = await createBulkQuestionsByDomainActionWithDependencies(
-    {
-      assessmentKey: 'signals',
-      assessmentVersionId: 'version-1',
-    },
-    initialAdminBulkQuestionByDomainAuthoringFormState,
-    buildBulkByDomainFormData('operating-style|First question'),
-    {
-      connect: async () => fake.client,
-      revalidatePath() {},
-    },
+  const { result, events } = await captureBulkImportLogs(() =>
+    createBulkQuestionsByDomainActionWithDependencies(
+      {
+        assessmentKey: 'signals',
+        assessmentVersionId: 'version-1',
+      },
+      initialAdminBulkQuestionByDomainAuthoringFormState,
+      buildBulkByDomainFormData('operating-style|First question'),
+      {
+        connect: async () => fake.client,
+        revalidatePath() {},
+      },
+    ),
   );
 
-  assert.equal(
-    result.formError,
-    'OPTION_INSERT_FAILED',
-  );
+  assert.equal(result.formError, 'Question import failed at option scaffold insert: OPTION_INSERT_FAILED');
   assert.notEqual(
     result.formError,
     'current transaction is aborted, commands ignored until end of transaction block',
   );
-  assert.equal(fake.state.questions.length, 0);
+  assert.equal(fake.state.questions.length, 1);
+  assert.equal(fake.state.questions[0]?.questionKey, 'q01');
   assert.equal(fake.state.options.length, 0);
+
+  const handlerEnteredEvent = events.find((event) => event.event === 'bulk-import-handler-entered');
+  assert.equal(handlerEnteredEvent?.assessmentKey, 'signals');
+  assert.equal(handlerEnteredEvent?.assessmentVersionId, 'version-1');
+
+  const rowFailureEvent = events.find((event) => event.event === 'row-failure');
+  assert.deepEqual(rowFailureEvent, {
+    event: 'row-failure',
+    assessmentVersionId: 'version-1',
+    lineIndex: 0,
+    token: 'operating-style',
+    prompt: 'First question',
+    questionKey: 'q01',
+    questionId: 'question-1',
+    domainId: 'domain-1',
+    step: 'option-scaffold-insert',
+    errorMessage: 'OPTION_INSERT_FAILED',
+    postgresMessage: 'OPTION_INSERT_FAILED',
+  });
 });
 
 test('multi-domain bulk import continues canonical keys and order after existing questions', async () => {
@@ -1688,7 +1726,7 @@ test('multi-domain bulk import fails with a line-specific format error', async (
   assert.equal(fake.state.options.length, 0);
 });
 
-test('multi-domain bulk import fails on unknown domains without inserting partial rows', async () => {
+test('multi-domain bulk import fails on unknown domains after preserving earlier successful rows', async () => {
   const fake = createFakeDb({
     domains: [
       {
@@ -1719,8 +1757,28 @@ test('multi-domain bulk import fails on unknown domains without inserting partia
     result.formError,
     'Line 2 uses a domain that does not exist in this assessment version.',
   );
-  assert.equal(fake.state.questions.length, 0);
-  assert.equal(fake.state.options.length, 0);
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({
+      id: question.id,
+      key: question.questionKey,
+      prompt: question.prompt,
+      orderIndex: question.orderIndex,
+    })),
+    [{ id: 'question-1', key: 'q01', prompt: 'First question', orderIndex: 0 }],
+  );
+  assert.deepEqual(
+    fake.state.options.map((option) => ({
+      questionId: option.questionId,
+      key: option.optionKey,
+      orderIndex: option.orderIndex,
+    })),
+    [
+      { questionId: 'question-1', key: 'q01_a', orderIndex: 1 },
+      { questionId: 'question-1', key: 'q01_b', orderIndex: 2 },
+      { questionId: 'question-1', key: 'q01_c', orderIndex: 3 },
+      { questionId: 'question-1', key: 'q01_d', orderIndex: 4 },
+    ],
+  );
 });
 
 test('multi-domain bulk import fails on empty question text', async () => {
@@ -1757,7 +1815,7 @@ test('multi-domain bulk import fails on empty question text', async () => {
   assert.equal(fake.state.questions.length, 0);
 });
 
-test('multi-domain bulk import is transactional when a later row is invalid', async () => {
+test('multi-domain bulk import stops at the first invalid row after earlier rows succeed', async () => {
   const fake = createFakeDb({
     domains: [
       {
@@ -1796,8 +1854,28 @@ test('multi-domain bulk import is transactional when a later row is invalid', as
     result.formError,
     'Line 2 uses a domain that does not exist in this assessment version.',
   );
-  assert.deepEqual(fake.state.questions, []);
-  assert.deepEqual(fake.state.options, []);
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({
+      id: question.id,
+      key: question.questionKey,
+      prompt: question.prompt,
+      orderIndex: question.orderIndex,
+    })),
+    [{ id: 'question-1', key: 'q01', prompt: 'First question', orderIndex: 0 }],
+  );
+  assert.deepEqual(
+    fake.state.options.map((option) => ({
+      questionId: option.questionId,
+      key: option.optionKey,
+      orderIndex: option.orderIndex,
+    })),
+    [
+      { questionId: 'question-1', key: 'q01_a', orderIndex: 1 },
+      { questionId: 'question-1', key: 'q01_b', orderIndex: 2 },
+      { questionId: 'question-1', key: 'q01_c', orderIndex: 3 },
+      { questionId: 'question-1', key: 'q01_d', orderIndex: 4 },
+    ],
+  );
 });
 
 test('multi-domain bulk action rejects batches over the safe maximum', async () => {

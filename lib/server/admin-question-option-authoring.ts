@@ -188,6 +188,12 @@ type ResolvedBulkQuestionByDomainLine = ParsedBulkQuestionByDomainLine & {
   domainId: string;
 };
 
+type BulkImportDomainLookup = {
+  byKey: Map<string, DomainResolutionRow>;
+  byLabel: Map<string, DomainResolutionRow>;
+  bySemanticKey: Map<string, DomainResolutionRow>;
+};
+
 const MAX_BULK_QUESTION_IMPORT_COUNT = 200;
 
 function logBulkQuestionImport(event: string, payload: Record<string, unknown>): void {
@@ -255,6 +261,33 @@ function getErrorMessage(error: unknown): string {
   return 'Unknown server error.';
 }
 
+function getPostgresErrorDiagnostics(error: unknown): Record<string, string> {
+  const postgresError = toPostgresErrorLike(error);
+  if (!postgresError) {
+    return {};
+  }
+
+  const diagnostics: Record<string, string> = {};
+  if (typeof postgresError.code === 'string' && postgresError.code.length > 0) {
+    diagnostics.postgresCode = postgresError.code;
+  }
+  if (typeof postgresError.message === 'string' && postgresError.message.length > 0) {
+    diagnostics.postgresMessage = postgresError.message;
+  }
+  if (typeof postgresError.detail === 'string' && postgresError.detail.length > 0) {
+    diagnostics.postgresDetail = postgresError.detail;
+  }
+  if (typeof postgresError.constraint === 'string' && postgresError.constraint.length > 0) {
+    diagnostics.postgresConstraint = postgresError.constraint;
+  }
+
+  return diagnostics;
+}
+
+function formatBulkImportStepFailureMessage(step: string, error: unknown): string {
+  return `Question import failed at ${step}: ${getErrorMessage(error)}`;
+}
+
 function formatBulkQuestionByDomainSaveError(error: unknown): string {
   const formattedDomainError =
     error instanceof Error ? formatBulkQuestionByDomainError(error.message) : null;
@@ -266,12 +299,6 @@ function formatBulkQuestionByDomainSaveError(error: unknown): string {
     switch (error.message) {
       case 'DOMAIN_NOT_FOUND':
         return 'The selected question domain is no longer available in this draft version.';
-      case 'QUESTION_KEY_EXISTS':
-        return 'A generated question key already exists in this draft version. Try the import again.';
-      case 'QUESTION_CREATE_FAILED':
-        return 'The question row could not be created.';
-      case 'OPTION_CREATE_FAILED':
-        return 'The default response options could not be created for an imported question.';
       default:
         break;
     }
@@ -498,6 +525,29 @@ async function resolveBulkQuestionByDomainLines(params: {
   });
 
   return Object.freeze(resolvedLines);
+}
+
+function createBulkImportDomainLookup(
+  domains: readonly DomainResolutionRow[],
+): BulkImportDomainLookup {
+  return {
+    byKey: new Map(domains.map((domain) => [domain.domain_key, domain])),
+    byLabel: new Map(domains.map((domain) => [domain.label, domain])),
+    bySemanticKey: new Map(
+      domains.flatMap((domain) =>
+        typeof domain.semantic_key === 'string' && domain.semantic_key.length > 0
+          ? [[domain.semantic_key, domain] as const]
+          : [],
+      ),
+    ),
+  };
+}
+
+function resolveBulkImportDomainToken(
+  lookup: BulkImportDomainLookup,
+  token: string,
+): DomainResolutionRow | null {
+  return lookup.byKey.get(token) ?? lookup.byLabel.get(token) ?? lookup.bySemanticKey.get(token) ?? null;
 }
 
 async function questionExists(params: {
@@ -1004,42 +1054,263 @@ export async function createBulkQuestionsByDomainRecord(params: {
   assessmentVersionId: string;
   questionLines: string;
 }): Promise<readonly AdminCreatedQuestion[]> {
-  const resolvedLines = await resolveBulkQuestionByDomainLines({
+  const parsedLines = parseBulkQuestionByDomainLines(params.questionLines);
+
+  if (parsedLines.length < 1) {
+    throw new Error('INVALID_BULK_IMPORT');
+  }
+
+  if (parsedLines.length > MAX_BULK_QUESTION_IMPORT_COUNT) {
+    throw new Error('BULK_IMPORT_LIMIT_EXCEEDED');
+  }
+
+  const domains = await getDomainsForAssessmentVersion({
     db: params.db,
     assessmentVersionId: params.assessmentVersionId,
-    questionLines: params.questionLines,
   });
+  const domainLookup = createBulkImportDomainLookup(domains);
 
   logBulkQuestionImport('bulk-save-start', {
     assessmentVersionId: params.assessmentVersionId,
-    questionCount: resolvedLines.length,
+    questionCount: parsedLines.length,
   });
 
   const createdQuestions: AdminCreatedQuestion[] = [];
 
-  for (const line of resolvedLines) {
+  for (const [lineIndex, line] of parsedLines.entries()) {
+    let questionKey: string | undefined;
+    let questionId: string | undefined;
+    let domainId: string | undefined;
+
+    logBulkQuestionImport('row-start', {
+      assessmentVersionId: params.assessmentVersionId,
+      lineIndex,
+      token: line.domainToken,
+      prompt: line.prompt,
+    });
+
     try {
-      createdQuestions.push(
-        await createQuestionRecord({
+      logBulkQuestionImport('domain-resolve-start', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        token: line.domainToken,
+        prompt: line.prompt,
+      });
+
+      const resolvedDomain = resolveBulkImportDomainToken(domainLookup, line.domainToken);
+      if (!resolvedDomain) {
+        const error = new Error(`BULK_IMPORT_LINE_${line.lineNumber}_UNKNOWN_DOMAIN`);
+        logBulkQuestionImport('row-failure', {
+          assessmentVersionId: params.assessmentVersionId,
+          lineIndex,
+          token: line.domainToken,
+          prompt: line.prompt,
+          step: 'domain-resolve',
+          errorMessage: getErrorMessage(error),
+        });
+        throw error;
+      }
+
+      domainId = resolvedDomain.id;
+      logBulkQuestionImport('domain-resolve-success', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        token: line.domainToken,
+        prompt: line.prompt,
+        domainId,
+      });
+
+      const orderIndex = await getNextQuestionOrderIndex(params.db, params.assessmentVersionId);
+      questionKey = generateQuestionKey(orderIndex + 1);
+
+      logBulkQuestionImport('question-insert-start', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        token: line.domainToken,
+        prompt: line.prompt,
+        domainId,
+        questionKey,
+      });
+
+      if (
+        await duplicateQuestionKeyExists({
           db: params.db,
           assessmentVersionId: params.assessmentVersionId,
-          values: {
+          questionKey,
+        })
+      ) {
+        const error = new Error('QUESTION_KEY_EXISTS');
+        logBulkQuestionImport('row-failure', {
+          assessmentVersionId: params.assessmentVersionId,
+          lineIndex,
+          token: line.domainToken,
+          prompt: line.prompt,
+          questionKey,
+          domainId,
+          step: 'question-insert',
+          errorMessage: getErrorMessage(error),
+        });
+        throw new Error(formatBulkImportStepFailureMessage('question insert', error));
+      }
+
+      const insertedQuestion = await params.db
+        .query<InsertedQuestionRow>(
+          `
+          INSERT INTO questions (
+            assessment_version_id,
+            domain_id,
+            question_key,
+            prompt,
+            order_index
+          )
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING id
+          `,
+          [params.assessmentVersionId, domainId, questionKey, line.prompt, orderIndex],
+        )
+        .catch((error: unknown) => {
+          logBulkQuestionImport('row-failure', {
+            assessmentVersionId: params.assessmentVersionId,
+            lineIndex,
+            token: line.domainToken,
             prompt: line.prompt,
-            key: '',
-            domainId: line.domainId,
-          },
-        }),
-      );
-    } catch (error) {
-      logBulkQuestionImport('bulk-save-line-error', {
+            questionKey,
+            domainId,
+            step: 'question-insert',
+            errorMessage: getErrorMessage(error),
+            ...getPostgresErrorDiagnostics(error),
+          });
+          throw new Error(formatBulkImportStepFailureMessage('question insert', error));
+        });
+
+      questionId = insertedQuestion.rows[0]?.id;
+      if (!questionId) {
+        const error = new Error('QUESTION_CREATE_FAILED');
+        logBulkQuestionImport('row-failure', {
+          assessmentVersionId: params.assessmentVersionId,
+          lineIndex,
+          token: line.domainToken,
+          prompt: line.prompt,
+          questionKey,
+          domainId,
+          step: 'question-insert',
+          errorMessage: getErrorMessage(error),
+        });
+        throw new Error(formatBulkImportStepFailureMessage('question insert', error));
+      }
+
+      logBulkQuestionImport('question-insert-success', {
         assessmentVersionId: params.assessmentVersionId,
-        lineNumber: line.lineNumber,
-        domainId: line.domainId,
-        domainToken: line.domainToken,
+        lineIndex,
+        token: line.domainToken,
         prompt: line.prompt,
-        errorMessage: getErrorMessage(error),
-        postgres: toPostgresErrorLike(error),
+        questionKey,
+        questionId,
+        domainId,
       });
+
+      const defaultOptions = buildDefaultCreatedOptions({
+        assessmentVersionId: params.assessmentVersionId,
+        questionId,
+        questionIndex: orderIndex + 1,
+      });
+
+      logBulkQuestionImport('option-scaffold-start', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        token: line.domainToken,
+        prompt: line.prompt,
+        questionKey,
+        questionId,
+        domainId,
+      });
+
+      const createdOptions: AdminQuestionCreatedOption[] = [];
+
+      for (const option of defaultOptions) {
+        const insertedOption = await params.db
+          .query<InsertedOptionRow>(
+            `
+            INSERT INTO options (
+              assessment_version_id,
+              question_id,
+              option_key,
+              option_label,
+              option_text,
+              order_index
+            )
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+            `,
+            [
+              option.assessmentVersionId,
+              option.questionId,
+              option.key,
+              option.label,
+              option.text,
+              option.orderIndex,
+            ],
+          )
+          .catch((error: unknown) => {
+            logBulkQuestionImport('row-failure', {
+              assessmentVersionId: params.assessmentVersionId,
+              lineIndex,
+              token: line.domainToken,
+              prompt: line.prompt,
+              questionKey,
+              questionId,
+              domainId,
+              step: 'option-scaffold-insert',
+              errorMessage: getErrorMessage(error),
+              ...getPostgresErrorDiagnostics(error),
+            });
+            throw new Error(formatBulkImportStepFailureMessage('option scaffold insert', error));
+          });
+
+        const optionId = insertedOption.rows[0]?.id;
+        if (!optionId) {
+          const error = new Error('OPTION_CREATE_FAILED');
+          logBulkQuestionImport('row-failure', {
+            assessmentVersionId: params.assessmentVersionId,
+            lineIndex,
+            token: line.domainToken,
+            prompt: line.prompt,
+            questionKey,
+            questionId,
+            domainId,
+            step: 'option-scaffold-insert',
+            errorMessage: getErrorMessage(error),
+          });
+          throw new Error(formatBulkImportStepFailureMessage('option scaffold insert', error));
+        }
+
+        createdOptions.push({
+          optionId,
+          ...option,
+        });
+      }
+
+      logBulkQuestionImport('option-scaffold-success', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        token: line.domainToken,
+        prompt: line.prompt,
+        questionKey,
+        questionId,
+        domainId,
+        optionCount: createdOptions.length,
+      });
+
+      createdQuestions.push({
+        questionId,
+        assessmentVersionId: params.assessmentVersionId,
+        domainId,
+        key: questionKey,
+        prompt: line.prompt,
+        orderIndex,
+        options: Object.freeze(createdOptions),
+      });
+    } catch (error) {
       throw error;
     }
   }
@@ -1783,6 +2054,11 @@ export async function createBulkQuestionsByDomainActionWithDependencies(
   dependencies: BulkQuestionActionDependencies,
 ): Promise<BulkQuestionByDomainActionState> {
   const values = getBulkQuestionByDomainValuesFromFormData(formData);
+  logBulkQuestionImport('bulk-import-handler-entered', {
+    assessmentKey: context.assessmentKey,
+    assessmentVersionId: context.assessmentVersionId,
+    questionLinesLength: values.questionLines.length,
+  });
   const validation = validateAdminBulkQuestionByDomainAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
@@ -1841,13 +2117,11 @@ export async function createBulkQuestionsByDomainActionWithDependencies(
       };
     }
 
-    await client.query('BEGIN');
     const createdQuestions = await createBulkQuestionsByDomainRecord({
       db: client,
       assessmentVersionId: context.assessmentVersionId,
       questionLines: values.questionLines,
     });
-    await client.query('COMMIT');
 
     dependencies.revalidatePath(authoringPath(context.assessmentKey));
 
@@ -1857,13 +2131,12 @@ export async function createBulkQuestionsByDomainActionWithDependencies(
       createdQuestions,
     };
   } catch (error) {
-    await client.query('ROLLBACK').catch(() => undefined);
     logBulkQuestionImport('bulk-save-error', {
       assessmentKey: context.assessmentKey,
       assessmentVersionId: context.assessmentVersionId,
       values,
       errorMessage: getErrorMessage(error),
-      postgres: toPostgresErrorLike(error),
+      ...getPostgresErrorDiagnostics(error),
     });
 
     return {
