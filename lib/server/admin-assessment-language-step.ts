@@ -19,6 +19,11 @@ export type AdminAssessmentLanguageDatasetCounts = {
   signals: AdminAssessmentLanguageDatasetSummary;
   pairs: AdminAssessmentLanguageDatasetSummary;
   domains: AdminAssessmentLanguageDatasetSummary;
+  applicationThesis: AdminAssessmentLanguageDatasetSummary;
+  applicationContribution: AdminAssessmentLanguageDatasetSummary;
+  applicationRisk: AdminAssessmentLanguageDatasetSummary;
+  applicationDevelopment: AdminAssessmentLanguageDatasetSummary;
+  applicationActionPrompts: AdminAssessmentLanguageDatasetSummary;
   pairTraitWeights: AdminAssessmentLanguageDatasetSummary;
   heroPatternRules: AdminAssessmentLanguageDatasetSummary;
   heroPatternLanguage: AdminAssessmentLanguageDatasetSummary;
@@ -48,6 +53,7 @@ export type AdminAssessmentLanguageStepViewModel = {
 
 const RECOVERABLE_LANGUAGE_STEP_SCHEMA_TABLES = [
   'assessment_version_language_',
+  'assessment_version_application_',
   'assessment_version_pair_trait_weights',
   'assessment_version_hero_pattern_rules',
   'assessment_version_hero_pattern_language',
@@ -92,6 +98,11 @@ function createEmptyCounts(): AdminAssessmentLanguageDatasetCounts {
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
+    applicationThesis: { entryCount: 0 },
+    applicationContribution: { entryCount: 0 },
+    applicationRisk: { entryCount: 0 },
+    applicationDevelopment: { entryCount: 0 },
+    applicationActionPrompts: { entryCount: 0 },
     pairTraitWeights: { entryCount: 0 },
     heroPatternRules: { entryCount: 0 },
     heroPatternLanguage: { entryCount: 0 },
@@ -154,6 +165,11 @@ export async function getAdminAssessmentLanguageStepViewModel(
         signals: { entryCount: countEntriesByKey(bundle.signals) },
         pairs: { entryCount: countEntriesByKey(bundle.pairs) },
         domains: { entryCount: countEntriesByKey(bundle.domains) },
+        applicationThesis: { entryCount: bundle.application?.thesis.length ?? 0 },
+        applicationContribution: { entryCount: bundle.application?.contribution.length ?? 0 },
+        applicationRisk: { entryCount: bundle.application?.risk.length ?? 0 },
+        applicationDevelopment: { entryCount: bundle.application?.development.length ?? 0 },
+        applicationActionPrompts: { entryCount: bundle.application?.prompts.length ?? 0 },
         pairTraitWeights: { entryCount: pairTraitWeights.length },
         heroPatternRules: { entryCount: heroPatternRules.length },
         heroPatternLanguage: { entryCount: heroPatternLanguage.length },

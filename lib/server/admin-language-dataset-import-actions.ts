@@ -7,6 +7,7 @@ import {
   type AdminLanguageDatasetImportState,
   type LanguageImportDataset,
 } from '@/lib/admin/admin-language-dataset-import';
+import { importApplicationLanguageForAssessmentVersion } from '@/lib/server/admin-application-language-import';
 import { importHeroHeaderLanguageForAssessmentVersion } from '@/lib/server/admin-hero-header-language-import';
 import { importReportLanguageForAssessmentVersion } from '@/lib/server/admin-report-language-import';
 
@@ -56,7 +57,17 @@ function buildEmptyInputState(dataset: LanguageImportDataset, rawInput: string):
         ? 'domain chapter'
       : dataset === 'signal'
           ? 'signal'
-          : 'pair chapter';
+        : dataset === 'pair'
+          ? 'pair chapter'
+          : dataset === 'applicationThesis'
+            ? 'Application Thesis'
+            : dataset === 'applicationContribution'
+              ? 'Contribution Language'
+              : dataset === 'applicationRisk'
+                ? 'Risk Language'
+                : dataset === 'applicationDevelopment'
+                  ? 'Development Language'
+                  : 'Action Prompt Language';
 
   return {
     ...initialAdminLanguageDatasetImportState,
@@ -77,6 +88,36 @@ export async function importLanguageDatasetAction(
   if (values.dataset === 'heroHeader') {
     const result = await importHeroHeaderLanguageForAssessmentVersion({
       assessmentVersionId: context.assessmentVersionId,
+      rawInput: values.rawInput,
+    });
+
+    return {
+      dataset: values.dataset,
+      rawInput: values.rawInput,
+      success: result.success,
+      parseErrors: normalizeIssues(result.parseErrors, (issue, index) => `parse-${index}-${issue.message}`),
+      validationErrors: normalizeIssues(
+        result.validationErrors,
+        (issue, index) => `validation-${index}-${issue.message}`,
+      ),
+      planErrors: normalizeIssues(result.planErrors, (issue, index) => `plan-${index}-${issue.message}`),
+      previewGroups: normalizePreviewGroups(values.dataset, result.previewGroups),
+      summary: result.summary,
+      executionError: result.executionError,
+      formError: null,
+    };
+  }
+
+  if (
+    values.dataset === 'applicationThesis' ||
+    values.dataset === 'applicationContribution' ||
+    values.dataset === 'applicationRisk' ||
+    values.dataset === 'applicationDevelopment' ||
+    values.dataset === 'applicationActionPrompts'
+  ) {
+    const result = await importApplicationLanguageForAssessmentVersion({
+      assessmentVersionId: context.assessmentVersionId,
+      dataset: values.dataset,
       rawInput: values.rawInput,
     });
 

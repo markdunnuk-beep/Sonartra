@@ -17,6 +17,7 @@ export type AssessmentVersionApplicationContributionRow = {
   assessmentVersionId: AssessmentVersionId;
   sourceType: Extract<ApplicationLanguageSourceType, 'pair' | 'signal'>;
   sourceKey: string;
+  priority: number;
   label: string;
   narrative: string;
   bestWhen: string;
@@ -30,6 +31,7 @@ export type AssessmentVersionApplicationRiskRow = {
   assessmentVersionId: AssessmentVersionId;
   sourceType: Extract<ApplicationLanguageSourceType, 'pair' | 'signal'>;
   sourceKey: string;
+  priority: number;
   label: string;
   narrative: string;
   impact: string;
@@ -43,6 +45,7 @@ export type AssessmentVersionApplicationDevelopmentRow = {
   assessmentVersionId: AssessmentVersionId;
   sourceType: Extract<ApplicationLanguageSourceType, 'pair' | 'signal'>;
   sourceKey: string;
+  priority: number;
   label: string;
   narrative: string;
   practice: string;
@@ -70,4 +73,49 @@ export type AssessmentVersionApplicationLanguageBundle = {
   risk: readonly AssessmentVersionApplicationRiskRow[];
   development: readonly AssessmentVersionApplicationDevelopmentRow[];
   prompts: readonly AssessmentVersionApplicationActionPromptsRow[];
+};
+
+export type AssessmentVersionApplicationThesisInput = {
+  heroPatternKey: string;
+  headline: string;
+  summary: string;
+};
+
+export type AssessmentVersionApplicationContributionInput = {
+  sourceType: 'pair' | 'signal';
+  sourceKey: string;
+  priority: number;
+  label: string;
+  narrative: string;
+  bestWhen: string;
+  watchFor: string | null;
+};
+
+export type AssessmentVersionApplicationRiskInput = {
+  sourceType: 'pair' | 'signal';
+  sourceKey: string;
+  priority: number;
+  label: string;
+  narrative: string;
+  impact: string;
+  earlyWarning: string | null;
+};
+
+export type AssessmentVersionApplicationDevelopmentInput = {
+  sourceType: 'pair' | 'signal';
+  sourceKey: string;
+  priority: number;
+  label: string;
+  narrative: string;
+  practice: string;
+  successMarker: string | null;
+};
+
+export type AssessmentVersionApplicationActionPromptsInput = {
+  sourceType: 'hero_pattern';
+  sourceKey: string;
+  keepDoing: string;
+  watchFor: string;
+  practiceNext: string;
+  askOthers: string;
 };

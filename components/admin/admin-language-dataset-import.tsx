@@ -93,6 +93,81 @@ const DATASET_OPTIONS: readonly DatasetOption[] = [
       'pair | driver_analyst | environmentFocus | Best in environments that reward momentum with clear structure.',
     ].join('\n'),
   },
+  {
+    key: 'applicationThesis',
+    label: 'Application Thesis',
+    title: 'Application Thesis',
+    description: 'Opening bridge into the final application chapter.',
+    detail: 'Header: hero_pattern_key|headline|summary',
+    currentRowsLabel: 'Current Thesis rows',
+    rowFormatLabel: 'hero_pattern_key|headline|summary',
+    textareaLabel: 'Paste application thesis rows',
+    placeholder: 'steady_steward|You create value through calm structured follow-through|At your best you help work become clearer, steadier, and easier to carry.',
+    formatExample: [
+      'hero_pattern_key|headline|summary',
+      'steady_steward|You create value through calm structured follow-through|At your best you help work become clearer, steadier, and easier to carry.',
+    ].join('\n'),
+  },
+  {
+    key: 'applicationContribution',
+    label: 'Contribution Language',
+    title: 'Contribution Language',
+    description: 'How the person creates value at their best.',
+    detail: 'Header: source_type|source_key|priority|label|narrative|best_when|watch_for',
+    currentRowsLabel: 'Current Contribution rows',
+    rowFormatLabel: 'source_type|source_key|priority|label|narrative|best_when|watch_for',
+    textareaLabel: 'Paste contribution language rows',
+    placeholder: 'pair|driver_analyst|1|Structured pace|Creates traction through structured pace.|When direction is clear and sequencing matters.|Can over-tighten the plan.',
+    formatExample: [
+      'source_type|source_key|priority|label|narrative|best_when|watch_for',
+      'pair|driver_analyst|1|Structured pace|Creates traction through structured pace.|When direction is clear and sequencing matters.|Can over-tighten the plan.',
+    ].join('\n'),
+  },
+  {
+    key: 'applicationRisk',
+    label: 'Risk Language',
+    title: 'Risk Language',
+    description: 'Where strengths can become limiting patterns.',
+    detail: 'Header: source_type|source_key|priority|label|narrative|impact|early_warning',
+    currentRowsLabel: 'Current Risk rows',
+    rowFormatLabel: 'source_type|source_key|priority|label|narrative|impact|early_warning',
+    textareaLabel: 'Paste risk language rows',
+    placeholder: 'pair|driver_analyst|1|Over-control|Can narrow too early around the plan.|Other options get filtered out too soon.|Discussion becomes one-track.',
+    formatExample: [
+      'source_type|source_key|priority|label|narrative|impact|early_warning',
+      'pair|driver_analyst|1|Over-control|Can narrow too early around the plan.|Other options get filtered out too soon.|Discussion becomes one-track.',
+    ].join('\n'),
+  },
+  {
+    key: 'applicationDevelopment',
+    label: 'Development Language',
+    title: 'Development Language',
+    description: 'Where to build more range.',
+    detail: 'Header: source_type|source_key|priority|label|narrative|practice|success_marker',
+    currentRowsLabel: 'Current Development rows',
+    rowFormatLabel: 'source_type|source_key|priority|label|narrative|practice|success_marker',
+    textareaLabel: 'Paste development language rows',
+    placeholder: 'signal|decision_evidence|1|Sharpen evidence|Support instinct with clearer proof points.|Bring two pieces of evidence to the decision.|Others can see the reasoning more clearly.',
+    formatExample: [
+      'source_type|source_key|priority|label|narrative|practice|success_marker',
+      'signal|decision_evidence|1|Sharpen evidence|Support instinct with clearer proof points.|Bring two pieces of evidence to the decision.|Others can see the reasoning more clearly.',
+    ].join('\n'),
+  },
+  {
+    key: 'applicationActionPrompts',
+    label: 'Action Prompt Language',
+    title: 'Action Prompt Language',
+    description: '30-day action guidance and feedback prompts.',
+    detail: 'Header: source_type|source_key|keep_doing|watch_for|practice_next|ask_others',
+    currentRowsLabel: 'Current Action Prompt rows',
+    rowFormatLabel: 'source_type|source_key|keep_doing|watch_for|practice_next|ask_others',
+    textareaLabel: 'Paste action prompt rows',
+    placeholder: 'hero_pattern|steady_steward|Keep making the next step concrete.|Watch for locking too soon.|Widen the option set before closing.|Ask where your pace is helping or narrowing the work.',
+    formatExample: [
+      'source_type|source_key|keep_doing|watch_for|practice_next|ask_others',
+      'hero_pattern|steady_steward|Keep making the next step concrete.|Watch for locking too soon.|Widen the option set before closing.|Ask where your pace is helping or narrowing the work.',
+    ].join('\n'),
+  },
 ] as const;
 
 function ActionButton({
@@ -136,6 +211,11 @@ export function AdminLanguageDatasetImport({
     domains: { entryCount: number };
     signals: { entryCount: number };
     pairs: { entryCount: number };
+    applicationThesis: { entryCount: number };
+    applicationContribution: { entryCount: number };
+    applicationRisk: { entryCount: number };
+    applicationDevelopment: { entryCount: number };
+    applicationActionPrompts: { entryCount: number };
   };
   isEditableAssessmentVersion: boolean;
   sectionEyebrow?: string;
@@ -165,7 +245,17 @@ export function AdminLanguageDatasetImport({
         ? counts.domains.entryCount
         : dataset === 'signal'
           ? counts.signals.entryCount
-          : counts.pairs.entryCount;
+          : dataset === 'pair'
+            ? counts.pairs.entryCount
+            : dataset === 'applicationThesis'
+              ? counts.applicationThesis.entryCount
+              : dataset === 'applicationContribution'
+                ? counts.applicationContribution.entryCount
+                : dataset === 'applicationRisk'
+                  ? counts.applicationRisk.entryCount
+                  : dataset === 'applicationDevelopment'
+                    ? counts.applicationDevelopment.entryCount
+                    : counts.applicationActionPrompts.entryCount;
   const inlineError =
     resultState.dataset === dataset
       ? resultState.formError ??

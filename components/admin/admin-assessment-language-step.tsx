@@ -15,6 +15,12 @@ import {
 import type { AdminAssessmentLanguageStepViewModel } from '@/lib/server/admin-assessment-language-step';
 
 type DomainChapterTab = 'domain' | 'signal' | 'pair';
+type ApplicationPlanTab =
+  | 'applicationThesis'
+  | 'applicationContribution'
+  | 'applicationRisk'
+  | 'applicationDevelopment'
+  | 'applicationActionPrompts';
 
 const DOMAIN_CHAPTER_TABS: readonly {
   key: DomainChapterTab;
@@ -38,6 +44,44 @@ const DOMAIN_CHAPTER_TABS: readonly {
   },
 ] as const;
 
+const APPLICATION_PLAN_TABS: readonly {
+  key: ApplicationPlanTab;
+  label: string;
+  title: string;
+  description: string;
+}[] = [
+  {
+    key: 'applicationThesis',
+    label: 'Thesis',
+    title: 'Application Thesis',
+    description: 'Opening bridge into the final application chapter.',
+  },
+  {
+    key: 'applicationContribution',
+    label: 'Contribution',
+    title: 'Contribution Language',
+    description: 'How the person creates value at their best.',
+  },
+  {
+    key: 'applicationRisk',
+    label: 'Risk',
+    title: 'Risk Language',
+    description: 'Where strengths can become limiting patterns.',
+  },
+  {
+    key: 'applicationDevelopment',
+    label: 'Development',
+    title: 'Development Language',
+    description: 'Where to build more range.',
+  },
+  {
+    key: 'applicationActionPrompts',
+    label: 'Action Prompts',
+    title: 'Action Prompt Language',
+    description: '30-day action guidance and feedback prompts.',
+  },
+] as const;
+
 function getVersionSummary(viewModel: AdminAssessmentLanguageStepViewModel): string {
   if (!viewModel.activeVersion) {
     return 'No draft or published version is currently available.';
@@ -58,6 +102,7 @@ export function AdminAssessmentLanguageStep({
   viewModel: AdminAssessmentLanguageStepViewModel;
 }>) {
   const [activeDomainTab, setActiveDomainTab] = useState<DomainChapterTab>('domain');
+  const [activeApplicationTab, setActiveApplicationTab] = useState<ApplicationPlanTab>('applicationThesis');
 
   if (!viewModel.activeVersion) {
     return (
@@ -211,6 +256,57 @@ export function AdminAssessmentLanguageStep({
         <MetaItem label="Pair Traits" value={formatEntryCount(viewModel.counts.pairTraitWeights.entryCount)} />
         <MetaItem label="Hero Rules" value={formatEntryCount(viewModel.counts.heroPatternRules.entryCount)} />
         <MetaItem label="Hero Language" value={formatEntryCount(viewModel.counts.heroPatternLanguage.entryCount)} />
+      </div>
+
+      <div className="space-y-6">
+        <SectionHeader
+          eyebrow="Stage 9"
+          title="Application Plan"
+          description="Import the version-scoped datasets that power the canonical application chapter without introducing UI-side logic."
+        />
+
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            {APPLICATION_PLAN_TABS.map((tab) => {
+              const isSelected = tab.key === activeApplicationTab;
+              return (
+                <button
+                  aria-pressed={isSelected}
+                  className={cn(
+                    'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
+                    isSelected
+                      ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
+                      : 'border-white/8 bg-black/10 hover:border-white/14',
+                  )}
+                  key={tab.key}
+                  onClick={() => setActiveApplicationTab(tab.key)}
+                  type="button"
+                >
+                  <p className="text-sm font-semibold text-white">{tab.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/54">{tab.title}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          <AdminLanguageDatasetImport
+            dataset={activeApplicationTab}
+            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+            counts={viewModel.counts}
+            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+            sectionEyebrow="Stage 9"
+            sectionTitle={APPLICATION_PLAN_TABS.find((tab) => tab.key === activeApplicationTab)?.title}
+            sectionDescription={APPLICATION_PLAN_TABS.find((tab) => tab.key === activeApplicationTab)?.description}
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <MetaItem label="Application Thesis" value={formatEntryCount(viewModel.counts.applicationThesis.entryCount)} />
+        <MetaItem label="Contribution" value={formatEntryCount(viewModel.counts.applicationContribution.entryCount)} />
+        <MetaItem label="Risk" value={formatEntryCount(viewModel.counts.applicationRisk.entryCount)} />
+        <MetaItem label="Development" value={formatEntryCount(viewModel.counts.applicationDevelopment.entryCount)} />
+        <MetaItem label="Action Prompts" value={formatEntryCount(viewModel.counts.applicationActionPrompts.entryCount)} />
       </div>
     </section>
   );

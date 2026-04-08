@@ -1,4 +1,13 @@
-export type LanguageImportDataset = 'heroHeader' | 'domain' | 'signal' | 'pair';
+export type LanguageImportDataset =
+  | 'heroHeader'
+  | 'domain'
+  | 'signal'
+  | 'pair'
+  | 'applicationThesis'
+  | 'applicationContribution'
+  | 'applicationRisk'
+  | 'applicationDevelopment'
+  | 'applicationActionPrompts';
 
 export type AdminLanguageDatasetImportIssue = {
   key: string;
