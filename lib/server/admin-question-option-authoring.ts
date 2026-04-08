@@ -175,6 +175,7 @@ type DomainResolutionRow = {
   id: string;
   domain_key: string;
   label: string;
+  semantic_key: string | null;
 };
 
 type ParsedBulkQuestionByDomainLine = {
@@ -284,17 +285,63 @@ async function getDomainsForAssessmentVersion(params: {
   db: Queryable;
   assessmentVersionId: string;
 }): Promise<readonly DomainResolutionRow[]> {
-  const result = await params.db.query<DomainResolutionRow>(
+  try {
+    const result = await params.db.query<DomainResolutionRow>(
+      `
+      SELECT id, domain_key, label, semantic_key
+      FROM domains
+      WHERE assessment_version_id = $1
+      ORDER BY order_index ASC, id ASC
+      `,
+      [params.assessmentVersionId],
+    );
+
+    return result.rows.map((row) => ({
+      ...row,
+      semantic_key: typeof row.semantic_key === 'string' ? row.semantic_key : null,
+    }));
+  } catch (error) {
+    const postgresError = toPostgresErrorLike(error);
+    if (postgresError?.code !== '42703' || !postgresError.message?.includes('semantic_key')) {
+      throw error;
+    }
+
+    const result = await params.db.query<Omit<DomainResolutionRow, 'semantic_key'>>(
+      `
+      SELECT id, domain_key, label
+      FROM domains
+      WHERE assessment_version_id = $1
+      ORDER BY order_index ASC, id ASC
+      `,
+      [params.assessmentVersionId],
+    );
+
+    return result.rows.map((row) => ({
+      ...row,
+      semantic_key: null,
+    }));
+  }
+}
+
+async function getLatestDraftAssessmentVersionId(params: {
+  db: Queryable;
+  assessmentKey: string;
+}): Promise<string | null> {
+  const result = await params.db.query<{ assessment_version_id: string }>(
     `
-    SELECT id, domain_key, label
-    FROM domains
-    WHERE assessment_version_id = $1
-    ORDER BY order_index ASC, id ASC
+    SELECT av.id AS assessment_version_id
+    FROM assessments a
+    INNER JOIN assessment_versions av
+      ON av.assessment_id = a.id
+    WHERE a.assessment_key = $1
+      AND av.lifecycle_status = 'DRAFT'
+    ORDER BY av.updated_at DESC, av.created_at DESC, av.version DESC
+    LIMIT 1
     `,
-    [params.assessmentVersionId],
+    [params.assessmentKey],
   );
 
-  return result.rows;
+  return result.rows[0]?.assessment_version_id ?? null;
 }
 
 function parseBulkQuestionByDomainLines(questionLines: string): readonly ParsedBulkQuestionByDomainLine[] {
@@ -359,9 +406,17 @@ async function resolveBulkQuestionByDomainLines(params: {
 
   const domainByKey = new Map(domains.map((domain) => [domain.domain_key, domain]));
   const domainByLabel = new Map(domains.map((domain) => [domain.label, domain]));
+  const domainBySemanticKey = new Map(
+    domains
+      .filter((domain) => typeof domain.semantic_key === 'string' && domain.semantic_key.length > 0)
+      .map((domain) => [domain.semantic_key, domain]),
+  );
 
   const resolvedLines = parsedLines.map((line) => {
-    const resolvedDomain = domainByKey.get(line.domainToken) ?? domainByLabel.get(line.domainToken);
+    const resolvedDomain =
+      domainByKey.get(line.domainToken) ??
+      domainByLabel.get(line.domainToken) ??
+      domainBySemanticKey.get(line.domainToken);
     if (!resolvedDomain) {
       throw new Error(`BULK_IMPORT_LINE_${line.lineNumber}_UNKNOWN_DOMAIN`);
     }
@@ -1634,6 +1689,18 @@ export async function createBulkQuestionsByDomainActionWithDependencies(
   const client = await dependencies.connect();
 
   try {
+    const latestDraftVersionId = await getLatestDraftAssessmentVersionId({
+      db: client,
+      assessmentKey: context.assessmentKey,
+    });
+    if (!latestDraftVersionId || latestDraftVersionId !== context.assessmentVersionId) {
+      return {
+        formError: 'The latest draft version is no longer available for question imports.',
+        fieldErrors: {},
+        values,
+      };
+    }
+
     await client.query('BEGIN');
     const createdQuestions = await createBulkQuestionsByDomainRecord({
       db: client,

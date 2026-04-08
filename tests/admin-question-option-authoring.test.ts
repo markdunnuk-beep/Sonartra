@@ -25,6 +25,7 @@ type StoredDomain = {
   id: string;
   assessmentVersionId: string;
   domainKey: string;
+  semanticKey?: string | null;
   label: string;
   domainType: 'QUESTION_SECTION' | 'SIGNAL_GROUP';
   orderIndex: number;
@@ -82,6 +83,7 @@ function createFakeDb(
   config?: {
     failOptionKey?: string;
     failWeightInsertForOptionId?: string;
+    latestDraftVersionIdByAssessmentKey?: Record<string, string | null>;
   },
 ) {
   const state: FakeState = {
@@ -92,6 +94,13 @@ function createFakeDb(
   };
 
   let transactionSnapshot: FakeState | null = null;
+  const latestDraftVersionIdByAssessmentKey = config?.latestDraftVersionIdByAssessmentKey ?? {
+    signals:
+      seed?.domains?.[0]?.assessmentVersionId ??
+      seed?.questions?.[0]?.assessmentVersionId ??
+      seed?.options?.[0]?.assessmentVersionId ??
+      null,
+  };
 
   function nextId(prefix: string, currentLength: number) {
     return `${prefix}-${currentLength + 1}`;
@@ -141,6 +150,30 @@ function createFakeDb(
       );
       state.optionSignalWeights = state.optionSignalWeights.filter((weight) => weight.optionId !== optionId);
       return { rows: [] as T[] };
+    }
+
+    if (text.includes('SELECT av.id AS assessment_version_id') && text.includes('FROM assessments a')) {
+      const [assessmentKey] = params as [string];
+      const latestDraftVersionId = latestDraftVersionIdByAssessmentKey[assessmentKey] ?? null;
+      return {
+        rows: latestDraftVersionId
+          ? ([{ assessment_version_id: latestDraftVersionId }] as unknown as T[])
+          : ([] as T[]),
+      };
+    }
+
+    if (text.includes('SELECT id, domain_key, label, semantic_key') && text.includes('FROM domains')) {
+      const [assessmentVersionId] = params as [string];
+      const rows = state.domains
+        .filter((domain) => domain.assessmentVersionId === assessmentVersionId)
+        .sort((left, right) => left.orderIndex - right.orderIndex || left.id.localeCompare(right.id))
+        .map((domain) => ({
+          id: domain.id,
+          domain_key: domain.domainKey,
+          label: domain.label,
+          semantic_key: domain.semanticKey ?? null,
+        }));
+      return { rows: rows as unknown as T[] };
     }
 
     if (text.includes('SELECT id, domain_key, label') && text.includes('FROM domains')) {
@@ -1277,6 +1310,127 @@ test('multi-domain bulk import resolves exact domain names and ignores blank lin
       { prompt: 'Second question', domainId: 'domain-2' },
     ],
   );
+});
+
+test('multi-domain bulk import accepts a one-line import by exact domain name', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        semanticKey: 'operating_style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('Operating Style|First question'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.createdQuestions?.length, 1);
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({ prompt: question.prompt, domainId: question.domainId })),
+    [{ prompt: 'First question', domainId: 'domain-1' }],
+  );
+});
+
+test('multi-domain bulk import accepts a one-line import by semantic key', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainKey: 'operating-style',
+        semanticKey: 'operating_style',
+        label: 'Operating Style',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+      {
+        id: 'domain-2',
+        assessmentVersionId: 'version-2',
+        domainKey: 'operating-style',
+        semanticKey: 'operating_style',
+        label: 'Operating Style (legacy)',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+  });
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating_style|First question'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.createdQuestions?.length, 1);
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({ prompt: question.prompt, domainId: question.domainId })),
+    [{ prompt: 'First question', domainId: 'domain-1' }],
+  );
+});
+
+test('multi-domain bulk import only writes to the active latest draft version', async () => {
+  const fake = createFakeDb(
+    {
+      domains: [
+        {
+          id: 'domain-1',
+          assessmentVersionId: 'version-1',
+          domainKey: 'operating-style',
+          semanticKey: 'operating_style',
+          label: 'Operating Style',
+          domainType: 'SIGNAL_GROUP',
+          orderIndex: 0,
+        },
+      ],
+    },
+    {
+      latestDraftVersionIdByAssessmentKey: {
+        signals: 'version-2',
+      },
+    },
+  );
+
+  const result = await createBulkQuestionsByDomainActionWithDependencies(
+    {
+      assessmentKey: 'signals',
+      assessmentVersionId: 'version-1',
+    },
+    initialAdminBulkQuestionByDomainAuthoringFormState,
+    buildBulkByDomainFormData('operating_style|First question'),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(result.formError, 'The latest draft version is no longer available for question imports.');
+  assert.equal(fake.state.questions.length, 0);
+  assert.equal(fake.state.options.length, 0);
 });
 
 test('multi-domain bulk import continues canonical keys and order after existing questions', async () => {

@@ -511,7 +511,7 @@ function BulkQuestionByDomainFormFields({
           </h3>
           <p className="max-w-2xl text-sm leading-7 text-white/62">
             Paste one question per line using: domain|question text. Domain can be either the
-            domain key or the exact domain name.
+            domain key, semantic key, or the exact domain name.
           </p>
         </div>
         <form action={formAction} className="space-y-5">
