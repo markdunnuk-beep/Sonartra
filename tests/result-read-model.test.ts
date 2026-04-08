@@ -398,6 +398,8 @@ test('detail load returns canonical payload sections alongside compatibility pro
   assert.equal(detail.actions.strengths[0]?.text, 'Core Focus strength.');
   assert.equal(detail.actions.watchouts[0]?.signalKey, 'role_executor');
   assert.equal(detail.actions.developmentFocus[0]?.text, 'Role Executor development.');
+  assert.equal(detail.application.signatureContribution.title, 'Where you create the most value');
+  assert.equal(detail.application.actionPlan30.keepDoing, '');
   assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (detail.domains[0] ?? {}), false);
   assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (detail.domains[1] ?? {}), false);
   assert.equal(detail.domainSummaries[0]?.signalScores.length, 0);
@@ -515,6 +517,36 @@ test('detail load normalizes legacy signal chapter summaries to string or null o
             strengths: [],
             watchouts: [],
             developmentFocus: [],
+          },
+          application: {
+            thesis: {
+              headline: '',
+              summary: '',
+              sourceKeys: {
+                heroPatternKey: '',
+              },
+            },
+            signatureContribution: {
+              title: 'Where you create the most value',
+              summary: '',
+              items: [],
+            },
+            patternRisks: {
+              title: 'Where this pattern can work against you',
+              summary: '',
+              items: [],
+            },
+            rangeBuilder: {
+              title: 'Where to build more range',
+              summary: '',
+              items: [],
+            },
+            actionPlan30: {
+              keepDoing: '',
+              watchFor: '',
+              practiceNext: '',
+              askOthers: '',
+            },
           },
           diagnostics: {
             readinessStatus: 'ready',

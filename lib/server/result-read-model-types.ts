@@ -112,6 +112,7 @@ export type AssessmentResultDetailViewModel = {
   hero: CanonicalResultPayload['hero'];
   domains: CanonicalResultPayload['domains'];
   actions: CanonicalResultPayload['actions'];
+  application: CanonicalResultPayload['application'];
   topSignal: AssessmentResultTopSignalViewModel | null;
   rankedSignals: readonly AssessmentResultRankedSignalViewModel[];
   normalizedScores: readonly AssessmentResultSignalScoreViewModel[];
