@@ -138,6 +138,12 @@ function createSignal(
   };
 }
 
+function createStatementTimeoutError(): Error & { code: string } {
+  return Object.assign(new Error('canceling statement due to statement timeout'), {
+    code: '57014',
+  });
+}
+
 function createFakeDb(
   seed?: {
     assessments?: StoredAssessment[];
@@ -148,7 +154,8 @@ function createFakeDb(
     weights?: StoredWeight[];
   },
   config?: {
-    failInsertForOptionId?: string;
+    failInsertFor?: { optionId: string; signalId: string; error: Error };
+    failUpdateFor?: { optionId: string; signalId: string; error: Error };
   },
 ) {
   const state = {
@@ -160,46 +167,12 @@ function createFakeDb(
     weights: [...(seed?.weights ?? [])],
   };
 
-  const snapshotState = () => ({
-    assessments: state.assessments.map((item) => ({ ...item })),
-    versions: state.versions.map((item) => ({ ...item })),
-    questions: state.questions.map((item) => ({ ...item })),
-    options: state.options.map((item) => ({ ...item })),
-    signals: state.signals.map((item) => ({ ...item })),
-    weights: state.weights.map((item) => ({ ...item })),
-  });
-
-  let transactionSnapshot: ReturnType<typeof snapshotState> | null = null;
-
   function nextId(prefix: string, length: number) {
     return `${prefix}-${length + 1}`;
   }
 
   const client = {
     async query<T>(text: string, params?: readonly unknown[]) {
-      if (text === 'BEGIN') {
-        transactionSnapshot = snapshotState();
-        return { rows: [] as T[] };
-      }
-
-      if (text === 'COMMIT') {
-        transactionSnapshot = null;
-        return { rows: [] as T[] };
-      }
-
-      if (text === 'ROLLBACK') {
-        if (transactionSnapshot) {
-          state.assessments = transactionSnapshot.assessments;
-          state.versions = transactionSnapshot.versions;
-          state.questions = transactionSnapshot.questions;
-          state.options = transactionSnapshot.options;
-          state.signals = transactionSnapshot.signals;
-          state.weights = transactionSnapshot.weights;
-        }
-        transactionSnapshot = null;
-        return { rows: [] as T[] };
-      }
-
       if (
         text.includes('FROM assessment_versions av') &&
         text.includes('INNER JOIN assessments a ON a.id = av.assessment_id')
@@ -300,20 +273,50 @@ function createFakeDb(
         return { rows: rows as unknown as T[] };
       }
 
-      if (text.includes('DELETE FROM option_signal_weights') && text.includes('RETURNING id')) {
-        const [optionId] = params as [string];
-        const deleted = state.weights.filter((weight) => weight.optionId === optionId);
-        state.weights = state.weights.filter((weight) => weight.optionId !== optionId);
+      if (
+        text.includes('SELECT id') &&
+        text.includes('FROM option_signal_weights') &&
+        text.includes('WHERE option_id = $1') &&
+        text.includes('signal_id = $2')
+      ) {
+        const [optionId, signalId] = params as [string, string];
+        const match = state.weights.find(
+          (weight) => weight.optionId === optionId && weight.signalId === signalId,
+        );
         return {
-          rows: deleted.map((weight) => ({ id: weight.id })) as unknown as T[],
+          rows: match ? ([{ id: match.id }] as unknown as T[]) : ([] as T[]),
         };
+      }
+
+      if (text.includes('UPDATE option_signal_weights') && text.includes('RETURNING id')) {
+        const [weightId, weight, sourceWeightKey] = params as [string, string, string];
+        const match = state.weights.find((item) => item.id === weightId);
+        if (!match) {
+          return { rows: [] as T[] };
+        }
+
+        if (
+          config?.failUpdateFor &&
+          config.failUpdateFor.optionId === match.optionId &&
+          config.failUpdateFor.signalId === match.signalId
+        ) {
+          throw config.failUpdateFor.error;
+        }
+
+        match.weight = weight;
+        match.sourceWeightKey = sourceWeightKey;
+        return { rows: ([{ id: match.id }] as unknown) as T[] };
       }
 
       if (text.includes('INSERT INTO option_signal_weights') && text.includes('RETURNING id')) {
         const [optionId, signalId, weight, sourceWeightKey] = params as [string, string, string, string];
 
-        if (config?.failInsertForOptionId === optionId) {
-          throw new Error('WEIGHT_INSERT_FAILED');
+        if (
+          config?.failInsertFor &&
+          config.failInsertFor.optionId === optionId &&
+          config.failInsertFor.signalId === signalId
+        ) {
+          throw config.failInsertFor.error;
         }
 
         const id = nextId('weight', state.weights.length);
@@ -679,7 +682,7 @@ test('preview returns planner errors and disables import for non-draft versions'
   assert.equal(result.planErrors[0]?.code, 'ASSESSMENT_VERSION_NOT_EDITABLE');
 });
 
-test('replaces existing weights for one option group in one transaction', async () => {
+test('uses the existing-row update path and logs signal lookup before write', async () => {
   const fake = createFakeDb({
     assessments: [{ id: 'assessment-1', assessmentKey: 'signals' }],
     versions: [{ id: 'version-1', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
@@ -695,24 +698,27 @@ test('replaces existing weights for one option group in one transaction', async 
     ],
   });
 
-  const result = await importBulkWeightsForAssessmentVersionWithDependencies(
-    {
-      assessmentVersionId: 'version-1',
-      rawInput: ['1|A|driver|3', '1|A|analyst|2'].join('\n'),
-    },
-    {
-      connect: async () => fake.client,
-      revalidatePath() {},
-    },
+  const { result, events } = await captureWeightImportLogs(() =>
+    importBulkWeightsForAssessmentVersionWithDependencies(
+      {
+        assessmentVersionId: 'version-1',
+        rawInput: ['1|A|driver|3', '1|A|analyst|2'].join('\n'),
+      },
+      {
+        connect: async () => fake.client,
+        revalidatePath() {},
+      },
+    ),
   );
 
   assert.equal(result.success, true);
   assert.equal(result.summary.optionGroupCountImported, 1);
-  assert.equal(result.summary.weightsInserted, 2);
-  assert.equal(result.summary.weightsDeleted, 2);
+  assert.equal(result.summary.weightsInserted, 0);
+  assert.equal(result.summary.weightsDeleted, 0);
   assert.deepEqual(
     fake.state.weights
       .filter((weight) => weight.optionId === 'option-1')
+      .sort((left, right) => left.signalId.localeCompare(right.signalId))
       .map((weight) => ({
         signalId: weight.signalId,
         weight: weight.weight,
@@ -723,9 +729,31 @@ test('replaces existing weights for one option group in one transaction', async 
       { signalId: 'signal-driver', weight: '3.0000', sourceWeightKey: '1|A' },
     ],
   );
+
+  const signalLookupEvent = events.find(
+    (event) => event.event === 'signal-lookup-success' && event.signalKey === 'driver',
+  );
+  assert.equal(signalLookupEvent?.signalId, 'signal-driver');
+
+  const existingRowCheckEvent = events.find(
+    (event) =>
+      event.event === 'weight-existing-row-check-success' &&
+      event.signalKey === 'driver' &&
+      event.optionKey === 'q01_a',
+  );
+  assert.equal(existingRowCheckEvent?.foundExistingRow, true);
+  assert.equal(existingRowCheckEvent?.existingRowId, 'weight-1');
+
+  const writeSuccessEvent = events.find(
+    (event) =>
+      event.event === 'weight-write-success' &&
+      event.signalKey === 'driver' &&
+      event.optionKey === 'q01_a',
+  );
+  assert.equal(writeSuccessEvent?.operation, 'update');
 });
 
-test('replaces existing weights for multiple option groups in one transaction', async () => {
+test('uses the missing-row insert path when no existing weight row matches', async () => {
   const fake = createFakeDb({
     assessments: [{ id: 'assessment-1', assessmentKey: 'signals' }],
     versions: [{ id: 'version-1', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
@@ -743,55 +771,70 @@ test('replaces existing weights for multiple option groups in one transaction', 
     ],
     weights: [
       { id: 'weight-1', optionId: 'option-1', signalId: 'signal-driver', weight: '1.0000', sourceWeightKey: '1|A' },
-      { id: 'weight-2', optionId: 'option-2', signalId: 'signal-analyst', weight: '1.0000', sourceWeightKey: '2|B' },
     ],
   });
 
-  const result = await importBulkWeightsForAssessmentVersionWithDependencies(
-    {
-      assessmentVersionId: 'version-1',
-      rawInput: [
-        '1|A|driver|3',
-        '1|A|analyst|2',
-        '2|B|driver|1',
-        '2|B|analyst|0',
-      ].join('\n'),
-    },
-    {
-      connect: async () => fake.client,
-      revalidatePath() {},
-    },
+  const { result, events } = await captureWeightImportLogs(() =>
+    importBulkWeightsForAssessmentVersionWithDependencies(
+      {
+        assessmentVersionId: 'version-1',
+        rawInput: '2|B|driver|1',
+      },
+      {
+        connect: async () => fake.client,
+        revalidatePath() {},
+      },
+    ),
   );
 
   assert.equal(result.success, true);
-  assert.equal(result.summary.optionGroupCountImported, 2);
-  assert.equal(result.summary.weightsInserted, 4);
+  assert.equal(result.summary.optionGroupCountImported, 1);
+  assert.equal(result.summary.weightsInserted, 1);
+  assert.deepEqual(
+    fake.state.weights
+      .filter((weight) => weight.optionId === 'option-2')
+      .map((weight) => ({
+        signalId: weight.signalId,
+        weight: weight.weight,
+        sourceWeightKey: weight.sourceWeightKey,
+      })),
+    [{ signalId: 'signal-driver', weight: '1.0000', sourceWeightKey: '2|B' }],
+  );
+
+  const existingRowCheckEvent = events.find(
+    (event) =>
+      event.event === 'weight-existing-row-check-success' &&
+      event.signalKey === 'driver' &&
+      event.optionKey === 'q02_b',
+  );
+  assert.equal(existingRowCheckEvent?.foundExistingRow, false);
+  assert.equal(existingRowCheckEvent?.existingRowId, null);
+
+  const writeSuccessEvent = events.find(
+    (event) =>
+      event.event === 'weight-write-success' &&
+      event.signalKey === 'driver' &&
+      event.optionKey === 'q02_b',
+  );
+  assert.equal(writeSuccessEvent?.operation, 'insert');
 });
 
-test('surfaces the first failing insert step and logs row failure details', async () => {
+test('timeout on update path surfaces explicit step name and operation', async () => {
   const fake = createFakeDb(
     {
       assessments: [{ id: 'assessment-1', assessmentKey: 'signals' }],
       versions: [{ id: 'version-1', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
-      questions: [
-        { id: 'question-1', assessmentVersionId: 'version-1', questionKey: 'q01', orderIndex: 0 },
-        { id: 'question-2', assessmentVersionId: 'version-1', questionKey: 'q02', orderIndex: 1 },
-      ],
-      options: [
-        { id: 'option-1', questionId: 'question-1', optionKey: 'q01_a', optionLabel: 'A', orderIndex: 1 },
-        { id: 'option-2', questionId: 'question-2', optionKey: 'q02_b', optionLabel: 'B', orderIndex: 2 },
-      ],
-      signals: [
-        { id: 'signal-driver', assessmentVersionId: 'version-1', signalKey: 'driver' },
-        { id: 'signal-analyst', assessmentVersionId: 'version-1', signalKey: 'analyst' },
-      ],
-      weights: [
-        { id: 'weight-1', optionId: 'option-1', signalId: 'signal-driver', weight: '1.0000', sourceWeightKey: '1|A' },
-        { id: 'weight-2', optionId: 'option-2', signalId: 'signal-analyst', weight: '1.0000', sourceWeightKey: '2|B' },
-      ],
+      questions: [{ id: 'question-1', assessmentVersionId: 'version-1', questionKey: 'q01', orderIndex: 0 }],
+      options: [{ id: 'option-1', questionId: 'question-1', optionKey: 'q01_a', optionLabel: 'A', orderIndex: 1 }],
+      signals: [{ id: 'signal-driver', assessmentVersionId: 'version-1', signalKey: 'driver' }],
+      weights: [{ id: 'weight-1', optionId: 'option-1', signalId: 'signal-driver', weight: '1.0000', sourceWeightKey: '1|A' }],
     },
     {
-      failInsertForOptionId: 'option-2',
+      failUpdateFor: {
+        optionId: 'option-1',
+        signalId: 'signal-driver',
+        error: createStatementTimeoutError(),
+      },
     },
   );
 
@@ -799,11 +842,7 @@ test('surfaces the first failing insert step and logs row failure details', asyn
     importBulkWeightsForAssessmentVersionWithDependencies(
       {
         assessmentVersionId: 'version-1',
-        rawInput: [
-          '1|A|driver|3',
-          '1|A|analyst|2',
-          '2|B|driver|1',
-        ].join('\n'),
+        rawInput: '1|A|driver|3',
       },
       {
         connect: async () => fake.client,
@@ -813,39 +852,72 @@ test('surfaces the first failing insert step and logs row failure details', asyn
   );
 
   assert.equal(result.success, false);
-  assert.equal(result.executionError, 'WEIGHT_INSERT_FAILED');
-  assert.notEqual(
-    result.executionError,
-    'current transaction is aborted, commands ignored until end of transaction block',
-  );
+  assert.match(result.executionError ?? '', /canceling statement due to statement timeout/);
+  assert.match(result.executionError ?? '', /step=weight-write/);
+  assert.match(result.executionError ?? '', /operation=update/);
+  assert.match(result.executionError ?? '', /existingRowFound=true/);
+  assert.match(result.executionError ?? '', /optionId=option-1/);
+  assert.match(result.executionError ?? '', /signalId=signal-driver/);
   assert.deepEqual(
     fake.state.weights.map((weight) => ({
       optionId: weight.optionId,
       signalId: weight.signalId,
       weight: weight.weight,
     })),
-    [
-      { optionId: 'option-1', signalId: 'signal-analyst', weight: '2.0000' },
-      { optionId: 'option-1', signalId: 'signal-driver', weight: '3.0000' },
-    ],
+    [{ optionId: 'option-1', signalId: 'signal-driver', weight: '1.0000' }],
   );
 
-  const handlerEnteredEvent = events.find((event) => event.event === 'bulk-import-handler-entered');
-  assert.equal(handlerEnteredEvent?.assessmentVersionId, 'version-1');
+  const rowFailureEvent = events.find((event) => event.event === 'row-failure');
+  assert.equal(rowFailureEvent?.step, 'weight-write');
+  assert.equal(rowFailureEvent?.operation, 'update');
+  assert.equal(rowFailureEvent?.postgresCode, '57014');
+});
+
+test('timeout on insert path surfaces explicit step name and operation', async () => {
+  const fake = createFakeDb(
+    {
+      assessments: [{ id: 'assessment-1', assessmentKey: 'signals' }],
+      versions: [{ id: 'version-1', assessmentId: 'assessment-1', lifecycleStatus: 'DRAFT' }],
+      questions: [{ id: 'question-1', assessmentVersionId: 'version-1', questionKey: 'q01', orderIndex: 0 }],
+      options: [{ id: 'option-1', questionId: 'question-1', optionKey: 'q01_a', optionLabel: 'A', orderIndex: 1 }],
+      signals: [{ id: 'signal-driver', assessmentVersionId: 'version-1', signalKey: 'driver' }],
+      weights: [],
+    },
+    {
+      failInsertFor: {
+        optionId: 'option-1',
+        signalId: 'signal-driver',
+        error: createStatementTimeoutError(),
+      },
+    },
+  );
+
+  const { result, events } = await captureWeightImportLogs(() =>
+    importBulkWeightsForAssessmentVersionWithDependencies(
+      {
+        assessmentVersionId: 'version-1',
+        rawInput: '1|A|driver|3',
+      },
+      {
+        connect: async () => fake.client,
+        revalidatePath() {},
+      },
+    ),
+  );
+
+  assert.equal(result.success, false);
+  assert.match(result.executionError ?? '', /canceling statement due to statement timeout/);
+  assert.match(result.executionError ?? '', /step=weight-write/);
+  assert.match(result.executionError ?? '', /operation=insert/);
+  assert.match(result.executionError ?? '', /existingRowFound=false/);
+  assert.match(result.executionError ?? '', /optionId=option-1/);
+  assert.match(result.executionError ?? '', /signalId=signal-driver/);
+  assert.deepEqual(fake.state.weights, []);
 
   const rowFailureEvent = events.find((event) => event.event === 'row-failure');
-  assert.deepEqual(rowFailureEvent, {
-    event: 'row-failure',
-    assessmentVersionId: 'version-1',
-    step: 'weight-insert',
-    lineIndex: 2,
-    questionKey: 'q02',
-    optionKey: 'q02_b',
-    signalKey: 'driver',
-    weight: 1,
-    errorMessage: 'WEIGHT_INSERT_FAILED',
-    postgresMessage: 'WEIGHT_INSERT_FAILED',
-  });
+  assert.equal(rowFailureEvent?.step, 'weight-write');
+  assert.equal(rowFailureEvent?.operation, 'insert');
+  assert.equal(rowFailureEvent?.postgresCode, '57014');
 });
 
 test('does not persist anything when planner errors exist', async () => {
@@ -920,10 +992,10 @@ test('returns correct summary counts after successful import', async () => {
     questionCountMatched: 2,
     optionGroupCountMatched: 2,
     optionGroupCountImported: 2,
-    weightsInserted: 3,
-    weightsDeleted: 3,
+    weightsInserted: 0,
+    weightsDeleted: 0,
   });
   assert.equal(result.importedOptionGroupCount, 2);
-  assert.equal(result.insertedWeightCount, 3);
-  assert.equal(result.deletedWeightCount, 3);
+  assert.equal(result.insertedWeightCount, 0);
+  assert.equal(result.deletedWeightCount, 0);
 });

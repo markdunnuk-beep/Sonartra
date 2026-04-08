@@ -65,11 +65,15 @@ type ImportWeightRow = {
   option_id: string;
 };
 
-type DeletedWeightRow = {
+type ExistingWeightRow = {
   id: string;
 };
 
 type InsertedWeightRow = {
+  id: string;
+};
+
+type UpdatedWeightRow = {
   id: string;
 };
 
@@ -208,6 +212,50 @@ function getWeightImportPostgresDiagnostics(error: unknown): Record<string, stri
   }
 
   return diagnostics;
+}
+
+function getDurationMs(startTimeMs: number): number {
+  return Date.now() - startTimeMs;
+}
+
+function buildWeightRowKey(params: {
+  questionNumber: number;
+  optionLabel: string;
+  signalKey: string;
+}): string {
+  return `${params.questionNumber}|${params.optionLabel}|${params.signalKey}`;
+}
+
+function buildWeightWriteError(params: {
+  error: unknown;
+  step: string;
+  operation: 'insert' | 'update';
+  existingRowFound: boolean;
+  existingRowId: string | null;
+  optionId: string;
+  signalId: string;
+}): Error {
+  const baseMessage =
+    params.error instanceof Error && params.error.message.trim().length > 0
+      ? params.error.message
+      : getWeightImportErrorMessage(params.error);
+  const diagnostics = getWeightImportPostgresDiagnostics(params.error);
+  const metadata = [
+    `step=${params.step}`,
+    `operation=${params.operation}`,
+    `existingRowFound=${params.existingRowFound}`,
+    `existingRowId=${params.existingRowId ?? 'null'}`,
+    `optionId=${params.optionId}`,
+    `signalId=${params.signalId}`,
+    ...Object.entries(diagnostics).map(([key, value]) => `${key}=${value}`),
+  ].join(', ');
+
+  const enrichedError = new Error(`${baseMessage} [${metadata}]`);
+  if (typeof params.error === 'object' && params.error !== null) {
+    Object.assign(enrichedError, params.error);
+  }
+
+  return enrichedError;
 }
 
 function buildPlannedImportLookupMaps(params: {
@@ -599,6 +647,7 @@ async function executeBulkWeightImportPlan(params: {
 
   for (const optionGroup of params.plannedOptionGroups) {
     const questionKey = params.lookupMaps.questionKeyByQuestionId.get(optionGroup.questionId) ?? null;
+    const questionLookupStartedAt = Date.now();
 
     logWeightBulkImport('question-lookup-start', {
       assessmentVersionId: params.assessmentVersionId,
@@ -610,8 +659,10 @@ async function executeBulkWeightImportPlan(params: {
       questionKey,
       questionNumber: optionGroup.questionNumber,
       questionId: optionGroup.questionId,
+      durationMs: getDurationMs(questionLookupStartedAt),
     });
 
+    const optionLookupStartedAt = Date.now();
     logWeightBulkImport('option-lookup-start', {
       assessmentVersionId: params.assessmentVersionId,
       questionKey,
@@ -626,27 +677,22 @@ async function executeBulkWeightImportPlan(params: {
       optionId: optionGroup.optionId,
       optionKey: optionGroup.optionKey,
       optionLabel: optionGroup.optionLabel,
+      durationMs: getDurationMs(optionLookupStartedAt),
     });
-
-    const deletedWeights = await params.db.query<DeletedWeightRow>(
-      `
-      DELETE FROM option_signal_weights
-      WHERE option_id = $1
-      RETURNING id
-      `,
-      [optionGroup.optionId],
-    );
-
-    weightsDeleted += deletedWeights.rows.length;
 
     for (const replacementWeight of optionGroup.replacementWeights) {
       const signalKey =
         params.lookupMaps.signalKeyBySignalId.get(replacementWeight.signalId) ?? replacementWeight.signalKey;
       const lineNumber =
         params.lookupMaps.lineNumberByRowKey.get(
-          `${optionGroup.questionNumber}|${optionGroup.optionLabel}|${signalKey}`,
+          buildWeightRowKey({
+            questionNumber: optionGroup.questionNumber,
+            optionLabel: optionGroup.optionLabel,
+            signalKey,
+          }),
         ) ?? null;
       const lineIndex = lineNumber === null ? null : lineNumber - 1;
+      const signalLookupStartedAt = Date.now();
 
       logWeightBulkImport('row-start', {
         assessmentVersionId: params.assessmentVersionId,
@@ -656,7 +702,7 @@ async function executeBulkWeightImportPlan(params: {
         signalKey,
         weight: replacementWeight.weight,
       });
-      logWeightBulkImport('weight-insert-start', {
+      logWeightBulkImport('signal-lookup-start', {
         assessmentVersionId: params.assessmentVersionId,
         lineIndex,
         questionKey,
@@ -664,54 +710,194 @@ async function executeBulkWeightImportPlan(params: {
         signalKey,
         weight: replacementWeight.weight,
       });
+      logWeightBulkImport('signal-lookup-success', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        signalKey,
+        signalId: replacementWeight.signalId,
+        weight: replacementWeight.weight,
+        durationMs: getDurationMs(signalLookupStartedAt),
+      });
 
-      const insertedWeight = await params.db
-        .query<InsertedWeightRow>(
+      const existingRowCheckStartedAt = Date.now();
+      logWeightBulkImport('weight-existing-row-check-start', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        optionId: optionGroup.optionId,
+        signalKey,
+        signalId: replacementWeight.signalId,
+        weight: replacementWeight.weight,
+      });
+
+      const existingWeightRow = await params.db
+        .query<ExistingWeightRow>(
           `
-          INSERT INTO option_signal_weights (
-            option_id,
-            signal_id,
-            weight,
-            source_weight_key
-          )
-          VALUES ($1, $2, $3::numeric(12, 4), $4)
-          RETURNING id
+          SELECT id
+          FROM option_signal_weights
+          WHERE option_id = $1
+            AND signal_id = $2
+          LIMIT 1
           `,
-          [
-            optionGroup.optionId,
-            replacementWeight.signalId,
-            formatWeightForStorage(replacementWeight.weight),
-            `${optionGroup.questionNumber}|${optionGroup.optionLabel}`,
-          ],
+          [optionGroup.optionId, replacementWeight.signalId],
         )
         .catch((error: unknown) => {
+          const enrichedError = buildWeightWriteError({
+            error,
+            step: 'weight-existing-row-check',
+            operation: 'update',
+            existingRowFound: false,
+            existingRowId: null,
+            optionId: optionGroup.optionId,
+            signalId: replacementWeight.signalId,
+          });
           logWeightBulkImportFailure('row-failure', {
             assessmentVersionId: params.assessmentVersionId,
-            step: 'weight-insert',
+            step: 'weight-existing-row-check',
             lineIndex,
             questionKey,
             optionKey: optionGroup.optionKey,
+            optionId: optionGroup.optionId,
             signalKey,
+            signalId: replacementWeight.signalId,
             weight: replacementWeight.weight,
-            errorMessage: getWeightImportErrorMessage(error),
-            ...getWeightImportPostgresDiagnostics(error),
+            errorMessage: enrichedError.message,
+            durationMs: getDurationMs(existingRowCheckStartedAt),
+            ...getWeightImportPostgresDiagnostics(enrichedError),
           });
-          throw error;
+          throw enrichedError;
+        });
+      const existingWeightRowId = existingWeightRow.rows[0]?.id ?? null;
+      const existingRowFound = existingWeightRowId !== null;
+
+      logWeightBulkImport('weight-existing-row-check-success', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        optionId: optionGroup.optionId,
+        signalKey,
+        signalId: replacementWeight.signalId,
+        weight: replacementWeight.weight,
+        foundExistingRow: existingRowFound,
+        existingRowId: existingWeightRowId,
+        durationMs: getDurationMs(existingRowCheckStartedAt),
+      });
+
+      const writeOperation = existingRowFound ? 'update' : 'insert';
+      const weightWriteStartedAt = Date.now();
+      logWeightBulkImport('weight-insert-start', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        signalKey,
+        signalId: replacementWeight.signalId,
+        optionId: optionGroup.optionId,
+        weight: replacementWeight.weight,
+      });
+      logWeightBulkImport('weight-write-start', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        optionId: optionGroup.optionId,
+        signalKey,
+        signalId: replacementWeight.signalId,
+        weight: replacementWeight.weight,
+        operation: writeOperation,
+        foundExistingRow: existingRowFound,
+        existingRowId: existingWeightRowId,
+      });
+
+      const sourceWeightKey = `${optionGroup.questionNumber}|${optionGroup.optionLabel}`;
+      const writtenWeight = await (existingRowFound
+        ? params.db.query<UpdatedWeightRow>(
+            `
+            UPDATE option_signal_weights
+            SET
+              weight = $2::numeric(12, 4),
+              source_weight_key = $3,
+              updated_at = NOW()
+            WHERE id = $1
+            RETURNING id
+            `,
+            [
+              existingWeightRowId,
+              formatWeightForStorage(replacementWeight.weight),
+              sourceWeightKey,
+            ],
+          )
+        : params.db.query<InsertedWeightRow>(
+            `
+            INSERT INTO option_signal_weights (
+              option_id,
+              signal_id,
+              weight,
+              source_weight_key
+            )
+            VALUES ($1, $2, $3::numeric(12, 4), $4)
+            RETURNING id
+            `,
+            [
+              optionGroup.optionId,
+              replacementWeight.signalId,
+              formatWeightForStorage(replacementWeight.weight),
+              sourceWeightKey,
+            ],
+          ))
+        .catch((error: unknown) => {
+          const enrichedError = buildWeightWriteError({
+            error,
+            step: 'weight-write',
+            operation: writeOperation,
+            existingRowFound,
+            existingRowId: existingWeightRowId,
+            optionId: optionGroup.optionId,
+            signalId: replacementWeight.signalId,
+          });
+          logWeightBulkImportFailure('row-failure', {
+            assessmentVersionId: params.assessmentVersionId,
+            step: 'weight-write',
+            lineIndex,
+            questionKey,
+            optionKey: optionGroup.optionKey,
+            optionId: optionGroup.optionId,
+            signalKey,
+            signalId: replacementWeight.signalId,
+            weight: replacementWeight.weight,
+            operation: writeOperation,
+            foundExistingRow: existingRowFound,
+            existingRowId: existingWeightRowId,
+            errorMessage: enrichedError.message,
+            durationMs: getDurationMs(weightWriteStartedAt),
+            ...getWeightImportPostgresDiagnostics(enrichedError),
+          });
+          throw enrichedError;
         });
 
-      if (!insertedWeight.rows[0]?.id) {
+      if (!writtenWeight.rows[0]?.id) {
         const error = new Error(
-          `Weight import failed at weight insert: no row returned for ${questionKey ?? optionGroup.questionNumber}/${optionGroup.optionKey}/${signalKey}.`,
+          `Weight import failed at weight-write: no row returned [step=weight-write, operation=${writeOperation}, existingRowFound=${existingRowFound}, existingRowId=${existingWeightRowId ?? 'null'}, optionId=${optionGroup.optionId}, signalId=${replacementWeight.signalId}]`,
         );
         logWeightBulkImportFailure('row-failure', {
           assessmentVersionId: params.assessmentVersionId,
-          step: 'weight-insert',
+          step: 'weight-write',
           lineIndex,
           questionKey,
           optionKey: optionGroup.optionKey,
+          optionId: optionGroup.optionId,
           signalKey,
+          signalId: replacementWeight.signalId,
           weight: replacementWeight.weight,
+          operation: writeOperation,
+          foundExistingRow: existingRowFound,
+          existingRowId: existingWeightRowId,
           errorMessage: error.message,
+          durationMs: getDurationMs(weightWriteStartedAt),
         });
         throw error;
       }
@@ -722,9 +908,30 @@ async function executeBulkWeightImportPlan(params: {
         questionKey,
         optionKey: optionGroup.optionKey,
         signalKey,
+        signalId: replacementWeight.signalId,
+        optionId: optionGroup.optionId,
         weight: replacementWeight.weight,
+        durationMs: getDurationMs(weightWriteStartedAt),
       });
-      weightsInserted += 1;
+      logWeightBulkImport('weight-write-success', {
+        assessmentVersionId: params.assessmentVersionId,
+        lineIndex,
+        questionKey,
+        optionKey: optionGroup.optionKey,
+        optionId: optionGroup.optionId,
+        signalKey,
+        signalId: replacementWeight.signalId,
+        weight: replacementWeight.weight,
+        operation: writeOperation,
+        foundExistingRow: existingRowFound,
+        existingRowId: existingWeightRowId,
+        writtenRowId: writtenWeight.rows[0]?.id ?? null,
+        durationMs: getDurationMs(weightWriteStartedAt),
+      });
+
+      if (!existingRowFound) {
+        weightsInserted += 1;
+      }
     }
   }
 
