@@ -84,6 +84,7 @@ function createFakeDb(
     failOptionKey?: string;
     failWeightInsertForOptionId?: string;
     latestDraftVersionIdByAssessmentKey?: Record<string, string | null>;
+    simulateTransactionAbortAfterOptionInsertFailure?: boolean;
   },
 ) {
   const state: FakeState = {
@@ -94,6 +95,7 @@ function createFakeDb(
   };
 
   let transactionSnapshot: FakeState | null = null;
+  let transactionAborted = false;
   const latestDraftVersionIdByAssessmentKey = config?.latestDraftVersionIdByAssessmentKey ?? {
     signals:
       seed?.domains?.[0]?.assessmentVersionId ??
@@ -109,11 +111,13 @@ function createFakeDb(
   async function query<T>(text: string, params?: readonly unknown[]) {
     if (text === 'BEGIN') {
       transactionSnapshot = cloneState(state);
+      transactionAborted = false;
       return { rows: [] as T[] };
     }
 
     if (text === 'COMMIT') {
       transactionSnapshot = null;
+      transactionAborted = false;
       return { rows: [] as T[] };
     }
 
@@ -125,7 +129,12 @@ function createFakeDb(
         state.optionSignalWeights = transactionSnapshot.optionSignalWeights;
       }
       transactionSnapshot = null;
+      transactionAborted = false;
       return { rows: [] as T[] };
+    }
+
+    if (transactionAborted) {
+      throw new Error('current transaction is aborted, commands ignored until end of transaction block');
     }
 
     if (text.includes('DELETE FROM questions')) {
@@ -436,6 +445,9 @@ function createFakeDb(
         };
         state.options.push(record);
         if (config?.failOptionKey && optionKey === config.failOptionKey) {
+          if (config.simulateTransactionAbortAfterOptionInsertFailure) {
+            transactionAborted = true;
+          }
           throw new Error('OPTION_INSERT_FAILED');
         }
         rows.push({
@@ -464,6 +476,9 @@ function createFakeDb(
         orderIndex: params?.[5] as number,
       });
       if (config?.failOptionKey && optionKey === config.failOptionKey) {
+        if (config.simulateTransactionAbortAfterOptionInsertFailure) {
+          transactionAborted = true;
+        }
         throw new Error('OPTION_INSERT_FAILED');
       }
       return { rows: ([{ id }] as unknown) as T[] };
@@ -1553,6 +1568,7 @@ test('multi-domain bulk import surfaces the real save-path error when option sca
     },
     {
       failOptionKey: 'q01_a',
+      simulateTransactionAbortAfterOptionInsertFailure: true,
     },
   );
 
@@ -1572,6 +1588,10 @@ test('multi-domain bulk import surfaces the real save-path error when option sca
   assert.equal(
     result.formError,
     'OPTION_INSERT_FAILED',
+  );
+  assert.notEqual(
+    result.formError,
+    'current transaction is aborted, commands ignored until end of transaction block',
   );
   assert.equal(fake.state.questions.length, 0);
   assert.equal(fake.state.options.length, 0);

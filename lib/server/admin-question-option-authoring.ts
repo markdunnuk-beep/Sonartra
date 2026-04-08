@@ -856,7 +856,18 @@ export async function createQuestionRecord(params: {
       params.values.prompt,
       orderIndex,
     ],
-  );
+  ).catch((error: unknown) => {
+    logBulkQuestionImport('question-insert-error', {
+      assessmentVersionId: params.assessmentVersionId,
+      domainId: params.values.domainId,
+      questionKey,
+      orderIndex,
+      prompt: params.values.prompt,
+      errorMessage: getErrorMessage(error),
+      postgres: toPostgresErrorLike(error),
+    });
+    throw error;
+  });
 
   const questionId = insertedQuestion.rows[0]?.id;
   if (!questionId) {
@@ -902,7 +913,18 @@ export async function createQuestionRecord(params: {
         option.text,
         option.orderIndex,
       ],
-    );
+    ).catch((error: unknown) => {
+      logBulkQuestionImport('default-option-insert-error', {
+        assessmentVersionId: params.assessmentVersionId,
+        questionId,
+        optionKey: option.key,
+        optionLabel: option.label,
+        orderIndex: option.orderIndex,
+        errorMessage: getErrorMessage(error),
+        postgres: toPostgresErrorLike(error),
+      });
+      throw error;
+    });
 
     const optionId = insertedOption.rows[0]?.id;
     if (!optionId) {
@@ -996,17 +1018,30 @@ export async function createBulkQuestionsByDomainRecord(params: {
   const createdQuestions: AdminCreatedQuestion[] = [];
 
   for (const line of resolvedLines) {
-    createdQuestions.push(
-      await createQuestionRecord({
-        db: params.db,
+    try {
+      createdQuestions.push(
+        await createQuestionRecord({
+          db: params.db,
+          assessmentVersionId: params.assessmentVersionId,
+          values: {
+            prompt: line.prompt,
+            key: '',
+            domainId: line.domainId,
+          },
+        }),
+      );
+    } catch (error) {
+      logBulkQuestionImport('bulk-save-line-error', {
         assessmentVersionId: params.assessmentVersionId,
-        values: {
-          prompt: line.prompt,
-          key: '',
-          domainId: line.domainId,
-        },
-      }),
-    );
+        lineNumber: line.lineNumber,
+        domainId: line.domainId,
+        domainToken: line.domainToken,
+        prompt: line.prompt,
+        errorMessage: getErrorMessage(error),
+        postgres: toPostgresErrorLike(error),
+      });
+      throw error;
+    }
   }
 
   return Object.freeze(createdQuestions);
