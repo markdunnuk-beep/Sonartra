@@ -629,6 +629,58 @@ export type ResultActionBlocks = {
   developmentFocus: readonly ResultActionBlockItem[];
 };
 
+export type ApplicationSection = {
+  thesis: {
+    headline: string;
+    summary: string;
+    sourceKeys: {
+      heroPatternKey: string;
+    };
+  };
+  signatureContribution: {
+    title: string;
+    summary: string;
+    items: ReadonlyArray<{
+      label: string;
+      narrative: string;
+      bestWhen: string;
+      watchFor?: string;
+      sourceKey: string;
+      sourceType: 'pair' | 'signal';
+    }>;
+  };
+  patternRisks: {
+    title: string;
+    summary: string;
+    items: ReadonlyArray<{
+      label: string;
+      narrative: string;
+      impact: string;
+      earlyWarning?: string;
+      sourceKey: string;
+      sourceType: 'pair' | 'signal';
+    }>;
+  };
+  rangeBuilder: {
+    title: string;
+    summary: string;
+    items: ReadonlyArray<{
+      label: string;
+      narrative: string;
+      practice: string;
+      successMarker?: string;
+      sourceKey: string;
+      sourceType: 'pair' | 'signal';
+    }>;
+  };
+  actionPlan30: {
+    keepDoing: string;
+    watchFor: string;
+    practiceNext: string;
+    askOthers: string;
+  };
+};
+
 export type ResultDomainSignal = {
   signalKey: string;
   signalLabel: string;
@@ -703,6 +755,7 @@ export type CanonicalResultPayload = {
   hero: ResultHeroSummary;
   domains: readonly ResultDomainChapter[];
   actions: ResultActionBlocks;
+  application: ApplicationSection;
   diagnostics: ResultDiagnostics;
 };
 

@@ -1,4 +1,5 @@
 import type {
+  ApplicationSection,
   CanonicalResultPayload,
   EngineLanguageBundle,
   HeroTraitKey,
@@ -21,6 +22,7 @@ import type {
   RuntimeAssessmentDefinition,
   ScoreDiagnostics,
 } from '@/lib/engine/types';
+import { buildApplicationSection } from '@/lib/engine/application-builder';
 import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking';
 import { buildDomainInterpretation } from '@/lib/engine/domain-interpretation';
 import {
@@ -210,7 +212,7 @@ function buildCanonicalSignalPairKey(
     return null;
   }
 
-  return `${primaryToken}_${secondaryToken}`;
+  return [primaryToken, secondaryToken].sort((left, right) => left.localeCompare(right)).join('_');
 }
 
 function selectPrimaryAndSecondaryDomainSignals(
@@ -543,6 +545,18 @@ export function buildPayload(params: {
 }): CanonicalResultPayload {
   const interpretationContext = createResultInterpretationContext(params.normalizedResult);
   const domainSummaries = buildDomainSummaries(params.normalizedResult, interpretationContext);
+  const hero = buildHero({
+    normalizedResult: params.normalizedResult,
+    domainSummaries,
+    interpretationContext,
+  });
+  const domains = buildDomains(domainSummaries, interpretationContext);
+  const application: ApplicationSection = buildApplicationSection({
+    hero,
+    domains,
+    signals: params.normalizedResult.signalScores,
+    language: params.normalizedResult.languageBundle.application,
+  });
 
   return Object.freeze({
     metadata: {
@@ -550,13 +564,10 @@ export function buildPayload(params: {
       assessmentDescription: params.normalizedResult.metadata.assessmentDescription ?? null,
     },
     intro: buildIntro(params.normalizedResult.metadata),
-    hero: buildHero({
-      normalizedResult: params.normalizedResult,
-      domainSummaries,
-      interpretationContext,
-    }),
-    domains: buildDomains(domainSummaries, interpretationContext),
+    hero,
+    domains,
     actions: buildActions(params.normalizedResult, interpretationContext),
+    application,
     diagnostics: buildDiagnostics({
       normalizedResult: params.normalizedResult,
       scoringDiagnostics: params.normalizedResult.scoringDiagnostics,

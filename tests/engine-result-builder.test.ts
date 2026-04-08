@@ -375,7 +375,7 @@ test('minimal valid payload construction returns a complete canonical result pay
   });
 
   assert.ok(isCanonicalResultPayload(payload));
-  assert.deepEqual(Object.keys(payload), ['metadata', 'intro', 'hero', 'domains', 'actions', 'diagnostics']);
+  assert.deepEqual(Object.keys(payload), ['metadata', 'intro', 'hero', 'domains', 'actions', 'application', 'diagnostics']);
   assert.equal(payload.metadata.assessmentKey, 'wplp80');
   assert.equal(payload.metadata.assessmentTitle, 'WPLP-80');
   assert.equal(payload.metadata.version, '1.0.0');

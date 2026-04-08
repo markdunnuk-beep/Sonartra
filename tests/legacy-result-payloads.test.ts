@@ -99,6 +99,13 @@ function buildReadyRow(overrides?: Partial<Parameters<typeof analyzeReadyResultR
           { signalKey: 'stress_scatter', signalLabel: 'Scatter', text: 'Development' },
         ],
       },
+      application: {
+        thesis: { headline: '', summary: '', sourceKeys: { heroPatternKey: '' } },
+        signatureContribution: { title: 'Where you create the most value', summary: '', items: [] },
+        patternRisks: { title: 'Where this pattern can work against you', summary: '', items: [] },
+        rangeBuilder: { title: 'Where to build more range', summary: '', items: [] },
+        actionPlan30: { keepDoing: '', watchFor: '', practiceNext: '', askOthers: '' },
+      },
       diagnostics: {
         readinessStatus: 'ready',
         scoring: {},
@@ -200,6 +207,13 @@ test('analyzeReadyResultRow flags exact legacy headline and unprefixed taxonomy 
         developmentFocus: [
           { signalKey: 'scatter', signalLabel: 'Scatter', text: 'Development' },
         ],
+      },
+      application: {
+        thesis: { headline: '', summary: '', sourceKeys: { heroPatternKey: '' } },
+        signatureContribution: { title: 'Where you create the most value', summary: '', items: [] },
+        patternRisks: { title: 'Where this pattern can work against you', summary: '', items: [] },
+        rangeBuilder: { title: 'Where to build more range', summary: '', items: [] },
+        actionPlan30: { keepDoing: '', watchFor: '', practiceNext: '', askOthers: '' },
       },
       diagnostics: {
         readinessStatus: 'ready',

@@ -416,6 +416,13 @@ test('reading empty language datasets returns empty collections cleanly', async 
     domains: {},
     overview: {},
     heroHeaders: {},
+    application: {
+      thesis: [],
+      contribution: [],
+      risk: [],
+      development: [],
+      prompts: [],
+    },
   });
 });
 
@@ -653,6 +660,13 @@ test('bundle loader groups content correctly by key and section', async () => {
       driver_analyst: {
         headline: 'Fast, structured, decisive.',
       },
+    },
+    application: {
+      thesis: [],
+      contribution: [],
+      risk: [],
+      development: [],
+      prompts: [],
     },
   });
 });

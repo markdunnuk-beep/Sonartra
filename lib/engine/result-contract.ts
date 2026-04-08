@@ -18,6 +18,7 @@ export const CANONICAL_RESULT_PAYLOAD_FIELDS = [
   'hero',
   'domains',
   'actions',
+  'application',
   'diagnostics',
 ] as const;
 
@@ -171,6 +172,71 @@ function isCanonicalDiagnostics(value: unknown): boolean {
   );
 }
 
+function isCanonicalApplicationItem(value: unknown, section: 'contribution' | 'risk' | 'development'): boolean {
+  if (
+    !isRecord(value)
+    || !hasRequiredStringField(value, 'label')
+    || !hasRequiredStringField(value, 'narrative')
+    || !hasRequiredStringField(value, 'sourceKey')
+    || (value.sourceType !== 'pair' && value.sourceType !== 'signal')
+  ) {
+    return false;
+  }
+
+  if (section === 'contribution') {
+    return hasRequiredStringField(value, 'bestWhen') && (!('watchFor' in value) || isNullableString(value.watchFor));
+  }
+
+  if (section === 'risk') {
+    return hasRequiredStringField(value, 'impact') && (!('earlyWarning' in value) || isNullableString(value.earlyWarning));
+  }
+
+  return hasRequiredStringField(value, 'practice') && (!('successMarker' in value) || isNullableString(value.successMarker));
+}
+
+function isCanonicalApplicationSection(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  if (
+    !isRecord(value.thesis)
+    || typeof value.thesis.headline !== 'string'
+    || typeof value.thesis.summary !== 'string'
+    || !isRecord(value.thesis.sourceKeys)
+    || typeof value.thesis.sourceKeys.heroPatternKey !== 'string'
+  ) {
+    return false;
+  }
+
+  const sectionDefinitions = [
+    ['signatureContribution', 'contribution'],
+    ['patternRisks', 'risk'],
+    ['rangeBuilder', 'development'],
+  ] as const;
+
+  for (const [sectionKey, itemSection] of sectionDefinitions) {
+    const section = value[sectionKey];
+    if (
+      !isRecord(section)
+      || typeof section.title !== 'string'
+      || typeof section.summary !== 'string'
+      || !Array.isArray(section.items)
+      || !section.items.every((item) => isCanonicalApplicationItem(item, itemSection))
+    ) {
+      return false;
+    }
+  }
+
+  return (
+    isRecord(value.actionPlan30)
+    && typeof value.actionPlan30.keepDoing === 'string'
+    && typeof value.actionPlan30.watchFor === 'string'
+    && typeof value.actionPlan30.practiceNext === 'string'
+    && typeof value.actionPlan30.askOthers === 'string'
+  );
+}
+
 export const isCanonicalResultPayload = (value: unknown): value is CanonicalResultPayload => {
   if (!isRecord(value)) {
     return false;
@@ -197,6 +263,7 @@ export const isCanonicalResultPayload = (value: unknown): value is CanonicalResu
     && isCanonicalActionBlock(value.actions.strengths)
     && isCanonicalActionBlock(value.actions.watchouts)
     && isCanonicalActionBlock(value.actions.developmentFocus)
+    && isCanonicalApplicationSection(value.application)
     && isCanonicalDiagnostics(value.diagnostics)
   );
 };

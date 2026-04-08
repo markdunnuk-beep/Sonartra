@@ -1,5 +1,6 @@
 import type { AssessmentVersionId } from '@/lib/engine/types';
 import type { Queryable } from '@/lib/engine/repository-sql';
+import { getAssessmentVersionApplicationLanguage } from '@/lib/server/assessment-version-application-language';
 import type {
   AssessmentVersionLanguageBundle,
   AssessmentVersionLanguageDomainInput,
@@ -647,12 +648,13 @@ export async function getAssessmentVersionLanguageBundle(
   db: Queryable,
   assessmentVersionId: AssessmentVersionId,
 ): Promise<AssessmentVersionLanguageBundle> {
-  const [signals, pairs, domains, overview, heroHeaders] = await Promise.all([
+  const [signals, pairs, domains, overview, heroHeaders, application] = await Promise.all([
     getAssessmentVersionLanguageSignals(db, assessmentVersionId),
     getAssessmentVersionLanguagePairs(db, assessmentVersionId),
     getAssessmentVersionLanguageDomains(db, assessmentVersionId),
     getAssessmentVersionLanguageOverview(db, assessmentVersionId),
     getAssessmentVersionLanguageHeroHeaders(db, assessmentVersionId),
+    getAssessmentVersionApplicationLanguage(db, assessmentVersionId),
   ]);
 
   return Object.freeze({
@@ -661,6 +663,7 @@ export async function getAssessmentVersionLanguageBundle(
     domains: buildAssessmentVersionLanguageDomainsBundle(domains),
     overview: buildAssessmentVersionLanguageOverviewBundle(overview),
     heroHeaders: buildAssessmentVersionLanguageHeroHeadersBundle(heroHeaders),
+    application,
   });
 }
 

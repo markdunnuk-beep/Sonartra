@@ -407,7 +407,7 @@ function resolveCanonicalHeroPatternKey(
     return null;
   }
 
-  return `${topToken}_${secondToken}`;
+  return [topToken, secondToken].sort((left, right) => left.localeCompare(right)).join('_');
 }
 
 function resolveHeroPairKey(

@@ -1,4 +1,5 @@
 import type { AssessmentVersionId } from '@/lib/engine/types';
+import type { AssessmentVersionApplicationLanguageBundle } from '@/lib/server/assessment-version-application-language-types';
 
 export type AssessmentVersionLanguageSignalSection =
   | 'chapterSummary'
@@ -147,4 +148,5 @@ export type AssessmentVersionLanguageBundle = {
   domains: AssessmentVersionLanguageDomainsByKey;
   overview: AssessmentVersionLanguageOverviewByKey;
   heroHeaders?: AssessmentVersionLanguageHeroHeadersByKey;
+  application?: AssessmentVersionApplicationLanguageBundle;
 };

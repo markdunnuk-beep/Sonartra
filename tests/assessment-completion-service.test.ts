@@ -312,6 +312,36 @@ function buildPayload(signalId: string): CanonicalResultPayload {
       watchouts: [],
       developmentFocus: [],
     },
+    application: {
+      thesis: {
+        headline: '',
+        summary: '',
+        sourceKeys: {
+          heroPatternKey: '',
+        },
+      },
+      signatureContribution: {
+        title: 'Where you create the most value',
+        summary: '',
+        items: [],
+      },
+      patternRisks: {
+        title: 'Where this pattern can work against you',
+        summary: '',
+        items: [],
+      },
+      rangeBuilder: {
+        title: 'Where to build more range',
+        summary: '',
+        items: [],
+      },
+      actionPlan30: {
+        keepDoing: '',
+        watchFor: '',
+        practiceNext: '',
+        askOthers: '',
+      },
+    },
     diagnostics: {
       readinessStatus: 'processing',
       scoring: { scoringMethod: 'option_signal_weights_only', totalQuestions: 1, answeredQuestions: 1, unansweredQuestions: 0, totalResponsesProcessed: 1, totalWeightsApplied: 1, totalScoreMass: 1, zeroScoreSignalCount: 0, zeroAnswerSubmission: false, warnings: Object.freeze([]), generatedAt: '2026-01-01T00:00:00.000Z' },

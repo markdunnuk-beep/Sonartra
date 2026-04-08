@@ -161,6 +161,36 @@ function buildPayload(params?: {
         text: 'Role Executor development.',
       }]),
     },
+    application: {
+      thesis: {
+        headline: '',
+        summary: '',
+        sourceKeys: {
+          heroPatternKey: '',
+        },
+      },
+      signatureContribution: {
+        title: 'Where you create the most value',
+        summary: '',
+        items: Object.freeze([]),
+      },
+      patternRisks: {
+        title: 'Where this pattern can work against you',
+        summary: '',
+        items: Object.freeze([]),
+      },
+      rangeBuilder: {
+        title: 'Where to build more range',
+        summary: '',
+        items: Object.freeze([]),
+      },
+      actionPlan30: {
+        keepDoing: '',
+        watchFor: '',
+        practiceNext: '',
+        askOthers: '',
+      },
+    },
     diagnostics: {
       readinessStatus: 'processing',
       scoring: {

@@ -141,6 +141,36 @@ function buildPayload(params?: {
       watchouts: [],
       developmentFocus: [],
     },
+    application: {
+      thesis: {
+        headline: '',
+        summary: '',
+        sourceKeys: {
+          heroPatternKey: '',
+        },
+      },
+      signatureContribution: {
+        title: 'Where you create the most value',
+        summary: '',
+        items: [],
+      },
+      patternRisks: {
+        title: 'Where this pattern can work against you',
+        summary: '',
+        items: [],
+      },
+      rangeBuilder: {
+        title: 'Where to build more range',
+        summary: '',
+        items: [],
+      },
+      actionPlan30: {
+        keepDoing: '',
+        watchFor: '',
+        practiceNext: '',
+        askOthers: '',
+      },
+    },
     diagnostics: {
       readinessStatus: 'ready',
       scoring: {

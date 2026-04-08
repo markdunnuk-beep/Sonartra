@@ -438,5 +438,16 @@ export function validateResultPayload(result: unknown): readonly EngineDiagnosti
     );
   }
 
+  if (!payload.application || typeof payload.application !== 'object') {
+    issues.push(
+      createIssue(
+        'result_payload',
+        'error',
+        'result_application_missing',
+        'Result payload must include an application section.',
+      ),
+    );
+  }
+
   return Object.freeze(issues);
 }
