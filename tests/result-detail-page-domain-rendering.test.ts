@@ -268,6 +268,7 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /const environmentOverlay = result\.hero\.environmentOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /const introMetadataItems = \[/);
   assert.match(source, /const TOP_LEVEL_SECTION_IDS = RESULT_READING_TOP_LEVEL_SECTIONS/);
+  assert.match(source, /const TOP_LEVEL_SECTION_HEADING_IDS = \{/);
   assert.match(source, /const CANONICAL_DOMAIN_ANCHOR_IDS = RESULT_READING_DOMAIN_SUBSECTIONS/);
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
@@ -277,10 +278,8 @@ test('result detail page renders the system introduction above hero and keeps ca
     /xl:grid xl:max-w-\[116rem\] xl:grid-cols-\[minmax\(0,1fr\)_minmax\(11\.5rem,13rem\)\] xl:gap-8 2xl:gap-10/,
   );
   assert.match(source, /<main className="min-w-0 max-w-none space-y-12 md:space-y-14">/);
-  assert.match(
-    source,
-    /<section id=\{TOP_LEVEL_SECTION_IDS\.intro\} className=\{RESULTS_ANCHOR_TARGET_CLASS\}>/,
-  );
+  assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.intro\}/);
+  assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.intro\}/);
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
   assert.match(source, /<ResultReadingProgress className="max-w-\[92rem\] px-1 md:px-2 xl:hidden" \/>/);
   assert.match(source, /<ResultReadingRail className="hidden xl:block xl:pt-0\.5 2xl:pl-0\.5" \/>/);
@@ -295,13 +294,18 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /sonartra-report-body max-w-\[54rem\] text-\[1rem\] leading-8 text-white\/78 sm:text-\[1\.05rem\] md:text-\[1\.1rem\] md:leading-9/);
   assert.match(source, /grid gap-9 md:grid-cols-\[minmax\(0,1fr\)_auto\] md:items-start md:gap-11/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.hero\}/);
+  assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.hero\}/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
+  assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.domains\}/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.application\}/);
+  assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.application\}/);
   assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.intro\}/);
   assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.hero\} \/>/);
   assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
   assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.application\}/);
   assert.match(source, /id=\{domainAnchorId \?\? undefined\}/);
+  assert.match(source, /aria-labelledby=\{chapterHeadingId\}/);
+  assert.match(source, /const chapterHeadingId = `\$\{domainAnchorId \?\? domain\.domainKey\}-heading`;/);
   assert.match(source, /domainAnchorId: CANONICAL_DOMAIN_ANCHOR_IDS\[index\] \?\? null,/);
   assert.match(source, /<HeroPatternMedallion\s+patternKey=\{heroPatternKey\}\s+label=\{heroPatternLabel\}/);
   assert.match(source, /<NarrativeBridge className="max-w-\[44rem\]">/);

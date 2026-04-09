@@ -23,5 +23,17 @@ test('global styles enable smooth anchors while respecting reduced motion', () =
 
   assert.match(cssSource, /html \{\n  scroll-behavior: smooth;/);
   assert.match(cssSource, /@media \(prefers-reduced-motion: reduce\) \{\n  html \{\n    scroll-behavior: auto;/);
+  assert.match(cssSource, /\.sonartra-motion-progress \{\n    transition: none;/);
+  assert.match(cssSource, /\.sonartra-motion-nav-item\[aria-current='location'\] \{\n    transform: none;/);
   assert.match(cssSource, /main \{\n  @apply mx-auto min-h-\[calc\(100vh-4rem\)\] w-full max-w-\[1320px\]/);
+});
+
+test('result detail page keeps one desktop rail and one mobile progress surface', () => {
+  const pageSource = fs.readFileSync(path.join(root, 'app/(user)/app/results/[resultId]/page.tsx'), 'utf8');
+
+  const railCount = pageSource.match(/<ResultReadingRail/g)?.length ?? 0;
+  const progressCount = pageSource.match(/<ResultReadingProgress/g)?.length ?? 0;
+
+  assert.equal(railCount, 1);
+  assert.equal(progressCount, 1);
 });

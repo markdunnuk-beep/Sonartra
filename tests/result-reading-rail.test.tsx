@@ -34,19 +34,22 @@ test('reading rail renders nested domain items beneath Domain Chapters', () => {
 test('active top-level section receives aria-current semantics', () => {
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride="hero" />);
 
-  assert.match(markup, /href="#hero"[^>]*aria-current="page"/);
-  assert.doesNotMatch(markup, /href="#intro"[^>]*aria-current="page"/);
-  assert.doesNotMatch(markup, /href="#application"[^>]*aria-current="page"/);
+  assert.match(markup, /href="#hero"[^>]*aria-current="location"/);
+  assert.doesNotMatch(markup, /href="#intro"[^>]*aria-current="location"/);
+  assert.doesNotMatch(markup, /href="#application"[^>]*aria-current="location"/);
 });
 
-test('active domain subsection is current while Domain Chapters remains current', () => {
+test('only the active domain subsection receives aria-current semantics', () => {
   const markup = renderToStaticMarkup(
     <ResultReadingRail activeSectionIdOverride="domain-core-drivers" />,
   );
 
-  assert.match(markup, /href="#domains"[^>]*aria-current="page"/);
-  assert.match(markup, /href="#domain-core-drivers"[^>]*aria-current="page"/);
-  assert.doesNotMatch(markup, /href="#domain-operating-style"[^>]*aria-current="page"/);
+  assert.doesNotMatch(markup, /href="#domains"[^>]*aria-current="location"/);
+  assert.match(markup, /href="#domain-core-drivers"[^>]*aria-current="location"/);
+  assert.doesNotMatch(markup, /href="#domain-operating-style"[^>]*aria-current="location"/);
+
+  const currentCount = markup.match(/aria-current="location"/g)?.length ?? 0;
+  assert.equal(currentCount, 1);
 });
 
 test('each rail item targets a stable in-page anchor id', () => {
@@ -77,4 +80,6 @@ test('reading rail links remain keyboard-focusable anchors with visible focus cl
   assert.equal(anchorCount, 10);
   assert.equal(focusClassCount, 10);
   assert.match(markup, /data-result-reading-rail="true"/);
+  assert.match(markup, /<nav[^>]*aria-label="Report reading navigation"/);
+  assert.match(markup, /<ul aria-label="Domain chapters"/);
 });
