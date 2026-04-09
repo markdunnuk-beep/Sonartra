@@ -51,6 +51,14 @@ function StepIndicator({
     );
   }
 
+  if (status === 'reference') {
+    return (
+      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.02] text-[11px] font-medium text-white/52">
+        {index + 1}
+      </span>
+    );
+  }
+
   return (
     <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[11px] font-medium text-white/44">
       {index + 1}
@@ -72,19 +80,26 @@ export function AdminAssessmentStepper() {
     0,
     steps.findIndex((step) => step.status === 'active'),
   );
+  const isReferenceMode = assessment.builderMode === 'published_no_draft';
 
   return (
     <SurfaceCard className="space-y-4 p-4 lg:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <p className="sonartra-page-eyebrow">Builder progress</p>
+          <p className="sonartra-page-eyebrow">
+            {isReferenceMode ? 'Published version reference' : 'Builder progress'}
+          </p>
           <p className="text-sm leading-6 text-white/58">
-            Step {activeIndex + 1} of {steps.length}
+            {isReferenceMode
+              ? 'Browse each stage in read-only mode. Create a draft to continue authoring.'
+              : `Step ${activeIndex + 1} of ${steps.length}`}
           </p>
         </div>
-        <p className="text-xs uppercase tracking-[0.18em] text-white/42">
-          {completedCount} of {steps.length} completed
-        </p>
+        {!isReferenceMode ? (
+          <p className="text-xs uppercase tracking-[0.18em] text-white/42">
+            {completedCount} of {steps.length} completed
+          </p>
+        ) : null}
       </div>
 
       <nav aria-label="Assessment builder steps" className="flex flex-wrap gap-2">
@@ -98,6 +113,8 @@ export function AdminAssessmentStepper() {
                 'sonartra-focus-ring flex min-w-[128px] items-center gap-3 rounded-[0.95rem] border px-3 py-2.5 transition',
                 isActive
                   ? 'border-[rgba(126,179,255,0.24)] bg-[rgba(126,179,255,0.1)] text-white'
+                  : step.status === 'reference'
+                    ? 'border-white/8 bg-black/10 text-white/58 hover:border-white/12 hover:bg-white/[0.03] hover:text-white/78'
                   : step.status === 'complete'
                     ? 'border-[rgba(116,209,177,0.12)] bg-[rgba(116,209,177,0.04)] text-white/86 hover:border-[rgba(116,209,177,0.2)] hover:bg-[rgba(116,209,177,0.06)]'
                     : step.status === 'neutral'

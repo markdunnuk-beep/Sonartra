@@ -32,6 +32,7 @@ function createAssessmentState(
 ): AdminAssessmentStepperState {
   return {
     assessmentKey: 'wplp80',
+    builderMode: 'draft',
     authoredDomains: [],
     availableSignals: [],
     authoredQuestions: [],
@@ -135,6 +136,16 @@ test('stepper uses a neutral language state when dataset availability cannot be 
 
   assert.equal(getStepStatus('assessment-intro', 'overview', assessment), 'neutral');
   assert.equal(getStepStatus('language', 'overview', assessment), 'neutral');
+});
+
+test('stepper switches into reference mode when a published assessment has no editable draft', () => {
+  const assessment = createAssessmentState({
+    builderMode: 'published_no_draft',
+  });
+
+  assert.equal(getStepStatus('overview', 'overview', assessment), 'active');
+  assert.equal(getStepStatus('domains', 'overview', assessment), 'reference');
+  assert.equal(getStepStatus('review', 'overview', assessment), 'reference');
 });
 
 test('assessment intro route now delegates to the persisted authoring step instead of a static placeholder', () => {

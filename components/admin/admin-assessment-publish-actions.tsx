@@ -10,9 +10,9 @@ import {
 import type { AdminAssessmentDetailVersion } from '@/lib/server/admin-assessment-detail';
 import type { AdminAssessmentValidationResult } from '@/lib/server/admin-assessment-validation';
 import {
-  createDraftVersionAction,
   publishDraftVersionAction,
 } from '@/lib/server/admin-assessment-versioning';
+import { AdminCreateDraftVersionForm } from '@/components/admin/admin-assessment-draft-state';
 import {
   AdminFeedbackNotice,
 } from '@/components/admin/admin-feedback-primitives';
@@ -107,30 +107,6 @@ function PublishDraftForm({
   );
 }
 
-function CreateDraftForm({
-  assessmentKey,
-}: Readonly<{
-  assessmentKey: string;
-}>) {
-  const [state, formAction] = useActionState(
-    createDraftVersionAction.bind(null, {
-      assessmentKey,
-    }),
-    initialAdminAssessmentVersionActionState,
-  );
-
-  return (
-    <form action={formAction} className="space-y-3">
-      <ActionNotice state={state} />
-      <SubmitButton
-        idleLabel="Create new draft version"
-        pendingLabel="Creating draft..."
-        variant="secondary"
-      />
-    </form>
-  );
-}
-
 export function AdminAssessmentPublishActions({
   assessmentKey,
   latestDraftVersion,
@@ -169,7 +145,7 @@ export function AdminAssessmentPublishActions({
             draftVersionId={latestDraftVersion.assessmentVersionId}
           />
         ) : (
-          <CreateDraftForm assessmentKey={assessmentKey} />
+          <AdminCreateDraftVersionForm assessmentKey={assessmentKey} variant="secondary" />
         )}
       </div>
     </SurfaceCard>

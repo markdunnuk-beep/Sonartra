@@ -10,9 +10,9 @@ import {
 import type { AdminAssessmentValidationResult } from '@/lib/server/admin-assessment-validation';
 import type { AdminAssessmentDetailVersion } from '@/lib/server/admin-assessment-detail';
 import {
-  createDraftVersionAction,
   publishDraftVersionAction,
 } from '@/lib/server/admin-assessment-versioning';
+import { AdminCreateDraftVersionForm } from '@/components/admin/admin-assessment-draft-state';
 import {
   AdminFeedbackNotice,
   AdminFeedbackStat,
@@ -170,30 +170,6 @@ function PublishDraftForm({
     <form action={formAction} className="space-y-3">
       <ActionNotice state={state} />
       <SubmitButton idleLabel="Publish" pendingLabel="Publishing..." disabled={disabled} />
-    </form>
-  );
-}
-
-function CreateDraftForm({
-  assessmentKey,
-}: {
-  assessmentKey: string;
-}) {
-  const [state, formAction] = useActionState(
-    createDraftVersionAction.bind(null, {
-      assessmentKey,
-    }),
-    initialAdminAssessmentVersionActionState,
-  );
-
-  return (
-    <form action={formAction} className="space-y-3">
-      <ActionNotice state={state} />
-      <SubmitButton
-        idleLabel="Create new draft version"
-        pendingLabel="Creating draft..."
-        variant="secondary"
-      />
     </form>
   );
 }
@@ -438,7 +414,9 @@ export function AdminAssessmentVersionGovernance({
               />
             ) : null}
 
-            {!hasDraft && versions.length > 0 ? <CreateDraftForm assessmentKey={assessmentKey} /> : null}
+            {!hasDraft && versions.length > 0 ? (
+              <AdminCreateDraftVersionForm assessmentKey={assessmentKey} variant="secondary" />
+            ) : null}
           </div>
         </div>
       </SurfaceCard>

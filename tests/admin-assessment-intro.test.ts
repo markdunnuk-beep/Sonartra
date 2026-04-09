@@ -414,7 +414,7 @@ test('assessment intro step view model returns null for an invalid assessment ke
   });
 });
 
-test('assessment intro editor renders a guarded empty state when no editable draft version exists', () => {
+test('assessment intro editor renders a published-mode draft creation prompt when no editable draft version exists', () => {
   const markup = renderToStaticMarkup(
     React.createElement(AdminAssessmentIntroEditor, {
       viewModel: {
@@ -435,8 +435,9 @@ test('assessment intro editor renders a guarded empty state when no editable dra
     }),
   );
 
-  assert.match(markup, /No draft version available/);
-  assert.match(markup, /Create a draft version before authoring assessment intro content\./);
+  assert.match(markup, /Assessment intro is currently read-only/);
+  assert.match(markup, /Create a draft version before authoring assessment intro content for the next release\./);
+  assert.match(markup, /Create draft version/);
 });
 
 test('assessment intro step view model falls back to empty intro content when the intro schema is unavailable', async () => {

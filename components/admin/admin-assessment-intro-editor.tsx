@@ -10,9 +10,9 @@ import {
 } from '@/lib/admin/admin-assessment-intro';
 import { saveAssessmentIntroAction } from '@/lib/server/admin-assessment-intro';
 import type { AdminAssessmentIntroStepViewModel } from '@/lib/server/admin-assessment-intro-step';
+import { AdminPublishedNoDraftStageState } from '@/components/admin/admin-assessment-draft-state';
 import { AdminFeedbackNotice } from '@/components/admin/admin-feedback-primitives';
 import {
-  EmptyState,
   LabelPill,
   SectionHeader,
   SurfaceCard,
@@ -373,9 +373,11 @@ export function AdminAssessmentIntroEditor({
 }>) {
   if (!viewModel.draftVersion) {
     return (
-      <EmptyState
-        title="No draft version available"
-        description="Create a draft version before authoring assessment intro content."
+      <AdminPublishedNoDraftStageState
+        assessmentKey={viewModel.assessmentKey}
+        description="You are browsing the stable published assessment. Create a draft version before authoring assessment intro content for the next release."
+        publishedVersionTag={null}
+        title="Assessment intro is currently read-only"
       />
     );
   }

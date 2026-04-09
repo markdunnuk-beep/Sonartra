@@ -435,6 +435,7 @@ test('loads latest draft weighting data and coverage for admin assessment detail
   assert.ok(detail);
   assert.equal(detail?.publishedVersion?.versionTag, '1.0.0');
   assert.equal(detail?.latestDraftVersion?.versionTag, '1.1.0');
+  assert.equal(detail?.builderMode, 'draft');
   assert.equal(detail?.authoredDomains.length, 1);
   assert.equal(detail?.questionDomains.length, 2);
   assert.equal(detail?.authoredQuestions.length, 1);
@@ -515,5 +516,42 @@ test('derives trustworthy intro and language step completion from persisted draf
     assessmentIntro: 'complete',
     language: 'complete',
   });
+});
+
+test('marks published assessments without an editable draft as published_no_draft builder mode', async () => {
+  const detail = await getAdminAssessmentDetailByKey(
+    createFakeDb({
+      baseRows: [
+        {
+          assessment_id: 'assessment-1',
+          assessment_key: 'wplp80',
+          assessment_title: 'WPLP-80',
+          assessment_description: 'Flagship assessment',
+          assessment_is_active: true,
+          assessment_created_at: '2026-01-01T00:00:00.000Z',
+          assessment_updated_at: '2026-01-05T00:00:00.000Z',
+          assessment_version_id: 'version-published',
+          version_tag: '1.0.0',
+          version_status: 'PUBLISHED',
+          published_at: '2026-01-03T00:00:00.000Z',
+          version_created_at: '2026-01-02T00:00:00.000Z',
+          version_updated_at: '2026-01-03T00:00:00.000Z',
+          question_count: '80',
+        },
+      ],
+      signalGroupDomains: [],
+      signals: [],
+      questionDomains: [],
+      questions: [],
+      optionSignalWeights: [],
+      availableSignals: [],
+    }),
+    'wplp80',
+  );
+
+  assert.ok(detail);
+  assert.equal(detail?.publishedVersion?.versionTag, '1.0.0');
+  assert.equal(detail?.latestDraftVersion, null);
+  assert.equal(detail?.builderMode, 'published_no_draft');
 });
 

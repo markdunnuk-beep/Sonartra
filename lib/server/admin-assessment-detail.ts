@@ -115,6 +115,8 @@ export type AdminAssessmentDetailStepCompletion = {
   language: AdminAssessmentDetailStepCompletionStatus;
 };
 
+export type AdminAssessmentBuilderMode = 'draft' | 'published_no_draft' | 'setup';
+
 export type AdminAssessmentDetailViewModel = {
   assessmentId: string;
   assessmentKey: string;
@@ -126,6 +128,7 @@ export type AdminAssessmentDetailViewModel = {
   versions: readonly AdminAssessmentDetailVersion[];
   publishedVersion: AdminAssessmentDetailVersion | null;
   latestDraftVersion: AdminAssessmentDetailVersion | null;
+  builderMode: AdminAssessmentBuilderMode;
   authoredDomains: readonly AdminAssessmentDetailDomain[];
   questionDomains: readonly AdminAssessmentDetailQuestionDomain[];
   authoredQuestions: readonly AdminAssessmentDetailQuestion[];
@@ -724,6 +727,11 @@ export async function getAdminAssessmentDetailByKey(
     });
   const publishedVersion = versions.find((version) => version.status === 'published') ?? null;
   const latestDraftVersion = versions.find((version) => version.status === 'draft') ?? null;
+  const builderMode: AdminAssessmentBuilderMode = latestDraftVersion
+    ? 'draft'
+    : publishedVersion
+      ? 'published_no_draft'
+      : 'setup';
   const [authoredDomains, questionDomains, authoredQuestions, availableSignals, draftValidation, stepCompletion] =
     latestDraftVersion
       ? await Promise.all([
@@ -763,6 +771,7 @@ export async function getAdminAssessmentDetailByKey(
     versions: Object.freeze(versions),
     publishedVersion,
     latestDraftVersion,
+    builderMode,
     authoredDomains,
     questionDomains,
     authoredQuestions,

@@ -18,6 +18,8 @@ export default function AdminAssessmentOverviewPage() {
     : assessment.publishedVersion
       ? 'Published'
       : 'Not started';
+  const activeVersionTag =
+    assessment.latestDraftVersion?.versionTag ?? assessment.publishedVersion?.versionTag ?? 'None';
 
   return (
     <section className="space-y-8">
@@ -47,7 +49,7 @@ export default function AdminAssessmentOverviewPage() {
       </SurfaceCard>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetaItem label="Version label" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
+        <MetaItem label="Version label" value={activeVersionTag} />
         <MetaItem label="Status" value={currentStatus} />
         <MetaItem label="Assessment key" value={assessment.assessmentKey} />
         <MetaItem label="Current published" value={assessment.publishedVersion?.versionTag ?? 'None'} />

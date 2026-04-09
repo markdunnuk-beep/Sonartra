@@ -13,11 +13,12 @@ export const builderSteps = [
 ] as const;
 
 export type BuilderStepSlug = (typeof builderSteps)[number]['slug'];
-export type BuilderStepStatus = 'complete' | 'active' | 'incomplete' | 'neutral';
+export type BuilderStepStatus = 'complete' | 'active' | 'incomplete' | 'neutral' | 'reference';
 
 export type AdminAssessmentStepperState = Pick<
   AdminAssessmentDetailViewModel,
   | 'assessmentKey'
+  | 'builderMode'
   | 'authoredDomains'
   | 'availableSignals'
   | 'authoredQuestions'
@@ -51,6 +52,10 @@ export function getStepStatus(
   activeSlug: BuilderStepSlug,
   assessment: AdminAssessmentStepperState,
 ): BuilderStepStatus {
+  if (assessment.builderMode === 'published_no_draft') {
+    return slug === activeSlug ? 'active' : 'reference';
+  }
+
   if (slug === activeSlug) {
     return 'active';
   }
