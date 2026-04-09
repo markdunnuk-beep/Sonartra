@@ -282,7 +282,9 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.intro\}/);
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
   assert.match(source, /<ResultReadingProgress className="max-w-\[92rem\] px-1 md:px-2 xl:hidden" \/>/);
-  assert.match(source, /<ResultReadingRail className="hidden xl:block xl:pt-1" \/>/);
+  assert.match(source, /<ResultReadingRail\s+className="hidden xl:block xl:pt-1"\s+utilityActions=\{/);
+  assert.match(source, /linkedInPostBody: linkedinShare\.postBody/);
+  assert.match(source, /linkedInAnalytics: linkedinShareAnalytics/);
   assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
   assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
   assert.match(source, /So what does this mean in practice\?/);
@@ -293,6 +295,8 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /sonartra-report-summary text-\[1\.08rem\] leading-8 text-white\/82 sm:text-\[1\.13rem\] md:text-\[1\.22rem\] md:leading-10/);
   assert.match(source, /sonartra-report-body max-w-\[54rem\] text-\[1rem\] leading-8 text-white\/78 sm:text-\[1\.05rem\] md:text-\[1\.1rem\] md:leading-9/);
   assert.match(source, /grid gap-9 md:grid-cols-\[minmax\(0,1fr\)_auto\] md:items-start md:gap-11/);
+  assert.doesNotMatch(source, /<ResultLinkedInShare/);
+  assert.doesNotMatch(source, /Share on LinkedIn/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.hero\}/);
   assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.hero\}/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.domains\}/);

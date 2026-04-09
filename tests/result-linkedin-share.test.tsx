@@ -80,13 +80,14 @@ test('share component source includes copy feedback and linkedin open behavior',
 test('results page wires the share formatter and suppresses the share ui when hero content is unavailable', () => {
   const source = readFileSync(pagePath, 'utf8');
 
-  assert.match(source, /import \{ ResultLinkedInShare \} from '@\/components\/results\/result-linkedin-share';/);
   assert.match(source, /import \{ formatLinkedInSharePost \} from '@\/lib\/results\/linkedin-share';/);
   assert.match(source, /import \{ buildResultsLinkedInShareAnalytics \} from '@\/lib\/results\/linkedin-share-analytics';/);
   assert.match(source, /const linkedinShare = formatLinkedInSharePost\(\{\s*hero: result\.hero,\s*rankedSignals: result\.rankedSignals,\s*\}\);/);
   assert.match(source, /const linkedinShareAnalytics = buildResultsLinkedInShareAnalytics\(result\);/);
-  assert.match(source, /linkedinShare\.canShare \? \(/);
-  assert.match(source, /analytics=\{linkedinShareAnalytics\}/);
-  assert.match(source, /<ResultLinkedInShare/);
+  assert.match(source, /utilityActions=\{/);
+  assert.match(source, /linkedinShare\.canShare/);
+  assert.match(source, /linkedInPostBody: linkedinShare\.postBody/);
+  assert.match(source, /linkedInAnalytics: linkedinShareAnalytics/);
+  assert.doesNotMatch(source, /<ResultLinkedInShare/);
   assert.match(source, /className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"/);
 });

@@ -7,11 +7,23 @@ import { ResultReadingRail } from '@/components/results/result-reading-rail';
 test('reading rail renders expected top-level section labels', () => {
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
 
+  assert.match(markup, /src="\/images\/sonartra-logo\.svg"/);
+  assert.match(markup, /alt="Sonartra"/);
   assert.match(markup, />01<\/span><span class="min-w-0">Introduction</);
   assert.match(markup, />02<\/span><span class="min-w-0">Your Behaviour Pattern</);
   assert.match(markup, />03<\/span><span class="min-w-0">How It Shows Up</);
   assert.match(markup, />04<\/span><span class="min-w-0">How to Apply This</);
   assert.match(markup, /aria-label="Report reading navigation"/);
+});
+
+test('reading rail renders utility actions beneath navigation with accessible labels', () => {
+  const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
+
+  assert.match(markup, /aria-label="Report utilities"/);
+  assert.match(markup, /aria-label="Share on LinkedIn"/);
+  assert.match(markup, /aria-label="Share by email"/);
+  assert.match(markup, /aria-label="Download PDF"/);
+  assert.match(markup, /PDF export coming soon/);
 });
 
 test('reading rail renders nested domain items beneath How It Shows Up without numbering', () => {
@@ -91,8 +103,8 @@ test('reading rail links remain keyboard-focusable anchors with visible focus cl
   const anchorCount = markup.match(/<a /g)?.length ?? 0;
   const focusClassCount = markup.match(/sonartra-focus-ring/g)?.length ?? 0;
 
-  assert.equal(anchorCount, 10);
-  assert.equal(focusClassCount, 10);
+  assert.equal(anchorCount, 11);
+  assert.equal(focusClassCount, 13);
   assert.match(markup, /data-result-reading-rail="true"/);
   assert.match(markup, /<nav[^>]*aria-label="Report reading navigation"/);
   assert.match(markup, /<ul aria-label="Domain chapters"/);

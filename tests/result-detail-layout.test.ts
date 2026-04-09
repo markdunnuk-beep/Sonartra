@@ -15,7 +15,8 @@ test('result detail desktop layout uses widened container and rebalanced columns
   assert.match(pageSource, /xl:grid-cols-\[minmax\(0,1fr\)_minmax\(10\.75rem,12\.25rem\)\]/);
   assert.match(pageSource, /<main className="min-w-0 max-w-none/);
   assert.match(pageSource, /<div className="w-full px-1 md:px-2 xl:px-0\.5">/);
-  assert.match(pageSource, /ResultReadingRail className="hidden xl:block xl:pt-1"/);
+  assert.match(pageSource, /ResultReadingRail\s+className="hidden xl:block xl:pt-1"/);
+  assert.match(pageSource, /utilityActions=\{/);
 });
 
 test('global styles enable smooth anchors while respecting reduced motion', () => {
