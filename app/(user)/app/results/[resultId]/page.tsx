@@ -419,7 +419,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   return (
     <PageFrame className="space-y-12 md:space-y-14">
       <div className="xl:mx-auto xl:grid xl:max-w-[114rem] xl:grid-cols-[minmax(0,1fr)_minmax(10.75rem,12.25rem)] xl:gap-7 2xl:gap-9">
-        <main className="min-w-0 max-w-none space-y-12 md:space-y-14">
+        <div className="min-w-0 max-w-none space-y-12 md:space-y-14">
           <section
             id={TOP_LEVEL_SECTION_IDS.intro}
             aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.intro}
@@ -573,7 +573,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               <ApplicationPlan application={result.application} />
             </section>
           </div>
-        </main>
+        </div>
 
         <ResultReadingRail
           className="hidden xl:block xl:pt-1"
