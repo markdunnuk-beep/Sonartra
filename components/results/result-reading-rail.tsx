@@ -68,7 +68,15 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                       (isTopLevelActive || isExactTopLevelActive) && 'opacity-100 scale-y-100',
                     )}
                   />
-                  <span className="relative block">{section.label}</span>
+                  <span className="relative flex min-w-0 items-baseline gap-2">
+                    <span
+                      aria-hidden="true"
+                      className="text-[0.69rem] font-medium tracking-[0.08em] text-white/35"
+                    >
+                      {String(section.order).padStart(2, '0')}
+                    </span>
+                    <span className="min-w-0">{section.label}</span>
+                  </span>
                 </a>
 
                 {hasNestedDomainSections ? (

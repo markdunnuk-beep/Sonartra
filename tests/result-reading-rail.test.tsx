@@ -7,14 +7,14 @@ import { ResultReadingRail } from '@/components/results/result-reading-rail';
 test('reading rail renders expected top-level section labels', () => {
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
 
-  assert.match(markup, />Introduction</);
-  assert.match(markup, />Your Pattern</);
-  assert.match(markup, />Domain Chapters</);
-  assert.match(markup, />Application</);
+  assert.match(markup, />01<\/span><span class="min-w-0">Introduction</);
+  assert.match(markup, />02<\/span><span class="min-w-0">Your Behaviour Pattern</);
+  assert.match(markup, />03<\/span><span class="min-w-0">How It Shows Up</);
+  assert.match(markup, />04<\/span><span class="min-w-0">How to Apply This</);
   assert.match(markup, /aria-label="Report reading navigation"/);
 });
 
-test('reading rail renders nested domain items beneath Domain Chapters', () => {
+test('reading rail renders nested domain items beneath How It Shows Up without numbering', () => {
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
 
   assert.match(markup, />Operating Style</);
@@ -24,11 +24,13 @@ test('reading rail renders nested domain items beneath Domain Chapters', () => {
   assert.match(markup, />Environment Fit</);
   assert.match(markup, />Pressure Response</);
 
-  const domainChaptersIndex = markup.indexOf('>Domain Chapters<');
+  const domainChaptersIndex = markup.indexOf('>How It Shows Up<');
   const firstNestedIndex = markup.indexOf('>Operating Style<');
 
   assert.ok(domainChaptersIndex >= 0);
   assert.ok(firstNestedIndex > domainChaptersIndex);
+  assert.equal(markup.includes('>05</span><span class="min-w-0">Operating Style<'), false);
+  assert.equal(markup.includes('>06</span><span class="min-w-0">Core Drivers<'), false);
 });
 
 test('active top-level section receives aria-current semantics', () => {
