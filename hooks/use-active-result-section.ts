@@ -205,15 +205,27 @@ export function useActiveResultSection(): string | null {
       return;
     }
 
-    const trackedElements = RESULT_READING_SECTION_IDS.map((sectionId) =>
-      document.getElementById(sectionId),
-    ).filter((element): element is HTMLElement => Boolean(element));
+    const trackedElements = Array.from(
+      document.querySelectorAll<HTMLElement>('.results-anchor-target[id]'),
+    ).reduce<HTMLElement[]>((elements, element) => {
+      if (!RESULT_READING_SECTIONS_BY_ID[element.id]) {
+        return elements;
+      }
+
+      if (elements.some((trackedElement) => trackedElement.id === element.id)) {
+        return elements;
+      }
+
+      elements.push(element);
+      return elements;
+    }, []);
 
     if (trackedElements.length === 0) {
       return;
     }
 
     const byTopOffset = [...trackedElements].sort((first, second) => first.offsetTop - second.offsetTop);
+    const orderedTrackedSectionIds = byTopOffset.map((element) => element.id);
     const observations = new Map<string, SectionObservation>();
     let frameId: number | null = null;
 
@@ -223,7 +235,7 @@ export function useActiveResultSection(): string | null {
       }
 
       const nextActiveSectionId = pickActiveSectionCandidate({
-        orderedSectionIds: RESULT_READING_SECTION_IDS,
+        orderedSectionIds: orderedTrackedSectionIds,
         currentActiveSectionId: activeSectionIdRef.current,
         observations,
       });
