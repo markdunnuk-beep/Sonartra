@@ -254,6 +254,8 @@ test('result detail page renders the system introduction above hero and keeps ca
     /import \{\s*RESULT_READING_DOMAIN_SUBSECTIONS,\s*RESULT_READING_TOP_LEVEL_SECTIONS,\s*\} from '@\/lib\/results\/result-reading-sections';/,
   );
   assert.match(source, /import \{ HeroPatternMedallion \} from '@\/components\/results\/hero-pattern-medallion';/);
+  assert.match(source, /import \{ ResultReadingRail \} from '@\/components\/results\/result-reading-rail';/);
+  assert.match(source, /import \{ ResultReadingProgress \} from '@\/components\/results\/result-reading-progress';/);
   assert.match(source, /import \{ ResultSectionIntent \} from '@\/components\/results\/result-section-intent';/);
   assert.match(source, /function NarrativeBridge\(/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
@@ -270,11 +272,15 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
   assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
+  assert.match(source, /xl:grid xl:max-w-\[80rem\] xl:grid-cols-\[minmax\(0,1fr\)_13\.25rem\] xl:gap-10/);
+  assert.match(source, /<main className="min-w-0 space-y-12 md:space-y-14">/);
   assert.match(
     source,
     /<section id=\{TOP_LEVEL_SECTION_IDS\.intro\} className=\{RESULTS_ANCHOR_TARGET_CLASS\}>/,
   );
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
+  assert.match(source, /<ResultReadingProgress className="mx-auto max-w-\[61rem\] px-1 md:px-2 xl:hidden" \/>/);
+  assert.match(source, /<ResultReadingRail className="hidden xl:block" \/>/);
   assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
   assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
   assert.match(source, /So what does this mean in practice\?/);
@@ -338,6 +344,12 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.ok(domainBridgeIndex < domainIndex);
   assert.ok(domainIndex < actionBridgeIndex);
   assert.ok(actionBridgeIndex < actionIndex);
+
+  const mobileProgressIndex = source.indexOf('<ResultReadingProgress');
+  const desktopRailIndex = source.indexOf('<ResultReadingRail');
+  assert.ok(mobileProgressIndex > introIndex);
+  assert.ok(mobileProgressIndex < heroIndex);
+  assert.ok(desktopRailIndex > actionIndex);
 });
 
 test('canonical reading model includes every required section and domain anchor id', () => {

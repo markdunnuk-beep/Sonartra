@@ -5,6 +5,8 @@ import { ApplicationPlan } from '@/components/results/application-plan';
 import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { HeroPatternMedallion } from '@/components/results/hero-pattern-medallion';
 import { ResultLinkedInShare } from '@/components/results/result-linkedin-share';
+import { ResultReadingProgress } from '@/components/results/result-reading-progress';
+import { ResultReadingRail } from '@/components/results/result-reading-rail';
 import { ResultSectionIntent } from '@/components/results/result-section-intent';
 import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
 import { buildResultsLinkedInShareAnalytics } from '@/lib/results/linkedin-share-analytics';
@@ -406,22 +408,26 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
-      <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
-        <SonartraIntroduction metadataItems={introMetadataItems} />
-        <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.intro} className="mx-auto mt-5 max-w-[61rem] px-1 md:mt-6 md:px-2" />
-      </section>
+      <div className="xl:mx-auto xl:grid xl:max-w-[80rem] xl:grid-cols-[minmax(0,1fr)_13.25rem] xl:gap-10">
+        <main className="min-w-0 space-y-12 md:space-y-14">
+          <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
+            <SonartraIntroduction metadataItems={introMetadataItems} />
+            <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.intro} className="mx-auto mt-5 max-w-[61rem] px-1 md:mt-6 md:px-2" />
+          </section>
 
-      <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
-        <NarrativeBridge>
-          With that context, here&apos;s what your patterns are showing.
-        </NarrativeBridge>
+          <ResultReadingProgress className="mx-auto max-w-[61rem] px-1 md:px-2 xl:hidden" />
 
-        {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
-        <section
-          id={TOP_LEVEL_SECTION_IDS.hero}
-          className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14`}
-          style={getRevealStyle(1)}
-        >
+          <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
+            <NarrativeBridge>
+              With that context, here&apos;s what your patterns are showing.
+            </NarrativeBridge>
+
+            {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
+            <section
+              id={TOP_LEVEL_SECTION_IDS.hero}
+              className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14`}
+              style={getRevealStyle(1)}
+            >
           <div className="max-w-[68rem] space-y-11 md:space-y-14">
             <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
               <div className="space-y-9 md:space-y-11">
@@ -485,50 +491,54 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               />
             </div>
           </div>
-        </section>
-      </div>
+            </section>
+          </div>
 
-      <div className="space-y-7 pt-5 md:space-y-8 md:pt-9">
-        <NarrativeBridge className="max-w-[38rem]">
-          Here&apos;s how these patterns show up across each domain.
-        </NarrativeBridge>
+          <div className="space-y-7 pt-5 md:space-y-8 md:pt-9">
+            <NarrativeBridge className="max-w-[38rem]">
+              Here&apos;s how these patterns show up across each domain.
+            </NarrativeBridge>
 
-        <section
-          id={TOP_LEVEL_SECTION_IDS.domains}
-          className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
-          style={getRevealStyle(2)}
-        >
-          <EditorialDivider title="Detailed reading" />
-          <SectionHeader
-            eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
-            title="Domain reading"
-            description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
-          />
-          <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.domains} className="max-w-[46rem]" />
+            <section
+              id={TOP_LEVEL_SECTION_IDS.domains}
+              className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
+              style={getRevealStyle(2)}
+            >
+              <EditorialDivider title="Detailed reading" />
+              <SectionHeader
+                eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
+                title="Domain reading"
+                description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
+              />
+              <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.domains} className="max-w-[46rem]" />
 
-          <DomainSection domainItems={resultDomainItems} />
-        </section>
-      </div>
+              <DomainSection domainItems={resultDomainItems} />
+            </section>
+          </div>
 
-      <div className="space-y-7 pt-6 md:space-y-8 md:pt-10">
-        <NarrativeBridge>
-          So what does this mean in practice?
-        </NarrativeBridge>
+          <div className="space-y-7 pt-6 md:space-y-8 md:pt-10">
+            <NarrativeBridge>
+              So what does this mean in practice?
+            </NarrativeBridge>
 
-        <section
-          id={TOP_LEVEL_SECTION_IDS.application}
-          className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
-          style={getRevealStyle(3)}
-        >
-          <EditorialDivider title="Application" />
-          <SectionHeader
-            eyebrow="Application"
-            title="Turning insight into impact"
-            description="This chapter brings the report together into a practical reading of contribution, risk, development, and next steps."
-          />
-          <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.application} className="max-w-[46rem]" />
-          <ApplicationPlan application={result.application} />
-        </section>
+            <section
+              id={TOP_LEVEL_SECTION_IDS.application}
+              className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
+              style={getRevealStyle(3)}
+            >
+              <EditorialDivider title="Application" />
+              <SectionHeader
+                eyebrow="Application"
+                title="Turning insight into impact"
+                description="This chapter brings the report together into a practical reading of contribution, risk, development, and next steps."
+              />
+              <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.application} className="max-w-[46rem]" />
+              <ApplicationPlan application={result.application} />
+            </section>
+          </div>
+        </main>
+
+        <ResultReadingRail className="hidden xl:block" />
       </div>
     </PageFrame>
   );
