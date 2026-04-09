@@ -5,6 +5,7 @@ import { ApplicationPlan } from '@/components/results/application-plan';
 import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { HeroPatternMedallion } from '@/components/results/hero-pattern-medallion';
 import { ResultLinkedInShare } from '@/components/results/result-linkedin-share';
+import { ResultSectionIntent } from '@/components/results/result-section-intent';
 import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
 import { buildResultsLinkedInShareAnalytics } from '@/lib/results/linkedin-share-analytics';
 import {
@@ -407,6 +408,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     <PageFrame className="space-y-12 md:space-y-14">
       <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
         <SonartraIntroduction metadataItems={introMetadataItems} />
+        <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.intro} className="mx-auto mt-5 max-w-[61rem] px-1 md:mt-6 md:px-2" />
       </section>
 
       <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
@@ -444,6 +446,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                       {heroHeadline}
                     </h1>
                   ) : null}
+                  <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.hero} />
                   {heroSubheadline ? (
                     <p className="sonartra-report-body-soft max-w-[42rem] text-[1rem] leading-8 text-white/68 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
                       {heroSubheadline}
@@ -501,6 +504,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             title="Domain reading"
             description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
           />
+          <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.domains} className="max-w-[46rem]" />
 
           <DomainSection domainItems={resultDomainItems} />
         </section>
@@ -522,6 +526,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             title="Turning insight into impact"
             description="This chapter brings the report together into a practical reading of contribution, risk, development, and next steps."
           />
+          <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.application} className="max-w-[46rem]" />
           <ApplicationPlan application={result.application} />
         </section>
       </div>

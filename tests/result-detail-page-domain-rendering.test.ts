@@ -254,6 +254,7 @@ test('result detail page renders the system introduction above hero and keeps ca
     /import \{\s*RESULT_READING_DOMAIN_SUBSECTIONS,\s*RESULT_READING_TOP_LEVEL_SECTIONS,\s*\} from '@\/lib\/results\/result-reading-sections';/,
   );
   assert.match(source, /import \{ HeroPatternMedallion \} from '@\/components\/results\/hero-pattern-medallion';/);
+  assert.match(source, /import \{ ResultSectionIntent \} from '@\/components\/results\/result-section-intent';/);
   assert.match(source, /function NarrativeBridge\(/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroSubheadline = result\.hero\.subheadline\?\.trim\(\) \?\? '';/);
@@ -287,6 +288,10 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.hero\}/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.application\}/);
+  assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.intro\}/);
+  assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.hero\} \/>/);
+  assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
+  assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.application\}/);
   assert.match(source, /id=\{domainAnchorId \?\? undefined\}/);
   assert.match(source, /domainAnchorId: CANONICAL_DOMAIN_ANCHOR_IDS\[index\] \?\? null,/);
   assert.match(source, /<HeroPatternMedallion\s+patternKey=\{heroPatternKey\}\s+label=\{heroPatternLabel\}/);
