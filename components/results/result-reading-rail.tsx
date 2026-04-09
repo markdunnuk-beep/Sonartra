@@ -129,7 +129,7 @@ export function ResultReadingRail({
             alt="Sonartra"
             width={174}
             height={28}
-            className="h-5 w-auto opacity-[0.9]"
+            className="h-10 opacity-[0.9] pb-5"
           />
         </div>
         <ul className="space-y-0.5" role="list">
