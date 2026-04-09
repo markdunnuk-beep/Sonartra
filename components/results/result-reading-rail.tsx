@@ -58,7 +58,7 @@ function UtilityIconButton({
   children: ReactNode;
 }) {
   const className =
-    'sonartra-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-white/52 outline-none transition hover:text-white/79 focus-visible:text-white/90';
+    'sonartra-focus-ring sonartra-result-rail-icon inline-flex h-9 w-9 items-center justify-center rounded-md text-white/52 outline-none transition hover:text-white/79 focus-visible:text-white/90';
 
   if (href && !disabled) {
     return (
@@ -144,7 +144,7 @@ export function ResultReadingRail({
                   href={`#${section.id}`}
                   aria-current={isExactTopLevelActive ? 'location' : undefined}
                   className={cn(
-                    'sonartra-motion-nav-item sonartra-focus-ring group relative block rounded-md px-2.5 py-1.5 text-[0.79rem] leading-5 tracking-[0.01em] text-white/47 outline-none',
+                    'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring group relative block rounded-md px-2.5 py-1.5 text-[0.79rem] leading-5 tracking-[0.01em] text-white/47 outline-none',
                     'hover:text-white/67 focus-visible:text-white/84',
                     isTopLevelActive && 'bg-white/[0.024] text-white/83',
                   )}
@@ -152,7 +152,7 @@ export function ResultReadingRail({
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'sonartra-motion-active-bar absolute inset-y-1.5 left-0 w-px rounded-full bg-white/40 opacity-0 scale-y-75',
+                      'sonartra-motion-active-bar sonartra-result-rail-marker absolute inset-y-1.5 left-0 w-px rounded-full bg-white/40 opacity-0 scale-y-[0.82]',
                       (isTopLevelActive || isExactTopLevelActive) && 'opacity-100 scale-y-100',
                     )}
                   />
@@ -182,7 +182,7 @@ export function ResultReadingRail({
                             href={`#${domainSection.id}`}
                             aria-current={isDomainSubsectionActive ? 'location' : undefined}
                             className={cn(
-                              'sonartra-motion-nav-item sonartra-focus-ring group relative block rounded-md px-2.5 py-1 text-[0.75rem] leading-5 tracking-[0.012em] text-white/43 outline-none',
+                              'sonartra-motion-nav-item sonartra-result-rail-item-subtle sonartra-focus-ring group relative block rounded-md px-2.5 py-1 text-[0.75rem] leading-5 tracking-[0.012em] text-white/43 outline-none',
                               'hover:text-white/62 focus-visible:text-white/82',
                               isDomainSubsectionActive && 'bg-white/[0.022] text-white/79',
                             )}
@@ -190,7 +190,7 @@ export function ResultReadingRail({
                             <span
                               aria-hidden="true"
                               className={cn(
-                                'sonartra-motion-active-bar absolute inset-y-1.5 left-0 w-px rounded-full bg-white/38 opacity-0 scale-y-75',
+                                'sonartra-motion-active-bar sonartra-result-rail-marker absolute inset-y-1.5 left-0 w-px rounded-full bg-white/38 opacity-0 scale-y-[0.86]',
                                 isDomainSubsectionActive && 'opacity-100 scale-y-100',
                               )}
                             />
