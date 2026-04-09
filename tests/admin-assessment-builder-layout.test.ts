@@ -20,8 +20,8 @@ test('authoring layout switches into published-no-draft banner mode', () => {
   assert.match(source, /assessment\.builderMode === 'published_no_draft'/);
   assert.match(source, /Browse the published assessment and create a draft when you are ready to change it\./);
   assert.match(source, /<AdminPublishedNoDraftBanner/);
-  assert.match(source, /space-y-5 sm:space-y-6 lg:space-y-8/);
-  assert.match(source, /overflow-hidden p-4 sm:p-5 lg:p-7/);
+  assert.match(source, /space-y-4 sm:space-y-5 lg:space-y-6/);
+  assert.match(source, /overflow-hidden p-4 sm:p-5 lg:p-6/);
 });
 
 test('guarded authoring stages route published assessments into the reusable read-only state', () => {
@@ -52,6 +52,6 @@ test('authoring layout tightens header chrome for small screens without removing
     'layout.tsx',
   );
 
-  assert.match(source, /<header className="space-y-2 sm:space-y-3">/);
-  assert.match(source, /text-\[1\.72rem\].*sm:text-\[2rem\].*lg:text-\[2\.35rem\]/);
+  assert.doesNotMatch(source, /Admin Workspace/);
+  assert.match(source, /text-\[1\.72rem\].*sm:text-\[2rem\].*lg:text-\[2\.2rem\]/);
 });

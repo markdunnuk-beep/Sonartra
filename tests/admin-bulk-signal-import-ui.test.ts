@@ -62,6 +62,8 @@ test('bulk signal import panel shows domain-required and non-overwrite guidance 
   assert.match(source, /New signals will be added to each matched domain\. Existing signals will not be changed or removed\./);
   assert.match(source, /No valid rows were found to import\. Fix the rejected rows and try again\./);
   assert.match(source, /Review the rejected rows below, then try importing again\./);
+  assert.match(source, /Show import format/);
+  assert.match(source, /Show example/);
 });
 
 test('signal authoring renders the bulk panel only in signals mode without a manual add-signal section', () => {

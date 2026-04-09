@@ -103,6 +103,23 @@ function SummaryGrid({ state }: Readonly<{ state: AdminBulkWeightImportState }>)
   );
 }
 
+function ReferenceDisclosure({
+  title,
+  children,
+}: Readonly<{
+  title: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <details className="overflow-hidden rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3">
+      <summary className="sonartra-motion-details-summary cursor-pointer list-none text-sm font-medium text-white/68">
+        {title}
+      </summary>
+      <div className="mt-3 text-sm leading-7 text-white/62">{children}</div>
+    </details>
+  );
+}
+
 export function AdminBulkWeightImport({
   assessmentVersionId,
   isEditableAssessmentVersion,
@@ -159,18 +176,11 @@ export function AdminBulkWeightImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Weights</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
             Import weights
           </h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
             Paste one weight row per line using the format: question_number | option_label | signal_key | weight
-          </p>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Each row assigns one signal weight to one option for one question.
-          </p>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Import replaces all existing weights for each matched question/option group in this draft version.
           </p>
         </div>
 
@@ -181,10 +191,23 @@ export function AdminBulkWeightImport({
         ) : null}
 
         <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
-          <p className="sonartra-admin-feedback-section-title">Expected format</p>
-          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
-            {BULK_WEIGHT_FORMAT_EXAMPLE}
-          </pre>
+          <p className="text-sm leading-7 text-white/58">
+            Keep the syntax nearby, but let the actual import action stay primary.
+          </p>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <ReferenceDisclosure title="Show import format">
+              <div className="space-y-3">
+                <p>Format: <code>question_number | option_label | signal_key | weight</code></p>
+                <p>Each row assigns one signal weight to one option for one question.</p>
+                <p>Import replaces all existing weights for each matched question/option group in this draft version.</p>
+              </div>
+            </ReferenceDisclosure>
+            <ReferenceDisclosure title="Show example">
+              <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
+                {BULK_WEIGHT_FORMAT_EXAMPLE}
+              </pre>
+            </ReferenceDisclosure>
+          </div>
         </div>
 
         <label className="block space-y-2">

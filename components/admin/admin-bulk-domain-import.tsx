@@ -62,6 +62,23 @@ function SummaryGrid({ state }: Readonly<{ state: AdminDomainBulkImportState }>)
   );
 }
 
+function ReferenceDisclosure({
+  title,
+  children,
+}: Readonly<{
+  title: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <details className="overflow-hidden rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3">
+      <summary className="sonartra-motion-details-summary cursor-pointer list-none text-sm font-medium text-white/68">
+        {title}
+      </summary>
+      <div className="mt-3 text-sm leading-7 text-white/62">{children}</div>
+    </details>
+  );
+}
+
 export function AdminBulkDomainImport({
   assessmentVersionId,
   isEditableAssessmentVersion,
@@ -118,16 +135,11 @@ export function AdminBulkDomainImport({
     <SurfaceCard className="sonartra-motion-reveal-soft overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Bulk import</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
             Bulk import domains
           </h3>
           <p className="text-white/62 max-w-3xl text-sm leading-7">
             Paste one domain per line to add domains to this assessment version.
-          </p>
-          <p className="text-white/62 max-w-3xl text-sm leading-7">
-            Accepted formats: <code>label</code>, <code>label|description</code>, or{' '}
-            <code>label|key|description</code>.
           </p>
         </div>
 
@@ -146,10 +158,22 @@ export function AdminBulkDomainImport({
         {successMessage ? <AdminFeedbackNotice tone="success">{successMessage}</AdminFeedbackNotice> : null}
 
         <div className="sonartra-admin-feedback-card sonartra-motion-surface rounded-[1rem] border p-4">
-          <p className="sonartra-admin-feedback-section-title">Accepted format</p>
-          <pre className="text-white/78 mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7">
-            {DOMAIN_IMPORT_FORMAT_EXAMPLE}
-          </pre>
+          <p className="text-sm leading-7 text-white/58">
+            Import guidance stays available here without competing with the main action surface.
+          </p>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <ReferenceDisclosure title="Show import format">
+              <p>
+                Accepted formats: <code>label</code>, <code>label|description</code>, or{' '}
+                <code>label|key|description</code>.
+              </p>
+            </ReferenceDisclosure>
+            <ReferenceDisclosure title="Show example">
+              <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
+                {DOMAIN_IMPORT_FORMAT_EXAMPLE}
+              </pre>
+            </ReferenceDisclosure>
+          </div>
         </div>
 
         <label className="block space-y-2">

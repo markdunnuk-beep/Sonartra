@@ -54,6 +54,8 @@ test('bulk domain import panel shows non-overwrite guidance and retry guidance f
   assert.match(source, /New domains will be added\. Existing domains will not be changed or removed\./);
   assert.match(source, /No valid rows were found to import\. Fix the rejected rows and try again\./);
   assert.match(source, /Review the rejected rows below, then try importing again\./);
+  assert.match(source, /Show import format/);
+  assert.match(source, /Show example/);
 });
 
 test('domain authoring renders the bulk panel only in domains mode and omits the manual create form', () => {

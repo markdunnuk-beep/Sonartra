@@ -6,7 +6,6 @@ import {
   LabelPill,
   MetaItem,
   PageFrame,
-  PageHeader,
   SectionHeader,
   SurfaceCard,
   cn,
@@ -16,7 +15,6 @@ import type {
   AdminAssessmentDashboardSummary,
   AdminAssessmentDraftReadiness,
   AdminAssessmentOverallStatus,
-  AdminAssessmentVersionSummary,
 } from '@/lib/server/admin-assessment-dashboard';
 
 function formatDate(value: string | null): string {
@@ -46,17 +44,6 @@ function getStatusPillClass(status: AdminAssessmentOverallStatus): string {
   }
 }
 
-function getVersionPillClass(status: AdminAssessmentVersionSummary['status']): string {
-  switch (status) {
-    case 'published':
-      return 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]';
-    case 'draft':
-      return 'border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]';
-    case 'archived':
-      return 'border-white/10 bg-white/[0.045] text-white/62';
-  }
-}
-
 function getDraftReadinessPillClass(status: AdminAssessmentDraftReadiness): string {
   switch (status) {
     case 'ready':
@@ -79,40 +66,6 @@ function formatDraftReadiness(status: AdminAssessmentDraftReadiness): string {
   }
 }
 
-function VersionSummaryCard({
-  label,
-  version,
-  emptyCopy,
-}: {
-  label: string;
-  version: AdminAssessmentVersionSummary | null;
-  emptyCopy: string;
-}) {
-  return (
-    <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-4">
-      <p className="sonartra-page-eyebrow">{label}</p>
-      {version ? (
-        <div className="mt-3 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
-              {version.versionTag}
-            </h3>
-            <LabelPill className={getVersionPillClass(version.status)}>
-              {version.status.replace('_', ' ')}
-            </LabelPill>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <MetaItem label="Questions" value={String(version.questionCount)} />
-            <MetaItem label="Updated" value={formatDate(version.updatedAt)} />
-          </div>
-        </div>
-      ) : (
-        <p className="mt-3 text-sm leading-7 text-white/54">{emptyCopy}</p>
-      )}
-    </div>
-  );
-}
-
 function SummaryCard({
   label,
   value,
@@ -131,61 +84,20 @@ function SummaryCard({
   );
 }
 
-function AssessmentVersionsList({
-  versions,
-}: {
-  versions: readonly AdminAssessmentVersionSummary[];
-}) {
-  if (versions.length === 0) {
-    return (
-      <div className="rounded-[1.2rem] border border-dashed border-white/10 bg-white/[0.02] p-4 text-sm leading-7 text-white/54">
-        No versions have been created for this assessment yet.
-      </div>
-    );
-  }
-
-  return (
-    <div className="rounded-[1.25rem] border border-white/8 bg-black/10">
-      <div className="grid gap-3 border-b border-white/8 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/34 md:grid-cols-[minmax(0,1.1fr)_140px_120px_120px]">
-        <span>Version</span>
-        <span>Status</span>
-        <span>Questions</span>
-        <span>Updated</span>
-      </div>
-      <div className="divide-y divide-white/8">
-        {versions.map((version) => (
-          <div
-            className="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1.1fr)_140px_120px_120px] md:items-center"
-            key={version.assessmentVersionId}
-          >
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white">{version.versionTag}</p>
-              <p className="mt-1 truncate text-xs text-white/46">
-                {version.publishedAt ? `Published ${formatDate(version.publishedAt)}` : 'Unpublished'}
-              </p>
-            </div>
-            <div>
-              <LabelPill className={getVersionPillClass(version.status)}>{version.status}</LabelPill>
-            </div>
-            <p className="text-sm text-white/68">{version.questionCount}</p>
-            <p className="text-sm text-white/68">{formatDate(version.updatedAt)}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function AssessmentCard({
   assessment,
 }: {
   assessment: AdminAssessmentDashboardItem;
 }) {
+  const reviewHref = assessment.latestDraftVersion
+    ? `/admin/assessments/${assessment.assessmentKey}/review`
+    : null;
+
   return (
     <SurfaceCard className="p-5 lg:p-6">
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-2">
               <LabelPill>{assessment.assessmentKey}</LabelPill>
               <LabelPill className={getStatusPillClass(assessment.overallStatus)}>
@@ -201,21 +113,32 @@ function AssessmentCard({
               ) : null}
             </div>
 
-            <div className="space-y-2">
-              <h2 className="text-[1.55rem] font-semibold tracking-[-0.03em] text-white">
-                {assessment.title}
-              </h2>
-              <p className="max-w-3xl text-sm leading-7 text-white/62">
-                {assessment.description ?? assessment.overallStatusDetail}
-              </p>
-            </div>
+            <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
+              {assessment.title}
+            </h2>
+            <p className="max-w-2xl text-sm leading-7 text-white/62">
+              {assessment.description ?? assessment.overallStatusDetail}
+            </p>
           </div>
 
-          <ButtonLink href={assessment.actionHref}>Manage</ButtonLink>
+          <div className="flex flex-wrap items-center gap-3">
+            <ButtonLink href={assessment.actionHref} variant="primary">
+              Open builder
+            </ButtonLink>
+            {reviewHref ? (
+              <Link
+                className={cn(
+                  'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/72 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
+                )}
+                href={reviewHref}
+              >
+                Review draft
+              </Link>
+            ) : null}
+          </div>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-5">
-          <MetaItem label="Versions" value={String(assessment.versionCount)} />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <MetaItem
             label="Published version"
             value={assessment.publishedVersion?.versionTag ?? 'None'}
@@ -223,40 +146,7 @@ function AssessmentCard({
           <MetaItem label="Latest draft" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
           <MetaItem label="Draft readiness" value={formatDraftReadiness(assessment.latestDraftReadiness)} />
           <MetaItem label="Last updated" value={formatDate(assessment.latestUpdatedAt)} />
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-2">
-          <VersionSummaryCard
-            label="Current published"
-            version={assessment.publishedVersion}
-            emptyCopy="No published version is available yet."
-          />
-          <VersionSummaryCard
-            label="Latest draft"
-            version={assessment.latestDraftVersion}
-            emptyCopy="No draft version is currently available."
-          />
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="sonartra-page-eyebrow">Versions</p>
-              <p className="mt-1 text-sm text-white/54">
-                See every version and its status.
-              </p>
-            </div>
-            <Link
-              className={cn(
-                'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/76 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
-              )}
-              href={assessment.actionHref}
-            >
-              View assessment
-            </Link>
-          </div>
-
-          <AssessmentVersionsList versions={assessment.versions} />
+          <MetaItem label="Versions" value={String(assessment.versionCount)} />
         </div>
       </div>
     </SurfaceCard>
@@ -272,29 +162,22 @@ export function AdminAssessmentsDashboard({
 }) {
   return (
     <PageFrame>
-      <PageHeader
-        eyebrow="Admin Workspace"
-        title="Assessments"
-        description="View assessments, drafts, and published versions."
-      />
-
-      <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <LabelPill className="bg-white/[0.08] text-white/82">Assessment list</LabelPill>
-            <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.45rem]">
-              Build assessments and manage versions.
-            </h2>
-            <p className="max-w-2xl text-sm leading-7 text-white/68">
-              See what is published, what is still a draft, and what needs work.
+      <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2">
+            <h1 className="max-w-3xl text-[2rem] font-semibold tracking-[-0.03em] text-white lg:text-[2.35rem]">
+              Assessments
+            </h1>
+            <p className="max-w-2xl text-sm leading-7 text-white/66">
+              Manage drafts, published versions, and what needs attention next.
             </p>
           </div>
 
-          <div className="flex flex-col items-start gap-3 lg:items-end">
+          <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href="/admin/assessments/create" variant="primary">
               Create assessment
             </ButtonLink>
-            <p className="text-sm text-white/54">Create a new assessment and start with a draft.</p>
+            <p className="text-sm text-white/52">Starts a new assessment with draft version `1.0.0`.</p>
           </div>
         </div>
       </SurfaceCard>
@@ -338,7 +221,7 @@ export function AdminAssessmentsDashboard({
       <section className="sonartra-section">
         <SectionHeader
           eyebrow="Assessments"
-          title="Build assessment"
+          title="Build"
           description="Open an assessment to keep building."
         />
 

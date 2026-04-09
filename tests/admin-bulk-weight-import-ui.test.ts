@@ -44,6 +44,8 @@ test('bulk weight import panel shows the required format help and a single impor
   assert.match(source, /question_number \| option_label \| signal_key \| weight/);
   assert.match(source, /Importing\.\.\./);
   assert.match(source, /hasImported \? 'Imported' : 'Import'/);
+  assert.match(source, /Show import format/);
+  assert.match(source, /Show example/);
   assert.doesNotMatch(source, /Preview import/);
   assert.doesNotMatch(source, /Clear/);
 });

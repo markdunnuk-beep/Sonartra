@@ -93,6 +93,23 @@ function buildAcceptedPreviewGroups(
     .filter((group) => group.rows.length > 0);
 }
 
+function ReferenceDisclosure({
+  title,
+  children,
+}: Readonly<{
+  title: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <details className="overflow-hidden rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3">
+      <summary className="sonartra-motion-details-summary cursor-pointer list-none text-sm font-medium text-white/68">
+        {title}
+      </summary>
+      <div className="mt-3 text-sm leading-7 text-white/62">{children}</div>
+    </details>
+  );
+}
+
 export function AdminBulkSignalImport({
   assessmentVersionId,
   domains,
@@ -157,19 +174,11 @@ export function AdminBulkSignalImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">Bulk import</p>
           <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
             Bulk import signals
           </h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
             Paste one signal per line to add signals across the authored domains in one pass.
-          </p>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Accepted formats: <code>domain|label</code>, <code>domain|label|description</code>, or{' '}
-            <code>domain|label|key|description</code>.
-          </p>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Prefer the exact <code>domain_key</code>. Exact domain labels also work. No fuzzy matching is applied.
           </p>
         </div>
 
@@ -194,10 +203,27 @@ export function AdminBulkSignalImport({
         {successMessage ? <AdminFeedbackNotice tone="success">{successMessage}</AdminFeedbackNotice> : null}
 
         <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
-          <p className="sonartra-admin-feedback-section-title">Accepted format</p>
-          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
-            {SIGNAL_IMPORT_FORMAT_EXAMPLE}
-          </pre>
+          <p className="text-sm leading-7 text-white/58">
+            Keep the import rules close at hand without letting them dominate the page.
+          </p>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <ReferenceDisclosure title="Show import format">
+              <div className="space-y-3">
+                <p>
+                  Accepted formats: <code>domain|label</code>, <code>domain|label|description</code>, or{' '}
+                  <code>domain|label|key|description</code>.
+                </p>
+                <p>
+                  Prefer the exact <code>domain_key</code>. Exact domain labels also work. No fuzzy matching is applied.
+                </p>
+              </div>
+            </ReferenceDisclosure>
+            <ReferenceDisclosure title="Show example">
+              <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
+                {SIGNAL_IMPORT_FORMAT_EXAMPLE}
+              </pre>
+            </ReferenceDisclosure>
+          </div>
         </div>
 
         <label className="block space-y-2">
