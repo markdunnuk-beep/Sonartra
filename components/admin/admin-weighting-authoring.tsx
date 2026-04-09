@@ -43,14 +43,18 @@ function QuestionSelect({
   onChange: (questionId: string) => void;
 }>) {
   return (
-    <label className="block space-y-2">
-      <span className="text-sm font-medium text-white">Question</span>
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-white" htmlFor="weighting-question-select">
+        Question
+      </label>
       <select
         aria-label="Select question for weighting grid"
         className={cn(
           'sonartra-focus-ring min-h-11 w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white',
           'hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
         )}
+        id="weighting-question-select"
+        name="selectedQuestionId"
         onChange={(event) => onChange(event.currentTarget.value)}
         value={selectedQuestionId}
       >
@@ -60,7 +64,7 @@ function QuestionSelect({
           </option>
         ))}
       </select>
-    </label>
+    </div>
   );
 }
 
@@ -151,17 +155,17 @@ export function AdminWeightingAuthoring({
 
       {questions.length === 0 ? (
         <EmptyState
-          description="Add questions and response options before setting scoring."
+          description="Response scoring depends on authored questions first. Add at least one question, then return here to map weights."
           title="No questions yet"
         />
       ) : optionsCount === 0 ? (
         <EmptyState
-          description="Add options before setting scoring."
-          title="Add options"
+          description="Weighting depends on response options. Add options to at least one question before setting scoring."
+          title="No response options yet"
         />
       ) : availableSignals.length === 0 ? (
         <EmptyState
-          description="Add signals before setting scoring."
+          description="Weighting depends on authored signals. Add signals before setting scoring."
           title="No signals yet"
         />
       ) : selectedQuestion ? (

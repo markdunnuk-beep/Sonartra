@@ -139,47 +139,62 @@ function normalizeOptionState(
 }
 
 function Field({
+  htmlFor,
   label,
   hint,
   error,
   children,
 }: Readonly<{
+  htmlFor: string;
   label: string;
   hint: string;
   error?: string;
   children: React.ReactNode;
 }>) {
   return (
-    <label className="block space-y-2">
+    <div className="space-y-2">
       <div className="space-y-1">
-        <span className="block text-sm font-medium text-white">{label}</span>
-        <span className="block text-sm leading-6 text-white/54">{hint}</span>
+        <label className="block text-sm font-medium text-white" htmlFor={htmlFor}>
+          {label}
+        </label>
+        <span className="block text-sm leading-6 text-white/54" id={`${htmlFor}-hint`}>
+          {hint}
+        </span>
       </div>
       {children}
-      {error ? <p className="text-sm text-[rgba(255,198,198,0.92)]">{error}</p> : null}
-    </label>
+      {error ? (
+        <p className="text-sm text-[rgba(255,198,198,0.92)]" id={`${htmlFor}-error`}>
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
 function TextArea({
+  id,
   name,
   defaultValue,
   value,
   placeholder,
   error,
   minHeightClass = 'min-h-[112px]',
+  describedBy,
   onChange,
 }: Readonly<{
+  id: string;
   name: string;
   defaultValue?: string;
   value?: string;
   placeholder: string;
   error?: string;
   minHeightClass?: string;
+  describedBy?: string;
   onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }>) {
   return (
     <textarea
+      aria-describedby={describedBy}
       className={cn(
         'sonartra-focus-ring w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
         minHeightClass,
@@ -187,6 +202,7 @@ function TextArea({
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
+      id={id}
       name={name}
       {...(value !== undefined ? { value } : { defaultValue: defaultValue ?? '' })}
       onChange={onChange}
@@ -516,12 +532,15 @@ function BulkQuestionByDomainFormFields({
         </div>
         <form action={formAction} className="space-y-5">
           <Field
+            htmlFor="bulk-question-lines"
             error={currentState.fieldErrors.questionLines}
             hint="Blank lines are ignored. Each non-empty row must include one exact domain token and one question."
             label="Questions by domain"
           >
             <TextArea
+              describedBy="bulk-question-lines-hint bulk-question-lines-error"
               error={currentState.fieldErrors.questionLines}
+              id="bulk-question-lines"
               minHeightClass="min-h-[220px]"
               name="questionLines"
               onChange={(event) => {
@@ -916,7 +935,7 @@ export function AdminQuestionOptionAuthoring({
 
       {domains.length === 0 ? (
         <EmptyState
-          description="Add a domain before adding questions."
+          description="Questions depend on question-section domains. Add at least one domain before authoring questions."
           title="No domains yet"
         />
       ) : (
@@ -941,8 +960,8 @@ export function AdminQuestionOptionAuthoring({
             <EmptyState
               description={
                 mode === 'responses'
-                  ? 'Add questions before setting response options.'
-                  : 'Add your first question.'
+                  ? 'Response options depend on authored questions. Add at least one question before setting responses.'
+                  : 'Add your first question to start the assessment flow.'
               }
               title="No questions yet"
             />

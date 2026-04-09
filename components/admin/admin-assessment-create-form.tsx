@@ -15,56 +15,81 @@ import {
   type AdminAssessmentCreateFormState,
 } from '@/lib/admin/admin-assessment-create';
 import { createAssessmentAction } from '@/lib/server/admin-assessment-create';
-import { syncAssessmentKeyFromTitle } from '@/lib/admin/assessment-key';
+import { ASSESSMENT_KEY_PATTERN, syncAssessmentKeyFromTitle } from '@/lib/admin/assessment-key';
 
 function FieldShell({
+  htmlFor,
   label,
   hint,
   error,
+  required = false,
   children,
 }: Readonly<{
+  htmlFor: string;
   label: string;
   hint: string;
   error?: string;
+  required?: boolean;
   children: React.ReactNode;
 }>) {
+  const hintId = `${htmlFor}-hint`;
+  const errorId = `${htmlFor}-error`;
+
   return (
-    <label className="block space-y-2">
+    <div className="space-y-2">
       <div className="space-y-1">
-        <span className="block text-sm font-medium text-white">{label}</span>
-        <span className="block text-sm leading-6 text-white/54">{hint}</span>
+        <label className="block text-sm font-medium text-white" htmlFor={htmlFor}>
+          {label}
+          {required ? <span className="ml-2 text-xs uppercase tracking-[0.14em] text-white/46">Required</span> : null}
+        </label>
+        <p className="block text-sm leading-6 text-white/54" id={hintId}>
+          {hint}
+        </p>
       </div>
       {children}
-      {error ? <p className="text-sm text-[rgba(255,198,198,0.92)]">{error}</p> : null}
-    </label>
+      {error ? (
+        <p className="text-sm text-[rgba(255,198,198,0.92)]" id={errorId}>
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
 function TextInput({
+  id,
   name,
   value,
   placeholder,
   error,
+  describedBy,
+  required = false,
   onChange,
 }: Readonly<{
+  id: string;
   name: string;
   value: string;
   placeholder: string;
   error?: string;
+  describedBy?: string;
+  required?: boolean;
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }>) {
   return (
     <input
       aria-invalid={error ? true : undefined}
+      aria-describedby={describedBy}
       className={cn(
         'sonartra-focus-ring min-h-12 w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
         error
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
+      id={id}
       name={name}
       onChange={onChange}
       placeholder={placeholder}
+      required={required}
       type="text"
       value={value}
     />
@@ -72,27 +97,33 @@ function TextInput({
 }
 
 function TextArea({
+  id,
   name,
   value,
   placeholder,
   error,
+  describedBy,
   onChange,
 }: Readonly<{
+  id: string;
   name: string;
   value: string;
   placeholder: string;
   error?: string;
+  describedBy?: string;
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
 }>) {
   return (
     <textarea
       aria-invalid={error ? true : undefined}
+      aria-describedby={describedBy}
       className={cn(
         'sonartra-focus-ring min-h-[152px] w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
         error
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
+      id={id}
       name={name}
       onChange={onChange}
       placeholder={placeholder}
@@ -101,16 +132,21 @@ function TextArea({
   );
 }
 
-function SubmitButton() {
+function SubmitButton({
+  disabled,
+}: Readonly<{
+  disabled: boolean;
+}>) {
   const { pending } = useFormStatus();
+  const isDisabled = pending || disabled;
 
   return (
     <button
       className={cn(
         'sonartra-button sonartra-focus-ring min-w-[164px]',
-        pending ? 'cursor-wait border-white/8 bg-white/[0.05] text-white/48' : 'sonartra-button-primary',
+        isDisabled ? 'cursor-not-allowed border-white/8 bg-white/[0.05] text-white/48' : 'sonartra-button-primary',
       )}
-      disabled={pending}
+      disabled={isDisabled}
       type="submit"
     >
       {pending ? 'Creating...' : 'Create assessment'}
@@ -145,6 +181,12 @@ export function AdminAssessmentCreateForm() {
         hasManualOverride: false,
       }),
   );
+  const titleValue = title.trim();
+  const assessmentKeyValue = assessmentKey.trim();
+  const hasMinimumValidState = titleValue.length > 0 && assessmentKeyValue.length > 0;
+  const assessmentKeyLooksValid =
+    assessmentKeyValue.length === 0 || ASSESSMENT_KEY_PATTERN.test(assessmentKeyValue);
+  const canCreateAssessment = hasMinimumValidState && assessmentKeyLooksValid;
 
   function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const nextTitle = event.currentTarget.value;
@@ -181,45 +223,58 @@ export function AdminAssessmentCreateForm() {
         <form action={formAction} className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-2">
             <FieldShell
+              htmlFor="assessment-title"
               error={safeState.fieldErrors.title}
-              hint="This name is shown in admin."
+              hint="Required. This name is shown across the admin workspace."
               label="Assessment title"
+              required
             >
               <TextInput
+                describedBy="assessment-title-hint assessment-title-error"
                 error={safeState.fieldErrors.title}
+                id="assessment-title"
                 name="title"
                 onChange={handleTitleChange}
                 placeholder="Leadership Signals"
+                required
                 value={title}
               />
             </FieldShell>
 
             <FieldShell
+              htmlFor="assessment-key"
               error={safeState.fieldErrors.assessmentKey}
-              hint="Use lowercase letters, numbers, and hyphens."
+              hint="Required. Use lowercase letters, numbers, and single hyphens only."
               label="Assessment key"
+              required
             >
               <TextInput
+                describedBy="assessment-key-hint assessment-key-error"
                 error={safeState.fieldErrors.assessmentKey}
+                id="assessment-key"
                 name="assessmentKey"
                 onChange={handleAssessmentKeyChange}
                 placeholder="leadership-signals"
+                required
                 value={assessmentKey}
               />
             </FieldShell>
           </div>
 
           <FieldShell
+            htmlFor="assessment-description"
             error={safeState.fieldErrors.description}
             hint="Optional short summary."
             label="Description"
           >
             <TextArea
-              value={description}
+              describedBy="assessment-description-hint assessment-description-error"
               error={safeState.fieldErrors.description}
+              id="assessment-description"
               name="description"
               onChange={(event) => setDescription(event.currentTarget.value)}
               placeholder="A focused individual assessment for leadership behaviour and decision patterns."
+              value={description}
             />
           </FieldShell>
 
@@ -227,6 +282,9 @@ export function AdminAssessmentCreateForm() {
             <p className="sonartra-page-eyebrow">Creation result</p>
             <p className="mt-2 text-sm leading-7 text-white/62">
               This creates the assessment and its first draft, version `1.0.0`.
+            </p>
+            <p className="mt-2 text-sm leading-7 text-white/52">
+              Provide the title and assessment key before creating the first draft.
             </p>
           </div>
 
@@ -237,7 +295,7 @@ export function AdminAssessmentCreateForm() {
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <SubmitButton />
+            <SubmitButton disabled={!canCreateAssessment} />
             <ButtonLink href="/admin/assessments">Cancel</ButtonLink>
           </div>
         </form>

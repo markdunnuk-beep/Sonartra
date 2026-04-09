@@ -93,6 +93,7 @@ test('builder navigation resolves language as a first-class active route', () =>
   assert.match(componentSource, /href: `\/admin\/assessments\/\$\{assessment\.assessmentKey\}\/\$\{step\.slug\}`/);
   assert.match(componentSource, /overflow-x-auto/);
   assert.match(componentSource, /min-w-\[11rem\] shrink-0/);
+  assert.match(componentSource, /function StepStatusBadge/);
 });
 
 test('stepper marks assessment intro complete when meaningful draft intro content exists', () => {
@@ -114,7 +115,7 @@ test('stepper leaves assessment intro incomplete when no meaningful draft intro 
     },
   });
 
-  assert.equal(getStepStatus('assessment-intro', 'overview', assessment), 'incomplete');
+  assert.equal(getStepStatus('assessment-intro', 'overview', assessment), 'empty');
 });
 
 test('stepper marks language complete when imported language datasets exist', () => {
@@ -136,8 +137,8 @@ test('stepper uses a neutral language state when dataset availability cannot be 
     },
   });
 
-  assert.equal(getStepStatus('assessment-intro', 'overview', assessment), 'neutral');
-  assert.equal(getStepStatus('language', 'overview', assessment), 'neutral');
+  assert.equal(getStepStatus('assessment-intro', 'overview', assessment), 'unavailable');
+  assert.equal(getStepStatus('language', 'overview', assessment), 'unavailable');
 });
 
 test('stepper switches into reference mode when a published assessment has no editable draft', () => {
@@ -145,9 +146,112 @@ test('stepper switches into reference mode when a published assessment has no ed
     builderMode: 'published_no_draft',
   });
 
-  assert.equal(getStepStatus('overview', 'overview', assessment), 'active');
+  assert.equal(getStepStatus('overview', 'overview', assessment), 'reference');
   assert.equal(getStepStatus('domains', 'overview', assessment), 'reference');
   assert.equal(getStepStatus('review', 'overview', assessment), 'reference');
+});
+
+test('stepper marks dependent stages as blocked or in progress from existing builder data', () => {
+  const blockedAssessment = createAssessmentState();
+  const responsesInProgressAssessment = createAssessmentState({
+    authoredQuestions: [
+      {
+        questionId: 'question-1',
+        questionKey: 'q1',
+        prompt: 'Question 1',
+        orderIndex: 0,
+        domainId: 'domain-1',
+        domainKey: 'domain-1',
+        domainLabel: 'Domain 1',
+        domainType: 'QUESTION_SECTION',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        options: [],
+      },
+    ],
+    questionDomains: [
+      {
+        domainId: 'domain-1',
+        domainKey: 'domain-1',
+        label: 'Domain 1',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+  });
+  const weightsInProgressAssessment = createAssessmentState({
+    authoredDomains: [
+      {
+        domainId: 'domain-1',
+        domainKey: 'domain-1',
+        label: 'Domain 1',
+        description: null,
+        orderIndex: 0,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        signals: [],
+      },
+    ],
+    questionDomains: [
+      {
+        domainId: 'domain-1',
+        domainKey: 'domain-1',
+        label: 'Domain 1',
+        domainType: 'QUESTION_SECTION',
+        orderIndex: 0,
+      },
+    ],
+    availableSignals: [
+      {
+        signalId: 'signal-1',
+        signalKey: 'signal-1',
+        signalLabel: 'Signal 1',
+        signalDescription: null,
+        signalOrderIndex: 0,
+        domainId: 'domain-1',
+        domainKey: 'domain-1',
+        domainLabel: 'Domain 1',
+        domainOrderIndex: 0,
+      },
+    ],
+    authoredQuestions: [
+      {
+        questionId: 'question-1',
+        questionKey: 'q1',
+        prompt: 'Question 1',
+        orderIndex: 0,
+        domainId: 'domain-1',
+        domainKey: 'domain-1',
+        domainLabel: 'Domain 1',
+        domainType: 'QUESTION_SECTION',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        options: [
+          {
+            optionId: 'option-1',
+            optionKey: 'q1_a',
+            optionLabel: 'A',
+            optionText: 'Option A',
+            orderIndex: 0,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+            weightingStatus: 'unmapped',
+            signalWeights: [],
+          },
+        ],
+      },
+    ],
+    weightingSummary: {
+      totalOptions: 1,
+      weightedOptions: 0,
+      unmappedOptions: 1,
+      totalMappings: 1,
+    },
+  });
+
+  assert.equal(getStepStatus('signals', 'overview', blockedAssessment), 'blocked');
+  assert.equal(getStepStatus('responses', 'overview', responsesInProgressAssessment), 'empty');
+  assert.equal(getStepStatus('weights', 'overview', weightsInProgressAssessment), 'in_progress');
 });
 
 test('assessment intro route now delegates to the persisted authoring step instead of a static placeholder', () => {

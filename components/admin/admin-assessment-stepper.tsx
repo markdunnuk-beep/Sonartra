@@ -15,53 +15,72 @@ import { SurfaceCard, cn } from '@/components/shared/user-app-ui';
 function StepIndicator({
   status,
   index,
+  isActive,
 }: Readonly<{
   status: BuilderStepStatus;
   index: number;
+  isActive: boolean;
 }>) {
-  if (status === 'complete') {
-    return (
-      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(116,209,177,0.28)] bg-[rgba(116,209,177,0.16)] text-[rgba(214,246,233,0.92)]">
-        <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 16 16">
-          <path
-            d="M3.5 8.5 6.5 11.5 12.5 5.5"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.8"
-          />
-        </svg>
-      </span>
-    );
-  }
+  return (
+    <span
+      className={cn(
+        'flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-medium',
+        isActive
+          ? 'border-[rgba(126,179,255,0.3)] bg-[rgba(126,179,255,0.16)] text-[rgba(228,234,255,0.96)]'
+          : status === 'complete'
+            ? 'border-[rgba(116,209,177,0.28)] bg-[rgba(116,209,177,0.16)] text-[rgba(214,246,233,0.92)]'
+            : status === 'in_progress'
+              ? 'border-[rgba(126,179,255,0.2)] bg-[rgba(126,179,255,0.08)] text-[rgba(214,232,255,0.82)]'
+              : status === 'blocked'
+                ? 'border-[rgba(255,184,107,0.2)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.9)]'
+                : status === 'unavailable'
+                  ? 'border-white/8 bg-white/[0.02] text-white/44'
+                  : status === 'reference'
+                    ? 'border-white/10 bg-white/[0.02] text-white/52'
+                    : 'border-white/10 bg-white/[0.03] text-white/56',
+      )}
+    >
+      {index + 1}
+    </span>
+  );
+}
 
-  if (status === 'active') {
-    return (
-      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(126,179,255,0.3)] bg-[rgba(126,179,255,0.16)] text-[rgba(228,234,255,0.96)]">
-        <span className="h-2.5 w-2.5 rounded-full bg-current" />
-      </span>
-    );
-  }
-
-  if (status === 'neutral') {
-    return (
-      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] text-[12px] font-semibold text-[rgba(255,227,187,0.9)]">
-        -
-      </span>
-    );
-  }
-
-  if (status === 'reference') {
-    return (
-      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.02] text-[11px] font-medium text-white/52">
-        {index + 1}
-      </span>
-    );
-  }
+function StepStatusBadge({
+  status,
+}: Readonly<{
+  status: BuilderStepStatus;
+}>) {
+  const label =
+    status === 'complete'
+      ? 'Complete'
+      : status === 'in_progress'
+        ? 'In progress'
+        : status === 'blocked'
+          ? 'Blocked'
+          : status === 'unavailable'
+            ? 'Unavailable'
+            : status === 'reference'
+              ? 'Reference'
+              : 'Empty';
 
   return (
-    <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[11px] font-medium text-white/44">
-      {index + 1}
+    <span
+      className={cn(
+        'rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]',
+        status === 'complete'
+          ? 'border-[rgba(116,209,177,0.18)] bg-[rgba(116,209,177,0.08)] text-[rgba(214,246,233,0.84)]'
+          : status === 'in_progress'
+            ? 'border-[rgba(126,179,255,0.18)] bg-[rgba(126,179,255,0.08)] text-[rgba(214,232,255,0.82)]'
+            : status === 'blocked'
+              ? 'border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.88)]'
+              : status === 'unavailable'
+                ? 'border-white/8 bg-white/[0.03] text-white/46'
+                : status === 'reference'
+                  ? 'border-white/10 bg-black/10 text-white/48'
+                  : 'border-white/10 bg-white/[0.03] text-white/54',
+      )}
+    >
+      {label}
     </span>
   );
 }
@@ -76,10 +95,7 @@ export function AdminAssessmentStepper() {
     status: getStepStatus(step.slug, activeSlug, assessment),
   }));
   const completedCount = steps.filter((step) => step.status === 'complete').length;
-  const activeIndex = Math.max(
-    0,
-    steps.findIndex((step) => step.status === 'active'),
-  );
+  const activeIndex = Math.max(0, steps.findIndex((step) => step.slug === activeSlug));
   const isReferenceMode = assessment.builderMode === 'published_no_draft';
 
   return (
@@ -107,7 +123,7 @@ export function AdminAssessmentStepper() {
         className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 sonartra-scrollbar sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
       >
         {steps.map((step, index) => {
-          const isActive = step.status === 'active';
+          const isActive = step.slug === activeSlug;
 
           return (
             <Link
@@ -120,15 +136,22 @@ export function AdminAssessmentStepper() {
                     ? 'border-white/8 bg-black/10 text-white/58 hover:border-white/12 hover:bg-white/[0.03] hover:text-white/78'
                   : step.status === 'complete'
                     ? 'border-[rgba(116,209,177,0.12)] bg-[rgba(116,209,177,0.04)] text-white/86 hover:border-[rgba(116,209,177,0.2)] hover:bg-[rgba(116,209,177,0.06)]'
-                    : step.status === 'neutral'
+                    : step.status === 'blocked'
                       ? 'border-[rgba(255,184,107,0.14)] bg-[rgba(255,184,107,0.04)] text-white/72 hover:border-[rgba(255,184,107,0.22)] hover:bg-[rgba(255,184,107,0.06)]'
-                    : 'border-white/8 bg-black/10 text-white/62 hover:border-white/14 hover:bg-white/[0.04] hover:text-white/84',
+                      : step.status === 'in_progress'
+                        ? 'border-[rgba(126,179,255,0.14)] bg-[rgba(126,179,255,0.05)] text-white/72 hover:border-[rgba(126,179,255,0.22)] hover:bg-[rgba(126,179,255,0.07)]'
+                        : step.status === 'unavailable'
+                          ? 'border-white/6 bg-black/10 text-white/46 hover:border-white/10 hover:bg-white/[0.03] hover:text-white/58'
+                          : 'border-white/8 bg-black/10 text-white/62 hover:border-white/14 hover:bg-white/[0.04] hover:text-white/84',
               )}
               href={step.href}
               key={step.slug}
             >
-              <StepIndicator index={index} status={step.status} />
-              <span className="block text-sm font-medium leading-5">{step.label}</span>
+              <div className="flex min-w-0 items-center gap-3">
+                <StepIndicator index={index} isActive={isActive} status={step.status} />
+                <span className="block min-w-0 text-sm font-medium leading-5">{step.label}</span>
+              </div>
+              <StepStatusBadge status={step.status} />
             </Link>
           );
         })}

@@ -13,13 +13,20 @@ export const builderSteps = [
 ] as const;
 
 export type BuilderStepSlug = (typeof builderSteps)[number]['slug'];
-export type BuilderStepStatus = 'complete' | 'active' | 'incomplete' | 'neutral' | 'reference';
+export type BuilderStepStatus =
+  | 'complete'
+  | 'in_progress'
+  | 'empty'
+  | 'blocked'
+  | 'unavailable'
+  | 'reference';
 
 export type AdminAssessmentStepperState = Pick<
   AdminAssessmentDetailViewModel,
   | 'assessmentKey'
   | 'builderMode'
   | 'authoredDomains'
+  | 'questionDomains'
   | 'availableSignals'
   | 'authoredQuestions'
   | 'weightingSummary'
@@ -49,38 +56,74 @@ export function getActiveStepSlug(pathname: string, assessmentKey: string): Buil
 
 export function getStepStatus(
   slug: BuilderStepSlug,
-  activeSlug: BuilderStepSlug,
+  _activeSlug: BuilderStepSlug,
   assessment: AdminAssessmentStepperState,
 ): BuilderStepStatus {
   if (assessment.builderMode === 'published_no_draft') {
-    return slug === activeSlug ? 'active' : 'reference';
+    return 'reference';
   }
 
-  if (slug === activeSlug) {
-    return 'active';
-  }
+  const totalOptions = assessment.authoredQuestions.reduce(
+    (sum, question) => sum + question.options.length,
+    0,
+  );
+  const allQuestionsHaveOptions =
+    assessment.authoredQuestions.length > 0 &&
+    assessment.authoredQuestions.every((question) => question.options.length > 0);
 
   switch (slug) {
     case 'overview':
       return 'complete';
     case 'assessment-intro':
-      return assessment.stepCompletion.assessmentIntro;
-    case 'domains':
-      return assessment.authoredDomains.length > 0 ? 'complete' : 'incomplete';
-    case 'signals':
-      return assessment.availableSignals.length > 0 ? 'complete' : 'incomplete';
-    case 'questions':
-      return assessment.authoredQuestions.length > 0 ? 'complete' : 'incomplete';
-    case 'responses':
-      return assessment.authoredQuestions.length > 0 &&
-        assessment.authoredQuestions.every((question) => question.options.length > 0)
+      return assessment.stepCompletion.assessmentIntro === 'complete'
         ? 'complete'
-        : 'incomplete';
+        : assessment.stepCompletion.assessmentIntro === 'neutral'
+          ? 'unavailable'
+          : 'empty';
+    case 'domains':
+      return assessment.authoredDomains.length > 0 ? 'complete' : 'empty';
+    case 'signals':
+      return assessment.authoredDomains.length === 0
+        ? 'blocked'
+        : assessment.availableSignals.length > 0
+          ? 'complete'
+          : 'empty';
+    case 'questions':
+      return assessment.questionDomains.length === 0
+        ? 'blocked'
+        : assessment.authoredQuestions.length > 0
+          ? 'complete'
+          : 'empty';
+    case 'responses':
+      return assessment.authoredQuestions.length === 0
+        ? 'blocked'
+        : totalOptions === 0
+          ? 'empty'
+          : allQuestionsHaveOptions
+            ? 'complete'
+            : 'in_progress';
     case 'weights':
-      return assessment.weightingSummary.totalMappings > 0 ? 'complete' : 'incomplete';
+      return assessment.authoredQuestions.length === 0 || totalOptions === 0 || assessment.availableSignals.length === 0
+        ? 'blocked'
+        : assessment.weightingSummary.totalMappings === 0
+          ? 'empty'
+          : assessment.weightingSummary.unmappedOptions > 0
+            ? 'in_progress'
+            : 'complete';
     case 'language':
-      return assessment.stepCompletion.language;
+      return assessment.stepCompletion.language === 'complete'
+        ? 'complete'
+        : assessment.stepCompletion.language === 'neutral'
+          ? 'unavailable'
+          : 'empty';
     case 'review':
-      return assessment.draftValidation.isPublishReady ? 'complete' : 'incomplete';
+      return assessment.draftValidation.status === 'missing_assessment' ||
+        assessment.draftValidation.status === 'no_draft'
+        ? 'unavailable'
+        : assessment.draftValidation.isPublishReady
+          ? 'complete'
+          : assessment.draftValidation.blockingErrors.length > 0
+            ? 'blocked'
+            : 'in_progress';
   }
 }
