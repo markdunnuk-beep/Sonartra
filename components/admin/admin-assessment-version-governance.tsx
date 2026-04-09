@@ -1,8 +1,10 @@
 ﻿'use client';
 
+import Link from 'next/link';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import { getReviewRemediationAction } from '@/lib/admin/admin-review-remediation';
 import {
   initialAdminAssessmentVersionActionState,
   type AdminAssessmentVersionActionState,
@@ -245,8 +247,10 @@ function formatReadinessLabel(validation: AdminAssessmentValidationResult): stri
 }
 
 function ValidationSummary({
+  assessmentKey,
   validation,
 }: {
+  assessmentKey: string;
   validation: AdminAssessmentValidationResult;
 }) {
   const failingSections = validation.sections.filter((section) => section.status === 'fail');
@@ -333,7 +337,25 @@ function ValidationSummary({
                     title={issue.severity === 'blocking' ? 'Blocking issue' : 'Warning'}
                     tone={issue.severity === 'blocking' ? 'warning' : 'neutral'}
                   >
-                    {issue.message}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <p className="min-w-0 flex-1 break-words">{issue.message}</p>
+                      {(() => {
+                        const remediation = getReviewRemediationAction(section.key, issue);
+
+                        if (!remediation) {
+                          return null;
+                        }
+
+                        return (
+                          <Link
+                            className="sonartra-button sonartra-button-secondary sonartra-focus-ring min-h-10 self-start px-3 py-2 text-xs sm:shrink-0"
+                            href={`/admin/assessments/${assessmentKey}/${remediation.slug}`}
+                          >
+                            {remediation.label}
+                          </Link>
+                        );
+                      })()}
+                    </div>
                   </AdminFeedbackNotice>
                 ))}
               </div>
@@ -421,7 +443,7 @@ export function AdminAssessmentVersionGovernance({
         </div>
       </SurfaceCard>
 
-      <ValidationSummary validation={draftValidation} />
+      <ValidationSummary assessmentKey={assessmentKey} validation={draftValidation} />
 
       <SurfaceCard className="p-5 lg:p-6">
         <div className="space-y-3">

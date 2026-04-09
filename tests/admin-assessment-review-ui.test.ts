@@ -17,12 +17,20 @@ const publishActionsPath = join(
   'admin-assessment-publish-actions.tsx',
 );
 
+const remediationHelperPath = join(
+  process.cwd(),
+  'lib',
+  'admin',
+  'admin-review-remediation.ts',
+);
+
 function readSource(path: string): string {
   return readFileSync(path, 'utf8');
 }
 
 test('review governance surfaces separate readiness summary, blocking counts, and section issues', () => {
   const source = readSource(governanceComponentPath);
+  const helperSource = readSource(remediationHelperPath);
 
   assert.match(source, /label="Blocking issues"/);
   assert.match(source, /label="Sections to fix"/);
@@ -34,6 +42,9 @@ test('review governance surfaces separate readiness summary, blocking counts, an
   assert.match(source, /section\.key === 'applicationPlan'/);
   assert.match(source, /label="Contribution"/);
   assert.match(source, /label="Development"/);
+  assert.match(source, /getReviewRemediationAction\(section\.key, issue\)/);
+  assert.match(source, /href=\{`\/admin\/assessments\/\$\{assessmentKey\}\/\$\{remediation\.slug\}`\}/);
+  assert.match(helperSource, /Fix in Review/);
 });
 
 test('publish actions use shared calm feedback notices for errors, success, and warnings', () => {
