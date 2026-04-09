@@ -67,7 +67,7 @@ export function ResultReadingProgress({
 
         <div className="mt-2 h-px w-full bg-white/12" aria-hidden="true">
           <div
-            className="h-px bg-white/58 transition-[width] duration-300 ease-out"
+            className="sonartra-motion-progress h-px bg-white/58"
             style={{ width: `${(activeStepNumber / totalSteps) * 100}%` }}
           />
         </div>

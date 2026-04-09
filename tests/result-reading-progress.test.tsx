@@ -35,3 +35,10 @@ test('applies intended mobile\/tablet visibility classes', () => {
   assert.match(markup, /sticky top-16/);
   assert.match(markup, /data-result-reading-progress="true"/);
 });
+
+
+test('progress indicator uses shared motion class for restrained transitions', () => {
+  const markup = renderToStaticMarkup(<ResultReadingProgress activeSectionIdOverride="hero" />);
+
+  assert.match(markup, /class="sonartra-motion-progress h-px bg-white\/58"/);
+});

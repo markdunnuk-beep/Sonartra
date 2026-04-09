@@ -40,7 +40,7 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
   return (
     <nav
       aria-label="Report reading navigation"
-      className={cn('hidden xl:block xl:w-[13.25rem] xl:shrink-0', className)}
+      className={cn('hidden xl:block xl:w-[14.5rem] xl:shrink-0', className)}
       data-result-reading-rail="true"
     >
       <div className="sticky top-28 space-y-4 border-l border-white/10 pl-4">
@@ -63,8 +63,8 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'sonartra-motion-active-bar absolute inset-y-1 left-0 w-px rounded-full bg-white/35 opacity-0',
-                      isTopLevelActive && 'opacity-100',
+                      'sonartra-motion-active-bar absolute inset-y-1 left-0 w-px rounded-full bg-white/35 opacity-0 scale-y-75',
+                      isTopLevelActive && 'opacity-100 scale-y-100',
                     )}
                   />
                   <span className="relative block">{section.label}</span>
@@ -89,8 +89,8 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                             <span
                               aria-hidden="true"
                               className={cn(
-                                'sonartra-motion-active-bar absolute inset-y-1 left-0 w-px rounded-full bg-white/35 opacity-0',
-                                isDomainSubsectionActive && 'opacity-100',
+                                'sonartra-motion-active-bar absolute inset-y-1 left-0 w-px rounded-full bg-white/35 opacity-0 scale-y-75',
+                                isDomainSubsectionActive && 'opacity-100 scale-y-100',
                               )}
                             />
                             <span className="sr-only">Domain chapter: </span>
