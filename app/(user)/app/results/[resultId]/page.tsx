@@ -419,7 +419,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
-      <div className="xl:mx-auto xl:grid xl:max-w-[116rem] xl:grid-cols-[minmax(0,1fr)_minmax(11.5rem,13rem)] xl:gap-8 2xl:gap-10">
+      <div className="xl:mx-auto xl:grid xl:max-w-[114rem] xl:grid-cols-[minmax(0,1fr)_minmax(10.75rem,12.25rem)] xl:gap-7 2xl:gap-9">
         <main className="min-w-0 max-w-none space-y-12 md:space-y-14">
           <section
             id={TOP_LEVEL_SECTION_IDS.intro}
@@ -432,13 +432,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             <SonartraIntroduction metadataItems={introMetadataItems} />
             <ResultSectionIntent
               sectionId={TOP_LEVEL_SECTION_IDS.intro}
-              className="mt-5 max-w-[56rem] px-1 md:mt-6 md:px-2"
+              className="mt-4 max-w-[54rem] px-1 md:mt-5 md:px-2"
             />
           </section>
 
           <ResultReadingProgress className="max-w-[92rem] px-1 md:px-2 xl:hidden" />
 
-          <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
+          <div className="space-y-5 pt-3 md:space-y-6 md:pt-3.5">
             <NarrativeBridge>
               With that context, here&apos;s what your patterns are showing.
             </NarrativeBridge>
@@ -477,7 +477,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                           {heroHeadline}
                         </h1>
                       ) : null}
-                      <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.hero} />
+                      <ResultSectionIntent
+                        sectionId={TOP_LEVEL_SECTION_IDS.hero}
+                        className="max-w-[52ch]"
+                      />
                       {heroSubheadline ? (
                         <p className="sonartra-report-body-soft max-w-[50rem] text-[1rem] leading-8 text-white/68 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
                           {heroSubheadline}
@@ -541,7 +544,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                 title="Domain reading"
                 description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
               />
-              <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.domains} className="max-w-[54rem]" />
+              <ResultSectionIntent
+                sectionId={TOP_LEVEL_SECTION_IDS.domains}
+                className="max-w-[53rem] md:mt-5"
+              />
 
               <DomainSection domainItems={resultDomainItems} />
             </section>
@@ -569,14 +575,14 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               />
               <ResultSectionIntent
                 sectionId={TOP_LEVEL_SECTION_IDS.application}
-                className="max-w-[54rem]"
+                className="max-w-[53rem] md:mt-5"
               />
               <ApplicationPlan application={result.application} />
             </section>
           </div>
         </main>
 
-        <ResultReadingRail className="hidden xl:block xl:pt-0.5 2xl:pl-0.5" />
+        <ResultReadingRail className="hidden xl:block xl:pt-1" />
       </div>
     </PageFrame>
   );

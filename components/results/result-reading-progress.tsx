@@ -55,19 +55,21 @@ export function ResultReadingProgress({
       className={cn('xl:hidden', className)}
       data-result-reading-progress="true"
     >
-      <div className="sticky top-16 z-20 border-y border-white/10 bg-[#07080d]/90 px-4 py-2.5 backdrop-blur">
+      <div className="sticky top-16 z-20 border-b border-white/[0.08] bg-[#080b13]/84 px-4 py-2.5 backdrop-blur-md">
         <div className="flex items-center justify-between gap-4">
-          <p className="text-[0.72rem] tracking-[0.09em] text-white/55">Currently reading</p>
-          <p className="text-[0.72rem] tracking-[0.05em] text-white/60">{activeStepNumber} of {totalSteps}</p>
+          <p className="text-[0.68rem] tracking-[0.1em] text-white/47">Currently reading</p>
+          <p className="text-[0.69rem] tracking-[0.06em] text-white/52">
+            {activeStepNumber} of {totalSteps}
+          </p>
         </div>
 
-        <p className="mt-0.5 text-[0.86rem] font-medium tracking-[0.01em] text-white/88">
+        <p className="mt-0.5 text-[0.84rem] font-medium tracking-[0.012em] text-white/82">
           {activeTopLevelSection?.label}
         </p>
 
-        <div className="mt-2 h-px w-full bg-white/12" aria-hidden="true">
+        <div className="mt-2 h-px w-full bg-white/10" aria-hidden="true">
           <div
-            className="sonartra-motion-progress h-px bg-white/58"
+            className="sonartra-motion-progress h-px bg-white/48"
             style={{ width: `${(activeStepNumber / totalSteps) * 100}%` }}
           />
         </div>

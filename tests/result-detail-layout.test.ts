@@ -11,11 +11,11 @@ test('result detail desktop layout uses widened container and rebalanced columns
     'utf8',
   );
 
-  assert.match(pageSource, /xl:max-w-\[116rem\]/);
-  assert.match(pageSource, /xl:grid-cols-\[minmax\(0,1fr\)_minmax\(11\.5rem,13rem\)\]/);
+  assert.match(pageSource, /xl:max-w-\[114rem\]/);
+  assert.match(pageSource, /xl:grid-cols-\[minmax\(0,1fr\)_minmax\(10\.75rem,12\.25rem\)\]/);
   assert.match(pageSource, /<main className="min-w-0 max-w-none/);
   assert.match(pageSource, /<div className="w-full px-1 md:px-2 xl:px-0\.5">/);
-  assert.match(pageSource, /ResultReadingRail className="hidden xl:block xl:pt-0\.5 2xl:pl-0\.5"/);
+  assert.match(pageSource, /ResultReadingRail className="hidden xl:block xl:pt-1"/);
 });
 
 test('global styles enable smooth anchors while respecting reduced motion', () => {
