@@ -1,0 +1,113 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+
+import {
+  getSafeDefaultActiveState,
+  pickActiveSectionCandidate,
+  toActiveResultSectionState,
+} from '@/hooks/use-active-result-section';
+import { RESULT_READING_SECTION_IDS } from '@/lib/results/result-reading-sections';
+
+function buildObservationMap(
+  items: Array<{
+    id: string;
+    intersectionRatio: number;
+    centerDistanceRatio: number;
+    isIntersecting?: boolean;
+  }>,
+) {
+  return new Map(
+    items.map((item) => [
+      item.id,
+      {
+        ...item,
+        isIntersecting: item.isIntersecting ?? true,
+      },
+    ]),
+  );
+}
+
+test('canonical hierarchy maps domain subsection to top-level domains', () => {
+  const state = toActiveResultSectionState('domain-core-drivers');
+
+  assert.equal(state.activeSectionId, 'domain-core-drivers');
+  assert.equal(state.activeTopLevelSectionId, 'domains');
+  assert.equal(state.activeDomainSectionId, 'domain-core-drivers');
+  assert.equal(state.activeTopLevelCount, 4);
+});
+
+test('safe defaults handle missing elements and preserve top-level fallback', () => {
+  const state = getSafeDefaultActiveState(['domain-operating-style', 'hero']);
+
+  assert.equal(state.activeSectionId, 'hero');
+  assert.equal(state.activeTopLevelSectionId, 'hero');
+  assert.equal(state.activeDomainSectionId, null);
+  assert.equal(state.hasActiveDomainSection, false);
+  assert.equal(state.activeTopLevelCount, 4);
+});
+
+test('candidate selection supports observer-driven reading progression', () => {
+  let activeSectionId: string | null = 'intro';
+
+  activeSectionId = pickActiveSectionCandidate({
+    orderedSectionIds: RESULT_READING_SECTION_IDS,
+    currentActiveSectionId: activeSectionId,
+    observations: buildObservationMap([
+      { id: 'intro', intersectionRatio: 0.18, centerDistanceRatio: 0.62 },
+      { id: 'hero', intersectionRatio: 0.72, centerDistanceRatio: 0.18 },
+    ]),
+  });
+  assert.equal(activeSectionId, 'hero');
+
+  activeSectionId = pickActiveSectionCandidate({
+    orderedSectionIds: RESULT_READING_SECTION_IDS,
+    currentActiveSectionId: activeSectionId,
+    observations: buildObservationMap([
+      { id: 'hero', intersectionRatio: 0.2, centerDistanceRatio: 0.55 },
+      { id: 'domains', intersectionRatio: 0.71, centerDistanceRatio: 0.2 },
+    ]),
+  });
+  assert.equal(activeSectionId, 'domains');
+
+  activeSectionId = pickActiveSectionCandidate({
+    orderedSectionIds: RESULT_READING_SECTION_IDS,
+    currentActiveSectionId: activeSectionId,
+    observations: buildObservationMap([
+      { id: 'domains', intersectionRatio: 0.2, centerDistanceRatio: 0.6 },
+      { id: 'domain-operating-style', intersectionRatio: 0.7, centerDistanceRatio: 0.16 },
+    ]),
+  });
+  assert.equal(activeSectionId, 'domain-operating-style');
+
+  activeSectionId = pickActiveSectionCandidate({
+    orderedSectionIds: RESULT_READING_SECTION_IDS,
+    currentActiveSectionId: activeSectionId,
+    observations: buildObservationMap([
+      { id: 'domain-operating-style', intersectionRatio: 0.15, centerDistanceRatio: 0.82 },
+      { id: 'application', intersectionRatio: 0.75, centerDistanceRatio: 0.16 },
+    ]),
+  });
+  assert.equal(activeSectionId, 'application');
+});
+
+test('stability logic keeps current section for weak neighbouring visibility', () => {
+  const nextSection = pickActiveSectionCandidate({
+    orderedSectionIds: RESULT_READING_SECTION_IDS,
+    currentActiveSectionId: 'domain-leadership-approach',
+    observations: buildObservationMap([
+      { id: 'domain-leadership-approach', intersectionRatio: 0.51, centerDistanceRatio: 0.28 },
+      { id: 'domain-tension-response', intersectionRatio: 0.54, centerDistanceRatio: 0.25 },
+    ]),
+  });
+
+  assert.equal(nextSection, 'domain-leadership-approach');
+});
+
+test('progress state remains top-level domains while a domain subsection is active', () => {
+  const state = toActiveResultSectionState('domain-pressure-response');
+
+  assert.equal(state.activeTopLevelSectionId, 'domains');
+  assert.equal(state.activeTopLevelIndex, 2);
+  assert.equal(state.activeTopLevelCount, 4);
+  assert.equal(state.hasActiveDomainSection, true);
+});
