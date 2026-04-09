@@ -69,7 +69,7 @@ export function ApplicationPlan({ application }: Props) {
                 key={`${item.sourceType}-${item.sourceKey}-${index}`}
                 label={item.label}
                 narrative={item.narrative}
-                aside={`Works best when ${item.bestWhen}`}
+                aside={item.bestWhen}
                 delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
               />
             ))}
@@ -117,7 +117,7 @@ export function ApplicationPlan({ application }: Props) {
                 key={`${item.sourceType}-${item.sourceKey}-${index}`}
                 label={item.label}
                 narrative={item.narrative}
-                aside={`Try this: ${item.practice}`}
+                aside={item.practice}
                 delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
               />
             ))}

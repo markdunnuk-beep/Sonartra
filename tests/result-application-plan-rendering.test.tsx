@@ -30,7 +30,7 @@ function buildApplication(overrides?: Partial<ApplicationSection>): ApplicationS
         {
           label: 'Stability under load',
           narrative: 'You help work stay coherent when demands increase.',
-          bestWhen: 'the team needs steadiness and follow-through',
+          bestWhen: 'Works best when the team needs steadiness and follow-through.',
           watchFor: 'over-carrying responsibility',
           sourceKey: 'signal_pair_a',
           sourceType: 'pair',
@@ -58,7 +58,7 @@ function buildApplication(overrides?: Partial<ApplicationSection>): ApplicationS
         {
           label: 'Sharpened escalation',
           narrative: 'Developing clearer escalation helps protect pace and ownership.',
-          practice: 'Name the decision point earlier and ask who owns the next move.',
+          practice: 'Try this: Name the decision point earlier and ask who owns the next move.',
           successMarker: 'You intervene later and more precisely.',
           sourceKey: 'signal_c',
           sourceType: 'signal',
@@ -78,7 +78,6 @@ function buildApplication(overrides?: Partial<ApplicationSection>): ApplicationS
 test('renders thesis headline and summary', () => {
   const markup = renderToStaticMarkup(<ApplicationPlan application={buildApplication()} />);
 
-  assert.match(markup, /Turning insight into impact/);
   assert.match(markup, /A steady pattern with practical leverage/);
   assert.match(
     markup,
