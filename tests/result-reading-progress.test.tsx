@@ -43,3 +43,13 @@ test('progress indicator uses shared motion class for restrained transitions', (
 
   assert.match(markup, /class="sonartra-motion-progress h-px bg-white\/48"/);
 });
+
+test('unknown sections safely resolve to first canonical top-level step', () => {
+  const markup = renderToStaticMarkup(
+    <ResultReadingProgress activeSectionIdOverride="not-a-real-section" />,
+  );
+
+  assert.match(markup, />Introduction</);
+  assert.match(markup, />1 of 4</);
+  assert.match(markup, /style="width:25%"/);
+});

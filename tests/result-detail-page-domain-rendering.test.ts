@@ -367,6 +367,29 @@ test('canonical reading model includes every required section and domain anchor 
   assert.deepEqual(canonicalIds, REQUIRED_RESULT_ANCHOR_IDS);
 });
 
+test('result detail page composes canonical top-level anchors exactly once and in order', () => {
+  const source = readFileSync(pagePath, 'utf8');
+
+  const introAnchorCount = source.match(/id=\{TOP_LEVEL_SECTION_IDS\.intro\}/g)?.length ?? 0;
+  const heroAnchorCount = source.match(/id=\{TOP_LEVEL_SECTION_IDS\.hero\}/g)?.length ?? 0;
+  const domainsAnchorCount = source.match(/id=\{TOP_LEVEL_SECTION_IDS\.domains\}/g)?.length ?? 0;
+  const applicationAnchorCount = source.match(/id=\{TOP_LEVEL_SECTION_IDS\.application\}/g)?.length ?? 0;
+
+  assert.equal(introAnchorCount, 1);
+  assert.equal(heroAnchorCount, 1);
+  assert.equal(domainsAnchorCount, 1);
+  assert.equal(applicationAnchorCount, 1);
+
+  const introIndex = source.indexOf('id={TOP_LEVEL_SECTION_IDS.intro}');
+  const heroIndex = source.indexOf('id={TOP_LEVEL_SECTION_IDS.hero}');
+  const domainsIndex = source.indexOf('id={TOP_LEVEL_SECTION_IDS.domains}');
+  const applicationIndex = source.indexOf('id={TOP_LEVEL_SECTION_IDS.application}');
+
+  assert.ok(introIndex < heroIndex);
+  assert.ok(heroIndex < domainsIndex);
+  assert.ok(domainsIndex < applicationIndex);
+});
+
 test('result detail page removes the redundant hero domain highlight subsection', () => {
   const source = readFileSync(pagePath, 'utf8');
 

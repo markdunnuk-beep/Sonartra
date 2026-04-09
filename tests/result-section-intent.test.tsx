@@ -3,6 +3,7 @@ import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { ResultSectionIntent } from '@/components/results/result-section-intent';
+import { RESULT_READING_DOMAIN_SUBSECTIONS } from '@/lib/results/result-reading-sections';
 
 test('ResultSectionIntent renders canonical prompt for a top-level section id', () => {
   const markup = renderToStaticMarkup(<ResultSectionIntent sectionId="hero" />);
@@ -37,6 +38,13 @@ test('ResultSectionIntent returns null for a domain subsection id', () => {
   const markup = renderToStaticMarkup(<ResultSectionIntent sectionId="domain-core-drivers" />);
 
   assert.equal(markup, '');
+});
+
+test('ResultSectionIntent never renders prompts for domain subsections', () => {
+  for (const section of RESULT_READING_DOMAIN_SUBSECTIONS) {
+    const markup = renderToStaticMarkup(<ResultSectionIntent sectionId={section.id} />);
+    assert.equal(markup, '');
+  }
 });
 
 test('ResultSectionIntent returns null for a missing section id', () => {
