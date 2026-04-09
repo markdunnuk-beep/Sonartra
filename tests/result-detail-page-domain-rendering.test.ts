@@ -4,6 +4,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { buildDomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
+import {
+  RESULT_READING_DOMAIN_SUBSECTIONS,
+  RESULT_READING_TOP_LEVEL_SECTIONS,
+} from '@/lib/results/result-reading-sections';
 import type { AssessmentResultDetailViewModel } from '@/lib/server/result-read-model-types';
 
 const pagePath = join(
@@ -19,6 +23,18 @@ const pagePath = join(
 const DISALLOWED_GENERIC_HERO_HEADLINE_PATTERN =
   /A clear (working style|source of motivation|leadership pattern|conflict response|environment preference|decision pattern|role fit) is coming through|A pressure pattern is coming through/;
 const REMOVED_DOMAIN_FOCUS_PATTERN = new RegExp(`domain${'Focus'}`);
+const REQUIRED_RESULT_ANCHOR_IDS = [
+  'intro',
+  'hero',
+  'domains',
+  'application',
+  'domain-operating-style',
+  'domain-core-drivers',
+  'domain-leadership-approach',
+  'domain-tension-response',
+  'domain-environment-fit',
+  'domain-pressure-response',
+] as const;
 
 function buildResultDetail(
   domains: AssessmentResultDetailViewModel['domains'],
@@ -233,6 +249,10 @@ test('result detail page renders the system introduction above hero and keeps ca
   const source = readFileSync(pagePath, 'utf8');
 
   assert.match(source, /import \{ SonartraIntroduction \} from '@\/components\/results\/sonartra-introduction';/);
+  assert.match(
+    source,
+    /import \{\s*RESULT_READING_DOMAIN_SUBSECTIONS,\s*RESULT_READING_TOP_LEVEL_SECTIONS,\s*\} from '@\/lib\/results\/result-reading-sections';/,
+  );
   assert.match(source, /import \{ HeroPatternMedallion \} from '@\/components\/results\/hero-pattern-medallion';/);
   assert.match(source, /function NarrativeBridge\(/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
@@ -244,9 +264,15 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /const pressureOverlay = result\.hero\.pressureOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /const environmentOverlay = result\.hero\.environmentOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /const introMetadataItems = \[/);
+  assert.match(source, /const TOP_LEVEL_SECTION_IDS = RESULT_READING_TOP_LEVEL_SECTIONS/);
+  assert.match(source, /const CANONICAL_DOMAIN_ANCHOR_IDS = RESULT_READING_DOMAIN_SUBSECTIONS/);
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
   assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
+  assert.match(
+    source,
+    /<section id=\{TOP_LEVEL_SECTION_IDS\.intro\} className=\{RESULTS_ANCHOR_TARGET_CLASS\}>/,
+  );
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
   assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
   assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
@@ -258,6 +284,11 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /sonartra-report-summary text-\[1\.08rem\] leading-8 text-white\/82 sm:text-\[1\.13rem\] md:text-\[1\.22rem\] md:leading-10/);
   assert.match(source, /sonartra-report-body max-w-\[46rem\] text-\[1rem\] leading-8 text-white\/78 sm:text-\[1\.05rem\] md:text-\[1\.1rem\] md:leading-9/);
   assert.match(source, /grid gap-9 md:grid-cols-\[minmax\(0,1fr\)_auto\] md:items-start md:gap-11/);
+  assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.hero\}/);
+  assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
+  assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.application\}/);
+  assert.match(source, /id=\{domainAnchorId \?\? undefined\}/);
+  assert.match(source, /domainAnchorId: CANONICAL_DOMAIN_ANCHOR_IDS\[index\] \?\? null,/);
   assert.match(source, /<HeroPatternMedallion\s+patternKey=\{heroPatternKey\}\s+label=\{heroPatternLabel\}/);
   assert.match(source, /<NarrativeBridge className="max-w-\[38rem\]">/);
   assert.match(source, /heroPatternLabel/);
@@ -302,6 +333,14 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.ok(domainBridgeIndex < domainIndex);
   assert.ok(domainIndex < actionBridgeIndex);
   assert.ok(actionBridgeIndex < actionIndex);
+});
+
+test('canonical reading model includes every required section and domain anchor id', () => {
+  const topLevelIds = RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => section.id);
+  const domainIds = RESULT_READING_DOMAIN_SUBSECTIONS.map((section) => section.id);
+  const canonicalIds = [...topLevelIds, ...domainIds];
+
+  assert.deepEqual(canonicalIds, REQUIRED_RESULT_ANCHOR_IDS);
 });
 
 test('result detail page removes the redundant hero domain highlight subsection', () => {
