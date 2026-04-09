@@ -16,10 +16,11 @@ test('canonical reading model includes four top-level sections and six domain su
 });
 
 test('top-level reading section order remains stable', () => {
-  assert.deepEqual(
-    RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => section.id),
-    ['intro', 'hero', 'domains', 'application'],
-  );
+  const topLevelIds = RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => section.id);
+
+  assert.deepEqual(topLevelIds, ['intro', 'hero', 'domains', 'application']);
+  assert.equal(new Set(topLevelIds).size, topLevelIds.length);
+  assert.equal(topLevelIds.includes('application'), true);
 });
 
 test('domain subsection reading order remains stable', () => {
@@ -45,4 +46,20 @@ test('intent prompts are present for top-level sections only', () => {
   for (const section of RESULT_READING_DOMAIN_SUBSECTIONS) {
     assert.equal(section.intentPrompt, undefined);
   }
+});
+
+test('canonical section id list remains ordered and duplicate-free', () => {
+  assert.deepEqual(RESULT_READING_SECTION_IDS, [
+    'intro',
+    'hero',
+    'domains',
+    'application',
+    'domain-operating-style',
+    'domain-core-drivers',
+    'domain-leadership-approach',
+    'domain-tension-response',
+    'domain-environment-fit',
+    'domain-pressure-response',
+  ]);
+  assert.equal(new Set(RESULT_READING_SECTION_IDS).size, RESULT_READING_SECTION_IDS.length);
 });

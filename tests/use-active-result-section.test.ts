@@ -111,3 +111,27 @@ test('progress state remains top-level domains while a domain subsection is acti
   assert.equal(state.activeTopLevelCount, 4);
   assert.equal(state.hasActiveDomainSection, true);
 });
+
+test('unknown active section ids fall back safely to intro defaults', () => {
+  const state = toActiveResultSectionState('not-a-real-section');
+
+  assert.equal(state.activeSectionId, 'intro');
+  assert.equal(state.activeTopLevelSectionId, 'intro');
+  assert.equal(state.activeDomainSectionId, null);
+  assert.equal(state.activeTopLevelIndex, 0);
+});
+
+test('candidate selection is not a simplistic top-edge-only tracker', () => {
+  const nextSection = pickActiveSectionCandidate({
+    orderedSectionIds: RESULT_READING_SECTION_IDS,
+    currentActiveSectionId: null,
+    observations: buildObservationMap([
+      // Tall intro block near the viewport edge remains visible but far from reading center.
+      { id: 'intro', intersectionRatio: 0.56, centerDistanceRatio: 0.96 },
+      // Hero is more central to reading position and should take focus.
+      { id: 'hero', intersectionRatio: 0.58, centerDistanceRatio: 0.12 },
+    ]),
+  });
+
+  assert.equal(nextSection, 'hero');
+});

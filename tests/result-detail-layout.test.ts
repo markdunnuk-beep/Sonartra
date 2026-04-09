@@ -37,3 +37,21 @@ test('result detail page keeps one desktop rail and one mobile progress surface'
   assert.equal(railCount, 1);
   assert.equal(progressCount, 1);
 });
+
+test('active-section hook wiring remains single-path through rail and progress components', () => {
+  const pageSource = fs.readFileSync(path.join(root, 'app/(user)/app/results/[resultId]/page.tsx'), 'utf8');
+  const railSource = fs.readFileSync(
+    path.join(root, 'components/results/result-reading-rail.tsx'),
+    'utf8',
+  );
+  const progressSource = fs.readFileSync(
+    path.join(root, 'components/results/result-reading-progress.tsx'),
+    'utf8',
+  );
+
+  assert.doesNotMatch(pageSource, /useActiveResultSection/);
+  assert.match(railSource, /import \{ useActiveResultSection \} from '@\/hooks\/use-active-result-section';/);
+  assert.match(progressSource, /import \{ useActiveResultSection \} from '@\/hooks\/use-active-result-section';/);
+  assert.equal(railSource.match(/useActiveResultSection\(\)/g)?.length ?? 0, 1);
+  assert.equal(progressSource.match(/useActiveResultSection\(\)/g)?.length ?? 0, 1);
+});

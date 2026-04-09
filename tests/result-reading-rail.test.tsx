@@ -71,6 +71,18 @@ test('each rail item targets a stable in-page anchor id', () => {
   }
 });
 
+test('rail renders one semantic nav list hierarchy without duplicate surfaces', () => {
+  const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
+
+  const navCount = markup.match(/<nav /g)?.length ?? 0;
+  const topLevelListCount = markup.match(/<ul class="space-y-0\.5" role="list">/g)?.length ?? 0;
+  const nestedListCount = markup.match(/<ul aria-label="Domain chapters"/g)?.length ?? 0;
+
+  assert.equal(navCount, 1);
+  assert.equal(topLevelListCount, 1);
+  assert.equal(nestedListCount, 1);
+});
+
 test('reading rail links remain keyboard-focusable anchors with visible focus classes', () => {
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
 
