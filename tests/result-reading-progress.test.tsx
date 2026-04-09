@@ -7,7 +7,7 @@ import { ResultReadingProgress } from '@/components/results/result-reading-progr
 test('renders current top-level label for active section', () => {
   const markup = renderToStaticMarkup(<ResultReadingProgress activeSectionIdOverride="hero" />);
 
-  assert.match(markup, />Your Pattern</);
+  assert.match(markup, />Your Behaviour Pattern</);
   assert.match(markup, /aria-label="Report reading progress"/);
 });
 
@@ -23,7 +23,7 @@ test('maps active domain subsection to Domain Chapters label and top-level progr
     <ResultReadingProgress activeSectionIdOverride="domain-core-drivers" />,
   );
 
-  assert.match(markup, />Domain Chapters</);
+  assert.match(markup, />How It Shows Up</);
   assert.match(markup, />3 of 4</);
   assert.match(markup, /style="width:75%"/);
 });
