@@ -118,7 +118,7 @@ function NarrativeBridge({
   return (
     <p
       className={[
-        'sonartra-report-body-soft mx-auto max-w-[42rem] text-center text-[0.92rem] leading-7 text-white/52 md:text-[0.97rem]',
+        'sonartra-report-body-soft mx-auto max-w-[50rem] text-center text-[0.92rem] leading-7 text-white/52 md:text-[0.97rem]',
         className,
       ]
         .filter(Boolean)
@@ -139,7 +139,7 @@ function DomainTransition({
   return (
     <p
       className={[
-        'sonartra-report-body-soft max-w-[42rem] text-[0.97rem] italic leading-8 text-white/50',
+        'sonartra-report-body-soft max-w-[52rem] text-[0.97rem] italic leading-8 text-white/50',
         className,
       ]
         .filter(Boolean)
@@ -197,11 +197,11 @@ function DomainChapter({
       className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal-soft space-y-10 border-t pt-16 first:border-t-0 first:pt-0 md:space-y-12 md:pt-20`}
       style={getRevealStyle(2)}
     >
-      <div className="grid gap-7 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-10">
+      <div className="grid gap-7 md:grid-cols-[minmax(0,12.5rem)_minmax(0,1fr)] md:gap-10 lg:gap-12">
         <div className="space-y-4 md:sticky md:top-24 md:self-start">
           <div className="space-y-2">
             <SectionEyebrow>{`Chapter ${chapterNumber.toString().padStart(2, '0')}`}</SectionEyebrow>
-            <p className="sonartra-report-body-soft max-w-[12rem] text-[0.95rem] leading-7">
+            <p className="sonartra-report-body-soft max-w-[13rem] text-[0.95rem] leading-7">
               Domain reading
             </p>
           </div>
@@ -214,7 +214,7 @@ function DomainChapter({
           {domain.chapterOpening ? (
             <div className="space-y-5">
               <EditorialDivider title="Chapter opening" />
-              <p className="sonartra-report-summary max-w-[46rem]">{domain.chapterOpening}</p>
+              <p className="sonartra-report-summary max-w-[56rem]">{domain.chapterOpening}</p>
             </div>
           ) : null}
 
@@ -227,7 +227,7 @@ function DomainChapter({
           {ringModel ? (
             <div className="space-y-3">
               <EditorialDivider title="Signal balance" />
-              <DomainSignalRing domain={ringModel} className="max-w-[47rem]" />
+              <DomainSignalRing domain={ringModel} className="max-w-[54rem]" />
             </div>
           ) : null}
 
@@ -264,7 +264,7 @@ function DomainChapter({
               {domain.signalPair?.summary ? (
                 <div className="space-y-3">
                   <EditorialDivider title="Signal pair" />
-                  <p className="sonartra-report-body max-w-[46rem] text-white/80">
+                  <p className="sonartra-report-body max-w-[56rem] text-white/80">
                     {domain.signalPair.summary}
                   </p>
                 </div>
@@ -287,7 +287,7 @@ function DomainChapter({
           ) : null}
 
           {!ringModel && !domain.primarySignal && !domain.secondarySignal && !hasPairReading ? (
-            <p className="sonartra-report-body-soft max-w-[42rem]">
+            <p className="sonartra-report-body-soft max-w-[50rem]">
               No persisted domain signals are available for this area.
             </p>
           ) : null}
@@ -315,7 +315,7 @@ function DomainSection({
   }
 
   return (
-    <div className="mx-auto max-w-[61rem] px-1 md:px-2">
+    <div className="mx-auto max-w-[72rem] px-1 md:px-2">
       {domainItems.map(({ domain, ringModel, domainAnchorId }, index) => (
         <DomainChapter
           key={domain.domainKey}
@@ -351,7 +351,7 @@ function SignalEditorialBlock({
     <div className="space-y-2.5">
       <p className="sonartra-report-kicker">{title}</p>
       <p className="sonartra-report-title text-[1.05rem]">{signalLabel}</p>
-      {summary ? <p className="sonartra-report-body-soft max-w-[34rem]">{summary}</p> : null}
+      {summary ? <p className="sonartra-report-body-soft max-w-[44rem]">{summary}</p> : null}
     </div>
   );
 }
@@ -408,14 +408,14 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
-      <div className="xl:mx-auto xl:grid xl:max-w-[96rem] xl:grid-cols-[minmax(0,3fr)_minmax(12.5rem,1fr)] xl:gap-8 2xl:gap-10">
+      <div className="xl:mx-auto xl:grid xl:max-w-[102rem] xl:grid-cols-[minmax(0,4fr)_minmax(11.5rem,1fr)] xl:gap-6 2xl:gap-8">
         <main className="min-w-0 max-w-none space-y-12 md:space-y-14">
           <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
             <SonartraIntroduction metadataItems={introMetadataItems} />
-            <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.intro} className="mx-auto mt-5 max-w-[68rem] px-1 md:mt-6 md:px-2" />
+            <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.intro} className="mx-auto mt-5 max-w-[74rem] px-1 md:mt-6 md:px-2" />
           </section>
 
-          <ResultReadingProgress className="mx-auto max-w-[68rem] px-1 md:px-2 xl:hidden" />
+          <ResultReadingProgress className="mx-auto max-w-[74rem] px-1 md:px-2 xl:hidden" />
 
           <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
             <NarrativeBridge>
@@ -428,74 +428,76 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14`}
               style={getRevealStyle(1)}
             >
-          <div className="max-w-[74rem] space-y-11 md:space-y-14">
-            <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
-              <div className="space-y-9 md:space-y-11">
-                <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                  <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <SectionEyebrow>Results report</SectionEyebrow>
-                    <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
-                    <span>{result.assessmentTitle}</span>
-                  </div>
+              <div className="max-w-[80rem] space-y-11 md:space-y-14">
+                <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
+                  <div className="space-y-9 md:space-y-11">
+                    <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                      <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <SectionEyebrow>Results report</SectionEyebrow>
+                        <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
+                        <span>{result.assessmentTitle}</span>
+                      </div>
 
-                  {linkedinShare.canShare ? (
-                    <ResultLinkedInShare
-                      postBody={linkedinShare.postBody}
-                      analytics={linkedinShareAnalytics}
-                    />
-                  ) : null}
-                </div>
+                      {linkedinShare.canShare ? (
+                        <ResultLinkedInShare
+                          postBody={linkedinShare.postBody}
+                          analytics={linkedinShareAnalytics}
+                        />
+                      ) : null}
+                    </div>
 
-                <div className="space-y-8 md:space-y-10">
-                  {heroHeadline ? (
-                    <h1 className="sonartra-type-display max-w-[11ch] text-[3.15rem] tracking-[-0.055em] md:text-[5rem]">
-                      {heroHeadline}
-                    </h1>
-                  ) : null}
-                  <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.hero} />
-                  {heroSubheadline ? (
-                    <p className="sonartra-report-body-soft max-w-[42rem] text-[1rem] leading-8 text-white/68 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
-                      {heroSubheadline}
-                    </p>
-                  ) : null}
-                  <div className="sonartra-report-prose max-w-[50rem] space-y-6 border-l border-white/8 pl-5 md:space-y-7 md:pl-7">
-                    {heroPatternLabel ? (
-                      <p className="sonartra-report-kicker text-white/58">{heroPatternLabel}</p>
-                    ) : null}
-                    {heroSummary ? (
-                      <p className="sonartra-report-summary text-[1.08rem] leading-8 text-white/82 sm:text-[1.13rem] md:text-[1.22rem] md:leading-10">
-                        {heroSummary}
-                      </p>
-                    ) : null}
-                    {heroNarrative ? (
-                      <p className="sonartra-report-body max-w-[46rem] text-[1rem] leading-8 text-white/78 sm:text-[1.05rem] md:text-[1.1rem] md:leading-9">
-                        {heroNarrative}
-                      </p>
-                    ) : null}
-                    {pressureOverlay || environmentOverlay ? (
-                      <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
-                        {pressureOverlay ? <EditorialAside label="Pressure" text={pressureOverlay} /> : null}
-                        {environmentOverlay ? (
-                          <EditorialAside label="Environment" text={environmentOverlay} />
+                    <div className="space-y-8 md:space-y-10">
+                      {heroHeadline ? (
+                        <h1 className="sonartra-type-display max-w-[11ch] text-[3.15rem] tracking-[-0.055em] md:text-[5rem]">
+                          {heroHeadline}
+                        </h1>
+                      ) : null}
+                      <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.hero} />
+                      {heroSubheadline ? (
+                        <p className="sonartra-report-body-soft max-w-[50rem] text-[1rem] leading-8 text-white/68 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                          {heroSubheadline}
+                        </p>
+                      ) : null}
+                      <div className="sonartra-report-prose max-w-[58rem] space-y-6 border-l border-white/8 pl-5 md:space-y-7 md:pl-7">
+                        {heroPatternLabel ? (
+                          <p className="sonartra-report-kicker text-white/58">{heroPatternLabel}</p>
+                        ) : null}
+                        {heroSummary ? (
+                          <p className="sonartra-report-summary text-[1.08rem] leading-8 text-white/82 sm:text-[1.13rem] md:text-[1.22rem] md:leading-10">
+                            {heroSummary}
+                          </p>
+                        ) : null}
+                        {heroNarrative ? (
+                          <p className="sonartra-report-body max-w-[54rem] text-[1rem] leading-8 text-white/78 sm:text-[1.05rem] md:text-[1.1rem] md:leading-9">
+                            {heroNarrative}
+                          </p>
+                        ) : null}
+                        {pressureOverlay || environmentOverlay ? (
+                          <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
+                            {pressureOverlay ? (
+                              <EditorialAside label="Pressure" text={pressureOverlay} />
+                            ) : null}
+                            {environmentOverlay ? (
+                              <EditorialAside label="Environment" text={environmentOverlay} />
+                            ) : null}
+                          </div>
                         ) : null}
                       </div>
-                    ) : null}
+                    </div>
                   </div>
+
+                  <HeroPatternMedallion
+                    patternKey={heroPatternKey}
+                    label={heroPatternLabel}
+                    className="mx-auto md:mx-0 md:mt-1"
+                  />
                 </div>
               </div>
-
-              <HeroPatternMedallion
-                patternKey={heroPatternKey}
-                label={heroPatternLabel}
-                className="mx-auto md:mx-0 md:mt-1"
-              />
-            </div>
-          </div>
             </section>
           </div>
 
           <div className="space-y-7 pt-5 md:space-y-8 md:pt-9">
-            <NarrativeBridge className="max-w-[38rem]">
+            <NarrativeBridge className="max-w-[44rem]">
               Here&apos;s how these patterns show up across each domain.
             </NarrativeBridge>
 

@@ -11,8 +11,8 @@ test('result detail desktop layout uses widened container and rebalanced columns
     'utf8',
   );
 
-  assert.match(pageSource, /xl:max-w-\[96rem\]/);
-  assert.match(pageSource, /xl:grid-cols-\[minmax\(0,3fr\)_minmax\(12\.5rem,1fr\)\]/);
+  assert.match(pageSource, /xl:max-w-\[102rem\]/);
+  assert.match(pageSource, /xl:grid-cols-\[minmax\(0,4fr\)_minmax\(11\.5rem,1fr\)\]/);
   assert.match(pageSource, /<main className="min-w-0 max-w-none/);
   assert.match(pageSource, /ResultReadingRail className="hidden xl:block xl:pt-0\.5"/);
 });
@@ -22,4 +22,5 @@ test('global styles enable smooth anchors while respecting reduced motion', () =
 
   assert.match(cssSource, /html \{\n  scroll-behavior: smooth;/);
   assert.match(cssSource, /@media \(prefers-reduced-motion: reduce\) \{\n  html \{\n    scroll-behavior: auto;/);
+  assert.match(cssSource, /main \{\n  @apply mx-auto min-h-\[calc\(100vh-4rem\)\] w-full max-w-\[1320px\]/);
 });
