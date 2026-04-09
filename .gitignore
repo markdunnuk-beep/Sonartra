@@ -11,3 +11,5 @@ pnpm-debug.log*
 *.tsbuildinfo
 .codex-dev.log
 ~$*.xlsx
+.codex-artifacts/
+.codex-dev.err.log
