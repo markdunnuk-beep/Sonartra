@@ -90,6 +90,40 @@ test('candidate selection supports observer-driven reading progression', () => {
   assert.equal(activeSectionId, 'application');
 });
 
+test('final application section overtakes lingering domain sections only when clearly in view', () => {
+  const staysOnDomain = pickActiveSectionCandidate({
+    orderedSectionIds: [
+      'domains',
+      'domain-pressure-response',
+      'application',
+    ],
+    currentActiveSectionId: 'domain-pressure-response',
+    observations: buildObservationMap([
+      { id: 'domains', intersectionRatio: 0.12, centerDistanceRatio: 0.88 },
+      { id: 'domain-pressure-response', intersectionRatio: 0.34, centerDistanceRatio: 0.26 },
+      { id: 'application', intersectionRatio: 0.29, centerDistanceRatio: 0.24 },
+    ]),
+  });
+
+  assert.equal(staysOnDomain, 'domain-pressure-response');
+
+  const switchesToApplication = pickActiveSectionCandidate({
+    orderedSectionIds: [
+      'domains',
+      'domain-pressure-response',
+      'application',
+    ],
+    currentActiveSectionId: 'domain-pressure-response',
+    observations: buildObservationMap([
+      { id: 'domains', intersectionRatio: 0.08, centerDistanceRatio: 0.94 },
+      { id: 'domain-pressure-response', intersectionRatio: 0.18, centerDistanceRatio: 0.79 },
+      { id: 'application', intersectionRatio: 0.62, centerDistanceRatio: 0.16 },
+    ]),
+  });
+
+  assert.equal(switchesToApplication, 'application');
+});
+
 test('stability logic keeps current section for weak neighbouring visibility', () => {
   const nextSection = pickActiveSectionCandidate({
     orderedSectionIds: RESULT_READING_SECTION_IDS,
