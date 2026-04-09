@@ -598,6 +598,11 @@ test('language step view model resolves the latest draft version and derives cou
     signals: { entryCount: 2 },
     pairs: { entryCount: 1 },
     domains: { entryCount: 1 },
+    applicationThesis: { entryCount: 0 },
+    applicationContribution: { entryCount: 0 },
+    applicationRisk: { entryCount: 0 },
+    applicationDevelopment: { entryCount: 0 },
+    applicationActionPrompts: { entryCount: 0 },
     pairTraitWeights: { entryCount: 2 },
     heroPatternRules: { entryCount: 1 },
     heroPatternLanguage: { entryCount: 1 },
@@ -667,13 +672,18 @@ test('language step view model returns null for a missing assessment and empty v
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
+    applicationThesis: { entryCount: 0 },
+    applicationContribution: { entryCount: 0 },
+    applicationRisk: { entryCount: 0 },
+    applicationDevelopment: { entryCount: 0 },
+    applicationActionPrompts: { entryCount: 0 },
     pairTraitWeights: { entryCount: 0 },
     heroPatternRules: { entryCount: 0 },
     heroPatternLanguage: { entryCount: 0 },
   });
 });
 
-test('language step component renders assessment introduction and first-class domain chapter modules without a top-level hero pattern language panel', () => {
+test('language step component renders four bounded language modules with downweighted reference guidance', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentLanguageStep
       viewModel={{
@@ -700,6 +710,11 @@ test('language step component renders assessment introduction and first-class do
           signals: { entryCount: 2 },
           pairs: { entryCount: 1 },
           domains: { entryCount: 1 },
+          applicationThesis: { entryCount: 1 },
+          applicationContribution: { entryCount: 2 },
+          applicationRisk: { entryCount: 2 },
+          applicationDevelopment: { entryCount: 2 },
+          applicationActionPrompts: { entryCount: 1 },
           pairTraitWeights: { entryCount: 12 },
           heroPatternRules: { entryCount: 8 },
           heroPatternLanguage: { entryCount: 9 },
@@ -710,57 +725,57 @@ test('language step component renders assessment introduction and first-class do
 
   assert.match(markup, /Language/);
   assert.match(markup, /Assessment Introduction/);
-  assert.match(markup, /This step controls report-facing language only\./);
-  assert.match(markup, /Import Hero engine datasets/);
+  assert.match(markup, /This stage controls report-facing language only\./);
+  assert.match(markup, /Hero Engine/);
   assert.match(markup, /Domain Chapters/);
-  assert.match(markup, /Manage the chapter-owned language used throughout the domain reading in the same order it appears on the results page\./);
-  assert.match(markup, /Domain Chapter/);
-  assert.match(markup, /Signal Chapter/);
-  assert.match(markup, /Signal Pair/);
+  assert.match(markup, /Application Layer/);
+  assert.match(markup, /Shape the opening report language before the deeper interpretation begins\./);
+  assert.match(markup, /Hero header language/);
+  assert.match(markup, /Replace the opening hero headline rows shown at the top of the results page for this assessment version\./);
+  assert.match(markup, /Domain chapter/);
+  assert.match(markup, /Signal chapter/);
+  assert.match(markup, /Signal pair/);
+  assert.match(markup, /Thesis/);
+  assert.match(markup, /Contribution/);
+  assert.match(markup, /Risk/);
+  assert.match(markup, /Development/);
+  assert.match(markup, /Action prompts/);
   assert.match(markup, /aria-pressed="true"/);
   assert.match(markup, /Pair Trait Weights/);
   assert.match(markup, /Hero Pattern Rules/);
   assert.match(markup, /Hero Pattern Language/);
   assert.match(markup, /Current rows: 12/);
-  assert.match(markup, /Domain Chapter Language/);
-  assert.match(markup, /Domain Chapter Language supports chapterOpening only\./);
-  assert.match(markup, /domain \| operating-style \| chapterOpening \|/);
+  assert.match(markup, /Domain chapter language/);
+  assert.match(markup, /Show import format/);
+  assert.match(markup, /Show example/);
   assert.match(markup, /supported authoring path for report language/i);
-  assert.doesNotMatch(markup, /Actions<\/h3>/);
   assert.match(markup, /2 entries/);
   assert.match(markup, /1 entry/);
+  assert.match(markup, /9 entries/);
   assert.match(markup, /Current Domain rows: 1/);
   assert.doesNotMatch(markup, /Current Signal rows: 2/);
   assert.doesNotMatch(markup, /Current Pair rows: 1/);
   assert.match(markup, /Pair Traits/);
-  assert.match(markup, /Hero Rules/);
-  assert.match(markup, /Hero Language/);
-  assert.doesNotMatch(markup, /Import report language/);
+  assert.match(markup, /Hero rules/);
+  assert.match(markup, /Hero language/);
+  assert.doesNotMatch(markup, /Import Hero engine datasets/);
   assert.doesNotMatch(markup, /Legacy shared import surface retained temporarily/);
-  assert.doesNotMatch(markup, /Replace the opening hero headline language from its own dedicated import surface\./);
-  assert.doesNotMatch(markup, /Replace the hero headline rows shown at the top of the results page from a dedicated, version-scoped import surface\./);
-  assert.doesNotMatch(markup, /Current Hero Header rows:/);
-  assert.doesNotMatch(markup, /Paste Hero Header rows/);
-  assert.doesNotMatch(markup, /Signal Chapter Language supports chapterSummary only\./);
-  assert.doesNotMatch(markup, /Signal Pair Chapter Language supports chapterSummary, pressureFocus, and environmentFocus only\./);
-  assert.doesNotMatch(markup, /signal \| driver \| chapterSummary \|/);
-  assert.doesNotMatch(markup, /pair \| driver_analyst \| chapterSummary \|/);
 
   const assessmentIntroIndex = markup.indexOf('Assessment Introduction');
-  const heroEngineIndex = markup.indexOf('Import Hero engine datasets');
+  const heroEngineIndex = markup.indexOf('Hero Engine');
   const domainChaptersIndex = markup.indexOf('Domain Chapters');
-  const domainTabIndex = markup.indexOf('Domain Chapter Language');
-  const signalTabIndex = markup.indexOf('Signal Chapter');
-  const pairTabIndex = markup.indexOf('Signal Pair');
-  const domainChapterIndex = markup.indexOf('Domain Chapter Language');
+  const applicationLayerIndex = markup.indexOf('Application Layer');
+  const domainTabIndex = markup.indexOf('Domain chapter language');
+  const signalTabIndex = markup.indexOf('Signal chapter');
+  const pairTabIndex = markup.indexOf('Signal pair');
 
   assert.ok(assessmentIntroIndex >= 0);
   assert.ok(heroEngineIndex > assessmentIntroIndex);
   assert.ok(domainChaptersIndex > heroEngineIndex);
+  assert.ok(applicationLayerIndex > domainChaptersIndex);
   assert.ok(domainTabIndex >= domainChaptersIndex);
-  assert.ok(signalTabIndex > domainChapterIndex);
-  assert.ok(pairTabIndex > signalTabIndex);
-  assert.ok(domainChapterIndex > domainChaptersIndex);
+  assert.ok(signalTabIndex >= domainChaptersIndex);
+  assert.ok(pairTabIndex >= domainChaptersIndex);
 });
 
 test('language step component shows a safe empty state when no usable version context exists', () => {
@@ -780,6 +795,11 @@ test('language step component shows a safe empty state when no usable version co
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
           domains: { entryCount: 0 },
+          applicationThesis: { entryCount: 0 },
+          applicationContribution: { entryCount: 0 },
+          applicationRisk: { entryCount: 0 },
+          applicationDevelopment: { entryCount: 0 },
+          applicationActionPrompts: { entryCount: 0 },
           pairTraitWeights: { entryCount: 0 },
           heroPatternRules: { entryCount: 0 },
           heroPatternLanguage: { entryCount: 0 },
@@ -1009,6 +1029,11 @@ test('language step view model degrades safely when language tables are unavaila
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
+    applicationThesis: { entryCount: 0 },
+    applicationContribution: { entryCount: 0 },
+    applicationRisk: { entryCount: 0 },
+    applicationDevelopment: { entryCount: 0 },
+    applicationActionPrompts: { entryCount: 0 },
     pairTraitWeights: { entryCount: 0 },
     heroPatternRules: { entryCount: 0 },
     heroPatternLanguage: { entryCount: 0 },
@@ -1033,6 +1058,11 @@ test('language step view model degrades safely when hero tables are unavailable 
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
+    applicationThesis: { entryCount: 0 },
+    applicationContribution: { entryCount: 0 },
+    applicationRisk: { entryCount: 0 },
+    applicationDevelopment: { entryCount: 0 },
+    applicationActionPrompts: { entryCount: 0 },
     pairTraitWeights: { entryCount: 0 },
     heroPatternRules: { entryCount: 0 },
     heroPatternLanguage: { entryCount: 0 },
@@ -1054,6 +1084,11 @@ test('brand-new assessment with zero dataset rows still loads the language step'
     signals: { entryCount: 0 },
     pairs: { entryCount: 0 },
     domains: { entryCount: 0 },
+    applicationThesis: { entryCount: 0 },
+    applicationContribution: { entryCount: 0 },
+    applicationRisk: { entryCount: 0 },
+    applicationDevelopment: { entryCount: 0 },
+    applicationActionPrompts: { entryCount: 0 },
     pairTraitWeights: { entryCount: 0 },
     heroPatternRules: { entryCount: 0 },
     heroPatternLanguage: { entryCount: 0 },
@@ -1088,6 +1123,11 @@ test('language step component shows a safe schema-unavailable state instead of r
           signals: { entryCount: 0 },
           pairs: { entryCount: 0 },
           domains: { entryCount: 0 },
+          applicationThesis: { entryCount: 0 },
+          applicationContribution: { entryCount: 0 },
+          applicationRisk: { entryCount: 0 },
+          applicationDevelopment: { entryCount: 0 },
+          applicationActionPrompts: { entryCount: 0 },
           pairTraitWeights: { entryCount: 0 },
           heroPatternRules: { entryCount: 0 },
           heroPatternLanguage: { entryCount: 0 },

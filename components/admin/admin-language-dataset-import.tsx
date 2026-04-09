@@ -194,13 +194,28 @@ function ActionButton({
   );
 }
 
+function ReferenceDisclosure({
+  title,
+  children,
+}: Readonly<{
+  title: string;
+  children: React.ReactNode;
+}>) {
+  return (
+    <details className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3">
+      <summary className="sonartra-motion-details-summary cursor-pointer list-none text-sm font-medium text-white/68">
+        {title}
+      </summary>
+      <div className="mt-3 text-sm leading-7 text-white/62">{children}</div>
+    </details>
+  );
+}
 
 export function AdminLanguageDatasetImport({
   dataset,
   assessmentVersionId,
   counts,
   isEditableAssessmentVersion,
-  sectionEyebrow,
   sectionTitle,
   sectionDescription,
 }: Readonly<{
@@ -218,7 +233,6 @@ export function AdminLanguageDatasetImport({
     applicationActionPrompts: { entryCount: number };
   };
   isEditableAssessmentVersion: boolean;
-  sectionEyebrow?: string;
   sectionTitle?: string;
   sectionDescription?: string;
 }>) {
@@ -234,7 +248,6 @@ export function AdminLanguageDatasetImport({
   const [isImportPending, startImportTransition] = useTransition();
 
   const selectedOption = DATASET_OPTIONS.find((option) => option.key === dataset) ?? DATASET_OPTIONS[0];
-  const resolvedSectionEyebrow = sectionEyebrow ?? selectedOption.title;
   const resolvedSectionTitle = sectionTitle ?? selectedOption.title;
   const resolvedSectionDescription =
     sectionDescription ?? selectedOption.description;
@@ -302,10 +315,8 @@ export function AdminLanguageDatasetImport({
     <SurfaceCard className="overflow-hidden p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
-          <p className="sonartra-page-eyebrow">{resolvedSectionEyebrow}</p>
-          <h3 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">{resolvedSectionTitle}</h3>
+          <h3 className="text-[1.22rem] font-semibold tracking-[-0.025em] text-white">{resolvedSectionTitle}</h3>
           <p className="max-w-3xl text-sm leading-7 text-white/62">{resolvedSectionDescription}</p>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">{REPORT_ALIGNED_AUTHORING_NOTE}</p>
         </div>
 
         {!isEditableAssessmentVersion ? (
@@ -324,40 +335,48 @@ export function AdminLanguageDatasetImport({
             </LabelPill>
           </div>
           <p className="mt-3 text-sm leading-7 text-white/62">{selectedOption.description}</p>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">{selectedOption.detail}</p>
-          <p className="sonartra-admin-feedback-section-title mt-3">Example</p>
-          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
-            {selectedOption.formatExample}
-          </pre>
+          <p className="max-w-3xl text-sm leading-7 text-white/62">{REPORT_ALIGNED_AUTHORING_NOTE}</p>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <ReferenceDisclosure title="Show import format">
+              <p>{selectedOption.detail}</p>
+            </ReferenceDisclosure>
+            <ReferenceDisclosure title="Show example">
+              <pre className="overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
+                {selectedOption.formatExample}
+              </pre>
+            </ReferenceDisclosure>
+          </div>
         </div>
 
-        <label className="block space-y-2">
-          <span className="block text-sm font-medium text-white">{selectedOption.textareaLabel}</span>
-          <textarea
-            aria-label={selectedOption.textareaLabel}
-            className={cn(
-              'sonartra-focus-ring min-h-[240px] w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
-              inlineError
-                ? 'border-[rgba(255,157,157,0.32)]'
-                : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
-            )}
-            disabled={!isEditableAssessmentVersion || isImportPending}
-            onChange={(event) => handleInputChange(event.currentTarget.value)}
-            placeholder={selectedOption.placeholder}
-            value={rawInput}
-          />
-        </label>
+        <div className="rounded-[1rem] border border-[rgba(142,162,255,0.14)] bg-[rgba(142,162,255,0.04)] p-4">
+          <label className="block space-y-2">
+            <span className="block text-sm font-medium text-white">{selectedOption.textareaLabel}</span>
+            <textarea
+              aria-label={selectedOption.textareaLabel}
+              className={cn(
+                'sonartra-focus-ring min-h-[240px] w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
+                inlineError
+                  ? 'border-[rgba(255,157,157,0.32)]'
+                  : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
+              )}
+              disabled={!isEditableAssessmentVersion || isImportPending}
+              onChange={(event) => handleInputChange(event.currentTarget.value)}
+              placeholder={selectedOption.placeholder}
+              value={rawInput}
+            />
+          </label>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className={inlineError ? 'text-sm text-[rgba(255,198,198,0.92)]' : 'text-sm text-white/45'}>
-            {inlineError ?? 'Import replaces the selected dataset for this assessment version only.'}
-          </p>
-          <ActionButton
-            disabled={!rawInput.trim() || isImportPending || !isEditableAssessmentVersion}
-            onClick={handleImport}
-          >
-            {isImportPending ? 'Importing...' : hasImported ? 'Imported' : 'Import'}
-          </ActionButton>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className={inlineError ? 'text-sm text-[rgba(255,198,198,0.92)]' : 'text-sm text-white/45'}>
+              {inlineError ?? 'Import replaces the selected dataset for this assessment version only.'}
+            </p>
+            <ActionButton
+              disabled={!rawInput.trim() || isImportPending || !isEditableAssessmentVersion}
+              onClick={handleImport}
+            >
+              {isImportPending ? 'Importing...' : hasImported ? 'Imported' : 'Import'}
+            </ActionButton>
+          </div>
         </div>
 
         {resultState.dataset === dataset &&

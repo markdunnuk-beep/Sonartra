@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 
-import { AdminLanguageDatasetImport } from '@/components/admin/admin-language-dataset-import';
 import { AdminHeroDatasetImport } from '@/components/admin/admin-hero-dataset-import';
+import { AdminLanguageDatasetImport } from '@/components/admin/admin-language-dataset-import';
 import {
   EmptyState,
   LabelPill,
@@ -26,21 +26,25 @@ const DOMAIN_CHAPTER_TABS: readonly {
   key: DomainChapterTab;
   label: string;
   title: string;
+  description: string;
 }[] = [
   {
     key: 'domain',
-    label: 'Domain Chapter',
-    title: 'Domain Chapter Language',
+    label: 'Domain chapter',
+    title: 'Domain chapter language',
+    description: 'Opening language for each domain chapter.',
   },
   {
     key: 'signal',
-    label: 'Signal Chapter',
-    title: 'Signal Chapter Language',
+    label: 'Signal chapter',
+    title: 'Signal chapter language',
+    description: 'Primary and secondary signal summaries used in the report.',
   },
   {
     key: 'pair',
-    label: 'Signal Pair',
-    title: 'Signal Pair Chapter Language',
+    label: 'Signal pair',
+    title: 'Signal pair chapter language',
+    description: 'Pair summary, pressure, and environment language.',
   },
 ] as const;
 
@@ -53,31 +57,31 @@ const APPLICATION_PLAN_TABS: readonly {
   {
     key: 'applicationThesis',
     label: 'Thesis',
-    title: 'Application Thesis',
+    title: 'Application thesis',
     description: 'Opening bridge into the final application chapter.',
   },
   {
     key: 'applicationContribution',
     label: 'Contribution',
-    title: 'Contribution Language',
+    title: 'Contribution language',
     description: 'How the person creates value at their best.',
   },
   {
     key: 'applicationRisk',
     label: 'Risk',
-    title: 'Risk Language',
+    title: 'Risk language',
     description: 'Where strengths can become limiting patterns.',
   },
   {
     key: 'applicationDevelopment',
     label: 'Development',
-    title: 'Development Language',
+    title: 'Development language',
     description: 'Where to build more range.',
   },
   {
     key: 'applicationActionPrompts',
-    label: 'Action Prompts',
-    title: 'Action Prompt Language',
+    label: 'Action prompts',
+    title: 'Action prompt language',
     description: '30-day action guidance and feedback prompts.',
   },
 ] as const;
@@ -94,6 +98,78 @@ function getVersionSummary(viewModel: AdminAssessmentLanguageStepViewModel): str
 
 function formatEntryCount(count: number): string {
   return `${count} entr${count === 1 ? 'y' : 'ies'}`;
+}
+
+function ModuleShell({
+  title,
+  description,
+  statusItems,
+  children,
+}: Readonly<{
+  title: string;
+  description: string;
+  statusItems: readonly { label: string; value: string }[];
+  children: React.ReactNode;
+}>) {
+  return (
+    <SurfaceCard className="space-y-6 p-5 lg:p-6">
+      <div className="space-y-2">
+        <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">{title}</h2>
+        <p className="max-w-3xl text-sm leading-7 text-white/62">{description}</p>
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">Status summary</p>
+        <div className={cn('grid gap-4', statusItems.length >= 4 ? 'md:grid-cols-2 xl:grid-cols-4' : 'md:grid-cols-3')}>
+          {statusItems.map((item) => (
+            <MetaItem key={item.label} label={item.label} value={item.value} />
+          ))}
+        </div>
+      </div>
+
+      {children}
+    </SurfaceCard>
+  );
+}
+
+function DatasetTabBar<T extends string>({
+  label,
+  tabs,
+  value,
+  onChange,
+}: Readonly<{
+  label: string;
+  tabs: readonly { key: T; label: string; title: string; description: string }[];
+  value: T;
+  onChange: (value: T) => void;
+}>) {
+  return (
+    <div className="space-y-3">
+      <p className="text-sm font-medium text-white">{label}</p>
+      <div className={cn('grid gap-3', tabs.length >= 5 ? 'sm:grid-cols-2 xl:grid-cols-5' : 'sm:grid-cols-3')}>
+        {tabs.map((tab) => {
+          const isSelected = tab.key === value;
+          return (
+            <button
+              aria-pressed={isSelected}
+              className={cn(
+                'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
+                isSelected
+                  ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
+                  : 'border-white/8 bg-black/10 hover:border-white/14',
+              )}
+              key={tab.key}
+              onClick={() => onChange(tab.key)}
+              type="button"
+            >
+              <p className="text-sm font-semibold text-white">{tab.label}</p>
+              <p className="mt-2 text-sm leading-6 text-white/54">{tab.description}</p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export function AdminAssessmentLanguageStep({
@@ -141,6 +217,10 @@ export function AdminAssessmentLanguageStep({
     );
   }
 
+  const selectedDomainTab = DOMAIN_CHAPTER_TABS.find((tab) => tab.key === activeDomainTab) ?? DOMAIN_CHAPTER_TABS[0];
+  const selectedApplicationTab =
+    APPLICATION_PLAN_TABS.find((tab) => tab.key === activeApplicationTab) ?? APPLICATION_PLAN_TABS[0];
+
   return (
     <section className="space-y-8">
       <SectionHeader
@@ -157,26 +237,38 @@ export function AdminAssessmentLanguageStep({
           </LabelPill>
         </div>
         <p className="max-w-3xl text-sm leading-7 text-white/62">
-          Use this step for report-facing copy only. The sections here shape the language participants see in their
-          results.
+          This stage controls report-facing language only. Move from the opening report frame into hero logic,
+          domain interpretation, and the final application layer without leaving the canonical import path.
         </p>
       </SurfaceCard>
 
-      <div className="space-y-6">
-        <SectionHeader
-          eyebrow="Assessment Introduction"
-          title="Assessment Introduction"
-          description="This step controls report-facing language only. Use the dedicated sections below to update the persisted copy each results layer reads from."
+      <ModuleShell
+        title="Assessment Introduction"
+        description="Shape the opening report language before the deeper interpretation begins. Use this area for the top-line report framing rather than engine logic."
+        statusItems={[
+          { label: 'Hero headers', value: formatEntryCount(viewModel.counts.heroHeaders.entryCount) },
+          { label: 'Version scope', value: viewModel.activeVersion.versionTag },
+        ]}
+      >
+        <AdminLanguageDatasetImport
+          dataset="heroHeader"
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          counts={viewModel.counts}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+          sectionTitle="Hero header language"
+          sectionDescription="Replace the opening hero headline rows shown at the top of the results page for this assessment version."
         />
-      </div>
+      </ModuleShell>
 
-      <div className="space-y-6">
-        <SectionHeader
-          eyebrow="Hero Engine"
-          title="Import Hero engine datasets"
-          description="Replace the version-scoped pair traits, pattern rules, and pattern language used by the canonical Hero engine."
-        />
-
+      <ModuleShell
+        title="Hero Engine"
+        description="Update the canonical datasets that decide how pair traits roll up into Hero patterns and how those patterns are expressed on the page."
+        statusItems={[
+          { label: 'Pair traits', value: formatEntryCount(viewModel.counts.pairTraitWeights.entryCount) },
+          { label: 'Hero rules', value: formatEntryCount(viewModel.counts.heroPatternRules.entryCount) },
+          { label: 'Hero language', value: formatEntryCount(viewModel.counts.heroPatternLanguage.entryCount) },
+        ]}
+      >
         <AdminHeroDatasetImport
           assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
           counts={{
@@ -186,128 +278,67 @@ export function AdminAssessmentLanguageStep({
           }}
           isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
         />
-      </div>
+      </ModuleShell>
 
-      <div className="space-y-6">
-        <SectionHeader
-          eyebrow="Domain Chapters"
-          title="Domain Chapters"
-          description="Manage the chapter-owned language used throughout the domain reading in the same order it appears on the results page."
+      <ModuleShell
+        title="Domain Chapters"
+        description="Manage the domain-owned reading in the same order it appears in the report, from chapter openings through signal and pair interpretation."
+        statusItems={[
+          { label: 'Domain chapters', value: formatEntryCount(viewModel.counts.domains.entryCount) },
+          { label: 'Signal chapters', value: formatEntryCount(viewModel.counts.signals.entryCount) },
+          { label: 'Signal pairs', value: formatEntryCount(viewModel.counts.pairs.entryCount) },
+        ]}
+      >
+        <DatasetTabBar
+          label="Choose a domain language dataset"
+          onChange={setActiveDomainTab}
+          tabs={DOMAIN_CHAPTER_TABS}
+          value={activeDomainTab}
         />
 
-        <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
-            {DOMAIN_CHAPTER_TABS.map((tab) => {
-              const isSelected = tab.key === activeDomainTab;
-              return (
-                <button
-                  aria-pressed={isSelected}
-                  className={cn(
-                    'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
-                    isSelected
-                      ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
-                      : 'border-white/8 bg-black/10 hover:border-white/14',
-                  )}
-                  key={tab.key}
-                  onClick={() => setActiveDomainTab(tab.key)}
-                  type="button"
-                >
-                  <p className="text-sm font-semibold text-white">{tab.label}</p>
-                  <p className="mt-2 text-sm leading-6 text-white/54">{tab.title}</p>
-                </button>
-              );
-            })}
-          </div>
+        <AdminLanguageDatasetImport
+          dataset={
+            activeDomainTab === 'domain'
+              ? 'domain'
+              : activeDomainTab === 'signal'
+                ? 'signal'
+                : 'pair'
+          }
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          counts={viewModel.counts}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+          sectionTitle={selectedDomainTab.title}
+          sectionDescription={selectedDomainTab.description}
+        />
+      </ModuleShell>
 
-          <AdminLanguageDatasetImport
-            dataset={
-              activeDomainTab === 'domain'
-                ? 'domain'
-                : activeDomainTab === 'signal'
-                  ? 'signal'
-                  : 'pair'
-            }
-            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-            counts={viewModel.counts}
-            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-            sectionEyebrow="Domain Chapters"
-            sectionTitle={
-              activeDomainTab === 'domain'
-                ? 'Domain Chapter Language'
-                : activeDomainTab === 'signal'
-                  ? 'Signal Chapter Language'
-                  : 'Signal Pair Chapter Language'
-            }
-            sectionDescription={
-              activeDomainTab === 'domain'
-                ? 'Replace the chapterOpening copy for each domain chapter from its own dedicated import surface.'
-                : activeDomainTab === 'signal'
-                  ? 'Replace the persisted primary and secondary signal summaries from their own dedicated import surface.'
-                  : 'Replace the pair summary, pressure, and environment language from their own dedicated import surface.'
-            }
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-        <MetaItem label="Domain Chapters" value={formatEntryCount(viewModel.counts.domains.entryCount)} />
-        <MetaItem label="Signals" value={formatEntryCount(viewModel.counts.signals.entryCount)} />
-        <MetaItem label="Pairs" value={formatEntryCount(viewModel.counts.pairs.entryCount)} />
-        <MetaItem label="Pair Traits" value={formatEntryCount(viewModel.counts.pairTraitWeights.entryCount)} />
-        <MetaItem label="Hero Rules" value={formatEntryCount(viewModel.counts.heroPatternRules.entryCount)} />
-        <MetaItem label="Hero Language" value={formatEntryCount(viewModel.counts.heroPatternLanguage.entryCount)} />
-      </div>
-
-      <div className="space-y-6">
-        <SectionHeader
-          eyebrow="Stage 9"
-          title="Application Plan"
-          description="Import the version-scoped datasets that power the canonical application chapter without introducing UI-side logic."
+      <ModuleShell
+        title="Application Layer"
+        description="Control the concluding guidance layer that turns the results into contribution, risk, development, and action language."
+        statusItems={[
+          { label: 'Thesis', value: formatEntryCount(viewModel.counts.applicationThesis.entryCount) },
+          { label: 'Contribution', value: formatEntryCount(viewModel.counts.applicationContribution.entryCount) },
+          { label: 'Risk', value: formatEntryCount(viewModel.counts.applicationRisk.entryCount) },
+          { label: 'Development', value: formatEntryCount(viewModel.counts.applicationDevelopment.entryCount) },
+          { label: 'Action prompts', value: formatEntryCount(viewModel.counts.applicationActionPrompts.entryCount) },
+        ]}
+      >
+        <DatasetTabBar
+          label="Choose an application dataset"
+          onChange={setActiveApplicationTab}
+          tabs={APPLICATION_PLAN_TABS}
+          value={activeApplicationTab}
         />
 
-        <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            {APPLICATION_PLAN_TABS.map((tab) => {
-              const isSelected = tab.key === activeApplicationTab;
-              return (
-                <button
-                  aria-pressed={isSelected}
-                  className={cn(
-                    'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
-                    isSelected
-                      ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
-                      : 'border-white/8 bg-black/10 hover:border-white/14',
-                  )}
-                  key={tab.key}
-                  onClick={() => setActiveApplicationTab(tab.key)}
-                  type="button"
-                >
-                  <p className="text-sm font-semibold text-white">{tab.label}</p>
-                  <p className="mt-2 text-sm leading-6 text-white/54">{tab.title}</p>
-                </button>
-              );
-            })}
-          </div>
-
-          <AdminLanguageDatasetImport
-            dataset={activeApplicationTab}
-            assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
-            counts={viewModel.counts}
-            isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
-            sectionEyebrow="Stage 9"
-            sectionTitle={APPLICATION_PLAN_TABS.find((tab) => tab.key === activeApplicationTab)?.title}
-            sectionDescription={APPLICATION_PLAN_TABS.find((tab) => tab.key === activeApplicationTab)?.description}
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <MetaItem label="Application Thesis" value={formatEntryCount(viewModel.counts.applicationThesis.entryCount)} />
-        <MetaItem label="Contribution" value={formatEntryCount(viewModel.counts.applicationContribution.entryCount)} />
-        <MetaItem label="Risk" value={formatEntryCount(viewModel.counts.applicationRisk.entryCount)} />
-        <MetaItem label="Development" value={formatEntryCount(viewModel.counts.applicationDevelopment.entryCount)} />
-        <MetaItem label="Action Prompts" value={formatEntryCount(viewModel.counts.applicationActionPrompts.entryCount)} />
-      </div>
+        <AdminLanguageDatasetImport
+          dataset={activeApplicationTab}
+          assessmentVersionId={viewModel.activeVersion.assessmentVersionId}
+          counts={viewModel.counts}
+          isEditableAssessmentVersion={viewModel.activeVersion.status === 'draft'}
+          sectionTitle={selectedApplicationTab.title}
+          sectionDescription={selectedApplicationTab.description}
+        />
+      </ModuleShell>
     </section>
   );
 }
