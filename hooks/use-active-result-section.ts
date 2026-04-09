@@ -2,17 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import {
-  RESULT_READING_SECTIONS_BY_ID,
-  RESULT_READING_TOP_LEVEL_SECTIONS,
-} from '@/lib/results/result-reading-sections';
+import { RESULT_READING_SECTIONS_BY_ID } from '@/lib/results/result-reading-sections';
 
-const TOP_LEVEL_PROGRESS_IDS = RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => section.id) as readonly [
-  'intro',
-  'hero',
-  'domains',
-  'application',
-];
+const TOP_LEVEL_PROGRESS_IDS = ['intro', 'hero', 'domains', 'application'] as const;
+
+type ResultReadingTopLevelSectionId = (typeof TOP_LEVEL_PROGRESS_IDS)[number];
 
 const TOP_LEVEL_PROGRESS_SET = new Set<string>(TOP_LEVEL_PROGRESS_IDS);
 
@@ -84,7 +78,7 @@ export function getSafeDefaultActiveState(orderedSectionIds: readonly string[]):
   const activeSectionId = firstTopLevelId;
   const activeTopLevelSectionId = introPreferredTopLevel;
   const activeTopLevelIndex = activeTopLevelSectionId
-    ? TOP_LEVEL_PROGRESS_IDS.indexOf(activeTopLevelSectionId as (typeof TOP_LEVEL_PROGRESS_IDS)[number])
+    ? TOP_LEVEL_PROGRESS_IDS.indexOf(activeTopLevelSectionId as ResultReadingTopLevelSectionId)
     : -1;
 
   return {
@@ -108,7 +102,7 @@ export function toActiveResultSectionState(activeSectionId: string | null): Acti
     activeTopLevelSectionId,
     activeDomainSectionId: hasActiveDomainSection ? activeSectionId : null,
     activeTopLevelIndex: activeTopLevelSectionId
-      ? TOP_LEVEL_PROGRESS_IDS.indexOf(activeTopLevelSectionId as (typeof TOP_LEVEL_PROGRESS_IDS)[number])
+      ? TOP_LEVEL_PROGRESS_IDS.indexOf(activeTopLevelSectionId as ResultReadingTopLevelSectionId)
       : -1,
     activeTopLevelCount: TOP_LEVEL_PROGRESS_IDS.length,
     hasActiveDomainSection,
@@ -232,7 +226,7 @@ export function useActiveResultSection(
       {
         root: null,
         rootMargin: config?.rootMargin ?? '-12% 0px -38% 0px',
-        threshold: config?.threshold ?? [0, 0.15, 0.3, 0.5, 0.7, 1],
+        threshold: config?.threshold ? [...config.threshold] : [0, 0.15, 0.3, 0.5, 0.7, 1],
       },
     );
 
