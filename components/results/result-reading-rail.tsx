@@ -40,10 +40,10 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
   return (
     <nav
       aria-label="Report reading navigation"
-      className={cn('hidden xl:block xl:w-[13rem] xl:shrink-0', className)}
+      className={cn('hidden xl:block xl:w-[12.5rem] xl:shrink-0', className)}
       data-result-reading-rail="true"
     >
-      <div className="sticky top-28 space-y-4 border-l border-white/10 pl-3.5">
+      <div className="sticky top-28 space-y-4 border-l border-white/10 pl-3">
         <ul className="space-y-1" role="list">
           {RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => {
             const isTopLevelActive = activeTopLevelId === section.id;

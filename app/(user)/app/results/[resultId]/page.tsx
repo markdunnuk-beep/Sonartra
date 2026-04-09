@@ -197,7 +197,7 @@ function DomainChapter({
       className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal-soft space-y-10 border-t pt-16 first:border-t-0 first:pt-0 md:space-y-12 md:pt-20`}
       style={getRevealStyle(2)}
     >
-      <div className="grid gap-7 md:grid-cols-[minmax(0,12.5rem)_minmax(0,1fr)] md:gap-10 lg:gap-12">
+      <div className="grid gap-7 md:grid-cols-[minmax(0,13.5rem)_minmax(0,1fr)] md:gap-10 lg:grid-cols-[minmax(0,14.5rem)_minmax(0,1fr)] lg:gap-12">
         <div className="space-y-4 md:sticky md:top-24 md:self-start">
           <div className="space-y-2">
             <SectionEyebrow>{`Chapter ${chapterNumber.toString().padStart(2, '0')}`}</SectionEyebrow>
@@ -315,7 +315,7 @@ function DomainSection({
   }
 
   return (
-    <div className="mx-auto max-w-[72rem] px-1 md:px-2">
+    <div className="w-full px-1 md:px-2 xl:px-0.5">
       {domainItems.map(({ domain, ringModel, domainAnchorId }, index) => (
         <DomainChapter
           key={domain.domainKey}
@@ -408,14 +408,17 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
-      <div className="xl:mx-auto xl:grid xl:max-w-[102rem] xl:grid-cols-[minmax(0,4fr)_minmax(11.5rem,1fr)] xl:gap-6 2xl:gap-8">
+      <div className="xl:mx-auto xl:grid xl:max-w-[116rem] xl:grid-cols-[minmax(0,1fr)_minmax(11.5rem,13rem)] xl:gap-8 2xl:gap-10">
         <main className="min-w-0 max-w-none space-y-12 md:space-y-14">
           <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
             <SonartraIntroduction metadataItems={introMetadataItems} />
-            <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.intro} className="mx-auto mt-5 max-w-[74rem] px-1 md:mt-6 md:px-2" />
+            <ResultSectionIntent
+              sectionId={TOP_LEVEL_SECTION_IDS.intro}
+              className="mt-5 max-w-[56rem] px-1 md:mt-6 md:px-2"
+            />
           </section>
 
-          <ResultReadingProgress className="mx-auto max-w-[74rem] px-1 md:px-2 xl:hidden" />
+          <ResultReadingProgress className="max-w-[92rem] px-1 md:px-2 xl:hidden" />
 
           <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
             <NarrativeBridge>
@@ -428,8 +431,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14`}
               style={getRevealStyle(1)}
             >
-              <div className="max-w-[80rem] space-y-11 md:space-y-14">
-                <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
+              <div className="w-full space-y-11 md:space-y-14">
+                <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:gap-12">
                   <div className="space-y-9 md:space-y-11">
                     <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                       <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -512,7 +515,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                 title="Domain reading"
                 description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
               />
-              <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.domains} className="max-w-[46rem]" />
+              <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.domains} className="max-w-[54rem]" />
 
               <DomainSection domainItems={resultDomainItems} />
             </section>
@@ -534,13 +537,16 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                 title="Turning insight into impact"
                 description="This chapter brings the report together into a practical reading of contribution, risk, development, and next steps."
               />
-              <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.application} className="max-w-[46rem]" />
+              <ResultSectionIntent
+                sectionId={TOP_LEVEL_SECTION_IDS.application}
+                className="max-w-[54rem]"
+              />
               <ApplicationPlan application={result.application} />
             </section>
           </div>
         </main>
 
-        <ResultReadingRail className="hidden xl:block xl:pt-0.5" />
+        <ResultReadingRail className="hidden xl:block xl:pt-0.5 2xl:pl-0.5" />
       </div>
     </PageFrame>
   );
