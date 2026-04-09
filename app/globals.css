@@ -46,7 +46,11 @@ html {
 
   .sonartra-motion-nav-item,
   .sonartra-motion-active-bar,
-  .sonartra-motion-progress {
+  .sonartra-motion-progress,
+  .sonartra-result-rail-item,
+  .sonartra-result-rail-item-subtle,
+  .sonartra-result-rail-marker,
+  .sonartra-result-rail-icon {
     transition: none;
   }
 
@@ -236,6 +240,31 @@ main {
     transition-property: opacity, transform, background-color;
     transition-duration: var(--sonartra-motion-duration-standard);
     transition-timing-function: var(--sonartra-motion-ease-standard);
+  }
+
+  .sonartra-result-rail-item {
+    transition-property: color, background-color;
+    transition-duration: 190ms;
+    transition-timing-function: cubic-bezier(0.22, 0.84, 0.24, 1);
+  }
+
+  .sonartra-result-rail-item-subtle {
+    transition-property: color, background-color;
+    transition-duration: 170ms;
+    transition-timing-function: cubic-bezier(0.22, 0.82, 0.24, 1);
+  }
+
+  .sonartra-result-rail-marker {
+    transform-origin: 50% 54%;
+    transition-property: opacity, transform;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.18, 0.86, 0.24, 1);
+  }
+
+  .sonartra-result-rail-icon {
+    transition-property: color, opacity, background-color;
+    transition-duration: 170ms;
+    transition-timing-function: cubic-bezier(0.22, 0.82, 0.24, 1);
   }
 
   .sonartra-motion-progress {
