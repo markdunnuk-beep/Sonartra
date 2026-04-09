@@ -408,14 +408,14 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
-      <div className="xl:mx-auto xl:grid xl:max-w-[80rem] xl:grid-cols-[minmax(0,1fr)_13.25rem] xl:gap-10">
-        <main className="min-w-0 space-y-12 md:space-y-14">
+      <div className="xl:mx-auto xl:grid xl:max-w-[96rem] xl:grid-cols-[minmax(0,3fr)_minmax(12.5rem,1fr)] xl:gap-8 2xl:gap-10">
+        <main className="min-w-0 max-w-none space-y-12 md:space-y-14">
           <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
             <SonartraIntroduction metadataItems={introMetadataItems} />
-            <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.intro} className="mx-auto mt-5 max-w-[61rem] px-1 md:mt-6 md:px-2" />
+            <ResultSectionIntent sectionId={TOP_LEVEL_SECTION_IDS.intro} className="mx-auto mt-5 max-w-[68rem] px-1 md:mt-6 md:px-2" />
           </section>
 
-          <ResultReadingProgress className="mx-auto max-w-[61rem] px-1 md:px-2 xl:hidden" />
+          <ResultReadingProgress className="mx-auto max-w-[68rem] px-1 md:px-2 xl:hidden" />
 
           <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
             <NarrativeBridge>
@@ -428,7 +428,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14`}
               style={getRevealStyle(1)}
             >
-          <div className="max-w-[68rem] space-y-11 md:space-y-14">
+          <div className="max-w-[74rem] space-y-11 md:space-y-14">
             <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11">
               <div className="space-y-9 md:space-y-11">
                 <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
@@ -538,7 +538,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           </div>
         </main>
 
-        <ResultReadingRail className="hidden xl:block" />
+        <ResultReadingRail className="hidden xl:block xl:pt-0.5" />
       </div>
     </PageFrame>
   );
