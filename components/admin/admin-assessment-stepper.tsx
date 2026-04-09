@@ -83,8 +83,8 @@ export function AdminAssessmentStepper() {
   const isReferenceMode = assessment.builderMode === 'published_no_draft';
 
   return (
-    <SurfaceCard className="space-y-4 p-4 lg:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <SurfaceCard className="space-y-4 overflow-hidden p-3 sm:p-4 lg:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <p className="sonartra-page-eyebrow">
             {isReferenceMode ? 'Published version reference' : 'Builder progress'}
@@ -102,7 +102,10 @@ export function AdminAssessmentStepper() {
         ) : null}
       </div>
 
-      <nav aria-label="Assessment builder steps" className="flex flex-wrap gap-2">
+      <nav
+        aria-label="Assessment builder steps"
+        className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 sonartra-scrollbar sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+      >
         {steps.map((step, index) => {
           const isActive = step.status === 'active';
 
@@ -110,7 +113,7 @@ export function AdminAssessmentStepper() {
             <Link
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'sonartra-focus-ring flex min-w-[128px] items-center gap-3 rounded-[0.95rem] border px-3 py-2.5 transition',
+                'sonartra-focus-ring flex min-w-[11rem] shrink-0 items-center gap-3 rounded-[0.95rem] border px-3 py-2.5 transition sm:min-w-0 sm:flex-1 lg:flex-none',
                 isActive
                   ? 'border-[rgba(126,179,255,0.24)] bg-[rgba(126,179,255,0.1)] text-white'
                   : step.status === 'reference'
@@ -125,7 +128,7 @@ export function AdminAssessmentStepper() {
               key={step.slug}
             >
               <StepIndicator index={index} status={step.status} />
-              <span className="block text-sm font-medium">{step.label}</span>
+              <span className="block text-sm font-medium leading-5">{step.label}</span>
             </Link>
           );
         })}

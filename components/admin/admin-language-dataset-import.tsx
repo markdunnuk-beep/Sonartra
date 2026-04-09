@@ -182,7 +182,7 @@ function ActionButton({
   return (
     <button
       className={cn(
-        'sonartra-button sonartra-focus-ring sonartra-button-primary min-w-[140px]',
+        'sonartra-button sonartra-focus-ring sonartra-button-primary w-full sm:min-w-[140px] sm:w-auto',
         disabled && 'cursor-not-allowed border-white/8 bg-white/[0.05] text-white/42',
       )}
       disabled={disabled}
@@ -202,7 +202,7 @@ function ReferenceDisclosure({
   children: React.ReactNode;
 }>) {
   return (
-    <details className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3">
+    <details className="overflow-hidden rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3">
       <summary className="sonartra-motion-details-summary cursor-pointer list-none text-sm font-medium text-white/68">
         {title}
       </summary>
@@ -312,11 +312,11 @@ export function AdminLanguageDatasetImport({
   }
 
   return (
-    <SurfaceCard className="overflow-hidden p-5 lg:p-6">
+    <SurfaceCard className="overflow-hidden p-4 sm:p-5 lg:p-6">
       <div className="space-y-5">
         <div className="space-y-2">
           <h3 className="text-[1.22rem] font-semibold tracking-[-0.025em] text-white">{resolvedSectionTitle}</h3>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">{resolvedSectionDescription}</p>
+          <p className="max-w-3xl text-sm leading-6 text-white/62 sm:leading-7">{resolvedSectionDescription}</p>
         </div>
 
         {!isEditableAssessmentVersion ? (
@@ -325,23 +325,23 @@ export function AdminLanguageDatasetImport({
           </AdminFeedbackNotice>
         ) : null}
 
-        <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="sonartra-admin-feedback-card min-w-0 rounded-[1rem] border p-4">
+          <div className="flex flex-wrap items-start gap-2">
             <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
               {selectedOption.currentRowsLabel}: {existingRowCount}
             </LabelPill>
-            <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+            <LabelPill className="max-w-full whitespace-normal break-all border-white/10 bg-white/[0.04] text-white/62">
               Format: {selectedOption.rowFormatLabel}
             </LabelPill>
           </div>
-          <p className="mt-3 text-sm leading-7 text-white/62">{selectedOption.description}</p>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">{REPORT_ALIGNED_AUTHORING_NOTE}</p>
+          <p className="mt-3 text-sm leading-6 text-white/62 sm:leading-7">{selectedOption.description}</p>
+          <p className="max-w-3xl text-sm leading-6 text-white/62 sm:leading-7">{REPORT_ALIGNED_AUTHORING_NOTE}</p>
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
             <ReferenceDisclosure title="Show import format">
-              <p>{selectedOption.detail}</p>
+              <p className="break-words">{selectedOption.detail}</p>
             </ReferenceDisclosure>
             <ReferenceDisclosure title="Show example">
-              <pre className="overflow-x-auto whitespace-pre-wrap text-sm leading-7 text-white/78">
+              <pre className="overflow-x-auto whitespace-pre-wrap break-words text-sm leading-7 text-white/78">
                 {selectedOption.formatExample}
               </pre>
             </ReferenceDisclosure>
@@ -367,7 +367,12 @@ export function AdminLanguageDatasetImport({
           </label>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className={inlineError ? 'text-sm text-[rgba(255,198,198,0.92)]' : 'text-sm text-white/45'}>
+            <p
+              className={cn(
+                'min-w-0 text-sm break-words',
+                inlineError ? 'text-[rgba(255,198,198,0.92)]' : 'text-white/45',
+              )}
+            >
               {inlineError ?? 'Import replaces the selected dataset for this assessment version only.'}
             </p>
             <ActionButton
@@ -388,7 +393,7 @@ export function AdminLanguageDatasetImport({
           Boolean(resultState.formError)) ? (
           <div className="space-y-5">
             <AdminFeedbackSection title="Summary">
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <AdminFeedbackStat label="Pasted rows" value={String(resultState.summary.rowCount)} />
                 <AdminFeedbackStat label="Targets in batch" value={String(resultState.summary.targetCount)} />
                 <AdminFeedbackStat
@@ -448,9 +453,9 @@ export function AdminLanguageDatasetImport({
               <AdminFeedbackSection title="Imported dataset">
                 <div className="space-y-4">
                   {resultState.previewGroups.map((group) => (
-                    <div className="sonartra-admin-feedback-card rounded-[1rem] border p-4" key={group.targetKey}>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold text-white">{group.targetLabel}</p>
+                    <div className="sonartra-admin-feedback-card min-w-0 rounded-[1rem] border p-4" key={group.targetKey}>
+                      <div className="flex flex-wrap items-start gap-2">
+                        <p className="break-words text-sm font-semibold text-white">{group.targetLabel}</p>
                         <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
                           {group.entries.length} row{group.entries.length === 1 ? '' : 's'}
                         </LabelPill>
@@ -464,7 +469,7 @@ export function AdminLanguageDatasetImport({
                             <p className="sonartra-admin-feedback-section-title">
                               {entry.label}
                             </p>
-                            <p className="mt-2 text-sm leading-6 text-white/82">{entry.content}</p>
+                            <p className="mt-2 break-words text-sm leading-6 text-white/82">{entry.content}</p>
                           </div>
                         ))}
                       </div>

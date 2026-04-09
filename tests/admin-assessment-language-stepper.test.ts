@@ -91,6 +91,8 @@ test('builder navigation resolves language as a first-class active route', () =>
   assert.match(helperSource, /case 'assessment-intro':/);
   assert.match(helperSource, /case 'language':/);
   assert.match(componentSource, /href: `\/admin\/assessments\/\$\{assessment\.assessmentKey\}\/\$\{step\.slug\}`/);
+  assert.match(componentSource, /overflow-x-auto/);
+  assert.match(componentSource, /min-w-\[11rem\] shrink-0/);
 });
 
 test('stepper marks assessment intro complete when meaningful draft intro content exists', () => {

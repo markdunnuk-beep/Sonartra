@@ -20,6 +20,8 @@ test('authoring layout switches into published-no-draft banner mode', () => {
   assert.match(source, /assessment\.builderMode === 'published_no_draft'/);
   assert.match(source, /Browse the published assessment and create a draft when you are ready to change it\./);
   assert.match(source, /<AdminPublishedNoDraftBanner/);
+  assert.match(source, /space-y-5 sm:space-y-6 lg:space-y-8/);
+  assert.match(source, /overflow-hidden p-4 sm:p-5 lg:p-7/);
 });
 
 test('guarded authoring stages route published assessments into the reusable read-only state', () => {
@@ -38,4 +40,18 @@ test('guarded authoring stages route published assessments into the reusable rea
   assert.match(domainsSource, /<AdminPublishedNoDraftStageState/);
   assert.match(introSource, /Assessment intro is currently read-only/);
   assert.match(introSource, /Create a draft version before authoring assessment intro content for the next release\./);
+});
+
+test('authoring layout tightens header chrome for small screens without removing builder context', () => {
+  const source = readSource(
+    'app',
+    '(admin)',
+    'admin',
+    'assessments',
+    '[assessmentKey]',
+    'layout.tsx',
+  );
+
+  assert.match(source, /<header className="space-y-2 sm:space-y-3">/);
+  assert.match(source, /text-\[1\.72rem\].*sm:text-\[2rem\].*lg:text-\[2\.35rem\]/);
 });

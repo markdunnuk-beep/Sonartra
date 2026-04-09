@@ -112,15 +112,20 @@ function ModuleShell({
   children: React.ReactNode;
 }>) {
   return (
-    <SurfaceCard className="space-y-6 p-5 lg:p-6">
+    <SurfaceCard className="space-y-5 overflow-hidden p-4 sm:p-5 lg:p-6">
       <div className="space-y-2">
         <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">{title}</h2>
-        <p className="max-w-3xl text-sm leading-7 text-white/62">{description}</p>
+        <p className="max-w-3xl text-sm leading-6 text-white/62 sm:leading-7">{description}</p>
       </div>
 
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">Status summary</p>
-        <div className={cn('grid gap-4', statusItems.length >= 4 ? 'md:grid-cols-2 xl:grid-cols-4' : 'md:grid-cols-3')}>
+        <div
+          className={cn(
+            'grid gap-3 sm:gap-4',
+            statusItems.length >= 4 ? 'sm:grid-cols-2 xl:grid-cols-4' : 'sm:grid-cols-2 xl:grid-cols-3',
+          )}
+        >
           {statusItems.map((item) => (
             <MetaItem key={item.label} label={item.label} value={item.value} />
           ))}
@@ -146,14 +151,19 @@ function DatasetTabBar<T extends string>({
   return (
     <div className="space-y-3">
       <p className="text-sm font-medium text-white">{label}</p>
-      <div className={cn('grid gap-3', tabs.length >= 5 ? 'sm:grid-cols-2 xl:grid-cols-5' : 'sm:grid-cols-3')}>
+      <div
+        className={cn(
+          '-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sonartra-scrollbar sm:mx-0 sm:grid sm:overflow-visible sm:px-0',
+          tabs.length >= 5 ? 'sm:grid-cols-2 xl:grid-cols-5' : 'sm:grid-cols-3',
+        )}
+      >
         {tabs.map((tab) => {
           const isSelected = tab.key === value;
           return (
             <button
               aria-pressed={isSelected}
               className={cn(
-                'sonartra-focus-ring rounded-[1rem] border px-4 py-4 text-left transition',
+                'sonartra-focus-ring min-w-[10.5rem] shrink-0 rounded-[1rem] border px-4 py-4 text-left transition sm:min-w-0',
                 isSelected
                   ? 'border-[rgba(142,162,255,0.36)] bg-[rgba(142,162,255,0.08)]'
                   : 'border-white/8 bg-black/10 hover:border-white/14',
@@ -191,17 +201,17 @@ export function AdminAssessmentLanguageStep({
 
   if (viewModel.languageSchemaStatus === 'unavailable') {
     return (
-      <section className="space-y-8">
+      <section className="space-y-6 sm:space-y-8">
         <SectionHeader
           eyebrow="Language"
           title="Language"
           description="Manage the report language used in the published results experience."
         />
 
-        <SurfaceCard className="space-y-4 p-5 lg:p-6">
-          <div className="flex flex-wrap items-center gap-2">
+        <SurfaceCard className="space-y-4 overflow-hidden p-4 sm:p-5 lg:p-6">
+          <div className="flex flex-wrap items-start gap-2">
             <LabelPill>{viewModel.assessmentKey}</LabelPill>
-            <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+            <LabelPill className="max-w-full whitespace-normal border-white/10 bg-white/[0.04] text-white/62">
               {getVersionSummary(viewModel)}
             </LabelPill>
           </div>
@@ -222,21 +232,21 @@ export function AdminAssessmentLanguageStep({
     APPLICATION_PLAN_TABS.find((tab) => tab.key === activeApplicationTab) ?? APPLICATION_PLAN_TABS[0];
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6 sm:space-y-8">
       <SectionHeader
         eyebrow="Language"
         title="Language"
         description="Author the report language used in results."
       />
 
-      <SurfaceCard className="space-y-4 p-5 lg:p-6">
-        <div className="flex flex-wrap items-center gap-2">
+      <SurfaceCard className="space-y-4 overflow-hidden p-4 sm:p-5 lg:p-6">
+        <div className="flex flex-wrap items-start gap-2">
           <LabelPill>{viewModel.assessmentKey}</LabelPill>
-          <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+          <LabelPill className="max-w-full whitespace-normal border-white/10 bg-white/[0.04] text-white/62">
             {getVersionSummary(viewModel)}
           </LabelPill>
         </div>
-        <p className="max-w-3xl text-sm leading-7 text-white/62">
+        <p className="max-w-3xl text-sm leading-6 text-white/62 sm:leading-7">
           This stage controls report-facing language only. Move from the opening report frame into hero logic,
           domain interpretation, and the final application layer without leaving the canonical import path.
         </p>

@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { AdminAssessmentLanguageStep } from '@/components/admin/admin-assessment-language-step';
@@ -9,6 +11,10 @@ import {
   importHeroHeaderLanguageForAssessmentVersionWithDependencies,
   previewHeroHeaderLanguageForAssessmentVersionWithDependencies,
 } from '@/lib/server/admin-hero-header-language-import';
+
+function readSource(path: string): string {
+  return readFileSync(path, 'utf8');
+}
 
 type AssessmentRow = {
   assessment_id: string;
@@ -760,6 +766,8 @@ test('language step component renders four bounded language modules with downwei
   assert.match(markup, /Hero language/);
   assert.doesNotMatch(markup, /Import Hero engine datasets/);
   assert.doesNotMatch(markup, /Legacy shared import surface retained temporarily/);
+  assert.match(markup, /Choose a domain language dataset/);
+  assert.match(markup, /Choose an application dataset/);
 
   const assessmentIntroIndex = markup.indexOf('Assessment Introduction');
   const heroEngineIndex = markup.indexOf('Hero Engine');
@@ -776,6 +784,24 @@ test('language step component renders four bounded language modules with downwei
   assert.ok(domainTabIndex >= domainChaptersIndex);
   assert.ok(signalTabIndex >= domainChaptersIndex);
   assert.ok(pairTabIndex >= domainChaptersIndex);
+});
+
+test('language import surfaces keep long technical guidance inside local responsive containers', () => {
+  const languageStepSource = readSource(
+    join(process.cwd(), 'components', 'admin', 'admin-assessment-language-step.tsx'),
+  );
+  const languageImportSource = readSource(
+    join(process.cwd(), 'components', 'admin', 'admin-language-dataset-import.tsx'),
+  );
+  const heroImportSource = readSource(
+    join(process.cwd(), 'components', 'admin', 'admin-hero-dataset-import.tsx'),
+  );
+
+  assert.match(languageStepSource, /overflow-x-auto px-1 pb-1 sonartra-scrollbar/);
+  assert.match(languageImportSource, /whitespace-normal break-all/);
+  assert.match(languageImportSource, /overflow-x-auto whitespace-pre-wrap break-words/);
+  assert.match(heroImportSource, /overflow-x-auto whitespace-pre-wrap break-words/);
+  assert.match(heroImportSource, /w-full sm:min-w-\[140px\] sm:w-auto/);
 });
 
 test('language step component shows a safe empty state when no usable version context exists', () => {
