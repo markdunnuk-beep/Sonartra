@@ -274,7 +274,7 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
   assert.match(
     source,
-    /xl:grid xl:max-w-\[102rem\] xl:grid-cols-\[minmax\(0,4fr\)_minmax\(11\.5rem,1fr\)\] xl:gap-6 2xl:gap-8/,
+    /xl:grid xl:max-w-\[116rem\] xl:grid-cols-\[minmax\(0,1fr\)_minmax\(11\.5rem,13rem\)\] xl:gap-8 2xl:gap-10/,
   );
   assert.match(source, /<main className="min-w-0 max-w-none space-y-12 md:space-y-14">/);
   assert.match(
@@ -282,8 +282,8 @@ test('result detail page renders the system introduction above hero and keeps ca
     /<section id=\{TOP_LEVEL_SECTION_IDS\.intro\} className=\{RESULTS_ANCHOR_TARGET_CLASS\}>/,
   );
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
-  assert.match(source, /<ResultReadingProgress className="mx-auto max-w-\[74rem\] px-1 md:px-2 xl:hidden" \/>/);
-  assert.match(source, /<ResultReadingRail className="hidden xl:block xl:pt-0\.5" \/>/);
+  assert.match(source, /<ResultReadingProgress className="max-w-\[92rem\] px-1 md:px-2 xl:hidden" \/>/);
+  assert.match(source, /<ResultReadingRail className="hidden xl:block xl:pt-0\.5 2xl:pl-0\.5" \/>/);
   assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
   assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
   assert.match(source, /So what does this mean in practice\?/);
@@ -297,10 +297,10 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.hero\}/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.application\}/);
-  assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.intro\}/);
+  assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.intro\}/);
   assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.hero\} \/>/);
-  assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
-  assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.application\}/);
+  assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
+  assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.application\}/);
   assert.match(source, /id=\{domainAnchorId \?\? undefined\}/);
   assert.match(source, /domainAnchorId: CANONICAL_DOMAIN_ANCHOR_IDS\[index\] \?\? null,/);
   assert.match(source, /<HeroPatternMedallion\s+patternKey=\{heroPatternKey\}\s+label=\{heroPatternLabel\}/);
@@ -453,7 +453,7 @@ test('result detail page removes payload-driven intro rendering in favor of the 
 
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
   assert.match(source, /sonartra-report-hero/);
-  assert.match(source, /mx-auto max-w-\[72rem\] px-1 md:px-2/);
+  assert.match(source, /w-full px-1 md:px-2 xl:px-0\.5/);
   assert.doesNotMatch(source, /import ReactMarkdown from 'react-markdown';/);
   assert.doesNotMatch(source, /import remarkGfm from 'remark-gfm';/);
   assert.doesNotMatch(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
