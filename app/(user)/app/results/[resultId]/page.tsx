@@ -7,6 +7,10 @@ import { HeroPatternMedallion } from '@/components/results/hero-pattern-medallio
 import { ResultLinkedInShare } from '@/components/results/result-linkedin-share';
 import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
 import { buildResultsLinkedInShareAnalytics } from '@/lib/results/linkedin-share-analytics';
+import {
+  RESULT_READING_DOMAIN_SUBSECTIONS,
+  RESULT_READING_TOP_LEVEL_SECTIONS,
+} from '@/lib/results/result-reading-sections';
 import { PageFrame, SectionHeader, SurfaceCard } from '@/components/shared/user-app-ui';
 import { formatLinkedInSharePost } from '@/lib/results/linkedin-share';
 import type { DomainSignalRingViewModel } from '@/lib/server/domain-signal-ring-view-model';
@@ -24,6 +28,31 @@ type ResultDetailPageProps = {
 };
 
 type CanonicalDomainChapter = AssessmentResultDetailViewModel['domains'][number];
+const RESULTS_ANCHOR_TARGET_CLASS = 'results-anchor-target';
+
+const TOP_LEVEL_SECTION_IDS = RESULT_READING_TOP_LEVEL_SECTIONS.reduce<
+  Record<'intro' | 'hero' | 'domains' | 'application', string>
+>(
+  (map, section) => {
+    if (
+      section.id === 'intro' ||
+      section.id === 'hero' ||
+      section.id === 'domains' ||
+      section.id === 'application'
+    ) {
+      map[section.id] = section.id;
+    }
+    return map;
+  },
+  {
+    intro: 'intro',
+    hero: 'hero',
+    domains: 'domains',
+    application: 'application',
+  },
+);
+
+const CANONICAL_DOMAIN_ANCHOR_IDS = RESULT_READING_DOMAIN_SUBSECTIONS.map((section) => section.id);
 
 function getRevealStyle(step = 0): CSSProperties {
   return {
@@ -124,6 +153,7 @@ function buildResultDetailDomainItems(params: {
 }): readonly {
   domain: CanonicalDomainChapter;
   ringModel: DomainSignalRingViewModel | null;
+  domainAnchorId: string | null;
 }[] {
   const ringModelsByDomainKey = new Map(
     params.ringModels.map((ringModel) => [ringModel.domainKey, ringModel]),
@@ -134,6 +164,7 @@ function buildResultDetailDomainItems(params: {
   return params.domains.map((domain, index) => ({
     domain,
     ringModel: ringModelsByDomainKey.get(domain.domainKey) ?? params.ringModels[index] ?? null,
+    domainAnchorId: CANONICAL_DOMAIN_ANCHOR_IDS[index] ?? null,
   }));
 }
 
@@ -141,10 +172,12 @@ function DomainChapter({
   domain,
   ringModel,
   chapterNumber,
+  domainAnchorId,
 }: {
   domain: CanonicalDomainChapter;
   ringModel: DomainSignalRingViewModel | null;
   chapterNumber: number;
+  domainAnchorId: string | null;
 }) {
   const title = domain.domainLabel.trim();
   const hasSignalReading = Boolean(ringModel || domain.primarySignal || domain.secondarySignal);
@@ -157,7 +190,8 @@ function DomainChapter({
 
   return (
     <article
-      className="border-white/6 sonartra-motion-reveal-soft space-y-10 border-t pt-16 first:border-t-0 first:pt-0 md:space-y-12 md:pt-20"
+      id={domainAnchorId ?? undefined}
+      className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal-soft space-y-10 border-t pt-16 first:border-t-0 first:pt-0 md:space-y-12 md:pt-20`}
       style={getRevealStyle(2)}
     >
       <div className="grid gap-7 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-10">
@@ -266,6 +300,7 @@ function DomainSection({
   domainItems: readonly {
     domain: CanonicalDomainChapter;
     ringModel: DomainSignalRingViewModel | null;
+    domainAnchorId: string | null;
   }[];
 }) {
   if (domainItems.length === 0) {
@@ -278,12 +313,13 @@ function DomainSection({
 
   return (
     <div className="mx-auto max-w-[61rem] px-1 md:px-2">
-      {domainItems.map(({ domain, ringModel }, index) => (
+      {domainItems.map(({ domain, ringModel, domainAnchorId }, index) => (
         <DomainChapter
           key={domain.domainKey}
           domain={domain}
           ringModel={ringModel}
           chapterNumber={index + 1}
+          domainAnchorId={domainAnchorId}
         />
       ))}
     </div>
@@ -369,7 +405,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
-      <SonartraIntroduction metadataItems={introMetadataItems} />
+      <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
+        <SonartraIntroduction metadataItems={introMetadataItems} />
+      </section>
 
       <div className="space-y-5 pt-3 md:space-y-6 md:pt-4">
         <NarrativeBridge>
@@ -378,7 +416,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
         {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
         <section
-          className="border-white/6 sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14"
+          id={TOP_LEVEL_SECTION_IDS.hero}
+          className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14`}
           style={getRevealStyle(1)}
         >
           <div className="max-w-[68rem] space-y-11 md:space-y-14">
@@ -452,7 +491,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </NarrativeBridge>
 
         <section
-          className="sonartra-motion-reveal space-y-10 md:space-y-11"
+          id={TOP_LEVEL_SECTION_IDS.domains}
+          className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
           style={getRevealStyle(2)}
         >
           <EditorialDivider title="Detailed reading" />
@@ -472,7 +512,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
         </NarrativeBridge>
 
         <section
-          className="sonartra-motion-reveal space-y-10 md:space-y-11"
+          id={TOP_LEVEL_SECTION_IDS.application}
+          className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
           style={getRevealStyle(3)}
         >
           <EditorialDivider title="Application" />
