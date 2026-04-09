@@ -40,11 +40,11 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
   return (
     <nav
       aria-label="Report reading navigation"
-      className={cn('hidden xl:block xl:w-[12.5rem] xl:shrink-0', className)}
+      className={cn('hidden xl:block xl:w-[11.75rem] xl:shrink-0', className)}
       data-result-reading-rail="true"
     >
-      <div className="sticky top-28 space-y-4 border-l border-white/10 pl-3">
-        <ul className="space-y-1" role="list">
+      <div className="sticky top-[6.35rem] space-y-3 border-l border-white/[0.08] pl-2.5">
+        <ul className="space-y-0.5" role="list">
           {RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => {
             const isTopLevelActive = activeTopLevelId === section.id;
             const isExactTopLevelActive = activeSectionId === section.id;
@@ -56,15 +56,15 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                   href={`#${section.id}`}
                   aria-current={isExactTopLevelActive ? 'location' : undefined}
                   className={cn(
-                    'sonartra-motion-nav-item sonartra-focus-ring group relative block rounded-md px-3 py-2 text-[0.81rem] leading-5 tracking-[0.01em] text-white/55 outline-none',
-                    'hover:text-white/72 focus-visible:text-white/86',
-                    isTopLevelActive && 'bg-white/[0.03] text-white/88',
+                    'sonartra-motion-nav-item sonartra-focus-ring group relative block rounded-md px-2.5 py-1.5 text-[0.79rem] leading-5 tracking-[0.01em] text-white/47 outline-none',
+                    'hover:text-white/67 focus-visible:text-white/84',
+                    isTopLevelActive && 'bg-white/[0.024] text-white/83',
                   )}
                 >
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'sonartra-motion-active-bar absolute inset-y-1 left-0 w-px rounded-full bg-white/35 opacity-0 scale-y-75',
+                      'sonartra-motion-active-bar absolute inset-y-1.5 left-0 w-px rounded-full bg-white/40 opacity-0 scale-y-75',
                       (isTopLevelActive || isExactTopLevelActive) && 'opacity-100 scale-y-100',
                     )}
                   />
@@ -72,7 +72,11 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                 </a>
 
                 {hasNestedDomainSections ? (
-                  <ul aria-label="Domain chapters" className="mt-1.5 space-y-0.5 pl-3" role="list">
+                  <ul
+                    aria-label="Domain chapters"
+                    className="mt-1.5 space-y-0.5 border-l border-white/[0.07] pl-2.5"
+                    role="list"
+                  >
                     {RESULT_READING_DOMAIN_SUBSECTIONS.map((domainSection) => {
                       const isDomainSubsectionActive = activeSectionId === domainSection.id;
 
@@ -82,15 +86,15 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                             href={`#${domainSection.id}`}
                             aria-current={isDomainSubsectionActive ? 'location' : undefined}
                             className={cn(
-                              'sonartra-motion-nav-item sonartra-focus-ring group relative block rounded-md px-3 py-1.5 text-[0.78rem] leading-5 text-white/48 outline-none',
-                              'hover:text-white/66 focus-visible:text-white/82',
-                              isDomainSubsectionActive && 'bg-white/[0.025] text-white/84',
+                              'sonartra-motion-nav-item sonartra-focus-ring group relative block rounded-md px-2.5 py-1 text-[0.75rem] leading-5 tracking-[0.012em] text-white/43 outline-none',
+                              'hover:text-white/62 focus-visible:text-white/82',
+                              isDomainSubsectionActive && 'bg-white/[0.022] text-white/79',
                             )}
                           >
                             <span
                               aria-hidden="true"
                               className={cn(
-                                'sonartra-motion-active-bar absolute inset-y-1 left-0 w-px rounded-full bg-white/35 opacity-0 scale-y-75',
+                                'sonartra-motion-active-bar absolute inset-y-1.5 left-0 w-px rounded-full bg-white/38 opacity-0 scale-y-75',
                                 isDomainSubsectionActive && 'opacity-100 scale-y-100',
                               )}
                             />

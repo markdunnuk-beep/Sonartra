@@ -19,7 +19,7 @@ export function ResultSectionIntent({ sectionId, className }: ResultSectionInten
   return (
     <p
       className={[
-        'sonartra-report-body-soft max-w-[54ch] text-[0.93rem] leading-7 text-white/56 md:text-[0.97rem]',
+        'sonartra-report-body-soft max-w-[56ch] text-[0.91rem] leading-7 text-white/52 md:text-[0.95rem]',
         className,
       ]
         .filter(Boolean)

@@ -275,14 +275,14 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
   assert.match(
     source,
-    /xl:grid xl:max-w-\[116rem\] xl:grid-cols-\[minmax\(0,1fr\)_minmax\(11\.5rem,13rem\)\] xl:gap-8 2xl:gap-10/,
+    /xl:grid xl:max-w-\[114rem\] xl:grid-cols-\[minmax\(0,1fr\)_minmax\(10\.75rem,12\.25rem\)\] xl:gap-7 2xl:gap-9/,
   );
   assert.match(source, /<main className="min-w-0 max-w-none space-y-12 md:space-y-14">/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.intro\}/);
   assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.intro\}/);
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
   assert.match(source, /<ResultReadingProgress className="max-w-\[92rem\] px-1 md:px-2 xl:hidden" \/>/);
-  assert.match(source, /<ResultReadingRail className="hidden xl:block xl:pt-0\.5 2xl:pl-0\.5" \/>/);
+  assert.match(source, /<ResultReadingRail className="hidden xl:block xl:pt-1" \/>/);
   assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
   assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
   assert.match(source, /So what does this mean in practice\?/);
@@ -300,7 +300,7 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.application\}/);
   assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.application\}/);
   assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.intro\}/);
-  assert.match(source, /<ResultSectionIntent sectionId=\{TOP_LEVEL_SECTION_IDS\.hero\} \/>/);
+  assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.hero\}/);
   assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
   assert.match(source, /<ResultSectionIntent\s+sectionId=\{TOP_LEVEL_SECTION_IDS\.application\}/);
   assert.match(source, /id=\{domainAnchorId \?\? undefined\}/);
