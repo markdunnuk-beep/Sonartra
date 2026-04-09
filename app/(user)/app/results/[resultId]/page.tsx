@@ -4,8 +4,8 @@ import type { CSSProperties, ReactNode } from 'react';
 import { ApplicationPlan } from '@/components/results/application-plan';
 import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { HeroPatternMedallion } from '@/components/results/hero-pattern-medallion';
-import { ResultsNavigationRail } from '@/components/results/results-navigation-rail';
 import { ResultLinkedInShare } from '@/components/results/result-linkedin-share';
+import { ResultReadingRail } from '@/components/results/result-reading-rail';
 import { ResultReadingProgress } from '@/components/results/result-reading-progress';
 import { ResultSectionIntent } from '@/components/results/result-section-intent';
 import { SonartraIntroduction } from '@/components/results/sonartra-introduction';
@@ -34,14 +34,14 @@ type CanonicalDomainChapter = AssessmentResultDetailViewModel['domains'][number]
 const RESULTS_ANCHOR_TARGET_CLASS = 'results-anchor-target';
 
 const TOP_LEVEL_SECTION_IDS = RESULT_READING_TOP_LEVEL_SECTIONS.reduce<
-  Record<'intro' | 'hero' | 'domains' | 'actions', string>
+  Record<'intro' | 'hero' | 'domains' | 'application', string>
 >(
   (map, section) => {
     if (
       section.id === 'intro' ||
       section.id === 'hero' ||
       section.id === 'domains' ||
-      section.id === 'actions'
+      section.id === 'application'
     ) {
       map[section.id] = section.id;
     }
@@ -51,16 +51,9 @@ const TOP_LEVEL_SECTION_IDS = RESULT_READING_TOP_LEVEL_SECTIONS.reduce<
     intro: 'intro',
     hero: 'hero',
     domains: 'domains',
-    actions: 'actions',
+    application: 'application',
   },
 );
-
-const RESULTS_NAVIGATION_SECTIONS = [
-  { id: 'intro', label: 'Overview', subtext: 'How to read this' },
-  { id: 'hero', label: 'Your Pattern', subtext: 'Your core behaviour' },
-  { id: 'domains', label: 'Behavioural Domains', subtext: 'How it shows up' },
-  { id: 'actions', label: 'Focus Areas', subtext: 'What to do next' },
-] as const;
 
 const CANONICAL_DOMAIN_ANCHOR_IDS = RESULT_READING_DOMAIN_SUBSECTIONS.map((section) => section.id);
 
@@ -415,8 +408,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
   return (
     <PageFrame className="space-y-12 md:space-y-14">
-      <div className="xl:mx-auto xl:grid xl:max-w-[118rem] xl:grid-cols-[minmax(0,1fr)_15rem] xl:gap-10 2xl:gap-12">
-        <main className="min-w-0 max-w-none space-y-12 md:space-y-14 xl:max-w-[92rem]">
+      <div className="xl:mx-auto xl:grid xl:max-w-[116rem] xl:grid-cols-[minmax(0,1fr)_minmax(11.5rem,13rem)] xl:gap-8 2xl:gap-10">
+        <main className="min-w-0 max-w-none space-y-12 md:space-y-14">
           <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
             <SonartraIntroduction metadataItems={introMetadataItems} />
             <ResultSectionIntent
@@ -534,7 +527,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             </NarrativeBridge>
 
             <section
-              id={TOP_LEVEL_SECTION_IDS.actions}
+              id={TOP_LEVEL_SECTION_IDS.application}
               className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
               style={getRevealStyle(3)}
             >
@@ -545,7 +538,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                 description="This chapter brings the report together into a practical reading of contribution, risk, development, and next steps."
               />
               <ResultSectionIntent
-                sectionId={TOP_LEVEL_SECTION_IDS.actions}
+                sectionId={TOP_LEVEL_SECTION_IDS.application}
                 className="max-w-[54rem]"
               />
               <ApplicationPlan application={result.application} />
@@ -553,10 +546,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           </div>
         </main>
 
-        <ResultsNavigationRail
-          sections={RESULTS_NAVIGATION_SECTIONS}
-          className="hidden xl:block xl:pt-0.5 2xl:pl-0.5"
-        />
+        <ResultReadingRail className="hidden xl:block xl:pt-0.5 2xl:pl-0.5" />
       </div>
     </PageFrame>
   );

@@ -23,8 +23,8 @@ export type ResultReadingSubsection = ResultReadingSectionItem & {
 export const RESULT_READING_TOP_LEVEL_SECTIONS: readonly ResultReadingTopLevelSection[] = [
   {
     id: 'intro',
-    label: 'Overview',
-    shortLabel: 'Overview',
+    label: 'Introduction',
+    shortLabel: 'Intro',
     level: 'section',
     order: 1,
     intentPrompt:
@@ -41,7 +41,7 @@ export const RESULT_READING_TOP_LEVEL_SECTIONS: readonly ResultReadingTopLevelSe
   },
   {
     id: 'domains',
-    label: 'Behavioural Domains',
+    label: 'Domain Chapters',
     shortLabel: 'Domains',
     level: 'section',
     order: 3,
@@ -49,9 +49,9 @@ export const RESULT_READING_TOP_LEVEL_SECTIONS: readonly ResultReadingTopLevelSe
       'These chapters show how that pattern appears in different areas. Focus on what feels most familiar, not everything at once.',
   },
   {
-    id: 'actions',
-    label: 'Focus Areas',
-    shortLabel: 'Actions',
+    id: 'application',
+    label: 'Application',
+    shortLabel: 'Application',
     level: 'section',
     order: 4,
     intentPrompt:
