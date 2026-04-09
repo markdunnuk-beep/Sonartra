@@ -123,13 +123,13 @@ export function ResultReadingRail({
       data-result-reading-rail="true"
     >
       <div className="sticky top-[6.35rem] space-y-3 border-l border-white/[0.08] pl-2.5">
-        <div className="pb-3.5">
+        <div className="pb-5 pl-1">
           <Image
             src="/images/sonartra-logo.svg"
             alt="Sonartra"
             width={174}
             height={28}
-            className="h-10 opacity-[0.9] pb-5"
+            className="w-[150px] h-auto opacity-[0.9]"
           />
         </div>
         <ul className="space-y-0.5" role="list">
