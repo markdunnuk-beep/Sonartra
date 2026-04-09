@@ -36,25 +36,7 @@ export function ApplicationPlan({ application }: Props) {
   }
 
   return (
-    <section
-      id="application"
-      className="mx-auto max-w-[61rem] space-y-8 px-1 md:space-y-12 md:px-2"
-    >
-      <div className="border-t border-neutral-800 pt-12" />
-
-      <div className="max-w-[52rem] space-y-6 border-l border-white/8 pl-5 md:space-y-6 md:pl-7">
-        <p className="sonartra-report-kicker">Application</p>
-        <h2 className="sonartra-report-title max-w-[24rem] text-[1.45rem] leading-8 text-white/94 md:text-[1.62rem] md:leading-9">
-          Turning insight into impact
-        </h2>
-        <p className="sonartra-report-body-soft max-w-[42rem] text-white/58">
-          This final section brings your patterns together into practical terms.
-        </p>
-        <p className="sonartra-report-body-soft max-w-[42rem] text-white/58">
-          This section brings your patterns together into a clear view of how you
-          create value, where they can work against you, and what to do next.
-        </p>
-      </div>
+    <div className="mx-auto max-w-[61rem] space-y-8 px-1 md:space-y-12 md:px-2">
 
       {(application.thesis.headline || application.thesis.summary) ? (
         <section className="space-y-6">
@@ -180,6 +162,6 @@ export function ApplicationPlan({ application }: Props) {
           ) : null}
         </div>
       </section>
-    </section>
+    </div>
   );
 }
