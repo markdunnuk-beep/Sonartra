@@ -34,6 +34,7 @@ test('applies intended mobile\/tablet visibility classes', () => {
   assert.match(markup, /class="xl:hidden"/);
   assert.match(markup, /sticky top-16/);
   assert.match(markup, /data-result-reading-progress="true"/);
+  assert.doesNotMatch(markup, /<nav/);
 });
 
 

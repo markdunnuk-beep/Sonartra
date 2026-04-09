@@ -56,6 +56,12 @@ const TOP_LEVEL_SECTION_IDS = RESULT_READING_TOP_LEVEL_SECTIONS.reduce<
 );
 
 const CANONICAL_DOMAIN_ANCHOR_IDS = RESULT_READING_DOMAIN_SUBSECTIONS.map((section) => section.id);
+const TOP_LEVEL_SECTION_HEADING_IDS = {
+  intro: 'intro-heading',
+  hero: 'hero-heading',
+  domains: 'domains-heading',
+  application: 'application-heading',
+} as const;
 
 function getRevealStyle(step = 0): CSSProperties {
   return {
@@ -183,6 +189,7 @@ function DomainChapter({
   domainAnchorId: string | null;
 }) {
   const title = domain.domainLabel.trim();
+  const chapterHeadingId = `${domainAnchorId ?? domain.domainKey}-heading`;
   const hasSignalReading = Boolean(ringModel || domain.primarySignal || domain.secondarySignal);
   const hasPairReading = Boolean(
     domain.signalPair?.summary || domain.pressureFocus || domain.environmentFocus,
@@ -194,6 +201,7 @@ function DomainChapter({
   return (
     <article
       id={domainAnchorId ?? undefined}
+      aria-labelledby={chapterHeadingId}
       className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal-soft space-y-10 border-t pt-16 first:border-t-0 first:pt-0 md:space-y-12 md:pt-20`}
       style={getRevealStyle(2)}
     >
@@ -205,7 +213,10 @@ function DomainChapter({
               Domain reading
             </p>
           </div>
-          <h3 className="max-w-[12ch] text-[1.8rem] font-semibold tracking-[-0.045em] text-white md:text-[2.35rem]">
+          <h3
+            id={chapterHeadingId}
+            className="max-w-[12ch] text-[1.8rem] font-semibold tracking-[-0.045em] text-white md:text-[2.35rem]"
+          >
             {title}
           </h3>
         </div>
@@ -410,7 +421,14 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     <PageFrame className="space-y-12 md:space-y-14">
       <div className="xl:mx-auto xl:grid xl:max-w-[116rem] xl:grid-cols-[minmax(0,1fr)_minmax(11.5rem,13rem)] xl:gap-8 2xl:gap-10">
         <main className="min-w-0 max-w-none space-y-12 md:space-y-14">
-          <section id={TOP_LEVEL_SECTION_IDS.intro} className={RESULTS_ANCHOR_TARGET_CLASS}>
+          <section
+            id={TOP_LEVEL_SECTION_IDS.intro}
+            aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.intro}
+            className={RESULTS_ANCHOR_TARGET_CLASS}
+          >
+            <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.intro} className="sr-only">
+              Introduction
+            </h2>
             <SonartraIntroduction metadataItems={introMetadataItems} />
             <ResultSectionIntent
               sectionId={TOP_LEVEL_SECTION_IDS.intro}
@@ -428,9 +446,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
             <section
               id={TOP_LEVEL_SECTION_IDS.hero}
+              aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.hero}
               className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14`}
               style={getRevealStyle(1)}
             >
+              <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.hero} className="sr-only">
+                Your pattern
+              </h2>
               <div className="w-full space-y-11 md:space-y-14">
                 <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:gap-12">
                   <div className="space-y-9 md:space-y-11">
@@ -506,9 +528,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
             <section
               id={TOP_LEVEL_SECTION_IDS.domains}
+              aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.domains}
               className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
               style={getRevealStyle(2)}
             >
+              <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.domains} className="sr-only">
+                Domain chapters
+              </h2>
               <EditorialDivider title="Detailed reading" />
               <SectionHeader
                 eyebrow={`${result.domains.length} Domain${result.domains.length === 1 ? '' : 's'}`}
@@ -528,9 +554,13 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
             <section
               id={TOP_LEVEL_SECTION_IDS.application}
+              aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.application}
               className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-10 md:space-y-11`}
               style={getRevealStyle(3)}
             >
+              <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.application} className="sr-only">
+                Application
+              </h2>
               <EditorialDivider title="Application" />
               <SectionHeader
                 eyebrow="Application"

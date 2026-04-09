@@ -47,13 +47,14 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
         <ul className="space-y-1" role="list">
           {RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => {
             const isTopLevelActive = activeTopLevelId === section.id;
+            const isExactTopLevelActive = activeSectionId === section.id;
             const hasNestedDomainSections = section.id === 'domains';
 
             return (
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
-                  aria-current={isTopLevelActive ? 'page' : undefined}
+                  aria-current={isExactTopLevelActive ? 'location' : undefined}
                   className={cn(
                     'sonartra-motion-nav-item sonartra-focus-ring group relative block rounded-md px-3 py-2 text-[0.81rem] leading-5 tracking-[0.01em] text-white/55 outline-none',
                     'hover:text-white/72 focus-visible:text-white/86',
@@ -64,14 +65,14 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                     aria-hidden="true"
                     className={cn(
                       'sonartra-motion-active-bar absolute inset-y-1 left-0 w-px rounded-full bg-white/35 opacity-0 scale-y-75',
-                      isTopLevelActive && 'opacity-100 scale-y-100',
+                      (isTopLevelActive || isExactTopLevelActive) && 'opacity-100 scale-y-100',
                     )}
                   />
                   <span className="relative block">{section.label}</span>
                 </a>
 
                 {hasNestedDomainSections ? (
-                  <ul className="mt-1.5 space-y-0.5 pl-3" role="list">
+                  <ul aria-label="Domain chapters" className="mt-1.5 space-y-0.5 pl-3" role="list">
                     {RESULT_READING_DOMAIN_SUBSECTIONS.map((domainSection) => {
                       const isDomainSubsectionActive = activeSectionId === domainSection.id;
 
@@ -79,7 +80,7 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                         <li key={domainSection.id}>
                           <a
                             href={`#${domainSection.id}`}
-                            aria-current={isDomainSubsectionActive ? 'page' : undefined}
+                            aria-current={isDomainSubsectionActive ? 'location' : undefined}
                             className={cn(
                               'sonartra-motion-nav-item sonartra-focus-ring group relative block rounded-md px-3 py-1.5 text-[0.78rem] leading-5 text-white/48 outline-none',
                               'hover:text-white/66 focus-visible:text-white/82',
@@ -93,7 +94,6 @@ export function ResultReadingRail({ className, activeSectionIdOverride }: Result
                                 isDomainSubsectionActive && 'opacity-100 scale-y-100',
                               )}
                             />
-                            <span className="sr-only">Domain chapter: </span>
                             <span className="relative block">{domainSection.label}</span>
                           </a>
                         </li>

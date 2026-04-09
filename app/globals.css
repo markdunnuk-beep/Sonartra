@@ -43,6 +43,17 @@ html {
   html {
     scroll-behavior: auto;
   }
+
+  .sonartra-motion-nav-item,
+  .sonartra-motion-active-bar,
+  .sonartra-motion-progress {
+    transition: none;
+  }
+
+  .sonartra-motion-nav-item:hover,
+  .sonartra-motion-nav-item[aria-current='location'] {
+    transform: none;
+  }
 }
 
 body {
