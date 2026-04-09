@@ -272,24 +272,27 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /buildDomainSignalRingViewModel\(\{\s*domains: result\.domains,\s*actions: result\.actions,/);
   assert.match(source, /buildResultDetailDomainItems\(\{\s*domains: result\.domains,/);
   assert.match(source, /<PageFrame className="space-y-12 md:space-y-14">/);
-  assert.match(source, /xl:grid xl:max-w-\[80rem\] xl:grid-cols-\[minmax\(0,1fr\)_13\.25rem\] xl:gap-10/);
-  assert.match(source, /<main className="min-w-0 space-y-12 md:space-y-14">/);
+  assert.match(
+    source,
+    /xl:grid xl:max-w-\[102rem\] xl:grid-cols-\[minmax\(0,4fr\)_minmax\(11\.5rem,1fr\)\] xl:gap-6 2xl:gap-8/,
+  );
+  assert.match(source, /<main className="min-w-0 max-w-none space-y-12 md:space-y-14">/);
   assert.match(
     source,
     /<section id=\{TOP_LEVEL_SECTION_IDS\.intro\} className=\{RESULTS_ANCHOR_TARGET_CLASS\}>/,
   );
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
-  assert.match(source, /<ResultReadingProgress className="mx-auto max-w-\[61rem\] px-1 md:px-2 xl:hidden" \/>/);
-  assert.match(source, /<ResultReadingRail className="hidden xl:block" \/>/);
+  assert.match(source, /<ResultReadingProgress className="mx-auto max-w-\[74rem\] px-1 md:px-2 xl:hidden" \/>/);
+  assert.match(source, /<ResultReadingRail className="hidden xl:block xl:pt-0\.5" \/>/);
   assert.match(source, /With that context, here&apos;s what your patterns are showing\./);
   assert.match(source, /Here&apos;s how these patterns show up across each domain\./);
   assert.match(source, /So what does this mean in practice\?/);
   assert.match(source, /sonartra-report-hero rounded-\[2rem\] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14/);
   assert.match(source, /sonartra-type-display max-w-\[11ch\] text-\[3\.15rem\] tracking-\[-0\.055em\] md:text-\[5rem\]/);
-  assert.match(source, /sonartra-report-body-soft max-w-\[42rem\] text-\[1rem\] leading-8 text-white\/68/);
-  assert.match(source, /sonartra-report-prose max-w-\[50rem\] space-y-6 border-l border-white\/8 pl-5 md:space-y-7 md:pl-7/);
+  assert.match(source, /sonartra-report-body-soft max-w-\[50rem\] text-\[1rem\] leading-8 text-white\/68/);
+  assert.match(source, /sonartra-report-prose max-w-\[58rem\] space-y-6 border-l border-white\/8 pl-5 md:space-y-7 md:pl-7/);
   assert.match(source, /sonartra-report-summary text-\[1\.08rem\] leading-8 text-white\/82 sm:text-\[1\.13rem\] md:text-\[1\.22rem\] md:leading-10/);
-  assert.match(source, /sonartra-report-body max-w-\[46rem\] text-\[1rem\] leading-8 text-white\/78 sm:text-\[1\.05rem\] md:text-\[1\.1rem\] md:leading-9/);
+  assert.match(source, /sonartra-report-body max-w-\[54rem\] text-\[1rem\] leading-8 text-white\/78 sm:text-\[1\.05rem\] md:text-\[1\.1rem\] md:leading-9/);
   assert.match(source, /grid gap-9 md:grid-cols-\[minmax\(0,1fr\)_auto\] md:items-start md:gap-11/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.hero\}/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.domains\}/);
@@ -301,7 +304,7 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /id=\{domainAnchorId \?\? undefined\}/);
   assert.match(source, /domainAnchorId: CANONICAL_DOMAIN_ANCHOR_IDS\[index\] \?\? null,/);
   assert.match(source, /<HeroPatternMedallion\s+patternKey=\{heroPatternKey\}\s+label=\{heroPatternLabel\}/);
-  assert.match(source, /<NarrativeBridge className="max-w-\[38rem\]">/);
+  assert.match(source, /<NarrativeBridge className="max-w-\[44rem\]">/);
   assert.match(source, /heroPatternLabel/);
   assert.match(source, /heroSummary/);
   assert.match(source, /heroNarrative/);
@@ -450,7 +453,7 @@ test('result detail page removes payload-driven intro rendering in favor of the 
 
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
   assert.match(source, /sonartra-report-hero/);
-  assert.match(source, /mx-auto max-w-\[61rem\] px-1 md:px-2/);
+  assert.match(source, /mx-auto max-w-\[72rem\] px-1 md:px-2/);
   assert.doesNotMatch(source, /import ReactMarkdown from 'react-markdown';/);
   assert.doesNotMatch(source, /import remarkGfm from 'remark-gfm';/);
   assert.doesNotMatch(source, /<ReactMarkdown remarkPlugins=\{\[remarkGfm\]\} skipHtml>/);
