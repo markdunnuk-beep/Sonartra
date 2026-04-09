@@ -4,7 +4,6 @@ import type { CSSProperties, ReactNode } from 'react';
 import { ApplicationPlan } from '@/components/results/application-plan';
 import { DomainSignalRing } from '@/components/results/domain-signal-ring';
 import { HeroPatternMedallion } from '@/components/results/hero-pattern-medallion';
-import { ResultLinkedInShare } from '@/components/results/result-linkedin-share';
 import { ResultReadingRail } from '@/components/results/result-reading-rail';
 import { ResultReadingProgress } from '@/components/results/result-reading-progress';
 import { ResultSectionIntent } from '@/components/results/result-section-intent';
@@ -463,12 +462,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                         <span>{result.assessmentTitle}</span>
                       </div>
 
-                      {linkedinShare.canShare ? (
-                        <ResultLinkedInShare
-                          postBody={linkedinShare.postBody}
-                          analytics={linkedinShareAnalytics}
-                        />
-                      ) : null}
                     </div>
 
                     <div className="space-y-8 md:space-y-10">
@@ -582,7 +575,17 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
           </div>
         </main>
 
-        <ResultReadingRail className="hidden xl:block xl:pt-1" />
+        <ResultReadingRail
+          className="hidden xl:block xl:pt-1"
+          utilityActions={
+            linkedinShare.canShare
+              ? {
+                  linkedInPostBody: linkedinShare.postBody,
+                  linkedInAnalytics: linkedinShareAnalytics,
+                }
+              : null
+          }
+        />
       </div>
     </PageFrame>
   );
