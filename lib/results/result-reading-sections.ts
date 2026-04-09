@@ -32,7 +32,7 @@ export const RESULT_READING_TOP_LEVEL_SECTIONS: readonly ResultReadingTopLevelSe
   },
   {
     id: 'hero',
-    label: 'Your Pattern',
+    label: 'Your Behaviour Pattern',
     shortLabel: 'Pattern',
     level: 'section',
     order: 2,
@@ -41,7 +41,7 @@ export const RESULT_READING_TOP_LEVEL_SECTIONS: readonly ResultReadingTopLevelSe
   },
   {
     id: 'domains',
-    label: 'Domain Chapters',
+    label: 'How It Shows Up',
     shortLabel: 'Domains',
     level: 'section',
     order: 3,
@@ -50,7 +50,7 @@ export const RESULT_READING_TOP_LEVEL_SECTIONS: readonly ResultReadingTopLevelSe
   },
   {
     id: 'application',
-    label: 'Application',
+    label: 'How to Apply This',
     shortLabel: 'Application',
     level: 'section',
     order: 4,

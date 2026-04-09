@@ -16,9 +16,19 @@ test('canonical reading model includes four top-level sections and six domain su
 });
 
 test('top-level reading section order remains stable', () => {
-  const topLevelIds = RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => section.id);
+  const topLevelSections = RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => ({
+    id: section.id,
+    label: section.label,
+  }));
+  const topLevelIds = topLevelSections.map((section) => section.id);
 
   assert.deepEqual(topLevelIds, ['intro', 'hero', 'domains', 'application']);
+  assert.deepEqual(topLevelSections, [
+    { id: 'intro', label: 'Introduction' },
+    { id: 'hero', label: 'Your Behaviour Pattern' },
+    { id: 'domains', label: 'How It Shows Up' },
+    { id: 'application', label: 'How to Apply This' },
+  ]);
   assert.equal(new Set(topLevelIds).size, topLevelIds.length);
   assert.equal(topLevelIds.includes('application'), true);
 });
