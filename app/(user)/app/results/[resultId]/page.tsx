@@ -155,6 +155,17 @@ function DomainTransition({
   );
 }
 
+function PairTransition({ children }: { children: ReactNode }) {
+  return (
+    <div className="space-y-3 pt-2 md:space-y-3.5 md:pt-3">
+      <div className="h-px w-full max-w-[7rem] bg-white/8" aria-hidden="true" />
+      <p className="sonartra-report-body-soft max-w-[52rem] text-[0.92rem] leading-7 text-white/56 md:text-[0.95rem]">
+        {children}
+      </p>
+    </div>
+  );
+}
+
 function buildResultDetailDomainItems(params: {
   domains: readonly CanonicalDomainChapter[];
   ringModels: readonly DomainSignalRingViewModel[];
@@ -190,6 +201,7 @@ function DomainChapter({
   const title = domain.domainLabel.trim();
   const chapterHeadingId = `${domainAnchorId ?? domain.domainKey}-heading`;
   const hasSignalReading = Boolean(ringModel || domain.primarySignal || domain.secondarySignal);
+  const hasIndividualSignalReading = Boolean(domain.primarySignal || domain.secondarySignal);
   const hasPairReading = Boolean(
     domain.signalPair?.summary || domain.pressureFocus || domain.environmentFocus,
   );
@@ -263,18 +275,21 @@ function DomainChapter({
             </div>
           ) : null}
 
-          {hasPairReading ? (
-            <DomainTransition>
-              When these patterns come together, they shape a more consistent way of operating.
-            </DomainTransition>
+          {hasIndividualSignalReading && hasPairReading ? (
+            <PairTransition>
+              When these two signals combine, a clearer pattern emerges:
+            </PairTransition>
           ) : null}
 
           {hasPairReading ? (
             <div className="space-y-6 rounded-[1.6rem] border border-white/7 bg-white/[0.02] px-5 py-5 md:space-y-7 md:px-7 md:py-7">
               {domain.signalPair?.summary ? (
                 <div className="space-y-3">
-                  <EditorialDivider title="Signal pair" />
-                  <p className="sonartra-report-body max-w-[56rem] text-white/80">
+                  <EditorialDivider
+                    title="Signal pair"
+                    className="[&>span]:text-white/68 before:bg-white/12 after:bg-white/8"
+                  />
+                  <p className="sonartra-report-body max-w-[56rem] text-[1.01rem] text-white/84 md:text-[1.05rem]">
                     {domain.signalPair.summary}
                   </p>
                 </div>
