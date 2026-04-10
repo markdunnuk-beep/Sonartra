@@ -595,6 +595,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                 sectionId={TOP_LEVEL_SECTION_IDS.application}
                 className="max-w-[53rem] md:mt-5"
               />
+              <p className="sonartra-report-body-soft max-w-[52rem] text-[0.98rem] leading-8 text-white/60">
+                These actions reflect how your core patterns tend to play out in practice.
+              </p>
               <ApplicationPlan application={result.application} />
             </section>
           </div>

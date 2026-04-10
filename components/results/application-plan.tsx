@@ -10,10 +10,28 @@ type ApplicationItemProps = {
   label: string;
   narrative: string;
   aside?: string;
+  sourceType?: 'pair' | 'signal';
   delayClassName?: string;
 };
 
-function ApplicationItem({ label, narrative, aside, delayClassName }: ApplicationItemProps) {
+type PatternFirstItem = {
+  sourceType: 'pair' | 'signal';
+};
+
+function splitPatternFirst<T extends PatternFirstItem>(items: readonly T[]) {
+  return {
+    pairItems: items.filter((item) => item.sourceType === 'pair'),
+    signalItems: items.filter((item) => item.sourceType === 'signal'),
+  };
+}
+
+function ApplicationItem({
+  label,
+  narrative,
+  aside,
+  sourceType,
+  delayClassName,
+}: ApplicationItemProps) {
   return (
     <article
       className={[
@@ -23,10 +41,51 @@ function ApplicationItem({ label, narrative, aside, delayClassName }: Applicatio
         .filter(Boolean)
         .join(' ')}
     >
+      {sourceType === 'pair' ? (
+        <p className="sonartra-report-kicker text-white/42">In this pattern</p>
+      ) : null}
       <p className="sonartra-report-title text-[1.02rem] text-white/92">{label}</p>
       <p className="sonartra-report-body-soft max-w-[34rem] text-white/70">{narrative}</p>
       {aside ? <p className="sonartra-report-kicker text-white/45">{aside}</p> : null}
     </article>
+  );
+}
+
+type ApplicationGridItem = {
+  label: string;
+  narrative: string;
+  sourceType: 'pair' | 'signal';
+  aside?: string;
+};
+
+function ApplicationItemGrid({ items }: { items: readonly ApplicationGridItem[] }) {
+  const { pairItems, signalItems } = splitPatternFirst(items);
+  const orderedItems = [...pairItems, ...signalItems];
+
+  if (orderedItems.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-5 md:space-y-6">
+      <div className="grid gap-6 md:grid-cols-2">
+        {orderedItems.map((item, index) => (
+          <ApplicationItem
+            key={`${item.sourceType}-${item.label}-${index}`}
+            label={item.label}
+            narrative={item.narrative}
+            aside={item.aside}
+            sourceType={item.sourceType}
+            delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
+          />
+        ))}
+      </div>
+      {pairItems.length > 0 && signalItems.length > 0 ? (
+        <p className="sonartra-report-body-soft max-w-[38rem] text-[0.88rem] leading-7 text-white/50">
+          Pattern-led actions are shown first, followed by supporting signal detail.
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -62,19 +121,14 @@ export function ApplicationPlan({ application }: Props) {
             </p>
           ) : null}
         </div>
-        {application.signatureContribution.items.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2">
-            {application.signatureContribution.items.map((item, index) => (
-              <ApplicationItem
-                key={`${item.sourceType}-${item.sourceKey}-${index}`}
-                label={item.label}
-                narrative={item.narrative}
-                aside={item.bestWhen}
-                delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
-              />
-            ))}
-          </div>
-        ) : null}
+        <ApplicationItemGrid
+          items={application.signatureContribution.items.map((item) => ({
+            label: item.label,
+            narrative: item.narrative,
+            aside: item.bestWhen,
+            sourceType: item.sourceType,
+          }))}
+        />
       </section>
 
       <section className="space-y-6">
@@ -86,19 +140,14 @@ export function ApplicationPlan({ application }: Props) {
             </p>
           ) : null}
         </div>
-        {application.patternRisks.items.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2">
-            {application.patternRisks.items.map((item, index) => (
-              <ApplicationItem
-                key={`${item.sourceType}-${item.sourceKey}-${index}`}
-                label={item.label}
-                narrative={item.narrative}
-                aside={item.earlyWarning}
-                delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
-              />
-            ))}
-          </div>
-        ) : null}
+        <ApplicationItemGrid
+          items={application.patternRisks.items.map((item) => ({
+            label: item.label,
+            narrative: item.narrative,
+            aside: item.earlyWarning,
+            sourceType: item.sourceType,
+          }))}
+        />
       </section>
 
       <section className="space-y-6">
@@ -110,19 +159,14 @@ export function ApplicationPlan({ application }: Props) {
             </p>
           ) : null}
         </div>
-        {application.rangeBuilder.items.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2">
-            {application.rangeBuilder.items.map((item, index) => (
-              <ApplicationItem
-                key={`${item.sourceType}-${item.sourceKey}-${index}`}
-                label={item.label}
-                narrative={item.narrative}
-                aside={item.practice}
-                delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
-              />
-            ))}
-          </div>
-        ) : null}
+        <ApplicationItemGrid
+          items={application.rangeBuilder.items.map((item) => ({
+            label: item.label,
+            narrative: item.narrative,
+            aside: item.practice,
+            sourceType: item.sourceType,
+          }))}
+        />
       </section>
 
       <section className="space-y-6">
