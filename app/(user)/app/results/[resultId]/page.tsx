@@ -30,6 +30,7 @@ type ResultDetailPageProps = {
 };
 
 type CanonicalDomainChapter = AssessmentResultDetailViewModel['domains'][number];
+type RankedSignalViewModel = AssessmentResultDetailViewModel['rankedSignals'][number];
 const RESULTS_ANCHOR_TARGET_CLASS = 'results-anchor-target';
 
 const TOP_LEVEL_SECTION_IDS = RESULT_READING_TOP_LEVEL_SECTIONS.reduce<
@@ -169,14 +170,20 @@ function PairTransition({ children }: { children: ReactNode }) {
 function buildResultDetailDomainItems(params: {
   domains: readonly CanonicalDomainChapter[];
   ringModels: readonly DomainSignalRingViewModel[];
+  rankedSignals: readonly RankedSignalViewModel[];
 }): readonly {
   domain: CanonicalDomainChapter;
   ringModel: DomainSignalRingViewModel | null;
   domainAnchorId: string | null;
+  significance: DomainSignificance;
 }[] {
   const ringModelsByDomainKey = new Map(
     params.ringModels.map((ringModel) => [ringModel.domainKey, ringModel]),
   );
+  const significanceByDomainKey = buildDomainSignificanceByKey({
+    domains: params.domains,
+    rankedSignals: params.rankedSignals,
+  });
 
   // Persisted domain order is still the rendering contract. Matching by key hardens the adapter
   // without introducing a second domain definition source in the UI layer.
@@ -184,7 +191,64 @@ function buildResultDetailDomainItems(params: {
     domain,
     ringModel: ringModelsByDomainKey.get(domain.domainKey) ?? params.ringModels[index] ?? null,
     domainAnchorId: CANONICAL_DOMAIN_ANCHOR_IDS[index] ?? null,
+    significance:
+      significanceByDomainKey.get(domain.domainKey)
+      ?? {
+        label: 'Supporting pattern area',
+        headingClassName: 'text-white/90',
+        cueClassName: 'text-white/44',
+        openingClassName: 'text-white/74',
+      },
   }));
+}
+
+type DomainSignificance = {
+  label: string;
+  headingClassName: string;
+  cueClassName: string;
+  openingClassName: string;
+};
+
+function buildDomainSignificanceByKey(params: {
+  domains: readonly CanonicalDomainChapter[];
+  rankedSignals: readonly RankedSignalViewModel[];
+}): ReadonlyMap<string, DomainSignificance> {
+  const bestRankByDomainKey = new Map<string, number>();
+
+  for (const signal of params.rankedSignals) {
+    const currentRank = bestRankByDomainKey.get(signal.domainKey);
+    if (currentRank === undefined || signal.rank < currentRank) {
+      bestRankByDomainKey.set(signal.domainKey, signal.rank);
+    }
+  }
+
+  const orderedDomains = params.domains
+    .map((domain) => ({
+      domainKey: domain.domainKey,
+      bestRank: bestRankByDomainKey.get(domain.domainKey) ?? Number.MAX_SAFE_INTEGER,
+    }))
+    .sort((left, right) => left.bestRank - right.bestRank || left.domainKey.localeCompare(right.domainKey));
+
+  const centralDomainCount = Math.min(2, orderedDomains.length);
+
+  return new Map(
+    orderedDomains.map(({ domainKey }, index) => [
+      domainKey,
+      index < centralDomainCount
+        ? {
+            label: index === 0 ? 'Most central in this report' : 'More central in this report',
+            headingClassName: 'text-white',
+            cueClassName: 'text-white/58',
+            openingClassName: 'text-white/78',
+          }
+        : {
+            label: 'Supporting pattern area',
+            headingClassName: 'text-white/90',
+            cueClassName: 'text-white/44',
+            openingClassName: 'text-white/72',
+          },
+    ]),
+  );
 }
 
 function DomainChapter({
@@ -192,11 +256,13 @@ function DomainChapter({
   ringModel,
   chapterNumber,
   domainAnchorId,
+  significance,
 }: {
   domain: CanonicalDomainChapter;
   ringModel: DomainSignalRingViewModel | null;
   chapterNumber: number;
   domainAnchorId: string | null;
+  significance: DomainSignificance;
 }) {
   const title = domain.domainLabel.trim();
   const chapterHeadingId = `${domainAnchorId ?? domain.domainKey}-heading`;
@@ -223,10 +289,13 @@ function DomainChapter({
             <p className="sonartra-report-body-soft max-w-[13rem] text-[0.95rem] leading-7">
               Domain reading
             </p>
+            <p className={`sonartra-report-kicker max-w-[13rem] ${significance.cueClassName}`}>
+              {significance.label}
+            </p>
           </div>
           <h3
             id={chapterHeadingId}
-            className="max-w-[12ch] text-[1.8rem] font-semibold tracking-[-0.045em] text-white md:text-[2.35rem]"
+            className={`max-w-[12ch] text-[1.8rem] font-semibold tracking-[-0.045em] md:text-[2.35rem] ${significance.headingClassName}`}
           >
             {title}
           </h3>
@@ -236,7 +305,9 @@ function DomainChapter({
           {domain.chapterOpening ? (
             <div className="space-y-5">
               <EditorialDivider title="Chapter opening" />
-              <p className="sonartra-report-summary max-w-[56rem]">{domain.chapterOpening}</p>
+              <p className={`sonartra-report-summary max-w-[56rem] ${significance.openingClassName}`}>
+                {domain.chapterOpening}
+              </p>
             </div>
           ) : null}
 
@@ -329,6 +400,7 @@ function DomainSection({
     domain: CanonicalDomainChapter;
     ringModel: DomainSignalRingViewModel | null;
     domainAnchorId: string | null;
+    significance: DomainSignificance;
   }[];
 }) {
   if (domainItems.length === 0) {
@@ -341,13 +413,14 @@ function DomainSection({
 
   return (
     <div className="w-full px-1 md:px-2 xl:px-0.5">
-      {domainItems.map(({ domain, ringModel, domainAnchorId }, index) => (
+      {domainItems.map(({ domain, ringModel, domainAnchorId, significance }, index) => (
         <DomainChapter
           key={domain.domainKey}
           domain={domain}
           ringModel={ringModel}
           chapterNumber={index + 1}
           domainAnchorId={domainAnchorId}
+          significance={significance}
         />
       ))}
     </div>
@@ -409,6 +482,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const resultDomainItems = buildResultDetailDomainItems({
     domains: result.domains,
     ringModels: domainRingModels,
+    rankedSignals: result.rankedSignals,
   });
   const linkedinShare = formatLinkedInSharePost({
     hero: result.hero,
@@ -562,6 +636,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                 title="Domain reading"
                 description="The chapters that follow stay with the same overall pattern, showing how it comes through across the main areas of the report."
               />
+              <p className="sonartra-report-body-soft max-w-[52rem] text-[0.96rem] leading-8 text-white/56">
+                Some domains carry more weight in this report than others. The more defining areas are signposted lightly as you move through the chapters.
+              </p>
               <ResultSectionIntent
                 sectionId={TOP_LEVEL_SECTION_IDS.domains}
                 className="max-w-[53rem] md:mt-5"
