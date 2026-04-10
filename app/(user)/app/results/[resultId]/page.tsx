@@ -477,6 +477,34 @@ function SignalEditorialBlock({
   );
 }
 
+function ResultClosingLayer() {
+  return (
+    <section
+      aria-labelledby="report-closing-heading"
+      className="sonartra-motion-reveal space-y-5 border-t border-white/6 pt-10 md:space-y-6 md:pt-12"
+      style={getRevealStyle(4)}
+    >
+      <div className="max-w-[48rem] space-y-3 md:space-y-4">
+        <SectionEyebrow>What to take forward</SectionEyebrow>
+        <h2
+          id="report-closing-heading"
+          className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white/88 md:text-[1.7rem]"
+        >
+          Return to the patterns, not just the labels
+        </h2>
+        <p className="sonartra-report-body-soft max-w-[46rem] text-[0.98rem] leading-8 text-white/62">
+          Your results are most useful when you come back to the patterns rather than treating the
+          report as a fixed type. The aim is to notice what you lean on, where it helps, and where
+          it may start to narrow your range.
+        </p>
+        <p className="sonartra-report-body-soft max-w-[42rem] text-[0.93rem] leading-7 text-white/58">
+          Use the pair patterns and development focus as the most useful places to revisit.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default async function ResultDetailPage({ params }: ResultDetailPageProps) {
   const { resultId } = await params;
   const userId = await getRequestUserId();
@@ -700,6 +728,8 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               </p>
               <ApplicationPlan application={result.application} />
             </section>
+
+            <ResultClosingLayer />
           </div>
         </div>
 
