@@ -209,6 +209,27 @@ type DomainSignificance = {
   openingClassName: string;
 };
 
+function getDomainOrientationCue(domainLabel: string): string {
+  const normalizedLabel = domainLabel.trim().toLowerCase();
+
+  switch (normalizedLabel) {
+    case 'operating style':
+      return 'This chapter looks at how this pattern tends to show up in the way you move work forward.';
+    case 'core drivers':
+      return 'This chapter looks at what this pattern is usually working toward underneath the surface.';
+    case 'leadership approach':
+      return 'This chapter looks at how this pattern tends to come through around other people.';
+    case 'tension response':
+      return 'This chapter looks at how this pattern tends to respond when friction starts to build.';
+    case 'environment fit':
+      return 'This chapter looks at where this pattern tends to work with you most naturally.';
+    case 'pressure response':
+      return 'This chapter looks at how this pattern tends to narrow when pressure rises.';
+    default:
+      return 'This chapter looks at how this pattern tends to show up in this area.';
+  }
+}
+
 function buildDomainSignificanceByKey(params: {
   domains: readonly CanonicalDomainChapter[];
   rankedSignals: readonly RankedSignalViewModel[];
@@ -266,6 +287,7 @@ function DomainChapter({
 }) {
   const title = domain.domainLabel.trim();
   const chapterHeadingId = `${domainAnchorId ?? domain.domainKey}-heading`;
+  const orientationCue = getDomainOrientationCue(title);
   const hasSignalReading = Boolean(ringModel || domain.primarySignal || domain.secondarySignal);
   const hasIndividualSignalReading = Boolean(domain.primarySignal || domain.secondarySignal);
   const hasPairReading = Boolean(
@@ -283,28 +305,29 @@ function DomainChapter({
       style={getRevealStyle(2)}
     >
       <div className="grid gap-7 md:grid-cols-[minmax(0,13.5rem)_minmax(0,1fr)] md:gap-10 lg:grid-cols-[minmax(0,14.5rem)_minmax(0,1fr)] lg:gap-12">
-        <div className="space-y-4 md:sticky md:top-24 md:self-start">
+        <div className="space-y-5 md:sticky md:top-24 md:self-start">
           <div className="space-y-2">
             <SectionEyebrow>{`Chapter ${chapterNumber.toString().padStart(2, '0')}`}</SectionEyebrow>
-            <p className="sonartra-report-body-soft max-w-[13rem] text-[0.95rem] leading-7">
-              Domain reading
-            </p>
             <p className={`sonartra-report-kicker max-w-[13rem] ${significance.cueClassName}`}>
               {significance.label}
             </p>
           </div>
-          <h3
-            id={chapterHeadingId}
-            className={`max-w-[12ch] text-[1.8rem] font-semibold tracking-[-0.045em] md:text-[2.35rem] ${significance.headingClassName}`}
-          >
-            {title}
-          </h3>
+          <div className="space-y-2.5">
+            <h3
+              id={chapterHeadingId}
+              className={`max-w-[12ch] text-[1.8rem] font-semibold tracking-[-0.045em] md:text-[2.35rem] ${significance.headingClassName}`}
+            >
+              {title}
+            </h3>
+            <p className="sonartra-report-body-soft max-w-[14rem] text-[0.93rem] leading-7 text-white/54">
+              {orientationCue}
+            </p>
+          </div>
         </div>
 
         <div className="space-y-8 md:space-y-9">
           {domain.chapterOpening ? (
-            <div className="space-y-5">
-              <EditorialDivider title="Chapter opening" />
+            <div className="space-y-3.5 md:space-y-4">
               <p className={`sonartra-report-summary max-w-[56rem] ${significance.openingClassName}`}>
                 {domain.chapterOpening}
               </p>
