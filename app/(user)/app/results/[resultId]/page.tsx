@@ -402,11 +402,15 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   const linkedinShareAnalytics = buildResultsLinkedInShareAnalytics(result);
   const completionTimestamp = formatResultTimestamp(result.generatedAt ?? result.createdAt);
   const heroHeadline = result.hero.headline?.trim() ?? '';
-  const heroSubheadline = result.hero.subheadline?.trim() ?? '';
+  const heroSubheadline =
+    'Start here. This is the clearest summary of the pattern that shows up most consistently across your results.';
   const heroSummary = result.hero.summary?.trim() ?? '';
   const heroNarrative = result.hero.narrative?.trim() ?? '';
   const heroPatternKey = result.hero.heroPattern?.patternKey ?? null;
-  const heroPatternLabel = result.hero.heroPattern?.label?.trim() ?? '';
+  const heroPatternBaseLabel = result.hero.heroPattern?.label?.trim() ?? '';
+  const heroPatternLabel = heroPatternBaseLabel
+    ? `Hero Pattern \u2014 ${heroPatternBaseLabel}`
+    : '';
   const pressureOverlay = result.hero.pressureOverlay?.trim() ?? '';
   const environmentOverlay = result.hero.environmentOverlay?.trim() ?? '';
   const introMetadataItems = [
@@ -496,10 +500,16 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                         {pressureOverlay || environmentOverlay ? (
                           <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
                             {pressureOverlay ? (
-                              <EditorialAside label="Pressure" text={pressureOverlay} />
+                              <EditorialAside
+                                label="When Under Pressure"
+                                text={pressureOverlay}
+                              />
                             ) : null}
                             {environmentOverlay ? (
-                              <EditorialAside label="Environment" text={environmentOverlay} />
+                              <EditorialAside
+                                label="Ideal Environment"
+                                text={environmentOverlay}
+                              />
                             ) : null}
                           </div>
                         ) : null}
