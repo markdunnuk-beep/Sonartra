@@ -9,10 +9,14 @@ test('reading rail renders expected top-level section labels', () => {
 
   assert.match(markup, /src="\/images\/sonartra-logo\.svg"/);
   assert.match(markup, /alt="Sonartra"/);
-  assert.match(markup, />01<\/span><span class="min-w-0">Introduction</);
-  assert.match(markup, />02<\/span><span class="min-w-0">Your Behaviour Pattern</);
-  assert.match(markup, />03<\/span><span class="min-w-0">How It Shows Up</);
-  assert.match(markup, />04<\/span><span class="min-w-0">How to Apply This</);
+  assert.match(markup, />01<\/span>/);
+  assert.match(markup, />02<\/span>/);
+  assert.match(markup, />03<\/span>/);
+  assert.match(markup, />04<\/span>/);
+  assert.match(markup, />Introduction</);
+  assert.match(markup, />Your Behaviour Pattern</);
+  assert.match(markup, />How It Shows Up</);
+  assert.match(markup, />How to Apply This</);
   assert.match(markup, /aria-label="Report reading navigation"/);
 });
 
@@ -89,12 +93,23 @@ test('rail renders one semantic nav list hierarchy without duplicate surfaces', 
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
 
   const navCount = markup.match(/<nav /g)?.length ?? 0;
-  const topLevelListCount = markup.match(/<ul class="space-y-0\.5" role="list">/g)?.length ?? 0;
+  const topLevelListCount = markup.match(/<ul class="sonartra-result-rail-track relative space-y-0\.5 pl-1\.5" role="list">/g)?.length ?? 0;
   const nestedListCount = markup.match(/<ul aria-label="Domain chapters"/g)?.length ?? 0;
 
   assert.equal(navCount, 1);
   assert.equal(topLevelListCount, 1);
   assert.equal(nestedListCount, 1);
+});
+
+test('rail provides restrained current and next reading cues', () => {
+  const markup = renderToStaticMarkup(
+    <ResultReadingRail activeSectionIdOverride="domain-core-drivers" />,
+  );
+
+  assert.match(markup, /Current chapter/);
+  assert.match(markup, /Up next/);
+  assert.match(markup, /data-reading-state="current"/);
+  assert.match(markup, /data-reading-state="next"/);
 });
 
 test('reading rail links remain keyboard-focusable anchors with visible focus classes', () => {

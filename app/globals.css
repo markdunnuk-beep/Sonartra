@@ -248,6 +248,23 @@ main {
     transition-timing-function: cubic-bezier(0.22, 0.84, 0.24, 1);
   }
 
+  .sonartra-result-rail-track::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    left: 0.58rem;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    width: 1px;
+    border-radius: 9999px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.11),
+      rgba(255, 255, 255, 0.065) 42%,
+      rgba(255, 255, 255, 0.025)
+    );
+  }
+
   .sonartra-result-rail-item-subtle {
     transition-property: color, background-color;
     transition-duration: 170ms;
