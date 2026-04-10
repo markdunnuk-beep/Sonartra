@@ -1033,6 +1033,185 @@ test('pair-owned pressure and environment fields do not fall back to domain lang
   assert.equal(payload.domains[0]?.environmentFocus, null);
 });
 
+test('pair language lookup prefers canonical pair key over reversed legacy key when both exist', () => {
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: Object.freeze([
+        buildNormalizedSignal({
+          signalId: 'signal-driver',
+          signalKey: 'style_driver',
+          title: 'Driver',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 5,
+          percentage: 38,
+          domainPercentage: 60,
+          rank: 1,
+        }),
+        buildNormalizedSignal({
+          signalId: 'signal-analyst',
+          signalKey: 'style_analyst',
+          title: 'Analyst',
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          rawTotal: 3,
+          percentage: 24,
+          domainPercentage: 40,
+          rank: 2,
+        }),
+      ]),
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'signal_style',
+          title: 'Behaviour Style',
+          rawTotal: 8,
+          percentage: 100,
+          signalScores: Object.freeze([
+            buildNormalizedSignal({
+              signalId: 'signal-driver',
+              signalKey: 'style_driver',
+              title: 'Driver',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 5,
+              percentage: 38,
+              domainPercentage: 60,
+              rank: 1,
+            }),
+            buildNormalizedSignal({
+              signalId: 'signal-analyst',
+              signalKey: 'style_analyst',
+              title: 'Analyst',
+              domainId: 'domain-style',
+              domainKey: 'signal_style',
+              rawTotal: 3,
+              percentage: 24,
+              domainPercentage: 40,
+              rank: 2,
+            }),
+          ]),
+          answeredQuestionCount: 3,
+        }),
+      ]),
+      topSignalId: 'signal-driver',
+      languageBundle: {
+        signals: {},
+        pairs: {
+          analyst_driver: {
+            chapterSummary: 'Canonical pair summary.',
+            pressureFocus: 'Canonical pair pressure.',
+            environmentFocus: 'Canonical pair environment.',
+          },
+          driver_analyst: {
+            chapterSummary: 'Legacy reversed summary that should not win.',
+            pressureFocus: 'Legacy reversed pressure that should not win.',
+            environmentFocus: 'Legacy reversed environment that should not win.',
+          },
+        },
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(payload.domains[0]?.signalPair?.summary, 'Canonical pair summary.');
+  assert.equal(payload.domains[0]?.pressureFocus, 'Canonical pair pressure.');
+  assert.equal(payload.domains[0]?.environmentFocus, 'Canonical pair environment.');
+});
+
+test('pair language lookup resolves reversed legacy pair rows for summary pressure and environment without fallback', () => {
+  const normalizedResult = buildNormalizedResultFixture({
+    signalScores: Object.freeze([
+      buildNormalizedSignal({
+        signalId: 'signal-driver',
+        signalKey: 'style_driver',
+        title: 'Driver',
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        rawTotal: 5,
+        percentage: 38,
+        domainPercentage: 60,
+        rank: 1,
+      }),
+      buildNormalizedSignal({
+        signalId: 'signal-analyst',
+        signalKey: 'style_analyst',
+        title: 'Analyst',
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        rawTotal: 3,
+        percentage: 24,
+        domainPercentage: 40,
+        rank: 2,
+      }),
+    ]),
+    domainSummaries: Object.freeze([
+      buildDomainSummary({
+        domainId: 'domain-style',
+        domainKey: 'signal_style',
+        title: 'Behaviour Style',
+        rawTotal: 8,
+        percentage: 100,
+        signalScores: Object.freeze([
+          buildNormalizedSignal({
+            signalId: 'signal-driver',
+            signalKey: 'style_driver',
+            title: 'Driver',
+            domainId: 'domain-style',
+            domainKey: 'signal_style',
+            rawTotal: 5,
+            percentage: 38,
+            domainPercentage: 60,
+            rank: 1,
+          }),
+          buildNormalizedSignal({
+            signalId: 'signal-analyst',
+            signalKey: 'style_analyst',
+            title: 'Analyst',
+            domainId: 'domain-style',
+            domainKey: 'signal_style',
+            rawTotal: 3,
+            percentage: 24,
+            domainPercentage: 40,
+            rank: 2,
+          }),
+        ]),
+        answeredQuestionCount: 3,
+      }),
+    ]),
+    topSignalId: 'signal-driver',
+  });
+
+  const baseline = buildCanonicalResultPayload({
+    normalizedResult,
+  });
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: {
+      ...normalizedResult,
+      languageBundle: {
+        signals: {},
+        pairs: {
+          driver_analyst: {
+            chapterSummary: 'Legacy reversed authored pair summary.',
+            pressureFocus: 'Legacy reversed authored pair pressure.',
+            environmentFocus: 'Legacy reversed authored pair environment.',
+          },
+        },
+        domains: {},
+        overview: {},
+      },
+    },
+  });
+
+  assert.notEqual(payload.domains[0]?.signalPair?.summary, baseline.domains[0]?.signalPair?.summary);
+  assert.equal(payload.domains[0]?.signalPair?.summary, 'Legacy reversed authored pair summary.');
+  assert.equal(payload.domains[0]?.pressureFocus, 'Legacy reversed authored pair pressure.');
+  assert.equal(payload.domains[0]?.environmentFocus, 'Legacy reversed authored pair environment.');
+  assert.equal(payload.overviewSummary.narrative, 'Legacy reversed authored pair summary.');
+});
+
 test('domain pair summaries fall back to deterministic pair rules when authored pair chapter language is missing', () => {
   const signals = Object.freeze([
     buildNormalizedSignal({

@@ -24,6 +24,7 @@ import type {
 } from '@/lib/engine/types';
 import { buildApplicationSection } from '@/lib/engine/application-builder';
 import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking';
+import { resolvePairLanguageSection as resolvePairLanguageSectionFromBundle } from '@/lib/engine/pair-language';
 import {
   buildDomainInterpretation,
   buildDomainPairInterpretationSummary,
@@ -175,11 +176,11 @@ function resolvePairLanguageSection(
   section: AssessmentVersionLanguagePairSection,
   interpretationContext: ResultInterpretationContext,
 ): string | null {
-  if (!pairKey) {
-    return null;
-  }
-
-  return trimToNull(interpretationContext.languageBundle.pairs[pairKey]?.[section]);
+  return resolvePairLanguageSectionFromBundle({
+    pairKey,
+    section,
+    languageBundle: interpretationContext.languageBundle,
+  });
 }
 
 function resolveSignalLanguageBundle(

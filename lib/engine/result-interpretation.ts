@@ -5,6 +5,7 @@ import type {
   ResultInterpretationContext,
   ResultOverviewSummary,
 } from '@/lib/engine/types';
+import { resolvePairLanguageSection } from '@/lib/engine/pair-language';
 
 /**
  * Canonical result-language ownership for the persisted report fields.
@@ -435,8 +436,15 @@ function resolveHeroPairSummary(
   context?: ResultInterpretationContext,
 ): string | null {
   const pairKey = resolveHeroPairKey(signalScores, context);
-  const content = pairKey ? context?.languageBundle.pairs[pairKey]?.chapterSummary?.trim() : null;
-  return content ? content : null;
+  if (!pairKey || !context) {
+    return null;
+  }
+
+  return resolvePairLanguageSection({
+    pairKey,
+    section: 'chapterSummary',
+    languageBundle: context.languageBundle,
+  });
 }
 
 function resolveSignalLanguageSection(
