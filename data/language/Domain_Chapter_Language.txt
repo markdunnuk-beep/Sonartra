@@ -1,0 +1,7 @@
+section	target	field	content
+domain	operating-style	chapterOpening	The Operating Style domain is about how you move work forward. It defines your pace, your approach to execution, and how others experience your momentum.
+domain	core-drivers	chapterOpening	The Core Drivers domain is about what fuels your decisions and where your energy comes from. It shapes what you prioritise, what motivates you, and what keeps you engaged over time.
+domain	leadership-approach	chapterOpening	The Leadership Approach domain is about how you guide and influence others. It shapes how you set direction, support people, and create alignment within a group.
+domain	tension-response	chapterOpening	The Tension Response domain is about how you handle pressure between people. It shapes how you respond to disagreement, protect relationships, and move through challenging situations.
+domain	environment-fit	chapterOpening	The Environment Fit domain is about the conditions where you do your best work. It shapes how you engage, perform, and sustain your effectiveness over time.
+domain	pressure-response	chapterOpening	The Pressure Response domain is about how you act when pressure rises. It shapes how you think, respond, and interact when demands increase or situations become more intense.
