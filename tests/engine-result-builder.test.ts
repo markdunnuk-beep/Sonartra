@@ -1033,6 +1033,263 @@ test('pair-owned pressure and environment fields do not fall back to domain lang
   assert.equal(payload.domains[0]?.environmentFocus, null);
 });
 
+test('domain pair summaries fall back to deterministic pair rules when authored pair chapter language is missing', () => {
+  const signals = Object.freeze([
+    buildNormalizedSignal({
+      signalId: 'signal-style-analyst',
+      signalKey: 'analyst',
+      title: 'Analyst',
+      domainId: 'domain-style',
+      domainKey: 'operating-style',
+      rawTotal: 6,
+      percentage: 16,
+      domainPercentage: 56,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-style-driver',
+      signalKey: 'driver',
+      title: 'Driver',
+      domainId: 'domain-style',
+      domainKey: 'operating-style',
+      rawTotal: 5,
+      percentage: 14,
+      domainPercentage: 44,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-mot-mastery',
+      signalKey: 'mastery',
+      title: 'Mastery',
+      domainId: 'domain-mot',
+      domainKey: 'core-drivers',
+      rawTotal: 6,
+      percentage: 16,
+      domainPercentage: 55,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-mot-stability',
+      signalKey: 'stability',
+      title: 'Stability',
+      domainId: 'domain-mot',
+      domainKey: 'core-drivers',
+      rawTotal: 5,
+      percentage: 14,
+      domainPercentage: 45,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-lead-people',
+      signalKey: 'people',
+      title: 'People',
+      domainId: 'domain-lead',
+      domainKey: 'leadership-approach',
+      rawTotal: 6,
+      percentage: 16,
+      domainPercentage: 58,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-lead-results',
+      signalKey: 'results',
+      title: 'Results',
+      domainId: 'domain-lead',
+      domainKey: 'leadership-approach',
+      rawTotal: 4,
+      percentage: 11,
+      domainPercentage: 42,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-conflict-avoid',
+      signalKey: 'avoidance',
+      title: 'Avoidance',
+      domainId: 'domain-conflict',
+      domainKey: 'tension-response',
+      rawTotal: 6,
+      percentage: 16,
+      domainPercentage: 57,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-conflict-compete',
+      signalKey: 'compete',
+      title: 'Compete',
+      domainId: 'domain-conflict',
+      domainKey: 'tension-response',
+      rawTotal: 4,
+      percentage: 11,
+      domainPercentage: 43,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-culture-creative',
+      signalKey: 'creative',
+      title: 'Creative',
+      domainId: 'domain-culture',
+      domainKey: 'environment-fit',
+      rawTotal: 6,
+      percentage: 16,
+      domainPercentage: 54,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-culture-structured',
+      signalKey: 'structured',
+      title: 'Structured',
+      domainId: 'domain-culture',
+      domainKey: 'environment-fit',
+      rawTotal: 5,
+      percentage: 14,
+      domainPercentage: 46,
+      rank: 2,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-stress-control',
+      signalKey: 'control',
+      title: 'Control',
+      domainId: 'domain-stress',
+      domainKey: 'pressure-response',
+      rawTotal: 6,
+      percentage: 16,
+      domainPercentage: 53,
+      rank: 1,
+    }),
+    buildNormalizedSignal({
+      signalId: 'signal-stress-avoidance',
+      signalKey: 'withdrawal',
+      title: 'Withdrawal',
+      domainId: 'domain-stress',
+      domainKey: 'pressure-response',
+      rawTotal: 5,
+      percentage: 14,
+      domainPercentage: 47,
+      rank: 2,
+    }),
+  ]);
+
+  const domainSignals = (domainKey: string) =>
+    Object.freeze(signals.filter((signal) => signal.domainKey === domainKey));
+
+  const payload = buildCanonicalResultPayload({
+    normalizedResult: buildNormalizedResultFixture({
+      signalScores: signals,
+      domainSummaries: Object.freeze([
+        buildDomainSummary({
+          domainId: 'domain-style',
+          domainKey: 'operating-style',
+          title: 'Operating Style',
+          rawTotal: 11,
+          percentage: 100,
+          signalScores: domainSignals('operating-style'),
+        }),
+        buildDomainSummary({
+          domainId: 'domain-mot',
+          domainKey: 'core-drivers',
+          title: 'Core Drivers',
+          rawTotal: 11,
+          percentage: 100,
+          signalScores: domainSignals('core-drivers'),
+        }),
+        buildDomainSummary({
+          domainId: 'domain-lead',
+          domainKey: 'leadership-approach',
+          title: 'Leadership Approach',
+          rawTotal: 10,
+          percentage: 100,
+          signalScores: domainSignals('leadership-approach'),
+        }),
+        buildDomainSummary({
+          domainId: 'domain-conflict',
+          domainKey: 'tension-response',
+          title: 'Tension Response',
+          rawTotal: 10,
+          percentage: 100,
+          signalScores: domainSignals('tension-response'),
+        }),
+        buildDomainSummary({
+          domainId: 'domain-culture',
+          domainKey: 'environment-fit',
+          title: 'Environment Fit',
+          rawTotal: 11,
+          percentage: 100,
+          signalScores: domainSignals('environment-fit'),
+        }),
+        buildDomainSummary({
+          domainId: 'domain-stress',
+          domainKey: 'pressure-response',
+          title: 'Pressure Response',
+          rawTotal: 11,
+          percentage: 100,
+          signalScores: domainSignals('pressure-response'),
+        }),
+      ]),
+      topSignalId: 'signal-style-analyst',
+      languageBundle: {
+        signals: {},
+        pairs: {
+          creative_structured: {
+            chapterSummary:
+              'You work best where ideas can be shaped into something usable. Exploration matters, but it needs somewhere to land.',
+            pressureFocus:
+              'In overly rigid environments, creativity is constrained. In highly unstructured ones, ideas may not settle.',
+            environmentFocus:
+              'This pattern fits where there is space to think differently, but also a clear route to execution.',
+          },
+          control_withdrawal: {
+            chapterSummary:
+              'When pressure rises, you alternate between stepping in and pulling back. You take control to stabilise the situation, then create distance to think and reassess, which can make your presence feel uneven.',
+            pressureFocus:
+              'As pressure builds, this push-pull becomes more pronounced. You may assert direction and then disengage, leaving others unsure whether to follow or wait. Staying visibly engaged for longer helps maintain clarity.',
+            environmentFocus:
+              'This pattern works where there is space to act and reflect. In more demanding environments, consistent visibility builds confidence in your direction.',
+          },
+        },
+        domains: {},
+        overview: {},
+      },
+    }),
+  });
+
+  assert.equal(
+    payload.domains[0]?.signalPair?.summary,
+    'A structured, analytical style with a clear results bias. Tends to test the logic first, then move decisively once the case feels sound.',
+  );
+  assert.equal(
+    payload.domains[1]?.signalPair?.summary,
+    'Effort is pulled by learning, quality, and strong craft, but best sustained in an environment that feels reliable and low-friction. Engagement often strengthens when there is room to improve without constant disruption.',
+  );
+  assert.equal(
+    payload.domains[2]?.signalPair?.summary,
+    'Leadership tends to lead with trust and support, while still holding a visible line on delivery. People are likely to feel backed, but expectations do not disappear.',
+  );
+  assert.equal(
+    payload.domains[3]?.signalPair?.summary,
+    'May step back from disagreement at first, but can switch into a much firmer response once the issue feels costly enough that avoiding it is no longer workable. This often makes the pattern look cautious on entry and unexpectedly direct once the threshold for action has been crossed, which others may experience as a sharper turn than the earlier calm suggested.',
+  );
+  assert.equal(
+    payload.domains[4]?.signalPair?.summary,
+    'You work best where ideas can be shaped into something usable. Exploration matters, but it needs somewhere to land.',
+  );
+  assert.equal(
+    payload.domains[5]?.signalPair?.summary,
+    'When pressure rises, you alternate between stepping in and pulling back. You take control to stabilise the situation, then create distance to think and reassess, which can make your presence feel uneven.',
+  );
+  assert.equal(payload.domains[0]?.pressureFocus, null);
+  assert.equal(payload.domains[1]?.environmentFocus, null);
+  assert.equal(payload.domains[2]?.pressureFocus, null);
+  assert.equal(payload.domains[3]?.environmentFocus, null);
+  assert.equal(
+    payload.domains[4]?.pressureFocus,
+    'In overly rigid environments, creativity is constrained. In highly unstructured ones, ideas may not settle.',
+  );
+  assert.equal(
+    payload.domains[5]?.environmentFocus,
+    'This pattern works where there is space to act and reflect. In more demanding environments, consistent visibility builds confidence in your direction.',
+  );
+});
+
 test('signal chapter summaries stay null when only signal action fields are authored', () => {
   const payload = buildCanonicalResultPayload({
     normalizedResult: buildNormalizedResultFixture({

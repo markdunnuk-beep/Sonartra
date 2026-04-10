@@ -259,11 +259,15 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /import \{ ResultSectionIntent \} from '@\/components\/results\/result-section-intent';/);
   assert.match(source, /function NarrativeBridge\(/);
   assert.match(source, /const heroHeadline = result\.hero\.headline\?\.trim\(\) \?\? '';/);
-  assert.match(source, /const heroSubheadline = result\.hero\.subheadline\?\.trim\(\) \?\? '';/);
+  assert.match(
+    source,
+    /const heroSubheadline =\s*'Start here\. This is the clearest summary of the pattern that shows up most consistently across your results\.';/,
+  );
   assert.match(source, /const heroSummary = result\.hero\.summary\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroNarrative = result\.hero\.narrative\?\.trim\(\) \?\? '';/);
   assert.match(source, /const heroPatternKey = result\.hero\.heroPattern\?\.patternKey \?\? null;/);
-  assert.match(source, /const heroPatternLabel = result\.hero\.heroPattern\?\.label\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const heroPatternBaseLabel = result\.hero\.heroPattern\?\.label\?\.trim\(\) \?\? '';/);
+  assert.match(source, /const heroPatternLabel = heroPatternBaseLabel/);
   assert.match(source, /const pressureOverlay = result\.hero\.pressureOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /const environmentOverlay = result\.hero\.environmentOverlay\?\.trim\(\) \?\? '';/);
   assert.match(source, /const introMetadataItems = \[/);
@@ -277,7 +281,7 @@ test('result detail page renders the system introduction above hero and keeps ca
     source,
     /xl:grid xl:max-w-\[114rem\] xl:grid-cols-\[minmax\(0,1fr\)_minmax\(10\.75rem,12\.25rem\)\] xl:gap-7 2xl:gap-9/,
   );
-  assert.match(source, /<main className="min-w-0 max-w-none space-y-12 md:space-y-14">/);
+  assert.match(source, /<div className="min-w-0 max-w-none space-y-12 md:space-y-14">/);
   assert.match(source, /id=\{TOP_LEVEL_SECTION_IDS\.intro\}/);
   assert.match(source, /aria-labelledby=\{TOP_LEVEL_SECTION_HEADING_IDS\.intro\}/);
   assert.match(source, /<SonartraIntroduction metadataItems=\{introMetadataItems\} \/>/);
@@ -316,8 +320,10 @@ test('result detail page renders the system introduction above hero and keeps ca
   assert.match(source, /heroPatternLabel/);
   assert.match(source, /heroSummary/);
   assert.match(source, /heroNarrative/);
-  assert.match(source, /<EditorialAside label="Pressure" text=\{pressureOverlay\} \/>/);
-  assert.match(source, /<EditorialAside label="Environment" text=\{environmentOverlay\} \/>/);
+  assert.match(source, /label="When Under Pressure"/);
+  assert.match(source, /text=\{pressureOverlay\}/);
+  assert.match(source, /label="Ideal Environment"/);
+  assert.match(source, /text=\{environmentOverlay\}/);
   assert.match(source, /<DomainSection domainItems=\{resultDomainItems\} \/>/);
   assert.match(source, /import \{ ApplicationPlan \} from '@\/components\/results\/application-plan';/);
   assert.match(source, /<ApplicationPlan application=\{result\.application\} \/>/);
