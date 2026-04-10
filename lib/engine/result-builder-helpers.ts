@@ -24,7 +24,10 @@ import type {
 } from '@/lib/engine/types';
 import { buildApplicationSection } from '@/lib/engine/application-builder';
 import { sortDomainSignalsForDisplay } from '@/lib/engine/domain-signal-ranking';
-import { buildDomainInterpretation } from '@/lib/engine/domain-interpretation';
+import {
+  buildDomainInterpretation,
+  buildDomainPairInterpretationSummary,
+} from '@/lib/engine/domain-interpretation';
 import {
   buildDevelopmentFocus,
   buildOverviewSummary,
@@ -438,7 +441,9 @@ export function buildDomains(
       primarySignal && secondarySignal
         ? buildCanonicalSignalPairKey(primarySignal.signalKey, secondarySignal.signalKey)
         : null;
-    const pairSummary = resolvePairLanguageSection(pairKey, 'chapterSummary', interpretationContext);
+    const pairSummary =
+      resolvePairLanguageSection(pairKey, 'chapterSummary', interpretationContext)
+      ?? buildDomainPairInterpretationSummary(domainSummary);
 
     return {
       domainKey: domainSummary.domainKey,

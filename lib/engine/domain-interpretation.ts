@@ -90,6 +90,37 @@ function toInterpretationInput(domainSummary: NormalizedDomainSummary): DomainIn
   };
 }
 
+function toPairToken(signalKey: string): string {
+  const segments = signalKey.split('_').filter((segment) => segment.length > 0);
+  const rawToken = segments[segments.length - 1] ?? signalKey;
+
+  switch (rawToken) {
+    case 'adhocracy':
+      return 'creative';
+    case 'market':
+      return 'competitive';
+    case 'clan':
+      return 'collaborative';
+    case 'hierarchy':
+      return 'structured';
+    case 'avoid':
+      return 'avoidance';
+    default:
+      return rawToken;
+  }
+}
+
+function buildPairTokenKey(primarySignalKey: string, secondarySignalKey: string): string | null {
+  const primaryToken = toPairToken(primarySignalKey);
+  const secondaryToken = toPairToken(secondarySignalKey);
+
+  if (!primaryToken || !secondaryToken || primaryToken === secondaryToken) {
+    return null;
+  }
+
+  return [primaryToken, secondaryToken].sort((left, right) => left.localeCompare(right)).join('_');
+}
+
 function getRankedSignals(signalScores: readonly NormalizedSignalScore[]): readonly NormalizedSignalScore[] {
   return sortDomainSignalsForDisplay(signalScores);
 }
@@ -445,6 +476,14 @@ const PAIRWISE_RULES: readonly PairwiseInterpretationRule[] = [
 const PAIRWISE_RULE_LOOKUP = new Map<string, PairwiseInterpretationRule>(
   PAIRWISE_RULES.map((rule) => [`${rule.domainKey}:${rule.primarySignalKey}:${rule.secondarySignalKey}`, rule] as const),
 );
+const PAIRWISE_RULE_LOOKUP_BY_SIGNALS = new Map<string, PairwiseInterpretationRule>(
+  PAIRWISE_RULES.map((rule) => [`${rule.primarySignalKey}:${rule.secondarySignalKey}`, rule] as const),
+);
+const PAIRWISE_RULE_LOOKUP_BY_PAIR_KEY = new Map<string, PairwiseInterpretationRule>(
+  PAIRWISE_RULES
+    .map((rule) => [buildPairTokenKey(rule.primarySignalKey, rule.secondarySignalKey), rule] as const)
+    .filter((entry): entry is readonly [string, PairwiseInterpretationRule] => entry[0] !== null),
+);
 
 function buildSupportLine(
   context: DomainInterpretationContext,
@@ -602,6 +641,10 @@ function buildPairwiseSummary(context: DomainInterpretationContext): {
 
   const rule = PAIRWISE_RULE_LOOKUP.get(
     `${context.input.domainKey}:${context.primarySignal.signalKey}:${context.secondarySignal.signalKey}`,
+  ) ?? PAIRWISE_RULE_LOOKUP_BY_SIGNALS.get(
+    `${context.primarySignal.signalKey}:${context.secondarySignal.signalKey}`,
+  ) ?? PAIRWISE_RULE_LOOKUP_BY_PAIR_KEY.get(
+    buildPairTokenKey(context.primarySignal.signalKey, context.secondarySignal.signalKey) ?? '',
   );
 
   if (!rule) {
@@ -619,6 +662,21 @@ function buildPairwiseSummary(context: DomainInterpretationContext): {
     tensionClause: buildTensionClause(context, rule.tensionClause ?? null),
     ruleKey: rule.key,
   };
+}
+
+export function buildDomainPairInterpretationSummary(
+  domainSummary: NormalizedDomainSummary,
+): string | null {
+  if (domainSummary.domainSource !== 'signal_group') {
+    return null;
+  }
+
+  const context = buildContext(domainSummary);
+  if (!context.primarySignal || !context.secondarySignal) {
+    return null;
+  }
+
+  return buildPairwiseSummary(context).summary;
 }
 
 function resolveDomainSummaryOverride(
