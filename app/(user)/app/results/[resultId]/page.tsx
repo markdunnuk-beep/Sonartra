@@ -561,9 +561,9 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
   ] as const;
 
   return (
-    <PageFrame className="space-y-12 md:space-y-14">
+    <PageFrame className="space-y-10 md:space-y-12">
       <div className="xl:mx-auto xl:grid xl:max-w-[114rem] xl:grid-cols-[minmax(0,1fr)_minmax(10.75rem,12.25rem)] xl:gap-7 2xl:gap-9">
-        <div className="min-w-0 max-w-none space-y-12 md:space-y-14">
+        <div className="min-w-0 max-w-none space-y-10 md:space-y-12">
           <section
             id={TOP_LEVEL_SECTION_IDS.intro}
             aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.intro}
@@ -575,31 +575,31 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             <SonartraIntroduction metadataItems={introMetadataItems} />
             <ResultSectionIntent
               sectionId={TOP_LEVEL_SECTION_IDS.intro}
-              className="mt-4 max-w-[54rem] px-1 md:mt-5 md:px-2"
+              className="mt-3 max-w-[52rem] px-1 md:mt-4 md:px-2"
             />
           </section>
 
           <ResultReadingProgress className="max-w-[92rem] px-1 md:px-2 xl:hidden" />
 
-          <div className="space-y-5 pt-3 md:space-y-6 md:pt-3.5">
-            <NarrativeBridge>
-              With that context, here&apos;s what your patterns are showing.
+          <div className="space-y-4 pt-1 md:space-y-5 md:pt-1.5">
+            <NarrativeBridge className="max-w-[38rem] text-[0.88rem] leading-6 text-white/46 md:text-[0.91rem] md:leading-7">
+              The clearest pattern comes first.
             </NarrativeBridge>
 
             {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
             <section
               id={TOP_LEVEL_SECTION_IDS.hero}
               aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.hero}
-              className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 md:py-16 lg:px-14`}
+              className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-10 sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14`}
               style={getRevealStyle(1)}
             >
               <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.hero} className="sr-only">
                 Your pattern
               </h2>
-              <div className="w-full space-y-11 md:space-y-14">
-                <div className="grid gap-9 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-11 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:gap-12">
-                  <div className="space-y-9 md:space-y-11">
-                    <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <div className="w-full space-y-9 md:space-y-11">
+                <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-10 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:gap-12">
+                  <div className="space-y-8 md:space-y-9">
+                    <div className="flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                       <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
                         <SectionEyebrow>Results report</SectionEyebrow>
                         <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
@@ -608,7 +608,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
                     </div>
 
-                    <div className="space-y-8 md:space-y-10">
+                    <div className="space-y-6 md:space-y-8">
                       {heroHeadline ? (
                         <h1 className="sonartra-type-display max-w-[11ch] text-[3.15rem] tracking-[-0.055em] md:text-[5rem]">
                           {heroHeadline}
@@ -619,7 +619,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                         className="max-w-[52ch]"
                       />
                       {heroSubheadline ? (
-                        <p className="sonartra-report-body-soft max-w-[50rem] text-[1rem] leading-8 text-white/68 sm:text-[1.05rem] md:text-[1.12rem] md:leading-9">
+                        <p className="sonartra-report-body-soft max-w-[46rem] text-[0.98rem] leading-8 text-white/66 sm:text-[1.03rem] md:text-[1.08rem] md:leading-8">
                           {heroSubheadline}
                         </p>
                       ) : null}
