@@ -599,13 +599,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
               <div className="w-full space-y-9 md:space-y-11">
                 <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-10 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:gap-12">
                   <div className="space-y-8 md:space-y-9">
-                    <div className="flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                      <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
-                        <SectionEyebrow>Results report</SectionEyebrow>
-                        <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
-                        <span>{result.assessmentTitle}</span>
-                      </div>
-
+                    <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <SectionEyebrow>Results report</SectionEyebrow>
+                      <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
+                      <span>{result.assessmentTitle}</span>
                     </div>
 
                     <div className="space-y-6 md:space-y-8">
@@ -701,7 +698,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
 
           <div className="space-y-7 pt-6 md:space-y-8 md:pt-10">
             <NarrativeBridge>
-              So what does this mean in practice?
+              This is where the pattern becomes practical.
             </NarrativeBridge>
 
             <section
@@ -723,9 +720,6 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
                 sectionId={TOP_LEVEL_SECTION_IDS.application}
                 className="max-w-[53rem] md:mt-5"
               />
-              <p className="sonartra-report-body-soft max-w-[52rem] text-[0.98rem] leading-8 text-white/60">
-                These actions reflect how your core patterns tend to play out in practice.
-              </p>
               <ApplicationPlan application={result.application} />
             </section>
 

@@ -67,24 +67,17 @@ function ApplicationItemGrid({ items }: { items: readonly ApplicationGridItem[] 
   }
 
   return (
-    <div className="space-y-5 md:space-y-6">
-      <div className="grid gap-6 md:grid-cols-2">
-        {orderedItems.map((item, index) => (
-          <ApplicationItem
-            key={`${item.sourceType}-${item.label}-${index}`}
-            label={item.label}
-            narrative={item.narrative}
-            aside={item.aside}
-            sourceType={item.sourceType}
-            delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
-          />
-        ))}
-      </div>
-      {pairItems.length > 0 && signalItems.length > 0 ? (
-        <p className="sonartra-report-body-soft max-w-[38rem] text-[0.88rem] leading-7 text-white/50">
-          Pattern-led actions are shown first, followed by supporting signal detail.
-        </p>
-      ) : null}
+    <div className="grid gap-6 md:grid-cols-2">
+      {orderedItems.map((item, index) => (
+        <ApplicationItem
+          key={`${item.sourceType}-${item.label}-${index}`}
+          label={item.label}
+          narrative={item.narrative}
+          aside={item.aside}
+          sourceType={item.sourceType}
+          delayClassName={index % 2 === 0 ? 'sonartra-motion-stage-2' : 'sonartra-motion-stage-3'}
+        />
+      ))}
     </div>
   );
 }
@@ -174,7 +167,7 @@ export function ApplicationPlan({ application }: Props) {
         <div className="max-w-[48rem] space-y-6 rounded-[1.5rem] border border-white/7 bg-white/[0.02] px-5 py-5 md:px-6 md:py-6">
           {application.actionPlan30.keepDoing ? (
             <div className="space-y-2">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+              <p className="sonartra-report-kicker text-white/42">
                 Keep doing
               </p>
               <p className="sonartra-report-body text-white/82">{application.actionPlan30.keepDoing}</p>
@@ -182,7 +175,7 @@ export function ApplicationPlan({ application }: Props) {
           ) : null}
           {application.actionPlan30.watchFor ? (
             <div className="space-y-2">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+              <p className="sonartra-report-kicker text-white/42">
                 Watch for
               </p>
               <p className="sonartra-report-body text-white/82">{application.actionPlan30.watchFor}</p>
@@ -190,7 +183,7 @@ export function ApplicationPlan({ application }: Props) {
           ) : null}
           {application.actionPlan30.practiceNext ? (
             <div className="space-y-2">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+              <p className="sonartra-report-kicker text-white/42">
                 Try this
               </p>
               <p className="sonartra-report-body text-white/82">{application.actionPlan30.practiceNext}</p>
@@ -198,7 +191,7 @@ export function ApplicationPlan({ application }: Props) {
           ) : null}
           {application.actionPlan30.askOthers ? (
             <div className="space-y-2">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+              <p className="sonartra-report-kicker text-white/42">
                 Ask others
               </p>
               <p className="sonartra-report-body text-white/82">{application.actionPlan30.askOthers}</p>
