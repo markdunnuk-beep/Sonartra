@@ -138,10 +138,26 @@ test('runner client renders explicit in-progress and review mode messaging from 
   assert.match(source, /runnerState === 'ANSWERED_AWAITING_SUBMIT'/);
   assert.match(source, /modeLabel: 'Review Mode'/);
   assert.match(source, /modeTitle: 'All questions answered'/);
-  assert.match(source, /Review your responses before completing the assessment\./);
+  assert.match(source, /Everything is answered\. Review any response before you complete the assessment\./);
   assert.match(source, /You can move through your answers before submitting the assessment\./);
   assert.match(source, /modeLabel: 'In Progress'/);
   assert.match(source, /Answer the current question to keep moving through the assessment\./);
+});
+
+test('runner client renders a dedicated completion handoff only for answered-awaiting-submit mode', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /const showReviewHandoff = runnerState === 'ANSWERED_AWAITING_SUBMIT';/);
+  assert.match(source, /showReviewHandoff \? \(/);
+  assert.match(source, /sonartra-runner-review-handoff/);
+  assert.match(source, /Completion checkpoint/);
+  assert.match(source, /Ready to complete/);
+  assert.match(source, /All questions answered/);
+  assert.match(source, /Response set complete/);
+  assert.match(source, /Assessment ready to complete/);
+  assert.match(source, /Completing the assessment finalises your responses and moves Sonartra/);
+  assert.match(source, /into results preparation\./);
+  assert.doesNotMatch(source, /runnerState === 'IN_PROGRESS'[\s\S]{0,120}sonartra-runner-review-handoff/);
 });
 
 test('runner client adjusts navigation and CTA hierarchy for review mode without changing submit action', () => {
@@ -150,7 +166,11 @@ test('runner client adjusts navigation and CTA hierarchy for review mode without
   assert.match(source, /runnerState === 'ANSWERED_AWAITING_SUBMIT' \? 'Previous Response' : 'Back'/);
   assert.match(source, /variant: runnerState === 'ANSWERED_AWAITING_SUBMIT' \? 'secondary' : 'primary'/);
   assert.match(source, /modeCopy\.nextLabel/);
+  assert.match(source, /const showFooterCompleteAction = showCompleteAction && !showReviewHandoff;/);
+  assert.match(source, /showFooterCompleteAction \? \(/);
   assert.match(source, /'Responses ready for review'/);
   assert.match(source, /'Ready to submit'/);
+  assert.match(source, /Review remains available until you choose to complete\./);
   assert.match(source, /'Complete Assessment'/);
+  assert.match(source, /onClick=\{handleSubmit\}/);
 });

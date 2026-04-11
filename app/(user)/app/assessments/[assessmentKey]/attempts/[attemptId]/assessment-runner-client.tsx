@@ -99,10 +99,11 @@ function getRunnerModeCopy(params: {
     return {
       modeLabel: 'Review Mode',
       modeTitle: 'All questions answered',
-      modeDescription: 'Review your responses before completing the assessment.',
+      modeDescription: 'Everything is answered. Review any response before you complete the assessment.',
       navigationLabel: 'Review Question',
       nextLabel: 'Next Response',
-      finalActionHint: 'You can move through your answers before submitting the assessment.',
+      finalActionHint:
+        'You can move through your answers before submitting the assessment.',
     };
   }
 
@@ -156,6 +157,8 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
     answeredQuestions === totalQuestions && !isSaving && completionState === 'idle' && !saveError;
   const interactionLocked = completionState !== 'idle';
   const showCompleteAction = isFinalQuestion || completionState !== 'idle' || submitError !== null;
+  const showReviewHandoff = runnerState === 'ANSWERED_AWAITING_SUBMIT';
+  const showFooterCompleteAction = showCompleteAction && !showReviewHandoff;
   const currentQuestionNumber = currentQuestionIndex + 1;
   const activePhase = showIntro ? 'intro' : completionState !== 'idle' ? 'completion' : 'question';
   const autosaveStateLabel = getAutosaveStateLabel({
@@ -539,6 +542,70 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 <span className="sonartra-status sonartra-status-neutral">
                   {currentQuestion.domainTitle}
                 </span>
+
+                {showReviewHandoff ? (
+                  <div className="sonartra-motion-reveal-soft sonartra-runner-review-handoff rounded-[1.4rem] border border-white/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-4 shadow-[0_22px_60px_rgba(0,0,0,0.24)] sm:p-5">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="max-w-[42rem] space-y-4">
+                        <div className="space-y-2">
+                          <p className="sonartra-type-eyebrow text-white/46">
+                            Completion checkpoint
+                          </p>
+                          <h3 className="sonartra-type-section-title text-[1.55rem] leading-[1.04] text-white sm:text-[1.8rem]">
+                            Ready to complete
+                          </h3>
+                          <p className="sonartra-type-body-secondary max-w-[34rem] text-white/68">
+                            Your response set is complete. You can still move through the
+                            assessment and change any answer before final submission.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <span className="inline-flex items-center rounded-full border border-emerald-400/18 bg-emerald-400/10 px-3 py-1.5 text-sm text-emerald-100">
+                            All questions answered
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-white/72">
+                            Response set complete
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-white/72">
+                            Assessment ready to complete
+                          </span>
+                        </div>
+
+                        <p className="sonartra-type-body-secondary max-w-[36rem] text-white/56">
+                          Completing the assessment finalises your responses and moves Sonartra
+                          into results preparation.
+                        </p>
+                      </div>
+
+                      <div className="flex min-w-[15rem] flex-col items-stretch gap-2 lg:max-w-[16rem]">
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          disabled={!canSubmit}
+                          className={getRunnerButtonClass({
+                            variant: 'primary',
+                            disabled: !canSubmit,
+                            minWidthClassName:
+                              'min-w-[12rem] shadow-[0_18px_40px_rgba(255,255,255,0.1)]',
+                          })}
+                        >
+                          {completionState === 'submitting'
+                            ? 'Submitting...'
+                            : completionState === 'processing'
+                              ? 'Opening processing state...'
+                              : completionState === 'redirecting'
+                                ? 'Opening result...'
+                                : 'Complete Assessment'}
+                        </button>
+                        <p className="sonartra-type-caption text-white/44">
+                          Review remains available until you choose to complete.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="space-y-2">
                   <p
                     className={cn(
@@ -666,7 +733,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   ) : null}
                 </div>
 
-                {showCompleteAction ? (
+                {showFooterCompleteAction ? (
                   <button
                     type="button"
                     onClick={handleSubmit}
@@ -688,7 +755,9 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 ) : null}
               </div>
 
-              {showCompleteAction && !canSubmit && completionState === 'idle' ? (
+              {(showFooterCompleteAction || showReviewHandoff) &&
+              !canSubmit &&
+              completionState === 'idle' ? (
                 <p className="sonartra-type-body-secondary text-white/52">
                   {unansweredQuestions > 0
                     ? `Complete the remaining ${unansweredQuestions} question${unansweredQuestions === 1 ? '' : 's'} before submitting.`
