@@ -69,18 +69,18 @@ function getAutosaveStateLabel(params: {
   saveError: string | null;
 }): string {
   if (params.completionState !== 'idle') {
-    return 'Locked';
+    return 'Submitting responses';
   }
 
   if (params.saveError) {
-    return 'Save issue';
+    return 'Needs attention';
   }
 
   if (params.isSaving) {
-    return 'Saving';
+    return 'Saving response';
   }
 
-  return 'Saved';
+  return 'Responses saved';
 }
 
 function getRunnerModeCopy(params: {
@@ -97,7 +97,7 @@ function getRunnerModeCopy(params: {
         'Everything is answered. Review any response before you complete the assessment.',
       navigationLabel: 'Review Question',
       nextLabel: 'Next Response',
-      finalActionHint: 'You can move through your answers before submitting the assessment.',
+      finalActionHint: 'You can continue reviewing responses before you complete the assessment.',
     };
   }
 
@@ -109,7 +109,7 @@ function getRunnerModeCopy(params: {
       : 'Answer the current question to keep moving through the assessment.',
     navigationLabel: 'Question',
     nextLabel: 'Next',
-    finalActionHint: 'Complete the remaining questions before submitting the assessment.',
+    finalActionHint: 'Complete the remaining questions to move into final review.',
   };
 }
 
@@ -343,7 +343,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
   if (!currentQuestion) {
     return (
       <section className="sonartra-motion-reveal sonartra-panel space-y-3">
-        <h2 className="sonartra-type-card-title">No questions available</h2>
+        <h1 className="sonartra-type-page-title">Assessment unavailable</h1>
         <p className="sonartra-type-body-secondary max-w-[44rem]">
           This attempt has no persisted question set loaded for the current assessment version.
         </p>
@@ -364,9 +364,15 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
         data-runner-phase="intro"
       >
         <div className="space-y-4">
+          <header className="px-1">
+            <p className="sonartra-type-eyebrow text-white/42">Assessment runner</p>
+            <h1 className="sonartra-type-page-title mt-2 max-w-[16ch]">{runner.assessmentTitle}</h1>
+          </header>
+
           <section
             className="sonartra-motion-reveal sonartra-panel sonartra-runner-stage overflow-hidden p-5 sm:p-6 lg:p-7"
             style={getRevealStyle(0)}
+            aria-labelledby="assessment-intro-title"
           >
             <div className="space-y-6 lg:space-y-7">
               <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.82fr)] xl:gap-8">
@@ -379,7 +385,10 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
                   <div className="space-y-3">
                     <p className="sonartra-type-caption text-white/54">{runner.assessmentTitle}</p>
-                    <h2 className="sonartra-type-page-title max-w-[16ch] text-[2.15rem] sm:text-[2.55rem] lg:text-[2.9rem]">
+                    <h2
+                      id="assessment-intro-title"
+                      className="sonartra-type-page-title max-w-[16ch] text-[2.15rem] sm:text-[2.55rem] lg:text-[2.9rem]"
+                    >
                       {runner.assessmentIntro.introTitle || runner.assessmentTitle}
                     </h2>
                   </div>
@@ -471,7 +480,21 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
       data-runner-state={runnerState}
     >
       <div className="space-y-3">
-        <section className="sticky top-3 z-20 xl:hidden" data-runner-mobile-nav>
+        <header className="px-1">
+          <p className="sonartra-type-eyebrow text-white/42">Assessment runner</p>
+          <h1 className="sonartra-type-page-title mt-2 max-w-[16ch]">{runner.assessmentTitle}</h1>
+          <p className="sonartra-type-body-secondary text-white/58 mt-2 max-w-[42rem]">
+            {showReviewHandoff
+              ? 'All responses are in place. Review freely, then complete the assessment when ready.'
+              : 'Work through each question in order. Responses save automatically as you go.'}
+          </p>
+        </header>
+
+        <nav
+          className="sticky top-3 z-20 xl:hidden"
+          data-runner-mobile-nav
+          aria-label="Question navigator"
+        >
           <div className="sonartra-runner-mobile-orientation rounded-[1.25rem] border border-white/10 px-3.5 py-3 shadow-[0_18px_42px_rgba(0,0,0,0.24)] backdrop-blur-xl">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
@@ -490,6 +513,9 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 type="button"
                 aria-controls="runner-compact-navigator"
                 aria-expanded={compactNavigatorOpen}
+                aria-label={
+                  compactNavigatorOpen ? 'Hide question navigator' : 'Open question navigator'
+                }
                 onClick={() => setCompactNavigatorOpen((current) => !current)}
                 className={getRunnerButtonClass({
                   variant: 'secondary',
@@ -504,6 +530,8 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
               <div
                 id="runner-compact-navigator"
                 className="sonartra-motion-reveal-soft border-white/8 mt-3 space-y-3 border-t pt-3"
+                role="region"
+                aria-label="Question navigator sheet"
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="sonartra-type-body-secondary text-white/58">
@@ -525,7 +553,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                         type="button"
                         onClick={() => goToQuestion(index)}
                         disabled={interactionLocked}
-                        aria-label={`Question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
+                        aria-label={`Jump to question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
                         className={cn(
                           'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-xl border px-2 py-2.5 text-center',
                           active
@@ -553,11 +581,12 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
               </div>
             ) : null}
           </div>
-        </section>
+        </nav>
 
         <section
           className="sonartra-motion-reveal sonartra-motion-stage-2 sonartra-panel sonartra-runner-stage min-h-[34rem] space-y-5 p-5 lg:p-6"
           style={getRevealStyle(1)}
+          aria-labelledby="runner-question-title"
         >
           <div
             key={currentQuestion.questionId}
@@ -591,6 +620,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   </div>
                   <div className="flex items-center gap-3 self-start sm:self-center">
                     <span
+                      aria-live="polite"
                       className={cn(
                         'sonartra-type-caption inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-white/60',
                         saveError
@@ -632,9 +662,9 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                           <p className="sonartra-type-eyebrow text-white/46">
                             Completion checkpoint
                           </p>
-                          <h3 className="sonartra-type-section-title text-[1.55rem] leading-[1.04] text-white sm:text-[1.8rem]">
+                          <h2 className="sonartra-type-section-title text-[1.55rem] leading-[1.04] text-white sm:text-[1.8rem]">
                             Ready to complete
-                          </h3>
+                          </h2>
                           <p className="sonartra-type-body-secondary text-white/68 max-w-[34rem]">
                             Your response set is complete. You can still move through the assessment
                             and change any answer before final submission.
@@ -664,6 +694,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                           type="button"
                           onClick={handleSubmit}
                           disabled={!canSubmit}
+                          aria-label="Complete the assessment and submit your responses"
                           className={getRunnerButtonClass({
                             variant: 'primary',
                             disabled: !canSubmit,
@@ -702,13 +733,16 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                     {modeCopy.modeDescription}
                   </p>
                 </div>
-                <h2 className="sonartra-type-section-title max-w-[30ch] text-[2rem] leading-[1.02] sm:text-[2.25rem] lg:text-[2.7rem]">
+                <h2
+                  id="runner-question-title"
+                  className="sonartra-type-section-title max-w-[30ch] text-[2rem] leading-[1.02] sm:text-[2.25rem] lg:text-[2.7rem]"
+                >
                   {currentQuestion.prompt}
                 </h2>
               </div>
 
-              <div className="grid gap-3">
-                {currentQuestion.options.map((option) => {
+              <div className="grid gap-3" role="radiogroup" aria-labelledby="runner-question-title">
+                {currentQuestion.options.map((option, index) => {
                   const selected =
                     selectedByQuestionId[currentQuestion.questionId] === option.optionId;
 
@@ -718,10 +752,13 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       type="button"
                       onClick={() => handleSelect(currentQuestion.questionId, option.optionId)}
                       disabled={interactionLocked}
+                      role="radio"
+                      aria-checked={selected}
+                      aria-label={`Select option ${option.label ?? index + 1}: ${option.text}`}
                       className={cn(
                         'sonartra-motion-choice sonartra-runner-option rounded-[1.15rem] border px-5 py-4 text-left',
                         selected
-                          ? 'border-white bg-white text-neutral-950 shadow-[0_14px_30px_rgba(255,255,255,0.08)]'
+                          ? 'ring-white/12 border-white/85 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,247,255,0.94))] text-neutral-950 shadow-[0_18px_38px_rgba(255,255,255,0.08)] ring-1'
                           : 'hover:border-white/24 border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.055]',
                         'disabled:cursor-not-allowed disabled:opacity-70',
                       )}
@@ -734,6 +771,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                                 ? 'bg-neutral-950/10 text-neutral-950'
                                 : 'bg-white/10 text-white'
                             }`}
+                            aria-hidden="true"
                           >
                             {option.label}
                           </span>
@@ -765,7 +803,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
               {getCompletionMessage() ? (
                 <div className="sonartra-motion-banner sonartra-runner-completion-card space-y-2 rounded-[1.1rem] border px-4 py-3.5">
-                  <p className="sonartra-type-eyebrow text-white/40">Finalizing</p>
+                  <p className="sonartra-type-eyebrow text-white/40">Completion status</p>
                   <p className="sonartra-type-body-secondary text-white/72">
                     {getCompletionMessage()}
                   </p>
@@ -778,6 +816,11 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                     type="button"
                     onClick={() => goToQuestion(currentQuestionIndex - 1)}
                     disabled={currentQuestionIndex === 0 || interactionLocked}
+                    aria-label={
+                      runnerState === 'ANSWERED_AWAITING_SUBMIT'
+                        ? 'Go to previous response'
+                        : 'Go to previous question'
+                    }
                     className={getRunnerButtonClass({
                       disabled: currentQuestionIndex === 0 || interactionLocked,
                       minWidthClassName: 'min-w-[7rem]',
@@ -790,6 +833,11 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       type="button"
                       onClick={() => goToQuestion(currentQuestionIndex + 1)}
                       disabled={interactionLocked}
+                      aria-label={
+                        runnerState === 'ANSWERED_AWAITING_SUBMIT'
+                          ? 'Go to next response'
+                          : 'Go to next question'
+                      }
                       className={getRunnerButtonClass({
                         variant:
                           runnerState === 'ANSWERED_AWAITING_SUBMIT' ? 'secondary' : 'primary',
@@ -804,6 +852,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       type="button"
                       onClick={goToFirstUnanswered}
                       disabled={interactionLocked}
+                      aria-label="Go to the next unanswered question"
                       className={getRunnerButtonClass({
                         variant: 'primary',
                         disabled: interactionLocked,
@@ -820,6 +869,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                     type="button"
                     onClick={handleSubmit}
                     disabled={!canSubmit}
+                    aria-label="Complete the assessment and submit your responses"
                     className={getRunnerButtonClass({
                       variant: 'primary',
                       disabled: !canSubmit,
@@ -851,7 +901,11 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
         </section>
 
         {showReviewHandoff ? (
-          <section className="sticky bottom-3 z-20 xl:hidden" data-runner-mobile-review-bar>
+          <aside
+            className="sticky bottom-3 z-20 xl:hidden"
+            data-runner-mobile-review-bar
+            aria-label="Review completion actions"
+          >
             <div className="sonartra-runner-mobile-review-bar rounded-[1.35rem] border border-white/10 px-3.5 py-3 shadow-[0_18px_42px_rgba(0,0,0,0.24)] backdrop-blur-xl">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
@@ -863,6 +917,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   <button
                     type="button"
                     onClick={() => setCompactNavigatorOpen(true)}
+                    aria-label="Open question navigator to review responses"
                     className={getRunnerButtonClass({
                       variant: 'secondary',
                       minWidthClassName: 'min-w-[6.75rem]',
@@ -874,6 +929,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                     type="button"
                     onClick={handleSubmit}
                     disabled={!canSubmit}
+                    aria-label="Complete the assessment and submit your responses"
                     className={getRunnerButtonClass({
                       variant: 'primary',
                       disabled: !canSubmit,
@@ -891,7 +947,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 </div>
               </div>
             </div>
-          </section>
+          </aside>
         ) : null}
       </div>
 
@@ -899,9 +955,12 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
         <section
           className="sonartra-motion-reveal sonartra-motion-stage-3 sonartra-panel sonartra-runner-support-card space-y-4 p-4"
           style={getRevealStyle(2)}
+          aria-labelledby="runner-desktop-nav-title"
         >
           <div className="space-y-2">
-            <p className="sonartra-type-eyebrow text-white/46">Question Map</p>
+            <p id="runner-desktop-nav-title" className="sonartra-type-eyebrow text-white/46">
+              Question navigator
+            </p>
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="sonartra-type-section-title text-2xl">
@@ -936,7 +995,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
             </span>
           </div>
 
-          <div className="grid grid-cols-5 gap-2">
+          <nav className="grid grid-cols-5 gap-2" aria-label="Question navigator">
             {runner.questions.map((question, index) => {
               const answered = selectedByQuestionId[question.questionId] !== null;
               const active = index === currentQuestionIndex;
@@ -947,11 +1006,11 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   type="button"
                   onClick={() => goToQuestion(index)}
                   disabled={interactionLocked}
-                  aria-label={`Question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
+                  aria-label={`Jump to question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
                   className={cn(
                     'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-xl border px-2 py-2.5 text-center',
                     active
-                      ? 'border-white bg-white text-neutral-950 shadow-[0_12px_24px_rgba(255,255,255,0.08)]'
+                      ? 'ring-white/12 border-white/85 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,247,255,0.94))] text-neutral-950 shadow-[0_14px_30px_rgba(255,255,255,0.1)] ring-1'
                       : answered
                         ? 'border-emerald-400/18 hover:border-emerald-300/28 hover:bg-emerald-400/14 bg-emerald-400/10 text-white'
                         : 'text-white/58 hover:border-white/18 border-white/10 bg-white/[0.03] hover:bg-white/[0.05]',
@@ -960,6 +1019,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 >
                   <span>{index + 1}</span>
                   <span
+                    aria-hidden="true"
                     className={`absolute right-2 top-2 h-1.5 w-1.5 rounded-full ${
                       active ? 'bg-neutral-950/45' : answered ? 'bg-emerald-200' : 'bg-white/28'
                     }`}
@@ -967,7 +1027,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 </button>
               );
             })}
-          </div>
+          </nav>
         </section>
       </aside>
     </div>

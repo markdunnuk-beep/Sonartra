@@ -94,6 +94,8 @@ test('runner client keeps intro and question phases within the same shell and st
   assert.match(source, /data-runner-phase="intro"/);
   assert.match(source, /data-runner-phase=\{activePhase\}/);
   assert.match(source, /data-runner-state=\{runnerState\}/);
+  assert.match(source, /<h1 className="sonartra-type-page-title mt-2 max-w-\[16ch\]">/);
+  assert.match(source, /Assessment runner/);
   assert.match(source, /sonartra-runner-stage overflow-hidden/);
   assert.match(source, /sonartra-runner-stage min-h-\[34rem\]/);
   assert.match(source, /sonartra-runner-support-card/);
@@ -119,7 +121,7 @@ test('runner client gives question changes and completion feedback a calmer stag
   );
   assert.match(source, /text-\[2rem\] leading-\[1\.02\] sm:text-\[2\.25rem\] lg:text-\[2\.7rem\]/);
   assert.match(source, /sonartra-runner-completion-card/);
-  assert.match(source, /Finalizing/);
+  assert.match(source, /Completion status/);
   assert.match(source, /sonartra-runner-map-item/);
   assert.doesNotMatch(source, /Selection saved automatically\./);
   assert.doesNotMatch(source, /Every question now has a saved response\./);
@@ -135,6 +137,20 @@ test('runner client derives and logs canonical runner state transitions for deve
   assert.match(source, /lifecycleStatus: runner\.status/);
 });
 
+test('runner client uses canonical autosave and completion status messaging', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /return 'Submitting responses';/);
+  assert.match(source, /return 'Needs attention';/);
+  assert.match(source, /return 'Saving response';/);
+  assert.match(source, /return 'Responses saved';/);
+  assert.match(source, /Completion status/);
+  assert.doesNotMatch(source, /return 'Locked';/);
+  assert.doesNotMatch(source, /return 'Save issue';/);
+  assert.doesNotMatch(source, /return 'Saving';/);
+  assert.doesNotMatch(source, /return 'Saved';/);
+});
+
 test('runner client renders explicit in-progress and review mode messaging from canonical runner state', () => {
   const source = readFileSync(runnerClientPath, 'utf8');
 
@@ -145,7 +161,7 @@ test('runner client renders explicit in-progress and review mode messaging from 
     source,
     /Everything is answered\. Review any response before you complete the assessment\./,
   );
-  assert.match(source, /You can move through your answers before submitting the assessment\./);
+  assert.match(source, /You can continue reviewing responses before you complete the assessment\./);
   assert.match(source, /modeLabel: 'In Progress'/);
   assert.match(source, /Answer the current question to keep moving through the assessment\./);
 });
@@ -193,6 +209,21 @@ test('runner client adjusts navigation and CTA hierarchy for review mode without
   assert.match(source, /onClick=\{handleSubmit\}/);
 });
 
+test('runner client hardens semantic structure and navigator accessibility labels', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /aria-labelledby="runner-question-title"/);
+  assert.match(source, /id="runner-question-title"/);
+  assert.match(source, /role="radiogroup" aria-labelledby="runner-question-title"/);
+  assert.match(source, /role="radio"/);
+  assert.match(source, /aria-checked=\{selected\}/);
+  assert.match(source, /aria-label="Question navigator"/);
+  assert.match(source, /aria-label="Question navigator sheet"/);
+  assert.match(source, /aria-label="Review completion actions"/);
+  assert.match(source, /Jump to question/);
+  assert.match(source, /aria-live="polite"/);
+});
+
 test('runner client adds compact orientation controls for tablet and mobile layouts', () => {
   const source = readFileSync(runnerClientPath, 'utf8');
 
@@ -205,6 +236,8 @@ test('runner client adds compact orientation controls for tablet and mobile layo
   assert.match(source, /Question Navigator/);
   assert.match(source, /Hide Navigator/);
   assert.match(source, /id="runner-compact-navigator"/);
+  assert.match(source, /Open question navigator/);
+  assert.match(source, /Hide question navigator/);
   assert.match(source, /Jump to any question without leaving the runner\./);
   assert.match(source, /sm:grid-cols-6 md:grid-cols-8/);
   assert.match(source, /setCompactNavigatorOpen\(false\);/);
@@ -218,6 +251,7 @@ test('runner client keeps review completion accessible on smaller screens', () =
   assert.match(source, /sticky bottom-3 z-20 xl:hidden/);
   assert.match(source, /sonartra-runner-mobile-review-bar/);
   assert.match(source, /onClick=\{\(\) => setCompactNavigatorOpen\(true\)\}/);
+  assert.match(source, /Open question navigator to review responses/);
   assert.match(
     source,
     /<p className="sonartra-type-nav text-white\/82 mt-1">Ready to complete<\/p>/,
