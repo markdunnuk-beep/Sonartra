@@ -366,6 +366,7 @@ test('runner view model loads ordered questions and saved responses for owned at
   });
 
   assert.equal(runner.status, 'in_progress');
+  assert.equal(runner.runnerState, 'IN_PROGRESS');
   assert.equal(runner.questions.length, 2);
   assert.equal(runner.questions[0]?.questionId, 'question-1');
   assert.equal(runner.questions[1]?.selectedOptionId, 'option-3');
@@ -453,6 +454,7 @@ test('runner view model serves the question structure linked to the attempt vers
   });
 
   assert.equal(runner.assessmentVersionId, 'version-2');
+  assert.equal(runner.runnerState, 'IN_PROGRESS');
   assert.equal(runner.assessmentIntro?.introTitle, 'Published intro for version 2');
   assert.deepEqual(runner.questions.map((question) => question.questionId), ['question-live']);
 });
@@ -502,6 +504,81 @@ test('runner view model returns null intro cleanly when the canonical runtime de
   });
 
   assert.equal(runner.assessmentIntro, null);
+  assert.equal(runner.runnerState, 'IN_PROGRESS');
+});
+
+test('runner view model derives answered awaiting submit when every question has a saved response', async () => {
+  const service = createAssessmentRunnerService({
+    db: createFakeDb({
+      attempts: [{
+        attemptId: 'attempt-4',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        assessmentDescription: 'Signals',
+        assessmentVersionId: 'version-1',
+        versionTag: '1.0.0',
+        lifecycleStatus: 'IN_PROGRESS',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        submittedAt: null,
+        completedAt: null,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      }],
+      questionsByVersionId: {
+        'version-1': [
+          {
+            questionId: 'question-1',
+            questionKey: 'q1',
+            prompt: 'Question one?',
+            orderIndex: 1,
+            domainTitle: 'Section A',
+            options: [
+              { optionId: 'option-1', optionKey: 'q1_a', optionLabel: 'A', optionText: 'First', orderIndex: 1 },
+            ],
+          },
+          {
+            questionId: 'question-2',
+            questionKey: 'q2',
+            prompt: 'Question two?',
+            orderIndex: 2,
+            domainTitle: 'Section B',
+            options: [
+              { optionId: 'option-2', optionKey: 'q2_a', optionLabel: 'A', optionText: 'Second', orderIndex: 1 },
+            ],
+          },
+        ],
+      },
+      responses: [
+        {
+          attemptId: 'attempt-4',
+          questionId: 'question-1',
+          selectedOptionId: 'option-1',
+        },
+        {
+          attemptId: 'attempt-4',
+          questionId: 'question-2',
+          selectedOptionId: 'option-2',
+        },
+      ],
+    }),
+    definitionRepository: {
+      async getAssessmentDefinitionByVersion() {
+        return buildDefinition();
+      },
+    },
+  });
+
+  const runner = await service.getAssessmentRunnerViewModel({
+    userId: 'user-1',
+    assessmentKey: 'wplp80',
+    attemptId: 'attempt-4',
+  });
+
+  assert.equal(runner.status, 'in_progress');
+  assert.equal(runner.runnerState, 'ANSWERED_AWAITING_SUBMIT');
+  assert.equal(runner.answeredQuestions, 2);
+  assert.equal(runner.totalQuestions, 2);
 });
 
 test('save response preserves overwrite semantics and returns updated progress', async () => {

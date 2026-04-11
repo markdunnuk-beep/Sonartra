@@ -1,4 +1,5 @@
 import { createAssessmentDefinitionRepository } from '@/lib/engine/repository';
+import { getRunnerState } from '@/lib/assessment-runner/runner-state';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
 import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
@@ -207,6 +208,11 @@ export function createAssessmentRunnerService(
         assessmentVersionId: attempt.assessmentVersionId,
         versionTag: attempt.versionTag,
         status: runnerStatus.status,
+        runnerState: getRunnerState({
+          answeredCount: progress.answeredQuestions,
+          totalQuestions: progress.totalQuestions,
+          attemptStatus: runnerStatus.status,
+        }),
         totalQuestions: progress.totalQuestions,
         answeredQuestions: progress.answeredQuestions,
         completionPercentage: progress.completionPercentage,

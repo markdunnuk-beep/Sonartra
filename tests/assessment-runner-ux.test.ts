@@ -115,3 +115,12 @@ test('runner client gives question changes and completion feedback a calmer stag
   assert.match(source, /Finalizing/);
   assert.match(source, /sonartra-runner-map-item/);
 });
+
+test('runner client derives and logs canonical runner state transitions for development verification', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /const runnerState = getRunnerState\(/);
+  assert.match(source, /console\.debug\('\[runner-state\]'/);
+  assert.match(source, /runnerState,/);
+  assert.match(source, /lifecycleStatus: runner\.status/);
+});

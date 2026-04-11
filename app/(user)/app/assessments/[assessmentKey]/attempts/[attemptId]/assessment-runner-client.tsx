@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { CSSProperties } from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/components/shared/user-app-ui';
+import { getRunnerState } from '@/lib/assessment-runner/runner-state';
 import {
   getResumeQuestionIndex,
   shouldShowAssessmentIntro,
@@ -96,6 +97,11 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
   const totalQuestions = runner.totalQuestions;
   const unansweredQuestions = Math.max(0, totalQuestions - answeredQuestions);
   const isFinalQuestion = currentQuestionIndex === runner.questions.length - 1;
+  const runnerState = getRunnerState({
+    answeredCount: answeredQuestions,
+    totalQuestions,
+    attemptStatus: runner.status,
+  });
   const currentQuestionAnswered = currentQuestion
     ? selectedByQuestionId[currentQuestion.questionId] !== null
     : false;
@@ -110,6 +116,32 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
     unansweredQuestions === 0
       ? 'Every question now has a saved response.'
       : `${unansweredQuestions} question${unansweredQuestions === 1 ? '' : 's'} still remain.`;
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') {
+      return;
+    }
+
+    console.debug('[runner-state]', {
+      attemptId: runner.attemptId,
+      assessmentKey: runner.assessmentKey,
+      runnerState,
+      lifecycleStatus: runner.status,
+      answeredQuestions,
+      totalQuestions,
+      currentQuestionIndex,
+      currentQuestionId: currentQuestion?.questionId ?? null,
+    });
+  }, [
+    answeredQuestions,
+    currentQuestion?.questionId,
+    currentQuestionIndex,
+    runner.assessmentKey,
+    runner.attemptId,
+    runner.status,
+    runnerState,
+    totalQuestions,
+  ]);
 
   function goToQuestion(index: number) {
     setCurrentQuestionIndex(Math.max(0, Math.min(index, runner.questions.length - 1)));

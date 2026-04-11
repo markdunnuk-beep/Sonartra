@@ -26,6 +26,11 @@ export type AssessmentRunnerStatus =
   | 'ready'
   | 'error';
 
+export type AssessmentRunnerFlowState =
+  | 'IN_PROGRESS'
+  | 'ANSWERED_AWAITING_SUBMIT'
+  | 'SUBMITTED';
+
 export type AssessmentRunnerViewModel = {
   attemptId: string;
   assessmentId: string;
@@ -36,6 +41,7 @@ export type AssessmentRunnerViewModel = {
   assessmentVersionId: string;
   versionTag: string;
   status: AssessmentRunnerStatus;
+  runnerState: AssessmentRunnerFlowState;
   totalQuestions: number;
   answeredQuestions: number;
   completionPercentage: number;
