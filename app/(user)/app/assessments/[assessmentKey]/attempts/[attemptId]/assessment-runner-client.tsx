@@ -89,6 +89,36 @@ function getAutosaveStateLabel(params: {
   return 'Saved';
 }
 
+function getRunnerModeCopy(params: {
+  runnerState: ReturnType<typeof getRunnerState>;
+  currentQuestionNumber: number;
+  totalQuestions: number;
+  isFinalQuestion: boolean;
+}) {
+  if (params.runnerState === 'ANSWERED_AWAITING_SUBMIT') {
+    return {
+      modeLabel: 'Review Mode',
+      modeTitle: 'All questions answered',
+      modeDescription: 'Review your responses before completing the assessment.',
+      navigationLabel: 'Review Question',
+      nextLabel: 'Next Response',
+      finalActionHint: 'You can move through your answers before submitting the assessment.',
+    };
+  }
+
+  return {
+    modeLabel: 'In Progress',
+    modeTitle: `Question ${params.currentQuestionNumber} of ${params.totalQuestions}`,
+    modeDescription: params.isFinalQuestion
+      ? 'Finish this question to move into final review.'
+      : 'Answer the current question to keep moving through the assessment.',
+    navigationLabel: 'Question',
+    nextLabel: 'Next',
+    finalActionHint:
+      'Complete the remaining questions before submitting the assessment.',
+  };
+}
+
 export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClientProps) {
   const router = useRouter();
   const initialQuestionIndex = getResumeQuestionIndex(runner.questions);
@@ -132,6 +162,12 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
     completionState,
     isSaving,
     saveError,
+  });
+  const modeCopy = getRunnerModeCopy({
+    runnerState,
+    currentQuestionNumber,
+    totalQuestions,
+    isFinalQuestion,
   });
 
   useEffect(() => {
@@ -427,9 +463,10 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
   }
 
   return (
-      <div
+    <div
       className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start"
       data-runner-phase={activePhase}
+      data-runner-state={runnerState}
     >
       <div className="space-y-3">
         <section
@@ -450,9 +487,21 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       <span className="text-white/22">/</span>
                       <span>{runner.assessmentTitle}</span>
                     </div>
-                    <p className="sonartra-type-nav text-white/82">
-                      Question {currentQuestionNumber} of {totalQuestions}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={cn(
+                          'sonartra-type-caption inline-flex items-center rounded-full border px-3 py-1.5',
+                          runnerState === 'ANSWERED_AWAITING_SUBMIT'
+                            ? 'border-emerald-400/18 bg-emerald-400/10 text-emerald-100'
+                            : 'border-white/10 bg-white/[0.03] text-white/60',
+                        )}
+                      >
+                        {modeCopy.modeLabel}
+                      </span>
+                      <p className="sonartra-type-nav text-white/82">
+                        {modeCopy.navigationLabel} {currentQuestionNumber} of {totalQuestions}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3 self-start sm:self-center">
                     <span
@@ -490,6 +539,21 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 <span className="sonartra-status sonartra-status-neutral">
                   {currentQuestion.domainTitle}
                 </span>
+                <div className="space-y-2">
+                  <p
+                    className={cn(
+                      'sonartra-type-caption uppercase tracking-[0.22em]',
+                      runnerState === 'ANSWERED_AWAITING_SUBMIT'
+                        ? 'text-emerald-100/72'
+                        : 'text-white/42',
+                    )}
+                  >
+                    {modeCopy.modeTitle}
+                  </p>
+                  <p className="sonartra-type-body-secondary max-w-[46rem] text-white/62">
+                    {modeCopy.modeDescription}
+                  </p>
+                </div>
                 <h2 className="sonartra-type-section-title max-w-[30ch] text-[2rem] leading-[1.02] sm:text-[2.25rem] lg:text-[2.7rem]">
                   {currentQuestion.prompt}
                 </h2>
@@ -571,7 +635,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       minWidthClassName: 'min-w-[7rem]',
                     })}
                   >
-                    Back
+                    {runnerState === 'ANSWERED_AWAITING_SUBMIT' ? 'Previous Response' : 'Back'}
                   </button>
                   {!isFinalQuestion ? (
                     <button
@@ -579,12 +643,12 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       onClick={() => goToQuestion(currentQuestionIndex + 1)}
                       disabled={interactionLocked}
                       className={getRunnerButtonClass({
-                        variant: 'primary',
+                        variant: runnerState === 'ANSWERED_AWAITING_SUBMIT' ? 'secondary' : 'primary',
                         disabled: interactionLocked,
                         minWidthClassName: 'min-w-[8rem]',
                       })}
                     >
-                      Next
+                      {modeCopy.nextLabel}
                     </button>
                   ) : unansweredQuestions > 0 ? (
                     <button
@@ -628,7 +692,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 <p className="sonartra-type-body-secondary text-white/52">
                   {unansweredQuestions > 0
                     ? `Complete the remaining ${unansweredQuestions} question${unansweredQuestions === 1 ? '' : 's'} before submitting.`
-                    : 'Completion is available once every question has a saved answer and no save is pending.'}
+                    : modeCopy.finalActionHint}
                 </p>
               ) : null}
             </div>
@@ -648,9 +712,17 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 <p className="sonartra-type-section-title text-2xl">
                   {answeredQuestions}/{totalQuestions}
                 </p>
-                <p className="sonartra-type-body-secondary text-white/58">Questions completed</p>
+                <p className="sonartra-type-body-secondary text-white/58">
+                  {runnerState === 'ANSWERED_AWAITING_SUBMIT'
+                    ? 'Responses ready for review'
+                    : 'Questions completed'}
+                </p>
               </div>
-              <p className="sonartra-type-caption text-white/46">{unansweredQuestions} remaining</p>
+              <p className="sonartra-type-caption text-white/46">
+                {runnerState === 'ANSWERED_AWAITING_SUBMIT'
+                  ? 'Ready to submit'
+                  : `${unansweredQuestions} remaining`}
+              </p>
             </div>
           </div>
 

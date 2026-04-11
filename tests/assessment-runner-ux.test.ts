@@ -96,11 +96,12 @@ test('runner client keeps intro and question phases within the same shell and st
 
   assert.match(source, /data-runner-phase="intro"/);
   assert.match(source, /data-runner-phase=\{activePhase\}/);
+  assert.match(source, /data-runner-state=\{runnerState\}/);
   assert.match(source, /sonartra-runner-stage overflow-hidden/);
   assert.match(source, /sonartra-runner-stage min-h-\[34rem\]/);
   assert.match(source, /sonartra-runner-support-card/);
   assert.match(source, /RunnerMetaStat label="Questions" value=\{`\$\{totalQuestions\}`\}/);
-  assert.match(source, /Question \{currentQuestionNumber\} of \{totalQuestions\}/);
+  assert.match(source, /\{modeCopy\.navigationLabel\} \{currentQuestionNumber\} of \{totalQuestions\}/);
   assert.match(source, /autosaveStateLabel/);
   assert.match(source, /style=\{\{ width: `\$\{completionPercentage\}%` \}\}/);
   assert.doesNotMatch(source, /RunnerMetaStat label="Answered"/);
@@ -129,4 +130,27 @@ test('runner client derives and logs canonical runner state transitions for deve
   assert.match(source, /console\.debug\('\[runner-state\]'/);
   assert.match(source, /runnerState,/);
   assert.match(source, /lifecycleStatus: runner\.status/);
+});
+
+test('runner client renders explicit in-progress and review mode messaging from canonical runner state', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /runnerState === 'ANSWERED_AWAITING_SUBMIT'/);
+  assert.match(source, /modeLabel: 'Review Mode'/);
+  assert.match(source, /modeTitle: 'All questions answered'/);
+  assert.match(source, /Review your responses before completing the assessment\./);
+  assert.match(source, /You can move through your answers before submitting the assessment\./);
+  assert.match(source, /modeLabel: 'In Progress'/);
+  assert.match(source, /Answer the current question to keep moving through the assessment\./);
+});
+
+test('runner client adjusts navigation and CTA hierarchy for review mode without changing submit action', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /runnerState === 'ANSWERED_AWAITING_SUBMIT' \? 'Previous Response' : 'Back'/);
+  assert.match(source, /variant: runnerState === 'ANSWERED_AWAITING_SUBMIT' \? 'secondary' : 'primary'/);
+  assert.match(source, /modeCopy\.nextLabel/);
+  assert.match(source, /'Responses ready for review'/);
+  assert.match(source, /'Ready to submit'/);
+  assert.match(source, /'Complete Assessment'/);
 });
