@@ -214,14 +214,37 @@ test('runner client hardens semantic structure and navigator accessibility label
 
   assert.match(source, /aria-labelledby="runner-question-title"/);
   assert.match(source, /id="runner-question-title"/);
-  assert.match(source, /role="radiogroup" aria-labelledby="runner-question-title"/);
-  assert.match(source, /role="radio"/);
-  assert.match(source, /aria-checked=\{selected\}/);
+  assert.match(source, /<fieldset className="grid gap-3">/);
+  assert.match(source, /<legend className="sr-only">\{currentQuestion\.prompt\}<\/legend>/);
+  assert.match(source, /type="radio"/);
+  assert.match(source, /name=\{`question-\$\{currentQuestion\.questionId\}`\}/);
+  assert.match(source, /checked=\{selected\}/);
+  assert.match(source, /onChange=\{\(\) => handleSelect\(currentQuestion\.questionId, option\.optionId\)\}/);
+  assert.match(source, /className="peer sr-only"/);
+  assert.doesNotMatch(source, /role="radiogroup"/);
+  assert.doesNotMatch(source, /role="radio"/);
+  assert.doesNotMatch(source, /aria-checked=\{selected\}/);
   assert.match(source, /aria-label="Question navigator"/);
   assert.match(source, /aria-label="Question navigator sheet"/);
   assert.match(source, /aria-label="Review completion actions"/);
   assert.match(source, /Jump to question/);
   assert.match(source, /aria-live="polite"/);
+});
+
+test('runner client preserves premium answer-card treatment around hidden native radios', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /<label key=\{option\.optionId\} htmlFor=\{optionInputId\} className="block">/);
+  assert.match(
+    source,
+    /sonartra-motion-choice sonartra-runner-option block rounded-\[1\.15rem\] border px-5 py-4 text-left transition peer-focus-visible:ring-2 peer-focus-visible:ring-white\/55 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950/,
+  );
+  assert.match(
+    source,
+    /ring-white\/12 border-white\/85 bg-\[linear-gradient\(180deg,rgba\(255,255,255,0\.98\),rgba\(244,247,255,0\.94\)\)\] text-neutral-950 shadow-\[0_18px_38px_rgba\(255,255,255,0\.08\)\] ring-1/,
+  );
+  assert.match(source, /hover:border-white\/24 border-white\/10 bg-white\/\[0\.03\] text-white hover:bg-white\/\[0\.055\]/);
+  assert.match(source, /interactionLocked && 'cursor-not-allowed opacity-70'/);
 });
 
 test('runner client adds compact orientation controls for tablet and mobile layouts', () => {

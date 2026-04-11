@@ -741,51 +741,58 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 </h2>
               </div>
 
-              <div className="grid gap-3" role="radiogroup" aria-labelledby="runner-question-title">
+              <fieldset className="grid gap-3">
+                <legend className="sr-only">{currentQuestion.prompt}</legend>
                 {currentQuestion.options.map((option, index) => {
                   const selected =
                     selectedByQuestionId[currentQuestion.questionId] === option.optionId;
+                  const optionInputId = `runner-option-${currentQuestion.questionId}-${option.optionId}`;
 
                   return (
-                    <button
-                      key={option.optionId}
-                      type="button"
-                      onClick={() => handleSelect(currentQuestion.questionId, option.optionId)}
-                      disabled={interactionLocked}
-                      role="radio"
-                      aria-checked={selected}
-                      aria-label={`Select option ${option.label ?? index + 1}: ${option.text}`}
-                      className={cn(
-                        'sonartra-motion-choice sonartra-runner-option rounded-[1.15rem] border px-5 py-4 text-left',
-                        selected
-                          ? 'ring-white/12 border-white/85 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,247,255,0.94))] text-neutral-950 shadow-[0_18px_38px_rgba(255,255,255,0.08)] ring-1'
-                          : 'hover:border-white/24 border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.055]',
-                        'disabled:cursor-not-allowed disabled:opacity-70',
-                      )}
-                    >
-                      <div className="flex items-start gap-3">
-                        {option.label ? (
-                          <span
-                            className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                              selected
-                                ? 'bg-neutral-950/10 text-neutral-950'
-                                : 'bg-white/10 text-white'
-                            }`}
-                            aria-hidden="true"
-                          >
-                            {option.label}
+                    <label key={option.optionId} htmlFor={optionInputId} className="block">
+                      <input
+                        id={optionInputId}
+                        type="radio"
+                        name={`question-${currentQuestion.questionId}`}
+                        value={option.optionId}
+                        checked={selected}
+                        onChange={() => handleSelect(currentQuestion.questionId, option.optionId)}
+                        disabled={interactionLocked}
+                        className="peer sr-only"
+                      />
+                      <span
+                        className={cn(
+                          'sonartra-motion-choice sonartra-runner-option block rounded-[1.15rem] border px-5 py-4 text-left transition peer-focus-visible:ring-2 peer-focus-visible:ring-white/55 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950',
+                          selected
+                            ? 'ring-white/12 border-white/85 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,247,255,0.94))] text-neutral-950 shadow-[0_18px_38px_rgba(255,255,255,0.08)] ring-1'
+                            : 'hover:border-white/24 border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.055]',
+                          interactionLocked && 'cursor-not-allowed opacity-70',
+                        )}
+                      >
+                        <span className="flex items-start gap-3">
+                          {option.label ? (
+                            <span
+                              className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
+                                selected
+                                  ? 'bg-neutral-950/10 text-neutral-950'
+                                  : 'bg-white/10 text-white'
+                              }`}
+                              aria-hidden="true"
+                            >
+                              {option.label}
+                            </span>
+                          ) : null}
+                          <span className="min-w-0 flex-1">
+                            <span className="sonartra-type-body block max-w-[54ch] text-[0.98rem] leading-7 text-inherit lg:text-[1.05rem]">
+                              {option.text}
+                            </span>
                           </span>
-                        ) : null}
-                        <div className="min-w-0 flex-1">
-                          <span className="sonartra-type-body block max-w-[54ch] text-[0.98rem] leading-7 text-inherit lg:text-[1.05rem]">
-                            {option.text}
-                          </span>
-                        </div>
-                      </div>
-                    </button>
+                        </span>
+                      </span>
+                    </label>
                   );
                 })}
-              </div>
+              </fieldset>
             </div>
 
             <div className="space-y-4">
