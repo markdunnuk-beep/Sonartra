@@ -100,20 +100,26 @@ test('runner client keeps intro and question phases within the same shell and st
   assert.match(source, /sonartra-runner-stage min-h-\[34rem\]/);
   assert.match(source, /sonartra-runner-support-card/);
   assert.match(source, /RunnerMetaStat label="Questions" value=\{`\$\{totalQuestions\}`\}/);
-  assert.match(source, /RunnerMetaStat label="Answered" value=\{`\$\{answeredQuestions\}\/\$\{totalQuestions\}`\}/);
-  assert.match(source, /RunnerMetaStat label="Remaining" value=\{`\$\{unansweredQuestions\}`\}/);
-  assert.match(source, /RunnerMetaStat label="Progress" value=\{`\$\{completionPercentage\}%`\}/);
+  assert.match(source, /Question \{currentQuestionNumber\} of \{totalQuestions\}/);
+  assert.match(source, /autosaveStateLabel/);
+  assert.match(source, /style=\{\{ width: `\$\{completionPercentage\}%` \}\}/);
+  assert.doesNotMatch(source, /RunnerMetaStat label="Answered"/);
+  assert.doesNotMatch(source, /RunnerMetaStat label="Remaining"/);
+  assert.doesNotMatch(source, /RunnerMetaStat label="Progress"/);
 });
 
 test('runner client gives question changes and completion feedback a calmer staged treatment', () => {
   const source = readFileSync(runnerClientPath, 'utf8');
 
   assert.match(source, /key=\{currentQuestion\.questionId\}/);
-  assert.match(source, /sonartra-motion-reveal-soft flex min-h-\[30rem\] flex-col justify-between/);
-  assert.match(source, /Selection saved automatically\./);
+  assert.match(source, /sonartra-motion-reveal-soft flex min-h-\[30rem\] flex-col justify-between space-y-5/);
+  assert.match(source, /text-\[2rem\] leading-\[1\.02\] sm:text-\[2\.25rem\] lg:text-\[2\.7rem\]/);
   assert.match(source, /sonartra-runner-completion-card/);
   assert.match(source, /Finalizing/);
   assert.match(source, /sonartra-runner-map-item/);
+  assert.doesNotMatch(source, /Selection saved automatically\./);
+  assert.doesNotMatch(source, /Every question now has a saved response\./);
+  assert.doesNotMatch(source, /Selections save automatically\./);
 });
 
 test('runner client derives and logs canonical runner state transitions for development verification', () => {
