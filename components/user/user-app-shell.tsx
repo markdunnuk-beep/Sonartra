@@ -246,6 +246,7 @@ export function UserAppShell({
   canAccessAdmin: boolean;
   userLabel: string;
 }>) {
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') {
       return false;
@@ -255,6 +256,8 @@ export function UserAppShell({
   });
   const [mobileOpen, setMobileOpen] = useState(false);
   const navSections = getUserAppNavSections({ canAccessAdmin });
+  const isAssessmentRunnerRoute = /^\/app\/assessments\/[^/]+\/attempts\/[^/]+\/?$/.test(pathname);
+  const shellDesktopBreakpoint = isAssessmentRunnerRoute ? 'xl' : 'lg';
 
   useEffect(() => {
     window.localStorage.setItem(SHELL_COLLAPSE_STORAGE_KEY, collapsed ? 'true' : 'false');
@@ -265,10 +268,19 @@ export function UserAppShell({
       <div className="mx-auto flex min-h-screen w-full max-w-[1560px]">
         <aside
           className={cn(
-            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 box-border flex w-[17.5rem] flex-col overflow-x-hidden bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
-            collapsed ? 'lg:w-[5.5rem]' : 'lg:w-[17.5rem]',
+            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 box-border flex w-[17.5rem] flex-col overflow-x-hidden bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300',
+            shellDesktopBreakpoint === 'xl'
+              ? 'xl:inset-y-auto xl:left-auto xl:top-5 xl:mx-4 xl:my-5 xl:h-[calc(100vh-2.5rem)] xl:translate-x-0 xl:rounded-[2rem] xl:border'
+              : 'lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
+            collapsed
+              ? shellDesktopBreakpoint === 'xl'
+                ? 'xl:w-[5.5rem]'
+                : 'lg:w-[5.5rem]'
+              : shellDesktopBreakpoint === 'xl'
+                ? 'xl:w-[17.5rem]'
+                : 'lg:w-[17.5rem]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
-            'lg:sticky',
+            shellDesktopBreakpoint === 'xl' ? 'xl:sticky' : 'lg:sticky',
           )}
         >
           <div
@@ -298,7 +310,10 @@ export function UserAppShell({
             {!collapsed ? (
               <button
                 aria-label="Collapse sidebar"
-                className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-white/12 hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white/[0.03] text-white/55 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
+                className={cn(
+                  'sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-white/12 hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white/[0.03] text-white/55 hover:bg-white/[0.06] hover:text-white',
+                  shellDesktopBreakpoint === 'xl' ? 'xl:inline-flex' : 'lg:inline-flex',
+                )}
                 onClick={() => setCollapsed(true)}
                 type="button"
               >
@@ -318,7 +333,10 @@ export function UserAppShell({
           {collapsed ? (
             <button
               aria-label="Expand sidebar"
-              className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-white/12 mt-4 hidden h-9 w-9 self-center rounded-xl border bg-white/[0.03] text-white/55 hover:bg-white/[0.06] hover:text-white lg:inline-flex"
+              className={cn(
+                'sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-white/12 mt-4 hidden h-9 w-9 self-center rounded-xl border bg-white/[0.03] text-white/55 hover:bg-white/[0.06] hover:text-white',
+                shellDesktopBreakpoint === 'xl' ? 'xl:inline-flex' : 'lg:inline-flex',
+              )}
               onClick={() => setCollapsed(false)}
               type="button"
             >
@@ -355,14 +373,25 @@ export function UserAppShell({
         {mobileOpen ? (
           <button
             aria-label="Close sidebar"
-            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+            className={cn(
+              'fixed inset-0 z-30 bg-black/50',
+              shellDesktopBreakpoint === 'xl' ? 'xl:hidden' : 'lg:hidden',
+            )}
             onClick={() => setMobileOpen(false)}
             type="button"
           />
         ) : null}
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <div className="border-white/6 flex items-center justify-between border-b px-4 py-4 lg:hidden">
+          <div
+            className={cn(
+              'border-white/6 flex items-center justify-between border-b',
+              isAssessmentRunnerRoute
+                ? 'sticky top-0 z-20 bg-[linear-gradient(180deg,rgba(9,15,29,0.96),rgba(9,15,29,0.88))] px-3 py-2.5 backdrop-blur-xl'
+                : 'px-4 py-4',
+              shellDesktopBreakpoint === 'xl' ? 'xl:hidden' : 'lg:hidden',
+            )}
+          >
             <button
               aria-label="Open sidebar"
               className="sonartra-focus-ring sonartra-motion-button border-white/8 text-white/62 hover:border-white/12 inline-flex h-11 w-11 items-center justify-center rounded-xl border bg-white/[0.03] hover:bg-white/[0.06] hover:text-white"
@@ -378,14 +407,33 @@ export function UserAppShell({
                 />
               </svg>
             </button>
-            <Link className="sonartra-shell-mobile-brand" href="/app/workspace">
-              SONARTRA
-            </Link>
+            <div className="min-w-0 text-center">
+              <Link className="sonartra-shell-mobile-brand" href="/app/workspace">
+                {isAssessmentRunnerRoute ? 'Assessment' : 'SONARTRA'}
+              </Link>
+              {isAssessmentRunnerRoute ? (
+                <p className="sonartra-type-caption text-white/42 mt-1">Runner focus</p>
+              ) : null}
+            </div>
             <div className="w-11" />
           </div>
 
-          <div className="flex-1 px-2 py-2 lg:px-5 lg:py-5">
-            <div className="border-white/6 min-h-full rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+          <div
+            className={cn(
+              'flex-1',
+              isAssessmentRunnerRoute
+                ? 'px-0 py-0 sm:px-1 sm:py-1 md:px-2 md:py-2 xl:px-5 xl:py-5'
+                : 'px-2 py-2 lg:px-5 lg:py-5',
+            )}
+          >
+            <div
+              className={cn(
+                'min-h-full',
+                isAssessmentRunnerRoute
+                  ? 'sm:border-white/6 border-0 bg-transparent shadow-none sm:rounded-[1.6rem] sm:border sm:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] sm:shadow-[0_28px_90px_rgba(0,0,0,0.22)] sm:backdrop-blur-xl'
+                  : 'border-white/6 rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl',
+              )}
+            >
               {children}
             </div>
           </div>
