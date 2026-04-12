@@ -37,4 +37,5 @@ test('single-domain create route uses the explicit single_domain mode scaffold',
 
   assert.match(source, /mode="single_domain"/);
   assert.match(source, /questions, responses, weightings, and language datasets/i);
+  assert.match(source, /showIntroCard=\{false\}/);
 });

@@ -54,13 +54,16 @@ function createFakeDb(seed?: {
         }
 
         if (text.includes('INSERT INTO assessments')) {
+          const includesModeColumn = text.includes('mode,');
           const assessmentId = `assessment-${state.assessments.length + 1}`;
           const record: StoredAssessment = {
             id: assessmentId,
             assessmentKey: params?.[0] as string,
-            mode: params?.[1] as 'multi_domain' | 'single_domain',
-            title: params?.[2] as string,
-            description: (params?.[3] as string | null) ?? null,
+            mode: includesModeColumn
+              ? (params?.[1] as 'multi_domain' | 'single_domain')
+              : 'multi_domain',
+            title: (includesModeColumn ? params?.[2] : params?.[1]) as string,
+            description: ((includesModeColumn ? params?.[3] : params?.[2]) as string | null) ?? null,
             isActive: true,
           };
           state.assessments.push(record);
@@ -71,10 +74,13 @@ function createFakeDb(seed?: {
         }
 
         if (text.includes('INSERT INTO assessment_versions')) {
+          const includesModeColumn = text.includes('mode,');
           state.versions.push({
             assessmentId: params?.[0] as string,
-            mode: params?.[1] as 'multi_domain' | 'single_domain',
-            versionTag: params?.[2] as string,
+            mode: includesModeColumn
+              ? (params?.[1] as 'multi_domain' | 'single_domain')
+              : 'multi_domain',
+            versionTag: (includesModeColumn ? params?.[2] : params?.[1]) as string,
             lifecycleStatus: 'DRAFT',
           });
 
@@ -496,4 +502,106 @@ test('create action stores single-domain mode when requested explicitly', async 
 
   assert.equal(fake.state.assessments[0]?.mode, 'single_domain');
   assert.equal(fake.state.versions[0]?.mode, 'single_domain');
+});
+
+test('multi-domain create action falls back cleanly when mode columns are absent in the database schema', async () => {
+  const fake = createFakeDb();
+
+  await assert.rejects(
+    () =>
+      createAssessmentActionWithDependencies(
+        initialAdminAssessmentCreateFormState,
+        buildFormData({
+          title: 'Legacy Multi',
+          assessmentKey: 'legacy-multi',
+          description: 'Legacy schema fallback.',
+          mode: 'multi_domain',
+        }),
+        {
+          getDbPool: () => ({
+            async connect() {
+              return {
+                async query<T>(text: string, params?: readonly unknown[]) {
+                  if (text.trim() === 'BEGIN' || text.trim() === 'COMMIT' || text.trim() === 'ROLLBACK') {
+                    return { rows: [] as T[] };
+                  }
+
+                  if (text.includes('FROM assessments') && text.includes('assessment_key = $1')) {
+                    return { rows: [] as T[] };
+                  }
+
+                  if (text.includes('INSERT INTO assessments') && text.includes('mode,')) {
+                    throw new Error('column "mode" of relation "assessments" does not exist');
+                  }
+
+                  if (text.includes('INSERT INTO assessment_versions') && text.includes('mode,')) {
+                    throw new Error('column "mode" of relation "assessment_versions" does not exist');
+                  }
+
+                  return fake.db.query<T>(text, params);
+                },
+                release() {},
+              };
+            },
+          }),
+          redirect(path: string): never {
+            throw new Error(`REDIRECT:${path}`);
+          },
+          revalidatePath(): void {},
+        },
+      ),
+    /REDIRECT:\/admin\/assessments\/legacy-multi/,
+  );
+
+  assert.equal(fake.state.assessments[0]?.mode, 'multi_domain');
+  assert.equal(fake.state.versions[0]?.mode, 'multi_domain');
+});
+
+test('single-domain create action returns a targeted schema error when mode columns are absent', async () => {
+  const { result, calls } = await withConsoleErrorCapture(() =>
+    createAssessmentActionWithDependencies(
+      initialAdminAssessmentCreateFormState,
+      buildFormData({
+        title: 'Legacy Single',
+        assessmentKey: 'legacy-single',
+        description: 'Mode migration missing.',
+        mode: 'single_domain',
+      }),
+      {
+        getDbPool: () => ({
+          async connect() {
+            return {
+              async query<T>(text: string) {
+                if (text.trim() === 'BEGIN' || text.trim() === 'ROLLBACK') {
+                  return { rows: [] as T[] };
+                }
+
+                if (text.includes('FROM assessments') && text.includes('assessment_key = $1')) {
+                  return { rows: [] as T[] };
+                }
+
+                if (text.includes('INSERT INTO assessments') && text.includes('mode,')) {
+                  throw new Error('column "mode" of relation "assessments" does not exist');
+                }
+
+                return { rows: [] as T[] };
+              },
+              release() {},
+            };
+          },
+        }),
+        redirect(path: string): never {
+          throw new Error(`unexpected redirect to ${path}`);
+        },
+        revalidatePath(): void {},
+      },
+    ),
+  );
+
+  assert.equal(
+    result.formError,
+    'Single-domain assessment creation requires the latest assessment mode database migration before this path can be used.',
+  );
+  assert.deepEqual(result.fieldErrors, {});
+  assert.equal(calls.length, 1);
 });

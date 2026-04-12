@@ -51,7 +51,7 @@ CREATE TABLE assessment_version_single_domain_signal_chapters (
   chapter_development TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT assessment_version_single_domain_signal_chapters_unique_version_signal
+  CONSTRAINT avsd_signal_chapters_unique_version_signal
     UNIQUE (assessment_version_id, signal_key)
 );
 
@@ -69,7 +69,7 @@ CREATE TABLE assessment_version_single_domain_balancing_sections (
   rebalance_action_3 TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT assessment_version_single_domain_balancing_sections_unique_version_pair
+  CONSTRAINT avsd_balancing_sections_unique_version_pair
     UNIQUE (assessment_version_id, pair_key)
 );
 
@@ -85,7 +85,7 @@ CREATE TABLE assessment_version_single_domain_pair_summaries (
   pair_close_paragraph TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT assessment_version_single_domain_pair_summaries_unique_version_pair
+  CONSTRAINT avsd_pair_summaries_unique_version_pair
     UNIQUE (assessment_version_id, pair_key)
 );
 
@@ -101,7 +101,7 @@ CREATE TABLE assessment_version_single_domain_application_statements (
   development_statement_2 TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT assessment_version_single_domain_application_statements_unique_version_signal
+  CONSTRAINT avsd_application_statements_unique_version_signal
     UNIQUE (assessment_version_id, signal_key)
 );
 
@@ -120,25 +120,25 @@ CREATE INDEX assessment_version_single_domain_hero_pairs_version_pair_idx
 CREATE INDEX assessment_version_single_domain_signal_chapters_version_idx
   ON assessment_version_single_domain_signal_chapters (assessment_version_id);
 
-CREATE INDEX assessment_version_single_domain_signal_chapters_version_signal_idx
+CREATE INDEX avsd_signal_chapters_version_signal_idx
   ON assessment_version_single_domain_signal_chapters (assessment_version_id, signal_key);
 
 CREATE INDEX assessment_version_single_domain_balancing_sections_version_idx
   ON assessment_version_single_domain_balancing_sections (assessment_version_id);
 
-CREATE INDEX assessment_version_single_domain_balancing_sections_version_pair_idx
+CREATE INDEX avsd_balancing_sections_version_pair_idx
   ON assessment_version_single_domain_balancing_sections (assessment_version_id, pair_key);
 
 CREATE INDEX assessment_version_single_domain_pair_summaries_version_idx
   ON assessment_version_single_domain_pair_summaries (assessment_version_id);
 
-CREATE INDEX assessment_version_single_domain_pair_summaries_version_pair_idx
+CREATE INDEX avsd_pair_summaries_version_pair_idx
   ON assessment_version_single_domain_pair_summaries (assessment_version_id, pair_key);
 
-CREATE INDEX assessment_version_single_domain_application_statements_version_idx
+CREATE INDEX avsd_application_statements_version_idx
   ON assessment_version_single_domain_application_statements (assessment_version_id);
 
-CREATE INDEX assessment_version_single_domain_application_statements_version_signal_idx
+CREATE INDEX avsd_application_statements_version_signal_idx
   ON assessment_version_single_domain_application_statements (assessment_version_id, signal_key);
 
 COMMIT;

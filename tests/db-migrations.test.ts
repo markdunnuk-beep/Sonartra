@@ -97,6 +97,8 @@ test('compareMigrationFilenames sorts migration files deterministically', () => 
     [
       '202604120002_assessment_mode.sql',
       '202604120001_assessment_version_single_domain_language.sql',
+      '202604080002_application_language_priority.sql',
+      '202604080001_assessment_version_application_language.sql',
       '202604050001_assessment_version_hero_engine.sql',
       '202604040002_assessment_version_intro.sql',
       '202604040001_assessment_version_language_hero_headers.sql',
@@ -115,6 +117,8 @@ test('compareMigrationFilenames sorts migration files deterministically', () => 
       '202604040001_assessment_version_language_hero_headers.sql',
       '202604040002_assessment_version_intro.sql',
       '202604050001_assessment_version_hero_engine.sql',
+      '202604080001_assessment_version_application_language.sql',
+      '202604080002_application_language_priority.sql',
       '202604120001_assessment_version_single_domain_language.sql',
       '202604120002_assessment_mode.sql',
     ],
@@ -128,8 +132,10 @@ test('loadMigrationsFromDirectory loads sorted sql files only', async () => {
   await writeFile(join(root, '202604040001_assessment_version_language_hero_headers.sql'), 'SELECT 5;');
   await writeFile(join(root, '202604040002_assessment_version_intro.sql'), 'SELECT 5;');
   await writeFile(join(root, '202604050001_assessment_version_hero_engine.sql'), 'SELECT 6;');
-  await writeFile(join(root, '202604120001_assessment_version_single_domain_language.sql'), 'SELECT 7;');
-  await writeFile(join(root, '202604120002_assessment_mode.sql'), 'SELECT 8;');
+  await writeFile(join(root, '202604080001_assessment_version_application_language.sql'), 'SELECT 7;');
+  await writeFile(join(root, '202604080002_application_language_priority.sql'), 'SELECT 8;');
+  await writeFile(join(root, '202604120001_assessment_version_single_domain_language.sql'), 'SELECT 9;');
+  await writeFile(join(root, '202604120002_assessment_mode.sql'), 'SELECT 10;');
   await writeFile(join(root, '202604010001_assessment_version_language_tables.sql'), 'SELECT 3;');
   await writeFile(join(root, '202603290001_option_version_key_scope.sql'), 'SELECT 2;');
   await writeFile(join(root, '202603260001_mvp_canonical_schema.sql'), 'SELECT 1;');
@@ -147,6 +153,8 @@ test('loadMigrationsFromDirectory loads sorted sql files only', async () => {
       '202604040001_assessment_version_language_hero_headers.sql',
       '202604040002_assessment_version_intro.sql',
       '202604050001_assessment_version_hero_engine.sql',
+      '202604080001_assessment_version_application_language.sql',
+      '202604080002_application_language_priority.sql',
       '202604120001_assessment_version_single_domain_language.sql',
       '202604120002_assessment_mode.sql',
     ],
@@ -160,6 +168,8 @@ test('loadMigrationsFromDirectory loads sorted sql files only', async () => {
   assert.equal(migrations[6]?.sql, 'SELECT 6;');
   assert.equal(migrations[7]?.sql, 'SELECT 7;');
   assert.equal(migrations[8]?.sql, 'SELECT 8;');
+  assert.equal(migrations[9]?.sql, 'SELECT 9;');
+  assert.equal(migrations[10]?.sql, 'SELECT 10;');
 });
 
 test('applyPendingMigrations runs pending migrations once and records them', async () => {
@@ -197,6 +207,14 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
         sql: 'CREATE TABLE assessment_version_pair_trait_weights (id UUID);',
       },
       {
+        filename: '202604080001_assessment_version_application_language.sql',
+        sql: 'CREATE TABLE assessment_version_application_thesis (id UUID);',
+      },
+      {
+        filename: '202604080002_application_language_priority.sql',
+        sql: 'ALTER TABLE assessment_version_application_contribution ADD COLUMN priority INTEGER;',
+      },
+      {
         filename: '202604120001_assessment_version_single_domain_language.sql',
         sql: 'CREATE TABLE assessment_version_single_domain_framing (id UUID);',
       },
@@ -214,6 +232,8 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
     '202604040001_assessment_version_language_hero_headers.sql',
     '202604040002_assessment_version_intro.sql',
     '202604050001_assessment_version_hero_engine.sql',
+    '202604080001_assessment_version_application_language.sql',
+    '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
   ]);
@@ -224,6 +244,8 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
     'CREATE TABLE assessment_version_language_hero_headers (id UUID);',
     'CREATE TABLE assessment_version_intro (id UUID);',
     'CREATE TABLE assessment_version_pair_trait_weights (id UUID);',
+    'CREATE TABLE assessment_version_application_thesis (id UUID);',
+    'ALTER TABLE assessment_version_application_contribution ADD COLUMN priority INTEGER;',
     'CREATE TABLE assessment_version_single_domain_framing (id UUID);',
     'ALTER TABLE assessments ADD COLUMN mode TEXT;',
   ]);
@@ -234,6 +256,8 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
     '202604040001_assessment_version_language_hero_headers.sql',
     '202604040002_assessment_version_intro.sql',
     '202604050001_assessment_version_hero_engine.sql',
+    '202604080001_assessment_version_application_language.sql',
+    '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
   ]);
@@ -251,6 +275,8 @@ test('applyPendingMigrations is idempotent when all migrations are already recor
     '202604040001_assessment_version_language_hero_headers.sql',
     '202604040002_assessment_version_intro.sql',
     '202604050001_assessment_version_hero_engine.sql',
+    '202604080001_assessment_version_application_language.sql',
+    '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
   ]);
@@ -287,12 +313,20 @@ test('applyPendingMigrations is idempotent when all migrations are already recor
         sql: 'SELECT 7;',
       },
       {
-        filename: '202604120001_assessment_version_single_domain_language.sql',
+        filename: '202604080001_assessment_version_application_language.sql',
         sql: 'SELECT 8;',
       },
       {
-        filename: '202604120002_assessment_mode.sql',
+        filename: '202604080002_application_language_priority.sql',
         sql: 'SELECT 9;',
+      },
+      {
+        filename: '202604120001_assessment_version_single_domain_language.sql',
+        sql: 'SELECT 10;',
+      },
+      {
+        filename: '202604120002_assessment_mode.sql',
+        sql: 'SELECT 11;',
       },
     ],
   });
@@ -322,6 +356,11 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     'assessment_version_pair_trait_weights',
     'assessment_version_hero_pattern_rules',
     'assessment_version_hero_pattern_language',
+    'assessment_version_application_thesis',
+    'assessment_version_application_contribution',
+    'assessment_version_application_risk',
+    'assessment_version_application_development',
+    'assessment_version_application_action_prompts',
     'assessment_version_single_domain_framing',
     'assessment_version_single_domain_hero_pairs',
     'assessment_version_single_domain_signal_chapters',
@@ -331,6 +370,9 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
   ]);
   fake.state.columns = new Set([
     'options.assessment_version_id',
+    'assessment_version_application_contribution.priority',
+    'assessment_version_application_risk.priority',
+    'assessment_version_application_development.priority',
     'assessments.mode',
     'assessment_versions.mode',
   ]);
@@ -340,18 +382,23 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     'assessment_version_language_pairs_version_idx',
     'assessment_version_language_domains_version_idx',
     'assessment_version_language_overview_version_idx',
+    'assessment_version_application_thesis_version_idx',
+    'assessment_version_application_contribution_version_idx',
+    'assessment_version_application_risk_version_idx',
+    'assessment_version_application_development_version_idx',
+    'assessment_version_application_action_prompts_version_idx',
     'assessment_version_single_domain_framing_version_idx',
     'assessment_version_single_domain_framing_version_domain_idx',
     'assessment_version_single_domain_hero_pairs_version_idx',
     'assessment_version_single_domain_hero_pairs_version_pair_idx',
     'assessment_version_single_domain_signal_chapters_version_idx',
-    'assessment_version_single_domain_signal_chapters_version_signal_idx',
+    'avsd_signal_chapters_version_signal_idx',
     'assessment_version_single_domain_balancing_sections_version_idx',
-    'assessment_version_single_domain_balancing_sections_version_pair_idx',
+    'avsd_balancing_sections_version_pair_idx',
     'assessment_version_single_domain_pair_summaries_version_idx',
-    'assessment_version_single_domain_pair_summaries_version_pair_idx',
-    'assessment_version_single_domain_application_statements_version_idx',
-    'assessment_version_single_domain_application_statements_version_signal_idx',
+    'avsd_pair_summaries_version_pair_idx',
+    'avsd_application_statements_version_idx',
+    'avsd_application_statements_version_signal_idx',
     'assessment_versions_assessment_mode_idx',
   ]);
 
@@ -387,12 +434,20 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
         sql: 'SELECT 7;',
       },
       {
-        filename: '202604120001_assessment_version_single_domain_language.sql',
+        filename: '202604080001_assessment_version_application_language.sql',
         sql: 'SELECT 8;',
       },
       {
-        filename: '202604120002_assessment_mode.sql',
+        filename: '202604080002_application_language_priority.sql',
         sql: 'SELECT 9;',
+      },
+      {
+        filename: '202604120001_assessment_version_single_domain_language.sql',
+        sql: 'SELECT 10;',
+      },
+      {
+        filename: '202604120002_assessment_mode.sql',
+        sql: 'SELECT 11;',
       },
     ],
   });
@@ -405,6 +460,8 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     '202604040001_assessment_version_language_hero_headers.sql',
     '202604040002_assessment_version_intro.sql',
     '202604050001_assessment_version_hero_engine.sql',
+    '202604080001_assessment_version_application_language.sql',
+    '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
   ]);
@@ -416,6 +473,8 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     '202604040001_assessment_version_language_hero_headers.sql',
     '202604040002_assessment_version_intro.sql',
     '202604050001_assessment_version_hero_engine.sql',
+    '202604080001_assessment_version_application_language.sql',
+    '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
   ]);
@@ -440,8 +499,8 @@ test('single-domain language migration declares all six tables, unique constrain
 
   assert.match(sql, /assessment_version_single_domain_framing_version_idx/i);
   assert.match(sql, /assessment_version_single_domain_hero_pairs_version_pair_idx/i);
-  assert.match(sql, /assessment_version_single_domain_signal_chapters_version_signal_idx/i);
-  assert.match(sql, /assessment_version_single_domain_balancing_sections_version_pair_idx/i);
-  assert.match(sql, /assessment_version_single_domain_pair_summaries_version_pair_idx/i);
-  assert.match(sql, /assessment_version_single_domain_application_statements_version_signal_idx/i);
+  assert.match(sql, /avsd_signal_chapters_version_signal_idx/i);
+  assert.match(sql, /avsd_balancing_sections_version_pair_idx/i);
+  assert.match(sql, /avsd_pair_summaries_version_pair_idx/i);
+  assert.match(sql, /avsd_application_statements_version_signal_idx/i);
 });

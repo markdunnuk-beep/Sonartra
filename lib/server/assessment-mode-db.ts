@@ -10,6 +10,7 @@ export function isMissingAssessmentModeColumnError(error: unknown): boolean {
     error.message.includes('column a.mode does not exist') ||
     error.message.includes('column dv.mode does not exist') ||
     error.message.includes('column "mode" does not exist') ||
+    error.message.includes('column "mode" of relation') ||
     error.message.includes('WITHIN GROUP is required for ordered-set aggregate mode')
   );
 }

@@ -17,6 +17,7 @@ export default function SingleDomainAssessmentCreatePage() {
         introDescription="Start the single-domain builder with one domain only, then extend it with variable signals, questions, responses, weightings, and richer language datasets."
         resultDescription="This creates a single-domain assessment and its first draft, version `1.0.0`."
         resultSupport="Use this path when the assessment should stay in one domain while still supporting full authoring and review later."
+        showIntroCard={false}
       />
     </PageFrame>
   );

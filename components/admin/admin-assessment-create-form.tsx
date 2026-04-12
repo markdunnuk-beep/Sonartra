@@ -169,6 +169,7 @@ export function AdminAssessmentCreateFormContent({
   introDescription = 'Start with the basics. You can add domains, signals, questions, and scoring next.',
   resultDescription = 'This creates the assessment and its first draft, version `1.0.0`.',
   resultSupport = 'Provide the title and assessment key before creating the first draft.',
+  showIntroCard = true,
 }: Readonly<{
   mode: AssessmentMode;
   submitLabel?: string;
@@ -176,6 +177,7 @@ export function AdminAssessmentCreateFormContent({
   introDescription?: string;
   resultDescription?: string;
   resultSupport?: string;
+  showIntroCard?: boolean;
 }>) {
   const [state, formAction] = useActionState(
     createAssessmentAction,
@@ -230,17 +232,19 @@ export function AdminAssessmentCreateFormContent({
 
   return (
     <div className="space-y-6">
-      <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
-        <div className="space-y-3">
-          <LabelPill className="bg-white/[0.08] text-white/82">{getAssessmentModeLabel(mode)} assessment</LabelPill>
-          <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.3rem]">
-            {heading}
-          </h2>
-          <p className="max-w-2xl text-sm leading-7 text-white/68">
-            {introDescription}
-          </p>
-        </div>
-      </SurfaceCard>
+      {showIntroCard ? (
+        <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
+          <div className="space-y-3">
+            <LabelPill className="bg-white/[0.08] text-white/82">{getAssessmentModeLabel(mode)} assessment</LabelPill>
+            <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.3rem]">
+              {heading}
+            </h2>
+            <p className="max-w-2xl text-sm leading-7 text-white/68">
+              {introDescription}
+            </p>
+          </div>
+        </SurfaceCard>
+      ) : null}
 
       <SurfaceCard className="p-5 lg:p-6">
         <form action={formAction} className="space-y-6">

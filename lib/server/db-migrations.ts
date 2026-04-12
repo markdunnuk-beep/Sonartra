@@ -288,6 +288,68 @@ export async function reconcileKnownMigrations(params: {
       continue;
     }
 
+    if (migration.filename === '202604080001_assessment_version_application_language.sql') {
+      const applicationTablesExist: boolean[] = [];
+      for (const tableName of [
+        'assessment_version_application_thesis',
+        'assessment_version_application_contribution',
+        'assessment_version_application_risk',
+        'assessment_version_application_development',
+        'assessment_version_application_action_prompts',
+      ]) {
+        applicationTablesExist.push(await tableExists(params.db, tableName));
+      }
+
+      const applicationIndexesExist: boolean[] = [];
+      for (const indexName of [
+        'assessment_version_application_thesis_version_idx',
+        'assessment_version_application_contribution_version_idx',
+        'assessment_version_application_risk_version_idx',
+        'assessment_version_application_development_version_idx',
+        'assessment_version_application_action_prompts_version_idx',
+      ]) {
+        applicationIndexesExist.push(await indexExists(params.db, indexName));
+      }
+
+      if (applicationTablesExist.every(Boolean) && applicationIndexesExist.every(Boolean)) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
+
+      continue;
+    }
+
+    if (migration.filename === '202604080002_application_language_priority.sql') {
+      const hasContributionPriorityColumn = await columnExists(
+        params.db,
+        'assessment_version_application_contribution',
+        'priority',
+      );
+      const hasRiskPriorityColumn = await columnExists(
+        params.db,
+        'assessment_version_application_risk',
+        'priority',
+      );
+      const hasDevelopmentPriorityColumn = await columnExists(
+        params.db,
+        'assessment_version_application_development',
+        'priority',
+      );
+
+      if (
+        hasContributionPriorityColumn
+        && hasRiskPriorityColumn
+        && hasDevelopmentPriorityColumn
+      ) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
+
+      continue;
+    }
+
     if (migration.filename === '202604120001_assessment_version_single_domain_language.sql') {
       const singleDomainTablesExist: boolean[] = [];
       for (const tableName of [
@@ -308,13 +370,13 @@ export async function reconcileKnownMigrations(params: {
         'assessment_version_single_domain_hero_pairs_version_idx',
         'assessment_version_single_domain_hero_pairs_version_pair_idx',
         'assessment_version_single_domain_signal_chapters_version_idx',
-        'assessment_version_single_domain_signal_chapters_version_signal_idx',
+        'avsd_signal_chapters_version_signal_idx',
         'assessment_version_single_domain_balancing_sections_version_idx',
-        'assessment_version_single_domain_balancing_sections_version_pair_idx',
+        'avsd_balancing_sections_version_pair_idx',
         'assessment_version_single_domain_pair_summaries_version_idx',
-        'assessment_version_single_domain_pair_summaries_version_pair_idx',
-        'assessment_version_single_domain_application_statements_version_idx',
-        'assessment_version_single_domain_application_statements_version_signal_idx',
+        'avsd_pair_summaries_version_pair_idx',
+        'avsd_application_statements_version_idx',
+        'avsd_application_statements_version_signal_idx',
       ]) {
         singleDomainIndexesExist.push(await indexExists(params.db, indexName));
       }

@@ -11,6 +11,7 @@ import {
   type AdminAssessmentCreateFormValues,
   validateAdminAssessmentCreateValues,
 } from '@/lib/admin/admin-assessment-create';
+import { isMissingAssessmentModeColumnError } from '@/lib/server/assessment-mode-db';
 import { getDbPool } from '@/lib/server/db';
 import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
@@ -40,7 +41,8 @@ type CreateAssessmentActionDependencies = {
 type CreateAssessmentFailureStage =
   | 'precheck_assessment_key'
   | 'insert_assessment'
-  | 'insert_assessment_version';
+  | 'insert_assessment_version'
+  | 'schema_compatibility';
 
 type PostgresErrorLike = {
   code?: string;
@@ -60,6 +62,16 @@ class CreateAssessmentPersistenceError extends Error {
     this.name = 'CreateAssessmentPersistenceError';
     this.stage = stage;
     this.cause = cause;
+  }
+}
+
+class CreateAssessmentSchemaCompatibilityError extends Error {
+  readonly mode: AdminAssessmentCreateFormValues['mode'];
+
+  constructor(mode: AdminAssessmentCreateFormValues['mode']) {
+    super('CREATE_ASSESSMENT_MODE_SCHEMA_REQUIRED');
+    this.name = 'CreateAssessmentSchemaCompatibilityError';
+    this.mode = mode;
   }
 }
 
@@ -87,7 +99,8 @@ function unwrapCreateAssessmentError(error: unknown): {
 
   return {
     cause: error,
-    stage: null,
+    stage:
+      error instanceof CreateAssessmentSchemaCompatibilityError ? 'schema_compatibility' : null,
   };
 }
 
@@ -147,6 +160,15 @@ function mapDatabaseFailureToFormState(
   error: unknown,
   stage: CreateAssessmentFailureStage | null,
 ): AdminAssessmentCreateFormState | null {
+  if (error instanceof CreateAssessmentSchemaCompatibilityError) {
+    return {
+      formError:
+        'Single-domain assessment creation requires the latest assessment mode database migration before this path can be used.',
+      fieldErrors: {},
+      values,
+    };
+  }
+
   if (isAssessmentKeyExistsError(error)) {
     return buildFieldErrorState(values, 'assessmentKey', 'That assessment key is already in use.');
   }
@@ -246,24 +268,10 @@ async function assessmentKeyExists(db: Queryable, assessmentKey: string): Promis
   return result.rows.length > 0;
 }
 
-export async function createAdminAssessmentRecords(params: {
+async function insertAssessmentRecord(params: {
   db: Queryable;
   values: AdminAssessmentCreateFormValues;
-}): Promise<{ assessmentId: string; assessmentKey: string }> {
-  let existing = false;
-
-  try {
-    existing = await assessmentKeyExists(params.db, params.values.assessmentKey);
-  } catch (error) {
-    throw new CreateAssessmentPersistenceError('precheck_assessment_key', error);
-  }
-
-  if (existing) {
-    throw new Error('ASSESSMENT_KEY_EXISTS');
-  }
-
-  let assessment: InsertAssessmentRecord | undefined;
-
+}): Promise<InsertAssessmentRecord> {
   try {
     const insertedAssessment = await params.db.query<InsertAssessmentRecord>(
       `
@@ -285,15 +293,43 @@ export async function createAdminAssessmentRecords(params: {
       ],
     );
 
-    assessment = insertedAssessment.rows[0];
+    return insertedAssessment.rows[0] as InsertAssessmentRecord;
   } catch (error) {
-    throw new CreateAssessmentPersistenceError('insert_assessment', error);
-  }
+    if (isMissingAssessmentModeColumnError(error)) {
+      if (params.values.mode === 'single_domain') {
+        throw new CreateAssessmentSchemaCompatibilityError(params.values.mode);
+      }
 
-  if (!assessment) {
-    throw new Error('ASSESSMENT_INSERT_FAILED');
-  }
+      const insertedAssessment = await params.db.query<InsertAssessmentRecord>(
+        `
+        INSERT INTO assessments (
+          assessment_key,
+          title,
+          description,
+          is_active
+        )
+        VALUES ($1, $2, $3, TRUE)
+        RETURNING id, assessment_key
+        `,
+        [
+          params.values.assessmentKey,
+          params.values.title,
+          params.values.description || null,
+        ],
+      );
 
+      return insertedAssessment.rows[0] as InsertAssessmentRecord;
+    }
+
+    throw error;
+  }
+}
+
+async function insertAssessmentVersionRecord(params: {
+  db: Queryable;
+  assessmentId: string;
+  values: AdminAssessmentCreateFormValues;
+}): Promise<void> {
   try {
     await params.db.query(
       `
@@ -307,10 +343,81 @@ export async function createAdminAssessmentRecords(params: {
       )
       VALUES ($1, $2, $3, 'DRAFT', NULL, NULL)
       `,
-      [assessment.id, params.values.mode, INITIAL_ASSESSMENT_VERSION_TAG],
+      [params.assessmentId, params.values.mode, INITIAL_ASSESSMENT_VERSION_TAG],
     );
+    return;
   } catch (error) {
-    throw new CreateAssessmentPersistenceError('insert_assessment_version', error);
+    if (isMissingAssessmentModeColumnError(error)) {
+      if (params.values.mode === 'single_domain') {
+        throw new CreateAssessmentSchemaCompatibilityError(params.values.mode);
+      }
+
+      await params.db.query(
+        `
+        INSERT INTO assessment_versions (
+          assessment_id,
+          version,
+          lifecycle_status,
+          title_override,
+          description_override
+        )
+        VALUES ($1, $2, 'DRAFT', NULL, NULL)
+        `,
+        [params.assessmentId, INITIAL_ASSESSMENT_VERSION_TAG],
+      );
+      return;
+    }
+
+    throw error;
+  }
+}
+
+export async function createAdminAssessmentRecords(params: {
+  db: Queryable;
+  values: AdminAssessmentCreateFormValues;
+}): Promise<{ assessmentId: string; assessmentKey: string }> {
+  let existing = false;
+
+  try {
+    existing = await assessmentKeyExists(params.db, params.values.assessmentKey);
+  } catch (error) {
+    throw new CreateAssessmentPersistenceError('precheck_assessment_key', error);
+  }
+
+  if (existing) {
+    throw new Error('ASSESSMENT_KEY_EXISTS');
+  }
+
+  let assessment: InsertAssessmentRecord | undefined;
+
+  try {
+    assessment = await insertAssessmentRecord(params);
+  } catch (error) {
+    throw new CreateAssessmentPersistenceError(
+      error instanceof CreateAssessmentSchemaCompatibilityError
+        ? 'schema_compatibility'
+        : 'insert_assessment',
+      error,
+    );
+  }
+
+  if (!assessment) {
+    throw new Error('ASSESSMENT_INSERT_FAILED');
+  }
+
+  try {
+    await insertAssessmentVersionRecord({
+      db: params.db,
+      assessmentId: assessment.id,
+      values: params.values,
+    });
+  } catch (error) {
+    throw new CreateAssessmentPersistenceError(
+      error instanceof CreateAssessmentSchemaCompatibilityError
+        ? 'schema_compatibility'
+        : 'insert_assessment_version',
+      error,
+    );
   }
 
   return {
