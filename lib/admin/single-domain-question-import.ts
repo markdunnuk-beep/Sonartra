@@ -47,6 +47,32 @@ export const initialSingleDomainQuestionImportState: SingleDomainQuestionImportS
   values: emptySingleDomainQuestionImportValues,
 };
 
+function formatOrderRanges(orders: readonly number[]): string {
+  if (orders.length === 0) {
+    return '';
+  }
+
+  const sortedOrders = [...orders].sort((left, right) => left - right);
+  const ranges: string[] = [];
+  let rangeStart = sortedOrders[0]!;
+  let previous = sortedOrders[0]!;
+
+  for (let index = 1; index < sortedOrders.length; index += 1) {
+    const current = sortedOrders[index]!;
+    if (current === previous + 1) {
+      previous = current;
+      continue;
+    }
+
+    ranges.push(rangeStart === previous ? String(rangeStart) : `${rangeStart}-${previous}`);
+    rangeStart = current;
+    previous = current;
+  }
+
+  ranges.push(rangeStart === previous ? String(rangeStart) : `${rangeStart}-${previous}`);
+  return ranges.join(', ');
+}
+
 function normalizePrompt(prompt: string): string {
   return prompt.trim().replace(/\s+/g, ' ');
 }
@@ -234,6 +260,20 @@ export function formatSingleDomainQuestionImportError(message: string): string |
     /^SINGLE_DOMAIN_IMPORT_LINE_(\d+)_ORDER_OUT_OF_RANGE_(\d+)$/.exec(message);
   if (outOfRangeMatch) {
     return `Line ${outOfRangeMatch[1]} uses an order outside the allowed final range of 1 to ${outOfRangeMatch[2]}.`;
+  }
+
+  const existingOrderConflictMatch =
+    /^SINGLE_DOMAIN_IMPORT_EXISTING_ORDERS_(.+)$/.exec(message);
+  if (existingOrderConflictMatch) {
+    const orders = existingOrderConflictMatch[1]
+      ?.split(',')
+      .map((value) => Number(value))
+      .filter((value) => Number.isSafeInteger(value) && value > 0) ?? [];
+    const orderSummary = formatOrderRanges(orders);
+
+    if (orderSummary) {
+      return `Questions already exist for order${orders.length === 1 ? '' : 's'} ${orderSummary}. This import only creates new questions, so update those prompts in the authored question cards instead of re-importing them.`;
+    }
   }
 
   return null;

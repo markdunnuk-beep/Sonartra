@@ -326,6 +326,10 @@ test('single-domain import parser rejects malformed rows and duplicate orders wi
     formatSingleDomainQuestionImportError('SINGLE_DOMAIN_IMPORT_LINE_4_DUPLICATE_ORDER_1'),
     'Line 4 repeats an order already used on line 1.',
   );
+  assert.equal(
+    formatSingleDomainQuestionImportError('SINGLE_DOMAIN_IMPORT_EXISTING_ORDERS_1,2,3,5'),
+    'Questions already exist for orders 1-3, 5. This import only creates new questions, so update those prompts in the authored question cards instead of re-importing them.',
+  );
 });
 
 test('single-domain import plan preserves explicit final order while keeping existing questions stable', () => {
@@ -466,6 +470,66 @@ test('single-domain import action rejects empty and invalid rows safely', async 
   );
 });
 
+test('single-domain question import rejects re-importing existing question orders with a specific message', async () => {
+  const fake = createFakeDb({
+    domains: [
+      {
+        id: 'domain-1',
+        assessmentVersionId: 'version-1',
+        domainType: 'SIGNAL_GROUP',
+        orderIndex: 0,
+      },
+    ],
+    questions: [
+      {
+        id: 'question-1',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q01',
+        prompt: 'Existing first question',
+        orderIndex: 0,
+      },
+      {
+        id: 'question-2',
+        assessmentVersionId: 'version-1',
+        domainId: 'domain-1',
+        questionKey: 'q02',
+        prompt: 'Existing second question',
+        orderIndex: 1,
+      },
+    ],
+  });
+
+  const result = await importSingleDomainQuestionsActionWithDependencies(
+    {
+      assessmentKey: 'role-focus',
+      assessmentVersionId: 'version-1',
+    },
+    {
+      formError: null,
+      fieldErrors: {},
+      values: { questionLines: '' },
+    },
+    buildImportFormData(['1 | Existing first question', '2 | Existing second question'].join('\n')),
+    {
+      connect: async () => fake.client,
+      revalidatePath() {},
+    },
+  );
+
+  assert.equal(
+    result.formError,
+    'Questions already exist for orders 1-2. This import only creates new questions, so update those prompts in the authored question cards instead of re-importing them.',
+  );
+  assert.deepEqual(
+    fake.state.questions.map((question) => ({ prompt: question.prompt, orderIndex: question.orderIndex })),
+    [
+      { prompt: 'Existing first question', orderIndex: 0 },
+      { prompt: 'Existing second question', orderIndex: 1 },
+    ],
+  );
+});
+
 test('single-domain structural validation reflects imported questions and response scaffolds through canonical data only', () => {
   const validation = buildSingleDomainStructuralValidation({
     authoredDomains: [
@@ -536,6 +600,7 @@ test('single-domain questions stage source includes the dedicated import surface
   assert.match(source, /importSingleDomainQuestionsAction/);
   assert.match(source, /useSingleDomainDirtyForm\(\{ state: importState \}\)/);
   assert.match(source, /default A-D responses are now persisted in the draft/);
+  assert.match(source, /This import creates new questions only/);
   assert.doesNotMatch(source, /idleLabel="Add question"/);
 });
 

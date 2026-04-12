@@ -242,6 +242,9 @@ test('review step reflects incomplete language datasets accurately', () => {
   assert.match(markup, /Runtime definition is still blocked/i);
   assert.match(markup, /DOMAIN_FRAMING must contain at least 1 row/i);
   assert.match(markup, /HERO_PAIRS must contain exactly 1 row/i);
+  assert.match(markup, /Current blocker/i);
+  assert.match(markup, /Missing or invalid in Language/i);
+  assert.match(markup, /Fix in Language/i);
   assert.match(markup, /0\/1\+/);
   assert.match(markup, /0\/2/);
 });
@@ -439,4 +442,86 @@ test('review step reflects complete language datasets accurately', () => {
   assert.match(markup, /1\/1\+/);
   assert.match(markup, /2\/2/);
   assert.doesNotMatch(markup, /must contain exactly/i);
+});
+
+test('review step keeps the affected section out of ready when runtime readiness names a blocker there', () => {
+  const assessment = buildAssessment({
+    DOMAIN_FRAMING: [{
+      domain_key: 'leadership-style',
+      section_title: 'Leadership style',
+      intro_paragraph: 'Intro',
+      meaning_paragraph: 'Meaning',
+      bridge_to_signals: 'Bridge',
+      blueprint_context_line: 'Blueprint',
+    }],
+    HERO_PAIRS: [],
+    SIGNAL_CHAPTERS: [
+      {
+        signal_key: 'directive',
+        position_primary_label: 'Primary',
+        position_secondary_label: 'Secondary',
+        position_supporting_label: 'Supporting',
+        position_underplayed_label: 'Underplayed',
+        chapter_intro_primary: 'A',
+        chapter_intro_secondary: 'B',
+        chapter_intro_supporting: 'C',
+        chapter_intro_underplayed: 'D',
+        chapter_how_it_shows_up: 'E',
+        chapter_value_outcome: 'F',
+        chapter_value_team_effect: 'G',
+        chapter_risk_behaviour: 'H',
+        chapter_risk_impact: 'I',
+        chapter_development: 'J',
+      },
+      {
+        signal_key: 'supportive',
+        position_primary_label: 'Primary',
+        position_secondary_label: 'Secondary',
+        position_supporting_label: 'Supporting',
+        position_underplayed_label: 'Underplayed',
+        chapter_intro_primary: 'A',
+        chapter_intro_secondary: 'B',
+        chapter_intro_supporting: 'C',
+        chapter_intro_underplayed: 'D',
+        chapter_how_it_shows_up: 'E',
+        chapter_value_outcome: 'F',
+        chapter_value_team_effect: 'G',
+        chapter_risk_behaviour: 'H',
+        chapter_risk_impact: 'I',
+        chapter_development: 'J',
+      },
+    ],
+    BALANCING_SECTIONS: [],
+    PAIR_SUMMARIES: [],
+    APPLICATION_STATEMENTS: [
+      {
+        signal_key: 'directive',
+        strength_statement_1: 'S1',
+        strength_statement_2: 'S2',
+        watchout_statement_1: 'W1',
+        watchout_statement_2: 'W2',
+        development_statement_1: 'D1',
+        development_statement_2: 'D2',
+      },
+      {
+        signal_key: 'supportive',
+        strength_statement_1: 'S1',
+        strength_statement_2: 'S2',
+        watchout_statement_1: 'W1',
+        watchout_statement_2: 'W2',
+        development_statement_1: 'D1',
+        development_statement_2: 'D2',
+      },
+    ],
+  });
+
+  const markup = renderToStaticMarkup(
+    <AdminAssessmentAuthoringProvider assessment={assessment}>
+      <SingleDomainReviewAuthoring />
+    </AdminAssessmentAuthoringProvider>,
+  );
+
+  assert.match(markup, /Language/);
+  assert.doesNotMatch(markup, /Language[\s\S]{0,240}No blocking structural issues in this section\./);
+  assert.match(markup, /HERO_PAIRS must contain exactly 1 row/i);
 });

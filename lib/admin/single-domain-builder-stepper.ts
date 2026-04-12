@@ -1,8 +1,10 @@
 import type { AdminAssessmentDetailViewModel } from '@/lib/server/admin-assessment-detail';
 import {
+  getSingleDomainReadinessIssueSectionKey,
   getSingleDomainResponseCoverage,
   getSingleDomainWeightingCoverage,
 } from '@/lib/admin/single-domain-structural-validation';
+import type { SingleDomainDraftReadiness } from '@/lib/types/single-domain-runtime';
 
 export type SingleDomainBuilderStepSlug =
   | 'overview'
@@ -32,6 +34,7 @@ export type SingleDomainBuilderStepperState = Pick<
   | 'draftValidation'
   | 'stepCompletion'
   | 'singleDomainLanguageValidation'
+  | 'singleDomainDraftReadiness'
 >;
 
 export type SingleDomainBuilderNextAction = {
@@ -40,6 +43,71 @@ export type SingleDomainBuilderNextAction = {
   description: string;
   ctaLabel: string;
 };
+
+function getNextActionFromRuntimeIssue(
+  readiness: SingleDomainDraftReadiness | null | undefined,
+): SingleDomainBuilderNextAction | null {
+  const issue = readiness?.issues[0];
+  if (!issue) {
+    return null;
+  }
+
+  const targetSection = getSingleDomainReadinessIssueSectionKey(issue);
+
+  switch (targetSection) {
+    case 'domain':
+      return {
+        step: 'domain',
+        title: 'Fix the domain blocker',
+        description: issue.message,
+        ctaLabel: 'Continue to Domain',
+      };
+    case 'signals':
+      return {
+        step: 'signals',
+        title: 'Fix the signal blocker',
+        description: issue.message,
+        ctaLabel: 'Continue to Signals',
+      };
+    case 'questions':
+      return {
+        step: 'questions',
+        title: 'Fix the question blocker',
+        description: issue.message,
+        ctaLabel: 'Continue to Questions',
+      };
+    case 'responses':
+      return {
+        step: 'responses',
+        title: 'Fix the response blocker',
+        description: issue.message,
+        ctaLabel: 'Continue to Responses',
+      };
+    case 'weightings':
+      return {
+        step: 'weightings',
+        title: 'Fix the weighting blocker',
+        description: issue.message,
+        ctaLabel: 'Continue to Weightings',
+      };
+    case 'language':
+      return {
+        step: 'language',
+        title: 'Fix the language blocker',
+        description: issue.message,
+        ctaLabel: 'Continue to Language',
+      };
+    case 'review':
+      return {
+        step: 'review',
+        title: 'Review the remaining runtime blocker',
+        description: issue.message,
+        ctaLabel: 'Continue to Review',
+      };
+  }
+
+  return null;
+}
 
 function hasMeaningfulSingleDomainDraftData(assessment: SingleDomainBuilderStepperState): boolean {
   return assessment.authoredDomains.length > 0 ||
@@ -135,6 +203,11 @@ export function getSingleDomainBuilderNextAction(
     };
   }
 
+  const runtimeIssueAction = getNextActionFromRuntimeIssue(assessment.singleDomainDraftReadiness);
+  if (runtimeIssueAction && runtimeIssueAction.step !== 'review') {
+    return runtimeIssueAction;
+  }
+
   if (!assessment.singleDomainLanguageValidation.overallReady) {
     if (expectedPairCount === 0) {
       return {
@@ -151,6 +224,10 @@ export function getSingleDomainBuilderNextAction(
       description: 'Language readiness is derived from the current signal set, expected pairs, and persisted dataset row counts.',
       ctaLabel: 'Continue to Language',
     };
+  }
+
+  if (runtimeIssueAction) {
+    return runtimeIssueAction;
   }
 
   if (!assessment.draftValidation.isPublishReady) {

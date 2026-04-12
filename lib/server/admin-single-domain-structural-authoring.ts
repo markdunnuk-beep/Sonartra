@@ -1250,6 +1250,13 @@ export async function importSingleDomainQuestionsActionWithDependencies(
 
       const parsedRows = parseSingleDomainQuestionImport(values.questionLines);
       const existingQuestions = await loadExistingSingleDomainQuestions(db, context.assessmentVersionId);
+      const conflictingOrders = parsedRows
+        .map((row) => row.requestedOrder)
+        .filter((requestedOrder) => requestedOrder <= existingQuestions.length);
+      if (conflictingOrders.length > 0) {
+        throw new Error(`SINGLE_DOMAIN_IMPORT_EXISTING_ORDERS_${conflictingOrders.join(',')}`);
+      }
+
       const plan = buildSingleDomainQuestionImportPlan({
         existingQuestions: existingQuestions.map((question) => ({
           questionId: question.question_id,

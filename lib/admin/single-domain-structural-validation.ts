@@ -8,6 +8,7 @@ import { getSingleDomainLanguageDatasetDefinition } from '@/lib/admin/single-dom
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
 import { getSingleDomainExpectedPairCount } from '@/lib/types/single-domain-runtime';
 import type { SingleDomainLanguageDatasetKey } from '@/lib/types/single-domain-language';
+import type { SingleDomainDraftReadinessIssue } from '@/lib/types/single-domain-runtime';
 
 export type SingleDomainStructuralIssueSeverity = 'blocking' | 'warning';
 
@@ -88,6 +89,28 @@ export type SingleDomainWeightingCoverage = {
   mappedOptionCount: number;
   unmappedOptionCount: number;
 };
+
+export function getSingleDomainReadinessIssueSectionKey(
+  issue: Pick<SingleDomainDraftReadinessIssue, 'section'>,
+): SingleDomainStructuralSectionKey | 'review' {
+  switch (issue.section) {
+    case 'domain':
+      return 'domain';
+    case 'signals':
+      return 'signals';
+    case 'questions':
+      return 'questions';
+    case 'options':
+      return 'responses';
+    case 'weights':
+      return 'weightings';
+    case 'language':
+      return 'language';
+    case 'metadata':
+    case 'runtime':
+      return 'review';
+  }
+}
 
 function isCanonicalResponseOptionLabel(value: string): value is (typeof SINGLE_DOMAIN_RESPONSE_OPTION_LABELS)[number] {
   return (SINGLE_DOMAIN_RESPONSE_OPTION_LABELS as readonly string[]).includes(value);

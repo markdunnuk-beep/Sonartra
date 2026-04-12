@@ -8,6 +8,7 @@ import { SingleDomainWeightGrid } from '@/components/admin/single-domain-weight-
 import { useAdminAssessmentAuthoring } from '@/components/admin/admin-assessment-authoring-context';
 import {
   EmptyState,
+  ButtonLink,
   LabelPill,
   SectionHeader,
   SurfaceCard,
@@ -16,6 +17,7 @@ import {
 import {
   buildSingleDomainStructuralValidation,
   buildSingleDomainLanguageValidation,
+  getSingleDomainReadinessIssueSectionKey,
   getExpectedSignalPairCount,
 } from '@/lib/admin/single-domain-structural-validation';
 import {
@@ -52,6 +54,7 @@ import {
   updateSingleDomainSignalAction,
 } from '@/lib/server/admin-single-domain-structural-authoring';
 import { useSingleDomainDirtyField, useSingleDomainDirtyForm } from '@/components/admin/single-domain-unsaved-changes';
+import { getAssessmentBuilderStepPath } from '@/lib/admin/assessment-builder-paths';
 
 function SubmitButton({
   idleLabel,
@@ -285,6 +288,29 @@ function getStatusLabel(status: 'ready' | 'attention' | 'waiting' | 'not_started
     return 'Not started';
   }
   return 'Attention';
+}
+
+function getReviewIssueRemediation(
+  issue: Readonly<{ section: 'metadata' | 'domain' | 'signals' | 'questions' | 'options' | 'weights' | 'language' | 'runtime' }>,
+) {
+  const targetSection = getSingleDomainReadinessIssueSectionKey(issue);
+
+  switch (targetSection) {
+    case 'domain':
+      return { sectionLabel: 'Domain', step: 'domain' as const, ctaLabel: 'Fix in Domain' };
+    case 'signals':
+      return { sectionLabel: 'Signals', step: 'signals' as const, ctaLabel: 'Fix in Signals' };
+    case 'questions':
+      return { sectionLabel: 'Questions', step: 'questions' as const, ctaLabel: 'Fix in Questions' };
+    case 'responses':
+      return { sectionLabel: 'Responses', step: 'responses' as const, ctaLabel: 'Fix in Responses' };
+    case 'weightings':
+      return { sectionLabel: 'Weightings', step: 'weightings' as const, ctaLabel: 'Fix in Weightings' };
+    case 'language':
+      return { sectionLabel: 'Language', step: 'language' as const, ctaLabel: 'Fix in Language' };
+    case 'review':
+      return { sectionLabel: 'Review', step: 'review' as const, ctaLabel: 'Stay in Review' };
+  }
 }
 
 function renderMissingDraftState(
@@ -996,7 +1022,9 @@ function SingleDomainQuestionImportFormFields({
           <p className="text-sm leading-7 text-white/62">
             Paste one row per question using the canonical import format. Blank lines are ignored.
             The import is atomic: either every row is written and rekeyed into the single-domain
-            draft, or nothing changes.
+            draft, or nothing changes. This import creates new questions only; once an order
+            already exists in the draft, edit that prompt in the authored question cards instead of
+            re-importing it.
           </p>
         </div>
         <form
@@ -1030,7 +1058,7 @@ function SingleDomainQuestionImportFormFields({
           <InlineError message={formError} />
           {createdQuestions.length > 0 ? (
             <div className="rounded-[1rem] border border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] p-4 text-sm text-[rgba(217,255,229,0.94)]">
-              Imported {createdQuestions.length} question{createdQuestions.length === 1 ? '' : 's'}.
+              Imported {createdQuestions.length} question{createdQuestions.length === 1 ? '' : 's'} successfully.
               Ordered questions and default A-D responses are now persisted in the draft.
             </div>
           ) : null}
@@ -1442,6 +1470,52 @@ export function SingleDomainReviewAuthoring() {
     [assessment.authoredDomains, assessment.authoredQuestions, languageValidation],
   );
   const languageSection = structuralValidation.sections.find((section) => section.key === 'language');
+  const runtimeIssuesBySection = useMemo(() => {
+    const grouped = new Map<string, NonNullable<typeof runtimeReadiness>['issues']>();
+    for (const issue of runtimeReadiness?.issues ?? []) {
+      const sectionKey = getSingleDomainReadinessIssueSectionKey(issue);
+      const existingIssues = grouped.get(sectionKey) ?? [];
+      grouped.set(sectionKey, [...existingIssues, issue]);
+    }
+    return grouped;
+  }, [runtimeReadiness]);
+  const reviewSections = useMemo(
+    () =>
+      structuralValidation.sections.map((section) => {
+        const runtimeSectionIssues = runtimeIssuesBySection.get(section.key) ?? [];
+        const issues = [
+          ...section.issues,
+          ...runtimeSectionIssues.filter(
+            (runtimeIssue) => !section.issues.some((sectionIssue) => sectionIssue.code === runtimeIssue.code),
+          ),
+        ];
+        const status = issues.length > 0 && section.status === 'ready' ? 'attention' : section.status;
+
+        return {
+          ...section,
+          status,
+          issues,
+        };
+      }),
+    [runtimeIssuesBySection, structuralValidation.sections],
+  );
+  const blockingIssues = useMemo(() => {
+    const seen = new Set<string>();
+    const merged = [...structuralValidation.issues, ...(runtimeReadiness?.issues ?? [])].filter((issue) => {
+      const key = `${issue.code}:${issue.message}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+
+    return merged;
+  }, [runtimeReadiness, structuralValidation.issues]);
+  const primaryRuntimeIssue = runtimeReadiness?.issues[0] ?? null;
+  const primaryRuntimeIssueRemediation = primaryRuntimeIssue
+    ? getReviewIssueRemediation(primaryRuntimeIssue)
+    : null;
 
   return (
     <section className="sonartra-section">
@@ -1492,6 +1566,29 @@ export function SingleDomainReviewAuthoring() {
               <SummaryCard detail="Options attached to authored questions." label="Options" value={String(runtimeReadiness.counts.optionCount)} />
               <SummaryCard detail="Resolved option-to-signal rows." label="Weights" value={String(runtimeReadiness.counts.weightCount)} />
             </div>
+            {primaryRuntimeIssue && primaryRuntimeIssueRemediation ? (
+              <div className="rounded-[1rem] border border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] p-4">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Current blocker</p>
+                    <p className="text-sm font-semibold text-white">{primaryRuntimeIssue.message}</p>
+                    <p className="text-sm leading-6 text-white/62">
+                      Missing or invalid in {primaryRuntimeIssueRemediation.sectionLabel}. Fix that stage next so the runtime definition can resolve cleanly.
+                    </p>
+                  </div>
+                  <ButtonLink
+                    href={getAssessmentBuilderStepPath(
+                      assessment.assessmentKey,
+                      primaryRuntimeIssueRemediation.step,
+                      assessment.mode,
+                    )}
+                    variant="secondary"
+                  >
+                    {primaryRuntimeIssueRemediation.ctaLabel}
+                  </ButtonLink>
+                </div>
+              </div>
+            ) : null}
             {runtimeReadiness.issues.length > 0 ? (
               <div className="space-y-2">
                 {runtimeReadiness.issues.map((issue) => (
@@ -1512,7 +1609,7 @@ export function SingleDomainReviewAuthoring() {
         </SurfaceCard>
       ) : null}
       <div className="grid gap-4 xl:grid-cols-2">
-        {structuralValidation.sections.map((section) => (
+        {reviewSections.map((section) => (
           <SurfaceCard className="p-5" key={section.key}>
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
@@ -1576,7 +1673,7 @@ export function SingleDomainReviewAuthoring() {
           </SurfaceCard>
         ))}
       </div>
-      {structuralValidation.issues.length === 0 ? null : (
+      {blockingIssues.length === 0 ? null : (
         <SurfaceCard className="p-5">
           <div className="space-y-3">
             <p className="sonartra-page-eyebrow">Blocking issues</p>
@@ -1584,10 +1681,10 @@ export function SingleDomainReviewAuthoring() {
               Resolve these issues before treating the single-domain draft as runtime-loadable.
             </p>
             <div className="space-y-2">
-              {structuralValidation.issues.map((issue) => (
+              {blockingIssues.map((issue) => (
                 <div
                   className="rounded-[0.9rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]"
-                  key={`issue-${issue.code}`}
+                  key={`issue-${issue.code}-${issue.message}`}
                 >
                   {issue.message}
                 </div>

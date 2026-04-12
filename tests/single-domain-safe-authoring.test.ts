@@ -149,3 +149,15 @@ test('single-domain builder layout wires the shared unsaved-change provider', ()
 
   assert.match(source, /SingleDomainUnsavedChangesProvider/);
 });
+
+test('single-domain unsaved-change provider keeps success clearing separate from failed-save retention and browser warnings', () => {
+  const source = readFileSync(
+    join(process.cwd(), 'components', 'admin', 'single-domain-unsaved-changes.tsx'),
+    'utf8',
+  );
+
+  assert.match(source, /beforeunload/);
+  assert.match(source, /popstate/);
+  assert.match(source, /if \(!submitAttemptedRef\.current \|\| !isSingleDomainActionStateSuccess\(params\.state\) \|\| !formRef\.current\)/);
+  assert.match(source, /window\.confirm\(SINGLE_DOMAIN_UNSAVED_CHANGES_MESSAGE\)/);
+});
