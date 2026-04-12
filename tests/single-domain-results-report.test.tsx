@@ -306,3 +306,43 @@ test('single-domain results report strips internal terms, raw keys, and unavaila
   assert.match(markup, /Combined meaning/i);
   assert.doesNotMatch(markup, />The leading tendencies show the Direction and Delivery pattern\.</);
 });
+
+test('single-domain results report removes raw single-domain signal and pair labels from user-facing output', () => {
+  const payload = buildPayload(4);
+  payload.hero.pair_key = 'results_vision';
+  payload.hero.hero_subheadline = 'The leading combination is report × Vision.';
+  payload.intro.bridge_to_signals = 'The leading tendencies show the report and vision pattern, not results_vision.';
+  payload.signals = payload.signals.map((signal) => {
+    if (signal.signal_key === 'vision') {
+      return {
+        ...signal,
+        signal_label: 'VISION',
+      };
+    }
+
+    if (signal.signal_key === 'delivery') {
+      return {
+        ...signal,
+        signal_key: 'results',
+        signal_label: 'REPORT',
+      };
+    }
+
+    return signal;
+  });
+  payload.application.watchouts = [
+    { signal_key: 'results', signal_label: 'report', rank: 2, statement: 'Watchout statement' },
+  ];
+
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
+  );
+
+  assert.match(markup, />Delivery and Vision</);
+  assert.match(markup, />Delivery</);
+  assert.match(markup, />Delivery[^<]*Rank 2</);
+  assert.doesNotMatch(markup, />report and vision</i);
+  assert.doesNotMatch(markup, /report × Vision/i);
+  assert.doesNotMatch(markup, />REPORT</);
+  assert.doesNotMatch(markup, /results_vision/i);
+});

@@ -111,10 +111,23 @@ const COPY_REPLACEMENTS: ReadonlyArray<readonly [pattern: RegExp, replacement: s
   [/\bnormalized\b/gi, 'overall'],
   [/\bsystem risk\b/gi, 'watchout'],
   [/\bblueprint context\b/gi, 'focus'],
-  [/\bvision_results\b/gi, 'Direction and Delivery'],
-  [/\bVISION_RESULTS\b/g, 'Direction and Delivery'],
-  [/\bresults\b/gi, 'report'],
 ]);
+
+const SINGLE_DOMAIN_SIGNAL_DISPLAY_LABELS = new Map<string, string>([
+  ['results', 'Delivery'],
+  ['result', 'Delivery'],
+  ['report', 'Delivery'],
+  ['delivery', 'Delivery'],
+  ['vision', 'Vision'],
+  ['people', 'People'],
+  ['process', 'Process'],
+  ['rigor', 'Rigor'],
+  ['clarity', 'Clarity'],
+]);
+
+const APPROVED_SINGLE_DOMAIN_SIGNAL_TOKENS = Array.from(SINGLE_DOMAIN_SIGNAL_DISPLAY_LABELS.keys())
+  .sort((left, right) => right.length - left.length)
+  .join('|');
 
 const STRONG_SIGNAL_LANGUAGE_PATTERNS: readonly RegExp[] = Object.freeze([
   /\bplays?\s+a\s+strong\s+role\b/i,
@@ -133,6 +146,35 @@ function cleanWhitespace(value: string): string {
   return value.replace(/\s{2,}/g, ' ').replace(/\s+([,.!?;:])/g, '$1').trim();
 }
 
+function normalizeDisplayLookupKey(value: string): string {
+  return value.trim().toLowerCase().replace(/[\s-]+/g, '_');
+}
+
+function resolveApprovedSignalDisplayLabel(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  return SINGLE_DOMAIN_SIGNAL_DISPLAY_LABELS.get(normalizeDisplayLookupKey(value)) ?? null;
+}
+
+function resolveApprovedPairDisplayLabel(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const parts = value
+    .split(/[_-]+/)
+    .map((part) => resolveApprovedSignalDisplayLabel(part))
+    .filter((part): part is string => Boolean(part));
+
+  if (parts.length >= 2) {
+    return `${parts[0]} and ${parts[1]}`;
+  }
+
+  return null;
+}
+
 function formatRawKeyLabel(value: string): string {
   const cleaned = value
     .split(/[_-]+/)
@@ -143,6 +185,25 @@ function formatRawKeyLabel(value: string): string {
   return cleanWhitespace(cleaned);
 }
 
+function replaceApprovedPairDisplayLabels(value: string): string {
+  return value.replace(
+    new RegExp(
+      `\\b(${APPROVED_SINGLE_DOMAIN_SIGNAL_TOKENS})\\b\\s*(?:×|x|and)\\s*\\b(${APPROVED_SINGLE_DOMAIN_SIGNAL_TOKENS})\\b`,
+      'gi',
+    ),
+    (match, left, right) => {
+      const leftLabel = resolveApprovedSignalDisplayLabel(left);
+      const rightLabel = resolveApprovedSignalDisplayLabel(right);
+
+      if (!leftLabel || !rightLabel) {
+        return match;
+      }
+
+      return `${leftLabel} and ${rightLabel}`;
+    },
+  );
+}
+
 function cleanResultCopy(value: string): string {
   let cleaned = value;
 
@@ -150,13 +211,25 @@ function cleanResultCopy(value: string): string {
     cleaned = cleaned.replace(pattern, replacement);
   }
 
-  cleaned = cleaned.replace(/\b[a-z]+(?:_[a-z]+)+\b/g, (match) => formatRawKeyLabel(match));
+  cleaned = replaceApprovedPairDisplayLabels(cleaned);
+
+  cleaned = cleaned.replace(/\b[a-z]+(?:[_-][a-z]+)+\b/gi, (match) => (
+    resolveApprovedPairDisplayLabel(match) ?? formatRawKeyLabel(match)
+  ));
 
   return cleanWhitespace(cleaned);
 }
 
 function cleanNullableCopy(value: string | null | undefined): string {
   return cleanResultCopy(value ?? '');
+}
+
+function getApprovedSignalLabel(signalKey: string | null | undefined, signalLabel: string | null | undefined): string {
+  return (
+    resolveApprovedSignalDisplayLabel(signalKey)
+    ?? resolveApprovedSignalDisplayLabel(signalLabel)
+    ?? cleanResultCopy(signalLabel ?? '')
+  );
 }
 
 function hasStrongSignalLanguage(value: string): boolean {
@@ -349,6 +422,7 @@ function gateSignalNarrativeCopy(params: {
 
 function getNarrativeSections(signal: SingleDomainResultPayload['signals'][number]): readonly SingleDomainSignalNarrativeSection[] {
   const tier = getSignalNarrativeTier(signal);
+  const signalLabel = getApprovedSignalLabel(signal.signal_key, signal.signal_label);
   const allSections: readonly SingleDomainSignalNarrativeSection[] = Object.freeze([
     {
       key: 'how_it_shows_up',
@@ -356,7 +430,7 @@ function getNarrativeSections(signal: SingleDomainResultPayload['signals'][numbe
       body: gateSignalNarrativeCopy({
         tier,
         role: 'how_it_shows_up',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel,
         normalizedScore: signal.normalized_score,
         source: signal.chapter_how_it_shows_up,
       }),
@@ -367,7 +441,7 @@ function getNarrativeSections(signal: SingleDomainResultPayload['signals'][numbe
       body: gateSignalNarrativeCopy({
         tier,
         role: 'value_outcome',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel,
         normalizedScore: signal.normalized_score,
         source: signal.chapter_value_outcome,
       }),
@@ -378,7 +452,7 @@ function getNarrativeSections(signal: SingleDomainResultPayload['signals'][numbe
       body: gateSignalNarrativeCopy({
         tier,
         role: 'team_effect',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel,
         normalizedScore: signal.normalized_score,
         source: signal.chapter_value_team_effect,
       }),
@@ -389,7 +463,7 @@ function getNarrativeSections(signal: SingleDomainResultPayload['signals'][numbe
       body: gateSignalNarrativeCopy({
         tier,
         role: 'risk_behaviour',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel,
         normalizedScore: signal.normalized_score,
         source: signal.chapter_risk_behaviour,
       }),
@@ -400,7 +474,7 @@ function getNarrativeSections(signal: SingleDomainResultPayload['signals'][numbe
       body: gateSignalNarrativeCopy({
         tier,
         role: 'risk_impact',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel,
         normalizedScore: signal.normalized_score,
         source: signal.chapter_risk_impact,
       }),
@@ -411,7 +485,7 @@ function getNarrativeSections(signal: SingleDomainResultPayload['signals'][numbe
       body: gateSignalNarrativeCopy({
         tier,
         role: 'development_line',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel,
         normalizedScore: signal.normalized_score,
         source: signal.chapter_development,
       }),
@@ -458,11 +532,20 @@ export function createSingleDomainResultsViewModel(
   const orderedSignals = [...payload.signals].sort((left, right) => (
     left.rank - right.rank || left.signal_key.localeCompare(right.signal_key)
   ));
-  const pairSignalLabels = orderedSignals.slice(0, 2).map((signal) => cleanResultCopy(signal.signal_label));
+  const resolvedPairLabel = resolveApprovedPairDisplayLabel(payload.hero.pair_key);
+  const pairSignalLabels =
+    resolvedPairLabel
+      ? resolvedPairLabel.split(/\s+and\s+/)
+      : orderedSignals.slice(0, 2).map((signal) => (
+        resolveApprovedSignalDisplayLabel(signal.signal_key)
+        ?? resolveApprovedSignalDisplayLabel(signal.signal_label)
+        ?? cleanResultCopy(signal.signal_label)
+      ));
   const pairLabel =
-    pairSignalLabels.length >= 2
+    resolvedPairLabel
+    ?? (pairSignalLabels.length >= 2
       ? `${pairSignalLabels[0]} and ${pairSignalLabels[1]}`
-      : cleanResultCopy(payload.hero.pair_key);
+      : cleanResultCopy(payload.hero.pair_key));
 
   return {
     assessmentTitle: payload.metadata.assessmentTitle,
@@ -502,6 +585,7 @@ export function createSingleDomainResultsViewModel(
     signals: orderedSignals.map((signal) => ({
       ...(() => {
         const tier = getSignalNarrativeTier(signal);
+        const signalLabel = getApprovedSignalLabel(signal.signal_key, signal.signal_label);
         return {
           tier,
           semanticState: getSignalSemanticState(tier),
@@ -509,7 +593,7 @@ export function createSingleDomainResultsViewModel(
           chapterIntro: gateSignalNarrativeCopy({
             tier,
             role: 'chapter_intro',
-            signalLabel: cleanResultCopy(signal.signal_label),
+            signalLabel,
             normalizedScore: signal.normalized_score,
             source: signal.chapter_intro,
           }),
@@ -517,49 +601,49 @@ export function createSingleDomainResultsViewModel(
       })(),
       anchorId: `signal-${String(signal.rank).padStart(2, '0')}`,
       signalKey: signal.signal_key,
-      signalLabel: cleanResultCopy(signal.signal_label),
+      signalLabel: getApprovedSignalLabel(signal.signal_key, signal.signal_label),
       rank: signal.rank,
       normalizedScore: signal.normalized_score,
       rawScore: signal.raw_score,
       howItShowsUp: gateSignalNarrativeCopy({
         tier: getSignalNarrativeTier(signal),
         role: 'how_it_shows_up',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel: getApprovedSignalLabel(signal.signal_key, signal.signal_label),
         normalizedScore: signal.normalized_score,
         source: signal.chapter_how_it_shows_up,
       }),
       valueOutcome: gateSignalNarrativeCopy({
         tier: getSignalNarrativeTier(signal),
         role: 'value_outcome',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel: getApprovedSignalLabel(signal.signal_key, signal.signal_label),
         normalizedScore: signal.normalized_score,
         source: signal.chapter_value_outcome,
       }),
       teamEffect: gateSignalNarrativeCopy({
         tier: getSignalNarrativeTier(signal),
         role: 'team_effect',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel: getApprovedSignalLabel(signal.signal_key, signal.signal_label),
         normalizedScore: signal.normalized_score,
         source: signal.chapter_value_team_effect,
       }),
       riskBehaviour: gateSignalNarrativeCopy({
         tier: getSignalNarrativeTier(signal),
         role: 'risk_behaviour',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel: getApprovedSignalLabel(signal.signal_key, signal.signal_label),
         normalizedScore: signal.normalized_score,
         source: signal.chapter_risk_behaviour,
       }),
       riskImpact: gateSignalNarrativeCopy({
         tier: getSignalNarrativeTier(signal),
         role: 'risk_impact',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel: getApprovedSignalLabel(signal.signal_key, signal.signal_label),
         normalizedScore: signal.normalized_score,
         source: signal.chapter_risk_impact,
       }),
       developmentLine: gateSignalNarrativeCopy({
         tier: getSignalNarrativeTier(signal),
         role: 'development_line',
-        signalLabel: cleanResultCopy(signal.signal_label),
+        signalLabel: getApprovedSignalLabel(signal.signal_key, signal.signal_label),
         normalizedScore: signal.normalized_score,
         source: signal.chapter_development,
       }),
@@ -585,17 +669,26 @@ export function createSingleDomainResultsViewModel(
     application: {
       strengths: payload.application.strengths.map((item) => ({
         ...item,
-        signal_label: cleanResultCopy(item.signal_label),
+        signal_label:
+          resolveApprovedSignalDisplayLabel(item.signal_key)
+          ?? resolveApprovedSignalDisplayLabel(item.signal_label)
+          ?? cleanResultCopy(item.signal_label),
         statement: cleanResultCopy(item.statement),
       })),
       watchouts: payload.application.watchouts.map((item) => ({
         ...item,
-        signal_label: cleanResultCopy(item.signal_label),
+        signal_label:
+          resolveApprovedSignalDisplayLabel(item.signal_key)
+          ?? resolveApprovedSignalDisplayLabel(item.signal_label)
+          ?? cleanResultCopy(item.signal_label),
         statement: cleanResultCopy(item.statement),
       })),
       developmentFocus: payload.application.developmentFocus.map((item) => ({
         ...item,
-        signal_label: cleanResultCopy(item.signal_label),
+        signal_label:
+          resolveApprovedSignalDisplayLabel(item.signal_key)
+          ?? resolveApprovedSignalDisplayLabel(item.signal_label)
+          ?? cleanResultCopy(item.signal_label),
         statement: cleanResultCopy(item.statement),
       })),
     },

@@ -293,3 +293,42 @@ test('single-domain results view model maps balancing, pair summary, and applica
   assert.equal(viewModel.application.watchouts[0]?.statement, 'Delivery watchout');
   assert.equal(viewModel.application.developmentFocus[0]?.statement, 'Rigor development');
 });
+
+test('single-domain results view model replaces raw single-domain signal and pair labels with approved display labels', () => {
+  const payload = buildPayload(4);
+  payload.hero.pair_key = 'results_vision';
+  payload.signals = payload.signals.map((signal) => {
+    if (signal.signal_key === 'vision') {
+      return {
+        ...signal,
+        signal_label: 'VISION',
+      };
+    }
+
+    if (signal.signal_key === 'delivery') {
+      return {
+        ...signal,
+        signal_key: 'results',
+        signal_label: 'REPORT',
+        chapter_intro: 'REPORT plays a strong role in how you operate.',
+      };
+    }
+
+    return signal;
+  });
+  payload.application.watchouts = [
+    { signal_key: 'results', signal_label: 'report', rank: 2, statement: 'Watchout statement' },
+  ];
+
+  const viewModel = createSingleDomainResultsViewModel(payload);
+
+  assert.equal(viewModel.hero.pairLabel, 'Delivery and Vision');
+  assert.deepEqual(viewModel.hero.pairSignalLabels, ['Delivery', 'Vision']);
+  assert.equal(viewModel.signals[1]?.signalLabel, 'Delivery');
+  assert.match(viewModel.signals[1]?.chapterIntro ?? '', /Delivery gives this domain steady support/i);
+  assert.equal(viewModel.application.watchouts[0]?.signal_label, 'Delivery');
+  assert.doesNotMatch(
+    JSON.stringify(viewModel),
+    /\bREPORT\b|\breport and vision\b|\breport × vision\b|\bresults_vision\b/i,
+  );
+});
