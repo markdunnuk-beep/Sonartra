@@ -121,3 +121,18 @@ test('single-domain builder helper rejects multi-domain assessments with a safe 
   assert.equal(result.assessment, null);
   assert.equal(result.redirectTo, '/admin/assessments/wplp80/overview');
 });
+
+test('single-domain builder helper rejects unknown mode values instead of treating them as single-domain', async () => {
+  const result = await getSingleDomainBuilderAssessment(
+    createFakeDb(
+      buildRow({
+        assessment_key: 'experimental',
+        assessment_mode: 'experimental_mode',
+      }),
+    ),
+    'experimental',
+  );
+
+  assert.equal(result.assessment, null);
+  assert.equal(result.redirectTo, '/admin/assessments/experimental/overview');
+});
