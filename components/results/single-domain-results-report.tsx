@@ -239,15 +239,12 @@ export function SingleDomainResultsReport({
             </div>
 
             <div className="grid gap-7 border-t border-white/6 pt-7 md:grid-cols-[minmax(0,1fr)_13.5rem] md:gap-10">
-              <div className="space-y-5 md:space-y-6">
+              <div className="space-y-4 md:space-y-5">
                 <p className="sonartra-report-summary max-w-[56rem] text-white/80">
                   {result.intro.introParagraph}
                 </p>
                 <p className="sonartra-report-body max-w-[54rem] text-[1rem] leading-8 text-white/76 md:text-[1.04rem] md:leading-9">
                   {result.intro.meaningParagraph}
-                </p>
-                <p className="sonartra-report-body-soft max-w-[50rem] text-[0.98rem] leading-8 text-white/58">
-                  {result.intro.bridgeToSignals}
                 </p>
               </div>
 
@@ -261,7 +258,7 @@ export function SingleDomainResultsReport({
                   ))}
                 </div>
                 <EditorialAside
-                  label="What this report focuses on"
+                  label="Why it matters"
                   text={result.intro.blueprintContextLine}
                 />
               </div>
@@ -295,24 +292,19 @@ export function SingleDomainResultsReport({
                     >
                       {result.hero.headline}
                     </h2>
-                    <ResultSectionIntent
-                      sectionId={SINGLE_DOMAIN_SECTION_IDS.hero}
-                      sectionsConfig={result.readingSections}
-                      className="max-w-[52ch]"
-                    />
                     <p className="sonartra-report-body-soft max-w-[46rem] text-[0.98rem] leading-8 text-white/66 sm:text-[1.03rem] md:text-[1.08rem] md:leading-8">
                       {result.hero.subheadline}
                     </p>
                     <div className="sonartra-report-prose max-w-[58rem] space-y-6 border-l border-white/8 pl-5 md:space-y-7 md:pl-7">
-                      <p className="sonartra-report-body max-w-[54rem] text-[1rem] leading-8 text-white/78 sm:text-[1.05rem] md:text-[1.1rem] md:leading-9">
-                        {result.hero.opening}
-                      </p>
                       <p className="sonartra-report-summary text-[1.08rem] leading-8 text-white/82 sm:text-[1.13rem] md:text-[1.22rem] md:leading-10">
                         {result.hero.strengthParagraph}
                       </p>
+                      <p className="sonartra-report-body max-w-[54rem] text-[1rem] leading-8 text-white/78 sm:text-[1.05rem] md:text-[1.1rem] md:leading-9">
+                        {result.hero.opening}
+                      </p>
                       <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
-                        <EditorialAside label="What steadies it" text={result.hero.tensionParagraph} />
-                        <EditorialAside label="What to remember" text={result.hero.closeParagraph} />
+                        <EditorialAside label="What keeps it effective" text={result.hero.tensionParagraph} />
+                        <EditorialAside label="Where to keep range" text={result.hero.closeParagraph} />
                       </div>
                     </div>
                   </div>
@@ -345,7 +337,7 @@ export function SingleDomainResultsReport({
 
           <div className="space-y-7 pt-5 md:space-y-8 md:pt-9">
             <NarrativeBridge className="max-w-[44rem]">
-              The signal chapters that follow stay inside this domain and explain the parts that build the pattern.
+              The signal chapters below show what is driving this pattern, what reinforces it, and what stays quieter unless the context calls for more.
             </NarrativeBridge>
 
             <section
@@ -361,7 +353,7 @@ export function SingleDomainResultsReport({
               <SectionHeader
                 eyebrow={`${result.signals.length} Signal${result.signals.length === 1 ? '' : 's'}`}
                 title="Inside this domain"
-                description="These chapters show what leads this domain, what supports it, and what sits more quietly in the background."
+                description="The full signal mix behind the way this domain comes through."
               />
               <ResultSectionIntent
                 sectionId={SINGLE_DOMAIN_SECTION_IDS.signals}

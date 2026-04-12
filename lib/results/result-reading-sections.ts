@@ -152,8 +152,7 @@ export const SINGLE_DOMAIN_RESULT_READING_SECTIONS = createResultReadingSections
       shortLabel: 'Intro',
       level: 'section',
       order: 1,
-      intentPrompt:
-        'Start here. This introduction frames the domain you completed and how to read the sections that follow.',
+      intentPrompt: 'What this domain says about the way you operate.',
     },
     {
       id: 'hero',
@@ -161,8 +160,7 @@ export const SINGLE_DOMAIN_RESULT_READING_SECTIONS = createResultReadingSections
       shortLabel: 'Pattern',
       level: 'section',
       order: 2,
-      intentPrompt:
-        'The clearest pattern in this domain, written as a direct read of how you tend to operate.',
+      intentPrompt: 'The clearest read of the pattern leading this domain.',
     },
     {
       id: 'signals',
@@ -170,8 +168,7 @@ export const SINGLE_DOMAIN_RESULT_READING_SECTIONS = createResultReadingSections
       shortLabel: 'Signals',
       level: 'section',
       order: 3,
-      intentPrompt:
-        'These signal chapters show how the pattern is built. Read them in order rather than scanning for a single label.',
+      intentPrompt: 'How the signal mix creates the pattern you see here.',
     },
     {
       id: 'balancing',
@@ -219,7 +216,7 @@ export function createSingleDomainResultReadingSections(params: {
         shortLabel: 'Intro',
         level: 'section',
         order: 1,
-        intentPrompt: 'A quick orientation to what this part of your report is about.',
+        intentPrompt: 'What this domain says about the way you operate.',
       },
       {
         id: 'hero',
@@ -227,7 +224,7 @@ export function createSingleDomainResultReadingSections(params: {
         shortLabel: 'Pattern',
         level: 'section',
         order: 2,
-        intentPrompt: 'The clearest pattern in this domain, written as a direct read of how you tend to operate.',
+        intentPrompt: 'The clearest read of the pattern leading this domain.',
       },
       {
         id: 'signals',
@@ -235,7 +232,7 @@ export function createSingleDomainResultReadingSections(params: {
         shortLabel: 'Signals',
         level: 'section',
         order: 3,
-        intentPrompt: 'A closer look at the tendencies shaping this domain and the role each one plays.',
+        intentPrompt: 'How the signal mix creates the pattern you see here.',
       },
       {
         id: 'balancing',

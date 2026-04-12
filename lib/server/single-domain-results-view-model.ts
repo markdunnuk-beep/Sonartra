@@ -5,7 +5,7 @@ import {
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
 const SINGLE_DOMAIN_RESULTS_BRIDGE_LINE =
-  'On their own, these signals describe you. Together, they explain how you actually operate.';
+  'The signals below show what is carrying this pattern, what supports it, and what stays quieter in the background.';
 
 export type SingleDomainResultsMetadataItem = {
   label: string;

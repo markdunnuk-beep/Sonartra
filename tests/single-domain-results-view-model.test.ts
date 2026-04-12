@@ -124,6 +124,17 @@ test('single-domain results view model exposes the intended reading structure an
   );
   assert.equal(viewModel.bridgeLine, SINGLE_DOMAIN_RESULTS_BRIDGE_LINE);
   assert.deepEqual(viewModel.hero.pairSignalLabels, ['Vision', 'Delivery']);
+  assert.deepEqual(
+    viewModel.readingSections.topLevelSections.map((section) => section.intentPrompt),
+    [
+      'What this domain says about the way you operate.',
+      'The clearest read of the pattern leading this domain.',
+      'How the signal mix creates the pattern you see here.',
+      'Where this pattern helps, where it can narrow your range, and how to bring it back into balance.',
+      'How the leading tendencies work together when this domain is at its most recognisable.',
+      'Practical points to lean on, watch for, and develop from here.',
+    ],
+  );
 });
 
 test('single-domain results view model keeps persisted signal counts variable and ordered by rank', () => {

@@ -116,7 +116,7 @@ test('single-domain results report renders sections in the intended order with o
   const heroIndex = markup.indexOf('id="hero"');
   const signalsIndex = markup.indexOf('id="signals"');
   const bridgeIndex = markup.indexOf(
-    'On their own, these signals describe you. Together, they explain how you actually operate.',
+    'The signals below show what is carrying this pattern, what supports it, and what stays quieter in the background.',
   );
   const balancingIndex = markup.indexOf('id="balancing"');
   const pairSummaryIndex = markup.indexOf('id="pair-summary"');
@@ -130,7 +130,7 @@ test('single-domain results report renders sections in the intended order with o
   assert.ok(pairSummaryIndex > balancingIndex);
   assert.ok(applicationIndex > pairSummaryIndex);
   assert.equal(
-    markup.match(/On their own, these signals describe you\. Together, they explain how you actually operate\./g)?.length ?? 0,
+    markup.match(/The signals below show what is carrying this pattern, what supports it, and what stays quieter in the background\./g)?.length ?? 0,
     1,
   );
 });
@@ -256,6 +256,28 @@ test('single-domain results report renders cleaned balancing, pair summary, and 
   assert.match(markup, />Rigor development</);
 });
 
+test('single-domain results report tightens the opening shell and removes procedural scaffolding copy', () => {
+  const payload = buildPayload(4);
+  payload.intro.intro_paragraph = 'A direct view of how you lead when the stakes are real.';
+  payload.intro.meaning_paragraph = 'It highlights the behaviours other people are most likely to feel from you and the trade-offs that come with them.';
+  payload.intro.bridge_to_signals = 'The signals below are ranked based on your responses.';
+  payload.intro.blueprint_context_line = 'Why it matters in practice.';
+  payload.hero.hero_subheadline = 'The pattern people are most likely to recognise first.';
+  payload.hero.hero_opening = 'It brings pace, direction, and visible follow-through.';
+  payload.hero.hero_strength_paragraph = 'You are likely to come across as clear, decisive, and hard to knock off course once the direction feels right.';
+
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
+  );
+
+  assert.match(markup, />What this domain says about the way you operate\.</);
+  assert.match(markup, />Why it matters</);
+  assert.match(markup, />What keeps it effective</);
+  assert.match(markup, />Where to keep range</);
+  assert.match(markup, />You are likely to come across as clear, decisive, and hard to knock off course once the direction feels right\.</);
+  assert.doesNotMatch(markup, /Start here|Read this first|This introduction frames the domain|signals below are ranked based on your responses/i);
+});
+
 test('single-domain results report strips internal terms, raw keys, and unavailable utilities from the rendered output', () => {
   const payload = buildPayload(4);
   payload.intro.bridge_to_signals = 'The ranked signals show the persisted vision_results pattern.';
@@ -282,5 +304,5 @@ test('single-domain results report strips internal terms, raw keys, and unavaila
 
   assert.match(markup, />Vision and Delivery</);
   assert.match(markup, /Combined meaning/i);
-  assert.match(markup, />The leading tendencies show the Direction and Delivery pattern\.</);
+  assert.doesNotMatch(markup, />The leading tendencies show the Direction and Delivery pattern\.</);
 });
