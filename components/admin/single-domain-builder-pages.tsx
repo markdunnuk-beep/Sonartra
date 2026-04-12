@@ -3,6 +3,7 @@
 import { useAdminAssessmentAuthoring } from '@/components/admin/admin-assessment-authoring-context';
 import { SingleDomainLanguageImport } from '@/components/admin/single-domain-language-import';
 import { SingleDomainBuilderStage } from '@/components/admin/single-domain-builder-stage';
+import { ButtonLink, CardTitle, LabelPill, SecondaryText, SurfaceCard } from '@/components/shared/user-app-ui';
 import {
   SingleDomainDomainAuthoring,
   SingleDomainQuestionsAuthoring,
@@ -11,6 +12,7 @@ import {
   SingleDomainSignalsAuthoring,
   SingleDomainWeightingsAuthoring,
 } from '@/components/admin/single-domain-structural-authoring';
+import { getAssessmentBuilderStepPath } from '@/lib/admin/assessment-builder-paths';
 
 export const singleDomainSignalsStepCopy = {
   intro:
@@ -51,35 +53,107 @@ function useReadinessMetrics() {
 
 export function SingleDomainOverviewPageContent() {
   const { assessment, domainCount, signalCount } = useReadinessMetrics();
+  const domainStepHref = getAssessmentBuilderStepPath(assessment.assessmentKey, 'domain', assessment.mode);
 
   return (
-    <SingleDomainBuilderStage
-      stepKey="overview"
-      eyebrow="Overview"
-      title="Overview"
-      description="Assessment title, description, version context, and the single-domain builder contract."
-      intro="This scaffold keeps the builder focused on one domain while preserving the rest of the assessment lifecycle: signals, questions, responses, weightings, language datasets, review, and publish."
-      guardrails={[
-        'This builder supports one domain only.',
-        'Signal count is flexible; there is no fixed four-signal assumption.',
-        'Questions, responses, weightings, and language remain first-class authoring stages.',
-      ]}
-      readiness={[
-        { label: 'Domain count', value: String(domainCount), detail: 'Single-domain target.' },
-        { label: 'Signal count', value: String(signalCount), detail: 'Flexible authored count.' },
-        {
-          label: 'Draft readiness',
-          value: assessment.draftValidation.isPublishReady ? 'Ready' : 'In progress',
-          detail: 'Current review state.',
-        },
-        {
-          label: 'Published version',
-          value: assessment.publishedVersion?.versionTag ?? 'None',
-          detail: 'Live version reference.',
-        },
-      ]}
-      nextIntent="Use the next steps to define one domain, then author the signals, questions, responses, mappings, and locked language families that will shape the finished report."
-    />
+    <section className="space-y-8">
+      <div className="space-y-2">
+        <p className="sonartra-page-eyebrow">Overview</p>
+        <h2 className="sonartra-section-title">Builder overview</h2>
+        <p className="sonartra-section-description">
+          Confirm the assessment identity, current draft state, and the one-domain constraint
+          before you move into authoring.
+        </p>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <SurfaceCard accent className="space-y-4 p-5 lg:p-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <LabelPill>{assessment.assessmentKey}</LabelPill>
+            <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
+              {assessment.modeLabel}
+            </LabelPill>
+            <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
+              {assessment.latestDraftVersion
+                ? `Draft ${assessment.latestDraftVersion.versionTag}`
+                : assessment.publishedVersion
+                  ? `Published ${assessment.publishedVersion.versionTag}`
+                  : 'Draft context pending'}
+            </LabelPill>
+          </div>
+          <div className="space-y-2">
+            <CardTitle>What this builder is for</CardTitle>
+            <SecondaryText>
+              This authoring path keeps the assessment inside a single scored domain while still
+              carrying the full draft workflow for signals, questions, responses, weightings,
+              language datasets, review, and publish.
+            </SecondaryText>
+            <SecondaryText>
+              Admins can open every stage now. Readiness states show what is complete, in progress,
+              or still empty without implying hidden route gates.
+            </SecondaryText>
+          </div>
+        </SurfaceCard>
+
+        <SurfaceCard className="space-y-4 p-5 lg:p-6">
+          <p className="sonartra-page-eyebrow">Next step</p>
+          <div className="space-y-2">
+            <CardTitle>Define the one allowed domain</CardTitle>
+            <SecondaryText>
+              Start in Domain to lock the assessment to a single domain record before authoring
+              signals and downstream structure.
+            </SecondaryText>
+          </div>
+          <div className="rounded-[1rem] border border-[rgba(126,179,255,0.16)] bg-[rgba(126,179,255,0.06)] p-4 text-sm leading-6 text-white/70">
+            The strongest next move here is Step 2. Name the domain, set its key, and give the rest
+            of the builder a stable anchor.
+          </div>
+          <div>
+            <ButtonLink className="w-full justify-center sm:w-auto" href={domainStepHref} variant="primary">
+              Continue to Domain
+            </ButtonLink>
+          </div>
+        </SurfaceCard>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <SurfaceCard className="p-4">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Assessment</p>
+          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">{assessment.title}</p>
+          <p className="mt-2 text-sm leading-6 text-white/56">
+            {assessment.description?.trim() || 'No admin description added yet.'}
+          </p>
+        </SurfaceCard>
+        <SurfaceCard className="p-4">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Domain count</p>
+          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">{domainCount}</p>
+          <p className="mt-2 text-sm leading-6 text-white/56">Target is exactly one authored domain.</p>
+        </SurfaceCard>
+        <SurfaceCard className="p-4">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Signals</p>
+          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">{signalCount}</p>
+          <p className="mt-2 text-sm leading-6 text-white/56">Signal count stays flexible once the domain exists.</p>
+        </SurfaceCard>
+        <SurfaceCard className="p-4">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Draft state</p>
+          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">
+            {assessment.draftValidation.isPublishReady ? 'Ready' : 'In progress'}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-white/56">
+            Published version: {assessment.publishedVersion?.versionTag ?? 'None'}.
+          </p>
+        </SurfaceCard>
+      </div>
+
+      <SurfaceCard className="space-y-4 p-5 lg:p-6">
+        <CardTitle>Builder guardrails</CardTitle>
+        <ul className="space-y-2 text-sm leading-7 text-white/66">
+          <li>This builder supports one domain only.</li>
+          <li>Signal count is flexible; there is no fixed four-signal assumption.</li>
+          <li>Questions, responses, weightings, and language remain first-class authoring stages.</li>
+        </ul>
+      </SurfaceCard>
+    </section>
   );
 }
 

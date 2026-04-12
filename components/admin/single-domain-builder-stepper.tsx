@@ -10,61 +10,17 @@ import {
   singleDomainBuilderSteps,
 } from '@/lib/admin/single-domain-builder-steps';
 import { getAssessmentBuilderStepPath } from '@/lib/admin/assessment-builder-paths';
-
-type StepStatus = 'complete' | 'in_progress' | 'empty' | 'blocked';
-
-function getStepStatus(
-  slug: (typeof singleDomainBuilderSteps)[number]['slug'],
-  assessment: ReturnType<typeof useAdminAssessmentAuthoring>,
-): StepStatus {
-  const domainCount = assessment.authoredDomains.length;
-  const signalCount = assessment.availableSignals.length;
-  const questionCount = assessment.authoredQuestions.length;
-  const optionCount = assessment.weightingSummary.totalOptions;
-  const mappingCount = assessment.weightingSummary.totalMappings;
-
-  switch (slug) {
-    case 'overview':
-      return 'complete';
-    case 'domain':
-      return domainCount === 1 ? 'complete' : domainCount > 1 ? 'blocked' : 'empty';
-    case 'signals':
-      return domainCount !== 1 ? 'blocked' : signalCount > 0 ? 'complete' : 'empty';
-    case 'questions':
-      return signalCount === 0 ? 'blocked' : questionCount > 0 ? 'complete' : 'empty';
-    case 'responses':
-      return questionCount === 0
-        ? 'blocked'
-        : optionCount > 0
-          ? 'complete'
-          : 'in_progress';
-    case 'weightings':
-      return optionCount === 0 || signalCount === 0
-        ? 'blocked'
-        : mappingCount > 0
-          ? 'complete'
-          : 'in_progress';
-    case 'language':
-      return assessment.stepCompletion.language === 'complete'
-        ? 'complete'
-        : assessment.latestDraftVersion
-          ? 'in_progress'
-          : 'blocked';
-    case 'review':
-      return assessment.draftValidation.isPublishReady
-        ? 'complete'
-        : assessment.draftValidation.blockingErrors.length > 0
-          ? 'blocked'
-          : 'in_progress';
-  }
-}
+import {
+  getSingleDomainBuilderStepStatus,
+  type SingleDomainBuilderStepStatus,
+} from '@/lib/admin/single-domain-builder-stepper';
 
 function StepIndicator({
   status,
   index,
   isActive,
 }: Readonly<{
-  status: StepStatus;
+  status: SingleDomainBuilderStepStatus;
   index: number;
   isActive: boolean;
 }>) {
@@ -78,8 +34,8 @@ function StepIndicator({
             ? 'border-[rgba(116,209,177,0.28)] bg-[rgba(116,209,177,0.16)] text-[rgba(214,246,233,0.92)]'
             : status === 'in_progress'
               ? 'border-[rgba(126,179,255,0.2)] bg-[rgba(126,179,255,0.08)] text-[rgba(214,232,255,0.82)]'
-              : status === 'blocked'
-                ? 'border-[rgba(255,184,107,0.2)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.9)]'
+              : status === 'reference'
+                ? 'border-[rgba(201,204,218,0.18)] bg-[rgba(201,204,218,0.08)] text-[rgba(232,235,245,0.86)]'
                 : 'border-white/10 bg-white/[0.03] text-white/56',
       )}
     >
@@ -91,15 +47,15 @@ function StepIndicator({
 function StepStatusBadge({
   status,
 }: Readonly<{
-  status: StepStatus;
+  status: SingleDomainBuilderStepStatus;
 }>) {
   const label =
     status === 'complete'
       ? 'Complete'
       : status === 'in_progress'
         ? 'In progress'
-        : status === 'blocked'
-          ? 'Blocked'
+        : status === 'reference'
+          ? 'Reference'
           : 'Empty';
 
   return (
@@ -110,8 +66,8 @@ function StepStatusBadge({
           ? 'border-[rgba(116,209,177,0.18)] bg-[rgba(116,209,177,0.08)] text-[rgba(214,246,233,0.84)]'
           : status === 'in_progress'
             ? 'border-[rgba(126,179,255,0.18)] bg-[rgba(126,179,255,0.08)] text-[rgba(214,232,255,0.82)]'
-            : status === 'blocked'
-              ? 'border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.88)]'
+            : status === 'reference'
+              ? 'border-[rgba(201,204,218,0.18)] bg-[rgba(201,204,218,0.08)] text-[rgba(232,235,245,0.82)]'
               : 'border-white/10 bg-white/[0.03] text-white/54',
       )}
     >
@@ -131,8 +87,10 @@ export function SingleDomainBuilderStepper() {
   const steps = singleDomainBuilderSteps.map((step) => ({
     ...step,
     href: getAssessmentBuilderStepPath(assessment.assessmentKey, step.slug, assessment.mode),
-    status: getStepStatus(step.slug, assessment),
+    status: getSingleDomainBuilderStepStatus(step.slug, assessment),
   }));
+  const activeStepModel = steps[activeIndex] ?? steps[0];
+  const completeCount = steps.filter((step) => step.status === 'complete').length;
 
   return (
     <SurfaceCard className="space-y-4 overflow-hidden p-3 sm:p-4 lg:p-5">
@@ -140,18 +98,76 @@ export function SingleDomainBuilderStepper() {
         <div className="space-y-1">
           <p className="sonartra-page-eyebrow">Single-domain builder progress</p>
           <p className="text-sm leading-6 text-white/58">
-            Step {activeIndex + 1} of {steps.length}. One domain only, variable signals, and full
-            assessment authoring follow the same draft.
+            Step {activeIndex + 1} of {steps.length}. Every stage stays viewable so readiness can
+            be checked without contradictory blocked states.
           </p>
         </div>
         <p className="text-xs uppercase tracking-[0.18em] text-white/42">
-          {steps.filter((step) => step.status === 'complete').length} of {steps.length} completed
+          {completeCount} of {steps.length} completed
         </p>
+      </div>
+
+      <div className="sm:hidden">
+        <div className="space-y-3 rounded-[1rem] border border-[rgba(126,179,255,0.16)] bg-[rgba(126,179,255,0.06)] p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgba(214,232,255,0.72)]">
+                Current step
+              </p>
+              <p className="text-base font-semibold text-white">{activeStepModel.label}</p>
+              <p className="text-sm leading-6 text-white/60">
+                {completeCount} complete, {steps.length - completeCount} still to finish.
+              </p>
+            </div>
+            <StepStatusBadge status={activeStepModel.status} />
+          </div>
+
+          <details className="group rounded-[0.95rem] border border-white/10 bg-black/10">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-white/86">
+              <span>View all steps</span>
+              <span className="text-xs uppercase tracking-[0.18em] text-white/46 transition group-open:rotate-45">
+                +
+              </span>
+            </summary>
+            <div className="space-y-2 border-t border-white/8 px-3 py-3">
+              {steps.map((step, index) => {
+                const isActive = step.key === activeStep;
+
+                return (
+                  <Link
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'flex items-center justify-between gap-3 rounded-[0.9rem] border px-3 py-3 transition',
+                      isActive
+                        ? 'border-[rgba(126,179,255,0.24)] bg-[rgba(126,179,255,0.1)] text-white'
+                        : step.status === 'complete'
+                          ? 'border-[rgba(116,209,177,0.12)] bg-[rgba(116,209,177,0.04)] text-white/86'
+                          : step.status === 'reference'
+                            ? 'border-[rgba(201,204,218,0.14)] bg-[rgba(201,204,218,0.05)] text-white/76'
+                            : step.status === 'in_progress'
+                              ? 'border-[rgba(126,179,255,0.14)] bg-[rgba(126,179,255,0.05)] text-white/78'
+                              : 'border-white/8 bg-black/10 text-white/66',
+                    )}
+                    href={step.href}
+                    key={step.key}
+                    prefetch={false}
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <StepIndicator index={index} isActive={isActive} status={step.status} />
+                      <span className="min-w-0 text-sm font-medium">{step.label}</span>
+                    </div>
+                    <StepStatusBadge status={step.status} />
+                  </Link>
+                );
+              })}
+            </div>
+          </details>
+        </div>
       </div>
 
       <nav
         aria-label="Single-domain builder steps"
-        className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 sonartra-scrollbar sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+        className="hidden gap-2 overflow-x-auto pb-1 sonartra-scrollbar sm:flex sm:flex-wrap sm:overflow-visible"
       >
         {steps.map((step, index) => {
           const isActive = step.key === activeStep;
@@ -165,14 +181,15 @@ export function SingleDomainBuilderStepper() {
                   ? 'border-[rgba(126,179,255,0.24)] bg-[rgba(126,179,255,0.1)] text-white'
                   : step.status === 'complete'
                     ? 'border-[rgba(116,209,177,0.12)] bg-[rgba(116,209,177,0.04)] text-white/86 hover:border-[rgba(116,209,177,0.2)] hover:bg-[rgba(116,209,177,0.06)]'
-                    : step.status === 'blocked'
-                      ? 'border-[rgba(255,184,107,0.14)] bg-[rgba(255,184,107,0.04)] text-white/72 hover:border-[rgba(255,184,107,0.22)] hover:bg-[rgba(255,184,107,0.06)]'
+                    : step.status === 'reference'
+                      ? 'border-[rgba(201,204,218,0.14)] bg-[rgba(201,204,218,0.05)] text-white/74 hover:border-[rgba(201,204,218,0.22)] hover:bg-[rgba(201,204,218,0.07)]'
                       : step.status === 'in_progress'
                         ? 'border-[rgba(126,179,255,0.14)] bg-[rgba(126,179,255,0.05)] text-white/72 hover:border-[rgba(126,179,255,0.22)] hover:bg-[rgba(126,179,255,0.07)]'
                         : 'border-white/8 bg-black/10 text-white/62 hover:border-white/14 hover:bg-white/[0.04] hover:text-white/84',
               )}
               href={step.href}
               key={step.key}
+              prefetch={false}
             >
               <div className="flex min-w-0 items-center gap-3">
                 <StepIndicator index={index} isActive={isActive} status={step.status} />

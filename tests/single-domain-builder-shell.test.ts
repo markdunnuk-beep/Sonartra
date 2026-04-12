@@ -40,8 +40,12 @@ test('single-domain builder step navigation renders the dedicated eight-step rai
 
   assert.match(stepperSource, /aria-label="Single-domain builder steps"/);
   assert.match(stepperSource, /Step \{activeIndex \+ 1\} of \{steps.length\}/);
-  assert.match(stepperSource, /One domain only, variable signals, and full\s+assessment authoring/);
+  assert.match(stepperSource, /Every stage stays viewable so readiness can\s+be checked without contradictory blocked states/);
   assert.match(stepperSource, /getAssessmentBuilderStepPath/);
+  assert.match(stepperSource, /Current step/);
+  assert.match(stepperSource, /View all steps/);
+  assert.match(stepperSource, /sm:hidden/);
+  assert.match(stepperSource, /prefetch=\{false\}/);
 });
 
 test('signals step copy keeps signal count flexible and avoids a fixed four-signal model', () => {
