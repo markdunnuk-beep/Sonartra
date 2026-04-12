@@ -1,25 +1,27 @@
 'use client';
 
 import { cn } from '@/components/shared/user-app-ui';
-import { useActiveResultSection } from '@/hooks/use-active-result-section';
+import { useActiveResultSectionWithConfig } from '@/hooks/use-active-result-section';
 import {
-  RESULT_READING_SECTIONS,
-  RESULT_READING_SECTIONS_BY_ID,
-  RESULT_READING_DOMAIN_SUBSECTIONS,
-  RESULT_READING_TOP_LEVEL_SECTIONS,
+  DEFAULT_RESULT_READING_SECTIONS,
+  type ResultReadingSectionsConfig,
 } from '@/lib/results/result-reading-sections';
 
 type ResultReadingProgressProps = {
   className?: string;
   activeSectionIdOverride?: string | null;
+  sectionsConfig?: ResultReadingSectionsConfig;
 };
 
-function resolveTopLevelSectionId(activeSectionId: string | null): string {
+function resolveTopLevelSectionId(
+  activeSectionId: string | null,
+  sectionsConfig: ResultReadingSectionsConfig,
+): string {
   if (!activeSectionId) {
-    return RESULT_READING_TOP_LEVEL_SECTIONS[0]?.id ?? 'intro';
+    return sectionsConfig.topLevelSections[0]?.id ?? 'intro';
   }
 
-  const activeDomainSubsection = RESULT_READING_DOMAIN_SUBSECTIONS.find(
+  const activeDomainSubsection = sectionsConfig.subsections.find(
     (section) => section.id === activeSectionId,
   );
 
@@ -27,16 +29,19 @@ function resolveTopLevelSectionId(activeSectionId: string | null): string {
     return activeDomainSubsection.parentId;
   }
 
-  const activeTopLevelSection = RESULT_READING_TOP_LEVEL_SECTIONS.find(
+  const activeTopLevelSection = sectionsConfig.topLevelSections.find(
     (section) => section.id === activeSectionId,
   );
 
-  return activeTopLevelSection?.id ?? (RESULT_READING_TOP_LEVEL_SECTIONS[0]?.id ?? 'intro');
+  return activeTopLevelSection?.id ?? (sectionsConfig.topLevelSections[0]?.id ?? 'intro');
 }
 
-function resolveActiveSectionId(activeSectionId: string | null): string {
-  if (!activeSectionId || !RESULT_READING_SECTIONS_BY_ID[activeSectionId]) {
-    return RESULT_READING_TOP_LEVEL_SECTIONS[0]?.id ?? 'intro';
+function resolveActiveSectionId(
+  activeSectionId: string | null,
+  sectionsConfig: ResultReadingSectionsConfig,
+): string {
+  if (!activeSectionId || !sectionsConfig.sectionsById[activeSectionId]) {
+    return sectionsConfig.topLevelSections[0]?.id ?? 'intro';
   }
 
   return activeSectionId;
@@ -45,29 +50,33 @@ function resolveActiveSectionId(activeSectionId: string | null): string {
 export function ResultReadingProgress({
   className,
   activeSectionIdOverride,
+  sectionsConfig = DEFAULT_RESULT_READING_SECTIONS,
 }: ResultReadingProgressProps) {
-  const activeSectionIdFromScroll = useActiveResultSection();
-  const activeSectionId = resolveActiveSectionId(activeSectionIdOverride ?? activeSectionIdFromScroll);
-
-  const activeTopLevelSectionId = resolveTopLevelSectionId(activeSectionId);
-  const activeTopLevelIndex = Math.max(
-    0,
-    RESULT_READING_TOP_LEVEL_SECTIONS.findIndex((section) => section.id === activeTopLevelSectionId),
+  const activeSectionIdFromScroll = useActiveResultSectionWithConfig(sectionsConfig);
+  const activeSectionId = resolveActiveSectionId(
+    activeSectionIdOverride ?? activeSectionIdFromScroll,
+    sectionsConfig,
   );
 
-  const activeSection = RESULT_READING_SECTIONS_BY_ID[activeSectionId];
-  const activeTopLevelSection = RESULT_READING_TOP_LEVEL_SECTIONS[activeTopLevelIndex];
+  const activeTopLevelSectionId = resolveTopLevelSectionId(activeSectionId, sectionsConfig);
+  const activeTopLevelIndex = Math.max(
+    0,
+    sectionsConfig.topLevelSections.findIndex((section) => section.id === activeTopLevelSectionId),
+  );
+
+  const activeSection = sectionsConfig.sectionsById[activeSectionId];
+  const activeTopLevelSection = sectionsConfig.topLevelSections[activeTopLevelIndex];
   const activeStepNumber = activeTopLevelIndex + 1;
-  const totalSteps = RESULT_READING_TOP_LEVEL_SECTIONS.length;
-  const nextSection = RESULT_READING_SECTIONS.find((section) => section.order === activeSection.order + 1);
+  const totalSteps = sectionsConfig.topLevelSections.length;
+  const nextSection = sectionsConfig.sections.find((section) => section.order === activeSection.order + 1);
   const activeSubsection = activeSection.level === 'subsection' ? activeSection : null;
-  const nextTopLevelSection = RESULT_READING_TOP_LEVEL_SECTIONS[activeTopLevelIndex + 1] ?? null;
+  const nextTopLevelSection = sectionsConfig.topLevelSections[activeTopLevelIndex + 1] ?? null;
   const currentPrimaryLabel = activeSubsection?.label ?? activeTopLevelSection?.label;
   const currentContextLabel = activeSubsection ? activeTopLevelSection?.label : null;
   const nextLabel = nextSection?.label ?? null;
   const nextContextLabel =
     nextSection?.level === 'subsection'
-      ? RESULT_READING_SECTIONS_BY_ID[nextSection.parentId ?? '']?.label
+      ? sectionsConfig.sectionsById[nextSection.parentId ?? '']?.label
       : nextSection?.level === 'section' && activeSubsection
         ? nextTopLevelSection?.label ?? nextSection?.label
         : null;
@@ -106,7 +115,7 @@ export function ResultReadingProgress({
             </div>
 
             <div className="flex shrink-0 items-center gap-1.5 pt-0.5" aria-hidden="true">
-              {RESULT_READING_TOP_LEVEL_SECTIONS.map((section, index) => {
+              {sectionsConfig.topLevelSections.map((section, index) => {
                 const isActive = section.id === activeTopLevelSectionId;
                 const isPassed = index < activeTopLevelIndex;
 

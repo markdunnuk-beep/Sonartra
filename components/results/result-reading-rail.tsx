@@ -4,33 +4,36 @@ import Image from 'next/image';
 import { type ReactNode, useState } from 'react';
 
 import { cn } from '@/components/shared/user-app-ui';
-import { useActiveResultSection } from '@/hooks/use-active-result-section';
+import { useActiveResultSectionWithConfig } from '@/hooks/use-active-result-section';
 import {
   copyResultsLinkedInSharePost,
   trackResultsLinkedInOpenClicked,
   type ResultsLinkedInShareAnalytics,
 } from '@/lib/results/linkedin-share-analytics';
 import {
-  RESULT_READING_SECTIONS,
-  RESULT_READING_DOMAIN_SUBSECTIONS,
-  RESULT_READING_TOP_LEVEL_SECTIONS,
+  DEFAULT_RESULT_READING_SECTIONS,
+  type ResultReadingSectionsConfig,
 } from '@/lib/results/result-reading-sections';
 
 type ResultReadingRailProps = {
   className?: string;
   activeSectionIdOverride?: string | null;
+  sectionsConfig?: ResultReadingSectionsConfig;
   utilityActions?: {
     linkedInPostBody: string;
     linkedInAnalytics: ResultsLinkedInShareAnalytics;
   } | null;
 };
 
-function getTopLevelActiveId(activeSectionId: string | null): string | null {
+function getTopLevelActiveId(
+  activeSectionId: string | null,
+  sectionsConfig: ResultReadingSectionsConfig,
+): string | null {
   if (!activeSectionId) {
     return null;
   }
 
-  const activeDomainSubsection = RESULT_READING_DOMAIN_SUBSECTIONS.find(
+  const activeDomainSubsection = sectionsConfig.subsections.find(
     (section) => section.id === activeSectionId,
   );
 
@@ -38,19 +41,22 @@ function getTopLevelActiveId(activeSectionId: string | null): string | null {
     return activeDomainSubsection.parentId;
   }
 
-  const activeTopLevelSection = RESULT_READING_TOP_LEVEL_SECTIONS.find(
+  const activeTopLevelSection = sectionsConfig.topLevelSections.find(
     (section) => section.id === activeSectionId,
   );
 
   return activeTopLevelSection?.id ?? null;
 }
 
-function getSectionOrder(activeSectionId: string | null): number | null {
+function getSectionOrder(
+  activeSectionId: string | null,
+  sectionsConfig: ResultReadingSectionsConfig,
+): number | null {
   if (!activeSectionId) {
     return null;
   }
 
-  const section = RESULT_READING_SECTIONS.find((entry) => entry.id === activeSectionId);
+  const section = sectionsConfig.sections.find((entry) => entry.id === activeSectionId);
   return section?.order ?? null;
 }
 
@@ -101,12 +107,13 @@ function UtilityIconButton({
 export function ResultReadingRail({
   className,
   activeSectionIdOverride,
+  sectionsConfig = DEFAULT_RESULT_READING_SECTIONS,
   utilityActions,
 }: ResultReadingRailProps) {
-  const activeSectionIdFromScroll = useActiveResultSection();
+  const activeSectionIdFromScroll = useActiveResultSectionWithConfig(sectionsConfig);
   const activeSectionId = activeSectionIdOverride ?? activeSectionIdFromScroll;
-  const activeTopLevelId = getTopLevelActiveId(activeSectionId);
-  const activeSectionOrder = getSectionOrder(activeSectionId);
+  const activeTopLevelId = getTopLevelActiveId(activeSectionId, sectionsConfig);
+  const activeSectionOrder = getSectionOrder(activeSectionId, sectionsConfig);
   const [utilityFeedback, setUtilityFeedback] = useState('');
 
   async function handleLinkedInShare() {
@@ -144,10 +151,12 @@ export function ResultReadingRail({
           />
         </div>
         <ul className="sonartra-result-rail-track relative space-y-0.5 pl-1.5" role="list">
-          {RESULT_READING_TOP_LEVEL_SECTIONS.map((section) => {
+          {sectionsConfig.topLevelSections.map((section) => {
             const isTopLevelActive = activeTopLevelId === section.id;
             const isExactTopLevelActive = activeSectionId === section.id;
-            const hasNestedDomainSections = section.id === 'domains';
+            const hasNestedDomainSections = sectionsConfig.subsections.some(
+              (subsection) => subsection.parentId === section.id,
+            );
             const isPassed =
               activeSectionOrder !== null && section.order < activeSectionOrder && !isTopLevelActive;
             const isUpcoming =
@@ -228,7 +237,9 @@ export function ResultReadingRail({
                     className="mt-1.5 space-y-0.5 pl-4.5"
                     role="list"
                   >
-                    {RESULT_READING_DOMAIN_SUBSECTIONS.map((domainSection) => {
+                    {sectionsConfig.subsections
+                      .filter((domainSection) => domainSection.parentId === section.id)
+                      .map((domainSection) => {
                       const isDomainSubsectionActive = activeSectionId === domainSection.id;
                       const isPassedDomainSubsection =
                         activeSectionOrder !== null && domainSection.order < activeSectionOrder;
@@ -284,7 +295,7 @@ export function ResultReadingRail({
                           </a>
                         </li>
                       );
-                    })}
+                      })}
                   </ul>
                 ) : null}
               </li>

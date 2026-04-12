@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
+  DEFAULT_RESULT_READING_SECTIONS,
+  type ResultReadingSectionsConfig,
   RESULT_READING_SECTION_IDS,
-  RESULT_READING_SECTIONS_BY_ID,
-  RESULT_READING_TOP_LEVEL_SECTIONS,
 } from '@/lib/results/result-reading-sections';
 
 const DEFAULT_ACTIVE_SECTION_ID = RESULT_READING_SECTION_IDS[0] ?? null;
@@ -65,36 +65,47 @@ function getSwitchMargin(candidateObservation: SectionObservation): number {
   return 0.12;
 }
 
-function isDomainSubsection(sectionId: string | null): boolean {
+function isDomainSubsectionInConfig(
+  sectionId: string | null,
+  sectionsConfig: ResultReadingSectionsConfig,
+): boolean {
   if (!sectionId) {
     return false;
   }
 
-  return RESULT_READING_SECTIONS_BY_ID[sectionId]?.parentId === 'domains';
+  return sectionsConfig.sectionsById[sectionId]?.level === 'subsection';
 }
 
-export function getSafeDefaultActiveState(orderedSectionIds: readonly string[]): ActiveSectionState {
+export function getSafeDefaultActiveState(
+  orderedSectionIds: readonly string[],
+  sectionsConfig: ResultReadingSectionsConfig = DEFAULT_RESULT_READING_SECTIONS,
+): ActiveSectionState {
   const firstValidSectionId =
-    orderedSectionIds.find((sectionId) => RESULT_READING_SECTIONS_BY_ID[sectionId]?.level === 'section') ??
+    orderedSectionIds.find((sectionId) => sectionsConfig.sectionsById[sectionId]?.level === 'section') ??
     DEFAULT_ACTIVE_SECTION_ID ??
     'intro';
 
-  return toActiveResultSectionState(firstValidSectionId);
+  return toActiveResultSectionState(firstValidSectionId, sectionsConfig);
 }
 
-export function toActiveResultSectionState(activeSectionId: string | null): ActiveSectionState {
+export function toActiveResultSectionState(
+  activeSectionId: string | null,
+  sectionsConfig: ResultReadingSectionsConfig = DEFAULT_RESULT_READING_SECTIONS,
+): ActiveSectionState {
   const fallbackSectionId = DEFAULT_ACTIVE_SECTION_ID ?? 'intro';
   const resolvedSectionId =
-    (activeSectionId && RESULT_READING_SECTIONS_BY_ID[activeSectionId]?.id) || fallbackSectionId;
+    (activeSectionId && sectionsConfig.sectionsById[activeSectionId]?.id) || fallbackSectionId;
 
-  const activeDomainSectionId = isDomainSubsection(resolvedSectionId) ? resolvedSectionId : null;
+  const activeDomainSectionId = isDomainSubsectionInConfig(resolvedSectionId, sectionsConfig)
+    ? resolvedSectionId
+    : null;
   const activeTopLevelSectionId = activeDomainSectionId
-    ? 'domains'
-    : RESULT_READING_SECTIONS_BY_ID[resolvedSectionId]?.id ?? fallbackSectionId;
+    ? sectionsConfig.sectionsById[activeDomainSectionId]?.parentId ?? fallbackSectionId
+    : sectionsConfig.sectionsById[resolvedSectionId]?.id ?? fallbackSectionId;
 
   const activeTopLevelIndex = Math.max(
     0,
-    RESULT_READING_TOP_LEVEL_SECTIONS.findIndex((section) => section.id === activeTopLevelSectionId),
+    sectionsConfig.topLevelSections.findIndex((section) => section.id === activeTopLevelSectionId),
   );
 
   return {
@@ -102,7 +113,7 @@ export function toActiveResultSectionState(activeSectionId: string | null): Acti
     activeTopLevelSectionId,
     activeDomainSectionId,
     activeTopLevelIndex,
-    activeTopLevelCount: RESULT_READING_TOP_LEVEL_SECTIONS.length,
+    activeTopLevelCount: sectionsConfig.topLevelSections.length,
     hasActiveDomainSection: Boolean(activeDomainSectionId),
   };
 }
@@ -193,6 +204,12 @@ function buildSectionObservation(element: HTMLElement): SectionObservation {
 }
 
 export function useActiveResultSection(): string | null {
+  return useActiveResultSectionWithConfig(DEFAULT_RESULT_READING_SECTIONS);
+}
+
+export function useActiveResultSectionWithConfig(
+  sectionsConfig: ResultReadingSectionsConfig,
+): string | null {
   const [activeSectionId, setActiveSectionId] = useState<string | null>(DEFAULT_ACTIVE_SECTION_ID);
   const activeSectionIdRef = useRef<string | null>(DEFAULT_ACTIVE_SECTION_ID);
 
@@ -208,7 +225,7 @@ export function useActiveResultSection(): string | null {
     const trackedElements = Array.from(
       document.querySelectorAll<HTMLElement>('.results-anchor-target[id]'),
     ).reduce<HTMLElement[]>((elements, element) => {
-      if (!RESULT_READING_SECTIONS_BY_ID[element.id]) {
+      if (!sectionsConfig.sectionsById[element.id]) {
         return elements;
       }
 
@@ -310,7 +327,7 @@ export function useActiveResultSection(): string | null {
       window.removeEventListener('scroll', scheduleResolveActiveSection);
       window.removeEventListener('resize', scheduleResolveActiveSection);
     };
-  }, []);
+  }, [sectionsConfig]);
 
   return activeSectionId;
 }

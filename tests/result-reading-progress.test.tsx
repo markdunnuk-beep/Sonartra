@@ -3,6 +3,7 @@ import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { ResultReadingProgress } from '@/components/results/result-reading-progress';
+import { SINGLE_DOMAIN_RESULT_READING_SECTIONS } from '@/lib/results/result-reading-sections';
 
 test('renders current top-level label for active section', () => {
   const markup = renderToStaticMarkup(<ResultReadingProgress activeSectionIdOverride="hero" />);
@@ -57,4 +58,18 @@ test('unknown sections safely resolve to first canonical top-level step', () => 
   assert.match(markup, />Introduction</);
   assert.match(markup, />01</);
   assert.match(markup, />Your Behaviour Pattern</);
+});
+
+test('progress component can follow the single-domain top-level sequence', () => {
+  const markup = renderToStaticMarkup(
+    <ResultReadingProgress
+      activeSectionIdOverride="balancing"
+      sectionsConfig={SINGLE_DOMAIN_RESULT_READING_SECTIONS}
+    />,
+  );
+
+  assert.match(markup, />Balancing Your Approach</);
+  assert.match(markup, />04</);
+  assert.match(markup, />How This Shows Up</);
+  assert.equal(markup.match(/sonartra-motion-progress block h-1\.5 rounded-full/g)?.length ?? 0, 6);
 });

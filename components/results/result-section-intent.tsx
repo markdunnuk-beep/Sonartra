@@ -1,16 +1,24 @@
-import { RESULT_READING_SECTIONS_BY_ID } from '@/lib/results/result-reading-sections';
+import {
+  DEFAULT_RESULT_READING_SECTIONS,
+  type ResultReadingSectionsConfig,
+} from '@/lib/results/result-reading-sections';
 
 type ResultSectionIntentProps = {
   sectionId: string;
   className?: string;
+  sectionsConfig?: ResultReadingSectionsConfig;
 };
 
-export function ResultSectionIntent({ sectionId, className }: ResultSectionIntentProps) {
+export function ResultSectionIntent({
+  sectionId,
+  className,
+  sectionsConfig = DEFAULT_RESULT_READING_SECTIONS,
+}: ResultSectionIntentProps) {
   if (!sectionId) {
     return null;
   }
 
-  const section = RESULT_READING_SECTIONS_BY_ID[sectionId];
+  const section = sectionsConfig.sectionsById[sectionId];
 
   if (!section || section.level !== 'section' || !section.intentPrompt) {
     return null;

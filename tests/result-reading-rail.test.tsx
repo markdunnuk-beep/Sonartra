@@ -3,6 +3,7 @@ import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { ResultReadingRail } from '@/components/results/result-reading-rail';
+import { SINGLE_DOMAIN_RESULT_READING_SECTIONS } from '@/lib/results/result-reading-sections';
 
 test('reading rail renders expected top-level section labels', () => {
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
@@ -107,7 +108,6 @@ test('rail provides restrained current and next reading cues', () => {
   );
 
   assert.match(markup, /Current chapter/);
-  assert.match(markup, /Up next/);
   assert.match(markup, /data-reading-state="current"/);
   assert.match(markup, /data-reading-state="next"/);
 });
@@ -123,4 +123,19 @@ test('reading rail links remain keyboard-focusable anchors with visible focus cl
   assert.match(markup, /data-result-reading-rail="true"/);
   assert.match(markup, /<nav[^>]*aria-label="Report reading navigation"/);
   assert.match(markup, /<ul aria-label="Domain chapters"/);
+});
+
+test('reading rail can render the single-domain section model without affecting default multi-domain behavior', () => {
+  const markup = renderToStaticMarkup(
+    <ResultReadingRail
+      activeSectionIdOverride="signals"
+      sectionsConfig={SINGLE_DOMAIN_RESULT_READING_SECTIONS}
+    />,
+  );
+
+  assert.match(markup, />Inside This Domain</);
+  assert.match(markup, />Balancing Your Approach</);
+  assert.match(markup, />How This Shows Up</);
+  assert.doesNotMatch(markup, /aria-label="Domain chapters"/);
+  assert.equal(markup.match(/<a /g)?.length ?? 0, 7);
 });
