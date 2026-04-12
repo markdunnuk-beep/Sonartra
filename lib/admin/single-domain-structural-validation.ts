@@ -3,6 +3,7 @@ import type {
   AdminAssessmentDetailQuestion,
   AdminAssessmentDetailSignalWeight,
 } from '@/lib/server/admin-assessment-detail';
+import { SINGLE_DOMAIN_RESPONSE_OPTION_LABELS } from '@/lib/admin/single-domain-response-import';
 import { getSingleDomainLanguageDatasetDefinition } from '@/lib/admin/single-domain-language-datasets';
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
 import { getSingleDomainExpectedPairCount } from '@/lib/types/single-domain-runtime';
@@ -75,6 +76,23 @@ export type SingleDomainLanguageValidation = {
   issues: readonly SingleDomainStructuralIssue[];
 };
 
+export type SingleDomainResponseCoverage = {
+  complete: boolean;
+  completeQuestionCount: number;
+  questionCountWithCanonicalGaps: number;
+  blankOptionTextCount: number;
+};
+
+export type SingleDomainWeightingCoverage = {
+  complete: boolean;
+  mappedOptionCount: number;
+  unmappedOptionCount: number;
+};
+
+function isCanonicalResponseOptionLabel(value: string): value is (typeof SINGLE_DOMAIN_RESPONSE_OPTION_LABELS)[number] {
+  return (SINGLE_DOMAIN_RESPONSE_OPTION_LABELS as readonly string[]).includes(value);
+}
+
 function createIssue(
   code: string,
   message: string,
@@ -103,6 +121,72 @@ function collectWeightMappings(
   questions: readonly AdminAssessmentDetailQuestion[],
 ): readonly AdminAssessmentDetailSignalWeight[] {
   return questions.flatMap((question) => question.options.flatMap((option) => option.signalWeights));
+}
+
+export function getSingleDomainResponseCoverage(
+  questions: readonly AdminAssessmentDetailQuestion[],
+): SingleDomainResponseCoverage {
+  let completeQuestionCount = 0;
+  let questionCountWithCanonicalGaps = 0;
+  let blankOptionTextCount = 0;
+
+  for (const question of questions) {
+    const optionGroups = new Map<string, number>();
+
+    for (const option of question.options) {
+      const normalizedLabel = option.optionLabel?.trim().toUpperCase() ?? '';
+      if (!isCanonicalResponseOptionLabel(normalizedLabel)) {
+        continue;
+      }
+
+      optionGroups.set(normalizedLabel, (optionGroups.get(normalizedLabel) ?? 0) + 1);
+
+      if (!option.optionText.trim()) {
+        blankOptionTextCount += 1;
+      }
+    }
+
+    const hasCanonicalSet = SINGLE_DOMAIN_RESPONSE_OPTION_LABELS.every(
+      (label) => optionGroups.get(label) === 1,
+    );
+    const hasBlankOptionText = question.options.some(
+      (option) =>
+        isCanonicalResponseOptionLabel(option.optionLabel?.trim().toUpperCase() ?? '')
+        && !option.optionText.trim(),
+    );
+
+    if (hasCanonicalSet && !hasBlankOptionText) {
+      completeQuestionCount += 1;
+      continue;
+    }
+
+    questionCountWithCanonicalGaps += 1;
+  }
+
+  return {
+    complete: questions.length > 0 && completeQuestionCount === questions.length,
+    completeQuestionCount,
+    questionCountWithCanonicalGaps,
+    blankOptionTextCount,
+  };
+}
+
+export function getSingleDomainWeightingCoverage(
+  questions: readonly AdminAssessmentDetailQuestion[],
+): SingleDomainWeightingCoverage {
+  const canonicalOptions = questions.flatMap((question) =>
+    question.options.filter((option) =>
+      isCanonicalResponseOptionLabel(option.optionLabel?.trim().toUpperCase() ?? '')
+      && option.optionText.trim().length > 0,
+    ),
+  );
+  const mappedOptionCount = canonicalOptions.filter((option) => option.signalWeights.length > 0).length;
+
+  return {
+    complete: canonicalOptions.length > 0 && mappedOptionCount === canonicalOptions.length,
+    mappedOptionCount,
+    unmappedOptionCount: canonicalOptions.length - mappedOptionCount,
+  };
 }
 
 export function getExpectedSignalPairCount(signalCount: number): number {
@@ -281,8 +365,8 @@ export function buildSingleDomainStructuralValidation(
   const weightingIssues: SingleDomainStructuralIssue[] = [];
   const languageValidation = input.languageValidation;
   const languageIssues = languageValidation ? [...languageValidation.issues] : [];
-  const allQuestionsHaveOptions =
-    questionCount > 0 && input.authoredQuestions.every((question) => question.options.length > 0);
+  const responseCoverage = getSingleDomainResponseCoverage(input.authoredQuestions);
+  const weightingCoverage = getSingleDomainWeightingCoverage(input.authoredQuestions);
 
   if (domainCount === 0) {
     domainIssues.push(createIssue('missing_domain', 'Add the one authored domain required by this builder.'));
@@ -331,6 +415,24 @@ export function buildSingleDomainStructuralValidation(
     );
   }
 
+  if (responseCoverage.questionCountWithCanonicalGaps > 0 && optionCount > 0) {
+    responseIssues.push(
+      createIssue(
+        'incomplete_responses',
+        `${responseCoverage.questionCountWithCanonicalGaps} question${responseCoverage.questionCountWithCanonicalGaps === 1 ? '' : 's'} are missing a complete persisted A-D response set with text.`,
+      ),
+    );
+  }
+
+  if (responseCoverage.blankOptionTextCount > 0) {
+    responseIssues.push(
+      createIssue(
+        'blank_response_text',
+        `${responseCoverage.blankOptionTextCount} response option${responseCoverage.blankOptionTextCount === 1 ? '' : 's'} still have blank text.`,
+      ),
+    );
+  }
+
   if (mappingCount === 0 && optionCount > 0) {
     weightingIssues.push(
       createIssue('missing_weights', 'Response options exist, but no option-to-signal weights have been authored.'),
@@ -351,6 +453,15 @@ export function buildSingleDomainStructuralValidation(
       createIssue(
         'orphan_weight_signals',
         `${orphanWeightSignalCount} weight row${orphanWeightSignalCount === 1 ? '' : 's'} reference a signal that no longer exists.`,
+      ),
+    );
+  }
+
+  if (responseCoverage.complete && weightingCoverage.unmappedOptionCount > 0) {
+    weightingIssues.push(
+      createIssue(
+        'incomplete_weightings',
+        `${weightingCoverage.unmappedOptionCount} authored response option${weightingCoverage.unmappedOptionCount === 1 ? '' : 's'} still have no persisted weight rows.`,
       ),
     );
   }
@@ -412,16 +523,16 @@ export function buildSingleDomainStructuralValidation(
         'Responses',
         questionCount === 0
           ? 'waiting'
-          : allQuestionsHaveOptions
+          : responseCoverage.complete
             ? 'ready'
             : optionCount > 0
               ? 'attention'
               : 'not_started',
         optionCount > 0
-          ? `${optionCount} response option${optionCount === 1 ? '' : 's'} grouped under authored questions.`
+          ? `${responseCoverage.completeQuestionCount} of ${questionCount} question${questionCount === 1 ? '' : 's'} have a complete persisted A-D response set with text.`
           : questionCount === 0
             ? 'Waiting on authored questions before responses can be assessed.'
-            : 'Each question needs at least one response option.',
+            : 'Each question needs a complete persisted A-D response set.',
         responseIssues,
       ),
       createSection(
@@ -429,18 +540,18 @@ export function buildSingleDomainStructuralValidation(
         'Weightings',
         signalCount === 0
           ? 'waiting'
-          : optionCount === 0
+          : optionCount === 0 || !responseCoverage.complete
             ? 'waiting'
-            : mappingCount > 0 && optionsWithoutWeightsCount === 0 && orphanWeightSignalCount === 0
+            : weightingCoverage.complete && orphanWeightSignalCount === 0
               ? 'ready'
-              : mappingCount > 0
+            : mappingCount > 0
                 ? 'attention'
                 : 'not_started',
         mappingCount > 0
-          ? `${mappingCount} option-to-signal weight row${mappingCount === 1 ? '' : 's'} authored.`
+          ? `${weightingCoverage.mappedOptionCount} of ${weightingCoverage.mappedOptionCount + weightingCoverage.unmappedOptionCount} authored response option${weightingCoverage.mappedOptionCount + weightingCoverage.unmappedOptionCount === 1 ? '' : 's'} have persisted weight rows.`
           : signalCount === 0
             ? 'Waiting on authored signals before weightings can be assessed.'
-            : optionCount === 0
+            : optionCount === 0 || !responseCoverage.complete
               ? 'Waiting on authored responses before weightings can be assessed.'
               : 'Weight rows must resolve against existing options and signals only.',
         weightingIssues,

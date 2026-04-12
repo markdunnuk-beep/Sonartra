@@ -33,21 +33,24 @@ import {
   initialSingleDomainQuestionImportState,
 } from '@/lib/admin/single-domain-question-import';
 import {
+  initialSingleDomainResponseImportState,
+} from '@/lib/admin/single-domain-response-import';
+import {
+  initialSingleDomainWeightingsImportState,
+} from '@/lib/admin/single-domain-weightings-import';
+import {
   createSingleDomainDomainAction,
-  importSingleDomainQuestionsAction,
-  createSingleDomainOptionAction,
-  createSingleDomainQuestionAction,
   createSingleDomainSignalAction,
-  deleteSingleDomainOptionAction,
   deleteSingleDomainQuestionAction,
   deleteSingleDomainSignalAction,
+  importSingleDomainQuestionsAction,
+  importSingleDomainResponsesAction,
+  importSingleDomainWeightingsAction,
   updateSingleDomainDomainAction,
   updateSingleDomainOptionAction,
   updateSingleDomainQuestionAction,
   updateSingleDomainSignalAction,
 } from '@/lib/server/admin-single-domain-structural-authoring';
-import { slugifyDomainKey } from '@/lib/utils/domain-key';
-import { slugifySignalKey } from '@/lib/utils/signal-key';
 import { useSingleDomainDirtyField, useSingleDomainDirtyForm } from '@/components/admin/single-domain-unsaved-changes';
 
 function SubmitButton({
@@ -636,18 +639,7 @@ function OptionCard({
       }),
     [assessment.assessmentKey, draftVersionId, option.optionId, question.questionId],
   );
-  const deleteAction = useMemo(
-    () =>
-      deleteSingleDomainOptionAction.bind(null, {
-        assessmentKey: assessment.assessmentKey,
-        assessmentVersionId: draftVersionId,
-        questionId: question.questionId,
-        optionId: option.optionId,
-      }),
-    [assessment.assessmentKey, draftVersionId, option.optionId, question.questionId],
-  );
   const [updateState, updateFormAction] = useActionState(updateAction, initialAdminOptionAuthoringFormState);
-  const [deleteState, deleteFormAction] = useActionState(deleteAction, initialAdminOptionAuthoringFormState);
   const {
     formRef,
     onChange: handleDirtyChange,
@@ -692,12 +684,6 @@ function OptionCard({
             <SubmitButton idleLabel="Update option" pendingLabel="Saving..." />
           </div>
         </form>
-        <form action={deleteFormAction} className="space-y-3 border-t border-white/8 pt-4">
-          <InlineError message={deleteState.formError} />
-          <div className="flex justify-end">
-            <SubmitButton idleLabel="Delete option" pendingLabel="Deleting..." variant="danger" />
-          </div>
-        </form>
       </div>
     </SurfaceCard>
   );
@@ -705,33 +691,9 @@ function OptionCard({
 
 function ResponsesQuestionCard({
   question,
-  assessmentKey,
-  assessmentVersionId,
 }: Readonly<{
   question: ReturnType<typeof useAdminAssessmentAuthoring>['authoredQuestions'][number];
-  assessmentKey: string;
-  assessmentVersionId: string;
 }>) {
-  const createAction = useMemo(
-    () =>
-      createSingleDomainOptionAction.bind(null, {
-        assessmentKey,
-        assessmentVersionId,
-        questionId: question.questionId,
-      }),
-    [assessmentKey, assessmentVersionId, question.questionId],
-  );
-  const [createState, createFormAction] = useActionState(
-    createAction,
-    initialAdminOptionAuthoringFormState,
-  );
-  const {
-    formRef,
-    onChange: handleDirtyChange,
-    onInput: handleDirtyInput,
-    onSubmit: handleDirtySubmit,
-  } = useSingleDomainDirtyForm({ state: createState });
-
   return (
     <SurfaceCard className="p-5 lg:p-6">
       <div className="space-y-5">
@@ -744,54 +706,12 @@ function ResponsesQuestionCard({
         <div className="space-y-2">
           <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">{question.prompt}</h3>
           <p className="text-sm leading-7 text-white/56">
-            Each question must keep at least one option. Options belong to real questions only.
+            Responses stay locked to the canonical A-D slots created from question import. Use bulk
+            import for scale, then adjust individual option text here only when needed.
           </p>
         </div>
-        <form
-          action={createFormAction}
-          className="grid gap-4 lg:grid-cols-[180px_minmax(0,1fr)_auto]"
-          onChange={handleDirtyChange}
-          onInput={handleDirtyInput}
-          onSubmit={handleDirtySubmit}
-          ref={formRef}
-        >
-          <Field
-            error={createState.fieldErrors.label}
-            hint="Optional letter label."
-            htmlFor={`create-option-label-${question.questionId}`}
-            label="Label"
-          >
-            <Input
-              defaultValue={createState.values.label}
-              error={createState.fieldErrors.label}
-              id={`create-option-label-${question.questionId}`}
-              name="label"
-              placeholder="A"
-            />
-          </Field>
-          <Field
-            error={createState.fieldErrors.text}
-            hint="Author a response option for this question."
-            htmlFor={`create-option-text-${question.questionId}`}
-            label="Option text"
-          >
-            <Input
-              defaultValue={createState.values.text}
-              error={createState.fieldErrors.text}
-              id={`create-option-text-${question.questionId}`}
-              name="text"
-              placeholder="Strongly agree"
-            />
-          </Field>
-          <div className="flex items-end">
-            <SubmitButton idleLabel="Add option" pendingLabel="Creating..." />
-          </div>
-          <div className="lg:col-span-3">
-            <InlineError message={createState.formError} />
-          </div>
-        </form>
         {question.options.length === 0 ? (
-          <EmptyState description="Add the first option for this question." title="No options yet" />
+          <EmptyState description="Import questions first so the canonical A-D response slots exist." title="No response slots yet" />
         ) : (
           <div className="space-y-4">
             {question.options.map((option) => (
@@ -1126,25 +1046,198 @@ function SingleDomainQuestionImportFormFields({
   );
 }
 
-export function SingleDomainQuestionsAuthoring() {
-  const assessment = useAdminAssessmentAuthoring();
-  const domain = assessment.authoredDomains[0] ?? null;
-  const draftVersionId = assessment.latestDraftVersion?.assessmentVersionId ?? '';
-  const createAction = useMemo(
+function SingleDomainResponsesImportForm({
+  assessmentKey,
+  assessmentVersionId,
+}: Readonly<{
+  assessmentKey: string;
+  assessmentVersionId: string;
+}>) {
+  const importAction = useMemo(
     () =>
-      createSingleDomainQuestionAction.bind(null, {
-        assessmentKey: assessment.assessmentKey,
-        assessmentVersionId: draftVersionId,
+      importSingleDomainResponsesAction.bind(null, {
+        assessmentKey,
+        assessmentVersionId,
       }),
-    [assessment.assessmentKey, draftVersionId],
+    [assessmentKey, assessmentVersionId],
   );
-  const [createState, createFormAction] = useActionState(createAction, initialAdminQuestionAuthoringFormState);
+  const [importState, importFormAction] = useActionState(
+    importAction,
+    initialSingleDomainResponseImportState,
+  );
   const {
     formRef,
     onChange: handleDirtyChange,
     onInput: handleDirtyInput,
     onSubmit: handleDirtySubmit,
-  } = useSingleDomainDirtyForm({ state: createState });
+  } = useSingleDomainDirtyForm({ state: importState });
+
+  return (
+    <SurfaceCard className="p-5 lg:p-6">
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <LabelPill>Bulk import</LabelPill>
+            <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+              question_order | option_label | response_text
+            </LabelPill>
+          </div>
+          <p className="text-sm leading-7 text-white/62">
+            Paste one persisted response row per line. Question references resolve by canonical
+            question order and option labels must stay A-D. The import is atomic: either every row
+            updates the draft or nothing changes.
+          </p>
+        </div>
+        <form
+          action={importFormAction}
+          className="space-y-4"
+          key={importState.updatedOptionCount ? `responses-${importState.updatedOptionCount}` : 'responses-draft'}
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
+          <Field
+            error={importState.fieldErrors.responseLines}
+            hint="Example: 21 | A | Ensuring targets and outcomes are achieved"
+            htmlFor="single-domain-response-import"
+            label="Import rows"
+          >
+            <TextArea
+              defaultValue={importState.values.responseLines}
+              error={importState.fieldErrors.responseLines}
+              id="single-domain-response-import"
+              minHeightClass="min-h-[220px]"
+              name="responseLines"
+              placeholder={[
+                '21 | A | Ensuring targets and outcomes are achieved',
+                '21 | B | Setting direction and future priorities',
+                '21 | C | Supporting and developing people',
+                '21 | D | Creating structure and clear ways of working',
+              ].join('\n')}
+            />
+          </Field>
+          <InlineError message={importState.formError} />
+          {importState.updatedOptionCount ? (
+            <div className="rounded-[1rem] border border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] p-4 text-sm text-[rgba(217,255,229,0.94)]">
+              Updated {importState.updatedOptionCount} response option{importState.updatedOptionCount === 1 ? '' : 's'} across {importState.updatedQuestionCount} question{importState.updatedQuestionCount === 1 ? '' : 's'}.
+            </div>
+          ) : null}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm leading-6 text-white/54">
+              Question order references the persisted draft order only. Option labels must stay in
+              the canonical A-D slots created by question import.
+            </p>
+            <SubmitButton idleLabel="Import responses" pendingLabel="Importing..." />
+          </div>
+        </form>
+      </div>
+    </SurfaceCard>
+  );
+}
+
+function SingleDomainWeightingsImportForm({
+  assessmentKey,
+  assessmentVersionId,
+  availableSignals,
+}: Readonly<{
+  assessmentKey: string;
+  assessmentVersionId: string;
+  availableSignals: ReturnType<typeof useAdminAssessmentAuthoring>['availableSignals'];
+}>) {
+  const importAction = useMemo(
+    () =>
+      importSingleDomainWeightingsAction.bind(null, {
+        assessmentKey,
+        assessmentVersionId,
+      }),
+    [assessmentKey, assessmentVersionId],
+  );
+  const [importState, importFormAction] = useActionState(
+    importAction,
+    initialSingleDomainWeightingsImportState,
+  );
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state: importState });
+  const signalKeys = availableSignals.map((signal) => signal.signalKey);
+
+  return (
+    <SurfaceCard className="p-5 lg:p-6">
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <LabelPill>Bulk import</LabelPill>
+            <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+              question_order | option_label | signal_key | weight
+            </LabelPill>
+          </div>
+          <p className="text-sm leading-7 text-white/62">
+            Paste one persisted weighting row per line. Each matched question and option group is
+            replaced atomically in the draft, so the canonical database rows stay authoritative.
+          </p>
+        </div>
+        <form
+          action={importFormAction}
+          className="space-y-4"
+          key={importState.updatedWeightCount ? `weightings-${importState.updatedWeightCount}` : 'weightings-draft'}
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
+          <Field
+            error={importState.fieldErrors.weightingLines}
+            hint="Example: 21 | A | results | 1"
+            htmlFor="single-domain-weightings-import"
+            label="Import rows"
+          >
+            <TextArea
+              defaultValue={importState.values.weightingLines}
+              error={importState.fieldErrors.weightingLines}
+              id="single-domain-weightings-import"
+              minHeightClass="min-h-[220px]"
+              name="weightingLines"
+              placeholder={[
+                '21 | A | results | 1',
+                '21 | B | vision | 1',
+                '21 | C | people | 1',
+                '21 | D | process | 1',
+              ].join('\n')}
+            />
+          </Field>
+          {signalKeys.length > 0 ? (
+            <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4 text-sm leading-7 text-white/62">
+              <p className="text-sm font-medium text-white">Allowed signal keys</p>
+              <p>{signalKeys.join(', ')}</p>
+            </div>
+          ) : null}
+          <InlineError message={importState.formError} />
+          {importState.updatedWeightCount ? (
+            <div className="rounded-[1rem] border border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] p-4 text-sm text-[rgba(217,255,229,0.94)]">
+              Replaced {importState.updatedWeightCount} weight row{importState.updatedWeightCount === 1 ? '' : 's'} across {importState.updatedOptionGroupCount} response option group{importState.updatedOptionGroupCount === 1 ? '' : 's'}.
+            </div>
+          ) : null}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm leading-6 text-white/54">
+              Question order resolves against the persisted draft. Option labels must stay A-D and
+              signal keys must match the current single-domain signal set exactly.
+            </p>
+            <SubmitButton idleLabel="Import weightings" pendingLabel="Importing..." />
+          </div>
+        </form>
+      </div>
+    </SurfaceCard>
+  );
+}
+
+export function SingleDomainQuestionsAuthoring() {
+  const assessment = useAdminAssessmentAuthoring();
+  const domain = assessment.authoredDomains[0] ?? null;
+  const draftVersionId = assessment.latestDraftVersion?.assessmentVersionId ?? '';
 
   if (!assessment.latestDraftVersion) {
     return renderMissingDraftState(
@@ -1180,39 +1273,8 @@ export function SingleDomainQuestionsAuthoring() {
         assessmentKey={assessment.assessmentKey}
         assessmentVersionId={draftVersionId}
       />
-      <SurfaceCard className="p-5 lg:p-6">
-        <form
-          action={createFormAction}
-          className="space-y-4"
-          onChange={handleDirtyChange}
-          onInput={handleDirtyInput}
-          onSubmit={handleDirtySubmit}
-          ref={formRef}
-        >
-          <input name="domainId" type="hidden" value={domain.domainId} />
-          <Field
-            error={createState.fieldErrors.prompt}
-            hint="New questions receive the existing deterministic option scaffold and stay attached to the single domain."
-            htmlFor="create-question-prompt"
-            label="Question text"
-          >
-            <TextArea
-              defaultValue={createState.values.prompt}
-              error={createState.fieldErrors.prompt}
-              id="create-question-prompt"
-              minHeightClass="min-h-[120px]"
-              name="prompt"
-              placeholder="What should this question ask?"
-            />
-          </Field>
-          <InlineError message={createState.formError} />
-          <div className="flex justify-end">
-            <SubmitButton idleLabel="Add question" pendingLabel="Creating..." />
-          </div>
-        </form>
-      </SurfaceCard>
       {assessment.authoredQuestions.length === 0 ? (
-        <EmptyState description="Add the first question for this domain." title="No questions yet" />
+        <EmptyState description="Import the first question set for this domain." title="No questions yet" />
       ) : (
         <div className="space-y-4">
           {assessment.authoredQuestions.map((question) => (
@@ -1256,16 +1318,15 @@ export function SingleDomainResponsesAuthoring() {
       <SectionHeader
         eyebrow="Responses"
         title="Author response options"
-        description="Options stay grouped by question and preserve label order using the existing convention."
+        description="Import response text against the canonical persisted question order and A-D option slots."
+      />
+      <SingleDomainResponsesImportForm
+        assessmentKey={assessment.assessmentKey}
+        assessmentVersionId={draftVersionId}
       />
       <div className="space-y-5">
         {assessment.authoredQuestions.map((question) => (
-          <ResponsesQuestionCard
-            assessmentKey={assessment.assessmentKey}
-            assessmentVersionId={draftVersionId}
-            key={question.questionId}
-            question={question}
-          />
+          <ResponsesQuestionCard key={question.questionId} question={question} />
         ))}
       </div>
     </section>
@@ -1310,6 +1371,11 @@ export function SingleDomainWeightingsAuthoring() {
         <SummaryCard detail="Options with at least one authored weight." label="Weighted options" value={String(assessment.weightingSummary.weightedOptions)} />
         <SummaryCard detail="Explicit option-to-signal rows." label="Mappings" value={String(assessment.weightingSummary.totalMappings)} />
       </div>
+      <SingleDomainWeightingsImportForm
+        assessmentKey={assessment.assessmentKey}
+        assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
+        availableSignals={availableSignals}
+      />
       {assessment.authoredQuestions.length === 0 ? (
         <EmptyState description="Add questions first, then author weightings." title="No questions yet" />
       ) : assessment.weightingSummary.totalOptions === 0 ? (

@@ -156,6 +156,98 @@ test('review validation marks questions with no options and options with no weig
   assert.ok(validation.issues.some((issue) => issue.code === 'missing_weights'));
 });
 
+test('review validation keeps responses incomplete when scaffold options still have blank text', () => {
+  const validation = buildSingleDomainStructuralValidation({
+    authoredDomains: [
+      {
+        domainId: 'domain-1',
+        domainKey: 'focus',
+        label: 'Focus',
+        description: null,
+        orderIndex: 0,
+        createdAt: '',
+        updatedAt: '',
+        signals: [
+          {
+            signalId: 'signal-1',
+            signalKey: 'clarity',
+            label: 'Clarity',
+            description: null,
+            orderIndex: 0,
+            createdAt: '',
+            updatedAt: '',
+          },
+        ],
+      },
+    ],
+    authoredQuestions: [
+      {
+        questionId: 'question-1',
+        questionKey: 'q01',
+        prompt: 'Question one',
+        orderIndex: 0,
+        domainId: 'domain-1',
+        domainKey: 'focus',
+        domainLabel: 'Focus',
+        domainType: 'SIGNAL_GROUP',
+        createdAt: '',
+        updatedAt: '',
+        options: [
+          {
+            optionId: 'option-1',
+            optionKey: 'q01_a',
+            optionLabel: 'A',
+            optionText: 'Clear answer',
+            orderIndex: 0,
+            createdAt: '',
+            updatedAt: '',
+            weightingStatus: 'unmapped',
+            signalWeights: [],
+          },
+          {
+            optionId: 'option-2',
+            optionKey: 'q01_b',
+            optionLabel: 'B',
+            optionText: '',
+            orderIndex: 1,
+            createdAt: '',
+            updatedAt: '',
+            weightingStatus: 'unmapped',
+            signalWeights: [],
+          },
+          {
+            optionId: 'option-3',
+            optionKey: 'q01_c',
+            optionLabel: 'C',
+            optionText: 'Clear answer',
+            orderIndex: 2,
+            createdAt: '',
+            updatedAt: '',
+            weightingStatus: 'unmapped',
+            signalWeights: [],
+          },
+          {
+            optionId: 'option-4',
+            optionKey: 'q01_d',
+            optionLabel: 'D',
+            optionText: 'Clear answer',
+            orderIndex: 3,
+            createdAt: '',
+            updatedAt: '',
+            weightingStatus: 'unmapped',
+            signalWeights: [],
+          },
+        ],
+      },
+    ],
+    languageReady: false,
+  });
+
+  assert.equal(validation.sections.find((section) => section.key === 'responses')?.status, 'attention');
+  assert.equal(validation.sections.find((section) => section.key === 'weightings')?.status, 'waiting');
+  assert.ok(validation.issues.some((issue) => issue.code === 'blank_response_text'));
+});
+
 test('hero pair completeness derives from the current signal-derived pair count', () => {
   const validation = buildSingleDomainLanguageValidation({
     authoredDomains: [{

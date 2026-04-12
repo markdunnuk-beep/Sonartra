@@ -671,6 +671,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
 
   const allOptions = questions.flatMap((question) => question.options);
   const allWeights = allOptions.flatMap((option) => option.signalWeights);
+  const blankOptionTextOptions = allOptions.filter((option) => option.label.trim().length === 0);
 
   const questionsWithoutOptions = questions.filter((question) => question.options.length === 0);
   if (questionsWithoutOptions.length > 0) {
@@ -692,6 +693,16 @@ export async function evaluateSingleDomainRuntimeDefinition(
   }
   if (allWeights.length === 0 && allOptions.length > 0) {
     issues.push(createIssue('missing_weights', 'weights', 'Options exist, but no option-to-signal weights were found.'));
+  }
+  if (blankOptionTextOptions.length > 0) {
+    issues.push(
+      createIssue(
+        'runtime_definition_incomplete',
+        'options',
+        'Every authored option must include non-empty response text.',
+        blankOptionTextOptions.map((option) => option.key),
+      ),
+    );
   }
   if (optionsWithoutWeights.length > 0) {
     issues.push(

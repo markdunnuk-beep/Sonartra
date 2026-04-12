@@ -1,4 +1,8 @@
 import type { AdminAssessmentDetailViewModel } from '@/lib/server/admin-assessment-detail';
+import {
+  getSingleDomainResponseCoverage,
+  getSingleDomainWeightingCoverage,
+} from '@/lib/admin/single-domain-structural-validation';
 
 export type SingleDomainBuilderStepSlug =
   | 'overview'
@@ -83,6 +87,8 @@ export function getSingleDomainBuilderNextAction(
   const hasAnyLanguageRows = assessment.singleDomainLanguageValidation.datasets.some(
     (dataset) => dataset.actualRowCount > 0,
   );
+  const responseCoverage = getSingleDomainResponseCoverage(assessment.authoredQuestions);
+  const weightingCoverage = getSingleDomainWeightingCoverage(assessment.authoredQuestions);
 
   if (domainCount === 0) {
     return {
@@ -111,20 +117,20 @@ export function getSingleDomainBuilderNextAction(
     };
   }
 
-  if (optionCount === 0) {
+  if (optionCount === 0 || !responseCoverage.complete) {
     return {
       step: 'responses',
-      title: 'Define response options',
-      description: 'Response options must exist before weightings and review can reflect real assessment structure.',
+      title: 'Finish response coverage',
+      description: 'Responses are only complete when each persisted question has its canonical A-D options filled with real text.',
       ctaLabel: 'Continue to Responses',
     };
   }
 
-  if (mappingCount === 0 || assessment.weightingSummary.unmappedOptions > 0) {
+  if (mappingCount === 0 || !weightingCoverage.complete || assessment.weightingSummary.unmappedOptions > 0) {
     return {
       step: 'weightings',
       title: 'Finish option-to-signal weightings',
-      description: 'Weightings are only complete when every authored option resolves to the current authored signal set.',
+      description: 'Weightings are only complete when every authored response option resolves to the current authored signal set.',
       ctaLabel: 'Continue to Weightings',
     };
   }
@@ -182,9 +188,8 @@ export function getSingleDomainBuilderStepStatus(
   const hasAnyLanguageRows = assessment.singleDomainLanguageValidation.datasets.some(
     (dataset) => dataset.actualRowCount > 0,
   );
-  const allQuestionsHaveOptions =
-    questionCount > 0 &&
-    assessment.authoredQuestions.every((question) => question.options.length > 0);
+  const responseCoverage = getSingleDomainResponseCoverage(assessment.authoredQuestions);
+  const weightingCoverage = getSingleDomainWeightingCoverage(assessment.authoredQuestions);
 
   switch (slug) {
     case 'overview':
@@ -205,15 +210,15 @@ export function getSingleDomainBuilderStepStatus(
       if (questionCount === 0) {
         return 'waiting';
       }
-      if (allQuestionsHaveOptions) {
+      if (responseCoverage.complete) {
         return 'complete';
       }
       return optionCount > 0 ? 'in_progress' : 'empty';
     case 'weightings':
-      if (signalCount === 0 || optionCount === 0) {
+      if (signalCount === 0 || optionCount === 0 || !responseCoverage.complete) {
         return 'waiting';
       }
-      if (optionCount > 0 && signalCount > 0 && assessment.weightingSummary.unmappedOptions === 0) {
+      if (weightingCoverage.complete && assessment.weightingSummary.unmappedOptions === 0) {
         return 'complete';
       }
       return hasAnyMappings ? 'in_progress' : 'empty';

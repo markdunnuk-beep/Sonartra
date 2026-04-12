@@ -155,19 +155,122 @@ test('single-domain responses can complete while weightings stays in progress', 
             weightingStatus: 'unmapped',
             signalWeights: [],
           },
+          {
+            optionId: 'option-2',
+            optionKey: 'q01_b',
+            optionLabel: 'B',
+            optionText: 'Disagree',
+            orderIndex: 1,
+            createdAt: '',
+            updatedAt: '',
+            weightingStatus: 'unmapped',
+            signalWeights: [],
+          },
+          {
+            optionId: 'option-3',
+            optionKey: 'q01_c',
+            optionLabel: 'C',
+            optionText: 'Depends',
+            orderIndex: 2,
+            createdAt: '',
+            updatedAt: '',
+            weightingStatus: 'unmapped',
+            signalWeights: [],
+          },
+          {
+            optionId: 'option-4',
+            optionKey: 'q01_d',
+            optionLabel: 'D',
+            optionText: 'Not me',
+            orderIndex: 3,
+            createdAt: '',
+            updatedAt: '',
+            weightingStatus: 'unmapped',
+            signalWeights: [],
+          },
         ],
       },
     ],
     weightingSummary: {
-      totalOptions: 1,
+      totalOptions: 4,
       weightedOptions: 0,
-      unmappedOptions: 1,
+      unmappedOptions: 4,
       totalMappings: 0,
     },
   });
 
   assert.equal(getSingleDomainBuilderStepStatus('responses', assessment), 'complete');
   assert.equal(getSingleDomainBuilderStepStatus('weightings', assessment), 'empty');
+});
+
+test('single-domain responses stay in progress while imported scaffold options are still blank', () => {
+  const assessment = createAssessmentState({
+    authoredDomains: [
+      {
+        domainId: 'domain-1',
+        domainKey: 'leadership-style',
+        label: 'Leadership style',
+        description: null,
+        orderIndex: 0,
+        createdAt: '',
+        updatedAt: '',
+        signals: [],
+      },
+    ],
+    availableSignals: [
+      {
+        signalId: 'signal-1',
+        signalKey: 'directive',
+        signalLabel: 'Directive',
+        signalDescription: null,
+        signalOrderIndex: 0,
+        domainId: 'domain-1',
+        domainKey: 'leadership-style',
+        domainLabel: 'Leadership style',
+        domainOrderIndex: 0,
+      },
+    ],
+    authoredQuestions: [
+      {
+        questionId: 'question-1',
+        questionKey: 'q01',
+        prompt: 'Question one',
+        orderIndex: 0,
+        domainId: 'domain-1',
+        domainKey: 'leadership-style',
+        domainLabel: 'Leadership style',
+        domainType: 'SIGNAL_GROUP',
+        createdAt: '',
+        updatedAt: '',
+        options: ['A', 'B', 'C', 'D'].map((label, index) => ({
+          optionId: `option-${label}`,
+          optionKey: `q01_${label.toLowerCase()}`,
+          optionLabel: label,
+          optionText: '',
+          orderIndex: index,
+          createdAt: '',
+          updatedAt: '',
+          weightingStatus: 'unmapped' as const,
+          signalWeights: [],
+        })),
+      },
+    ],
+    weightingSummary: {
+      totalOptions: 4,
+      weightedOptions: 0,
+      unmappedOptions: 4,
+      totalMappings: 0,
+    },
+  });
+
+  assert.equal(getSingleDomainBuilderStepStatus('responses', assessment), 'in_progress');
+  assert.equal(getSingleDomainBuilderStepStatus('weightings', assessment), 'waiting');
+  assert.deepEqual(getSingleDomainBuilderNextAction(assessment), {
+    step: 'responses',
+    title: 'Finish response coverage',
+    description: 'Responses are only complete when each persisted question has its canonical A-D options filled with real text.',
+    ctaLabel: 'Continue to Responses',
+  });
 });
 
 test('single-domain review never reports blocked while the route stays viewable', () => {

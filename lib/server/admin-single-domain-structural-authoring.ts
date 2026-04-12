@@ -18,12 +18,21 @@ import {
   emptySingleDomainQuestionImportValues,
   formatSingleDomainQuestionImportError,
   initialSingleDomainQuestionImportState,
-  parseSingleDomainQuestionImport,
   buildSingleDomainQuestionImportPlan,
+  parseSingleDomainQuestionImport,
   validateSingleDomainQuestionImportValues,
   type SingleDomainQuestionImportState,
   type SingleDomainQuestionImportValues,
 } from '@/lib/admin/single-domain-question-import';
+import {
+  emptySingleDomainResponseImportValues,
+  formatSingleDomainResponseImportError,
+  initialSingleDomainResponseImportState,
+  parseSingleDomainResponseImport,
+  validateSingleDomainResponseImportValues,
+  type SingleDomainResponseImportState,
+  type SingleDomainResponseImportValues,
+} from '@/lib/admin/single-domain-response-import';
 import {
   emptyAdminWeightingAuthoringFormValues,
   initialAdminWeightingAuthoringFormState,
@@ -31,6 +40,15 @@ import {
   type AdminWeightingAuthoringFormValues,
   validateAdminWeightingAuthoringValues,
 } from '@/lib/admin/admin-weighting-authoring';
+import {
+  emptySingleDomainWeightingsImportValues,
+  formatSingleDomainWeightingsImportError,
+  initialSingleDomainWeightingsImportState,
+  parseSingleDomainWeightingsImport,
+  validateSingleDomainWeightingsImportValues,
+  type SingleDomainWeightingsImportState,
+  type SingleDomainWeightingsImportValues,
+} from '@/lib/admin/single-domain-weightings-import';
 import {
   emptyAdminAuthoringFormValues,
   initialAdminAuthoringFormState,
@@ -105,6 +123,13 @@ type SignalScopeRow = {
   signal_key: string;
 };
 
+type ImportQuestionOptionRow = {
+  question_id: string;
+  question_order_index: string | number;
+  option_id: string;
+  option_label: string | null;
+};
+
 type ActionContext = {
   assessmentKey: string;
   assessmentVersionId: string;
@@ -119,7 +144,7 @@ type TransactionClient = Queryable & {
   release(): void;
 };
 
-type QuestionImportDependencies = {
+type ImportDependencies = {
   connect(): Promise<TransactionClient>;
   revalidatePath(path: string): void;
 };
@@ -286,6 +311,26 @@ function getSingleDomainQuestionImportValuesFromFormData(
   };
 }
 
+function getSingleDomainResponseImportValuesFromFormData(
+  formData: FormData,
+): SingleDomainResponseImportValues {
+  return {
+    responseLines: typeof formData.get('responseLines') === 'string'
+      ? (formData.get('responseLines') as string)
+      : '',
+  };
+}
+
+function getSingleDomainWeightingsImportValuesFromFormData(
+  formData: FormData,
+): SingleDomainWeightingsImportValues {
+  return {
+    weightingLines: typeof formData.get('weightingLines') === 'string'
+      ? (formData.get('weightingLines') as string)
+      : '',
+  };
+}
+
 function buildTemporaryQuestionKey(lineNumber: number, orderIndex: number): string {
   return `single-domain-import-q-${lineNumber}-${orderIndex + 1}`;
 }
@@ -311,6 +356,49 @@ async function loadExistingSingleDomainQuestions(
     ORDER BY order_index ASC, id ASC
     `,
     [assessmentVersionId],
+  );
+
+  return Object.freeze(result.rows);
+}
+
+async function loadSingleDomainQuestionOptionsForImport(
+  db: Queryable,
+  assessmentVersionId: string,
+  domainId: string,
+): Promise<readonly ImportQuestionOptionRow[]> {
+  const result = await db.query<ImportQuestionOptionRow>(
+    `
+    SELECT
+      q.id AS question_id,
+      q.order_index AS question_order_index,
+      o.id AS option_id,
+      o.option_label
+    FROM questions q
+    INNER JOIN options o ON o.question_id = q.id
+    WHERE q.assessment_version_id = $1
+      AND q.domain_id = $2
+    ORDER BY q.order_index ASC, q.id ASC, o.order_index ASC, o.id ASC
+    `,
+    [assessmentVersionId, domainId],
+  );
+
+  return Object.freeze(result.rows);
+}
+
+async function loadSingleDomainSignalsForImport(
+  db: Queryable,
+  assessmentVersionId: string,
+  domainId: string,
+): Promise<readonly SignalScopeRow[]> {
+  const result = await db.query<SignalScopeRow>(
+    `
+    SELECT id AS signal_id, signal_key
+    FROM signals
+    WHERE assessment_version_id = $1
+      AND domain_id = $2
+    ORDER BY order_index ASC, id ASC
+    `,
+    [assessmentVersionId, domainId],
   );
 
   return Object.freeze(result.rows);
@@ -559,7 +647,7 @@ async function runQuestionWriteAction(params: {
 async function runQuestionImportAction(params: {
   context: ActionContext;
   values: SingleDomainQuestionImportValues;
-  dependencies: QuestionImportDependencies;
+  dependencies: ImportDependencies;
   action: (
     db: Queryable,
     scope: SingleDomainDraftScope,
@@ -646,6 +734,138 @@ async function runQuestionImportAction(params: {
 
     return {
       formError: 'Question import could not be saved. Try again.',
+      fieldErrors: {},
+      values: params.values,
+    };
+  } finally {
+    client.release();
+  }
+}
+
+async function runResponseImportAction(params: {
+  context: ActionContext;
+  values: SingleDomainResponseImportValues;
+  dependencies: ImportDependencies;
+  action: (
+    db: Queryable,
+    scope: SingleDomainDraftScope,
+  ) => Promise<SingleDomainResponseImportState>;
+}): Promise<SingleDomainResponseImportState> {
+  const client = await params.dependencies.connect();
+
+  try {
+    await client.query('BEGIN');
+    const scope = await loadSingleDomainDraftScope(client, params.context);
+    const result = await params.action(client, scope);
+    await client.query('COMMIT');
+    params.dependencies.revalidatePath(singleDomainPath(params.context.assessmentKey));
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'DRAFT_VERSION_NOT_FOUND') {
+        return {
+          formError: 'The editable draft version is no longer available.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      if (error.message === 'SINGLE_DOMAIN_MODE_REQUIRED') {
+        return {
+          formError: 'Single-domain responses import is only available on single-domain drafts.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      if (error.message === 'SINGLE_DOMAIN_DOMAIN_REQUIRED') {
+        return {
+          formError: 'Create the single domain first before importing responses.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      const formattedImportError = formatSingleDomainResponseImportError(error.message);
+      if (formattedImportError) {
+        return {
+          formError: formattedImportError,
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+    }
+
+    return {
+      formError: 'Responses import could not be saved. Try again.',
+      fieldErrors: {},
+      values: params.values,
+    };
+  } finally {
+    client.release();
+  }
+}
+
+async function runWeightingsImportAction(params: {
+  context: ActionContext;
+  values: SingleDomainWeightingsImportValues;
+  dependencies: ImportDependencies;
+  action: (
+    db: Queryable,
+    scope: SingleDomainDraftScope,
+  ) => Promise<SingleDomainWeightingsImportState>;
+}): Promise<SingleDomainWeightingsImportState> {
+  const client = await params.dependencies.connect();
+
+  try {
+    await client.query('BEGIN');
+    const scope = await loadSingleDomainDraftScope(client, params.context);
+    const result = await params.action(client, scope);
+    await client.query('COMMIT');
+    params.dependencies.revalidatePath(singleDomainPath(params.context.assessmentKey));
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'DRAFT_VERSION_NOT_FOUND') {
+        return {
+          formError: 'The editable draft version is no longer available.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      if (error.message === 'SINGLE_DOMAIN_MODE_REQUIRED') {
+        return {
+          formError: 'Single-domain weightings import is only available on single-domain drafts.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      if (error.message === 'SINGLE_DOMAIN_DOMAIN_REQUIRED') {
+        return {
+          formError: 'Create the single domain first before importing weightings.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      const formattedImportError = formatSingleDomainWeightingsImportError(error.message);
+      if (formattedImportError) {
+        return {
+          formError: formattedImportError,
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+    }
+
+    return {
+      formError: 'Weightings import could not be saved. Try again.',
       fieldErrors: {},
       values: params.values,
     };
@@ -995,7 +1215,7 @@ export async function importSingleDomainQuestionsActionWithDependencies(
   context: ActionContext,
   _previousState: SingleDomainQuestionImportState,
   formData: FormData,
-  dependencies: QuestionImportDependencies,
+  dependencies: ImportDependencies,
 ): Promise<SingleDomainQuestionImportState & {
   createdQuestions?: readonly {
     questionId: string;
@@ -1211,6 +1431,266 @@ export async function importSingleDomainQuestionsAction(
   }[];
 }> {
   return importSingleDomainQuestionsActionWithDependencies(
+    context,
+    previousState,
+    formData,
+    {
+      connect: () => getDbPool().connect(),
+      revalidatePath,
+    },
+  );
+}
+
+export async function importSingleDomainResponsesActionWithDependencies(
+  context: ActionContext,
+  _previousState: SingleDomainResponseImportState,
+  formData: FormData,
+  dependencies: ImportDependencies,
+): Promise<SingleDomainResponseImportState> {
+  const values = getSingleDomainResponseImportValuesFromFormData(formData);
+  const validation = validateSingleDomainResponseImportValues(values);
+  if (Object.keys(validation.fieldErrors).length > 0) {
+    return validation;
+  }
+
+  return runResponseImportAction({
+    context,
+    values,
+    dependencies,
+    action: async (db, scope) => {
+      if (!scope.singleDomainId || scope.domainIds.length !== 1) {
+        throw new Error('SINGLE_DOMAIN_DOMAIN_REQUIRED');
+      }
+
+      const parsedRows = parseSingleDomainResponseImport(values.responseLines);
+      const questionOptions = await loadSingleDomainQuestionOptionsForImport(
+        db,
+        context.assessmentVersionId,
+        scope.singleDomainId,
+      );
+
+      const questionMap = new Map<number, Map<string, { questionId: string; optionId: string }[]>>();
+
+      for (const row of questionOptions) {
+        const questionOrder = Number(row.question_order_index) + 1;
+        const optionLabel = row.option_label?.trim().toUpperCase() ?? '';
+        const optionEntry = {
+          questionId: row.question_id,
+          optionId: row.option_id,
+        };
+        const optionsByLabel = questionMap.get(questionOrder) ?? new Map<string, { questionId: string; optionId: string }[]>();
+        const existingOptions = optionsByLabel.get(optionLabel) ?? [];
+        existingOptions.push(optionEntry);
+        optionsByLabel.set(optionLabel, existingOptions);
+        questionMap.set(questionOrder, optionsByLabel);
+      }
+
+      const updates: { questionId: string; optionId: string; responseText: string }[] = [];
+
+      for (const row of parsedRows) {
+        const questionOptionsByLabel = questionMap.get(row.questionOrder);
+        if (!questionOptionsByLabel) {
+          throw new Error(
+            `SINGLE_DOMAIN_RESPONSES_IMPORT_LINE_${row.lineNumber}_QUESTION_ORDER_NOT_FOUND_${row.questionOrder}`,
+          );
+        }
+
+        const matchedOptions = questionOptionsByLabel.get(row.optionLabel) ?? [];
+        if (matchedOptions.length !== 1) {
+          throw new Error(
+            `SINGLE_DOMAIN_RESPONSES_IMPORT_LINE_${row.lineNumber}_OPTION_LABEL_NOT_FOUND_${row.questionOrder}_${row.optionLabel}`,
+          );
+        }
+
+        updates.push({
+          questionId: matchedOptions[0].questionId,
+          optionId: matchedOptions[0].optionId,
+          responseText: row.responseText,
+        });
+      }
+
+      for (const update of updates) {
+        await updateOptionText({
+          db,
+          assessmentVersionId: context.assessmentVersionId,
+          questionId: update.questionId,
+          optionId: update.optionId,
+          text: update.responseText,
+        });
+      }
+
+      return {
+        ...initialSingleDomainResponseImportState,
+        values: emptySingleDomainResponseImportValues,
+        updatedQuestionCount: new Set(updates.map((update) => update.questionId)).size,
+        updatedOptionCount: updates.length,
+      };
+    },
+  });
+}
+
+export async function importSingleDomainResponsesAction(
+  context: ActionContext,
+  previousState: SingleDomainResponseImportState,
+  formData: FormData,
+): Promise<SingleDomainResponseImportState> {
+  return importSingleDomainResponsesActionWithDependencies(
+    context,
+    previousState,
+    formData,
+    {
+      connect: () => getDbPool().connect(),
+      revalidatePath,
+    },
+  );
+}
+
+export async function importSingleDomainWeightingsActionWithDependencies(
+  context: ActionContext,
+  _previousState: SingleDomainWeightingsImportState,
+  formData: FormData,
+  dependencies: ImportDependencies,
+): Promise<SingleDomainWeightingsImportState> {
+  const values = getSingleDomainWeightingsImportValuesFromFormData(formData);
+  const validation = validateSingleDomainWeightingsImportValues(values);
+  if (Object.keys(validation.fieldErrors).length > 0) {
+    return validation;
+  }
+
+  return runWeightingsImportAction({
+    context,
+    values,
+    dependencies,
+    action: async (db, scope) => {
+      if (!scope.singleDomainId || scope.domainIds.length !== 1) {
+        throw new Error('SINGLE_DOMAIN_DOMAIN_REQUIRED');
+      }
+
+      const parsedRows = parseSingleDomainWeightingsImport(values.weightingLines);
+      const [questionOptions, signals] = await Promise.all([
+        loadSingleDomainQuestionOptionsForImport(
+          db,
+          context.assessmentVersionId,
+          scope.singleDomainId,
+        ),
+        loadSingleDomainSignalsForImport(
+          db,
+          context.assessmentVersionId,
+          scope.singleDomainId,
+        ),
+      ]);
+
+      const questionMap = new Map<number, Map<string, { optionId: string }[]>>();
+      for (const row of questionOptions) {
+        const questionOrder = Number(row.question_order_index) + 1;
+        const optionLabel = row.option_label?.trim().toUpperCase() ?? '';
+        const optionsByLabel = questionMap.get(questionOrder) ?? new Map<string, { optionId: string }[]>();
+        const existingOptions = optionsByLabel.get(optionLabel) ?? [];
+        existingOptions.push({ optionId: row.option_id });
+        optionsByLabel.set(optionLabel, existingOptions);
+        questionMap.set(questionOrder, optionsByLabel);
+      }
+
+      const signalsByKey = new Map<string, SignalScopeRow[]>();
+      for (const signal of signals) {
+        const existingSignals = signalsByKey.get(signal.signal_key) ?? [];
+        existingSignals.push(signal);
+        signalsByKey.set(signal.signal_key, existingSignals);
+      }
+
+      const groupedByOptionId = new Map<string, {
+        questionOrder: number;
+        optionLabel: string;
+        optionId: string;
+        rows: { signalId: string; signalKey: string; weight: number }[];
+      }>();
+
+      for (const row of parsedRows) {
+        const questionOptionsByLabel = questionMap.get(row.questionOrder);
+        if (!questionOptionsByLabel) {
+          throw new Error(
+            `SINGLE_DOMAIN_WEIGHTINGS_IMPORT_LINE_${row.lineNumber}_QUESTION_ORDER_NOT_FOUND_${row.questionOrder}`,
+          );
+        }
+
+        const matchedOptions = questionOptionsByLabel.get(row.optionLabel) ?? [];
+        if (matchedOptions.length !== 1) {
+          throw new Error(
+            `SINGLE_DOMAIN_WEIGHTINGS_IMPORT_LINE_${row.lineNumber}_OPTION_LABEL_NOT_FOUND_${row.questionOrder}_${row.optionLabel}`,
+          );
+        }
+
+        const matchedSignals = signalsByKey.get(row.signalKey) ?? [];
+        if (matchedSignals.length !== 1) {
+          throw new Error(
+            `SINGLE_DOMAIN_WEIGHTINGS_IMPORT_LINE_${row.lineNumber}_SIGNAL_KEY_NOT_FOUND_${row.signalKey}`,
+          );
+        }
+
+        const optionId = matchedOptions[0].optionId;
+        const currentGroup = groupedByOptionId.get(optionId) ?? {
+          questionOrder: row.questionOrder,
+          optionLabel: row.optionLabel,
+          optionId,
+          rows: [],
+        };
+        currentGroup.rows.push({
+          signalId: matchedSignals[0].signal_id,
+          signalKey: matchedSignals[0].signal_key,
+          weight: row.weight,
+        });
+        groupedByOptionId.set(optionId, currentGroup);
+      }
+
+      for (const group of groupedByOptionId.values()) {
+        await db.query(
+          `
+          DELETE FROM option_signal_weights
+          WHERE option_id = $1
+          `,
+          [group.optionId],
+        );
+
+        for (const row of group.rows) {
+          await db.query(
+            `
+            INSERT INTO option_signal_weights (
+              option_id,
+              signal_id,
+              weight,
+              source_weight_key
+            )
+            VALUES ($1, $2, $3::numeric(12, 4), $4)
+            `,
+            [
+              group.optionId,
+              row.signalId,
+              String(row.weight),
+              `${group.questionOrder}|${group.optionLabel}|${row.signalKey}`,
+            ],
+          );
+        }
+      }
+
+      return {
+        ...initialSingleDomainWeightingsImportState,
+        values: emptySingleDomainWeightingsImportValues,
+        updatedOptionGroupCount: groupedByOptionId.size,
+        updatedWeightCount: [...groupedByOptionId.values()].reduce(
+          (count, group) => count + group.rows.length,
+          0,
+        ),
+      };
+    },
+  });
+}
+
+export async function importSingleDomainWeightingsAction(
+  context: ActionContext,
+  previousState: SingleDomainWeightingsImportState,
+  formData: FormData,
+): Promise<SingleDomainWeightingsImportState> {
+  return importSingleDomainWeightingsActionWithDependencies(
     context,
     previousState,
     formData,
