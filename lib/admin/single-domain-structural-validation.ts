@@ -28,7 +28,7 @@ export type SingleDomainStructuralSectionKey =
 export type SingleDomainStructuralSection = {
   key: SingleDomainStructuralSectionKey;
   label: string;
-  status: 'ready' | 'attention';
+  status: 'ready' | 'attention' | 'waiting' | 'not_started';
   detail: string;
   issues: readonly SingleDomainStructuralIssue[];
 };
@@ -61,6 +61,7 @@ export type SingleDomainLanguageDatasetValidation = {
   actualRowCount: number;
   expectedRowCount: number;
   countRule: 'at_least' | 'exact';
+  status: 'ready' | 'attention' | 'waiting' | 'not_started';
   isReady: boolean;
   detail: string;
   issues: readonly SingleDomainStructuralIssue[];
@@ -85,13 +86,14 @@ function createIssue(
 function createSection(
   key: SingleDomainStructuralSectionKey,
   label: string,
+  status: SingleDomainStructuralSection['status'],
   detail: string,
   issues: readonly SingleDomainStructuralIssue[],
 ): SingleDomainStructuralSection {
   return {
     key,
     label,
-    status: issues.some((issue) => issue.severity === 'blocking') ? 'attention' : 'ready',
+    status,
     detail,
     issues: Object.freeze([...issues]),
   };
@@ -114,12 +116,14 @@ function createLanguageDatasetValidation(params: {
   countRule: 'at_least' | 'exact';
   successDetail: string;
   failureMessage: string;
+  waitingDetail?: string;
 }): SingleDomainLanguageDatasetValidation {
+  const isWaiting = typeof params.waitingDetail === 'string';
   const definition = getSingleDomainLanguageDatasetDefinition(params.datasetKey);
-  const isReady = params.countRule === 'at_least'
+  const isReady = !isWaiting && (params.countRule === 'at_least'
     ? params.actualRowCount >= params.expectedRowCount
-    : params.actualRowCount === params.expectedRowCount;
-  const issues = isReady
+    : params.actualRowCount === params.expectedRowCount);
+  const issues = isReady || isWaiting
     ? []
     : [
         createIssue(
@@ -127,6 +131,13 @@ function createLanguageDatasetValidation(params: {
           params.failureMessage,
         ),
       ];
+  const status = isWaiting
+    ? 'waiting'
+    : isReady
+      ? 'ready'
+      : params.actualRowCount > 0
+        ? 'attention'
+        : 'not_started';
 
   return {
     datasetKey: params.datasetKey,
@@ -134,8 +145,9 @@ function createLanguageDatasetValidation(params: {
     actualRowCount: params.actualRowCount,
     expectedRowCount: params.expectedRowCount,
     countRule: params.countRule,
+    status,
     isReady,
-    detail: isReady ? params.successDetail : params.failureMessage,
+    detail: isWaiting ? params.waitingDetail ?? params.failureMessage : isReady ? params.successDetail : params.failureMessage,
     issues: Object.freeze(issues),
   };
 }
@@ -144,6 +156,7 @@ export function buildSingleDomainLanguageValidation(params: {
   authoredDomains: readonly AdminAssessmentDetailDomain[];
   languageBundle: SingleDomainLanguageBundle;
 }): SingleDomainLanguageValidation {
+  const domainCount = params.authoredDomains.length;
   const signalCount = params.authoredDomains.reduce((sum, domain) => sum + domain.signals.length, 0);
   const expectedPairCount = getExpectedSignalPairCount(signalCount);
   const datasets: SingleDomainLanguageDatasetValidation[] = [
@@ -154,6 +167,7 @@ export function buildSingleDomainLanguageValidation(params: {
       countRule: 'at_least',
       successDetail: 'Domain framing includes the required opening coverage for this single-domain builder.',
       failureMessage: 'DOMAIN_FRAMING must contain at least 1 row for the domain framing section.',
+      waitingDetail: domainCount === 0 ? 'Waiting on the single authored domain before domain framing can be assessed.' : undefined,
     }),
     createLanguageDatasetValidation({
       datasetKey: 'HERO_PAIRS',
@@ -162,6 +176,11 @@ export function buildSingleDomainLanguageValidation(params: {
       countRule: 'exact',
       successDetail: `HERO_PAIRS matches the current derived pair count (${expectedPairCount}).`,
       failureMessage: `HERO_PAIRS must contain exactly ${expectedPairCount} row${expectedPairCount === 1 ? '' : 's'} to match the current signal-derived pair count.`,
+      waitingDetail: signalCount === 0
+        ? 'Waiting on authored signals before hero pairs can be derived.'
+        : expectedPairCount === 0
+          ? 'Waiting on at least two authored signals before hero pairs can be derived.'
+          : undefined,
     }),
     createLanguageDatasetValidation({
       datasetKey: 'SIGNAL_CHAPTERS',
@@ -170,6 +189,7 @@ export function buildSingleDomainLanguageValidation(params: {
       countRule: 'exact',
       successDetail: `SIGNAL_CHAPTERS matches the current authored signal count (${signalCount}).`,
       failureMessage: `SIGNAL_CHAPTERS must contain exactly ${signalCount} row${signalCount === 1 ? '' : 's'} to match the current authored signal count.`,
+      waitingDetail: signalCount === 0 ? 'Waiting on authored signals before signal chapters can be assessed.' : undefined,
     }),
     createLanguageDatasetValidation({
       datasetKey: 'BALANCING_SECTIONS',
@@ -178,6 +198,11 @@ export function buildSingleDomainLanguageValidation(params: {
       countRule: 'exact',
       successDetail: `BALANCING_SECTIONS matches the current derived pair count (${expectedPairCount}).`,
       failureMessage: `BALANCING_SECTIONS must contain exactly ${expectedPairCount} row${expectedPairCount === 1 ? '' : 's'} to match the current signal-derived pair count.`,
+      waitingDetail: signalCount === 0
+        ? 'Waiting on authored signals before balancing sections can be derived.'
+        : expectedPairCount === 0
+          ? 'Waiting on at least two authored signals before balancing sections can be derived.'
+          : undefined,
     }),
     createLanguageDatasetValidation({
       datasetKey: 'PAIR_SUMMARIES',
@@ -186,6 +211,11 @@ export function buildSingleDomainLanguageValidation(params: {
       countRule: 'exact',
       successDetail: `PAIR_SUMMARIES matches the current derived pair count (${expectedPairCount}).`,
       failureMessage: `PAIR_SUMMARIES must contain exactly ${expectedPairCount} row${expectedPairCount === 1 ? '' : 's'} to match the current signal-derived pair count.`,
+      waitingDetail: signalCount === 0
+        ? 'Waiting on authored signals before pair summaries can be derived.'
+        : expectedPairCount === 0
+          ? 'Waiting on at least two authored signals before pair summaries can be derived.'
+          : undefined,
     }),
     createLanguageDatasetValidation({
       datasetKey: 'APPLICATION_STATEMENTS',
@@ -194,6 +224,7 @@ export function buildSingleDomainLanguageValidation(params: {
       countRule: 'exact',
       successDetail: `APPLICATION_STATEMENTS matches the current authored signal count (${signalCount}).`,
       failureMessage: `APPLICATION_STATEMENTS must contain exactly ${signalCount} row${signalCount === 1 ? '' : 's'} to match the current authored signal count.`,
+      waitingDetail: signalCount === 0 ? 'Waiting on authored signals before application statements can be assessed.' : undefined,
     }),
   ];
   const issues = Object.freeze(datasets.flatMap((dataset) => dataset.issues));
@@ -250,6 +281,8 @@ export function buildSingleDomainStructuralValidation(
   const weightingIssues: SingleDomainStructuralIssue[] = [];
   const languageValidation = input.languageValidation;
   const languageIssues = languageValidation ? [...languageValidation.issues] : [];
+  const allQuestionsHaveOptions =
+    questionCount > 0 && input.authoredQuestions.every((question) => question.options.length > 0);
 
   if (domainCount === 0) {
     domainIssues.push(createIssue('missing_domain', 'Add the one authored domain required by this builder.'));
@@ -344,43 +377,72 @@ export function buildSingleDomainStructuralValidation(
     orphanWeightSignalCount,
     issues,
     sections: Object.freeze([
-      createSection('overview', 'Overview', 'Assessment identity and draft scope are available.', []),
+      createSection('overview', 'Overview', 'ready', 'Assessment identity and draft scope are available.', []),
       createSection(
         'domain',
         'Domain',
+        domainCount === 1 ? 'ready' : 'attention',
         domainCount === 1 ? 'Exactly one domain is in place.' : 'This builder supports one domain only.',
         domainIssues,
       ),
       createSection(
         'signals',
         'Signals',
+        domainCount === 0 ? 'waiting' : signalCount > 0 ? 'ready' : 'not_started',
         signalCount > 0
           ? `${signalCount} signal${signalCount === 1 ? '' : 's'} authored. Expected pairs derive from the current signal set.`
-          : 'Signal count is flexible, but at least one signal is required.',
+          : domainCount === 0
+            ? 'Waiting on the single domain before signals can be assessed.'
+            : 'Signal count is flexible, but at least one signal is required.',
         signalIssues,
       ),
       createSection(
         'questions',
         'Questions',
+        domainCount === 0 ? 'waiting' : questionCount > 0 ? 'ready' : 'not_started',
         questionCount > 0
           ? `${questionCount} question${questionCount === 1 ? '' : 's'} authored in deterministic order.`
-          : 'Questions must attach to the single domain.',
+          : domainCount === 0
+            ? 'Waiting on the single domain before questions can be assessed.'
+            : 'Questions must attach to the single domain.',
         questionIssues,
       ),
       createSection(
         'responses',
         'Responses',
+        questionCount === 0
+          ? 'waiting'
+          : allQuestionsHaveOptions
+            ? 'ready'
+            : optionCount > 0
+              ? 'attention'
+              : 'not_started',
         optionCount > 0
           ? `${optionCount} response option${optionCount === 1 ? '' : 's'} grouped under authored questions.`
-          : 'Each question needs at least one response option.',
+          : questionCount === 0
+            ? 'Waiting on authored questions before responses can be assessed.'
+            : 'Each question needs at least one response option.',
         responseIssues,
       ),
       createSection(
         'weightings',
         'Weightings',
+        signalCount === 0
+          ? 'waiting'
+          : optionCount === 0
+            ? 'waiting'
+            : mappingCount > 0 && optionsWithoutWeightsCount === 0 && orphanWeightSignalCount === 0
+              ? 'ready'
+              : mappingCount > 0
+                ? 'attention'
+                : 'not_started',
         mappingCount > 0
           ? `${mappingCount} option-to-signal weight row${mappingCount === 1 ? '' : 's'} authored.`
-          : 'Weight rows must resolve against existing options and signals only.',
+          : signalCount === 0
+            ? 'Waiting on authored signals before weightings can be assessed.'
+            : optionCount === 0
+              ? 'Waiting on authored responses before weightings can be assessed.'
+              : 'Weight rows must resolve against existing options and signals only.',
         weightingIssues,
       ),
       createSection(
@@ -388,8 +450,21 @@ export function buildSingleDomainStructuralValidation(
         'Language',
         languageValidation
           ? languageValidation.overallReady
+            ? 'ready'
+            : languageValidation.datasets.every((dataset) => dataset.status === 'waiting')
+              ? 'waiting'
+              : languageValidation.datasets.some((dataset) => dataset.status === 'attention')
+                ? 'attention'
+                : 'not_started'
+          : input.languageReady
+            ? 'attention'
+            : 'waiting',
+        languageValidation
+          ? languageValidation.overallReady
             ? 'All six locked single-domain language datasets meet the current completeness contract.'
-            : 'Language completeness is evaluated from the authored signals and current dataset row counts.'
+            : languageValidation.datasets.every((dataset) => dataset.status === 'waiting')
+              ? 'Language datasets are waiting on earlier authored structure before they can be assessed.'
+              : 'Language completeness is evaluated from the authored signals, derived pairs, and current dataset row counts.'
           : input.languageReady
             ? 'Single-domain language datasets have draft activity.'
             : 'Language remains a placeholder in this task.',

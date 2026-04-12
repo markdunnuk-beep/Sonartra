@@ -40,9 +40,13 @@ test('review validation surfaces real structural readiness issues for single-dom
 
   const domainSection = validation.sections.find((section) => section.key === 'domain');
   const weightingSection = validation.sections.find((section) => section.key === 'weightings');
+  const responseSection = validation.sections.find((section) => section.key === 'responses');
+  const languageSection = validation.sections.find((section) => section.key === 'language');
 
   assert.equal(domainSection?.status, 'attention');
-  assert.equal(weightingSection?.status, 'ready');
+  assert.equal(responseSection?.status, 'waiting');
+  assert.equal(weightingSection?.status, 'waiting');
+  assert.equal(languageSection?.status, 'waiting');
 });
 
 test('review validation flags multiple domains so the builder can block second-domain drift explicitly', () => {
@@ -249,6 +253,33 @@ test('signal chapters and application statements completeness derive from the cu
   assert.equal(validation.signalCount, 2);
   assert.equal(signalChapters?.expectedRowCount, 2);
   assert.equal(signalChapters?.isReady, false);
+  assert.equal(signalChapters?.status, 'attention');
   assert.equal(applicationStatements?.expectedRowCount, 2);
   assert.equal(applicationStatements?.isReady, false);
+  assert.equal(applicationStatements?.status, 'attention');
+});
+
+test('language validation never treats zero expected rows as ready when prerequisites are missing', () => {
+  const validation = buildSingleDomainLanguageValidation({
+    authoredDomains: [],
+    languageBundle: {
+      DOMAIN_FRAMING: [],
+      HERO_PAIRS: [],
+      SIGNAL_CHAPTERS: [],
+      BALANCING_SECTIONS: [],
+      PAIR_SUMMARIES: [],
+      APPLICATION_STATEMENTS: [],
+    },
+  });
+
+  const heroPairs = validation.datasets.find((dataset) => dataset.datasetKey === 'HERO_PAIRS');
+  const signalChapters = validation.datasets.find((dataset) => dataset.datasetKey === 'SIGNAL_CHAPTERS');
+
+  assert.equal(validation.overallReady, false);
+  assert.equal(heroPairs?.expectedRowCount, 0);
+  assert.equal(heroPairs?.isReady, false);
+  assert.equal(heroPairs?.status, 'waiting');
+  assert.match(heroPairs?.detail ?? '', /Waiting on authored signals/i);
+  assert.equal(signalChapters?.expectedRowCount, 0);
+  assert.equal(signalChapters?.status, 'waiting');
 });

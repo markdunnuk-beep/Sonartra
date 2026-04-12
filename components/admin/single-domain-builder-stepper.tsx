@@ -34,6 +34,8 @@ function StepIndicator({
             ? 'border-[rgba(116,209,177,0.28)] bg-[rgba(116,209,177,0.16)] text-[rgba(214,246,233,0.92)]'
             : status === 'in_progress'
               ? 'border-[rgba(126,179,255,0.2)] bg-[rgba(126,179,255,0.08)] text-[rgba(214,232,255,0.82)]'
+              : status === 'waiting'
+                ? 'border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.84)]'
               : status === 'reference'
                 ? 'border-[rgba(201,204,218,0.18)] bg-[rgba(201,204,218,0.08)] text-[rgba(232,235,245,0.86)]'
                 : 'border-white/10 bg-white/[0.03] text-white/56',
@@ -54,6 +56,8 @@ function StepStatusBadge({
       ? 'Complete'
       : status === 'in_progress'
         ? 'In progress'
+        : status === 'waiting'
+          ? 'Waiting'
         : status === 'reference'
           ? 'Reference'
           : 'Empty';
@@ -66,6 +70,8 @@ function StepStatusBadge({
           ? 'border-[rgba(116,209,177,0.18)] bg-[rgba(116,209,177,0.08)] text-[rgba(214,246,233,0.84)]'
           : status === 'in_progress'
             ? 'border-[rgba(126,179,255,0.18)] bg-[rgba(126,179,255,0.08)] text-[rgba(214,232,255,0.82)]'
+            : status === 'waiting'
+              ? 'border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.09)] text-[rgba(255,227,187,0.88)]'
             : status === 'reference'
               ? 'border-[rgba(201,204,218,0.18)] bg-[rgba(201,204,218,0.08)] text-[rgba(232,235,245,0.82)]'
               : 'border-white/10 bg-white/[0.03] text-white/54',
@@ -87,7 +93,7 @@ export function SingleDomainBuilderStepper() {
   const steps = singleDomainBuilderSteps.map((step) => ({
     ...step,
     href: getAssessmentBuilderStepPath(assessment.assessmentKey, step.slug, assessment.mode),
-    status: getSingleDomainBuilderStepStatus(step.slug, assessment),
+    status: getSingleDomainBuilderStepStatus(step.slug, assessment, activeStep),
   }));
   const activeStepModel = steps[activeIndex] ?? steps[0];
   const completeCount = steps.filter((step) => step.status === 'complete').length;
@@ -142,6 +148,8 @@ export function SingleDomainBuilderStepper() {
                         ? 'border-[rgba(126,179,255,0.24)] bg-[rgba(126,179,255,0.1)] text-white'
                         : step.status === 'complete'
                           ? 'border-[rgba(116,209,177,0.12)] bg-[rgba(116,209,177,0.04)] text-white/86'
+                          : step.status === 'waiting'
+                            ? 'border-[rgba(255,184,107,0.14)] bg-[rgba(255,184,107,0.06)] text-white/78'
                           : step.status === 'reference'
                             ? 'border-[rgba(201,204,218,0.14)] bg-[rgba(201,204,218,0.05)] text-white/76'
                             : step.status === 'in_progress'
@@ -181,6 +189,8 @@ export function SingleDomainBuilderStepper() {
                   ? 'border-[rgba(126,179,255,0.24)] bg-[rgba(126,179,255,0.1)] text-white'
                   : step.status === 'complete'
                     ? 'border-[rgba(116,209,177,0.12)] bg-[rgba(116,209,177,0.04)] text-white/86 hover:border-[rgba(116,209,177,0.2)] hover:bg-[rgba(116,209,177,0.06)]'
+                    : step.status === 'waiting'
+                      ? 'border-[rgba(255,184,107,0.14)] bg-[rgba(255,184,107,0.06)] text-white/76 hover:border-[rgba(255,184,107,0.22)] hover:bg-[rgba(255,184,107,0.08)]'
                     : step.status === 'reference'
                       ? 'border-[rgba(201,204,218,0.14)] bg-[rgba(201,204,218,0.05)] text-white/74 hover:border-[rgba(201,204,218,0.22)] hover:bg-[rgba(201,204,218,0.07)]'
                       : step.status === 'in_progress'

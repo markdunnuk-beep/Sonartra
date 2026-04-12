@@ -205,17 +205,27 @@ export function SingleDomainLanguageImport({
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-semibold text-white">{dataset.label}</p>
                 <LabelPill
-                  className={dataset.isReady
+                  className={dataset.status === 'ready'
                     ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
                     : 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'}
                 >
-                  {dataset.isReady ? 'Ready' : 'Attention'}
+                  {dataset.status === 'ready'
+                    ? 'Ready'
+                    : dataset.status === 'waiting'
+                      ? 'Waiting'
+                      : dataset.status === 'not_started'
+                        ? 'Not started'
+                        : 'Attention'}
                 </LabelPill>
               </div>
               <p className="mt-3 text-sm leading-6 text-white/54">
                 {dataset.actualRowCount} row{dataset.actualRowCount === 1 ? '' : 's'}
                 {' '}loaded
-                {dataset.countRule === 'exact' ? ` / ${dataset.expectedRowCount} expected` : ' / 1+ required'}
+                {dataset.status === 'waiting'
+                  ? ` / ${dataset.detail}`
+                  : dataset.countRule === 'exact'
+                    ? ` / ${dataset.expectedRowCount} expected`
+                    : ' / 1+ required'}
               </p>
             </button>
           );
@@ -253,7 +263,9 @@ export function SingleDomainLanguageImport({
                 Expected header: {selectedDefinition.expectedHeaders.join('|')}
               </LabelPill>
               <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
-                {selectedValidation?.countRule === 'exact'
+                {selectedValidation?.status === 'waiting'
+                  ? 'Waiting on earlier structure'
+                  : selectedValidation?.countRule === 'exact'
                   ? `${selectedValidation.expectedRowCount} expected`
                   : '1+ required'}
               </LabelPill>

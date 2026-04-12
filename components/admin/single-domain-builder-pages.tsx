@@ -14,6 +14,24 @@ import {
 } from '@/components/admin/single-domain-structural-authoring';
 import { getAssessmentBuilderStepPath } from '@/lib/admin/assessment-builder-paths';
 
+function getSingleDomainLanguageStageSummary(
+  validation: ReturnType<typeof useAdminAssessmentAuthoring>['singleDomainLanguageValidation'],
+): { value: string; detail: string } {
+  if (validation.overallReady) {
+    return { value: 'Ready', detail: 'Current locked dataset completeness.' };
+  }
+
+  if (validation.datasets.every((dataset) => dataset.status === 'waiting')) {
+    return { value: 'Waiting', detail: 'Earlier structure must exist before language can be assessed.' };
+  }
+
+  if (validation.datasets.some((dataset) => dataset.actualRowCount > 0)) {
+    return { value: 'In progress', detail: 'Some locked datasets have authored rows, but the set is incomplete.' };
+  }
+
+  return { value: 'Not started', detail: 'Locked datasets have not been authored yet.' };
+}
+
 export const singleDomainSignalsStepCopy = {
   intro:
     'Signal count stays open-ended here. Pair expectations, report balance, and future import checks will derive from the actual signals you author instead of any fixed four-signal template.',
@@ -179,6 +197,7 @@ export function SingleDomainWeightingsPageContent() {
 
 export function SingleDomainLanguagePageContent() {
   const { assessment, signalCount } = useReadinessMetrics();
+  const languageStageSummary = getSingleDomainLanguageStageSummary(assessment.singleDomainLanguageValidation);
 
   return (
     <SingleDomainBuilderStage
@@ -195,8 +214,8 @@ export function SingleDomainLanguagePageContent() {
       readiness={[
         {
           label: 'Language status',
-          value: assessment.singleDomainLanguageValidation.overallReady ? 'Ready' : 'In progress',
-          detail: 'Current locked dataset completeness.',
+          value: languageStageSummary.value,
+          detail: languageStageSummary.detail,
         },
         { label: 'Signals available', value: String(signalCount), detail: 'Signal chapters depend on authored signals.' },
         { label: 'Dataset families', value: '6 locked', detail: 'Structured single-domain language datasets.' },
@@ -208,10 +227,12 @@ export function SingleDomainLanguagePageContent() {
       ]}
       checklist={assessment.singleDomainLanguageValidation.datasets.map((dataset) => ({
         label: dataset.label,
-        status: dataset.isReady ? 'ready' : 'attention',
-        detail: dataset.countRule === 'exact'
-          ? `${dataset.actualRowCount}/${dataset.expectedRowCount} rows loaded.`
-          : `${dataset.actualRowCount} row${dataset.actualRowCount === 1 ? '' : 's'} loaded; 1+ required.`,
+        status: dataset.status === 'ready' ? 'ready' : 'attention',
+        detail: dataset.status === 'waiting'
+          ? dataset.detail
+          : dataset.countRule === 'exact'
+            ? `${dataset.actualRowCount}/${dataset.expectedRowCount} rows loaded.`
+            : `${dataset.actualRowCount} row${dataset.actualRowCount === 1 ? '' : 's'} loaded; 1+ required.`,
       }))}
       nextIntent="Import each locked dataset through the strict schema contract only. Review readiness updates from the persisted row counts and the current authored signal set."
     >

@@ -10,7 +10,12 @@ export type SingleDomainBuilderStepSlug =
   | 'language'
   | 'review';
 
-export type SingleDomainBuilderStepStatus = 'complete' | 'in_progress' | 'empty' | 'reference';
+export type SingleDomainBuilderStepStatus =
+  | 'complete'
+  | 'in_progress'
+  | 'empty'
+  | 'waiting'
+  | 'reference';
 
 export type SingleDomainBuilderStepperState = Pick<
   AdminAssessmentDetailViewModel,
@@ -22,20 +27,27 @@ export type SingleDomainBuilderStepperState = Pick<
   | 'weightingSummary'
   | 'draftValidation'
   | 'stepCompletion'
+  | 'singleDomainLanguageValidation'
 >;
 
 export function getSingleDomainBuilderStepStatus(
   slug: SingleDomainBuilderStepSlug,
   assessment: SingleDomainBuilderStepperState,
+  activeStep?: SingleDomainBuilderStepSlug,
 ): SingleDomainBuilderStepStatus {
   if (assessment.builderMode === 'published_no_draft') {
     return 'reference';
   }
 
+  const isCurrentStep = activeStep === slug;
   const domainCount = assessment.authoredDomains.length;
   const signalCount = assessment.availableSignals.length;
   const questionCount = assessment.authoredQuestions.length;
   const optionCount = assessment.weightingSummary.totalOptions;
+  const hasAnyMappings = assessment.weightingSummary.totalMappings > 0;
+  const hasAnyLanguageRows = assessment.singleDomainLanguageValidation.datasets.some(
+    (dataset) => dataset.actualRowCount > 0,
+  );
   const allQuestionsHaveOptions =
     questionCount > 0 &&
     assessment.authoredQuestions.every((question) => question.options.length > 0);
@@ -44,36 +56,73 @@ export function getSingleDomainBuilderStepStatus(
     case 'overview':
       return 'complete';
     case 'domain':
-      return domainCount === 1 ? 'complete' : domainCount > 1 ? 'in_progress' : 'empty';
+      return domainCount === 1 ? 'complete' : isCurrentStep || domainCount > 1 ? 'in_progress' : 'empty';
     case 'signals':
-      return signalCount > 0 ? 'complete' : domainCount > 1 ? 'in_progress' : 'empty';
+      if (signalCount > 0) {
+        return 'complete';
+      }
+      if (isCurrentStep) {
+        return 'in_progress';
+      }
+      return domainCount === 0 ? 'waiting' : 'empty';
     case 'questions':
-      return questionCount > 0 ? 'complete' : signalCount > 0 ? 'in_progress' : 'empty';
+      if (questionCount > 0) {
+        return 'complete';
+      }
+      if (isCurrentStep) {
+        return 'in_progress';
+      }
+      return signalCount === 0 ? 'waiting' : 'empty';
     case 'responses':
-      return allQuestionsHaveOptions
-        ? 'complete'
-        : optionCount > 0 || questionCount > 0
-          ? 'in_progress'
-          : 'empty';
+      if (allQuestionsHaveOptions) {
+        return 'complete';
+      }
+      if (isCurrentStep) {
+        return 'in_progress';
+      }
+      if (questionCount === 0) {
+        return 'waiting';
+      }
+      return optionCount > 0 ? 'in_progress' : 'empty';
     case 'weightings':
-      return optionCount > 0 && signalCount > 0 && assessment.weightingSummary.unmappedOptions === 0
-        ? 'complete'
-        : assessment.weightingSummary.totalMappings > 0
-          || optionCount > 0
-          || signalCount > 0
-          ? 'in_progress'
-          : 'empty';
+      if (optionCount > 0 && signalCount > 0 && assessment.weightingSummary.unmappedOptions === 0) {
+        return 'complete';
+      }
+      if (isCurrentStep) {
+        return 'in_progress';
+      }
+      if (signalCount === 0 || optionCount === 0) {
+        return 'waiting';
+      }
+      return hasAnyMappings ? 'in_progress' : 'empty';
     case 'language':
-      return assessment.stepCompletion.language === 'complete'
-        ? 'complete'
-        : assessment.latestDraftVersion
-          ? 'in_progress'
-          : 'empty';
+      if (assessment.stepCompletion.language === 'complete') {
+        return 'complete';
+      }
+      if (isCurrentStep) {
+        return 'in_progress';
+      }
+      if (signalCount === 0) {
+        return 'waiting';
+      }
+      return hasAnyLanguageRows ? 'in_progress' : 'empty';
     case 'review':
-      return !assessment.latestDraftVersion
-        ? 'empty'
-        : assessment.draftValidation.isPublishReady
-          ? 'complete'
-          : 'in_progress';
+      if (!assessment.latestDraftVersion) {
+        return 'empty';
+      }
+      if (assessment.draftValidation.isPublishReady) {
+        return 'complete';
+      }
+      if (isCurrentStep) {
+        return 'in_progress';
+      }
+      return domainCount === 0 &&
+        signalCount === 0 &&
+        questionCount === 0 &&
+        optionCount === 0 &&
+        !hasAnyMappings &&
+        !hasAnyLanguageRows
+        ? 'waiting'
+        : 'in_progress';
   }
 }

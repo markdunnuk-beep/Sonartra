@@ -7,6 +7,7 @@ import {
   getSingleDomainBuilderStepStatus,
   type SingleDomainBuilderStepperState,
 } from '@/lib/admin/single-domain-builder-stepper';
+import { buildSingleDomainLanguageValidation } from '@/lib/admin/single-domain-structural-validation';
 
 function createAssessmentState(
   overrides: Partial<SingleDomainBuilderStepperState> = {},
@@ -66,6 +67,17 @@ function createAssessmentState(
       assessmentIntro: 'incomplete',
       language: 'incomplete',
     },
+    singleDomainLanguageValidation: buildSingleDomainLanguageValidation({
+      authoredDomains: [],
+      languageBundle: {
+        DOMAIN_FRAMING: [],
+        HERO_PAIRS: [],
+        SIGNAL_CHAPTERS: [],
+        BALANCING_SECTIONS: [],
+        PAIR_SUMMARIES: [],
+        APPLICATION_STATEMENTS: [],
+      },
+    }),
     ...overrides,
   };
 }
@@ -73,11 +85,18 @@ function createAssessmentState(
 test('single-domain stepper keeps viewable incomplete stages out of blocked semantics', () => {
   const assessment = createAssessmentState();
 
-  assert.equal(getSingleDomainBuilderStepStatus('signals', assessment), 'empty');
-  assert.equal(getSingleDomainBuilderStepStatus('questions', assessment), 'empty');
-  assert.equal(getSingleDomainBuilderStepStatus('responses', assessment), 'empty');
-  assert.equal(getSingleDomainBuilderStepStatus('weightings', assessment), 'empty');
-  assert.equal(getSingleDomainBuilderStepStatus('review', assessment), 'in_progress');
+  assert.equal(getSingleDomainBuilderStepStatus('signals', assessment), 'waiting');
+  assert.equal(getSingleDomainBuilderStepStatus('questions', assessment), 'waiting');
+  assert.equal(getSingleDomainBuilderStepStatus('responses', assessment), 'waiting');
+  assert.equal(getSingleDomainBuilderStepStatus('weightings', assessment), 'waiting');
+  assert.equal(getSingleDomainBuilderStepStatus('review', assessment), 'waiting');
+});
+
+test('active single-domain steps do not report empty while the admin is working on them', () => {
+  const assessment = createAssessmentState();
+
+  assert.equal(getSingleDomainBuilderStepStatus('domain', assessment, 'domain'), 'in_progress');
+  assert.equal(getSingleDomainBuilderStepStatus('signals', assessment, 'signals'), 'in_progress');
 });
 
 test('single-domain responses can complete while weightings stays in progress', () => {
@@ -143,7 +162,7 @@ test('single-domain responses can complete while weightings stays in progress', 
   });
 
   assert.equal(getSingleDomainBuilderStepStatus('responses', assessment), 'complete');
-  assert.equal(getSingleDomainBuilderStepStatus('weightings', assessment), 'in_progress');
+  assert.equal(getSingleDomainBuilderStepStatus('weightings', assessment), 'empty');
 });
 
 test('single-domain review never reports blocked while the route stays viewable', () => {
@@ -160,7 +179,14 @@ test('single-domain review never reports blocked while the route stays viewable'
     },
   });
 
-  assert.equal(getSingleDomainBuilderStepStatus('review', assessment), 'in_progress');
+  assert.equal(getSingleDomainBuilderStepStatus('review', assessment), 'waiting');
+});
+
+test('single-domain language waits instead of overstating progress when no structure exists', () => {
+  const assessment = createAssessmentState();
+
+  assert.equal(getSingleDomainBuilderStepStatus('language', assessment), 'waiting');
+  assert.equal(getSingleDomainBuilderStepStatus('language', assessment, 'language'), 'in_progress');
 });
 
 test('single-domain stepper source no longer renders a blocked badge', () => {

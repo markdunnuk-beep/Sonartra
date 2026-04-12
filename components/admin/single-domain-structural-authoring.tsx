@@ -196,6 +196,35 @@ function SummaryCard({
   );
 }
 
+function getStatusPillClass(status: 'ready' | 'attention' | 'waiting' | 'not_started') {
+  if (status === 'ready') {
+    return 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]';
+  }
+
+  if (status === 'waiting') {
+    return 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]';
+  }
+
+  if (status === 'not_started') {
+    return 'border-white/10 bg-white/[0.04] text-white/68';
+  }
+
+  return 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]';
+}
+
+function getStatusLabel(status: 'ready' | 'attention' | 'waiting' | 'not_started') {
+  if (status === 'ready') {
+    return 'Ready';
+  }
+  if (status === 'waiting') {
+    return 'Waiting';
+  }
+  if (status === 'not_started') {
+    return 'Not started';
+  }
+  return 'Attention';
+}
+
 function renderMissingDraftState(
   assessmentKey: string,
   builderMode: 'draft' | 'published_no_draft' | 'setup',
@@ -1101,13 +1130,9 @@ export function SingleDomainReviewAuthoring() {
               <div className="flex flex-wrap items-center gap-2">
                 <LabelPill>{section.label}</LabelPill>
                 <LabelPill
-                  className={
-                    section.status === 'ready'
-                      ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
-                      : 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'
-                  }
+                  className={getStatusPillClass(section.status)}
                 >
-                  {section.status === 'ready' ? 'Ready' : 'Attention'}
+                  {getStatusLabel(section.status)}
                 </LabelPill>
               </div>
               <p className="text-sm leading-7 text-white/62">{section.detail}</p>
@@ -1123,13 +1148,13 @@ export function SingleDomainReviewAuthoring() {
                         <p className="text-sm leading-6 text-white/54">{dataset.detail}</p>
                       </div>
                       <LabelPill
-                        className={dataset.isReady
-                          ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
-                          : 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'}
+                        className={getStatusPillClass(dataset.status)}
                       >
-                        {dataset.countRule === 'exact'
-                          ? `${dataset.actualRowCount}/${dataset.expectedRowCount}`
-                          : `${dataset.actualRowCount}/1+`}
+                        {dataset.status === 'waiting'
+                          ? 'Waiting'
+                          : dataset.countRule === 'exact'
+                            ? `${dataset.actualRowCount}/${dataset.expectedRowCount}`
+                            : `${dataset.actualRowCount}/1+`}
                       </LabelPill>
                     </div>
                   ))}
@@ -1145,6 +1170,14 @@ export function SingleDomainReviewAuthoring() {
                       {issue.message}
                     </div>
                   ))}
+                </div>
+              ) : section.status === 'waiting' ? (
+                <div className="rounded-[0.9rem] border border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] px-4 py-3 text-sm text-[rgba(255,234,196,0.94)]">
+                  This section is waiting on earlier authored structure before readiness can be assessed.
+                </div>
+              ) : section.status === 'not_started' ? (
+                <div className="rounded-[0.9rem] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/68">
+                  This section has not been meaningfully authored yet.
                 </div>
               ) : (
                 <div className="rounded-[0.9rem] border border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] px-4 py-3 text-sm text-[rgba(217,255,229,0.94)]">

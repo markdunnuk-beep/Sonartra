@@ -246,6 +246,40 @@ test('review step reflects incomplete language datasets accurately', () => {
   assert.match(markup, /0\/2/);
 });
 
+test('review step keeps zero-data structural sections out of ready states', () => {
+  const assessment = buildAssessment({
+    DOMAIN_FRAMING: [],
+    HERO_PAIRS: [],
+    SIGNAL_CHAPTERS: [],
+    BALANCING_SECTIONS: [],
+    PAIR_SUMMARIES: [],
+    APPLICATION_STATEMENTS: [],
+  });
+  const markup = renderToStaticMarkup(
+    <AdminAssessmentAuthoringProvider
+      assessment={{
+        ...assessment,
+        authoredQuestions: [],
+        weightingSummary: {
+          totalOptions: 0,
+          weightedOptions: 0,
+          unmappedOptions: 0,
+          totalMappings: 0,
+        },
+      }}
+    >
+      <SingleDomainReviewAuthoring />
+    </AdminAssessmentAuthoringProvider>,
+  );
+
+  assert.match(markup, /Responses/);
+  assert.match(markup, /Weightings/);
+  assert.match(markup, /Waiting on authored questions before responses can be assessed/i);
+  assert.match(markup, /Waiting on authored responses before weightings can be assessed/i);
+  assert.doesNotMatch(markup, /Responses[\s\S]{0,220}No blocking structural issues in this section\./);
+  assert.doesNotMatch(markup, /Weightings[\s\S]{0,220}No blocking structural issues in this section\./);
+});
+
 test('review step reflects complete language datasets accurately', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentAuthoringProvider
