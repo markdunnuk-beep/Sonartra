@@ -141,11 +141,11 @@ test('single-domain results report reuses guide rail labels for the single-domai
   );
 
   for (const label of [
-    'Introduction',
-    'Your Behaviour Pattern',
-    'Inside This Domain',
-    'Balancing Your Approach',
-    'How This Shows Up',
+    'Leadership style',
+    'Behaviour pattern',
+    'Inside this domain',
+    'Balancing your approach',
+    'How this shows up',
     'Application',
   ]) {
     assert.match(markup, new RegExp(`>${label}<`));
@@ -198,18 +198,47 @@ test('single-domain results report keeps secondary signals lighter than primary 
   );
 
   assert.equal(markup.match(/>How it shows up</g)?.length ?? 2, 2);
-  assert.equal(markup.match(/>Team effect</g)?.length ?? 1, 1);
+  assert.equal(markup.match(/>Effect on others</g)?.length ?? 1, 1);
   assert.equal(markup.match(/>Context and underplayed signals</g)?.length ?? 1, 1);
 });
 
-test('single-domain results report renders balancing, pair summary, and application from persisted payload fields', () => {
+test('single-domain results report renders cleaned balancing, pair summary, and application copy', () => {
   const markup = renderToStaticMarkup(
     <SingleDomainResultsReport result={createSingleDomainResultsViewModel(buildPayload(4))} />,
   );
 
   assert.match(markup, />Current pattern paragraph\.</);
-  assert.match(markup, />Integrated meaning</);
+  assert.match(markup, /Combined meaning/i);
   assert.match(markup, />Vision strength</);
   assert.match(markup, />Delivery watchout</);
   assert.match(markup, />Rigor development</);
+});
+
+test('single-domain results report strips internal terms, raw keys, and unavailable utilities from the rendered output', () => {
+  const payload = buildPayload(4);
+  payload.intro.bridge_to_signals = 'The ranked signals show the persisted vision_results pattern.';
+  payload.hero.hero_subheadline = 'This comes from the persisted integrated meaning.';
+  payload.balancing.practical_meaning_paragraph = 'This section avoids recomputing in the UI.';
+  payload.pairSummary.pair_headline = 'Integrated meaning';
+
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
+  );
+
+  for (const forbidden of [
+    'persisted',
+    'recomputing',
+    'integrated meaning',
+    'vision_results',
+    'vision_delivery',
+    'signal-vision',
+    'Download PDF',
+    'Share on LinkedIn',
+  ]) {
+    assert.doesNotMatch(markup, new RegExp(forbidden, 'i'));
+  }
+
+  assert.match(markup, />Vision and Delivery</);
+  assert.match(markup, /Combined meaning/i);
+  assert.match(markup, />The leading tendencies show the Direction and Delivery pattern\.</);
 });

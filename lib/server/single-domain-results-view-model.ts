@@ -1,4 +1,7 @@
-import { SINGLE_DOMAIN_RESULT_READING_SECTIONS } from '@/lib/results/result-reading-sections';
+import {
+  SINGLE_DOMAIN_RESULT_READING_SECTIONS,
+  createSingleDomainResultReadingSections,
+} from '@/lib/results/result-reading-sections';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
 const SINGLE_DOMAIN_RESULTS_BRIDGE_LINE =
@@ -53,7 +56,8 @@ export type SingleDomainResultsViewModel = {
     blueprintContextLine: string;
   };
   hero: {
-    pairKey: string;
+    sectionLabel: string;
+    pairLabel: string;
     pairSignalLabels: readonly string[];
     headline: string;
     subheadline: string;
@@ -86,6 +90,54 @@ export type SingleDomainResultsViewModel = {
     developmentFocus: SingleDomainResultPayload['application']['developmentFocus'];
   };
 };
+
+const COPY_REPLACEMENTS: ReadonlyArray<readonly [pattern: RegExp, replacement: string]> = Object.freeze([
+  [/\bpersisted\b/gi, ''],
+  [/\brecomputing in the ui\b/gi, 'working it out again here'],
+  [/\brecomputing\b/gi, 'working it out again'],
+  [/\bintegrated meaning\b/gi, 'combined meaning'],
+  [/\bbalancing diagnosis\b/gi, 'balance reading'],
+  [/\bruntime definition\b/gi, 'current picture'],
+  [/\bcanonical\b/gi, ''],
+  [/\branked signals\b/gi, 'leading tendencies'],
+  [/\bnormalized signal weight\b/gi, 'overall emphasis'],
+  [/\bnormalized\b/gi, 'overall'],
+  [/\bsystem risk\b/gi, 'watchout'],
+  [/\bblueprint context\b/gi, 'focus'],
+  [/\bvision_results\b/gi, 'Direction and Delivery'],
+  [/\bVISION_RESULTS\b/g, 'Direction and Delivery'],
+  [/\bresults\b/gi, 'report'],
+]);
+
+function cleanWhitespace(value: string): string {
+  return value.replace(/\s{2,}/g, ' ').replace(/\s+([,.!?;:])/g, '$1').trim();
+}
+
+function formatRawKeyLabel(value: string): string {
+  const cleaned = value
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+
+  return cleanWhitespace(cleaned);
+}
+
+function cleanResultCopy(value: string): string {
+  let cleaned = value;
+
+  for (const [pattern, replacement] of COPY_REPLACEMENTS) {
+    cleaned = cleaned.replace(pattern, replacement);
+  }
+
+  cleaned = cleaned.replace(/\b[a-z]+(?:_[a-z]+)+\b/g, (match) => formatRawKeyLabel(match));
+
+  return cleanWhitespace(cleaned);
+}
+
+function cleanNullableCopy(value: string | null | undefined): string {
+  return cleanResultCopy(value ?? '');
+}
 
 function formatResultTimestamp(value: string | null): {
   date: string;
@@ -130,14 +182,29 @@ function getSignalNarrativeTier(signal: SingleDomainResultPayload['signals'][num
   return 'supporting';
 }
 
+function getSignalPositionLabel(tier: SingleDomainSignalNarrativeTier): string {
+  switch (tier) {
+    case 'primary':
+      return 'Most present';
+    case 'secondary':
+      return 'Strong support';
+    case 'supporting':
+      return 'Supporting note';
+    case 'underplayed':
+      return 'Less present';
+    default:
+      return 'Supporting note';
+  }
+}
+
 function getNarrativeSections(signal: SingleDomainResultPayload['signals'][number]): readonly SingleDomainSignalNarrativeSection[] {
   const allSections: readonly SingleDomainSignalNarrativeSection[] = Object.freeze([
-    { key: 'how_it_shows_up', label: 'How it shows up', body: signal.chapter_how_it_shows_up },
-    { key: 'value_outcome', label: 'Value outcome', body: signal.chapter_value_outcome },
-    { key: 'team_effect', label: 'Team effect', body: signal.chapter_value_team_effect },
-    { key: 'risk_behaviour', label: 'Risk behaviour', body: signal.chapter_risk_behaviour },
-    { key: 'risk_impact', label: 'Risk impact', body: signal.chapter_risk_impact },
-    { key: 'development_line', label: 'Development line', body: signal.chapter_development },
+    { key: 'how_it_shows_up', label: 'How it shows up', body: cleanNullableCopy(signal.chapter_how_it_shows_up) },
+    { key: 'value_outcome', label: 'What it adds', body: cleanNullableCopy(signal.chapter_value_outcome) },
+    { key: 'team_effect', label: 'Effect on others', body: cleanNullableCopy(signal.chapter_value_team_effect) },
+    { key: 'risk_behaviour', label: 'When it overreaches', body: cleanNullableCopy(signal.chapter_risk_behaviour) },
+    { key: 'risk_impact', label: 'What to watch', body: cleanNullableCopy(signal.chapter_risk_impact) },
+    { key: 'development_line', label: 'How to stretch it', body: cleanNullableCopy(signal.chapter_development) },
   ]);
 
   const tier = getSignalNarrativeTier(signal);
@@ -182,6 +249,11 @@ export function createSingleDomainResultsViewModel(
   const orderedSignals = [...payload.signals].sort((left, right) => (
     left.rank - right.rank || left.signal_key.localeCompare(right.signal_key)
   ));
+  const pairSignalLabels = orderedSignals.slice(0, 2).map((signal) => cleanResultCopy(signal.signal_label));
+  const pairLabel =
+    pairSignalLabels.length >= 2
+      ? `${pairSignalLabels[0]} and ${pairSignalLabels[1]}`
+      : cleanResultCopy(payload.hero.pair_key);
 
   return {
     assessmentTitle: payload.metadata.assessmentTitle,
@@ -192,63 +264,83 @@ export function createSingleDomainResultsViewModel(
       { label: 'Assessment', value: payload.metadata.assessmentTitle },
       { label: 'Version', value: payload.metadata.version },
     ],
-    readingSections: SINGLE_DOMAIN_RESULT_READING_SECTIONS,
+    readingSections: createSingleDomainResultReadingSections({
+      introLabel: cleanResultCopy(payload.intro.section_title),
+      heroLabel: 'Behaviour pattern',
+      signalsLabel: 'Inside this domain',
+      balancingLabel: cleanResultCopy(payload.balancing.balancing_section_title),
+      pairSummaryLabel: cleanResultCopy(payload.pairSummary.pair_section_title),
+      applicationLabel: 'Application',
+    }),
     intro: {
-      sectionTitle: payload.intro.section_title,
-      introParagraph: payload.intro.intro_paragraph,
-      meaningParagraph: payload.intro.meaning_paragraph,
-      bridgeToSignals: payload.intro.bridge_to_signals,
-      blueprintContextLine: payload.intro.blueprint_context_line,
+      sectionTitle: cleanResultCopy(payload.intro.section_title),
+      introParagraph: cleanResultCopy(payload.intro.intro_paragraph),
+      meaningParagraph: cleanResultCopy(payload.intro.meaning_paragraph),
+      bridgeToSignals: cleanResultCopy(payload.intro.bridge_to_signals),
+      blueprintContextLine: cleanResultCopy(payload.intro.blueprint_context_line),
     },
     hero: {
-      pairKey: payload.hero.pair_key,
-      pairSignalLabels: orderedSignals.slice(0, 2).map((signal) => signal.signal_label),
-      headline: payload.hero.hero_headline,
-      subheadline: payload.hero.hero_subheadline,
-      opening: payload.hero.hero_opening,
-      strengthParagraph: payload.hero.hero_strength_paragraph,
-      tensionParagraph: payload.hero.hero_tension_paragraph,
-      closeParagraph: payload.hero.hero_close_paragraph,
+      sectionLabel: 'Behaviour pattern',
+      pairLabel,
+      pairSignalLabels,
+      headline: cleanResultCopy(payload.hero.hero_headline),
+      subheadline: cleanResultCopy(payload.hero.hero_subheadline),
+      opening: cleanResultCopy(payload.hero.hero_opening),
+      strengthParagraph: cleanResultCopy(payload.hero.hero_strength_paragraph),
+      tensionParagraph: cleanResultCopy(payload.hero.hero_tension_paragraph),
+      closeParagraph: cleanResultCopy(payload.hero.hero_close_paragraph),
     },
     signals: orderedSignals.map((signal) => ({
-      anchorId: `signal-${signal.signal_key}`,
+      anchorId: `signal-${String(signal.rank).padStart(2, '0')}`,
       signalKey: signal.signal_key,
-      signalLabel: signal.signal_label,
+      signalLabel: cleanResultCopy(signal.signal_label),
       rank: signal.rank,
       normalizedScore: signal.normalized_score,
       rawScore: signal.raw_score,
       tier: getSignalNarrativeTier(signal),
-      positionLabel: signal.position_label,
-      chapterIntro: signal.chapter_intro,
-      howItShowsUp: signal.chapter_how_it_shows_up,
-      valueOutcome: signal.chapter_value_outcome,
-      teamEffect: signal.chapter_value_team_effect,
-      riskBehaviour: signal.chapter_risk_behaviour,
-      riskImpact: signal.chapter_risk_impact,
-      developmentLine: signal.chapter_development,
+      positionLabel: getSignalPositionLabel(getSignalNarrativeTier(signal)),
+      chapterIntro: cleanResultCopy(signal.chapter_intro),
+      howItShowsUp: cleanNullableCopy(signal.chapter_how_it_shows_up),
+      valueOutcome: cleanNullableCopy(signal.chapter_value_outcome),
+      teamEffect: cleanNullableCopy(signal.chapter_value_team_effect),
+      riskBehaviour: cleanNullableCopy(signal.chapter_risk_behaviour),
+      riskImpact: cleanNullableCopy(signal.chapter_risk_impact),
+      developmentLine: cleanNullableCopy(signal.chapter_development),
       narrativeSections: getNarrativeSections(signal),
     })),
     bridgeLine: SINGLE_DOMAIN_RESULTS_BRIDGE_LINE,
     balancing: {
-      sectionTitle: payload.balancing.balancing_section_title,
-      currentPatternParagraph: payload.balancing.current_pattern_paragraph,
-      practicalMeaningParagraph: payload.balancing.practical_meaning_paragraph,
-      systemRiskParagraph: payload.balancing.system_risk_paragraph,
-      rebalanceIntro: payload.balancing.rebalance_intro,
-      rebalanceActions: payload.balancing.rebalance_actions,
+      sectionTitle: cleanResultCopy(payload.balancing.balancing_section_title),
+      currentPatternParagraph: cleanResultCopy(payload.balancing.current_pattern_paragraph),
+      practicalMeaningParagraph: cleanResultCopy(payload.balancing.practical_meaning_paragraph),
+      systemRiskParagraph: cleanResultCopy(payload.balancing.system_risk_paragraph),
+      rebalanceIntro: cleanResultCopy(payload.balancing.rebalance_intro),
+      rebalanceActions: payload.balancing.rebalance_actions.map((action) => cleanResultCopy(action)),
     },
     pairSummary: {
-      sectionTitle: payload.pairSummary.pair_section_title,
-      headline: payload.pairSummary.pair_headline,
-      openingParagraph: payload.pairSummary.pair_opening_paragraph,
-      strengthParagraph: payload.pairSummary.pair_strength_paragraph,
-      tensionParagraph: payload.pairSummary.pair_tension_paragraph,
-      closeParagraph: payload.pairSummary.pair_close_paragraph,
+      sectionTitle: cleanResultCopy(payload.pairSummary.pair_section_title),
+      headline: cleanResultCopy(payload.pairSummary.pair_headline),
+      openingParagraph: cleanResultCopy(payload.pairSummary.pair_opening_paragraph),
+      strengthParagraph: cleanResultCopy(payload.pairSummary.pair_strength_paragraph),
+      tensionParagraph: cleanResultCopy(payload.pairSummary.pair_tension_paragraph),
+      closeParagraph: cleanResultCopy(payload.pairSummary.pair_close_paragraph),
     },
     application: {
-      strengths: payload.application.strengths,
-      watchouts: payload.application.watchouts,
-      developmentFocus: payload.application.developmentFocus,
+      strengths: payload.application.strengths.map((item) => ({
+        ...item,
+        signal_label: cleanResultCopy(item.signal_label),
+        statement: cleanResultCopy(item.statement),
+      })),
+      watchouts: payload.application.watchouts.map((item) => ({
+        ...item,
+        signal_label: cleanResultCopy(item.signal_label),
+        statement: cleanResultCopy(item.statement),
+      })),
+      developmentFocus: payload.application.developmentFocus.map((item) => ({
+        ...item,
+        signal_label: cleanResultCopy(item.signal_label),
+        statement: cleanResultCopy(item.statement),
+      })),
     },
   };
 }

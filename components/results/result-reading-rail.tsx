@@ -303,47 +303,30 @@ export function ResultReadingRail({
           })}
         </ul>
 
-        <div className="mt-1.5 border-t border-white/[0.06] pt-3.5">
-          <div className="flex items-center gap-2" aria-label="Report utilities" role="group">
-            <UtilityIconButton
-              label="Share on LinkedIn"
-              onClick={handleLinkedInShare}
-              disabled={!utilityActions}
+        {utilityActions ? (
+          <div className="mt-1.5 border-t border-white/[0.06] pt-3.5">
+            <div className="flex items-center gap-2" aria-label="Report utilities" role="group">
+              <UtilityIconButton
+                label="Share on LinkedIn"
+                onClick={handleLinkedInShare}
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-[1.05rem] w-[1.05rem] fill-current"
+                >
+                  <path d="M6.94 8.75H3.56V20h3.38V8.75ZM5.25 3C4.16 3 3.28 3.9 3.28 5s.88 2 1.97 2c1.1 0 1.98-.9 1.98-2S6.35 3 5.25 3ZM20.72 13.1c0-3.38-1.8-4.95-4.2-4.95-1.93 0-2.8 1.06-3.28 1.8v-1.2H9.87c.04.8 0 11.25 0 11.25h3.37v-6.28c0-.34.03-.67.13-.9.27-.67.9-1.37 1.95-1.37 1.38 0 1.94 1.03 1.94 2.55V20h3.37v-6.9Z" />
+                </svg>
+              </UtilityIconButton>
+            </div>
+            <p
+              className="mt-2.5 min-h-4 text-[0.63rem] tracking-[0.02em] text-white/31"
+              aria-live="polite"
             >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="h-[1.05rem] w-[1.05rem] fill-current"
-              >
-                <path d="M6.94 8.75H3.56V20h3.38V8.75ZM5.25 3C4.16 3 3.28 3.9 3.28 5s.88 2 1.97 2c1.1 0 1.98-.9 1.98-2S6.35 3 5.25 3ZM20.72 13.1c0-3.38-1.8-4.95-4.2-4.95-1.93 0-2.8 1.06-3.28 1.8v-1.2H9.87c.04.8 0 11.25 0 11.25h3.37v-6.28c0-.34.03-.67.13-.9.27-.67.9-1.37 1.95-1.37 1.38 0 1.94 1.03 1.94 2.55V20h3.37v-6.9Z" />
-              </svg>
-            </UtilityIconButton>
-            <UtilityIconButton label="Share by email" href="mailto:?subject=My%20Sonartra%20results">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="h-[1.05rem] w-[1.05rem] fill-current"
-              >
-                <path d="M3 6.75A2.75 2.75 0 0 1 5.75 4h12.5A2.75 2.75 0 0 1 21 6.75v10.5A2.75 2.75 0 0 1 18.25 20H5.75A2.75 2.75 0 0 1 3 17.25V6.75Zm2.2-.17 6.23 4.7a1 1 0 0 0 1.2 0l6.18-4.67a1.25 1.25 0 0 0-.56-.11H5.75c-.2 0-.38.03-.55.08Zm14.3 2.28-5.36 4.05a2.75 2.75 0 0 1-3.3 0L5.5 8.9v8.35c0 .14.11.25.25.25h12.5c.14 0 .25-.11.25-.25V8.86Z" />
-              </svg>
-            </UtilityIconButton>
-            <UtilityIconButton label="Download PDF" disabled>
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="h-[1.05rem] w-[1.05rem] fill-current"
-              >
-                <path d="M6 3.75A2.75 2.75 0 0 1 8.75 1h5.6c.73 0 1.43.29 1.95.81l2.89 2.89c.52.52.81 1.22.81 1.95v11.6A2.75 2.75 0 0 1 17.25 21h-8.5A2.75 2.75 0 0 1 6 18.25V3.75Zm7.25-.25v3.25c0 .69.56 1.25 1.25 1.25h3.25l-4.5-4.5ZM9.5 14.25a.75.75 0 0 0-1.5 0v2.5a.75.75 0 0 0 1.5 0v-.5h.75a2 2 0 1 0 0-4H9.5v2Zm.75-1h-.75v1.5h.75a.75.75 0 1 0 0-1.5Zm5 0h-.75a.75.75 0 0 0 0 1.5h.75a.75.75 0 1 0 0-1.5Zm-1.5-1.5a.75.75 0 0 0 0 1.5h2a.75.75 0 0 0 0-1.5h-2Z" />
-              </svg>
-            </UtilityIconButton>
+              {utilityFeedback}
+            </p>
           </div>
-          <p
-            className="mt-2.5 min-h-4 text-[0.63rem] tracking-[0.02em] text-white/31"
-            aria-live="polite"
-          >
-            {utilityFeedback || 'PDF export coming soon'}
-          </p>
-        </div>
+        ) : null}
       </div>
     </nav>
   );

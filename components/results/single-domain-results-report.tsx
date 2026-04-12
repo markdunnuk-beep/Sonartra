@@ -87,7 +87,7 @@ function SignalChapter({
   index: number;
 }) {
   const chapterHeadingId = `${signal.anchorId}-heading`;
-  const scoreLine = `${signal.normalizedScore}% of the normalized signal weight in this domain.`;
+  const scoreLine = `${signal.normalizedScore}% of the emphasis in this domain.`;
 
   return (
     <article
@@ -168,7 +168,7 @@ function CompactSignalCard({
             {signal.signalLabel}
           </h3>
           <p className="sonartra-report-body-soft text-[0.92rem] leading-7 text-white/56">
-            {signal.normalizedScore}% of the normalized signal weight in this domain.
+            {signal.normalizedScore}% of the emphasis in this domain.
           </p>
         </div>
 
@@ -260,7 +260,10 @@ export function SingleDomainResultsReport({
                     </div>
                   ))}
                 </div>
-                <EditorialAside label="Blueprint context" text={result.intro.blueprintContextLine} />
+                <EditorialAside
+                  label="What this report focuses on"
+                  text={result.intro.blueprintContextLine}
+                />
               </div>
             </div>
           </section>
@@ -280,9 +283,9 @@ export function SingleDomainResultsReport({
               <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_14rem] md:items-start md:gap-10 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:gap-12">
                 <div className="space-y-8 md:space-y-9">
                   <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <SectionEyebrow>Hero pattern</SectionEyebrow>
+                    <SectionEyebrow>{result.hero.sectionLabel}</SectionEyebrow>
                     <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
-                    <span>{result.hero.pairKey}</span>
+                    <span>{result.hero.pairLabel}</span>
                   </div>
 
                   <div className="space-y-6 md:space-y-8">
@@ -308,17 +311,17 @@ export function SingleDomainResultsReport({
                         {result.hero.strengthParagraph}
                       </p>
                       <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
-                        <EditorialAside label="Pattern tension" text={result.hero.tensionParagraph} />
-                        <EditorialAside label="Pattern close" text={result.hero.closeParagraph} />
+                        <EditorialAside label="What steadies it" text={result.hero.tensionParagraph} />
+                        <EditorialAside label="What to remember" text={result.hero.closeParagraph} />
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="rounded-[1.6rem] border border-white/7 bg-white/[0.02] px-5 py-5 md:px-6 md:py-6">
-                  <p className="sonartra-report-kicker text-white/42">Top pair</p>
+                  <p className="sonartra-report-kicker text-white/42">Leading combination</p>
                   <p className="mt-3 text-[1.15rem] font-semibold tracking-[-0.02em] text-white/90">
-                    {result.hero.pairKey}
+                    {result.hero.pairLabel}
                   </p>
                   {result.hero.pairSignalLabels.length > 0 ? (
                     <div className="mt-4 space-y-2">
@@ -358,7 +361,7 @@ export function SingleDomainResultsReport({
               <SectionHeader
                 eyebrow={`${result.signals.length} Signal${result.signals.length === 1 ? '' : 's'}`}
                 title="Inside this domain"
-                description="These chapters stay with the persisted ranked signals, giving the most room to what leads and compressing what is less relied on."
+                description="These chapters show what leads this domain, what supports it, and what sits more quietly in the background."
               />
               <ResultSectionIntent
                 sectionId={SINGLE_DOMAIN_SECTION_IDS.signals}
@@ -380,7 +383,7 @@ export function SingleDomainResultsReport({
                     </p>
                     <p className="sonartra-report-body-soft max-w-[48rem]">
                       {underplayedSignals.length > 0
-                        ? 'These signals still shape the domain, but they are framed in proportion to their lower presence in the persisted result.'
+                        ? 'These signals still shape the picture here, but they show up with less force than the leading tendencies.'
                         : 'These signals support the pattern without carrying the same narrative weight as the leading pair.'}
                     </p>
                   </div>
@@ -411,7 +414,7 @@ export function SingleDomainResultsReport({
             <SectionHeader
               eyebrow="Balancing"
               title={result.balancing.sectionTitle}
-              description="This chapter stays with the persisted balancing diagnosis rather than recomputing the pattern in the UI."
+              description="This chapter shows where your current approach helps, where it can tighten, and how to widen your range."
             />
             <ResultSectionIntent
               sectionId={SINGLE_DOMAIN_SECTION_IDS.balancing}
@@ -429,7 +432,7 @@ export function SingleDomainResultsReport({
                 {result.balancing.systemRiskParagraph}
               </p>
               <div className="space-y-4 border-t border-white/7 pt-6">
-                <p className="sonartra-report-kicker">Rebalance</p>
+                <p className="sonartra-report-kicker">Bring it back into balance</p>
                 <p className="sonartra-report-body-soft max-w-[48rem]">{result.balancing.rebalanceIntro}</p>
                 <ul className="grid gap-3 sm:grid-cols-3">
                   {result.balancing.rebalanceActions.map((action, index) => (
@@ -456,9 +459,9 @@ export function SingleDomainResultsReport({
             </h2>
             <EditorialDivider title="Pair summary" />
             <SectionHeader
-              eyebrow={result.pairSummary.sectionTitle}
-              title={result.pairSummary.headline}
-              description="This section holds the persisted integrated meaning of the pair after the balancing diagnosis."
+              eyebrow="How the leading tendencies work together"
+              title={result.pairSummary.sectionTitle}
+              description="This section explains how the two strongest tendencies combine in practice."
             />
             <ResultSectionIntent
               sectionId={SINGLE_DOMAIN_SECTION_IDS.pairSummary}
@@ -468,6 +471,9 @@ export function SingleDomainResultsReport({
             <div className="max-w-[58rem] space-y-6 border-l border-white/8 pl-5 md:space-y-7 md:pl-7">
               <p className="sonartra-report-summary text-white/80">
                 {result.pairSummary.openingParagraph}
+              </p>
+              <p className="sonartra-report-title text-[1.2rem] text-white/86">
+                {result.pairSummary.headline}
               </p>
               <p className="sonartra-report-body text-white/76">{result.pairSummary.strengthParagraph}</p>
               <p className="sonartra-report-body text-white/72">{result.pairSummary.tensionParagraph}</p>
@@ -488,7 +494,7 @@ export function SingleDomainResultsReport({
             <SectionHeader
               eyebrow="Application"
               title="Turning insight into action"
-              description="This final chapter stays with the persisted application statements and keeps them separate from the hero, signal, and pair sections."
+              description="This final chapter turns the report into practical strengths, watchouts, and next steps."
             />
             <ResultSectionIntent
               sectionId={SINGLE_DOMAIN_SECTION_IDS.application}

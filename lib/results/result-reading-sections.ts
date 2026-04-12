@@ -162,7 +162,7 @@ export const SINGLE_DOMAIN_RESULT_READING_SECTIONS = createResultReadingSections
       level: 'section',
       order: 2,
       intentPrompt:
-        'Read this first. It captures the strongest persisted pattern in this domain and the tension it creates.',
+        'The clearest pattern in this domain, written as a direct read of how you tend to operate.',
     },
     {
       id: 'signals',
@@ -198,7 +198,69 @@ export const SINGLE_DOMAIN_RESULT_READING_SECTIONS = createResultReadingSections
       level: 'section',
       order: 6,
       intentPrompt:
-        'This is where to act. Use the persisted strengths, watchouts, and development focus as your next practical steps.',
+        'Practical points to lean on, watch for, and develop from here.',
     },
   ] as const,
 });
+
+export function createSingleDomainResultReadingSections(params: {
+  introLabel: string;
+  heroLabel?: string;
+  signalsLabel?: string;
+  balancingLabel: string;
+  pairSummaryLabel: string;
+  applicationLabel?: string;
+}) {
+  return createResultReadingSections({
+    topLevelSections: [
+      {
+        id: 'intro',
+        label: params.introLabel,
+        shortLabel: 'Intro',
+        level: 'section',
+        order: 1,
+        intentPrompt: 'A quick orientation to what this part of your report is about.',
+      },
+      {
+        id: 'hero',
+        label: params.heroLabel ?? 'Behaviour pattern',
+        shortLabel: 'Pattern',
+        level: 'section',
+        order: 2,
+        intentPrompt: 'The clearest pattern in this domain, written as a direct read of how you tend to operate.',
+      },
+      {
+        id: 'signals',
+        label: params.signalsLabel ?? 'Inside this domain',
+        shortLabel: 'Signals',
+        level: 'section',
+        order: 3,
+        intentPrompt: 'A closer look at the tendencies shaping this domain and the role each one plays.',
+      },
+      {
+        id: 'balancing',
+        label: params.balancingLabel,
+        shortLabel: 'Balance',
+        level: 'section',
+        order: 4,
+        intentPrompt: 'Where this pattern helps, where it can narrow your range, and how to bring it back into balance.',
+      },
+      {
+        id: 'pair-summary',
+        label: params.pairSummaryLabel,
+        shortLabel: 'Summary',
+        level: 'section',
+        order: 5,
+        intentPrompt: 'How the leading tendencies work together when this domain is at its most recognisable.',
+      },
+      {
+        id: 'application',
+        label: params.applicationLabel ?? 'Application',
+        shortLabel: 'Apply',
+        level: 'section',
+        order: 6,
+        intentPrompt: 'Practical points to lean on, watch for, and develop from here.',
+      },
+    ] as const,
+  });
+}
