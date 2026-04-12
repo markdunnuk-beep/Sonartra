@@ -451,10 +451,10 @@ export function buildSingleDomainStructuralValidation(
         languageValidation
           ? languageValidation.overallReady
             ? 'ready'
-            : languageValidation.datasets.every((dataset) => dataset.status === 'waiting')
+            : languageValidation.datasets.some((dataset) => dataset.status === 'waiting')
               ? 'waiting'
-              : languageValidation.datasets.some((dataset) => dataset.status === 'attention')
-                ? 'attention'
+            : languageValidation.datasets.some((dataset) => dataset.status === 'attention')
+              ? 'attention'
                 : 'not_started'
           : input.languageReady
             ? 'attention'
@@ -462,8 +462,8 @@ export function buildSingleDomainStructuralValidation(
         languageValidation
           ? languageValidation.overallReady
             ? 'All six locked single-domain language datasets meet the current completeness contract.'
-            : languageValidation.datasets.every((dataset) => dataset.status === 'waiting')
-              ? 'Language datasets are waiting on earlier authored structure before they can be assessed.'
+            : languageValidation.datasets.some((dataset) => dataset.status === 'waiting')
+              ? 'Language datasets are still waiting on the current authored signal and pair structure before readiness can be fully assessed.'
               : 'Language completeness is evaluated from the authored signals, derived pairs, and current dataset row counts.'
           : input.languageReady
             ? 'Single-domain language datasets have draft activity.'

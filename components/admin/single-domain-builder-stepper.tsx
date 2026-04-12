@@ -11,6 +11,7 @@ import {
 } from '@/lib/admin/single-domain-builder-steps';
 import { getAssessmentBuilderStepPath } from '@/lib/admin/assessment-builder-paths';
 import {
+  getSingleDomainBuilderProgress,
   getSingleDomainBuilderStepStatus,
   type SingleDomainBuilderStepStatus,
 } from '@/lib/admin/single-domain-builder-stepper';
@@ -96,7 +97,7 @@ export function SingleDomainBuilderStepper() {
     status: getSingleDomainBuilderStepStatus(step.slug, assessment, activeStep),
   }));
   const activeStepModel = steps[activeIndex] ?? steps[0];
-  const completeCount = steps.filter((step) => step.status === 'complete').length;
+  const progress = getSingleDomainBuilderProgress(assessment);
 
   return (
     <SurfaceCard className="space-y-4 overflow-hidden p-3 sm:p-4 lg:p-5">
@@ -105,11 +106,11 @@ export function SingleDomainBuilderStepper() {
           <p className="sonartra-page-eyebrow">Single-domain builder progress</p>
           <p className="text-sm leading-6 text-white/58">
             Step {activeIndex + 1} of {steps.length}. Every stage stays viewable so readiness can
-            be checked without contradictory blocked states.
+            be checked without route access changing the underlying status.
           </p>
         </div>
         <p className="text-xs uppercase tracking-[0.18em] text-white/42">
-          {completeCount} of {steps.length} completed
+          {progress.actionableCompleteCount} of {progress.actionableTotalCount} authoring stages complete
         </p>
       </div>
 
@@ -122,7 +123,8 @@ export function SingleDomainBuilderStepper() {
               </p>
               <p className="text-base font-semibold text-white">{activeStepModel.label}</p>
               <p className="text-sm leading-6 text-white/60">
-                {completeCount} complete, {steps.length - completeCount} still to finish.
+                {progress.actionableCompleteCount} complete,{' '}
+                {Math.max(0, progress.actionableTotalCount - progress.actionableCompleteCount)} still to finish.
               </p>
             </div>
             <StepStatusBadge status={activeStepModel.status} />

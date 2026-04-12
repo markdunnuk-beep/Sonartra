@@ -13,6 +13,10 @@ import {
   SingleDomainWeightingsAuthoring,
 } from '@/components/admin/single-domain-structural-authoring';
 import { getAssessmentBuilderStepPath } from '@/lib/admin/assessment-builder-paths';
+import {
+  getSingleDomainBuilderNextAction,
+  getSingleDomainBuilderProgress,
+} from '@/lib/admin/single-domain-builder-stepper';
 
 function getSingleDomainLanguageStageSummary(
   validation: ReturnType<typeof useAdminAssessmentAuthoring>['singleDomainLanguageValidation'],
@@ -71,7 +75,25 @@ function useReadinessMetrics() {
 
 export function SingleDomainOverviewPageContent() {
   const { assessment, domainCount, signalCount } = useReadinessMetrics();
-  const domainStepHref = getAssessmentBuilderStepPath(assessment.assessmentKey, 'domain', assessment.mode);
+  const nextAction = getSingleDomainBuilderNextAction(assessment);
+  const progress = getSingleDomainBuilderProgress(assessment);
+  const hasMeaningfulDraftData =
+    domainCount > 0 ||
+    signalCount > 0 ||
+    assessment.authoredQuestions.length > 0 ||
+    assessment.weightingSummary.totalOptions > 0 ||
+    assessment.weightingSummary.totalMappings > 0 ||
+    assessment.singleDomainLanguageValidation.datasets.some((dataset) => dataset.actualRowCount > 0);
+  const nextActionHref = getAssessmentBuilderStepPath(
+    assessment.assessmentKey,
+    nextAction.step,
+    assessment.mode,
+  );
+  const draftStateLabel = assessment.draftValidation.isPublishReady
+    ? 'Ready'
+    : hasMeaningfulDraftData
+      ? 'In progress'
+      : 'Not started';
 
   return (
     <section className="space-y-8">
@@ -107,8 +129,8 @@ export function SingleDomainOverviewPageContent() {
               language datasets, review, and publish.
             </SecondaryText>
             <SecondaryText>
-              Admins can open every stage now. Readiness states show what is complete, in progress,
-              or still empty without implying hidden route gates.
+              Admins can open every stage now. Readiness states follow authored data and
+              prerequisites only, while the current route is highlighted separately.
             </SecondaryText>
           </div>
         </SurfaceCard>
@@ -116,19 +138,17 @@ export function SingleDomainOverviewPageContent() {
         <SurfaceCard className="space-y-4 p-5 lg:p-6">
           <p className="sonartra-page-eyebrow">Next step</p>
           <div className="space-y-2">
-            <CardTitle>Define the one allowed domain</CardTitle>
-            <SecondaryText>
-              Start in Domain to lock the assessment to a single domain record before authoring
-              signals and downstream structure.
-            </SecondaryText>
+            <CardTitle>{nextAction.title}</CardTitle>
+            <SecondaryText>{nextAction.description}</SecondaryText>
           </div>
           <div className="rounded-[1rem] border border-[rgba(126,179,255,0.16)] bg-[rgba(126,179,255,0.06)] p-4 text-sm leading-6 text-white/70">
-            The strongest next move here is Step 2. Name the domain, set its key, and give the rest
-            of the builder a stable anchor.
+            {progress.actionableCompleteCount === progress.actionableTotalCount
+              ? 'The authored workflow is structurally complete. Use Review for a final verification pass.'
+              : `The strongest next move here is ${nextAction.title.toLowerCase()}.`}
           </div>
           <div>
-            <ButtonLink className="w-full justify-center sm:w-auto" href={domainStepHref} variant="primary">
-              Continue to Domain
+            <ButtonLink className="w-full justify-center sm:w-auto" href={nextActionHref} variant="primary">
+              {nextAction.ctaLabel}
             </ButtonLink>
           </div>
         </SurfaceCard>
@@ -154,11 +174,10 @@ export function SingleDomainOverviewPageContent() {
         </SurfaceCard>
         <SurfaceCard className="p-4">
           <p className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Draft state</p>
-          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">
-            {assessment.draftValidation.isPublishReady ? 'Ready' : 'In progress'}
-          </p>
+          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">{draftStateLabel}</p>
           <p className="mt-2 text-sm leading-6 text-white/56">
-            Published version: {assessment.publishedVersion?.versionTag ?? 'None'}.
+            {progress.actionableCompleteCount} of {progress.actionableTotalCount} authoring stages complete. Published version:{' '}
+            {assessment.publishedVersion?.versionTag ?? 'None'}.
           </p>
         </SurfaceCard>
       </div>

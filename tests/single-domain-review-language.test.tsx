@@ -280,6 +280,57 @@ test('review step keeps zero-data structural sections out of ready states', () =
   assert.doesNotMatch(markup, /Weightings[\s\S]{0,220}No blocking structural issues in this section\./);
 });
 
+test('review step keeps language in waiting when pair-derived prerequisites do not yet exist', () => {
+  const assessment = buildAssessment({
+    DOMAIN_FRAMING: [],
+    HERO_PAIRS: [],
+    SIGNAL_CHAPTERS: [],
+    BALANCING_SECTIONS: [],
+    PAIR_SUMMARIES: [],
+    APPLICATION_STATEMENTS: [],
+  });
+  const markup = renderToStaticMarkup(
+    <AdminAssessmentAuthoringProvider
+      assessment={{
+        ...assessment,
+        authoredDomains: [{
+          ...assessment.authoredDomains[0]!,
+          signals: [assessment.authoredDomains[0]!.signals[0]!],
+        }],
+        availableSignals: [assessment.availableSignals[0]!],
+        singleDomainLanguageBundle: {
+          DOMAIN_FRAMING: [],
+          HERO_PAIRS: [],
+          SIGNAL_CHAPTERS: [],
+          BALANCING_SECTIONS: [],
+          PAIR_SUMMARIES: [],
+          APPLICATION_STATEMENTS: [],
+        },
+        singleDomainLanguageValidation: buildSingleDomainLanguageValidation({
+          authoredDomains: [{
+            ...assessment.authoredDomains[0]!,
+            signals: [assessment.authoredDomains[0]!.signals[0]!],
+          }],
+          languageBundle: {
+            DOMAIN_FRAMING: [],
+            HERO_PAIRS: [],
+            SIGNAL_CHAPTERS: [],
+            BALANCING_SECTIONS: [],
+            PAIR_SUMMARIES: [],
+            APPLICATION_STATEMENTS: [],
+          },
+        }),
+      }}
+    >
+      <SingleDomainReviewAuthoring />
+    </AdminAssessmentAuthoringProvider>,
+  );
+
+  assert.match(markup, /Language/);
+  assert.match(markup, /Waiting/);
+  assert.match(markup, /waiting on the current authored signal and pair structure/i);
+});
+
 test('review step reflects complete language datasets accurately', () => {
   const markup = renderToStaticMarkup(
     <AdminAssessmentAuthoringProvider

@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
+  getSingleDomainBuilderNextAction,
+  getSingleDomainBuilderProgress,
   getSingleDomainBuilderStepStatus,
   type SingleDomainBuilderStepperState,
 } from '@/lib/admin/single-domain-builder-stepper';
@@ -92,11 +94,14 @@ test('single-domain stepper keeps viewable incomplete stages out of blocked sema
   assert.equal(getSingleDomainBuilderStepStatus('review', assessment), 'waiting');
 });
 
-test('active single-domain steps do not report empty while the admin is working on them', () => {
+test('active single-domain routes do not change empty or waiting stages into in-progress', () => {
   const assessment = createAssessmentState();
 
-  assert.equal(getSingleDomainBuilderStepStatus('domain', assessment, 'domain'), 'in_progress');
-  assert.equal(getSingleDomainBuilderStepStatus('signals', assessment, 'signals'), 'in_progress');
+  assert.equal(getSingleDomainBuilderStepStatus('domain', assessment, 'domain'), 'empty');
+  assert.equal(getSingleDomainBuilderStepStatus('signals', assessment, 'signals'), 'waiting');
+  assert.equal(getSingleDomainBuilderStepStatus('questions', assessment, 'questions'), 'waiting');
+  assert.equal(getSingleDomainBuilderStepStatus('responses', assessment, 'responses'), 'waiting');
+  assert.equal(getSingleDomainBuilderStepStatus('weightings', assessment, 'weightings'), 'waiting');
 });
 
 test('single-domain responses can complete while weightings stays in progress', () => {
@@ -186,7 +191,135 @@ test('single-domain language waits instead of overstating progress when no struc
   const assessment = createAssessmentState();
 
   assert.equal(getSingleDomainBuilderStepStatus('language', assessment), 'waiting');
-  assert.equal(getSingleDomainBuilderStepStatus('language', assessment, 'language'), 'in_progress');
+  assert.equal(getSingleDomainBuilderStepStatus('language', assessment, 'language'), 'waiting');
+});
+
+test('single-domain language stays waiting when authored signals cannot yet derive pairs', () => {
+  const assessment = createAssessmentState({
+    authoredDomains: [
+      {
+        domainId: 'domain-1',
+        domainKey: 'leadership-style',
+        label: 'Leadership style',
+        description: null,
+        orderIndex: 0,
+        createdAt: '',
+        updatedAt: '',
+        signals: [
+          {
+            signalId: 'signal-1',
+            signalKey: 'directive',
+            label: 'Directive',
+            description: null,
+            orderIndex: 0,
+            createdAt: '',
+            updatedAt: '',
+          },
+        ],
+      },
+    ],
+    availableSignals: [
+      {
+        signalId: 'signal-1',
+        signalKey: 'directive',
+        signalLabel: 'Directive',
+        signalDescription: null,
+        signalOrderIndex: 0,
+        domainId: 'domain-1',
+        domainKey: 'leadership-style',
+        domainLabel: 'Leadership style',
+        domainOrderIndex: 0,
+      },
+    ],
+    singleDomainLanguageValidation: buildSingleDomainLanguageValidation({
+      authoredDomains: [
+        {
+          domainId: 'domain-1',
+          domainKey: 'leadership-style',
+          label: 'Leadership style',
+          description: null,
+          orderIndex: 0,
+          createdAt: '',
+          updatedAt: '',
+          signals: [
+            {
+              signalId: 'signal-1',
+              signalKey: 'directive',
+              label: 'Directive',
+              description: null,
+              orderIndex: 0,
+              createdAt: '',
+              updatedAt: '',
+            },
+          ],
+        },
+      ],
+      languageBundle: {
+        DOMAIN_FRAMING: [],
+        HERO_PAIRS: [],
+        SIGNAL_CHAPTERS: [],
+        BALANCING_SECTIONS: [],
+        PAIR_SUMMARIES: [],
+        APPLICATION_STATEMENTS: [],
+      },
+    }),
+  });
+
+  assert.equal(getSingleDomainBuilderStepStatus('language', assessment), 'waiting');
+});
+
+test('single-domain overview guidance follows authored state instead of staying fixed', () => {
+  const emptyAssessment = createAssessmentState();
+  const inFlightAssessment = createAssessmentState({
+    authoredDomains: [
+      {
+        domainId: 'domain-1',
+        domainKey: 'leadership-style',
+        label: 'Leadership style',
+        description: null,
+        orderIndex: 0,
+        createdAt: '',
+        updatedAt: '',
+        signals: [],
+      },
+    ],
+    availableSignals: [
+      {
+        signalId: 'signal-1',
+        signalKey: 'directive',
+        signalLabel: 'Directive',
+        signalDescription: null,
+        signalOrderIndex: 0,
+        domainId: 'domain-1',
+        domainKey: 'leadership-style',
+        domainLabel: 'Leadership style',
+        domainOrderIndex: 0,
+      },
+    ],
+  });
+
+  assert.deepEqual(getSingleDomainBuilderNextAction(emptyAssessment), {
+    step: 'domain',
+    title: 'Define the one allowed domain',
+    description: 'Start in Domain to lock the assessment to a single domain record before authoring downstream structure.',
+    ctaLabel: 'Continue to Domain',
+  });
+  assert.deepEqual(getSingleDomainBuilderNextAction(inFlightAssessment), {
+    step: 'questions',
+    title: 'Author the first question',
+    description: 'Questions turn the domain and signal structure into something the runtime can actually serve.',
+    ctaLabel: 'Continue to Questions',
+  });
+});
+
+test('single-domain progress excludes the informational overview stage from completion totals', () => {
+  const assessment = createAssessmentState();
+
+  assert.deepEqual(getSingleDomainBuilderProgress(assessment), {
+    completeCount: 0,
+    actionableCompleteCount: 0,
+    actionableTotalCount: 7,
+  });
 });
 
 test('single-domain stepper source no longer renders a blocked badge', () => {
@@ -217,8 +350,8 @@ test('single-domain overview surfaces a stronger next action and avoids repeated
   assert.match(source, /Builder overview/);
   assert.match(source, /What this builder is for/);
   assert.match(source, /Next step/);
-  assert.match(source, /Define the one allowed domain/);
-  assert.match(source, /Continue to Domain/);
+  assert.match(source, /getSingleDomainBuilderNextAction/);
+  assert.match(source, /getSingleDomainBuilderProgress/);
   assert.doesNotMatch(source, /title="Overview"/);
   assert.doesNotMatch(source, /description="Assessment title, description, version context, and the single-domain builder contract\."/);
 });

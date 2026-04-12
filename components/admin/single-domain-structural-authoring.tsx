@@ -1057,6 +1057,7 @@ export function SingleDomainReviewAuthoring() {
       }),
     [assessment.authoredDomains, assessment.authoredQuestions, languageValidation],
   );
+  const languageSection = structuralValidation.sections.find((section) => section.key === 'language');
 
   return (
     <section className="sonartra-section">
@@ -1073,9 +1074,9 @@ export function SingleDomainReviewAuthoring() {
         <SummaryCard detail="Grouped under questions." label="Responses" value={String(structuralValidation.optionCount)} />
         <SummaryCard detail="Explicit weight rows." label="Weightings" value={String(structuralValidation.mappingCount)} />
         <SummaryCard
-          detail="Locked dataset completeness."
+          detail={languageSection?.detail ?? 'Locked dataset completeness.'}
           label="Language"
-          value={languageValidation.overallReady ? 'Ready' : 'Attention'}
+          value={languageSection ? getStatusLabel(languageSection.status) : 'Waiting'}
         />
       </div>
       {runtimeReadiness ? (

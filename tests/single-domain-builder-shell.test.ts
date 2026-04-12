@@ -40,7 +40,8 @@ test('single-domain builder step navigation renders the dedicated eight-step rai
 
   assert.match(stepperSource, /aria-label="Single-domain builder steps"/);
   assert.match(stepperSource, /Step \{activeIndex \+ 1\} of \{steps.length\}/);
-  assert.match(stepperSource, /Every stage stays viewable so readiness can\s+be checked without contradictory blocked states/);
+  assert.match(stepperSource, /Every stage stays viewable so readiness can\s+be checked without route access changing the underlying status/);
+  assert.match(stepperSource, /authoring stages complete/);
   assert.match(stepperSource, /getAssessmentBuilderStepPath/);
   assert.match(stepperSource, /Current step/);
   assert.match(stepperSource, /View all steps/);
