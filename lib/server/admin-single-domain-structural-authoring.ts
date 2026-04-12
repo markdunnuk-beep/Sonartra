@@ -29,6 +29,12 @@ import {
   validateAdminAuthoringValues,
 } from '@/lib/admin/admin-domain-signal-authoring';
 import {
+  buildSingleDomainCreateDomainValues,
+  buildSingleDomainCreateSignalValues,
+  buildSingleDomainLockedDomainValues,
+  buildSingleDomainLockedSignalValues,
+} from '@/lib/admin/single-domain-safe-authoring';
+import {
   createDomainRecord,
   createSignalRecord,
   deleteSignalRecord,
@@ -62,11 +68,17 @@ type VersionScopeRow = {
 
 type DomainScopeRow = {
   domain_id: string;
+  domain_key?: string;
 };
 
 type QuestionScopeRow = {
   question_id: string;
   domain_id: string;
+};
+
+type SignalScopeRow = {
+  signal_id: string;
+  signal_key: string;
 };
 
 type ActionContext = {
@@ -155,6 +167,42 @@ async function assertSingleDomainQuestionScope(
       AND assessment_version_id = $2
     `,
     [context.questionId, context.assessmentVersionId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function loadSingleDomainDomainScope(
+  db: Queryable,
+  context: Pick<ActionContext, 'assessmentVersionId' | 'domainId'>,
+): Promise<DomainScopeRow | null> {
+  const result = await db.query<DomainScopeRow>(
+    `
+    SELECT id AS domain_id, domain_key
+    FROM domains
+    WHERE id = $1
+      AND assessment_version_id = $2
+      AND domain_type = 'SIGNAL_GROUP'
+    `,
+    [context.domainId, context.assessmentVersionId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function loadSingleDomainSignalScope(
+  db: Queryable,
+  context: Pick<ActionContext, 'assessmentVersionId' | 'domainId' | 'signalId'>,
+): Promise<SignalScopeRow | null> {
+  const result = await db.query<SignalScopeRow>(
+    `
+    SELECT id AS signal_id, signal_key
+    FROM signals
+    WHERE id = $1
+      AND domain_id = $2
+      AND assessment_version_id = $3
+    `,
+    [context.signalId, context.domainId, context.assessmentVersionId],
   );
 
   return result.rows[0] ?? null;
@@ -512,7 +560,7 @@ export async function createSingleDomainDomainAction(
   _previousState: AdminAuthoringFormState,
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
-  const values = getDomainValuesFromFormData(formData);
+  const values = buildSingleDomainCreateDomainValues(getDomainValuesFromFormData(formData));
   const validation = validateAdminAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
@@ -540,16 +588,26 @@ export async function updateSingleDomainDomainAction(
   _previousState: AdminAuthoringFormState,
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
-  const values = getDomainValuesFromFormData(formData);
-  const validation = validateAdminAuthoringValues(values);
-  if (Object.keys(validation.fieldErrors).length > 0) {
-    return validation;
+  const submittedValues = getDomainValuesFromFormData(formData);
+  const submittedValidation = validateAdminAuthoringValues(submittedValues);
+  if (Object.keys(submittedValidation.fieldErrors).length > 0) {
+    return submittedValidation;
   }
 
   return runDomainSignalWriteAction({
     context,
-    values,
+    values: submittedValues,
     action: async (db) => {
+      const currentDomain = await loadSingleDomainDomainScope(db, context);
+      if (!currentDomain?.domain_key) {
+        throw new Error('DOMAIN_NOT_FOUND');
+      }
+
+      const values = buildSingleDomainLockedDomainValues(
+        submittedValues,
+        currentDomain.domain_key,
+      );
+
       await updateDomainRecord({
         db,
         assessmentVersionId: context.assessmentVersionId,
@@ -565,7 +623,7 @@ export async function createSingleDomainSignalAction(
   _previousState: AdminAuthoringFormState,
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
-  const values = getDomainValuesFromFormData(formData);
+  const values = buildSingleDomainCreateSignalValues(getDomainValuesFromFormData(formData));
   const validation = validateAdminAuthoringValues(values);
   if (Object.keys(validation.fieldErrors).length > 0) {
     return validation;
@@ -594,19 +652,29 @@ export async function updateSingleDomainSignalAction(
   _previousState: AdminAuthoringFormState,
   formData: FormData,
 ): Promise<AdminAuthoringFormState> {
-  const values = getDomainValuesFromFormData(formData);
-  const validation = validateAdminAuthoringValues(values);
-  if (Object.keys(validation.fieldErrors).length > 0) {
-    return validation;
+  const submittedValues = getDomainValuesFromFormData(formData);
+  const submittedValidation = validateAdminAuthoringValues(submittedValues);
+  if (Object.keys(submittedValidation.fieldErrors).length > 0) {
+    return submittedValidation;
   }
 
   return runDomainSignalWriteAction({
     context,
-    values,
+    values: submittedValues,
     action: async (db, scope) => {
       if (!scope.domainIds.includes(context.domainId ?? '')) {
         throw new Error('DOMAIN_NOT_FOUND');
       }
+
+      const currentSignal = await loadSingleDomainSignalScope(db, context);
+      if (!currentSignal?.signal_key) {
+        throw new Error('SIGNAL_NOT_FOUND');
+      }
+
+      const values = buildSingleDomainLockedSignalValues(
+        submittedValues,
+        currentSignal.signal_key,
+      );
 
       await updateSignalRecord({
         db,

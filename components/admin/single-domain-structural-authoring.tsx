@@ -19,6 +19,10 @@ import {
   getExpectedSignalPairCount,
 } from '@/lib/admin/single-domain-structural-validation';
 import {
+  buildSingleDomainCreateDomainValues,
+  buildSingleDomainCreateSignalValues,
+} from '@/lib/admin/single-domain-safe-authoring';
+import {
   initialAdminAuthoringFormState,
 } from '@/lib/admin/admin-domain-signal-authoring';
 import {
@@ -38,6 +42,9 @@ import {
   updateSingleDomainQuestionAction,
   updateSingleDomainSignalAction,
 } from '@/lib/server/admin-single-domain-structural-authoring';
+import { slugifyDomainKey } from '@/lib/utils/domain-key';
+import { slugifySignalKey } from '@/lib/utils/signal-key';
+import { useSingleDomainDirtyField, useSingleDomainDirtyForm } from '@/components/admin/single-domain-unsaved-changes';
 
 function SubmitButton({
   idleLabel,
@@ -120,28 +127,40 @@ function Input({
   id,
   name,
   defaultValue,
+  value,
   placeholder,
   error,
+  readOnly = false,
+  onChange,
 }: Readonly<{
   id: string;
   name: string;
   defaultValue?: string;
+  value?: string;
   placeholder: string;
   error?: string;
+  readOnly?: boolean;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }>) {
+  const controlledProps = value !== undefined ? { value } : { defaultValue: defaultValue ?? '' };
+
   return (
     <input
       className={cn(
         'sonartra-focus-ring min-h-11 w-full rounded-[1rem] border bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28',
         error
           ? 'border-[rgba(255,157,157,0.32)]'
-          : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
+          : readOnly
+            ? 'border-white/10 text-white/68'
+            : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
-      defaultValue={defaultValue ?? ''}
       id={id}
       name={name}
+      onChange={onChange}
       placeholder={placeholder}
+      readOnly={readOnly}
       type="text"
+      {...controlledProps}
     />
   );
 }
@@ -150,17 +169,23 @@ function TextArea({
   id,
   name,
   defaultValue,
+  value,
   placeholder,
   error,
   minHeightClass = 'min-h-[112px]',
+  onChange,
 }: Readonly<{
   id: string;
   name: string;
   defaultValue?: string;
+  value?: string;
   placeholder: string;
   error?: string;
   minHeightClass?: string;
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
 }>) {
+  const controlledProps = value !== undefined ? { value } : { defaultValue: defaultValue ?? '' };
+
   return (
     <textarea
       className={cn(
@@ -170,11 +195,41 @@ function TextArea({
           ? 'border-[rgba(255,157,157,0.32)]'
           : 'border-white/10 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]',
       )}
-      defaultValue={defaultValue ?? ''}
       id={id}
       name={name}
+      onChange={onChange}
       placeholder={placeholder}
+      {...controlledProps}
     />
+  );
+}
+
+function CanonicalKeyField({
+  htmlFor,
+  label,
+  hint,
+  value,
+  hiddenFieldName = 'key',
+}: Readonly<{
+  htmlFor: string;
+  label: string;
+  hint: string;
+  value: string;
+  hiddenFieldName?: string;
+}>) {
+  return (
+    <>
+      <input name={hiddenFieldName} type="hidden" value={value} />
+      <Field hint={hint} htmlFor={htmlFor} label={label}>
+        <Input
+          id={htmlFor}
+          name={`${hiddenFieldName}-preview`}
+          placeholder="Generated from the label"
+          readOnly
+          value={value}
+        />
+      </Field>
+    </>
   );
 }
 
@@ -268,10 +323,32 @@ function DomainForm() {
     [assessment.assessmentKey, draftVersionId, domain],
   );
   const [state, formAction] = useActionState(action, initialAdminAuthoringFormState);
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state });
+  const [labelDraft, setLabelDraft] = useState(domain?.label ?? state.values.label);
+  const [descriptionDraft, setDescriptionDraft] = useState(domain?.description ?? state.values.description);
+  const generatedKey = domain
+    ? domain.domainKey
+    : buildSingleDomainCreateDomainValues({
+        label: labelDraft,
+        key: '',
+        description: descriptionDraft,
+      }).key;
 
   return (
     <SurfaceCard className="p-5 lg:p-6">
-      <form action={formAction} className="space-y-5">
+      <form
+        action={formAction}
+        className="space-y-5"
+        onChange={handleDirtyChange}
+        onInput={handleDirtyInput}
+        onSubmit={handleDirtySubmit}
+        ref={formRef}
+      >
         <div className="flex flex-wrap items-center gap-2">
           <LabelPill>One domain only</LabelPill>
           {domain ? (
@@ -287,27 +364,22 @@ function DomainForm() {
           label="Domain label"
         >
           <Input
-            defaultValue={domain?.label ?? state.values.label}
             error={state.fieldErrors.label}
             id="single-domain-label"
             name="label"
+            onChange={(event) => setLabelDraft(event.currentTarget.value)}
             placeholder="Leadership style"
+            value={labelDraft}
           />
         </Field>
-        <Field
-          error={state.fieldErrors.key}
-          hint="Use the existing domain-key convention. A second domain is never allowed here."
+        <CanonicalKeyField
+          hint={domain
+            ? 'This canonical key is locked after creation so downstream references stay stable.'
+            : 'The canonical key will be generated from the label when the domain is created.'}
           htmlFor="single-domain-key"
           label="Domain key"
-        >
-          <Input
-            defaultValue={domain?.domainKey ?? state.values.key}
-            error={state.fieldErrors.key}
-            id="single-domain-key"
-            name="key"
-            placeholder="leadership-style"
-          />
-        </Field>
+          value={generatedKey}
+        />
         <Field
           error={state.fieldErrors.description}
           hint="Optional structural context for admins. This does not create output language."
@@ -315,12 +387,13 @@ function DomainForm() {
           label="Description"
         >
           <TextArea
-            defaultValue={domain?.description ?? state.values.description}
             error={state.fieldErrors.description}
             id="single-domain-description"
             minHeightClass="min-h-[120px]"
             name="description"
+            onChange={(event) => setDescriptionDraft(event.currentTarget.value)}
             placeholder="What this domain covers."
+            value={descriptionDraft}
           />
         </Field>
         <InlineError message={state.formError} />
@@ -371,6 +444,12 @@ function SignalCard({
   );
   const [updateState, updateFormAction] = useActionState(updateAction, initialAdminAuthoringFormState);
   const [deleteState, deleteFormAction] = useActionState(deleteAction, initialAdminAuthoringFormState);
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state: updateState });
 
   return (
     <SurfaceCard className="p-5">
@@ -381,7 +460,14 @@ function SignalCard({
             Order {signal.orderIndex + 1}
           </LabelPill>
         </div>
-        <form action={updateFormAction} className="space-y-4">
+        <form
+          action={updateFormAction}
+          className="space-y-4"
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
           <Field
             error={updateState.fieldErrors.label}
             hint="Signal count stays flexible here."
@@ -396,20 +482,12 @@ function SignalCard({
               placeholder="Directive"
             />
           </Field>
-          <Field
-            error={updateState.fieldErrors.key}
-            hint="Pair expectations derive from the current authored signals, not a fixed template."
+          <CanonicalKeyField
+            hint="This canonical key is locked after creation so language and runtime references stay stable."
             htmlFor={`signal-key-${signal.signalId}`}
             label="Signal key"
-          >
-            <Input
-              defaultValue={signal.signalKey}
-              error={updateState.fieldErrors.key}
-              id={`signal-key-${signal.signalId}`}
-              name="key"
-              placeholder="directive"
-            />
-          </Field>
+            value={signal.signalKey}
+          />
           <Field
             error={updateState.fieldErrors.description}
             hint="Optional internal description."
@@ -473,6 +551,12 @@ function QuestionCard({
   );
   const [updateState, updateFormAction] = useActionState(updateAction, initialAdminQuestionAuthoringFormState);
   const [deleteState, deleteFormAction] = useActionState(deleteAction, initialAdminQuestionAuthoringFormState);
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state: updateState });
 
   return (
     <SurfaceCard className="p-5">
@@ -486,7 +570,14 @@ function QuestionCard({
             {question.options.length} option{question.options.length === 1 ? '' : 's'}
           </LabelPill>
         </div>
-        <form action={updateFormAction} className="space-y-4">
+        <form
+          action={updateFormAction}
+          className="space-y-4"
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
           <input name="domainId" type="hidden" value={domainId} />
           <Field
             error={updateState.fieldErrors.prompt}
@@ -553,6 +644,12 @@ function OptionCard({
   );
   const [updateState, updateFormAction] = useActionState(updateAction, initialAdminOptionAuthoringFormState);
   const [deleteState, deleteFormAction] = useActionState(deleteAction, initialAdminOptionAuthoringFormState);
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state: updateState });
 
   return (
     <SurfaceCard className="p-4">
@@ -563,7 +660,14 @@ function OptionCard({
             {option.optionLabel?.trim() || String.fromCharCode(65 + option.orderIndex)}
           </LabelPill>
         </div>
-        <form action={updateFormAction} className="space-y-4">
+        <form
+          action={updateFormAction}
+          className="space-y-4"
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
           <input name="label" type="hidden" value={option.optionLabel ?? ''} />
           <Field
             error={updateState.fieldErrors.text}
@@ -617,6 +721,12 @@ function ResponsesQuestionCard({
     createAction,
     initialAdminOptionAuthoringFormState,
   );
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state: createState });
 
   return (
     <SurfaceCard className="p-5 lg:p-6">
@@ -633,7 +743,14 @@ function ResponsesQuestionCard({
             Each question must keep at least one option. Options belong to real questions only.
           </p>
         </div>
-        <form action={createFormAction} className="grid gap-4 lg:grid-cols-[180px_minmax(0,1fr)_auto]">
+        <form
+          action={createFormAction}
+          className="grid gap-4 lg:grid-cols-[180px_minmax(0,1fr)_auto]"
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
           <Field
             error={createState.fieldErrors.label}
             hint="Optional letter label."
@@ -723,6 +840,19 @@ export function SingleDomainSignalsAuthoring() {
     [assessment.assessmentKey, draftVersionId, domain?.domainId],
   );
   const [createState, createFormAction] = useActionState(createAction, initialAdminAuthoringFormState);
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state: createState });
+  const [labelDraft, setLabelDraft] = useState(createState.values.label);
+  const [descriptionDraft, setDescriptionDraft] = useState(createState.values.description);
+  const generatedSignalKey = buildSingleDomainCreateSignalValues({
+    label: labelDraft,
+    key: '',
+    description: descriptionDraft,
+  }).key;
 
   if (!assessment.latestDraftVersion) {
     return renderMissingDraftState(
@@ -763,7 +893,14 @@ export function SingleDomainSignalsAuthoring() {
         <SummaryCard detail="All signals stay tied to the one domain." label="Domain" value={domain.label} />
       </div>
       <SurfaceCard className="p-5 lg:p-6">
-        <form action={createFormAction} className="space-y-4">
+        <form
+          action={createFormAction}
+          className="space-y-4"
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
           <Field
             error={createState.fieldErrors.label}
             hint="Create one signal at a time. Ordering is deterministic by insertion order."
@@ -771,27 +908,20 @@ export function SingleDomainSignalsAuthoring() {
             label="Signal label"
           >
             <Input
-              defaultValue={createState.values.label}
               error={createState.fieldErrors.label}
               id="create-signal-label"
               name="label"
+              onChange={(event) => setLabelDraft(event.currentTarget.value)}
               placeholder="Directive"
+              value={labelDraft}
             />
           </Field>
-          <Field
-            error={createState.fieldErrors.key}
-            hint="Keys stay deterministic and DB-backed."
+          <CanonicalKeyField
+            hint="The canonical key will be generated from the label when the signal is created."
             htmlFor="create-signal-key"
             label="Signal key"
-          >
-            <Input
-              defaultValue={createState.values.key}
-              error={createState.fieldErrors.key}
-              id="create-signal-key"
-              name="key"
-              placeholder="directive"
-            />
-          </Field>
+            value={generatedSignalKey}
+          />
           <Field
             error={createState.fieldErrors.description}
             hint="Optional structural description."
@@ -799,11 +929,12 @@ export function SingleDomainSignalsAuthoring() {
             label="Description"
           >
             <TextArea
-              defaultValue={createState.values.description}
               error={createState.fieldErrors.description}
               id="create-signal-description"
               name="description"
+              onChange={(event) => setDescriptionDraft(event.currentTarget.value)}
               placeholder="What this signal measures."
+              value={descriptionDraft}
             />
           </Field>
           <InlineError message={createState.formError} />
@@ -838,6 +969,12 @@ export function SingleDomainQuestionsAuthoring() {
     [assessment.assessmentKey, draftVersionId],
   );
   const [createState, createFormAction] = useActionState(createAction, initialAdminQuestionAuthoringFormState);
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state: createState });
 
   if (!assessment.latestDraftVersion) {
     return renderMissingDraftState(
@@ -870,7 +1007,14 @@ export function SingleDomainQuestionsAuthoring() {
         description="Questions must belong to the one authored domain and stay in deterministic order."
       />
       <SurfaceCard className="p-5 lg:p-6">
-        <form action={createFormAction} className="space-y-4">
+        <form
+          action={createFormAction}
+          className="space-y-4"
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
           <input name="domainId" type="hidden" value={domain.domainId} />
           <Field
             error={createState.fieldErrors.prompt}

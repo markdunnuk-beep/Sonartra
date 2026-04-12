@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { SurfaceCard, cn } from '@/components/shared/user-app-ui';
+import { useSingleDomainDirtyField } from '@/components/admin/single-domain-unsaved-changes';
 import {
   initialAdminWeightingAuthoringFormState,
   validateAdminWeightingAuthoringValues,
@@ -169,6 +170,11 @@ function WeightGridCell({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const setDirty = useSingleDomainDirtyField();
+
+  useEffect(() => {
+    setDirty(draftValue.trim() !== (mapping?.weight ?? '').trim());
+  }, [draftValue, mapping, setDirty]);
 
   useEffect(() => {
     registerInput(rowIndex, columnIndex, inputRef.current);
@@ -194,6 +200,7 @@ function WeightGridCell({
     if (saveMode === 'noop') {
       setDraftValue(nextValue);
       setError(null);
+      setDirty(false);
       return;
     }
 
@@ -264,10 +271,12 @@ function WeightGridCell({
       if (actionError) {
         setDraftValue(currentValue);
         setError(actionError);
+        setDirty(false);
         return;
       }
 
       setDraftValue(nextValue);
+      setDirty(false);
       router.refresh();
     });
   }
