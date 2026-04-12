@@ -1,4 +1,5 @@
 import type { AssessmentVersionId } from '@/lib/engine/types';
+import { queryWithAssessmentModeFallback } from '@/lib/server/assessment-mode-db';
 
 export type Queryable = {
   query<T>(text: string, params?: unknown[]): Promise<{ rows: T[] }>;
@@ -221,8 +222,9 @@ export async function getVersionByAssessmentKeyAndVersion(
   assessmentKey: string,
   version: string,
 ): Promise<AssessmentVersionRow | null> {
-  const result = await db.query<AssessmentVersionRow>(
-    `
+  const result = await queryWithAssessmentModeFallback<AssessmentVersionRow>({
+    db,
+    queryWithMode: `
     SELECT
       av.id,
       av.assessment_id,
@@ -237,8 +239,23 @@ export async function getVersionByAssessmentKeyAndVersion(
     WHERE a.assessment_key = $1
       AND av.version = $2
     `,
-    [assessmentKey, version],
-  );
+    queryWithoutMode: `
+    SELECT
+      av.id,
+      av.assessment_id,
+      NULL AS mode,
+      av.version,
+      av.lifecycle_status,
+      av.published_at,
+      av.created_at,
+      av.updated_at
+    FROM assessment_versions av
+    INNER JOIN assessments a ON a.id = av.assessment_id
+    WHERE a.assessment_key = $1
+      AND av.version = $2
+    `,
+    values: [assessmentKey, version],
+  });
 
   return result.rows[0] ?? null;
 }

@@ -291,6 +291,7 @@ function createFakeDb(params: {
   responses?: ResponseFixture[];
   results?: ResultFixture[];
   questionCountByVersionId?: Record<string, number>;
+  missingModeColumns?: boolean;
 }): Queryable {
   const attempts = [...(params.attempts ?? [])];
   const responses = [...(params.responses ?? [])];
@@ -436,6 +437,10 @@ function createFakeDb(params: {
       }
 
       if (text.includes('ORDER BY COALESCE(r.generated_at, r.created_at) DESC, r.id DESC')) {
+        if (text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') && params.missingModeColumns) {
+          throw new Error('WITHIN GROUP is required for ordered-set aggregate mode');
+        }
+
         const userId = queryParams?.[0] as string;
         const filtered = results
           .filter((result) => result.userId === userId && result.readinessStatus === 'READY' && result.canonicalResultPayload !== null)
@@ -456,6 +461,7 @@ function createFakeDb(params: {
             attempt_id: row.attemptId,
             assessment_id: row.assessmentId,
             assessment_key: row.assessmentKey,
+            assessment_mode: null,
             assessment_title: inventoryById.get(row.assessmentId)?.title ?? row.assessmentTitle,
             version_tag: row.versionTag,
             readiness_status: row.readinessStatus,
@@ -879,4 +885,72 @@ test('workspace and dashboard skip legacy-shaped ready payload rows that used to
   assert.equal(workspace.assessments[0]?.latestReadyResultId, null);
   assert.equal(dashboard.readyResultCount, 0);
   assert.equal(dashboard.latestReadyResult, null);
+});
+
+test('workspace and dashboard still load when assessment mode columns are absent in the database schema', async () => {
+  const db = createFakeDb({
+    inventory: [
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        title: 'WPLP-80',
+        description: 'Signals assessment',
+        assessmentVersionId: 'version-1',
+        versionTag: '1.0.0',
+        publishedAt: '2026-01-01T00:00:00.000Z',
+      },
+    ],
+    attempts: [
+      {
+        attemptId: 'attempt-1',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        lifecycleStatus: 'RESULT_READY',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        submittedAt: '2026-01-01T00:15:00.000Z',
+        completedAt: '2026-01-01T00:16:00.000Z',
+        lastActivityAt: '2026-01-01T00:16:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:16:00.000Z',
+      },
+    ],
+    results: [
+      {
+        resultId: 'result-1',
+        attemptId: 'attempt-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.0.0',
+        userId: 'user-1',
+        pipelineStatus: 'COMPLETED',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:16:00.000Z',
+        failureReason: null,
+        hasCanonicalResultPayload: true,
+        createdAt: '2026-01-01T00:16:00.000Z',
+        updatedAt: '2026-01-01T00:16:00.000Z',
+        canonicalResultPayload: buildPayload(),
+      },
+    ],
+    questionCountByVersionId: {
+      'version-1': 80,
+    },
+    missingModeColumns: true,
+  });
+
+  const workspace = await buildAssessmentWorkspaceViewModel({
+    db,
+    userId: 'user-1',
+  });
+  const dashboard = await buildDashboardViewModel({
+    db,
+    userId: 'user-1',
+  });
+
+  assert.equal(workspace.assessments[0]?.status, 'ready');
+  assert.equal(workspace.assessments[0]?.cta.href, '/app/results/result-1');
+  assert.equal(dashboard.latestReadyResult?.href, '/app/results/result-1');
 });

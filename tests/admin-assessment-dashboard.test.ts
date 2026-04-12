@@ -43,10 +43,19 @@ type AdminAssessmentDashboardRowFixture = {
   question_count: string;
 };
 
-function createFakeDb(fixtures: readonly AssessmentDashboardFixture[]): Queryable {
+function createFakeDb(
+  fixtures: readonly AssessmentDashboardFixture[],
+  options?: {
+    missingModeColumns?: boolean;
+  },
+): Queryable {
   return {
     async query<T>(text: string, params?: unknown[]) {
       if (text.includes('FROM assessments a') && text.includes('LEFT JOIN assessment_versions av')) {
+        if (text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') && options?.missingModeColumns) {
+          throw new Error('column av.mode does not exist');
+        }
+
         const rows: AdminAssessmentDashboardRowFixture[] = [];
 
         for (const fixture of fixtures) {
@@ -104,6 +113,10 @@ function createFakeDb(fixtures: readonly AssessmentDashboardFixture[]): Queryabl
       }
 
       if (text.includes('LEFT JOIN LATERAL') && text.includes('draft_version_id')) {
+        if (text.includes('COALESCE(dv.mode, a.mode) AS assessment_mode') && options?.missingModeColumns) {
+          throw new Error('column dv.mode does not exist');
+        }
+
         const assessmentKey = params?.[0] as string;
         const fixture = fixtures.find((entry) => entry.assessmentKey === assessmentKey);
         const draftVersion = fixture?.versions.find((version) => version.status === 'DRAFT') ?? null;
@@ -417,4 +430,36 @@ test('undefined and unknown modes resolve safely for dashboard labels', async ()
     viewModel.assessments.find((assessment) => assessment.assessmentKey === 'single-mode')?.modeLabel,
     'Single-Domain',
   );
+});
+
+test('dashboard falls back safely when assessment mode columns are not present in the database', async () => {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(
+    createFakeDb(
+      [
+        {
+          assessmentId: 'assessment-1',
+          assessmentKey: 'legacy-mode',
+          title: 'Legacy Mode',
+          description: null,
+          versions: [
+            {
+              assessmentVersionId: 'version-2',
+              versionTag: '1.1.0',
+              status: 'DRAFT',
+              questionCount: 12,
+              updatedAt: '2026-01-04T00:00:00.000Z',
+            },
+          ],
+        },
+      ],
+      {
+        missingModeColumns: true,
+      },
+    ),
+  );
+
+  assert.equal(viewModel.assessments[0]?.assessmentKey, 'legacy-mode');
+  assert.equal(viewModel.assessments[0]?.mode, 'multi_domain');
+  assert.equal(viewModel.assessments[0]?.modeLabel, 'Multi-Domain');
+  assert.equal(viewModel.assessments[0]?.actionHref, '/admin/assessments/legacy-mode');
 });

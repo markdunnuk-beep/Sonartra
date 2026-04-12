@@ -3,6 +3,7 @@ import {
   APPLICATION_PLAN_WARNING_THRESHOLD,
   summarizeApplicationPlanCoverage,
 } from '@/lib/server/application-plan-governance';
+import { queryWithAssessmentModeFallback } from '@/lib/server/assessment-mode-db';
 import { getAssessmentVersionApplicationLanguage } from '@/lib/server/assessment-version-application-language';
 import { getSingleDomainDraftReadiness } from '@/lib/server/single-domain-draft-readiness';
 import { isSingleDomain } from '@/lib/utils/assessment-mode';
@@ -174,8 +175,9 @@ async function loadValidationContext(
   db: Queryable,
   assessmentKey: string,
 ): Promise<ValidationContextRow | null> {
-  const result = await db.query<ValidationContextRow>(
-    `
+  const result = await queryWithAssessmentModeFallback<ValidationContextRow>({
+    db,
+    queryWithMode: `
     SELECT
       a.id AS assessment_id,
       a.assessment_key,
@@ -196,8 +198,28 @@ async function loadValidationContext(
     ) dv ON TRUE
     WHERE a.assessment_key = $1
     `,
-    [assessmentKey],
-  );
+    queryWithoutMode: `
+    SELECT
+      a.id AS assessment_id,
+      a.assessment_key,
+      NULL AS assessment_mode,
+      dv.id AS draft_version_id,
+      dv.version AS draft_version_tag
+    FROM assessments a
+    LEFT JOIN LATERAL (
+      SELECT
+        av.id,
+        av.version
+      FROM assessment_versions av
+      WHERE av.assessment_id = a.id
+        AND av.lifecycle_status = 'DRAFT'
+      ORDER BY av.updated_at DESC, av.created_at DESC, av.version DESC
+      LIMIT 1
+    ) dv ON TRUE
+    WHERE a.assessment_key = $1
+    `,
+    values: [assessmentKey],
+  });
 
   return result.rows[0] ?? null;
 }

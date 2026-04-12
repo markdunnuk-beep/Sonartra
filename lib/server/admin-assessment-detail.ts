@@ -1,5 +1,6 @@
 import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
+import { queryWithAssessmentModeFallback } from '@/lib/server/assessment-mode-db';
 import type { AssessmentMode } from '@/lib/types/assessment';
 import { getAssessmentModeLabel, isSingleDomain, resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 import {
@@ -670,8 +671,9 @@ export async function getAdminAssessmentDetailByKey(
   db: Queryable,
   assessmentKey: string,
 ): Promise<AdminAssessmentDetailViewModel | null> {
-  const result = await db.query<AdminAssessmentDetailRow>(
-    `
+  const result = await queryWithAssessmentModeFallback<AdminAssessmentDetailRow>({
+    db,
+    queryWithMode: `
     SELECT
       a.id AS assessment_id,
       a.assessment_key,
@@ -713,8 +715,48 @@ export async function getAdminAssessmentDetailByKey(
       av.created_at DESC NULLS LAST,
       av.version DESC NULLS LAST
     `,
-    [assessmentKey],
-  );
+    queryWithoutMode: `
+    SELECT
+      a.id AS assessment_id,
+      a.assessment_key,
+      NULL AS assessment_mode,
+      a.title AS assessment_title,
+      a.description AS assessment_description,
+      a.is_active AS assessment_is_active,
+      a.created_at AS assessment_created_at,
+      a.updated_at AS assessment_updated_at,
+      av.id AS assessment_version_id,
+      av.version AS version_tag,
+      av.lifecycle_status AS version_status,
+      av.published_at,
+      av.created_at AS version_created_at,
+      av.updated_at AS version_updated_at,
+      COUNT(q.id) AS question_count
+    FROM assessments a
+    LEFT JOIN assessment_versions av ON av.assessment_id = a.id
+    LEFT JOIN questions q ON q.assessment_version_id = av.id
+    WHERE a.assessment_key = $1
+    GROUP BY
+      a.id,
+      a.assessment_key,
+      a.title,
+      a.description,
+      a.is_active,
+      a.created_at,
+      a.updated_at,
+      av.id,
+      av.version,
+      av.lifecycle_status,
+      av.published_at,
+      av.created_at,
+      av.updated_at
+    ORDER BY
+      av.updated_at DESC NULLS LAST,
+      av.created_at DESC NULLS LAST,
+      av.version DESC NULLS LAST
+    `,
+    values: [assessmentKey],
+  });
 
   const firstRow = result.rows[0];
   if (!firstRow) {

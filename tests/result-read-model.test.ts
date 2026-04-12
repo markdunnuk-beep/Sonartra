@@ -23,6 +23,7 @@ type ResultRowFixture = {
   generatedAt: string | null;
   createdAt: string;
   canonicalResultPayload: unknown;
+  mode?: string | null;
 };
 
 function buildPayload(params?: {
@@ -234,10 +235,19 @@ function buildPayload(params?: {
   };
 }
 
-function createFakeDb(rows: ResultRowFixture[]): Queryable {
+function createFakeDb(
+  rows: ResultRowFixture[],
+  options?: {
+    missingModeColumns?: boolean;
+  },
+): Queryable {
   return {
     async query<T>(text: string, params?: unknown[]) {
       if (text.includes('FROM results r') && text.includes('ORDER BY COALESCE(r.generated_at, r.created_at) DESC, r.id DESC')) {
+        if (text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') && options?.missingModeColumns) {
+          throw new Error('WITHIN GROUP is required for ordered-set aggregate mode');
+        }
+
         const userId = params?.[0] as string;
         const filtered = rows
           .filter((row) => row.userId === userId && row.readinessStatus === 'READY' && row.canonicalResultPayload !== null)
@@ -256,6 +266,7 @@ function createFakeDb(rows: ResultRowFixture[]): Queryable {
             attempt_id: row.attemptId,
             assessment_id: row.assessmentId,
             assessment_key: row.assessmentKey,
+            assessment_mode: row.mode ?? null,
             assessment_title: row.assessmentTitle,
             version_tag: row.versionTag,
             readiness_status: row.readinessStatus,
@@ -267,6 +278,10 @@ function createFakeDb(rows: ResultRowFixture[]): Queryable {
       }
 
       if (text.includes('FROM results r') && text.includes('WHERE r.id = $1')) {
+        if (text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') && options?.missingModeColumns) {
+          throw new Error('WITHIN GROUP is required for ordered-set aggregate mode');
+        }
+
         const resultId = params?.[0] as string;
         const userId = params?.[1] as string;
         const row = rows.find(
@@ -284,6 +299,7 @@ function createFakeDb(rows: ResultRowFixture[]): Queryable {
                 attempt_id: row.attemptId,
                 assessment_id: row.assessmentId,
                 assessment_key: row.assessmentKey,
+                assessment_mode: row.mode ?? null,
                 assessment_title: row.assessmentTitle,
                 version_tag: row.versionTag,
                 readiness_status: row.readinessStatus,
@@ -804,4 +820,38 @@ test('repeated reads are deterministic and byte-stable', async () => {
 
   assert.equal(JSON.stringify(firstList), JSON.stringify(secondList));
   assert.equal(JSON.stringify(firstDetail), JSON.stringify(secondDetail));
+});
+
+test('result read model falls back to multi_domain when mode columns are absent in the database schema', async () => {
+  const service = createResultReadModelService({
+    db: createFakeDb(
+      [
+        {
+          resultId: 'result-legacy',
+          attemptId: 'attempt-legacy',
+          assessmentId: 'assessment-1',
+          assessmentKey: 'wplp80',
+          assessmentTitle: 'WPLP-80',
+          versionTag: '1.0.0',
+          userId: 'user-1',
+          readinessStatus: 'READY',
+          generatedAt: '2026-01-01T00:01:00.000Z',
+          createdAt: '2026-01-01T00:01:00.000Z',
+          canonicalResultPayload: buildPayload({ resultAttemptId: 'attempt-legacy' }),
+        },
+      ],
+      {
+        missingModeColumns: true,
+      },
+    ),
+  });
+
+  const [listItem] = await service.listAssessmentResults({ userId: 'user-1' });
+  const detail = await service.getAssessmentResultDetail({
+    userId: 'user-1',
+    resultId: 'result-legacy',
+  });
+
+  assert.equal(listItem?.mode, 'multi_domain');
+  assert.equal(detail.mode, 'multi_domain');
 });

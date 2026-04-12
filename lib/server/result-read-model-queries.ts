@@ -1,4 +1,5 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
+import { queryWithAssessmentModeFallback } from '@/lib/server/assessment-mode-db';
 
 type ResultListRow = {
   result_id: string;
@@ -50,8 +51,9 @@ export async function listReadyResultsForUser(
   db: Queryable,
   userId: string,
 ): Promise<readonly PersistedReadyResultRecord[]> {
-  const result = await db.query<ResultListRow>(
-    `
+  const result = await queryWithAssessmentModeFallback<ResultListRow>({
+    db,
+    queryWithMode: `
     SELECT
       r.id AS result_id,
       r.attempt_id,
@@ -73,8 +75,30 @@ export async function listReadyResultsForUser(
       AND r.canonical_result_payload IS NOT NULL
     ORDER BY COALESCE(r.generated_at, r.created_at) DESC, r.id DESC
     `,
-    [userId],
-  );
+    queryWithoutMode: `
+    SELECT
+      r.id AS result_id,
+      r.attempt_id,
+      r.assessment_id,
+      a.assessment_key,
+      NULL AS assessment_mode,
+      a.title AS assessment_title,
+      av.version AS version_tag,
+      r.readiness_status,
+      r.generated_at,
+      r.created_at,
+      r.canonical_result_payload
+    FROM results r
+    INNER JOIN attempts t ON t.id = r.attempt_id
+    INNER JOIN assessments a ON a.id = r.assessment_id
+    INNER JOIN assessment_versions av ON av.id = r.assessment_version_id
+    WHERE t.user_id = $1
+      AND r.readiness_status = 'READY'
+      AND r.canonical_result_payload IS NOT NULL
+    ORDER BY COALESCE(r.generated_at, r.created_at) DESC, r.id DESC
+    `,
+    values: [userId],
+  });
 
   return Object.freeze(result.rows.map(mapReadyResultRecord));
 }
@@ -86,8 +110,9 @@ export async function getReadyResultDetailForUser(
     userId: string;
   },
 ): Promise<PersistedReadyResultRecord | null> {
-  const result = await db.query<ResultDetailRow>(
-    `
+  const result = await queryWithAssessmentModeFallback<ResultDetailRow>({
+    db,
+    queryWithMode: `
     SELECT
       r.id AS result_id,
       r.attempt_id,
@@ -109,8 +134,30 @@ export async function getReadyResultDetailForUser(
       AND r.readiness_status = 'READY'
       AND r.canonical_result_payload IS NOT NULL
     `,
-    [params.resultId, params.userId],
-  );
+    queryWithoutMode: `
+    SELECT
+      r.id AS result_id,
+      r.attempt_id,
+      r.assessment_id,
+      a.assessment_key,
+      NULL AS assessment_mode,
+      a.title AS assessment_title,
+      av.version AS version_tag,
+      r.readiness_status,
+      r.generated_at,
+      r.created_at,
+      r.canonical_result_payload
+    FROM results r
+    INNER JOIN attempts t ON t.id = r.attempt_id
+    INNER JOIN assessments a ON a.id = r.assessment_id
+    INNER JOIN assessment_versions av ON av.id = r.assessment_version_id
+    WHERE r.id = $1
+      AND t.user_id = $2
+      AND r.readiness_status = 'READY'
+      AND r.canonical_result_payload IS NOT NULL
+    `,
+    values: [params.resultId, params.userId],
+  });
 
   const row = result.rows[0];
   return row ? mapReadyResultRecord(row) : null;
