@@ -5,6 +5,7 @@ import type {
 } from '@/lib/server/admin-assessment-detail';
 import { getSingleDomainLanguageDatasetDefinition } from '@/lib/admin/single-domain-language-datasets';
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
+import { getSingleDomainExpectedPairCount } from '@/lib/types/single-domain-runtime';
 import type { SingleDomainLanguageDatasetKey } from '@/lib/types/single-domain-language';
 
 export type SingleDomainStructuralIssueSeverity = 'blocking' | 'warning';
@@ -103,11 +104,7 @@ function collectWeightMappings(
 }
 
 export function getExpectedSignalPairCount(signalCount: number): number {
-  if (signalCount < 2) {
-    return 0;
-  }
-
-  return (signalCount * (signalCount - 1)) / 2;
+  return getSingleDomainExpectedPairCount(signalCount);
 }
 
 function createLanguageDatasetValidation(params: {

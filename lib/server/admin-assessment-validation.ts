@@ -4,6 +4,8 @@ import {
   summarizeApplicationPlanCoverage,
 } from '@/lib/server/application-plan-governance';
 import { getAssessmentVersionApplicationLanguage } from '@/lib/server/assessment-version-application-language';
+import { getSingleDomainDraftReadiness } from '@/lib/server/single-domain-draft-readiness';
+import { isSingleDomain } from '@/lib/utils/assessment-mode';
 
 export type AdminAssessmentValidationStatus = 'ready' | 'not_ready' | 'no_draft' | 'missing_assessment';
 export type AdminAssessmentValidationSectionKey =
@@ -59,6 +61,7 @@ export type AdminAssessmentValidationResult = {
 type ValidationContextRow = {
   assessment_id: string;
   assessment_key: string;
+  assessment_mode: string | null;
   draft_version_id: string | null;
   draft_version_tag: string | null;
 };
@@ -176,12 +179,14 @@ async function loadValidationContext(
     SELECT
       a.id AS assessment_id,
       a.assessment_key,
+      COALESCE(dv.mode, a.mode) AS assessment_mode,
       dv.id AS draft_version_id,
       dv.version AS draft_version_tag
     FROM assessments a
     LEFT JOIN LATERAL (
       SELECT
         av.id,
+        av.mode,
         av.version
       FROM assessment_versions av
       WHERE av.assessment_id = a.id
@@ -438,6 +443,61 @@ export async function validateLatestDraftAssessmentVersion(
           createIssue('publish_readiness_unavailable', 'Publish readiness cannot be computed until an editable draft exists.'),
         ]),
       ],
+    });
+  }
+
+  if (isSingleDomain(context.assessment_mode)) {
+    const readiness = await getSingleDomainDraftReadiness(db, context.draft_version_id);
+    const domainsSignalsIssues = readiness.issues
+      .filter((issue) => issue.section === 'domain' || issue.section === 'signals')
+      .map((issue) => createIssue(issue.code, issue.message));
+    const questionsOptionsIssues = readiness.issues
+      .filter((issue) => issue.section === 'questions' || issue.section === 'options')
+      .map((issue) => createIssue(issue.code, issue.message));
+    const weightIssues = readiness.issues
+      .filter((issue) => issue.section === 'weights')
+      .map((issue) => createIssue(issue.code, issue.message));
+    const runtimeLanguageIssues = readiness.issues
+      .filter((issue) => issue.section === 'language' || issue.section === 'runtime')
+      .map((issue) => createIssue(issue.code, issue.message));
+
+    return buildValidationResult({
+      status: readiness.isReady ? 'ready' : 'not_ready',
+      assessmentKey,
+      assessmentId: context.assessment_id,
+      draftVersionId: context.draft_version_id,
+      draftVersionTag: context.draft_version_tag,
+      sections: [
+        createSection('assessmentVersionContext', 'Assessment / version context', []),
+        createSection('domainsSignals', 'Domains / signals', domainsSignalsIssues),
+        createSection('questionsOptions', 'Questions / options', questionsOptionsIssues),
+        createSection('weights', 'Weights', weightIssues),
+        createSection('applicationPlan', 'Runtime / language', runtimeLanguageIssues),
+        createSection(
+          'overallSummary',
+          'Overall summary',
+          readiness.isReady
+            ? []
+            : [createIssue(
+                'draft_not_publish_ready',
+                'The current single-domain draft is not publish-ready until runtime readiness issues are resolved.',
+              )],
+        ),
+      ],
+      counts: {
+        domainCount: readiness.counts.domainCount,
+        signalCount: readiness.counts.signalCount,
+        questionCount: readiness.counts.questionCount,
+        optionCount: readiness.counts.optionCount,
+        weightedOptionCount: readiness.counts.optionCount - readiness.counts.optionsWithoutWeightsCount,
+        unmappedOptionCount: readiness.counts.optionsWithoutWeightsCount,
+        weightMappingCount: readiness.counts.weightCount,
+        applicationThesisCount: 0,
+        applicationContributionCount: 0,
+        applicationRiskCount: 0,
+        applicationDevelopmentCount: 0,
+        applicationActionPromptsCount: 0,
+      },
     });
   }
 

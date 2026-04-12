@@ -18,6 +18,8 @@ import {
   getSingleDomainLanguageBundle,
 } from '@/lib/server/assessment-version-single-domain-language';
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
+import { getSingleDomainDraftReadiness } from '@/lib/server/single-domain-draft-readiness';
+import type { SingleDomainDraftReadiness } from '@/lib/types/single-domain-runtime';
 
 import type { AdminAssessmentVersionStatus } from '@/lib/server/admin-assessment-dashboard';
 
@@ -147,6 +149,7 @@ export type AdminAssessmentDetailViewModel = {
   availableSignals: readonly AdminAssessmentDetailAvailableSignal[];
   weightingSummary: AdminAssessmentDetailWeightingSummary;
   draftValidation: AdminAssessmentValidationResult;
+  singleDomainDraftReadiness: SingleDomainDraftReadiness | null;
   stepCompletion: AdminAssessmentDetailStepCompletion;
   singleDomainLanguageBundle: SingleDomainLanguageBundle;
   singleDomainLanguageValidation: SingleDomainLanguageValidation;
@@ -851,6 +854,9 @@ export async function getAdminAssessmentDetailByKey(
       totalMappings,
     },
     draftValidation,
+    singleDomainDraftReadiness: latestDraftVersion && isSingleDomain(assessmentMode)
+      ? await getSingleDomainDraftReadiness(db, latestDraftVersion.assessmentVersionId)
+      : null,
     stepCompletion,
     singleDomainLanguageBundle,
     singleDomainLanguageValidation,

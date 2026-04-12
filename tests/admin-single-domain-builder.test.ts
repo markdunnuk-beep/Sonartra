@@ -34,6 +34,24 @@ function createFakeDb(row: DetailRow | null) {
         return { rows: [] as T[] };
       }
 
+      if (text.includes('FROM assessment_versions av') && text.includes('WHERE av.id = $1')) {
+        return {
+          rows: row ? ([{
+            assessment_id: row.assessment_id,
+            assessment_key: row.assessment_key,
+            assessment_title: row.assessment_title,
+            assessment_description: row.assessment_description,
+            assessment_version_id: row.assessment_version_id ?? 'version-1',
+            assessment_version_tag: row.version_tag ?? '1.0.0',
+            assessment_mode: row.assessment_mode,
+          }] as unknown as T[]) : ([] as T[]),
+        };
+      }
+
+      if (text.includes('FROM options o WHERE o.assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
       if (text.includes('FROM assessment_version_intro')) {
         return { rows: [] as T[] };
       }

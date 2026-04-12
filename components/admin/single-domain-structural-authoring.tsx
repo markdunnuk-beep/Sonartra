@@ -1007,6 +1007,7 @@ export function SingleDomainWeightingsAuthoring() {
 
 export function SingleDomainReviewAuthoring() {
   const assessment = useAdminAssessmentAuthoring();
+  const runtimeReadiness = assessment.singleDomainDraftReadiness;
   const languageValidation = useMemo(
     () =>
       buildSingleDomainLanguageValidation({
@@ -1029,8 +1030,8 @@ export function SingleDomainReviewAuthoring() {
     <section className="sonartra-section">
       <SectionHeader
         eyebrow="Review"
-        title="Review structural readiness"
-        description="Review readiness across overview, domain, signals, questions, responses, weightings, and language before publish checks."
+        title="Review runtime readiness"
+        description="Review structural completeness, language completeness, and strict runtime loadability before future publish checks."
       />
       <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-7">
         <SummaryCard detail="One required." label="Domains" value={String(structuralValidation.domainCount)} />
@@ -1045,6 +1046,54 @@ export function SingleDomainReviewAuthoring() {
           value={languageValidation.overallReady ? 'Ready' : 'Attention'}
         />
       </div>
+      {runtimeReadiness ? (
+        <SurfaceCard className="p-5">
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className="sonartra-page-eyebrow">Runtime readiness</p>
+                <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
+                  {runtimeReadiness.isReady ? 'Runtime definition can load cleanly' : 'Runtime definition is still blocked'}
+                </h3>
+                <p className="text-sm leading-7 text-white/62">
+                  Single-domain drafts become publishable only when the authored data can resolve into one deterministic runtime definition.
+                </p>
+              </div>
+              <LabelPill
+                className={runtimeReadiness.isReady
+                  ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
+                  : 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'}
+              >
+                {runtimeReadiness.isReady ? 'Ready' : 'Attention'}
+              </LabelPill>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+              <SummaryCard detail="Exactly one authored domain." label="Domains" value={String(runtimeReadiness.counts.domainCount)} />
+              <SummaryCard detail="Current authored signal set." label="Signals" value={String(runtimeReadiness.counts.signalCount)} />
+              <SummaryCard detail="nC2 derived from current signals." label="Derived pairs" value={String(runtimeReadiness.counts.derivedPairCount)} />
+              <SummaryCard detail="Questions that runtime will serve." label="Questions" value={String(runtimeReadiness.counts.questionCount)} />
+              <SummaryCard detail="Options attached to authored questions." label="Options" value={String(runtimeReadiness.counts.optionCount)} />
+              <SummaryCard detail="Resolved option-to-signal rows." label="Weights" value={String(runtimeReadiness.counts.weightCount)} />
+            </div>
+            {runtimeReadiness.issues.length > 0 ? (
+              <div className="space-y-2">
+                {runtimeReadiness.issues.map((issue) => (
+                  <div
+                    className="rounded-[0.9rem] border border-[rgba(255,157,157,0.24)] bg-[rgba(80,20,20,0.22)] px-4 py-3 text-sm text-[rgba(255,216,216,0.94)]"
+                    key={`runtime-${issue.code}-${issue.message}`}
+                  >
+                    {issue.message}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[0.9rem] border border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] px-4 py-3 text-sm text-[rgba(217,255,229,0.94)]">
+                The current draft resolves into a strict runtime-ready single-domain definition.
+              </div>
+            )}
+          </div>
+        </SurfaceCard>
+      ) : null}
       <div className="grid gap-4 xl:grid-cols-2">
         {structuralValidation.sections.map((section) => (
           <SurfaceCard className="p-5" key={section.key}>
@@ -1111,7 +1160,7 @@ export function SingleDomainReviewAuthoring() {
           <div className="space-y-3">
             <p className="sonartra-page-eyebrow">Blocking issues</p>
             <p className="text-sm leading-7 text-white/62">
-              Resolve these structural issues before treating the single-domain draft as structurally ready.
+              Resolve these issues before treating the single-domain draft as runtime-loadable.
             </p>
             <div className="space-y-2">
               {structuralValidation.issues.map((issue) => (

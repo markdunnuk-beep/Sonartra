@@ -152,6 +152,64 @@ function buildAssessment(languageBundle: SingleDomainLanguageBundle): AdminAsses
         applicationActionPromptsCount: 0,
       },
     },
+    singleDomainDraftReadiness: {
+      isReady:
+        languageBundle.DOMAIN_FRAMING.length > 0
+        && languageBundle.HERO_PAIRS.length === 1
+        && languageBundle.SIGNAL_CHAPTERS.length === 2
+        && languageBundle.BALANCING_SECTIONS.length === 1
+        && languageBundle.PAIR_SUMMARIES.length === 1
+        && languageBundle.APPLICATION_STATEMENTS.length === 2,
+      issues:
+        languageBundle.DOMAIN_FRAMING.length > 0
+        && languageBundle.HERO_PAIRS.length === 1
+        && languageBundle.SIGNAL_CHAPTERS.length === 2
+        && languageBundle.BALANCING_SECTIONS.length === 1
+        && languageBundle.PAIR_SUMMARIES.length === 1
+        && languageBundle.APPLICATION_STATEMENTS.length === 2
+          ? []
+          : [{
+              code: 'hero_pairs_count_mismatch',
+              section: 'language',
+              message: 'HERO_PAIRS must contain exactly 1 row.',
+              severity: 'blocking',
+            }],
+      counts: {
+        domainCount: 1,
+        signalCount: 2,
+        derivedPairCount: 1,
+        questionCount: 1,
+        optionCount: 1,
+        weightCount: 1,
+        questionsWithoutOptionsCount: 0,
+        optionsWithoutWeightsCount: 0,
+        orphanOptionCount: 0,
+        unresolvedWeightSignalCount: 0,
+        languageRowCounts: {
+          DOMAIN_FRAMING: languageBundle.DOMAIN_FRAMING.length,
+          HERO_PAIRS: languageBundle.HERO_PAIRS.length,
+          SIGNAL_CHAPTERS: languageBundle.SIGNAL_CHAPTERS.length,
+          BALANCING_SECTIONS: languageBundle.BALANCING_SECTIONS.length,
+          PAIR_SUMMARIES: languageBundle.PAIR_SUMMARIES.length,
+          APPLICATION_STATEMENTS: languageBundle.APPLICATION_STATEMENTS.length,
+        },
+      },
+      expectations: {
+        requiredDomainCount: 1,
+        minimumSignalCount: 1,
+        minimumQuestionCount: 1,
+        expectedDerivedPairCount: 1,
+        expectedLanguageRowCounts: {
+          DOMAIN_FRAMING: 1,
+          HERO_PAIRS: 1,
+          SIGNAL_CHAPTERS: 2,
+          BALANCING_SECTIONS: 1,
+          PAIR_SUMMARIES: 1,
+          APPLICATION_STATEMENTS: 2,
+        },
+      },
+      runtimeDefinition: null,
+    },
     stepCompletion: {
       assessmentIntro: 'incomplete',
       language: 'incomplete',
@@ -181,6 +239,7 @@ test('review step reflects incomplete language datasets accurately', () => {
   );
 
   assert.match(markup, /Language/);
+  assert.match(markup, /Runtime definition is still blocked/i);
   assert.match(markup, /DOMAIN_FRAMING must contain at least 1 row/i);
   assert.match(markup, /HERO_PAIRS must contain exactly 1 row/i);
   assert.match(markup, /0\/1\+/);
@@ -291,6 +350,7 @@ test('review step reflects complete language datasets accurately', () => {
   );
 
   assert.match(markup, /All six locked single-domain language datasets meet the current completeness contract/i);
+  assert.match(markup, /Runtime definition can load cleanly/i);
   assert.match(markup, /1\/1\+/);
   assert.match(markup, /2\/2/);
   assert.doesNotMatch(markup, /must contain exactly/i);
