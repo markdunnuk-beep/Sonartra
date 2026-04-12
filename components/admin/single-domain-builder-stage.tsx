@@ -39,6 +39,7 @@ type SingleDomainBuilderStageProps = {
   readiness: readonly SingleDomainBuilderReadinessItem[];
   nextIntent: string;
   checklist?: readonly SingleDomainBuilderChecklistItem[];
+  children?: React.ReactNode;
 };
 
 function StageChecklist({
@@ -79,6 +80,7 @@ export function SingleDomainBuilderStage({
   readiness,
   nextIntent,
   checklist,
+  children,
 }: Readonly<SingleDomainBuilderStageProps>) {
   const assessment = useAdminAssessmentAuthoring();
   const previousStep = getPreviousSingleDomainBuilderStep(stepKey);
@@ -137,6 +139,8 @@ export function SingleDomainBuilderStage({
       </div>
 
       {checklist?.length ? <StageChecklist items={checklist} /> : null}
+
+      {children}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm leading-6 text-white/52">

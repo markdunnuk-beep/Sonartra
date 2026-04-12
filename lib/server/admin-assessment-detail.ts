@@ -1,15 +1,23 @@
 import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import type { AssessmentMode } from '@/lib/types/assessment';
-import { getAssessmentModeLabel, resolveAssessmentMode } from '@/lib/utils/assessment-mode';
+import { getAssessmentModeLabel, isSingleDomain, resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 import {
   validateLatestDraftAssessmentVersion,
   type AdminAssessmentValidationResult,
 } from '@/lib/server/admin-assessment-validation';
 import {
+  buildSingleDomainLanguageValidation,
+  type SingleDomainLanguageValidation,
+} from '@/lib/admin/single-domain-structural-validation';
+import {
   isMissingAssessmentVersionIntroSchemaError,
 } from '@/lib/server/assessment-version-intro-repository';
 import { getAssessmentVersionLanguageBundle } from '@/lib/server/assessment-version-language';
+import {
+  getSingleDomainLanguageBundle,
+} from '@/lib/server/assessment-version-single-domain-language';
+import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
 
 import type { AdminAssessmentVersionStatus } from '@/lib/server/admin-assessment-dashboard';
 
@@ -140,6 +148,8 @@ export type AdminAssessmentDetailViewModel = {
   weightingSummary: AdminAssessmentDetailWeightingSummary;
   draftValidation: AdminAssessmentValidationResult;
   stepCompletion: AdminAssessmentDetailStepCompletion;
+  singleDomainLanguageBundle: SingleDomainLanguageBundle;
+  singleDomainLanguageValidation: SingleDomainLanguageValidation;
 };
 
 type AdminAssessmentDetailRow = {
@@ -328,7 +338,19 @@ async function loadAssessmentIntroStepCompletion(
 async function loadLanguageStepCompletion(
   db: Queryable,
   assessmentVersionId: string,
+  mode: AssessmentMode,
+  authoredDomains: readonly AdminAssessmentDetailDomain[],
 ): Promise<AdminAssessmentDetailStepCompletionStatus> {
+  if (isSingleDomain(mode)) {
+    const bundle = await getSingleDomainLanguageBundle(db, assessmentVersionId);
+    const validation = buildSingleDomainLanguageValidation({
+      authoredDomains,
+      languageBundle: bundle,
+    });
+
+    return validation.overallReady ? 'complete' : 'incomplete';
+  }
+
   try {
     const bundle = await getAssessmentVersionLanguageBundle(db, assessmentVersionId);
 
@@ -735,12 +757,20 @@ export async function getAdminAssessmentDetailByKey(
     });
   const publishedVersion = versions.find((version) => version.status === 'published') ?? null;
   const latestDraftVersion = versions.find((version) => version.status === 'draft') ?? null;
+  const assessmentMode = resolveAssessmentMode(firstRow.assessment_mode);
   const builderMode: AdminAssessmentBuilderMode = latestDraftVersion
     ? 'draft'
     : publishedVersion
       ? 'published_no_draft'
       : 'setup';
-  const [authoredDomains, questionDomains, authoredQuestions, availableSignals, draftValidation, stepCompletion] =
+  const [
+    authoredDomains,
+    questionDomains,
+    authoredQuestions,
+    availableSignals,
+    draftValidation,
+    singleDomainLanguageBundle,
+  ] =
     latestDraftVersion
       ? await Promise.all([
           loadAuthoringDomainsForVersion(db, latestDraftVersion.assessmentVersionId),
@@ -748,10 +778,16 @@ export async function getAdminAssessmentDetailByKey(
           loadQuestionsForVersion(db, latestDraftVersion.assessmentVersionId),
           loadAvailableSignalsForVersion(db, latestDraftVersion.assessmentVersionId),
           validateLatestDraftAssessmentVersion(db, assessmentKey),
-          Promise.all([
-            loadAssessmentIntroStepCompletion(db, latestDraftVersion.assessmentVersionId),
-            loadLanguageStepCompletion(db, latestDraftVersion.assessmentVersionId),
-          ]).then(([assessmentIntro, language]) => ({ assessmentIntro, language })),
+          isSingleDomain(assessmentMode)
+            ? getSingleDomainLanguageBundle(db, latestDraftVersion.assessmentVersionId)
+            : Promise.resolve({
+                DOMAIN_FRAMING: Object.freeze([]),
+                HERO_PAIRS: Object.freeze([]),
+                SIGNAL_CHAPTERS: Object.freeze([]),
+                BALANCING_SECTIONS: Object.freeze([]),
+                PAIR_SUMMARIES: Object.freeze([]),
+                APPLICATION_STATEMENTS: Object.freeze([]),
+              } satisfies SingleDomainLanguageBundle),
         ])
       : await Promise.all([
           Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailDomain[]),
@@ -760,10 +796,32 @@ export async function getAdminAssessmentDetailByKey(
           Promise.resolve(Object.freeze([]) as readonly AdminAssessmentDetailAvailableSignal[]),
           validateLatestDraftAssessmentVersion(db, assessmentKey),
           Promise.resolve({
-            assessmentIntro: 'incomplete' as const,
-            language: 'incomplete' as const,
-          }),
+            DOMAIN_FRAMING: Object.freeze([]),
+            HERO_PAIRS: Object.freeze([]),
+            SIGNAL_CHAPTERS: Object.freeze([]),
+            BALANCING_SECTIONS: Object.freeze([]),
+            PAIR_SUMMARIES: Object.freeze([]),
+            APPLICATION_STATEMENTS: Object.freeze([]),
+          } satisfies SingleDomainLanguageBundle),
         ]);
+  const singleDomainLanguageValidation = buildSingleDomainLanguageValidation({
+    authoredDomains,
+    languageBundle: singleDomainLanguageBundle,
+  });
+  const stepCompletion = latestDraftVersion
+    ? await Promise.all([
+        loadAssessmentIntroStepCompletion(db, latestDraftVersion.assessmentVersionId),
+        loadLanguageStepCompletion(
+          db,
+          latestDraftVersion.assessmentVersionId,
+          assessmentMode,
+          authoredDomains,
+        ),
+      ]).then(([assessmentIntro, language]) => ({ assessmentIntro, language }))
+    : {
+        assessmentIntro: 'incomplete' as const,
+        language: 'incomplete' as const,
+      };
   const allOptions = authoredQuestions.flatMap((question) => question.options);
   const weightedOptions = allOptions.filter((option) => option.signalWeights.length > 0).length;
   const totalMappings = allOptions.reduce((sum, option) => sum + option.signalWeights.length, 0);
@@ -771,7 +829,7 @@ export async function getAdminAssessmentDetailByKey(
   return {
     assessmentId: firstRow.assessment_id,
     assessmentKey: firstRow.assessment_key,
-    mode: resolveAssessmentMode(firstRow.assessment_mode),
+    mode: assessmentMode,
     modeLabel: getAssessmentModeLabel(firstRow.assessment_mode),
     title: firstRow.assessment_title,
     description: firstRow.assessment_description,
@@ -794,6 +852,8 @@ export async function getAdminAssessmentDetailByKey(
     },
     draftValidation,
     stepCompletion,
+    singleDomainLanguageBundle,
+    singleDomainLanguageValidation,
   };
 }
 

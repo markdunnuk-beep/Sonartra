@@ -15,6 +15,7 @@ import {
 } from '@/components/shared/user-app-ui';
 import {
   buildSingleDomainStructuralValidation,
+  buildSingleDomainLanguageValidation,
   getExpectedSignalPairCount,
 } from '@/lib/admin/single-domain-structural-validation';
 import {
@@ -1006,14 +1007,22 @@ export function SingleDomainWeightingsAuthoring() {
 
 export function SingleDomainReviewAuthoring() {
   const assessment = useAdminAssessmentAuthoring();
+  const languageValidation = useMemo(
+    () =>
+      buildSingleDomainLanguageValidation({
+        authoredDomains: assessment.authoredDomains,
+        languageBundle: assessment.singleDomainLanguageBundle,
+      }),
+    [assessment.authoredDomains, assessment.singleDomainLanguageBundle],
+  );
   const structuralValidation = useMemo(
     () =>
       buildSingleDomainStructuralValidation({
         authoredDomains: assessment.authoredDomains,
         authoredQuestions: assessment.authoredQuestions,
-        languageReady: assessment.stepCompletion.language === 'complete',
+        languageValidation,
       }),
-    [assessment.authoredDomains, assessment.authoredQuestions, assessment.stepCompletion.language],
+    [assessment.authoredDomains, assessment.authoredQuestions, languageValidation],
   );
 
   return (
@@ -1023,13 +1032,18 @@ export function SingleDomainReviewAuthoring() {
         title="Review structural readiness"
         description="Review readiness across overview, domain, signals, questions, responses, weightings, and language before publish checks."
       />
-      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-7">
         <SummaryCard detail="One required." label="Domains" value={String(structuralValidation.domainCount)} />
         <SummaryCard detail="Flexible count." label="Signals" value={String(structuralValidation.signalCount)} />
         <SummaryCard detail="Derived from current signals." label="Expected pairs" value={String(structuralValidation.expectedPairCount)} />
         <SummaryCard detail="Deterministic order." label="Questions" value={String(structuralValidation.questionCount)} />
         <SummaryCard detail="Grouped under questions." label="Responses" value={String(structuralValidation.optionCount)} />
         <SummaryCard detail="Explicit weight rows." label="Weightings" value={String(structuralValidation.mappingCount)} />
+        <SummaryCard
+          detail="Locked dataset completeness."
+          label="Language"
+          value={languageValidation.overallReady ? 'Ready' : 'Attention'}
+        />
       </div>
       <div className="grid gap-4 xl:grid-cols-2">
         {structuralValidation.sections.map((section) => (
@@ -1048,6 +1062,30 @@ export function SingleDomainReviewAuthoring() {
                 </LabelPill>
               </div>
               <p className="text-sm leading-7 text-white/62">{section.detail}</p>
+              {section.key === 'language' ? (
+                <div className="space-y-2 rounded-[0.9rem] border border-white/8 bg-black/10 p-4">
+                  {languageValidation.datasets.map((dataset) => (
+                    <div
+                      className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 pb-3 last:border-b-0 last:pb-0"
+                      key={dataset.datasetKey}
+                    >
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-white">{dataset.label}</p>
+                        <p className="text-sm leading-6 text-white/54">{dataset.detail}</p>
+                      </div>
+                      <LabelPill
+                        className={dataset.isReady
+                          ? 'border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] text-[rgba(217,255,229,0.94)]'
+                          : 'border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]'}
+                      >
+                        {dataset.countRule === 'exact'
+                          ? `${dataset.actualRowCount}/${dataset.expectedRowCount}`
+                          : `${dataset.actualRowCount}/1+`}
+                      </LabelPill>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
               {section.issues.length > 0 ? (
                 <div className="space-y-2">
                   {section.issues.map((issue) => (

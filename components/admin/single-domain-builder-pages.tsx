@@ -1,6 +1,7 @@
 'use client';
 
 import { useAdminAssessmentAuthoring } from '@/components/admin/admin-assessment-authoring-context';
+import { SingleDomainLanguageImport } from '@/components/admin/single-domain-language-import';
 import { SingleDomainBuilderStage } from '@/components/admin/single-domain-builder-stage';
 import {
   SingleDomainDomainAuthoring,
@@ -120,23 +121,34 @@ export function SingleDomainLanguagePageContent() {
       readiness={[
         {
           label: 'Language status',
-          value: assessment.stepCompletion.language === 'complete' ? 'Started' : 'Scaffolded',
-          detail: 'Current draft language completion.',
+          value: assessment.singleDomainLanguageValidation.overallReady ? 'Ready' : 'In progress',
+          detail: 'Current locked dataset completeness.',
         },
         { label: 'Signals available', value: String(signalCount), detail: 'Signal chapters depend on authored signals.' },
         { label: 'Dataset families', value: '6 locked', detail: 'Structured single-domain language datasets.' },
-        { label: 'Import path', value: 'Planned', detail: 'Future dataset authoring/import lands here.' },
+        {
+          label: 'Expected pairs',
+          value: String(assessment.singleDomainLanguageValidation.expectedPairCount),
+          detail: 'Derived from the authored signal set.',
+        },
       ]}
-      checklist={[
-        { label: 'Domain framing', status: 'attention', detail: 'Future domain-level framing dataset.' },
-        { label: 'Hero pairs', status: 'attention', detail: 'Future pair-level opening language dataset.' },
-        { label: 'Signal chapters', status: 'attention', detail: 'Future per-signal interpretation dataset.' },
-        { label: 'Balancing sections', status: 'attention', detail: 'Future balancing guidance dataset.' },
-        { label: 'Pair summaries', status: 'attention', detail: 'Future pair summary dataset.' },
-        { label: 'Application statements', status: 'attention', detail: 'Future application output dataset.' },
-      ]}
-      nextIntent="The route and copy are in place so later work can plug single-domain dataset authoring or import into this step without disturbing the rest of the builder."
-    />
+      checklist={assessment.singleDomainLanguageValidation.datasets.map((dataset) => ({
+        label: dataset.label,
+        status: dataset.isReady ? 'ready' : 'attention',
+        detail: dataset.countRule === 'exact'
+          ? `${dataset.actualRowCount}/${dataset.expectedRowCount} rows loaded.`
+          : `${dataset.actualRowCount} row${dataset.actualRowCount === 1 ? '' : 's'} loaded; 1+ required.`,
+      }))}
+      nextIntent="Import each locked dataset through the strict schema contract only. Review readiness updates from the persisted row counts and the current authored signal set."
+    >
+      {assessment.latestDraftVersion ? (
+        <SingleDomainLanguageImport
+          assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
+          datasetValidation={assessment.singleDomainLanguageValidation.datasets}
+          isEditableAssessmentVersion={assessment.latestDraftVersion.status === 'draft'}
+        />
+      ) : null}
+    </SingleDomainBuilderStage>
   );
 }
 

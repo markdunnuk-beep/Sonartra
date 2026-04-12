@@ -3,6 +3,9 @@ import type {
   AdminAssessmentDetailQuestion,
   AdminAssessmentDetailSignalWeight,
 } from '@/lib/server/admin-assessment-detail';
+import { getSingleDomainLanguageDatasetDefinition } from '@/lib/admin/single-domain-language-datasets';
+import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
+import type { SingleDomainLanguageDatasetKey } from '@/lib/types/single-domain-language';
 
 export type SingleDomainStructuralIssueSeverity = 'blocking' | 'warning';
 
@@ -48,6 +51,26 @@ type ValidationInput = {
   authoredDomains: readonly AdminAssessmentDetailDomain[];
   authoredQuestions: readonly AdminAssessmentDetailQuestion[];
   languageReady?: boolean;
+  languageValidation?: SingleDomainLanguageValidation;
+};
+
+export type SingleDomainLanguageDatasetValidation = {
+  datasetKey: SingleDomainLanguageDatasetKey;
+  label: string;
+  actualRowCount: number;
+  expectedRowCount: number;
+  countRule: 'at_least' | 'exact';
+  isReady: boolean;
+  detail: string;
+  issues: readonly SingleDomainStructuralIssue[];
+};
+
+export type SingleDomainLanguageValidation = {
+  overallReady: boolean;
+  signalCount: number;
+  expectedPairCount: number;
+  datasets: readonly SingleDomainLanguageDatasetValidation[];
+  issues: readonly SingleDomainStructuralIssue[];
 };
 
 function createIssue(
@@ -85,6 +108,106 @@ export function getExpectedSignalPairCount(signalCount: number): number {
   }
 
   return (signalCount * (signalCount - 1)) / 2;
+}
+
+function createLanguageDatasetValidation(params: {
+  datasetKey: SingleDomainLanguageDatasetKey;
+  actualRowCount: number;
+  expectedRowCount: number;
+  countRule: 'at_least' | 'exact';
+  successDetail: string;
+  failureMessage: string;
+}): SingleDomainLanguageDatasetValidation {
+  const definition = getSingleDomainLanguageDatasetDefinition(params.datasetKey);
+  const isReady = params.countRule === 'at_least'
+    ? params.actualRowCount >= params.expectedRowCount
+    : params.actualRowCount === params.expectedRowCount;
+  const issues = isReady
+    ? []
+    : [
+        createIssue(
+          `language_${params.datasetKey.toLowerCase()}_count_mismatch`,
+          params.failureMessage,
+        ),
+      ];
+
+  return {
+    datasetKey: params.datasetKey,
+    label: definition.label,
+    actualRowCount: params.actualRowCount,
+    expectedRowCount: params.expectedRowCount,
+    countRule: params.countRule,
+    isReady,
+    detail: isReady ? params.successDetail : params.failureMessage,
+    issues: Object.freeze(issues),
+  };
+}
+
+export function buildSingleDomainLanguageValidation(params: {
+  authoredDomains: readonly AdminAssessmentDetailDomain[];
+  languageBundle: SingleDomainLanguageBundle;
+}): SingleDomainLanguageValidation {
+  const signalCount = params.authoredDomains.reduce((sum, domain) => sum + domain.signals.length, 0);
+  const expectedPairCount = getExpectedSignalPairCount(signalCount);
+  const datasets: SingleDomainLanguageDatasetValidation[] = [
+    createLanguageDatasetValidation({
+      datasetKey: 'DOMAIN_FRAMING',
+      actualRowCount: params.languageBundle.DOMAIN_FRAMING.length,
+      expectedRowCount: 1,
+      countRule: 'at_least',
+      successDetail: 'Domain framing includes the required opening coverage for this single-domain builder.',
+      failureMessage: 'DOMAIN_FRAMING must contain at least 1 row for the domain framing section.',
+    }),
+    createLanguageDatasetValidation({
+      datasetKey: 'HERO_PAIRS',
+      actualRowCount: params.languageBundle.HERO_PAIRS.length,
+      expectedRowCount: expectedPairCount,
+      countRule: 'exact',
+      successDetail: `HERO_PAIRS matches the current derived pair count (${expectedPairCount}).`,
+      failureMessage: `HERO_PAIRS must contain exactly ${expectedPairCount} row${expectedPairCount === 1 ? '' : 's'} to match the current signal-derived pair count.`,
+    }),
+    createLanguageDatasetValidation({
+      datasetKey: 'SIGNAL_CHAPTERS',
+      actualRowCount: params.languageBundle.SIGNAL_CHAPTERS.length,
+      expectedRowCount: signalCount,
+      countRule: 'exact',
+      successDetail: `SIGNAL_CHAPTERS matches the current authored signal count (${signalCount}).`,
+      failureMessage: `SIGNAL_CHAPTERS must contain exactly ${signalCount} row${signalCount === 1 ? '' : 's'} to match the current authored signal count.`,
+    }),
+    createLanguageDatasetValidation({
+      datasetKey: 'BALANCING_SECTIONS',
+      actualRowCount: params.languageBundle.BALANCING_SECTIONS.length,
+      expectedRowCount: expectedPairCount,
+      countRule: 'exact',
+      successDetail: `BALANCING_SECTIONS matches the current derived pair count (${expectedPairCount}).`,
+      failureMessage: `BALANCING_SECTIONS must contain exactly ${expectedPairCount} row${expectedPairCount === 1 ? '' : 's'} to match the current signal-derived pair count.`,
+    }),
+    createLanguageDatasetValidation({
+      datasetKey: 'PAIR_SUMMARIES',
+      actualRowCount: params.languageBundle.PAIR_SUMMARIES.length,
+      expectedRowCount: expectedPairCount,
+      countRule: 'exact',
+      successDetail: `PAIR_SUMMARIES matches the current derived pair count (${expectedPairCount}).`,
+      failureMessage: `PAIR_SUMMARIES must contain exactly ${expectedPairCount} row${expectedPairCount === 1 ? '' : 's'} to match the current signal-derived pair count.`,
+    }),
+    createLanguageDatasetValidation({
+      datasetKey: 'APPLICATION_STATEMENTS',
+      actualRowCount: params.languageBundle.APPLICATION_STATEMENTS.length,
+      expectedRowCount: signalCount,
+      countRule: 'exact',
+      successDetail: `APPLICATION_STATEMENTS matches the current authored signal count (${signalCount}).`,
+      failureMessage: `APPLICATION_STATEMENTS must contain exactly ${signalCount} row${signalCount === 1 ? '' : 's'} to match the current authored signal count.`,
+    }),
+  ];
+  const issues = Object.freeze(datasets.flatMap((dataset) => dataset.issues));
+
+  return {
+    overallReady: datasets.every((dataset) => dataset.isReady),
+    signalCount,
+    expectedPairCount,
+    datasets: Object.freeze(datasets),
+    issues,
+  };
 }
 
 export function buildSingleDomainStructuralValidation(
@@ -128,6 +251,8 @@ export function buildSingleDomainStructuralValidation(
   const questionIssues: SingleDomainStructuralIssue[] = [];
   const responseIssues: SingleDomainStructuralIssue[] = [];
   const weightingIssues: SingleDomainStructuralIssue[] = [];
+  const languageValidation = input.languageValidation;
+  const languageIssues = languageValidation ? [...languageValidation.issues] : [];
 
   if (domainCount === 0) {
     domainIssues.push(createIssue('missing_domain', 'Add the one authored domain required by this builder.'));
@@ -206,6 +331,7 @@ export function buildSingleDomainStructuralValidation(
     ...questionIssues,
     ...responseIssues,
     ...weightingIssues,
+    ...languageIssues,
   ]);
 
   return {
@@ -263,10 +389,14 @@ export function buildSingleDomainStructuralValidation(
       createSection(
         'language',
         'Language',
-        input.languageReady
-          ? 'Single-domain language datasets have draft activity.'
-          : 'Language remains a placeholder in this task.',
-        [],
+        languageValidation
+          ? languageValidation.overallReady
+            ? 'All six locked single-domain language datasets meet the current completeness contract.'
+            : 'Language completeness is evaluated from the authored signals and current dataset row counts.'
+          : input.languageReady
+            ? 'Single-domain language datasets have draft activity.'
+            : 'Language remains a placeholder in this task.',
+        languageValidation ? languageIssues : [],
       ),
     ]),
   };
