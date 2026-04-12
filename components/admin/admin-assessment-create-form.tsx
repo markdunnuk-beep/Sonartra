@@ -16,6 +16,8 @@ import {
 } from '@/lib/admin/admin-assessment-create';
 import { createAssessmentAction } from '@/lib/server/admin-assessment-create';
 import { ASSESSMENT_KEY_PATTERN, syncAssessmentKeyFromTitle } from '@/lib/admin/assessment-key';
+import type { AssessmentMode } from '@/lib/types/assessment';
+import { getAssessmentModeLabel } from '@/lib/utils/assessment-mode';
 
 function FieldShell({
   htmlFor,
@@ -134,8 +136,10 @@ function TextArea({
 
 function SubmitButton({
   disabled,
+  label,
 }: Readonly<{
   disabled: boolean;
+  label: string;
 }>) {
   const { pending } = useFormStatus();
   const isDisabled = pending || disabled;
@@ -149,12 +153,30 @@ function SubmitButton({
       disabled={isDisabled}
       type="submit"
     >
-      {pending ? 'Creating...' : 'Create assessment'}
+      {pending ? 'Creating...' : label}
     </button>
   );
 }
 
 export function AdminAssessmentCreateForm() {
+  return <AdminAssessmentCreateFormContent mode="multi_domain" />;
+}
+
+export function AdminAssessmentCreateFormContent({
+  mode,
+  submitLabel = 'Create assessment',
+  heading = 'Create an assessment and start a draft.',
+  introDescription = 'Start with the basics. You can add domains, signals, questions, and scoring next.',
+  resultDescription = 'This creates the assessment and its first draft, version `1.0.0`.',
+  resultSupport = 'Provide the title and assessment key before creating the first draft.',
+}: Readonly<{
+  mode: AssessmentMode;
+  submitLabel?: string;
+  heading?: string;
+  introDescription?: string;
+  resultDescription?: string;
+  resultSupport?: string;
+}>) {
   const [state, formAction] = useActionState(
     createAssessmentAction,
     initialAdminAssessmentCreateFormState,
@@ -168,6 +190,7 @@ export function AdminAssessmentCreateForm() {
         state?.values?.assessmentKey ?? emptyAdminAssessmentCreateFormValues.assessmentKey,
       description:
         state?.values?.description ?? emptyAdminAssessmentCreateFormValues.description,
+      mode: state?.values?.mode ?? mode,
     },
   };
   const [title, setTitle] = useState(safeState.values.title);
@@ -209,18 +232,19 @@ export function AdminAssessmentCreateForm() {
     <div className="space-y-6">
       <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
         <div className="space-y-3">
-          <LabelPill className="bg-white/[0.08] text-white/82">New assessment</LabelPill>
+          <LabelPill className="bg-white/[0.08] text-white/82">{getAssessmentModeLabel(mode)} assessment</LabelPill>
           <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.3rem]">
-            Create an assessment and start a draft.
+            {heading}
           </h2>
           <p className="max-w-2xl text-sm leading-7 text-white/68">
-            Start with the basics. You can add domains, signals, questions, and scoring next.
+            {introDescription}
           </p>
         </div>
       </SurfaceCard>
 
       <SurfaceCard className="p-5 lg:p-6">
         <form action={formAction} className="space-y-6">
+          <input name="mode" type="hidden" value={mode} />
           <div className="grid gap-6 lg:grid-cols-2">
             <FieldShell
               htmlFor="assessment-title"
@@ -281,10 +305,10 @@ export function AdminAssessmentCreateForm() {
           <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-4">
             <p className="sonartra-page-eyebrow">Creation result</p>
             <p className="mt-2 text-sm leading-7 text-white/62">
-              This creates the assessment and its first draft, version `1.0.0`.
+              {resultDescription}
             </p>
             <p className="mt-2 text-sm leading-7 text-white/52">
-              Provide the title and assessment key before creating the first draft.
+              {resultSupport}
             </p>
           </div>
 
@@ -295,7 +319,7 @@ export function AdminAssessmentCreateForm() {
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <SubmitButton disabled={!canCreateAssessment} />
+            <SubmitButton disabled={!canCreateAssessment} label={submitLabel} />
             <ButtonLink href="/admin/assessments">Cancel</ButtonLink>
           </div>
         </form>

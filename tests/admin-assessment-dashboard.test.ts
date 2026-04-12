@@ -7,6 +7,7 @@ import { buildAdminAssessmentDashboardViewModel } from '@/lib/server/admin-asses
 type AssessmentDashboardFixture = {
   assessmentId: string;
   assessmentKey: string;
+  mode?: string | null;
   title: string;
   description: string | null;
   isActive?: boolean;
@@ -26,6 +27,7 @@ type AdminAssessmentDashboardRowFixture = {
   assessment_id: string;
   assessment_key: string;
   assessment_title: string;
+  assessment_mode: string | null;
   assessment_description: string | null;
   assessment_is_active: boolean;
   assessment_created_at: string;
@@ -53,6 +55,7 @@ function createFakeDb(fixtures: readonly AssessmentDashboardFixture[]): Queryabl
                 assessment_id: fixture.assessmentId,
                 assessment_key: fixture.assessmentKey,
                 assessment_title: fixture.title,
+                assessment_mode: fixture.mode ?? null,
                 assessment_description: fixture.description,
                 assessment_is_active: fixture.isActive ?? true,
                 assessment_created_at: '2026-01-01T00:00:00.000Z',
@@ -76,6 +79,7 @@ function createFakeDb(fixtures: readonly AssessmentDashboardFixture[]): Queryabl
               assessment_id: fixture.assessmentId,
               assessment_key: fixture.assessmentKey,
               assessment_title: fixture.title,
+              assessment_mode: fixture.mode ?? null,
               assessment_description: fixture.description,
               assessment_is_active: fixture.isActive ?? true,
               assessment_created_at: '2026-01-01T00:00:00.000Z',
@@ -174,6 +178,98 @@ function createFakeDb(fixtures: readonly AssessmentDashboardFixture[]): Queryabl
         };
       }
 
+      if (text.includes('FROM assessment_version_application_thesis')) {
+        const draftVersionId = params?.[0] as string;
+        if (draftVersionId !== 'version-2') {
+          return { rows: [] as T[] };
+        }
+
+        return {
+          rows: [
+            'forceful_driver',
+            'exacting_controller',
+            'delivery_commander',
+            'deliberate_craftsperson',
+            'grounded_planner',
+            'relational_catalyst',
+            'adaptive_mobiliser',
+            'steady_steward',
+            'balanced_operator',
+          ].map((heroPatternKey, index) => ({
+            id: `thesis-${index + 1}`,
+            assessment_version_id: draftVersionId,
+            hero_pattern_key: heroPatternKey,
+            headline: `${heroPatternKey} headline`,
+            summary: `${heroPatternKey} summary`,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          })) as T[],
+        };
+      }
+
+      if (text.includes('FROM assessment_version_application_action_prompts')) {
+        const draftVersionId = params?.[0] as string;
+        if (draftVersionId !== 'version-2') {
+          return { rows: [] as T[] };
+        }
+
+        return {
+          rows: [
+            'forceful_driver',
+            'exacting_controller',
+            'delivery_commander',
+            'deliberate_craftsperson',
+            'grounded_planner',
+            'relational_catalyst',
+            'adaptive_mobiliser',
+            'steady_steward',
+            'balanced_operator',
+          ].map((sourceKey, index) => ({
+            id: `prompt-${index + 1}`,
+            assessment_version_id: draftVersionId,
+            source_type: 'hero_pattern',
+            source_key: sourceKey,
+            keep_doing: `${sourceKey} keep`,
+            watch_for: `${sourceKey} watch`,
+            practice_next: `${sourceKey} practice`,
+            ask_others: `${sourceKey} ask`,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          })) as T[],
+        };
+      }
+
+      if (
+        text.includes('FROM assessment_version_application_contribution')
+        || text.includes('FROM assessment_version_application_risk')
+        || text.includes('FROM assessment_version_application_development')
+      ) {
+        const draftVersionId = params?.[0] as string;
+        if (draftVersionId !== 'version-2') {
+          return { rows: [] as T[] };
+        }
+
+        return {
+          rows: Array.from({ length: 24 }, (_, index) => ({
+            id: `application-${index + 1}`,
+            assessment_version_id: draftVersionId,
+            source_type: 'signal',
+            source_key: `signal_${index + 1}`,
+            priority: index + 1,
+            label: `Label ${index + 1}`,
+            narrative: `Narrative ${index + 1}`,
+            best_when: `Best ${index + 1}`,
+            watch_for: `Watch ${index + 1}`,
+            impact: `Impact ${index + 1}`,
+            early_warning: `Warning ${index + 1}`,
+            practice: `Practice ${index + 1}`,
+            success_marker: `Success ${index + 1}`,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          })) as T[],
+        };
+      }
+
       return { rows: [] as T[] };
     },
   };
@@ -254,6 +350,8 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
 
   const flagship = viewModel.assessments.find((assessment) => assessment.assessmentKey === 'wplp80');
   assert.equal(flagship?.overallStatus, 'published_and_draft');
+  assert.equal(flagship?.mode, 'multi_domain');
+  assert.equal(flagship?.modeLabel, 'Multi-Domain');
   assert.equal(flagship?.publishedVersion?.versionTag, '1.0.0');
   assert.equal(flagship?.latestDraftVersion?.versionTag, '1.1.0');
   assert.equal(flagship?.latestDraftReadiness, 'ready');
@@ -276,4 +374,47 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
     (assessment) => assessment.assessmentKey === 'archive-only',
   );
   assert.equal(setupIncomplete?.overallStatus, 'setup_incomplete');
+});
+
+test('undefined and unknown modes resolve safely for dashboard labels', async () => {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(
+    createFakeDb([
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'default-mode',
+        title: 'Default Mode',
+        description: null,
+        versions: [],
+      },
+      {
+        assessmentId: 'assessment-2',
+        assessmentKey: 'custom-mode',
+        mode: 'unexpected_mode',
+        title: 'Custom Mode',
+        description: null,
+        versions: [],
+      },
+      {
+        assessmentId: 'assessment-3',
+        assessmentKey: 'single-mode',
+        mode: 'single_domain',
+        title: 'Single Mode',
+        description: null,
+        versions: [],
+      },
+    ]),
+  );
+
+  assert.equal(
+    viewModel.assessments.find((assessment) => assessment.assessmentKey === 'default-mode')?.modeLabel,
+    'Multi-Domain',
+  );
+  assert.equal(
+    viewModel.assessments.find((assessment) => assessment.assessmentKey === 'custom-mode')?.modeLabel,
+    'Multi-Domain',
+  );
+  assert.equal(
+    viewModel.assessments.find((assessment) => assessment.assessmentKey === 'single-mode')?.modeLabel,
+    'Single-Domain',
+  );
 });

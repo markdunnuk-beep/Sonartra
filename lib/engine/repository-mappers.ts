@@ -15,7 +15,7 @@ import type {
   RuntimeSignal,
   SignalOverlayType,
 } from '@/lib/engine/types';
-import { normalizeAssessmentMode } from '@/lib/types/assessment';
+import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 import type {
   AssessmentRow,
   AssessmentVersionRow,
@@ -58,7 +58,7 @@ export function mapAssessmentRecord(row: AssessmentRow): AssessmentRecord {
   return {
     id: row.id,
     key: row.assessment_key,
-    mode: normalizeAssessmentMode(row.mode),
+    mode: resolveAssessmentMode(row.mode),
     title: row.title,
     description: row.description,
     estimatedTimeMinutes: null,
@@ -71,7 +71,7 @@ export function mapAssessmentVersionRecord(row: AssessmentVersionRow): Assessmen
   return {
     id: row.id,
     assessmentId: row.assessment_id,
-    mode: normalizeAssessmentMode(row.mode),
+    mode: resolveAssessmentMode(row.mode),
     versionTag: row.version,
     status: row.lifecycle_status.toLowerCase() as AssessmentVersionRecord['status'],
     isPublished: row.lifecycle_status === 'PUBLISHED',

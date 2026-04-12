@@ -17,6 +17,7 @@ import {
 type StoredAssessment = {
   id: string;
   assessmentKey: string;
+  mode: 'multi_domain' | 'single_domain';
   title: string;
   description: string | null;
   isActive: boolean;
@@ -24,6 +25,7 @@ type StoredAssessment = {
 
 type StoredAssessmentVersion = {
   assessmentId: string;
+  mode: 'multi_domain' | 'single_domain';
   versionTag: string;
   lifecycleStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 };
@@ -56,8 +58,9 @@ function createFakeDb(seed?: {
           const record: StoredAssessment = {
             id: assessmentId,
             assessmentKey: params?.[0] as string,
-            title: params?.[1] as string,
-            description: (params?.[2] as string | null) ?? null,
+            mode: params?.[1] as 'multi_domain' | 'single_domain',
+            title: params?.[2] as string,
+            description: (params?.[3] as string | null) ?? null,
             isActive: true,
           };
           state.assessments.push(record);
@@ -70,7 +73,8 @@ function createFakeDb(seed?: {
         if (text.includes('INSERT INTO assessment_versions')) {
           state.versions.push({
             assessmentId: params?.[0] as string,
-            versionTag: params?.[1] as string,
+            mode: params?.[1] as 'multi_domain' | 'single_domain',
+            versionTag: params?.[2] as string,
             lifecycleStatus: 'DRAFT',
           });
 
@@ -88,11 +92,13 @@ function buildFormData(values: {
   title?: string;
   assessmentKey?: string;
   description?: string;
+  mode?: string;
 }) {
   const formData = new FormData();
   formData.set('title', values.title ?? '');
   formData.set('assessmentKey', values.assessmentKey ?? '');
   formData.set('description', values.description ?? '');
+  formData.set('mode', values.mode ?? 'multi_domain');
   return formData;
 }
 
@@ -120,13 +126,16 @@ test('creates a new assessment and initial draft version', async () => {
       title: 'Leadership Signals',
       assessmentKey: 'leadership-signals',
       description: 'Leadership behaviour baseline.',
+      mode: 'multi_domain',
     },
   });
 
   assert.equal(created.assessmentKey, 'leadership-signals');
   assert.equal(fake.state.assessments.length, 1);
+  assert.equal(fake.state.assessments[0]?.mode, 'multi_domain');
   assert.equal(fake.state.assessments[0]?.title, 'Leadership Signals');
   assert.equal(fake.state.versions.length, 1);
+  assert.equal(fake.state.versions[0]?.mode, 'multi_domain');
   assert.equal(fake.state.versions[0]?.versionTag, '1.0.0');
   assert.equal(fake.state.versions[0]?.lifecycleStatus, 'DRAFT');
   assert.equal(fake.state.versions[0]?.assessmentId, created.assessmentId);
@@ -138,6 +147,7 @@ test('rejects duplicate assessment keys before inserting', async () => {
       {
         id: 'assessment-1',
         assessmentKey: 'wplp80',
+        mode: 'multi_domain',
         title: 'WPLP-80',
         description: null,
         isActive: true,
@@ -153,6 +163,7 @@ test('rejects duplicate assessment keys before inserting', async () => {
           title: 'Duplicate',
           assessmentKey: 'wplp80',
           description: '',
+          mode: 'multi_domain',
         },
       }),
     /ASSESSMENT_KEY_EXISTS/,
@@ -192,6 +203,7 @@ test('returns inline validation state for blank submit values', () => {
     title: '',
     assessmentKey: '',
     description: '',
+    mode: 'multi_domain',
   });
 
   assert.deepEqual(result.fieldErrors, {
@@ -206,6 +218,7 @@ test('returns inline validation state for invalid assessment key format', () => 
     title: 'Leadership Signals',
     assessmentKey: 'Leadership Signals',
     description: '',
+    mode: 'multi_domain',
   });
 
   assert.equal(result.fieldErrors.assessmentKey, 'Use lowercase letters, numbers, and single hyphens only.');
@@ -294,6 +307,7 @@ test('create action returns an inline field error for duplicate assessment keys'
       {
         id: 'assessment-1',
         assessmentKey: 'wplp80',
+        mode: 'multi_domain',
         title: 'WPLP-80',
         description: null,
         isActive: true,
@@ -445,4 +459,41 @@ test('create action returns a targeted form error for assessment version constra
   );
   assert.deepEqual(result.fieldErrors, {});
   assert.equal(calls.length, 1);
+});
+
+test('create action stores single-domain mode when requested explicitly', async () => {
+  const fake = createFakeDb();
+
+  await assert.rejects(
+    () =>
+      createAssessmentActionWithDependencies(
+        initialAdminAssessmentCreateFormState,
+        buildFormData({
+          title: 'Role Focus',
+          assessmentKey: 'role-focus',
+          description: 'Single-domain draft.',
+          mode: 'single_domain',
+        }),
+        {
+          getDbPool: () => ({
+            async connect() {
+              return {
+                async query<T>(text: string, params?: readonly unknown[]) {
+                  return fake.db.query<T>(text, params);
+                },
+                release() {},
+              };
+            },
+          }),
+          redirect(path: string): never {
+            throw new Error(`REDIRECT:${path}`);
+          },
+          revalidatePath(): void {},
+        },
+      ),
+    /REDIRECT:\/admin\/assessments\/role-focus/,
+  );
+
+  assert.equal(fake.state.assessments[0]?.mode, 'single_domain');
+  assert.equal(fake.state.versions[0]?.mode, 'single_domain');
 });

@@ -22,7 +22,7 @@ import {
   type AssessmentCompletionPersistedResponse,
   type AssessmentCompletionServiceResult,
 } from '@/lib/server/assessment-completion-types';
-import { normalizeAssessmentMode } from '@/lib/types/assessment';
+import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
 export type AssessmentCompletionServiceDeps = {
   db: Queryable;
@@ -200,7 +200,7 @@ export function createAssessmentCompletionService(
           success: true,
           attemptId: attempt.attemptId,
           resultId,
-          mode: normalizeAssessmentMode(payload.metadata.mode),
+          mode: resolveAssessmentMode(payload.metadata.mode),
           lifecycleStatus: 'ready',
           resultStatus: 'ready',
           hasResult: true,

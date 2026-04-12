@@ -100,6 +100,9 @@ function AssessmentCard({
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-2">
               <LabelPill>{assessment.assessmentKey}</LabelPill>
+              <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
+                {assessment.modeLabel}
+              </LabelPill>
               <LabelPill className={getStatusPillClass(assessment.overallStatus)}>
                 {assessment.overallStatusLabel}
               </LabelPill>
@@ -174,7 +177,7 @@ export function AdminAssessmentsDashboard({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <ButtonLink href="/admin/assessments/create" variant="primary">
+            <ButtonLink href="/admin/assessments/new" variant="primary">
               Create assessment
             </ButtonLink>
             <p className="text-sm text-white/52">Starts a new assessment with draft version `1.0.0`.</p>
@@ -230,7 +233,7 @@ export function AdminAssessmentsDashboard({
             title="No assessments yet"
             description="Create your first assessment."
             action={
-              <ButtonLink href="/admin/assessments/create" variant="primary">
+              <ButtonLink href="/admin/assessments/new" variant="primary">
                 Create assessment
               </ButtonLink>
             }

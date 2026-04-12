@@ -2,11 +2,13 @@ import {
   ASSESSMENT_KEY_PATTERN,
   MAX_ASSESSMENT_KEY_LENGTH,
 } from '@/lib/admin/assessment-key';
+import type { AssessmentMode } from '@/lib/types/assessment';
 
 export type AdminAssessmentCreateFormValues = {
   title: string;
   assessmentKey: string;
   description: string;
+  mode: AssessmentMode;
 };
 
 export type AdminAssessmentCreateFormState = {
@@ -23,6 +25,7 @@ export const emptyAdminAssessmentCreateFormValues: AdminAssessmentCreateFormValu
   title: '',
   assessmentKey: '',
   description: '',
+  mode: 'multi_domain',
 };
 
 export const initialAdminAssessmentCreateFormState: AdminAssessmentCreateFormState = {

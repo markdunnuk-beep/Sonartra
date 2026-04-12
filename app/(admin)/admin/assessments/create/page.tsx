@@ -6,8 +6,8 @@ export default function AdminAssessmentCreatePlaceholderPage() {
     <PageFrame className="space-y-8">
       <PageHeader
         eyebrow="Admin Workspace"
-        title="Create assessment"
-        description="Create a new assessment and start with a draft."
+        title="Create multi-domain assessment"
+        description="Create a new multi-domain assessment and start with a draft."
       />
 
       <AdminAssessmentCreateForm />

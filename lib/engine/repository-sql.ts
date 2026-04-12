@@ -153,7 +153,7 @@ export async function getAssessmentByKey(db: Queryable, assessmentKey: string): 
     SELECT
       id,
       assessment_key,
-      NULL::text AS mode,
+      mode,
       title,
       description,
       created_at,
@@ -176,7 +176,7 @@ export async function getPublishedVersionForAssessment(
     SELECT
       id,
       assessment_id,
-      NULL::text AS mode,
+      mode,
       version,
       lifecycle_status,
       published_at,
@@ -201,7 +201,7 @@ export async function getVersionById(
     SELECT
       id,
       assessment_id,
-      NULL::text AS mode,
+      mode,
       version,
       lifecycle_status,
       published_at,
@@ -226,7 +226,7 @@ export async function getVersionByAssessmentKeyAndVersion(
     SELECT
       av.id,
       av.assessment_id,
-      NULL::text AS mode,
+      COALESCE(av.mode, a.mode) AS mode,
       av.version,
       av.lifecycle_status,
       av.published_at,

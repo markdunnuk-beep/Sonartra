@@ -11,6 +11,7 @@ import {
   validateAdminAssessmentCreateValues,
 } from '@/lib/admin/admin-assessment-create';
 import { getDbPool } from '@/lib/server/db';
+import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
 type InsertAssessmentRecord = {
   id: string;
@@ -267,15 +268,17 @@ export async function createAdminAssessmentRecords(params: {
       `
       INSERT INTO assessments (
         assessment_key,
+        mode,
         title,
         description,
         is_active
       )
-      VALUES ($1, $2, $3, TRUE)
+      VALUES ($1, $2, $3, $4, TRUE)
       RETURNING id, assessment_key
       `,
       [
         params.values.assessmentKey,
+        params.values.mode,
         params.values.title,
         params.values.description || null,
       ],
@@ -295,14 +298,15 @@ export async function createAdminAssessmentRecords(params: {
       `
       INSERT INTO assessment_versions (
         assessment_id,
+        mode,
         version,
         lifecycle_status,
         title_override,
         description_override
       )
-      VALUES ($1, $2, 'DRAFT', NULL, NULL)
+      VALUES ($1, $2, $3, 'DRAFT', NULL, NULL)
       `,
-      [assessment.id, INITIAL_ASSESSMENT_VERSION_TAG],
+      [assessment.id, params.values.mode, INITIAL_ASSESSMENT_VERSION_TAG],
     );
   } catch (error) {
     throw new CreateAssessmentPersistenceError('insert_assessment_version', error);
@@ -334,6 +338,7 @@ export async function createAssessmentActionWithDependencies(
     title: normalizeFormValue(formData.get('title')),
     assessmentKey: normalizeAssessmentKey(normalizeFormValue(formData.get('assessmentKey'))),
     description: normalizeFormValue(formData.get('description')),
+    mode: resolveAssessmentMode(normalizeFormValue(formData.get('mode'))),
   };
 
   const validation = validateAdminAssessmentCreateValues(values);

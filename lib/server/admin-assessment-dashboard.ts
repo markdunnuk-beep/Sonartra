@@ -1,6 +1,8 @@
 ﻿import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import { validateLatestDraftAssessmentVersion } from '@/lib/server/admin-assessment-validation';
+import type { AssessmentMode } from '@/lib/types/assessment';
+import { getAssessmentModeLabel, resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
 export type AdminAssessmentVersionStatus = 'draft' | 'published' | 'archived';
 export type AdminAssessmentOverallStatus =
@@ -27,6 +29,8 @@ export type AdminAssessmentDraftReadiness = 'ready' | 'not_ready' | 'no_draft';
 export type AdminAssessmentDashboardItem = {
   assessmentId: string;
   assessmentKey: string;
+  mode: AssessmentMode;
+  modeLabel: 'Multi-Domain' | 'Single-Domain';
   title: string;
   description: string | null;
   isActive: boolean;
@@ -60,6 +64,7 @@ type AdminAssessmentCatalogRow = {
   assessment_id: string;
   assessment_key: string;
   assessment_title: string;
+  assessment_mode: string | null;
   assessment_description: string | null;
   assessment_is_active: boolean;
   assessment_created_at: string;
@@ -227,6 +232,8 @@ function mapAssessmentDashboardItem(
   return {
     assessmentId: firstRow.assessment_id,
     assessmentKey: firstRow.assessment_key,
+    mode: resolveAssessmentMode(firstRow.assessment_mode),
+    modeLabel: getAssessmentModeLabel(firstRow.assessment_mode),
     title: firstRow.assessment_title,
     description: firstRow.assessment_description,
     isActive: firstRow.assessment_is_active,
@@ -252,6 +259,7 @@ async function listAdminAssessmentCatalogRows(
       a.id AS assessment_id,
       a.assessment_key,
       a.title AS assessment_title,
+      COALESCE(av.mode, a.mode) AS assessment_mode,
       a.description AS assessment_description,
       a.is_active AS assessment_is_active,
       a.created_at AS assessment_created_at,
@@ -272,11 +280,13 @@ async function listAdminAssessmentCatalogRows(
       a.id,
       a.assessment_key,
       a.title,
+      a.mode,
       a.description,
       a.is_active,
       a.created_at,
       a.updated_at,
       av.id,
+      av.mode,
       av.version,
       av.lifecycle_status,
       av.title_override,

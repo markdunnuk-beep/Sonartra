@@ -15,8 +15,9 @@ test('create assessment form marks required fields, wires explicit ids, and disa
   assert.match(source, /id="assessment-title"/);
   assert.match(source, /id="assessment-key"/);
   assert.match(source, /Required/);
+  assert.match(source, /<input name="mode" type="hidden" value=\{mode\} \/>/);
   assert.match(source, /const canCreateAssessment = hasMinimumValidState && assessmentKeyLooksValid;/);
-  assert.match(source, /<SubmitButton disabled=\{!canCreateAssessment\} \/>/);
+  assert.match(source, /<SubmitButton disabled=\{!canCreateAssessment\} label=\{submitLabel\} \/>/);
 });
 
 test('builder dependency copy names exact prerequisites on questions responses and weights surfaces', () => {

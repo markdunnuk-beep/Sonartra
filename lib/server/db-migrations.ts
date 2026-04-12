@@ -324,6 +324,23 @@ export async function reconcileKnownMigrations(params: {
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);
       }
+
+      continue;
+    }
+
+    if (migration.filename === '202604120002_assessment_mode.sql') {
+      const hasAssessmentModeColumn = await columnExists(params.db, 'assessments', 'mode');
+      const hasAssessmentVersionModeColumn = await columnExists(params.db, 'assessment_versions', 'mode');
+      const hasAssessmentModeIndex = await indexExists(
+        params.db,
+        'assessment_versions_assessment_mode_idx',
+      );
+
+      if (hasAssessmentModeColumn && hasAssessmentVersionModeColumn && hasAssessmentModeIndex) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
     }
   }
 
