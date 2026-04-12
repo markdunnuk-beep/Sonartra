@@ -284,6 +284,46 @@ export async function reconcileKnownMigrations(params: {
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);
       }
+
+      continue;
+    }
+
+    if (migration.filename === '202604120001_assessment_version_single_domain_language.sql') {
+      const singleDomainTablesExist: boolean[] = [];
+      for (const tableName of [
+        'assessment_version_single_domain_framing',
+        'assessment_version_single_domain_hero_pairs',
+        'assessment_version_single_domain_signal_chapters',
+        'assessment_version_single_domain_balancing_sections',
+        'assessment_version_single_domain_pair_summaries',
+        'assessment_version_single_domain_application_statements',
+      ]) {
+        singleDomainTablesExist.push(await tableExists(params.db, tableName));
+      }
+
+      const singleDomainIndexesExist: boolean[] = [];
+      for (const indexName of [
+        'assessment_version_single_domain_framing_version_idx',
+        'assessment_version_single_domain_framing_version_domain_idx',
+        'assessment_version_single_domain_hero_pairs_version_idx',
+        'assessment_version_single_domain_hero_pairs_version_pair_idx',
+        'assessment_version_single_domain_signal_chapters_version_idx',
+        'assessment_version_single_domain_signal_chapters_version_signal_idx',
+        'assessment_version_single_domain_balancing_sections_version_idx',
+        'assessment_version_single_domain_balancing_sections_version_pair_idx',
+        'assessment_version_single_domain_pair_summaries_version_idx',
+        'assessment_version_single_domain_pair_summaries_version_pair_idx',
+        'assessment_version_single_domain_application_statements_version_idx',
+        'assessment_version_single_domain_application_statements_version_signal_idx',
+      ]) {
+        singleDomainIndexesExist.push(await indexExists(params.db, indexName));
+      }
+
+      if (singleDomainTablesExist.every(Boolean) && singleDomainIndexesExist.every(Boolean)) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
     }
   }
 
