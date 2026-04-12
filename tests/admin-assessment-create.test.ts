@@ -491,7 +491,7 @@ test('create action stores single-domain mode when requested explicitly', async 
           revalidatePath(): void {},
         },
       ),
-    /REDIRECT:\/admin\/assessments\/role-focus/,
+    /REDIRECT:\/admin\/assessments\/single-domain\/role-focus/,
   );
 
   assert.equal(fake.state.assessments[0]?.mode, 'single_domain');

@@ -1,4 +1,5 @@
-﻿import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
+import { getAssessmentBuilderBasePath } from '@/lib/admin/assessment-builder-paths';
+import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import { validateLatestDraftAssessmentVersion } from '@/lib/server/admin-assessment-validation';
 import type { AssessmentMode } from '@/lib/types/assessment';
@@ -165,8 +166,8 @@ function formatOverallStatus(params: {
   };
 }
 
-function buildActionHref(assessmentKey: string): string {
-  return `/admin/assessments/${assessmentKey}`;
+function buildActionHref(assessmentKey: string, mode?: AssessmentMode | string | null): string {
+  return getAssessmentBuilderBasePath(assessmentKey, mode);
 }
 
 function mapAssessmentDashboardItem(
@@ -245,7 +246,7 @@ function mapAssessmentDashboardItem(
     latestDraftVersion,
     latestDraftReadiness,
     latestUpdatedAt,
-    actionHref: buildActionHref(firstRow.assessment_key),
+    actionHref: buildActionHref(firstRow.assessment_key, firstRow.assessment_mode),
     versions: Object.freeze(versions),
   };
 }
@@ -369,5 +370,3 @@ export async function buildAdminAssessmentDashboardViewModel(
     assessments,
   };
 }
-
-

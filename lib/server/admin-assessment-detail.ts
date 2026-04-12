@@ -1,5 +1,7 @@
 import { compareAssessmentVersionTagsDesc } from '@/lib/admin/admin-assessment-versioning';
 import type { Queryable } from '@/lib/engine/repository-sql';
+import type { AssessmentMode } from '@/lib/types/assessment';
+import { getAssessmentModeLabel, resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 import {
   validateLatestDraftAssessmentVersion,
   type AdminAssessmentValidationResult,
@@ -120,6 +122,8 @@ export type AdminAssessmentBuilderMode = 'draft' | 'published_no_draft' | 'setup
 export type AdminAssessmentDetailViewModel = {
   assessmentId: string;
   assessmentKey: string;
+  mode: AssessmentMode;
+  modeLabel: 'Multi-Domain' | 'Single-Domain';
   title: string;
   description: string | null;
   isActive: boolean;
@@ -141,6 +145,7 @@ export type AdminAssessmentDetailViewModel = {
 type AdminAssessmentDetailRow = {
   assessment_id: string;
   assessment_key: string;
+  assessment_mode: string | null;
   assessment_title: string;
   assessment_description: string | null;
   assessment_is_active: boolean;
@@ -645,6 +650,7 @@ export async function getAdminAssessmentDetailByKey(
     SELECT
       a.id AS assessment_id,
       a.assessment_key,
+      COALESCE(av.mode, a.mode) AS assessment_mode,
       a.title AS assessment_title,
       a.description AS assessment_description,
       a.is_active AS assessment_is_active,
@@ -664,12 +670,14 @@ export async function getAdminAssessmentDetailByKey(
     GROUP BY
       a.id,
       a.assessment_key,
+      a.mode,
       a.title,
       a.description,
       a.is_active,
       a.created_at,
       a.updated_at,
       av.id,
+      av.mode,
       av.version,
       av.lifecycle_status,
       av.published_at,
@@ -763,6 +771,8 @@ export async function getAdminAssessmentDetailByKey(
   return {
     assessmentId: firstRow.assessment_id,
     assessmentKey: firstRow.assessment_key,
+    mode: resolveAssessmentMode(firstRow.assessment_mode),
+    modeLabel: getAssessmentModeLabel(firstRow.assessment_mode),
     title: firstRow.assessment_title,
     description: firstRow.assessment_description,
     isActive: firstRow.assessment_is_active,

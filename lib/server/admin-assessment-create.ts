@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { normalizeAssessmentKeyInput } from '@/lib/admin/assessment-key';
 import { INITIAL_ASSESSMENT_VERSION_TAG } from '@/lib/admin/admin-assessment-versioning';
+import { getAssessmentBuilderBasePath } from '@/lib/admin/assessment-builder-paths';
 import {
   type AdminAssessmentCreateFormState,
   type AdminAssessmentCreateFormValues,
@@ -404,7 +405,7 @@ export async function createAssessmentActionWithDependencies(
 
   dependencies.revalidatePath('/admin/assessments');
   dependencies.revalidatePath(`/admin/assessments/${created.assessmentKey}`);
-  dependencies.redirect(`/admin/assessments/${created.assessmentKey}`);
+  dependencies.redirect(getAssessmentBuilderBasePath(created.assessmentKey, values.mode));
 }
 
 

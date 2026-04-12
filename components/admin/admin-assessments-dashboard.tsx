@@ -90,7 +90,7 @@ function AssessmentCard({
   assessment: AdminAssessmentDashboardItem;
 }) {
   const reviewHref = assessment.latestDraftVersion
-    ? `/admin/assessments/${assessment.assessmentKey}/review`
+    ? `${assessment.actionHref}/review`
     : null;
 
   return (

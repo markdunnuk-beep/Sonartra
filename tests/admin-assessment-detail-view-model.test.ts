@@ -8,6 +8,7 @@ type DetailFixture = {
   baseRows: Array<{
     assessment_id: string;
     assessment_key: string;
+    assessment_mode: string | null;
     assessment_title: string;
     assessment_description: string | null;
     assessment_is_active: boolean;
@@ -270,6 +271,7 @@ test('loads latest draft weighting data and coverage for admin assessment detail
         {
           assessment_id: 'assessment-1',
           assessment_key: 'wplp80',
+          assessment_mode: 'multi_domain',
           assessment_title: 'WPLP-80',
           assessment_description: 'Flagship assessment',
           assessment_is_active: true,
@@ -286,6 +288,7 @@ test('loads latest draft weighting data and coverage for admin assessment detail
         {
           assessment_id: 'assessment-1',
           assessment_key: 'wplp80',
+          assessment_mode: 'multi_domain',
           assessment_title: 'WPLP-80',
           assessment_description: 'Flagship assessment',
           assessment_is_active: true,
@@ -466,6 +469,7 @@ test('derives trustworthy intro and language step completion from persisted draf
         {
           assessment_id: 'assessment-1',
           assessment_key: 'wplp80',
+          assessment_mode: 'multi_domain',
           assessment_title: 'WPLP-80',
           assessment_description: 'Flagship assessment',
           assessment_is_active: true,
@@ -525,6 +529,7 @@ test('marks published assessments without an editable draft as published_no_draf
         {
           assessment_id: 'assessment-1',
           assessment_key: 'wplp80',
+          assessment_mode: 'multi_domain',
           assessment_title: 'WPLP-80',
           assessment_description: 'Flagship assessment',
           assessment_is_active: true,
