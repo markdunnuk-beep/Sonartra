@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
 import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
+import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
+import {
+  buildAssessmentWorkspaceViewModel,
+  buildDashboardViewModel,
+} from '@/lib/server/dashboard-workspace-view-model';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import { buildSingleDomainResultPayload } from '@/lib/server/single-domain-completion';
 import type { AssessmentCompletionPayload } from '@/lib/server/assessment-completion-types';
@@ -342,14 +348,158 @@ function createDb(config?: {
     { responseId: 'response-4', attemptId: 'attempt-1', questionId: 'question-4', selectedOptionId: 'option-4a', respondedAt: '2026-04-12T10:00:00.000Z', updatedAt: '2026-04-12T10:00:00.000Z' },
   ])];
   const results = [...(config?.results ?? [])];
+  let attemptSequence = attempts.length + 1;
   let resultSequence = results.length + 1;
 
   return {
     attempts,
+    responses,
     results,
+    mutateRuntimeDefinition() {
+      runtime.signals[0]!.signal_label = 'Changed Vision';
+      runtime.options[0]!.option_text = 'Changed answer text';
+      runtime.weights[0]!.weight = '99';
+      runtime.language.HERO_PAIRS[0]!.hero_headline = 'Changed hero headline';
+    },
     db: {
       async query<T>(text: string, params?: unknown[]) {
         const sql = text.replace(/\s+/g, ' ').trim();
+
+        if (sql.includes('a.title AS assessment_title') && sql.includes("WHERE av.lifecycle_status = 'PUBLISHED'")) {
+          return {
+            rows: ([{
+              assessment_id: runtime.context.assessment_id,
+              assessment_key: runtime.context.assessment_key,
+              assessment_title: runtime.context.assessment_title,
+              assessment_description: runtime.context.assessment_description,
+              assessment_version_id: runtime.context.assessment_version_id,
+              version_tag: runtime.context.assessment_version_tag,
+              published_at: '2026-04-12T09:45:00.000Z',
+              question_count: String(runtime.questions.length),
+            }] as unknown[]) as T[],
+          };
+        }
+
+        if (sql.includes('FROM assessments a') && sql.includes("WHERE a.assessment_key = $1") && sql.includes("av.lifecycle_status = 'PUBLISHED'")) {
+          if ((params?.[0] as string) !== runtime.context.assessment_key) {
+            return { rows: [] as T[] };
+          }
+
+          return {
+            rows: ([{
+              assessment_id: runtime.context.assessment_id,
+              assessment_key: runtime.context.assessment_key,
+              assessment_version_id: runtime.context.assessment_version_id,
+              version_tag: runtime.context.assessment_version_tag,
+            }] as unknown[]) as T[],
+          };
+        }
+
+        if (sql.includes('FROM attempts') && sql.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+          const [userId, assessmentId] = params as [string, string];
+          const row = attempts
+            .filter((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId && attempt.lifecycleStatus === 'IN_PROGRESS')
+            .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.attemptId.localeCompare(left.attemptId))[0];
+
+          return {
+            rows: (row
+              ? [({
+                  attempt_id: row.attemptId,
+                  user_id: row.userId,
+                  assessment_id: row.assessmentId,
+                  assessment_version_id: row.assessmentVersionId,
+                  lifecycle_status: row.lifecycleStatus,
+                  started_at: row.startedAt,
+                  submitted_at: row.submittedAt,
+                  completed_at: row.completedAt,
+                  last_activity_at: row.lastActivityAt,
+                  created_at: row.createdAt,
+                  updated_at: row.updatedAt,
+                } as unknown)]
+              : []) as T[],
+          };
+        }
+
+        if (sql.includes('FROM attempts') && sql.includes('WHERE user_id = $1') && sql.includes('assessment_id = $2') && !sql.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+          const [userId, assessmentId] = params as [string, string];
+          const row = attempts
+            .filter((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId)
+            .sort((left, right) => right.createdAt.localeCompare(left.createdAt) || right.attemptId.localeCompare(left.attemptId))[0];
+
+          return {
+            rows: (row
+              ? [({
+                  attempt_id: row.attemptId,
+                  user_id: row.userId,
+                  assessment_id: row.assessmentId,
+                  assessment_version_id: row.assessmentVersionId,
+                  lifecycle_status: row.lifecycleStatus,
+                  started_at: row.startedAt,
+                  submitted_at: row.submittedAt,
+                  completed_at: row.completedAt,
+                  last_activity_at: row.lastActivityAt,
+                  created_at: row.createdAt,
+                  updated_at: row.updatedAt,
+                } as unknown)]
+              : []) as T[],
+          };
+        }
+
+        if (sql.includes('INSERT INTO attempts') && sql.includes("VALUES ($1, $2, $3, 'IN_PROGRESS')")) {
+          const [userId, assessmentId, assessmentVersionId] = params as [string, string, string];
+          const attemptId = `attempt-${attemptSequence++}`;
+          const row: AttemptState = {
+            attemptId,
+            userId,
+            assessmentId,
+            assessmentVersionId,
+            assessmentKey: runtime.context.assessment_key,
+            assessmentMode: 'single_domain',
+            versionTag: runtime.context.assessment_version_tag,
+            lifecycleStatus: 'IN_PROGRESS',
+            startedAt: '2026-04-12T09:50:00.000Z',
+            submittedAt: null,
+            completedAt: null,
+            lastActivityAt: '2026-04-12T09:50:00.000Z',
+            createdAt: '2026-04-12T09:50:00.000Z',
+            updatedAt: '2026-04-12T09:50:00.000Z',
+          };
+          attempts.push(row);
+
+          return {
+            rows: ([{
+              attempt_id: row.attemptId,
+              user_id: row.userId,
+              assessment_id: row.assessmentId,
+              assessment_version_id: row.assessmentVersionId,
+              lifecycle_status: row.lifecycleStatus,
+              started_at: row.startedAt,
+              submitted_at: row.submittedAt,
+              completed_at: row.completedAt,
+              last_activity_at: row.lastActivityAt,
+              created_at: row.createdAt,
+              updated_at: row.updatedAt,
+            }] as unknown[]) as T[],
+          };
+        }
+
+        if (sql.includes('COUNT(DISTINCT question_id) AS answered_questions')) {
+          const answeredQuestions = new Set(
+            responses
+              .filter((row) => row.attemptId === (params?.[0] as string))
+              .map((row) => row.questionId),
+          ).size;
+
+          return {
+            rows: ([{ answered_questions: answeredQuestions }] as unknown[]) as T[],
+          };
+        }
+
+        if (sql.includes('COUNT(*) AS total_questions') && sql.includes('FROM questions WHERE assessment_version_id = $1')) {
+          return {
+            rows: ([{ total_questions: runtime.questions.length }] as unknown[]) as T[],
+          };
+        }
 
         if (sql.includes('FROM attempts t') && sql.includes('WHERE t.id = $1')) {
           const row = attempts.find((attempt) => attempt.attemptId === (params?.[0] as string));
@@ -373,6 +523,88 @@ function createDb(config?: {
                 }]
               : []) as T[],
           };
+        }
+
+        if (sql.includes('FROM questions q') && sql.includes('INNER JOIN domains d ON d.id = q.domain_id') && sql.includes('INNER JOIN options o ON o.question_id = q.id')) {
+          const rows = runtime.questions.flatMap((question) => {
+            const domain = runtime.domains.find((entry) => entry.domain_id === question.domain_id)!;
+            return runtime.options
+              .filter((option) => option.question_id === question.question_id)
+              .sort((left, right) => left.option_order_index - right.option_order_index || left.option_id.localeCompare(right.option_id))
+              .map((option) => ({
+                question_id: question.question_id,
+                question_key: question.question_key,
+                prompt: question.prompt,
+                question_order_index: question.question_order_index,
+                domain_title: domain.domain_label,
+                option_id: option.option_id,
+                option_key: option.option_key,
+                option_label: option.option_label,
+                option_text: option.option_text,
+                option_order_index: option.option_order_index,
+              }));
+          });
+
+          return { rows: rows as T[] };
+        }
+
+        if (sql.includes('FROM responses') && sql.includes('WHERE attempt_id = $1') && sql.includes('selected_option_id') && !sql.includes('SELECT DISTINCT ON')) {
+          return {
+            rows: responses
+              .filter((row) => row.attemptId === (params?.[0] as string))
+              .map((row) => ({
+                question_id: row.questionId,
+                selected_option_id: row.selectedOptionId,
+              })) as T[],
+          };
+        }
+
+        if (sql.includes('COALESCE(r.answered_questions, 0) AS answered_questions')) {
+          const [attemptId] = params as [string, string];
+          const answeredQuestions = responses.filter((row) => row.attemptId === attemptId).length;
+          return {
+            rows: ([{
+              answered_questions: answeredQuestions,
+              total_questions: runtime.questions.length,
+            }] as unknown[]) as T[],
+          };
+        }
+
+        if (sql.includes('SELECT 1 AS valid_row')) {
+          const [, questionId, selectedOptionId] = params as [string, string, string];
+          const valid = runtime.options.some((option) => option.question_id === questionId && option.option_id === selectedOptionId);
+          return {
+            rows: (valid ? ([{ valid_row: 1 }] as unknown[]) : []) as T[],
+          };
+        }
+
+        if (sql.includes('INSERT INTO responses') && sql.includes('ON CONFLICT (attempt_id, question_id) DO UPDATE')) {
+          const [attemptId, questionId, selectedOptionId] = params as [string, string, string];
+          const existing = responses.find((row) => row.attemptId === attemptId && row.questionId === questionId);
+          if (existing) {
+            existing.selectedOptionId = selectedOptionId;
+            existing.updatedAt = '2026-04-12T10:00:00.000Z';
+          } else {
+            responses.push({
+              responseId: `response-${responses.length + 1}`,
+              attemptId,
+              questionId,
+              selectedOptionId,
+              respondedAt: '2026-04-12T10:00:00.000Z',
+              updatedAt: '2026-04-12T10:00:00.000Z',
+            });
+          }
+
+          return { rows: [] as T[] };
+        }
+
+        if (sql.includes('UPDATE attempts') && sql.includes('last_activity_at = NOW()') && !sql.includes('lifecycle_status =')) {
+          const attempt = attempts.find((entry) => entry.attemptId === (params?.[0] as string));
+          if (attempt) {
+            attempt.lastActivityAt = '2026-04-12T10:00:00.000Z';
+            attempt.updatedAt = '2026-04-12T10:00:00.000Z';
+          }
+          return { rows: [] as T[] };
         }
 
         if (sql.includes('FROM results WHERE attempt_id = $1')) {
@@ -649,6 +881,188 @@ test('single-domain result retrieval returns the payload cleanly without affecti
   assert.equal(list[0]?.topSignal?.signalKey, 'vision');
   assert.equal(detail.mode, 'single_domain');
   assert.equal(detail.singleDomainResult?.hero.hero_headline, 'Hero vision_delivery');
+});
+
+test('published single-domain runtime regression proves start-to-ready persisted retrieval flow', async () => {
+  const harness = createDb({
+    attempts: [],
+    responses: [],
+  });
+  const lifecycleService = createAssessmentAttemptLifecycleService({ db: harness.db });
+  const runnerService = createAssessmentRunnerService({
+    db: harness.db,
+    lifecycleService,
+    definitionRepository: {
+      async getAssessmentDefinitionByVersion() {
+        return null;
+      },
+    },
+  });
+  const resultReadModel = createResultReadModelService({ db: harness.db });
+  const userId = 'user-regression';
+
+  const started = await lifecycleService.startAssessmentAttempt({
+    userId,
+    assessmentKey: 'role-focus',
+  });
+
+  assert.equal(started.status, 'in_progress');
+  assert.equal(started.assessmentVersionId, 'version-1');
+  assert.equal(started.versionTag, '1.0.0');
+  assert.equal(started.totalQuestions, 4);
+  assert.ok(started.attemptId);
+
+  const runner = await runnerService.getAssessmentRunnerViewModel({
+    userId,
+    assessmentKey: 'role-focus',
+    attemptId: started.attemptId!,
+  });
+
+  assert.equal(runner.status, 'in_progress');
+  assert.deepEqual(
+    runner.questions.map((question) => question.questionKey),
+    ['q01', 'q02', 'q03', 'q04'],
+  );
+  assert.deepEqual(
+    runner.questions.map((question) => question.options.map((option) => option.text)),
+    [
+      ['Text q01_a', 'Text q01_b'],
+      ['Text q02_a', 'Text q02_b'],
+      ['Text q03_a', 'Text q03_b'],
+      ['Text q04_a', 'Text q04_b'],
+    ],
+  );
+
+  const firstQuestion = runner.questions[0]!;
+  await runnerService.saveAssessmentResponse({
+    userId,
+    assessmentKey: 'role-focus',
+    attemptId: started.attemptId!,
+    questionId: firstQuestion.questionId,
+    selectedOptionId: firstQuestion.options[0]!.optionId,
+  });
+  const overwrite = await runnerService.saveAssessmentResponse({
+    userId,
+    assessmentKey: 'role-focus',
+    attemptId: started.attemptId!,
+    questionId: firstQuestion.questionId,
+    selectedOptionId: firstQuestion.options[1]!.optionId,
+  });
+
+  assert.equal(overwrite.selectedOptionId, 'option-1b');
+  assert.equal(overwrite.answeredQuestions, 1);
+
+  for (const question of runner.questions.slice(1)) {
+    await runnerService.saveAssessmentResponse({
+      userId,
+      assessmentKey: 'role-focus',
+      attemptId: started.attemptId!,
+      questionId: question.questionId,
+      selectedOptionId: question.options[0]!.optionId,
+    });
+  }
+
+  assert.equal(harness.responses.length, runner.questions.length);
+  assert.equal(
+    harness.responses.filter((response) => response.questionId === firstQuestion.questionId).length,
+    1,
+  );
+  assert.equal(
+    harness.responses.find((response) => response.questionId === firstQuestion.questionId)?.selectedOptionId,
+    'option-1b',
+  );
+
+  const submitted = await runnerService.completeAssessmentAttempt({
+    userId,
+    assessmentKey: 'role-focus',
+    attemptId: started.attemptId!,
+  });
+
+  assert.equal(submitted.kind, 'ready');
+  assert.match(submitted.href, /\/app\/results\/single-domain\/result-\d+/);
+  assert.equal(submitted.completion.mode, 'single_domain');
+  assert.equal(submitted.completion.resultStatus, 'ready');
+  assert.equal(harness.attempts[0]?.lifecycleStatus, 'RESULT_READY');
+  assert.equal(harness.results[0]?.readinessStatus, 'READY');
+  assert.equal(harness.results[0]?.canonicalResultPayload?.metadata.mode, 'single_domain');
+
+  const workspace = await buildAssessmentWorkspaceViewModel({
+    db: harness.db,
+    userId,
+  });
+  const dashboard = await buildDashboardViewModel({
+    db: harness.db,
+    userId,
+  });
+  const resultList = await resultReadModel.listAssessmentResults({ userId });
+  const resultDetail = await resultReadModel.getAssessmentResultDetail({
+    userId,
+    resultId: harness.results[0]!.resultId,
+  });
+  const entryResolution = await runnerService.resolveAssessmentEntry({
+    userId,
+    assessmentKey: 'role-focus',
+  });
+
+  assert.equal(workspace.assessments.length, 1);
+  assert.equal(workspace.assessments[0]?.assessmentKey, 'role-focus');
+  assert.equal(workspace.assessments[0]?.status, 'ready');
+  assert.equal(workspace.assessments[0]?.latestReadyResultId, harness.results[0]?.resultId);
+
+  assert.equal(dashboard.readyResultCount, 1);
+  assert.equal(dashboard.processingCount, 0);
+  assert.equal(dashboard.latestReadyResult?.href, `/app/results/single-domain/${harness.results[0]?.resultId}`);
+
+  assert.equal(resultList.length, 1);
+  assert.equal(resultList[0]?.mode, 'single_domain');
+  assert.equal(resultList[0]?.resultId, harness.results[0]?.resultId);
+
+  assert.equal(resultDetail.mode, 'single_domain');
+  assert.equal(resultDetail.singleDomainResult?.metadata.attemptId, started.attemptId);
+  assert.equal(
+    resultDetail.singleDomainResult?.hero.hero_headline,
+    harness.results[0]?.canonicalResultPayload?.hero.hero_headline,
+  );
+
+  assert.deepEqual(entryResolution, {
+    kind: 'result',
+    assessmentKey: 'role-focus',
+    resultId: harness.results[0]!.resultId,
+    href: `/app/results/single-domain/${harness.results[0]!.resultId}`,
+  });
+
+  const baselineList = JSON.stringify(resultList);
+  const baselineDetail = JSON.stringify(resultDetail);
+  const baselineWorkspace = JSON.stringify(workspace);
+  const baselineDashboard = JSON.stringify(dashboard);
+
+  harness.mutateRuntimeDefinition();
+
+  assert.equal(
+    JSON.stringify(await resultReadModel.listAssessmentResults({ userId })),
+    baselineList,
+  );
+  assert.equal(
+    JSON.stringify(await resultReadModel.getAssessmentResultDetail({
+      userId,
+      resultId: harness.results[0]!.resultId,
+    })),
+    baselineDetail,
+  );
+  assert.equal(
+    JSON.stringify(await buildAssessmentWorkspaceViewModel({
+      db: harness.db,
+      userId,
+    })),
+    baselineWorkspace,
+  );
+  assert.equal(
+    JSON.stringify(await buildDashboardViewModel({
+      db: harness.db,
+      userId,
+    })),
+    baselineDashboard,
+  );
 });
 
 test('multi-domain attempts still route through the injected multi-domain engine path', async () => {

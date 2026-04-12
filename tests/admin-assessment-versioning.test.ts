@@ -959,6 +959,9 @@ test('publish action revalidates dashboard and detail routes after success', asy
     '/admin/assessments/single-domain/wplp80',
     '/admin/assessments/single-domain/wplp80/overview',
     '/admin/assessments/single-domain/wplp80/review',
+    '/app/assessments',
+    '/app/assessments/wplp80',
+    '/app/workspace',
   ]);
 });
 

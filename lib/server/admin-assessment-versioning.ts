@@ -204,6 +204,9 @@ function getAssessmentRevalidationPaths(assessmentKey: string): readonly string[
     singleDomainAssessmentPath(assessmentKey),
     `${singleDomainAssessmentPath(assessmentKey)}/overview`,
     `${singleDomainAssessmentPath(assessmentKey)}/review`,
+    '/app/assessments',
+    `/app/assessments/${assessmentKey}`,
+    '/app/workspace',
   ]);
 }
 

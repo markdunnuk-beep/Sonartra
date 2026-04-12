@@ -18,7 +18,7 @@ import {
 } from '@/components/admin/admin-feedback-primitives';
 import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
 
-function ActionNotice({
+export function AdminAssessmentPublishStateNotices({
   state,
 }: Readonly<{
   state: AdminAssessmentVersionActionState;
@@ -82,14 +82,35 @@ function SubmitButton({
   );
 }
 
-function PublishDraftForm({
+export function getAdminAssessmentPublishStatusLabel(isPublishReady: boolean): string {
+  return isPublishReady ? 'Ready to publish' : 'Review required';
+}
+
+export function getAdminAssessmentPublishStatusClass(isPublishReady: boolean): string {
+  return isPublishReady
+    ? 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]'
+    : 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]';
+}
+
+export function getAdminAssessmentPublishDisabledReason(
+  draftValidation: AdminAssessmentValidationResult,
+): string {
+  return draftValidation.blockingErrors[0]?.message
+    ?? 'Resolve the blocking review issues before publishing.';
+}
+
+export function AdminAssessmentPublishForm({
   assessmentKey,
   draftVersionId,
   disabled,
+  idleLabel = 'Publish',
+  pendingLabel = 'Publishing...',
 }: Readonly<{
   assessmentKey: string;
   draftVersionId: string;
   disabled: boolean;
+  idleLabel?: string;
+  pendingLabel?: string;
 }>) {
   const [state, formAction] = useActionState(
     publishDraftVersionAction.bind(null, {
@@ -101,8 +122,8 @@ function PublishDraftForm({
 
   return (
     <form action={formAction} className="space-y-3">
-      <ActionNotice state={state} />
-      <SubmitButton disabled={disabled} idleLabel="Publish" pendingLabel="Publishing..." />
+      <AdminAssessmentPublishStateNotices state={state} />
+      <SubmitButton disabled={disabled} idleLabel={idleLabel} pendingLabel={pendingLabel} />
     </form>
   );
 }
@@ -121,14 +142,8 @@ export function AdminAssessmentPublishActions({
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <p className="sonartra-page-eyebrow">Publish</p>
-          <LabelPill
-            className={
-              draftValidation.isPublishReady
-                ? 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]'
-                : 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]'
-            }
-          >
-            {draftValidation.isPublishReady ? 'Ready to publish' : 'Review required'}
+          <LabelPill className={getAdminAssessmentPublishStatusClass(draftValidation.isPublishReady)}>
+            {getAdminAssessmentPublishStatusLabel(draftValidation.isPublishReady)}
           </LabelPill>
         </div>
 
@@ -139,7 +154,7 @@ export function AdminAssessmentPublishActions({
         </p>
 
         {latestDraftVersion ? (
-          <PublishDraftForm
+          <AdminAssessmentPublishForm
             assessmentKey={assessmentKey}
             disabled={!draftValidation.isPublishReady}
             draftVersionId={latestDraftVersion.assessmentVersionId}

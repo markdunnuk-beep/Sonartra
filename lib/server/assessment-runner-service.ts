@@ -3,6 +3,7 @@ import { getRunnerState } from '@/lib/assessment-runner/runner-state';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
 import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
+import { createResultReadModelService } from '@/lib/server/result-read-model';
 import {
   getAttemptForRunner,
   getAttemptProgressCounts,
@@ -110,6 +111,7 @@ export function createAssessmentRunnerService(
     deps.definitionRepository ?? createAssessmentDefinitionRepository({ db: deps.db });
   const completionService =
     deps.completionService ?? createAssessmentCompletionService({ db: deps.db });
+  const resultReadModel = createResultReadModelService({ db: deps.db });
 
   return {
     async resolveAssessmentEntry(params) {
@@ -119,11 +121,18 @@ export function createAssessmentRunnerService(
       });
 
       if (lifecycle.status === 'ready') {
+        const readyResult = lifecycle.latestResultId
+          ? (await resultReadModel.listAssessmentResults({ userId: params.userId }))
+              .find((result) => result.resultId === lifecycle.latestResultId)
+          : null;
+
         return {
           kind: 'result',
           assessmentKey: params.assessmentKey,
           resultId: lifecycle.latestResultId,
-          href: getResultHref(lifecycle.latestResultId),
+          href: lifecycle.latestResultId
+            ? getAssessmentResultHref(lifecycle.latestResultId, readyResult?.mode)
+            : getResultHref(null),
         };
       }
 

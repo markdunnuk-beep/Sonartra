@@ -4,6 +4,12 @@ import { useActionState, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { AdminPublishedNoDraftStageState } from '@/components/admin/admin-assessment-draft-state';
+import {
+  AdminAssessmentPublishForm,
+  getAdminAssessmentPublishDisabledReason,
+  getAdminAssessmentPublishStatusClass,
+  getAdminAssessmentPublishStatusLabel,
+} from '@/components/admin/admin-assessment-publish-actions';
 import { SingleDomainWeightGrid } from '@/components/admin/single-domain-weight-grid';
 import { useAdminAssessmentAuthoring } from '@/components/admin/admin-assessment-authoring-context';
 import {
@@ -311,6 +317,88 @@ function getReviewIssueRemediation(
     case 'review':
       return { sectionLabel: 'Review', step: 'review' as const, ctaLabel: 'Stay in Review' };
   }
+}
+
+function SingleDomainReviewPublishCard() {
+  const assessment = useAdminAssessmentAuthoring();
+  const latestDraftVersion = assessment.latestDraftVersion;
+  const publishedVersion = assessment.publishedVersion;
+  const isPublishReady = assessment.draftValidation.isPublishReady;
+
+  if (latestDraftVersion) {
+    return (
+      <SurfaceCard className="w-full max-w-[28rem] p-5">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="sonartra-page-eyebrow">Publish</p>
+            <LabelPill className={getAdminAssessmentPublishStatusClass(isPublishReady)}>
+              {getAdminAssessmentPublishStatusLabel(isPublishReady)}
+            </LabelPill>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
+              Publish assessment
+            </h3>
+            <p className="text-sm leading-7 text-white/62">
+              {isPublishReady
+                ? `Draft ${latestDraftVersion.versionTag} is runtime-ready and can be published now.`
+                : `Draft ${latestDraftVersion.versionTag} is still blocked by review issues.`}
+            </p>
+          </div>
+
+          <AdminAssessmentPublishForm
+            assessmentKey={assessment.assessmentKey}
+            disabled={!isPublishReady}
+            draftVersionId={latestDraftVersion.assessmentVersionId}
+            idleLabel="Publish assessment"
+            pendingLabel="Publishing assessment..."
+          />
+
+          <p className="text-sm leading-6 text-white/54">
+            {isPublishReady
+              ? 'Publishing will make this version live for runtime consumption and archive any previously active published version.'
+              : getAdminAssessmentPublishDisabledReason(assessment.draftValidation)}
+          </p>
+        </div>
+      </SurfaceCard>
+    );
+  }
+
+  if (publishedVersion) {
+    return (
+      <SurfaceCard className="w-full max-w-[28rem] p-5">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="sonartra-page-eyebrow">Publish</p>
+            <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
+              Live
+            </LabelPill>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
+              Assessment is live
+            </h3>
+            <p className="text-sm leading-7 text-white/62">
+              Published version {publishedVersion.versionTag} is now the active runtime definition.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <ButtonLink href="/app/assessments" variant="primary">
+              Open user assessments
+            </ButtonLink>
+            <ButtonLink href="/app/workspace" variant="secondary">
+              Open user app
+            </ButtonLink>
+          </div>
+        </div>
+      </SurfaceCard>
+    );
+  }
+
+  return null;
 }
 
 function renderMissingDraftState(
@@ -1519,11 +1607,18 @@ export function SingleDomainReviewAuthoring() {
 
   return (
     <section className="sonartra-section">
-      <SectionHeader
-        eyebrow="Review"
-        title="Review runtime readiness"
-        description="Review structural completeness, language completeness, and strict runtime loadability before future publish checks."
-      />
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="sonartra-section-header sonartra-motion-reveal-soft max-w-3xl">
+          <p className="sonartra-page-eyebrow">Review</p>
+          <h2 className="sonartra-section-title">Review runtime readiness</h2>
+          <p className="sonartra-section-description">
+            Review structural completeness, language completeness, and strict runtime
+            loadability before publishing the current version.
+          </p>
+        </div>
+
+        <SingleDomainReviewPublishCard />
+      </div>
       <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-7">
         <SummaryCard detail="One required." label="Domains" value={String(structuralValidation.domainCount)} />
         <SummaryCard detail="Flexible count." label="Signals" value={String(structuralValidation.signalCount)} />

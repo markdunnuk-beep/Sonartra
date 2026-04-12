@@ -92,6 +92,9 @@ function AssessmentCard({
   const reviewHref = assessment.latestDraftVersion
     ? `${assessment.actionHref}/review`
     : null;
+  const reviewLabel = assessment.latestDraftReadiness === 'ready'
+    ? 'Review and publish'
+    : 'Review draft';
 
   return (
     <SurfaceCard className="p-5 lg:p-6">
@@ -135,7 +138,7 @@ function AssessmentCard({
                 )}
                 href={reviewHref}
               >
-                Review draft
+                {reviewLabel}
               </Link>
             ) : null}
           </div>
