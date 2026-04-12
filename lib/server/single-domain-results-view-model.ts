@@ -9,12 +9,26 @@ export type SingleDomainResultsMetadataItem = {
   value: string;
 };
 
+export type SingleDomainSignalNarrativeTier =
+  | 'primary'
+  | 'secondary'
+  | 'supporting'
+  | 'underplayed';
+
+export type SingleDomainSignalNarrativeSection = {
+  key: 'how_it_shows_up' | 'value_outcome' | 'team_effect' | 'risk_behaviour' | 'risk_impact' | 'development_line';
+  label: string;
+  body: string;
+};
+
 export type SingleDomainSignalChapterViewModel = {
   anchorId: string;
   signalKey: string;
   signalLabel: string;
   rank: number;
   normalizedScore: number;
+  rawScore: number;
+  tier: SingleDomainSignalNarrativeTier;
   positionLabel: string;
   chapterIntro: string;
   howItShowsUp: string;
@@ -23,6 +37,7 @@ export type SingleDomainSignalChapterViewModel = {
   riskBehaviour: string;
   riskImpact: string;
   developmentLine: string;
+  narrativeSections: readonly SingleDomainSignalNarrativeSection[];
 };
 
 export type SingleDomainResultsViewModel = {
@@ -99,6 +114,67 @@ function formatResultTimestamp(value: string | null): {
   };
 }
 
+function getSignalNarrativeTier(signal: SingleDomainResultPayload['signals'][number]): SingleDomainSignalNarrativeTier {
+  if (signal.normalized_score <= 0 || signal.raw_score <= 0 || signal.position === 'underplayed') {
+    return 'underplayed';
+  }
+
+  if (signal.position === 'primary') {
+    return 'primary';
+  }
+
+  if (signal.position === 'secondary') {
+    return 'secondary';
+  }
+
+  return 'supporting';
+}
+
+function getNarrativeSections(signal: SingleDomainResultPayload['signals'][number]): readonly SingleDomainSignalNarrativeSection[] {
+  const allSections: readonly SingleDomainSignalNarrativeSection[] = Object.freeze([
+    { key: 'how_it_shows_up', label: 'How it shows up', body: signal.chapter_how_it_shows_up },
+    { key: 'value_outcome', label: 'Value outcome', body: signal.chapter_value_outcome },
+    { key: 'team_effect', label: 'Team effect', body: signal.chapter_value_team_effect },
+    { key: 'risk_behaviour', label: 'Risk behaviour', body: signal.chapter_risk_behaviour },
+    { key: 'risk_impact', label: 'Risk impact', body: signal.chapter_risk_impact },
+    { key: 'development_line', label: 'Development line', body: signal.chapter_development },
+  ]);
+
+  const tier = getSignalNarrativeTier(signal);
+
+  if (tier === 'primary') {
+    return allSections;
+  }
+
+  if (tier === 'secondary') {
+    return Object.freeze(
+      allSections.filter((section) => (
+        section.key === 'how_it_shows_up'
+        || section.key === 'value_outcome'
+        || section.key === 'risk_behaviour'
+        || section.key === 'development_line'
+      )),
+    );
+  }
+
+  if (tier === 'supporting') {
+    return Object.freeze(
+      allSections.filter((section) => (
+        section.key === 'how_it_shows_up'
+        || section.key === 'value_outcome'
+        || section.key === 'development_line'
+      )),
+    );
+  }
+
+  return Object.freeze(
+    allSections.filter((section) => (
+      section.key === 'risk_impact'
+      || section.key === 'development_line'
+    )),
+  );
+}
+
 export function createSingleDomainResultsViewModel(
   payload: SingleDomainResultPayload,
 ): SingleDomainResultsViewModel {
@@ -140,6 +216,8 @@ export function createSingleDomainResultsViewModel(
       signalLabel: signal.signal_label,
       rank: signal.rank,
       normalizedScore: signal.normalized_score,
+      rawScore: signal.raw_score,
+      tier: getSignalNarrativeTier(signal),
       positionLabel: signal.position_label,
       chapterIntro: signal.chapter_intro,
       howItShowsUp: signal.chapter_how_it_shows_up,
@@ -148,6 +226,7 @@ export function createSingleDomainResultsViewModel(
       riskBehaviour: signal.chapter_risk_behaviour,
       riskImpact: signal.chapter_risk_impact,
       developmentLine: signal.chapter_development,
+      narrativeSections: getNarrativeSections(signal),
     })),
     bridgeLine: SINGLE_DOMAIN_RESULTS_BRIDGE_LINE,
     balancing: {

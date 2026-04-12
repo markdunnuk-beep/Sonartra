@@ -137,6 +137,30 @@ test('single-domain results view model keeps persisted signal counts variable an
   assert.equal(viewModel.signals[4]?.normalizedScore, 8);
 });
 
+test('single-domain results view model derives narrative tiers from persisted position and score weight', () => {
+  const payload = buildPayload(4);
+  payload.signals = payload.signals.map((signal) => (
+    signal.signal_key === 'delivery'
+      ? { ...signal, normalized_score: 0, raw_score: 0, position: 'secondary' }
+      : signal
+  ));
+
+  const viewModel = createSingleDomainResultsViewModel(payload);
+
+  assert.equal(viewModel.signals[0]?.tier, 'primary');
+  assert.equal(viewModel.signals[1]?.tier, 'underplayed');
+  assert.equal(viewModel.signals[2]?.tier, 'supporting');
+  assert.equal(viewModel.signals[3]?.tier, 'underplayed');
+  assert.deepEqual(
+    viewModel.signals[0]?.narrativeSections.map((section) => section.label),
+    ['How it shows up', 'Value outcome', 'Team effect', 'Risk behaviour', 'Risk impact', 'Development line'],
+  );
+  assert.deepEqual(
+    viewModel.signals[1]?.narrativeSections.map((section) => section.label),
+    ['Risk impact', 'Development line'],
+  );
+});
+
 test('single-domain results view model maps balancing, pair summary, and application from persisted fields only', () => {
   const viewModel = createSingleDomainResultsViewModel(buildPayload(3));
 

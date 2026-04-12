@@ -87,6 +87,7 @@ function SignalChapter({
   index: number;
 }) {
   const chapterHeadingId = `${signal.anchorId}-heading`;
+  const scoreLine = `${signal.normalizedScore}% of the normalized signal weight in this domain.`;
 
   return (
     <article
@@ -111,7 +112,7 @@ function SignalChapter({
               {signal.signalLabel}
             </h3>
             <p className="sonartra-report-body-soft max-w-[14rem] text-[0.93rem] leading-7 text-white/54">
-              {signal.normalizedScore}% of the normalized signal weight in this domain.
+              {scoreLine}
             </p>
           </div>
         </div>
@@ -122,31 +123,81 @@ function SignalChapter({
           </p>
 
           <div className="grid gap-x-10 gap-y-6 border-t border-white/7 pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <div className="space-y-2.5">
-              <p className="sonartra-report-kicker">How it shows up</p>
-              <p className="sonartra-report-body-soft max-w-[34rem]">{signal.howItShowsUp}</p>
-            </div>
-            <div className="space-y-2.5">
-              <p className="sonartra-report-kicker">Value outcome</p>
-              <p className="sonartra-report-body-soft max-w-[34rem]">{signal.valueOutcome}</p>
-            </div>
-            <div className="space-y-2.5">
-              <p className="sonartra-report-kicker">Team effect</p>
-              <p className="sonartra-report-body-soft max-w-[34rem]">{signal.teamEffect}</p>
-            </div>
-            <div className="space-y-2.5">
-              <p className="sonartra-report-kicker">Risk behaviour</p>
-              <p className="sonartra-report-body-soft max-w-[34rem]">{signal.riskBehaviour}</p>
-            </div>
-            <div className="space-y-2.5">
-              <p className="sonartra-report-kicker">Risk impact</p>
-              <p className="sonartra-report-body-soft max-w-[34rem]">{signal.riskImpact}</p>
-            </div>
-            <div className="space-y-2.5">
-              <p className="sonartra-report-kicker">Development line</p>
-              <p className="sonartra-report-body-soft max-w-[34rem]">{signal.developmentLine}</p>
-            </div>
+            {signal.narrativeSections.map((section) => (
+              <div key={section.key} className="space-y-2.5">
+                <p className="sonartra-report-kicker">{section.label}</p>
+                <p className="sonartra-report-body-soft max-w-[34rem]">{section.body}</p>
+              </div>
+            ))}
           </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function CompactSignalCard({
+  signal,
+  index,
+}: {
+  signal: SingleDomainResultsViewModel['signals'][number];
+  index: number;
+}) {
+  const cardHeadingId = `${signal.anchorId}-heading`;
+  const isUnderplayed = signal.tier === 'underplayed';
+
+  return (
+    <article
+      id={signal.anchorId}
+      aria-labelledby={cardHeadingId}
+      className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal-soft rounded-[1.45rem] border border-white/7 bg-white/[0.02] px-5 py-5 md:px-6 md:py-6`}
+      style={getRevealStyle(4 + index)}
+    >
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <p className="sonartra-report-kicker">{`Signal ${signal.rank.toString().padStart(2, '0')}`}</p>
+            <span className="rounded-full border border-white/8 px-2.5 py-1 text-[0.72rem] uppercase tracking-[0.22em] text-white/48">
+              {signal.positionLabel}
+            </span>
+          </div>
+          <h3
+            id={cardHeadingId}
+            className="text-[1.45rem] font-semibold tracking-[-0.04em] text-white md:text-[1.7rem]"
+          >
+            {signal.signalLabel}
+          </h3>
+          <p className="sonartra-report-body-soft text-[0.92rem] leading-7 text-white/56">
+            {signal.normalizedScore}% of the normalized signal weight in this domain.
+          </p>
+        </div>
+
+        <p className="sonartra-report-body-soft text-white/74">{signal.chapterIntro}</p>
+
+        <div className="grid gap-4 border-t border-white/7 pt-4">
+          {isUnderplayed ? (
+            <>
+              <div className="space-y-2">
+                <p className="sonartra-report-kicker">Less present in this result</p>
+                <p className="sonartra-report-body-soft">{signal.riskImpact}</p>
+              </div>
+              <div className="space-y-2">
+                <p className="sonartra-report-kicker">If more range is needed</p>
+                <p className="sonartra-report-body-soft">{signal.developmentLine}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <p className="sonartra-report-kicker">What it adds</p>
+                <p className="sonartra-report-body-soft">{signal.valueOutcome}</p>
+              </div>
+              <div className="space-y-2">
+                <p className="sonartra-report-kicker">Keep it in range</p>
+                <p className="sonartra-report-body-soft">{signal.developmentLine}</p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </article>
@@ -158,6 +209,10 @@ export function SingleDomainResultsReport({
 }: {
   result: SingleDomainResultsViewModel;
 }) {
+  const featuredSignals = result.signals.filter((signal) => signal.tier === 'primary' || signal.tier === 'secondary');
+  const contextualSignals = result.signals.filter((signal) => signal.tier === 'supporting' || signal.tier === 'underplayed');
+  const underplayedSignals = contextualSignals.filter((signal) => signal.tier === 'underplayed');
+
   return (
     <PageFrame className="space-y-10 md:space-y-12">
       <div className="xl:mx-auto xl:grid xl:max-w-[114rem] xl:grid-cols-[minmax(0,1fr)_minmax(10.75rem,12.25rem)] xl:gap-7 2xl:gap-9">
@@ -303,7 +358,7 @@ export function SingleDomainResultsReport({
               <SectionHeader
                 eyebrow={`${result.signals.length} Signal${result.signals.length === 1 ? '' : 's'}`}
                 title="Inside this domain"
-                description="These chapters stay with the persisted ranked signals, showing how each one contributes to the overall pattern."
+                description="These chapters stay with the persisted ranked signals, giving the most room to what leads and compressing what is less relied on."
               />
               <ResultSectionIntent
                 sectionId={SINGLE_DOMAIN_SECTION_IDS.signals}
@@ -312,10 +367,30 @@ export function SingleDomainResultsReport({
               />
 
               <div className="w-full px-1 md:px-2 xl:px-0.5">
-                {result.signals.map((signal, index) => (
+                {featuredSignals.map((signal, index) => (
                   <SignalChapter key={signal.signalKey} signal={signal} index={index} />
                 ))}
               </div>
+
+              {contextualSignals.length > 0 ? (
+                <div className="space-y-6 border-t border-white/7 pt-8 md:space-y-7 md:pt-10">
+                  <div className="max-w-[52rem] space-y-3">
+                    <p className="sonartra-report-kicker">
+                      {underplayedSignals.length > 0 ? 'Context and underplayed signals' : 'Supporting signals'}
+                    </p>
+                    <p className="sonartra-report-body-soft max-w-[48rem]">
+                      {underplayedSignals.length > 0
+                        ? 'These signals still shape the domain, but they are framed in proportion to their lower presence in the persisted result.'
+                        : 'These signals support the pattern without carrying the same narrative weight as the leading pair.'}
+                    </p>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {contextualSignals.map((signal, index) => (
+                      <CompactSignalCard key={signal.signalKey} signal={signal} index={index} />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               <NarrativeBridge className="max-w-[46rem] text-left md:mx-0 md:text-left">
                 {result.bridgeLine}

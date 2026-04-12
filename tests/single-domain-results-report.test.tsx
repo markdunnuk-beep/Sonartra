@@ -166,6 +166,42 @@ test('single-domain results report supports variable signal counts without colla
   assert.match(markup, />Clarity intro</);
 });
 
+test('single-domain results report compresses zero-weight and underplayed signals instead of rendering full chapters', () => {
+  const payload = buildPayload(4);
+  payload.signals = payload.signals.map((signal) => (
+    signal.signal_key === 'delivery'
+      ? {
+          ...signal,
+          normalized_score: 0,
+          raw_score: 0,
+          position: 'secondary',
+          position_label: 'Secondary',
+          chapter_intro: 'Delivery is comparatively absent in this result.',
+        }
+      : signal
+  ));
+
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
+  );
+
+  assert.match(markup, />Vision intro</);
+  assert.match(markup, />Delivery is comparatively absent in this result\.</);
+  assert.equal(markup.match(/>How it shows up</g)?.length ?? 0, 1);
+  assert.equal(markup.match(/>Less present in this result</g)?.length ?? 0, 2);
+  assert.match(markup, />Context and underplayed signals</);
+});
+
+test('single-domain results report keeps secondary signals lighter than primary chapters', () => {
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(buildPayload(4))} />,
+  );
+
+  assert.equal(markup.match(/>How it shows up</g)?.length ?? 2, 2);
+  assert.equal(markup.match(/>Team effect</g)?.length ?? 1, 1);
+  assert.equal(markup.match(/>Context and underplayed signals</g)?.length ?? 1, 1);
+});
+
 test('single-domain results report renders balancing, pair summary, and application from persisted payload fields', () => {
   const markup = renderToStaticMarkup(
     <SingleDomainResultsReport result={createSingleDomainResultsViewModel(buildPayload(4))} />,
