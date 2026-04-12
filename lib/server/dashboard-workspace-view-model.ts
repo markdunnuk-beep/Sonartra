@@ -7,6 +7,7 @@ import { listPublishedAssessmentInventory } from '@/lib/server/published-assessm
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import type { AssessmentResultListItem } from '@/lib/server/result-read-model-types';
 import type { Queryable } from '@/lib/engine/repository-sql';
+import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
 export type AssessmentCardAction =
   | 'start'
@@ -89,10 +90,6 @@ function getAssessmentEntryHref(assessmentKey: string): string {
   return `/app/assessments/${assessmentKey}`;
 }
 
-function getResultHref(resultId: string): string {
-  return `/app/results/${resultId}`;
-}
-
 function getFallbackResultHref(): string {
   return '/app/results';
 }
@@ -109,6 +106,7 @@ export function mapLifecycleStatusToCta(params: {
   status: AssessmentLifecycleStatus;
   assessmentKey: string;
   latestReadyResultId: string | null;
+  latestReadyResultMode?: AssessmentResultListItem['mode'] | null;
 }): AssessmentCardCta {
   switch (params.status) {
     case 'not_started':
@@ -137,7 +135,7 @@ export function mapLifecycleStatusToCta(params: {
         action: 'view_results',
         label: 'View Results',
         href: params.latestReadyResultId
-          ? getResultHref(params.latestReadyResultId)
+          ? getAssessmentResultHref(params.latestReadyResultId, params.latestReadyResultMode)
           : getFallbackResultHref(),
         disabled: false,
       };
@@ -175,6 +173,7 @@ export function projectAssessmentWorkspaceItem(params: {
     status: effectiveStatus,
     assessmentKey: params.assessment.assessmentKey,
     latestReadyResultId,
+    latestReadyResultMode: params.latestReadyResult?.mode ?? null,
   });
 
   let statusLabel = 'Not started';
@@ -250,7 +249,7 @@ export function selectDashboardRecommendation(
       cta: {
         action: 'view_results',
         label: 'View Results',
-        href: getResultHref(latestReadyResult.resultId),
+        href: getAssessmentResultHref(latestReadyResult.resultId, latestReadyResult.mode),
         disabled: false,
       },
     };
@@ -377,7 +376,7 @@ export async function buildDashboardViewModel(params: {
           generatedAt: latestReadyResult.generatedAt,
           topSignalTitle: latestReadyResult.topSignal?.title ?? null,
           topSignalPercentage: latestReadyResult.topSignalPercentage,
-          href: getResultHref(latestReadyResult.resultId),
+          href: getAssessmentResultHref(latestReadyResult.resultId, latestReadyResult.mode),
         }
       : null,
   };

@@ -25,6 +25,7 @@ import {
   AssessmentRunnerStateError,
   AssessmentRunnerValidationError,
 } from '@/lib/server/assessment-runner-types';
+import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
 export type AssessmentRunnerServiceDeps = {
   db: Queryable;
@@ -65,7 +66,7 @@ function getRunnerHref(params: { assessmentKey: string; attemptId: string }): st
 }
 
 function getResultHref(resultId: string | null): string {
-  return resultId ? `/app/results/${resultId}` : '/app/results';
+  return resultId ? getAssessmentResultHref(resultId) : '/app/results';
 }
 
 function getWorkspaceHref(assessmentKey: string): string {
@@ -282,7 +283,9 @@ export function createAssessmentRunnerService(
       if (completion.resultStatus === 'ready') {
         return {
           kind: 'ready',
-          href: getResultHref(completion.resultId),
+          href: completion.resultId
+            ? getAssessmentResultHref(completion.resultId, completion.mode)
+            : '/app/results',
           completion,
         };
       }

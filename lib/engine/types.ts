@@ -1,4 +1,5 @@
 import type { AssessmentVersionLanguageBundle } from '@/lib/server/assessment-version-language-types';
+import type { AssessmentMode } from '@/lib/types/assessment';
 
 /**
  * Engine core shared types (Task 6).
@@ -62,6 +63,7 @@ export type HeroRuleOperator = '>=' | '<=' | '>' | '<' | '===';
 export type AssessmentRecord = {
   id: AssessmentId;
   key: AssessmentKey;
+  mode: AssessmentMode;
   title: string;
   description: string | null;
   estimatedTimeMinutes: number | null;
@@ -74,6 +76,7 @@ export type AssessmentVersionStatus = 'draft' | 'published' | 'archived';
 export type AssessmentVersionRecord = {
   id: AssessmentVersionId;
   assessmentId: AssessmentId;
+  mode: AssessmentMode;
   versionTag: AssessmentVersionTag;
   status: AssessmentVersionStatus;
   isPublished: boolean;
@@ -519,6 +522,7 @@ export type DomainInterpretationOutput = {
 export type ResultMetadata = {
   assessmentKey: AssessmentKey;
   assessmentTitle: string;
+  mode?: AssessmentMode;
   version: AssessmentVersionTag;
   attemptId: AttemptId;
   completedAt: string | null;

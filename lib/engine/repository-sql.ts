@@ -7,6 +7,7 @@ export type Queryable = {
 export type AssessmentRow = {
   id: string;
   assessment_key: string;
+  mode?: string | null;
   title: string;
   description: string | null;
   created_at: string;
@@ -16,6 +17,7 @@ export type AssessmentRow = {
 export type AssessmentVersionRow = {
   id: string;
   assessment_id: string;
+  mode?: string | null;
   version: string;
   lifecycle_status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   published_at: string | null;
@@ -151,6 +153,7 @@ export async function getAssessmentByKey(db: Queryable, assessmentKey: string): 
     SELECT
       id,
       assessment_key,
+      NULL::text AS mode,
       title,
       description,
       created_at,
@@ -173,6 +176,7 @@ export async function getPublishedVersionForAssessment(
     SELECT
       id,
       assessment_id,
+      NULL::text AS mode,
       version,
       lifecycle_status,
       published_at,
@@ -197,6 +201,7 @@ export async function getVersionById(
     SELECT
       id,
       assessment_id,
+      NULL::text AS mode,
       version,
       lifecycle_status,
       published_at,
@@ -221,6 +226,7 @@ export async function getVersionByAssessmentKeyAndVersion(
     SELECT
       av.id,
       av.assessment_id,
+      NULL::text AS mode,
       av.version,
       av.lifecycle_status,
       av.published_at,

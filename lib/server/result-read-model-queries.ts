@@ -5,6 +5,7 @@ type ResultListRow = {
   attempt_id: string;
   assessment_id: string;
   assessment_key: string;
+  assessment_mode: string | null;
   assessment_title: string;
   version_tag: string;
   readiness_status: 'READY';
@@ -20,6 +21,7 @@ export type PersistedReadyResultRecord = {
   attemptId: string;
   assessmentId: string;
   assessmentKey: string;
+  mode: string | null;
   assessmentTitle: string;
   version: string;
   readinessStatus: 'READY';
@@ -34,6 +36,7 @@ function mapReadyResultRecord(row: ResultListRow): PersistedReadyResultRecord {
     attemptId: row.attempt_id,
     assessmentId: row.assessment_id,
     assessmentKey: row.assessment_key,
+    mode: row.assessment_mode,
     assessmentTitle: row.assessment_title,
     version: row.version_tag,
     readinessStatus: 'READY',
@@ -54,6 +57,7 @@ export async function listReadyResultsForUser(
       r.attempt_id,
       r.assessment_id,
       a.assessment_key,
+      NULL::text AS assessment_mode,
       a.title AS assessment_title,
       av.version AS version_tag,
       r.readiness_status,
@@ -89,6 +93,7 @@ export async function getReadyResultDetailForUser(
       r.attempt_id,
       r.assessment_id,
       a.assessment_key,
+      NULL::text AS assessment_mode,
       a.title AS assessment_title,
       av.version AS version_tag,
       r.readiness_status,

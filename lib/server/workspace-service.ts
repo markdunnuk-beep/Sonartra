@@ -3,6 +3,7 @@ import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment
 import { listPublishedAssessmentInventory } from '@/lib/server/published-assessment-inventory';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import type { AssessmentResultListItem } from '@/lib/server/result-read-model-types';
+import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
 export type WorkspaceActionType = 'start' | 'resume' | 'view_result';
 export type WorkspaceAssessmentStatus = 'not_started' | 'in_progress' | 'results_ready';
@@ -48,10 +49,6 @@ export type WorkspaceServiceDeps = {
 
 function getAssessmentEntryHref(assessmentKey: string): string {
   return `/app/assessments/${assessmentKey}`;
-}
-
-function getResultHref(resultId: string): string {
-  return `/app/results/${resultId}`;
 }
 
 function resolveAssessmentStatus(params: {
@@ -129,7 +126,7 @@ function buildLatestResult(result: AssessmentResultListItem | null): WorkspaceLa
     resultId: result.resultId,
     assessmentTitle: result.assessmentTitle,
     completedAt: result.generatedAt ?? result.createdAt,
-    href: getResultHref(result.resultId),
+    href: getAssessmentResultHref(result.resultId, result.mode),
   };
 }
 
@@ -178,7 +175,7 @@ export function createWorkspaceService(deps: WorkspaceServiceDeps) {
           ctaLabel: mapAssessmentCtaLabel(status),
           href:
             status === 'results_ready' && latestReadyResult
-              ? getResultHref(latestReadyResult.resultId)
+              ? getAssessmentResultHref(latestReadyResult.resultId, latestReadyResult.mode)
               : getAssessmentEntryHref(assessment.assessmentKey),
         } satisfies WorkspaceAssessmentItem;
       });
@@ -205,7 +202,7 @@ export function createWorkspaceService(deps: WorkspaceServiceDeps) {
         });
         recommendedAction = {
           ...copy,
-          href: getResultHref(latestReadyResult.resultId),
+          href: getAssessmentResultHref(latestReadyResult.resultId, latestReadyResult.mode),
         };
       } else if (notStartedAssessment) {
         const copy = getRecommendedActionCopy({

@@ -1,4 +1,5 @@
 import type { CanonicalResultPayload, RuntimeResponseSet } from '@/lib/engine/types';
+import type { AssessmentMode } from '@/lib/types/assessment';
 import type {
   AssessmentAttemptRecordSummary,
   AssessmentLifecycleStatus,
@@ -24,6 +25,7 @@ export type AssessmentCompletionServiceResult = {
   success: boolean;
   attemptId: string;
   resultId: string | null;
+  mode?: AssessmentMode;
   lifecycleStatus: AssessmentLifecycleStatus;
   resultStatus: AssessmentCompletionResultStatus;
   hasResult: boolean;

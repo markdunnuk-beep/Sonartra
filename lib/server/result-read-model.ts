@@ -19,6 +19,7 @@ import {
   AssessmentResultNotFoundError,
   AssessmentResultPayloadError,
 } from '@/lib/server/result-read-model-types';
+import { normalizeAssessmentMode } from '@/lib/types/assessment';
 
 export type ResultReadModelServiceDeps = {
   db: Queryable;
@@ -295,6 +296,7 @@ function toListItem(record: PersistedReadyResultRecord): AssessmentResultListIte
     attemptId: record.attemptId,
     assessmentId: record.assessmentId,
     assessmentKey: record.assessmentKey,
+    mode: normalizeAssessmentMode(record.mode),
     assessmentTitle: record.assessmentTitle,
     version: record.version,
     readinessStatus: 'ready',
@@ -333,6 +335,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     attemptId: record.attemptId,
     assessmentId: record.assessmentId,
     assessmentKey: record.assessmentKey,
+    mode: normalizeAssessmentMode(record.mode ?? payload.metadata.mode),
     assessmentTitle: record.assessmentTitle,
     version: record.version,
     metadata: payload.metadata,

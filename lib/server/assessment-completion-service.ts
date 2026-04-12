@@ -22,6 +22,7 @@ import {
   type AssessmentCompletionPersistedResponse,
   type AssessmentCompletionServiceResult,
 } from '@/lib/server/assessment-completion-types';
+import { normalizeAssessmentMode } from '@/lib/types/assessment';
 
 export type AssessmentCompletionServiceDeps = {
   db: Queryable;
@@ -117,6 +118,7 @@ export function createAssessmentCompletionService(
           success: true,
           attemptId: attempt.attemptId,
           resultId: existingResult.resultId,
+          mode: 'multi_domain',
           lifecycleStatus: 'ready',
           resultStatus: 'ready',
           hasResult: true,
@@ -131,6 +133,7 @@ export function createAssessmentCompletionService(
           success: true,
           attemptId: attempt.attemptId,
           resultId: existingResult.resultId,
+          mode: 'multi_domain',
           lifecycleStatus: 'completed_processing',
           resultStatus: 'processing',
           hasResult: true,
@@ -197,6 +200,7 @@ export function createAssessmentCompletionService(
           success: true,
           attemptId: attempt.attemptId,
           resultId,
+          mode: normalizeAssessmentMode(payload.metadata.mode),
           lifecycleStatus: 'ready',
           resultStatus: 'ready',
           hasResult: true,

@@ -1,5 +1,6 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
+import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
 export type ResultsListItem = {
   resultId: string;
@@ -11,10 +12,6 @@ export type ResultsListItem = {
 export type ResultsServiceDeps = {
   db: Queryable;
 };
-
-function getResultHref(resultId: string): string {
-  return `/app/results/${resultId}`;
-}
 
 export function createResultsService(deps: ResultsServiceDeps) {
   return {
@@ -30,7 +27,7 @@ export function createResultsService(deps: ResultsServiceDeps) {
           resultId: result.resultId,
           assessmentTitle: result.assessmentTitle,
           completedAt: result.generatedAt ?? result.createdAt,
-          href: getResultHref(result.resultId),
+          href: getAssessmentResultHref(result.resultId, result.mode),
         })),
       );
     },

@@ -2,6 +2,7 @@ import type {
   CanonicalResultPayload,
   ResultDiagnostics,
 } from '@/lib/engine/types';
+import type { AssessmentMode } from '@/lib/types/assessment';
 
 export type AssessmentResultTopSignalViewModel = {
   signalId: string;
@@ -84,6 +85,7 @@ export type AssessmentResultSummary = {
   attemptId: string;
   assessmentId: string;
   assessmentKey: string;
+  mode: AssessmentMode;
   assessmentTitle: string;
   version: string;
   readinessStatus: 'ready';
@@ -105,6 +107,7 @@ export type AssessmentResultDetailViewModel = {
   attemptId: string;
   assessmentId: string;
   assessmentKey: string;
+  mode: AssessmentMode;
   assessmentTitle: string;
   version: string;
   metadata: CanonicalResultPayload['metadata'];

@@ -12,6 +12,8 @@ import {
   shouldShowAssessmentIntro,
 } from '@/lib/assessment-runner/runner-ux';
 import type { AssessmentRunnerViewModel } from '@/lib/server/assessment-runner-types';
+import type { AssessmentMode } from '@/lib/types/assessment';
+import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
 type AssessmentRunnerClientProps = {
   userId: string;
@@ -27,6 +29,7 @@ type SavePayload = {
 type CompletionResponseBody = {
   error?: string;
   resultId?: string | null;
+  mode?: AssessmentMode;
   resultStatus?: 'ready' | 'processing' | 'failed';
   alreadyCompleted?: boolean;
 };
@@ -302,7 +305,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
       if (body.resultStatus === 'ready' && body.resultId) {
         setCompletionState('redirecting');
-        router.replace(`/app/results/${body.resultId}`);
+        router.replace(getAssessmentResultHref(body.resultId, body.mode));
         return;
       }
 

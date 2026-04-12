@@ -15,6 +15,7 @@ export type DomainId = string;
 export type SignalId = string;
 export type QuestionId = string;
 export type OptionId = string;
+export type AssessmentMode = 'multi_domain' | 'single_domain';
 
 export enum AssessmentAttemptLifecycleStatus {
   NOT_STARTED = 'NOT_STARTED',
@@ -41,6 +42,7 @@ export enum ResultReadinessStatus {
 export interface AssessmentDefinition {
   assessmentId: string;
   assessmentKey: AssessmentKey;
+  mode: AssessmentMode;
   version: AssessmentVersion;
   title: string;
   description?: string;
@@ -167,6 +169,7 @@ export interface CanonicalResultMetadata {
   attemptId: AssessmentAttemptId;
   userId: UserId;
   assessmentKey: AssessmentKey;
+  mode?: AssessmentMode;
   version: AssessmentVersion;
   generatedAt: string;
   readiness: ResultReadinessStatus;

@@ -9,6 +9,7 @@ import {
   AssessmentRunnerNotFoundError,
 } from '@/lib/server/assessment-runner-types';
 import { getRequestUserId } from '@/lib/server/request-user';
+import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
 type AssessmentAttemptRunnerPageProps = {
   params: Promise<{
@@ -45,7 +46,11 @@ export default async function AssessmentAttemptRunnerPage({
   }
 
   if (runner.status === 'ready') {
-    redirect(runner.latestReadyResultId ? `/app/results/${runner.latestReadyResultId}` : '/app/results');
+    redirect(
+      runner.latestReadyResultId
+        ? getAssessmentResultHref(runner.latestReadyResultId)
+        : '/app/results',
+    );
   }
 
   return (
