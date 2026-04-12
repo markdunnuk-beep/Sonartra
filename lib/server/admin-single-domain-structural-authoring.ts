@@ -15,6 +15,16 @@ import {
   validateAdminQuestionAuthoringValues,
 } from '@/lib/admin/admin-question-option-authoring';
 import {
+  emptySingleDomainQuestionImportValues,
+  formatSingleDomainQuestionImportError,
+  initialSingleDomainQuestionImportState,
+  parseSingleDomainQuestionImport,
+  buildSingleDomainQuestionImportPlan,
+  validateSingleDomainQuestionImportValues,
+  type SingleDomainQuestionImportState,
+  type SingleDomainQuestionImportValues,
+} from '@/lib/admin/single-domain-question-import';
+import {
   emptyAdminWeightingAuthoringFormValues,
   initialAdminWeightingAuthoringFormState,
   type AdminWeightingAuthoringFormState,
@@ -55,6 +65,7 @@ import {
   deleteOptionSignalWeightRecord,
   updateOptionSignalWeightRecord,
 } from '@/lib/server/admin-weighting-authoring';
+import { generateOptionKey, generateQuestionKey } from '@/lib/utils/key-generator';
 import { isSingleDomain } from '@/lib/utils/assessment-mode';
 
 type Queryable = {
@@ -76,6 +87,19 @@ type QuestionScopeRow = {
   domain_id: string;
 };
 
+type ExistingQuestionOrderRow = {
+  question_id: string;
+  order_index: string | number;
+};
+
+type InsertedQuestionIdRow = {
+  id: string;
+};
+
+type InsertedOptionIdRow = {
+  id: string;
+};
+
 type SignalScopeRow = {
   signal_id: string;
   signal_key: string;
@@ -89,6 +113,15 @@ type ActionContext = {
   questionId?: string;
   optionId?: string;
   optionSignalWeightId?: string;
+};
+
+type TransactionClient = Queryable & {
+  release(): void;
+};
+
+type QuestionImportDependencies = {
+  connect(): Promise<TransactionClient>;
+  revalidatePath(path: string): void;
 };
 
 type SingleDomainDraftScope = {
@@ -241,6 +274,120 @@ function getWeightValuesFromFormData(formData: FormData): AdminWeightingAuthorin
     signalId: normalizeFormValue(formData.get('signalId')),
     weight: normalizeFormValue(formData.get('weight')),
   };
+}
+
+function getSingleDomainQuestionImportValuesFromFormData(
+  formData: FormData,
+): SingleDomainQuestionImportValues {
+  return {
+    questionLines: typeof formData.get('questionLines') === 'string'
+      ? (formData.get('questionLines') as string)
+      : '',
+  };
+}
+
+function buildTemporaryQuestionKey(lineNumber: number, orderIndex: number): string {
+  return `single-domain-import-q-${lineNumber}-${orderIndex + 1}`;
+}
+
+function buildTemporaryOptionKey(lineNumber: number, orderIndex: number, optionLabel: string): string {
+  return `single-domain-import-o-${lineNumber}-${orderIndex + 1}-${optionLabel.toLowerCase()}`;
+}
+
+function getCanonicalOptionLetter(optionOrderIndex: number): string {
+  const normalizedIndex = Math.max(0, optionOrderIndex - 1);
+  return String.fromCharCode('a'.charCodeAt(0) + normalizedIndex);
+}
+
+async function loadExistingSingleDomainQuestions(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<readonly ExistingQuestionOrderRow[]> {
+  const result = await db.query<ExistingQuestionOrderRow>(
+    `
+    SELECT id AS question_id, order_index
+    FROM questions
+    WHERE assessment_version_id = $1
+    ORDER BY order_index ASC, id ASC
+    `,
+    [assessmentVersionId],
+  );
+
+  return Object.freeze(result.rows);
+}
+
+async function rekeySingleDomainQuestionOptions(params: {
+  db: Queryable;
+  assessmentVersionId: string;
+  questionId: string;
+  questionIndex: number;
+}): Promise<void> {
+  const options = await params.db.query<{ id: string; order_index: string | number }>(
+    `
+    SELECT id, order_index
+    FROM options
+    WHERE question_id = $1
+      AND assessment_version_id = $2
+    ORDER BY order_index ASC, id ASC
+    `,
+    [params.questionId, params.assessmentVersionId],
+  );
+
+  for (const option of options.rows) {
+    const optionOrderIndex = Number(option.order_index);
+    await params.db.query(
+      `
+      UPDATE options
+      SET
+        option_key = $3,
+        updated_at = NOW()
+      WHERE id = $1
+        AND assessment_version_id = $2
+      `,
+      [
+        option.id,
+        params.assessmentVersionId,
+        generateOptionKey(params.questionIndex, getCanonicalOptionLetter(optionOrderIndex)),
+      ],
+    );
+  }
+}
+
+async function rekeySingleDomainQuestions(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<void> {
+  const questions = await db.query<ExistingQuestionOrderRow>(
+    `
+    SELECT id AS question_id, order_index
+    FROM questions
+    WHERE assessment_version_id = $1
+    ORDER BY order_index ASC, id ASC
+    `,
+    [assessmentVersionId],
+  );
+
+  for (const question of questions.rows) {
+    const questionIndex = Number(question.order_index) + 1;
+    await db.query(
+      `
+      UPDATE questions
+      SET
+        question_key = $3,
+        updated_at = NOW()
+      WHERE id = $1
+        AND assessment_version_id = $2
+      `,
+      [question.question_id, assessmentVersionId, generateQuestionKey(questionIndex)],
+    );
+
+    await rekeySingleDomainQuestionOptions({
+      db,
+      assessmentVersionId,
+      questionId: question.question_id,
+      questionIndex,
+    });
+  }
 }
 
 async function runDomainSignalWriteAction(params: {
@@ -401,6 +548,104 @@ async function runQuestionWriteAction(params: {
 
     return {
       formError: 'Question changes could not be saved. Review the inputs and try again.',
+      fieldErrors: {},
+      values: params.values,
+    };
+  } finally {
+    client.release();
+  }
+}
+
+async function runQuestionImportAction(params: {
+  context: ActionContext;
+  values: SingleDomainQuestionImportValues;
+  dependencies: QuestionImportDependencies;
+  action: (
+    db: Queryable,
+    scope: SingleDomainDraftScope,
+  ) => Promise<SingleDomainQuestionImportState & {
+    createdQuestions?: readonly {
+      questionId: string;
+      assessmentVersionId: string;
+      domainId: string;
+      key: string;
+      prompt: string;
+      orderIndex: number;
+      options: readonly {
+        optionId: string;
+        key: string;
+        label: string;
+        text: string;
+        orderIndex: number;
+      }[];
+    }[];
+  }>;
+}): Promise<SingleDomainQuestionImportState & {
+  createdQuestions?: readonly {
+    questionId: string;
+    assessmentVersionId: string;
+    domainId: string;
+    key: string;
+    prompt: string;
+    orderIndex: number;
+    options: readonly {
+      optionId: string;
+      key: string;
+      label: string;
+      text: string;
+      orderIndex: number;
+    }[];
+  }[];
+}> {
+  const client = await params.dependencies.connect();
+
+  try {
+    await client.query('BEGIN');
+    const scope = await loadSingleDomainDraftScope(client, params.context);
+    const result = await params.action(client, scope);
+    await client.query('COMMIT');
+    params.dependencies.revalidatePath(singleDomainPath(params.context.assessmentKey));
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+
+    if (error instanceof Error) {
+      if (error.message === 'DRAFT_VERSION_NOT_FOUND') {
+        return {
+          formError: 'The editable draft version is no longer available.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      if (error.message === 'SINGLE_DOMAIN_MODE_REQUIRED') {
+        return {
+          formError: 'Single-domain question import is only available on single-domain drafts.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      if (error.message === 'SINGLE_DOMAIN_DOMAIN_REQUIRED') {
+        return {
+          formError: 'Create the single domain first before importing questions.',
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+
+      const formattedImportError = formatSingleDomainQuestionImportError(error.message);
+      if (formattedImportError) {
+        return {
+          formError: formattedImportError,
+          fieldErrors: {},
+          values: params.values,
+        };
+      }
+    }
+
+    return {
+      formError: 'Question import could not be saved. Try again.',
       fieldErrors: {},
       values: params.values,
     };
@@ -744,6 +989,236 @@ export async function createSingleDomainQuestionAction(
       });
     },
   });
+}
+
+export async function importSingleDomainQuestionsActionWithDependencies(
+  context: ActionContext,
+  _previousState: SingleDomainQuestionImportState,
+  formData: FormData,
+  dependencies: QuestionImportDependencies,
+): Promise<SingleDomainQuestionImportState & {
+  createdQuestions?: readonly {
+    questionId: string;
+    assessmentVersionId: string;
+    domainId: string;
+    key: string;
+    prompt: string;
+    orderIndex: number;
+    options: readonly {
+      optionId: string;
+      key: string;
+      label: string;
+      text: string;
+      orderIndex: number;
+    }[];
+  }[];
+}> {
+  const values = getSingleDomainQuestionImportValuesFromFormData(formData);
+  const validation = validateSingleDomainQuestionImportValues(values);
+  if (Object.keys(validation.fieldErrors).length > 0) {
+    return validation;
+  }
+
+  return runQuestionImportAction({
+    context,
+    values,
+    dependencies,
+    action: async (db, scope) => {
+      if (!scope.singleDomainId || scope.domainIds.length !== 1) {
+        throw new Error('SINGLE_DOMAIN_DOMAIN_REQUIRED');
+      }
+
+      const parsedRows = parseSingleDomainQuestionImport(values.questionLines);
+      const existingQuestions = await loadExistingSingleDomainQuestions(db, context.assessmentVersionId);
+      const plan = buildSingleDomainQuestionImportPlan({
+        existingQuestions: existingQuestions.map((question) => ({
+          questionId: question.question_id,
+          orderIndex: Number(question.order_index),
+        })),
+        rows: parsedRows,
+      });
+
+      for (const slot of plan) {
+        if (slot.type !== 'existing') {
+          continue;
+        }
+
+        await db.query(
+          `
+          UPDATE questions
+          SET
+            order_index = $3,
+            updated_at = NOW()
+          WHERE id = $1
+            AND assessment_version_id = $2
+          `,
+          [slot.questionId, context.assessmentVersionId, slot.orderIndex],
+        );
+      }
+
+      const createdQuestions: {
+        questionId: string;
+        assessmentVersionId: string;
+        domainId: string;
+        key: string;
+        prompt: string;
+        orderIndex: number;
+        options: {
+          optionId: string;
+          key: string;
+          label: string;
+          text: string;
+          orderIndex: number;
+        }[];
+      }[] = [];
+
+      for (const slot of plan) {
+        if (slot.type !== 'new') {
+          continue;
+        }
+
+        const temporaryQuestionKey = buildTemporaryQuestionKey(slot.lineNumber, slot.orderIndex);
+        const insertedQuestion = await db.query<InsertedQuestionIdRow>(
+          `
+          INSERT INTO questions (
+            assessment_version_id,
+            domain_id,
+            question_key,
+            prompt,
+            order_index
+          )
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING id
+          `,
+          [
+            context.assessmentVersionId,
+            scope.singleDomainId,
+            temporaryQuestionKey,
+            slot.prompt,
+            slot.orderIndex,
+          ],
+        );
+
+        const questionId = insertedQuestion.rows[0]?.id;
+        if (!questionId) {
+          throw new Error('QUESTION_CREATE_FAILED');
+        }
+
+        const createdOptions: {
+          optionId: string;
+          key: string;
+          label: string;
+          text: string;
+          orderIndex: number;
+        }[] = [];
+
+        for (const [index, label] of ['A', 'B', 'C', 'D'].entries()) {
+          const optionOrderIndex = index + 1;
+          const insertedOption = await db.query<InsertedOptionIdRow>(
+            `
+            INSERT INTO options (
+              assessment_version_id,
+              question_id,
+              option_key,
+              option_label,
+              option_text,
+              order_index
+            )
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+            `,
+            [
+              context.assessmentVersionId,
+              questionId,
+              buildTemporaryOptionKey(slot.lineNumber, slot.orderIndex, label),
+              label,
+              '',
+              optionOrderIndex,
+            ],
+          );
+
+          const optionId = insertedOption.rows[0]?.id;
+          if (!optionId) {
+            throw new Error('OPTION_CREATE_FAILED');
+          }
+
+          createdOptions.push({
+            optionId,
+            key: '',
+            label,
+            text: '',
+            orderIndex: optionOrderIndex,
+          });
+        }
+
+        createdQuestions.push({
+          questionId,
+          assessmentVersionId: context.assessmentVersionId,
+          domainId: scope.singleDomainId,
+          key: '',
+          prompt: slot.prompt,
+          orderIndex: slot.orderIndex,
+          options: createdOptions,
+        });
+      }
+
+      await rekeySingleDomainQuestions(db, context.assessmentVersionId);
+
+      for (const createdQuestion of createdQuestions) {
+        const questionIndex = createdQuestion.orderIndex + 1;
+        createdQuestion.key = generateQuestionKey(questionIndex);
+        createdQuestion.options = createdQuestion.options.map((option) => ({
+          ...option,
+          key: generateOptionKey(questionIndex, getCanonicalOptionLetter(option.orderIndex)),
+        }));
+      }
+
+      return {
+        ...initialSingleDomainQuestionImportState,
+        values: emptySingleDomainQuestionImportValues,
+        createdQuestions: Object.freeze(
+          createdQuestions
+            .sort((left, right) => left.orderIndex - right.orderIndex || left.questionId.localeCompare(right.questionId))
+            .map((question) => ({
+              ...question,
+              options: Object.freeze(question.options),
+            })),
+        ),
+      };
+    },
+  });
+}
+
+export async function importSingleDomainQuestionsAction(
+  context: ActionContext,
+  previousState: SingleDomainQuestionImportState,
+  formData: FormData,
+): Promise<SingleDomainQuestionImportState & {
+  createdQuestions?: readonly {
+    questionId: string;
+    assessmentVersionId: string;
+    domainId: string;
+    key: string;
+    prompt: string;
+    orderIndex: number;
+    options: readonly {
+      optionId: string;
+      key: string;
+      label: string;
+      text: string;
+      orderIndex: number;
+    }[];
+  }[];
+}> {
+  return importSingleDomainQuestionsActionWithDependencies(
+    context,
+    previousState,
+    formData,
+    {
+      connect: () => getDbPool().connect(),
+      revalidatePath,
+    },
+  );
 }
 
 export async function updateSingleDomainQuestionAction(

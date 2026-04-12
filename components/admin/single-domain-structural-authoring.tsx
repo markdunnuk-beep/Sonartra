@@ -30,7 +30,11 @@ import {
   initialAdminQuestionAuthoringFormState,
 } from '@/lib/admin/admin-question-option-authoring';
 import {
+  initialSingleDomainQuestionImportState,
+} from '@/lib/admin/single-domain-question-import';
+import {
   createSingleDomainDomainAction,
+  importSingleDomainQuestionsAction,
   createSingleDomainOptionAction,
   createSingleDomainQuestionAction,
   createSingleDomainSignalAction,
@@ -956,6 +960,172 @@ export function SingleDomainSignalsAuthoring() {
   );
 }
 
+function SingleDomainQuestionImportForm({
+  assessmentKey,
+  assessmentVersionId,
+}: Readonly<{
+  assessmentKey: string;
+  assessmentVersionId: string;
+}>) {
+  const importAction = useMemo(
+    () =>
+      importSingleDomainQuestionsAction.bind(null, {
+        assessmentKey,
+        assessmentVersionId,
+      }),
+    [assessmentKey, assessmentVersionId],
+  );
+  const [importState, importFormAction] = useActionState(
+    importAction,
+    {
+      ...initialSingleDomainQuestionImportState,
+      createdQuestions: [] as readonly {
+        questionId: string;
+        assessmentVersionId: string;
+        domainId: string;
+        key: string;
+        prompt: string;
+        orderIndex: number;
+        options: readonly {
+          optionId: string;
+          key: string;
+          label: string;
+          text: string;
+          orderIndex: number;
+        }[];
+      }[],
+    },
+  );
+  const {
+    formRef,
+    onChange: handleDirtyChange,
+    onInput: handleDirtyInput,
+    onSubmit: handleDirtySubmit,
+  } = useSingleDomainDirtyForm({ state: importState });
+  const createdQuestions = importState.createdQuestions ?? [];
+
+  return (
+    <SingleDomainQuestionImportFormFields
+      key={
+        createdQuestions.length > 0
+          ? createdQuestions.map((question) => question.questionId).join('|')
+          : 'draft'
+      }
+      createdQuestions={createdQuestions}
+      fieldError={importState.fieldErrors.questionLines}
+      formAction={importFormAction}
+      formError={importState.formError}
+      formRef={formRef}
+      handleDirtyChange={handleDirtyChange}
+      handleDirtyInput={handleDirtyInput}
+      handleDirtySubmit={handleDirtySubmit}
+      initialQuestionLines={importState.values.questionLines}
+    />
+  );
+}
+
+function SingleDomainQuestionImportFormFields({
+  createdQuestions,
+  fieldError,
+  formAction,
+  formError,
+  formRef,
+  handleDirtyChange,
+  handleDirtyInput,
+  handleDirtySubmit,
+  initialQuestionLines,
+}: Readonly<{
+  createdQuestions: readonly {
+    questionId: string;
+    assessmentVersionId: string;
+    domainId: string;
+    key: string;
+    prompt: string;
+    orderIndex: number;
+    options: readonly {
+      optionId: string;
+      key: string;
+      label: string;
+      text: string;
+      orderIndex: number;
+    }[];
+  }[];
+  fieldError?: string;
+  formAction: (payload: FormData) => void;
+  formError: string | null;
+  formRef: React.RefObject<HTMLFormElement | null>;
+  handleDirtyChange: React.FormEventHandler<HTMLFormElement>;
+  handleDirtyInput: React.FormEventHandler<HTMLFormElement>;
+  handleDirtySubmit: React.FormEventHandler<HTMLFormElement>;
+  initialQuestionLines: string;
+}>) {
+  const [questionLines, setQuestionLines] = useState(
+    createdQuestions.length > 0 ? '' : initialQuestionLines,
+  );
+
+  return (
+    <SurfaceCard className="p-5 lg:p-6">
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <LabelPill>Bulk import</LabelPill>
+            <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+              order | question_text
+            </LabelPill>
+          </div>
+          <p className="text-sm leading-7 text-white/62">
+            Paste one row per question using the canonical import format. Blank lines are ignored.
+            The import is atomic: either every row is written and rekeyed into the single-domain
+            draft, or nothing changes.
+          </p>
+        </div>
+        <form
+          action={formAction}
+          className="space-y-4"
+          onChange={handleDirtyChange}
+          onInput={handleDirtyInput}
+          onSubmit={handleDirtySubmit}
+          ref={formRef}
+        >
+          <Field
+            error={fieldError}
+            hint="Example: 1 | I step in quickly when a team loses direction"
+            htmlFor="single-domain-question-import"
+            label="Import rows"
+          >
+            <TextArea
+              error={fieldError}
+              id="single-domain-question-import"
+              minHeightClass="min-h-[220px]"
+              name="questionLines"
+              onChange={(event) => setQuestionLines(event.currentTarget.value)}
+              placeholder={[
+                '1 | I step in quickly when a team loses direction',
+                '2 | I prefer to test assumptions before committing',
+                '3 | I keep discussions moving when others hesitate',
+              ].join('\n')}
+              value={questionLines}
+            />
+          </Field>
+          <InlineError message={formError} />
+          {createdQuestions.length > 0 ? (
+            <div className="rounded-[1rem] border border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] p-4 text-sm text-[rgba(217,255,229,0.94)]">
+              Imported {createdQuestions.length} question{createdQuestions.length === 1 ? '' : 's'}.
+              Ordered questions and default A-D responses are now persisted in the draft.
+            </div>
+          ) : null}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm leading-6 text-white/54">
+              Question keys are generated by the system after the final canonical order is persisted.
+            </p>
+            <SubmitButton idleLabel="Import questions" pendingLabel="Importing..." />
+          </div>
+        </form>
+      </div>
+    </SurfaceCard>
+  );
+}
+
 export function SingleDomainQuestionsAuthoring() {
   const assessment = useAdminAssessmentAuthoring();
   const domain = assessment.authoredDomains[0] ?? null;
@@ -1005,6 +1175,10 @@ export function SingleDomainQuestionsAuthoring() {
         eyebrow="Questions"
         title="Author questions"
         description="Questions must belong to the one authored domain and stay in deterministic order."
+      />
+      <SingleDomainQuestionImportForm
+        assessmentKey={assessment.assessmentKey}
+        assessmentVersionId={draftVersionId}
       />
       <SurfaceCard className="p-5 lg:p-6">
         <form
