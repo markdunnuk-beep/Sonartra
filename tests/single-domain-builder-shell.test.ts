@@ -74,6 +74,14 @@ test('review step renders the seven readiness scaffold categories', () => {
   assert.match(source, /label: 'Language'/);
 });
 
+test('weightings question scope selector keeps stable id and name attributes for browser/a11y tooling', () => {
+  const source = readSource('components', 'admin', 'single-domain-structural-authoring.tsx');
+
+  assert.match(source, /const questionScopeFieldId = 'single-domain-weightings-question-scope'/);
+  assert.match(source, /<select[\s\S]*id=\{questionScopeFieldId\}/);
+  assert.match(source, /<select[\s\S]*name="questionScope"/);
+});
+
 test('existing multi-domain builder remains on its original route structure', () => {
   const dashboardSource = readSource('lib', 'server', 'admin-assessment-dashboard.ts');
   const multiDomainLayoutSource = readSource(

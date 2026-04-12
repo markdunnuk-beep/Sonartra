@@ -951,7 +951,15 @@ test('publish action revalidates dashboard and detail routes after success', asy
   assert.equal(result.formError, null);
   assert.ok(result.formSuccess?.includes('1.0.0'));
   assert.ok(result.formWarnings.length > 0);
-  assert.deepEqual(revalidatedPaths, ['/admin/assessments', '/admin/assessments/wplp80']);
+  assert.deepEqual(revalidatedPaths, [
+    '/admin/assessments',
+    '/admin/assessments/wplp80',
+    '/admin/assessments/wplp80/overview',
+    '/admin/assessments/wplp80/review',
+    '/admin/assessments/single-domain/wplp80',
+    '/admin/assessments/single-domain/wplp80/overview',
+    '/admin/assessments/single-domain/wplp80/review',
+  ]);
 });
 
 test('publish action returns an inline error when validation blocks readiness', async () => {

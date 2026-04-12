@@ -960,6 +960,7 @@ export function SingleDomainWeightingsAuthoring() {
   const questionsWithOptions = assessment.authoredQuestions.filter(
     (question) => question.options.length > 0,
   );
+  const questionScopeFieldId = 'single-domain-weightings-question-scope';
   const [selectedQuestionId, setSelectedQuestionId] = useState(
     questionsWithOptions[0]?.questionId ?? '',
   );
@@ -1004,7 +1005,9 @@ export function SingleDomainWeightingsAuthoring() {
               <div className="space-y-2">
                 <p className="sonartra-page-eyebrow">Question scope</p>
                 <select
+                  id={questionScopeFieldId}
                   className="sonartra-focus-ring min-h-11 w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]"
+                  name="questionScope"
                   onChange={(event) => setSelectedQuestionId(event.currentTarget.value)}
                   value={selectedQuestion.questionId}
                 >

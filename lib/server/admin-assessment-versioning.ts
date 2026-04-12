@@ -191,6 +191,22 @@ function assessmentPath(assessmentKey: string): string {
   return `/admin/assessments/${assessmentKey}`;
 }
 
+function singleDomainAssessmentPath(assessmentKey: string): string {
+  return `/admin/assessments/single-domain/${assessmentKey}`;
+}
+
+function getAssessmentRevalidationPaths(assessmentKey: string): readonly string[] {
+  return Object.freeze([
+    '/admin/assessments',
+    assessmentPath(assessmentKey),
+    `${assessmentPath(assessmentKey)}/overview`,
+    `${assessmentPath(assessmentKey)}/review`,
+    singleDomainAssessmentPath(assessmentKey),
+    `${singleDomainAssessmentPath(assessmentKey)}/overview`,
+    `${singleDomainAssessmentPath(assessmentKey)}/review`,
+  ]);
+}
+
 function unwrapVersioningError(error: unknown): {
   cause: unknown;
   stage: AssessmentVersioningFailureStage | null;
@@ -1120,8 +1136,9 @@ export async function publishDraftVersionActionWithDependencies(
     });
 
     await client.query('COMMIT');
-    dependencies.revalidatePath('/admin/assessments');
-    dependencies.revalidatePath(assessmentPath(context.assessmentKey));
+    for (const path of getAssessmentRevalidationPaths(context.assessmentKey)) {
+      dependencies.revalidatePath(path);
+    }
 
     return {
       formError: null,
@@ -1185,8 +1202,9 @@ export async function createDraftVersionActionWithDependencies(
     });
 
     await client.query('COMMIT');
-    dependencies.revalidatePath('/admin/assessments');
-    dependencies.revalidatePath(assessmentPath(context.assessmentKey));
+    for (const path of getAssessmentRevalidationPaths(context.assessmentKey)) {
+      dependencies.revalidatePath(path);
+    }
 
     return {
       formError: null,
