@@ -383,7 +383,7 @@ export function SingleDomainResultsReport({
                     </p>
                     <p className="sonartra-report-body-soft max-w-[48rem]">
                       {underplayedSignals.length > 0
-                        ? 'These signals still shape the picture here, but they show up with less force than the leading tendencies.'
+                        ? 'These signals round out the picture here. Some support the leading pattern, while the least-present ones stay in the background unless the context calls them forward.'
                         : 'These signals support the pattern without carrying the same narrative weight as the leading pair.'}
                     </p>
                   </div>

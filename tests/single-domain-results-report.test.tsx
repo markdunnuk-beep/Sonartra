@@ -163,7 +163,8 @@ test('single-domain results report supports variable signal counts without colla
 
   assert.equal(markup.match(/Signal 0[1-5]/g)?.length ?? 0, 5);
   assert.match(markup, />Vision intro</);
-  assert.match(markup, />Clarity intro</);
+  assert.match(markup, />Clarity</);
+  assert.match(markup, /Clarity sits further in the background here and tends to take a back seat to the leading signals\./);
 });
 
 test('single-domain results report compresses zero-weight and underplayed signals instead of rendering full chapters', () => {
@@ -176,7 +177,8 @@ test('single-domain results report compresses zero-weight and underplayed signal
           raw_score: 0,
           position: 'secondary',
           position_label: 'Secondary',
-          chapter_intro: 'Delivery is comparatively absent in this result.',
+          chapter_intro: 'Delivery plays a strong role in how you operate.',
+          chapter_risk_impact: 'You rely on delivery to keep standards clear.',
         }
       : signal
   ));
@@ -186,20 +188,60 @@ test('single-domain results report compresses zero-weight and underplayed signal
   );
 
   assert.match(markup, />Vision intro</);
-  assert.match(markup, />Delivery is comparatively absent in this result\.</);
+  assert.match(markup, />Delivery is less present in this result and is not a primary driver in this domain\.</);
   assert.equal(markup.match(/>How it shows up</g)?.length ?? 0, 1);
   assert.equal(markup.match(/>Less present in this result</g)?.length ?? 0, 2);
   assert.match(markup, />Context and underplayed signals</);
+  assert.doesNotMatch(markup, /plays a strong role|you rely on/i);
 });
 
 test('single-domain results report keeps secondary signals lighter than primary chapters', () => {
+  const payload = buildPayload(4);
+  payload.signals = payload.signals.map((signal) => (
+    signal.signal_key === 'delivery'
+      ? {
+          ...signal,
+          chapter_intro: 'Delivery plays a strong role in how you operate.',
+        }
+      : signal
+  ));
+
   const markup = renderToStaticMarkup(
-    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(buildPayload(4))} />,
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
   );
 
   assert.equal(markup.match(/>How it shows up</g)?.length ?? 2, 2);
   assert.equal(markup.match(/>Effect on others</g)?.length ?? 1, 1);
   assert.equal(markup.match(/>Context and underplayed signals</g)?.length ?? 1, 1);
+  assert.match(markup, />Delivery gives this domain steady support, but it works behind the leading signal rather than setting the tone on its own\.</);
+  assert.doesNotMatch(markup, /Delivery plays a strong role/i);
+});
+
+test('single-domain results report prevents the 100-0 contradiction from resurfacing in rendered copy', () => {
+  const payload = buildPayload(4);
+  payload.signals = payload.signals.map((signal) => {
+    if (signal.signal_key === 'vision') {
+      return { ...signal, normalized_score: 100, raw_score: 12 };
+    }
+
+    return {
+      ...signal,
+      normalized_score: 0,
+      raw_score: 0,
+      position: signal.signal_key === 'delivery' ? 'secondary' : 'underplayed',
+      chapter_intro: `${signal.signal_label} plays a strong role in how you operate.`,
+      chapter_risk_impact: `${signal.signal_label} is central to how you stay effective.`,
+    };
+  });
+
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
+  );
+
+  assert.match(markup, />100% of the emphasis in this domain\.</);
+  assert.equal(markup.match(/>0% of the emphasis in this domain\.</g)?.length ?? 0, 3);
+  assert.doesNotMatch(markup, /plays a strong role|central to how you/i);
+  assert.match(markup, /not a primary driver|less present|back seat/i);
 });
 
 test('single-domain results report renders cleaned balancing, pair summary, and application copy', () => {

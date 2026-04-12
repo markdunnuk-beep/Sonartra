@@ -114,11 +114,11 @@ test('single-domain results view model exposes the intended reading structure an
   assert.deepEqual(
     viewModel.readingSections.topLevelSections.map((section) => section.label),
     [
-      'Introduction',
-      'Your Behaviour Pattern',
-      'Inside This Domain',
-      'Balancing Your Approach',
-      'How This Shows Up',
+      'Leadership style',
+      'Behaviour pattern',
+      'Inside this domain',
+      'Balancing your approach',
+      'How this shows up',
       'Application',
     ],
   );
@@ -148,24 +148,136 @@ test('single-domain results view model derives narrative tiers from persisted po
   const viewModel = createSingleDomainResultsViewModel(payload);
 
   assert.equal(viewModel.signals[0]?.tier, 'primary');
+  assert.equal(viewModel.signals[0]?.semanticState, 'dominant');
   assert.equal(viewModel.signals[1]?.tier, 'underplayed');
+  assert.equal(viewModel.signals[1]?.semanticState, 'underplayed');
   assert.equal(viewModel.signals[2]?.tier, 'supporting');
+  assert.equal(viewModel.signals[2]?.semanticState, 'contextual');
   assert.equal(viewModel.signals[3]?.tier, 'underplayed');
   assert.deepEqual(
     viewModel.signals[0]?.narrativeSections.map((section) => section.label),
-    ['How it shows up', 'Value outcome', 'Team effect', 'Risk behaviour', 'Risk impact', 'Development line'],
+    ['How it shows up', 'What it adds', 'Effect on others', 'When it overreaches', 'What to watch', 'How to stretch it'],
   );
   assert.deepEqual(
     viewModel.signals[1]?.narrativeSections.map((section) => section.label),
-    ['Risk impact', 'Development line'],
+    ['What to watch', 'How to stretch it'],
   );
+});
+
+test('single-domain results view model blocks strong-presence wording for zero-score signals', () => {
+  const payload = buildPayload(4);
+  payload.signals = payload.signals.map((signal) => (
+    signal.signal_key === 'delivery'
+      ? {
+          ...signal,
+          normalized_score: 0,
+          raw_score: 0,
+          position: 'secondary',
+          chapter_intro: 'Delivery plays a strong role in how you operate.',
+          chapter_risk_impact: 'You rely on delivery even when conditions change quickly.',
+          chapter_development: 'This is central to how you stay effective.',
+        }
+      : signal
+  ));
+
+  const viewModel = createSingleDomainResultsViewModel(payload);
+  const deliverySignal = viewModel.signals.find((signal) => signal.signalKey === 'delivery');
+
+  assert.ok(deliverySignal);
+  assert.equal(deliverySignal.tier, 'underplayed');
+  assert.equal(deliverySignal.semanticState, 'underplayed');
+  assert.match(deliverySignal.chapterIntro, /less present|not a primary driver/i);
+  assert.match(deliverySignal.riskImpact, /not a primary driver|less relied on|back seat/i);
+  assert.doesNotMatch(
+    `${deliverySignal.chapterIntro} ${deliverySignal.riskImpact} ${deliverySignal.developmentLine}`,
+    /plays a strong role|strongly shapes|drives your behaviour|you rely on|central to how you|core part of your approach/i,
+  );
+});
+
+test('single-domain results view model downgrades dominant phrasing for underplayed and supporting semantics', () => {
+  const payload = buildPayload(4);
+  payload.signals = payload.signals.map((signal) => {
+    if (signal.signal_key === 'people') {
+      return {
+        ...signal,
+        chapter_intro: 'People is central to how you operate in this domain.',
+        chapter_how_it_shows_up: 'People strongly shapes how you behave with others.',
+      };
+    }
+
+    if (signal.signal_key === 'rigor') {
+      return {
+        ...signal,
+        chapter_intro: 'Rigor drives your behaviour and sets the tone.',
+        chapter_risk_impact: 'Rigor is a core part of your approach.',
+      };
+    }
+
+    return signal;
+  });
+
+  const viewModel = createSingleDomainResultsViewModel(payload);
+  const peopleSignal = viewModel.signals.find((signal) => signal.signalKey === 'people');
+  const rigorSignal = viewModel.signals.find((signal) => signal.signalKey === 'rigor');
+
+  assert.ok(peopleSignal);
+  assert.equal(peopleSignal.tier, 'supporting');
+  assert.equal(peopleSignal.semanticState, 'contextual');
+  assert.match(peopleSignal.chapterIntro, /supporting position|adds context/i);
+  assert.doesNotMatch(
+    `${peopleSignal.chapterIntro} ${peopleSignal.howItShowsUp}`,
+    /central to how you|strongly shapes/i,
+  );
+
+  assert.ok(rigorSignal);
+  assert.equal(rigorSignal.tier, 'underplayed');
+  assert.match(rigorSignal.chapterIntro, /less present|back seat/i);
+  assert.doesNotMatch(
+    `${rigorSignal.chapterIntro} ${rigorSignal.riskImpact}`,
+    /drives your behaviour|core part of your approach|sets the tone/i,
+  );
+});
+
+test('single-domain results view model preserves strong primary language while moderating secondary copy', () => {
+  const payload = buildPayload(4);
+  payload.signals = payload.signals.map((signal) => {
+    if (signal.signal_key === 'vision') {
+      return {
+        ...signal,
+        chapter_intro: 'Vision plays a strong role and drives your behaviour in this domain.',
+      };
+    }
+
+    if (signal.signal_key === 'delivery') {
+      return {
+        ...signal,
+        chapter_intro: 'Delivery plays a strong role and is central to how you operate.',
+      };
+    }
+
+    return signal;
+  });
+
+  const viewModel = createSingleDomainResultsViewModel(payload);
+  const visionSignal = viewModel.signals.find((signal) => signal.signalKey === 'vision');
+  const deliverySignal = viewModel.signals.find((signal) => signal.signalKey === 'delivery');
+
+  assert.ok(visionSignal);
+  assert.equal(visionSignal.tier, 'primary');
+  assert.match(visionSignal.chapterIntro, /plays a strong role/i);
+
+  assert.ok(deliverySignal);
+  assert.equal(deliverySignal.tier, 'secondary');
+  assert.equal(deliverySignal.semanticState, 'reinforcing');
+  assert.match(deliverySignal.chapterIntro, /steady support|behind the leading signal/i);
+  assert.doesNotMatch(deliverySignal.chapterIntro, /plays a strong role|central to how you/i);
 });
 
 test('single-domain results view model maps balancing, pair summary, and application from persisted fields only', () => {
   const viewModel = createSingleDomainResultsViewModel(buildPayload(3));
 
   assert.equal(viewModel.balancing.sectionTitle, 'Balancing your approach');
-  assert.equal(viewModel.pairSummary.headline, 'Integrated meaning');
+  assert.equal(viewModel.pairSummary.headline, 'combined meaning');
   assert.equal(viewModel.application.strengths[0]?.statement, 'Vision strength');
   assert.equal(viewModel.application.watchouts[0]?.statement, 'Delivery watchout');
   assert.equal(viewModel.application.developmentFocus[0]?.statement, 'Rigor development');

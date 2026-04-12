@@ -18,6 +18,12 @@ export type SingleDomainSignalNarrativeTier =
   | 'supporting'
   | 'underplayed';
 
+export type SingleDomainSignalNarrativeSemanticState =
+  | 'dominant'
+  | 'reinforcing'
+  | 'contextual'
+  | 'underplayed';
+
 export type SingleDomainSignalNarrativeSection = {
   key: 'how_it_shows_up' | 'value_outcome' | 'team_effect' | 'risk_behaviour' | 'risk_impact' | 'development_line';
   label: string;
@@ -32,6 +38,7 @@ export type SingleDomainSignalChapterViewModel = {
   normalizedScore: number;
   rawScore: number;
   tier: SingleDomainSignalNarrativeTier;
+  semanticState: SingleDomainSignalNarrativeSemanticState;
   positionLabel: string;
   chapterIntro: string;
   howItShowsUp: string;
@@ -109,6 +116,19 @@ const COPY_REPLACEMENTS: ReadonlyArray<readonly [pattern: RegExp, replacement: s
   [/\bresults\b/gi, 'report'],
 ]);
 
+const STRONG_SIGNAL_LANGUAGE_PATTERNS: readonly RegExp[] = Object.freeze([
+  /\bplays?\s+a\s+strong\s+role\b/i,
+  /\bstrongly\s+shapes?\b/i,
+  /\bdrives?\s+your\s+(?:behaviou?r|style|approach)\b/i,
+  /\byou\s+rely\s+on\b/i,
+  /\bcentral\s+to\s+how\s+you\b/i,
+  /\bcore\s+part\s+of\s+your\s+(?:approach|style)\b/i,
+  /\bdominant\s+force\b/i,
+  /\bsets?\s+the\s+tone\b/i,
+  /\bdefining\s+force\b/i,
+  /\bmain\s+driver\b/i,
+]);
+
 function cleanWhitespace(value: string): string {
   return value.replace(/\s{2,}/g, ' ').replace(/\s+([,.!?;:])/g, '$1').trim();
 }
@@ -137,6 +157,10 @@ function cleanResultCopy(value: string): string {
 
 function cleanNullableCopy(value: string | null | undefined): string {
   return cleanResultCopy(value ?? '');
+}
+
+function hasStrongSignalLanguage(value: string): boolean {
+  return STRONG_SIGNAL_LANGUAGE_PATTERNS.some((pattern) => pattern.test(value));
 }
 
 function formatResultTimestamp(value: string | null): {
@@ -182,6 +206,22 @@ function getSignalNarrativeTier(signal: SingleDomainResultPayload['signals'][num
   return 'supporting';
 }
 
+function getSignalSemanticState(
+  tier: SingleDomainSignalNarrativeTier,
+): SingleDomainSignalNarrativeSemanticState {
+  switch (tier) {
+    case 'primary':
+      return 'dominant';
+    case 'secondary':
+      return 'reinforcing';
+    case 'supporting':
+      return 'contextual';
+    case 'underplayed':
+    default:
+      return 'underplayed';
+  }
+}
+
 function getSignalPositionLabel(tier: SingleDomainSignalNarrativeTier): string {
   switch (tier) {
     case 'primary':
@@ -197,17 +237,186 @@ function getSignalPositionLabel(tier: SingleDomainSignalNarrativeTier): string {
   }
 }
 
-function getNarrativeSections(signal: SingleDomainResultPayload['signals'][number]): readonly SingleDomainSignalNarrativeSection[] {
-  const allSections: readonly SingleDomainSignalNarrativeSection[] = Object.freeze([
-    { key: 'how_it_shows_up', label: 'How it shows up', body: cleanNullableCopy(signal.chapter_how_it_shows_up) },
-    { key: 'value_outcome', label: 'What it adds', body: cleanNullableCopy(signal.chapter_value_outcome) },
-    { key: 'team_effect', label: 'Effect on others', body: cleanNullableCopy(signal.chapter_value_team_effect) },
-    { key: 'risk_behaviour', label: 'When it overreaches', body: cleanNullableCopy(signal.chapter_risk_behaviour) },
-    { key: 'risk_impact', label: 'What to watch', body: cleanNullableCopy(signal.chapter_risk_impact) },
-    { key: 'development_line', label: 'How to stretch it', body: cleanNullableCopy(signal.chapter_development) },
-  ]);
+type SignalNarrativeCopyRole =
+  | 'chapter_intro'
+  | 'how_it_shows_up'
+  | 'value_outcome'
+  | 'team_effect'
+  | 'risk_behaviour'
+  | 'risk_impact'
+  | 'development_line';
 
+function buildSignalFallbackCopy(params: {
+  tier: SingleDomainSignalNarrativeTier;
+  role: SignalNarrativeCopyRole;
+  signalLabel: string;
+  normalizedScore: number;
+}): string {
+  const isZeroSignal = params.normalizedScore <= 0;
+
+  if (params.tier === 'secondary') {
+    switch (params.role) {
+      case 'chapter_intro':
+        return `${params.signalLabel} gives this domain steady support, but it works behind the leading signal rather than setting the tone on its own.`;
+      case 'how_it_shows_up':
+        return `It shows up consistently, although it is not the main force shaping this pattern.`;
+      case 'value_outcome':
+        return `It adds useful range and follow-through without carrying the same weight as the strongest signal here.`;
+      case 'team_effect':
+        return `Other people are likely to notice it as a clear influence, but not as the defining feature of your approach.`;
+      default:
+        return '';
+    }
+  }
+
+  if (params.tier === 'supporting') {
+    switch (params.role) {
+      case 'chapter_intro':
+        return `${params.signalLabel} adds context to this domain, but it stays in a supporting position rather than defining the pattern.`;
+      case 'how_it_shows_up':
+        return `It appears in the background of this result and adds nuance without leading your behaviour here.`;
+      case 'value_outcome':
+        return `It contributes some useful range, but it is not a primary driver in this domain.`;
+      case 'team_effect':
+        return `Others may notice it in moments, though it is not the strongest signal they are likely to experience.`;
+      default:
+        return '';
+    }
+  }
+
+  switch (params.role) {
+    case 'chapter_intro':
+      return isZeroSignal
+        ? `${params.signalLabel} is less present in this result and is not a primary driver in this domain.`
+        : `${params.signalLabel} sits further in the background here and tends to take a back seat to the leading signals.`;
+    case 'how_it_shows_up':
+      return isZeroSignal
+        ? `It does not show up as an instinctive pattern here and is less relied on than the stronger signals in this domain.`
+        : `It appears more occasionally here and is less instinctive than the leading parts of the pattern.`;
+    case 'value_outcome':
+      return `Its contribution is lighter in this result, so it adds context rather than momentum.`;
+    case 'team_effect':
+      return `Other people are less likely to experience this as a defining force in how you operate here.`;
+    case 'risk_behaviour':
+      return `Because it is less present, it is less likely to overreach unless the context starts demanding more of it.`;
+    case 'risk_impact':
+      return isZeroSignal
+        ? `In this result, it is not a primary driver and tends to stay in the background unless the situation clearly calls for it.`
+        : `In this result, it stays less relied on and usually takes a back seat unless the context calls it forward.`;
+    case 'development_line':
+      return `If the situation needs more of this signal, bring it in deliberately rather than expecting it to lead on instinct.`;
+    default:
+      return '';
+  }
+}
+
+function gateSignalNarrativeCopy(params: {
+  tier: SingleDomainSignalNarrativeTier;
+  role: SignalNarrativeCopyRole;
+  signalLabel: string;
+  normalizedScore: number;
+  source: string | null | undefined;
+}): string {
+  const cleaned = cleanNullableCopy(params.source);
+
+  if (params.tier === 'primary') {
+    return cleaned;
+  }
+
+  if (params.tier === 'underplayed') {
+    const fallback = buildSignalFallbackCopy(params);
+
+    if (params.role === 'chapter_intro') {
+      return fallback;
+    }
+
+    if (!cleaned || hasStrongSignalLanguage(cleaned)) {
+      return fallback;
+    }
+
+    return cleaned;
+  }
+
+  if (params.tier === 'secondary' || params.tier === 'supporting') {
+    if (hasStrongSignalLanguage(cleaned)) {
+      const fallback = buildSignalFallbackCopy(params);
+      return fallback || cleaned;
+    }
+  }
+
+  return cleaned;
+}
+
+function getNarrativeSections(signal: SingleDomainResultPayload['signals'][number]): readonly SingleDomainSignalNarrativeSection[] {
   const tier = getSignalNarrativeTier(signal);
+  const allSections: readonly SingleDomainSignalNarrativeSection[] = Object.freeze([
+    {
+      key: 'how_it_shows_up',
+      label: 'How it shows up',
+      body: gateSignalNarrativeCopy({
+        tier,
+        role: 'how_it_shows_up',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_how_it_shows_up,
+      }),
+    },
+    {
+      key: 'value_outcome',
+      label: 'What it adds',
+      body: gateSignalNarrativeCopy({
+        tier,
+        role: 'value_outcome',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_value_outcome,
+      }),
+    },
+    {
+      key: 'team_effect',
+      label: 'Effect on others',
+      body: gateSignalNarrativeCopy({
+        tier,
+        role: 'team_effect',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_value_team_effect,
+      }),
+    },
+    {
+      key: 'risk_behaviour',
+      label: 'When it overreaches',
+      body: gateSignalNarrativeCopy({
+        tier,
+        role: 'risk_behaviour',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_risk_behaviour,
+      }),
+    },
+    {
+      key: 'risk_impact',
+      label: 'What to watch',
+      body: gateSignalNarrativeCopy({
+        tier,
+        role: 'risk_impact',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_risk_impact,
+      }),
+    },
+    {
+      key: 'development_line',
+      label: 'How to stretch it',
+      body: gateSignalNarrativeCopy({
+        tier,
+        role: 'development_line',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_development,
+      }),
+    },
+  ]);
 
   if (tier === 'primary') {
     return allSections;
@@ -291,21 +500,69 @@ export function createSingleDomainResultsViewModel(
       closeParagraph: cleanResultCopy(payload.hero.hero_close_paragraph),
     },
     signals: orderedSignals.map((signal) => ({
+      ...(() => {
+        const tier = getSignalNarrativeTier(signal);
+        return {
+          tier,
+          semanticState: getSignalSemanticState(tier),
+          positionLabel: getSignalPositionLabel(tier),
+          chapterIntro: gateSignalNarrativeCopy({
+            tier,
+            role: 'chapter_intro',
+            signalLabel: cleanResultCopy(signal.signal_label),
+            normalizedScore: signal.normalized_score,
+            source: signal.chapter_intro,
+          }),
+        };
+      })(),
       anchorId: `signal-${String(signal.rank).padStart(2, '0')}`,
       signalKey: signal.signal_key,
       signalLabel: cleanResultCopy(signal.signal_label),
       rank: signal.rank,
       normalizedScore: signal.normalized_score,
       rawScore: signal.raw_score,
-      tier: getSignalNarrativeTier(signal),
-      positionLabel: getSignalPositionLabel(getSignalNarrativeTier(signal)),
-      chapterIntro: cleanResultCopy(signal.chapter_intro),
-      howItShowsUp: cleanNullableCopy(signal.chapter_how_it_shows_up),
-      valueOutcome: cleanNullableCopy(signal.chapter_value_outcome),
-      teamEffect: cleanNullableCopy(signal.chapter_value_team_effect),
-      riskBehaviour: cleanNullableCopy(signal.chapter_risk_behaviour),
-      riskImpact: cleanNullableCopy(signal.chapter_risk_impact),
-      developmentLine: cleanNullableCopy(signal.chapter_development),
+      howItShowsUp: gateSignalNarrativeCopy({
+        tier: getSignalNarrativeTier(signal),
+        role: 'how_it_shows_up',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_how_it_shows_up,
+      }),
+      valueOutcome: gateSignalNarrativeCopy({
+        tier: getSignalNarrativeTier(signal),
+        role: 'value_outcome',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_value_outcome,
+      }),
+      teamEffect: gateSignalNarrativeCopy({
+        tier: getSignalNarrativeTier(signal),
+        role: 'team_effect',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_value_team_effect,
+      }),
+      riskBehaviour: gateSignalNarrativeCopy({
+        tier: getSignalNarrativeTier(signal),
+        role: 'risk_behaviour',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_risk_behaviour,
+      }),
+      riskImpact: gateSignalNarrativeCopy({
+        tier: getSignalNarrativeTier(signal),
+        role: 'risk_impact',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_risk_impact,
+      }),
+      developmentLine: gateSignalNarrativeCopy({
+        tier: getSignalNarrativeTier(signal),
+        role: 'development_line',
+        signalLabel: cleanResultCopy(signal.signal_label),
+        normalizedScore: signal.normalized_score,
+        source: signal.chapter_development,
+      }),
       narrativeSections: getNarrativeSections(signal),
     })),
     bridgeLine: SINGLE_DOMAIN_RESULTS_BRIDGE_LINE,
