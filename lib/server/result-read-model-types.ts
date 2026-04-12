@@ -3,6 +3,7 @@ import type {
   ResultDiagnostics,
 } from '@/lib/engine/types';
 import type { AssessmentMode } from '@/lib/types/assessment';
+import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
 export type AssessmentResultTopSignalViewModel = {
   signalId: string;
@@ -129,6 +130,7 @@ export type AssessmentResultDetailViewModel = {
   watchouts: readonly AssessmentResultActionItemViewModel[];
   developmentFocus: readonly AssessmentResultActionItemViewModel[];
   diagnostics: ResultDiagnostics;
+  singleDomainResult: SingleDomainResultPayload | null;
   createdAt: string;
   generatedAt: string | null;
 };

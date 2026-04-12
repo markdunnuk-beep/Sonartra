@@ -1,5 +1,6 @@
 import type { CanonicalResultPayload, RuntimeResponseSet } from '@/lib/engine/types';
 import type { AssessmentMode } from '@/lib/types/assessment';
+import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import type {
   AssessmentAttemptRecordSummary,
   AssessmentLifecycleStatus,
@@ -10,7 +11,13 @@ import type {
 export type AssessmentCompletionResultStatus = 'processing' | 'ready' | 'failed';
 
 export type AssessmentCompletionAttemptSummary = AssessmentAttemptRecordSummary &
-  AssessmentRecordSummary;
+  AssessmentRecordSummary & {
+    assessmentMode?: AssessmentMode;
+  };
+
+export type AssessmentCompletionPayload =
+  | CanonicalResultPayload
+  | SingleDomainResultPayload;
 
 export type AssessmentCompletionPersistedResponse = {
   responseId: string;
@@ -48,7 +55,7 @@ export type AssessmentCompletionExecuteEngine = (params: {
   assessmentKey?: string;
   versionKey?: string;
   responses: RuntimeResponseSet;
-}) => Promise<CanonicalResultPayload>;
+}) => Promise<AssessmentCompletionPayload>;
 
 export class AssessmentCompletionNotFoundError extends Error {
   constructor(message: string) {

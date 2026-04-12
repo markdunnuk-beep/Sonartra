@@ -19,6 +19,10 @@ import {
   AssessmentResultNotFoundError,
   AssessmentResultPayloadError,
 } from '@/lib/server/result-read-model-types';
+import {
+  isSingleDomainResultPayload,
+  type SingleDomainResultPayload,
+} from '@/lib/types/single-domain-result';
 import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
 export type ResultReadModelServiceDeps = {
@@ -101,10 +105,19 @@ type ReadableResultPayload = Omit<CanonicalResultPayload, 'application'> & {
   application?: CanonicalResultPayload['application'];
 };
 
-type ParsedReadablePayload = {
-  payload: ReadableResultPayload;
-  hasApplicationPlan: boolean;
-};
+type ParsedReadablePayload =
+  | {
+      mode: 'multi_domain';
+      payload: ReadableResultPayload;
+      hasApplicationPlan: boolean;
+      singleDomainResult: null;
+    }
+  | {
+      mode: 'single_domain';
+      payload: SingleDomainResultPayload;
+      hasApplicationPlan: false;
+      singleDomainResult: SingleDomainResultPayload;
+    };
 
 function createEmptyApplicationSection(): CanonicalResultPayload['application'] {
   return {
@@ -154,11 +167,50 @@ function isReadableLegacyPayload(value: unknown): value is ReadableResultPayload
   });
 }
 
+function getPersistedPayloadMode(record: PersistedReadyResultRecord): 'multi_domain' | 'single_domain' {
+  if (
+    isRecord(record.canonicalResultPayload)
+    && isRecord(record.canonicalResultPayload.metadata)
+  ) {
+    const metadataMode = readLegacyNullableText(record.canonicalResultPayload.metadata, 'mode');
+    if (!metadataMode) {
+      return resolveAssessmentMode(record.mode) === 'single_domain'
+        ? 'single_domain'
+        : 'multi_domain';
+    }
+
+    return resolveAssessmentMode(metadataMode) === 'single_domain'
+      ? 'single_domain'
+      : 'multi_domain';
+  }
+
+  return resolveAssessmentMode(record.mode) === 'single_domain'
+    ? 'single_domain'
+    : 'multi_domain';
+}
+
 function parseCanonicalPayload(record: PersistedReadyResultRecord): ParsedReadablePayload {
+  if (getPersistedPayloadMode(record) === 'single_domain') {
+    if (!isSingleDomainResultPayload(record.canonicalResultPayload)) {
+      throw new AssessmentResultPayloadError(
+        `Persisted single-domain result payload is malformed for result ${record.resultId}`,
+      );
+    }
+
+    return {
+      mode: 'single_domain',
+      payload: record.canonicalResultPayload,
+      hasApplicationPlan: false,
+      singleDomainResult: record.canonicalResultPayload,
+    };
+  }
+
   if (isCanonicalResultPayload(record.canonicalResultPayload)) {
     return {
+      mode: 'multi_domain',
       payload: normalizeCanonicalPayload(record.canonicalResultPayload),
       hasApplicationPlan: true,
+      singleDomainResult: null,
     };
   }
 
@@ -169,8 +221,137 @@ function parseCanonicalPayload(record: PersistedReadyResultRecord): ParsedReadab
   }
 
   return {
+    mode: 'multi_domain',
     payload: record.canonicalResultPayload,
     hasApplicationPlan: false,
+    singleDomainResult: null,
+  };
+}
+
+function createCompatibilityApplicationSection(): CanonicalResultPayload['application'] {
+  return createEmptyApplicationSection();
+}
+
+function createCompatibilityDiagnostics(
+  payload: SingleDomainResultPayload,
+): import('@/lib/engine/types').ResultDiagnostics {
+  return {
+    readinessStatus: 'ready',
+    scoring: {
+      scoringMethod: payload.diagnostics.scoringMethod,
+      totalQuestions: payload.diagnostics.totalQuestionCount,
+      answeredQuestions: payload.diagnostics.answeredQuestionCount,
+      unansweredQuestions:
+        payload.diagnostics.totalQuestionCount - payload.diagnostics.answeredQuestionCount,
+      totalResponsesProcessed: payload.diagnostics.answeredQuestionCount,
+      totalWeightsApplied: payload.diagnostics.counts.weightCount,
+      totalScoreMass: payload.signals.reduce((total, signal) => total + signal.raw_score, 0),
+      zeroScoreSignalCount: payload.signals.filter((signal) => signal.raw_score === 0).length,
+      zeroAnswerSubmission: payload.diagnostics.answeredQuestionCount === 0,
+      warnings: Object.freeze([...payload.diagnostics.warnings]),
+      generatedAt: payload.metadata.generatedAt,
+    },
+    normalization: {
+      normalizationMethod: payload.diagnostics.normalizationMethod,
+      totalScoreMass: payload.signals.reduce((total, signal) => total + signal.raw_score, 0),
+      zeroMass: payload.signals.every((signal) => signal.raw_score === 0),
+      globalPercentageSum: payload.signals.reduce((total, signal) => total + signal.normalized_score, 0),
+      domainPercentageSums: Object.freeze({
+        [payload.metadata.domainKey]: payload.signals.reduce(
+          (total, signal) => total + signal.normalized_score,
+          0,
+        ),
+      }),
+      roundingAdjustmentsApplied: 0,
+      zeroScoreSignalCount: payload.signals.filter((signal) => signal.raw_score === 0).length,
+      warnings: Object.freeze([...payload.diagnostics.warnings]),
+      generatedAt: payload.metadata.generatedAt,
+    },
+    answeredQuestionCount: payload.diagnostics.answeredQuestionCount,
+    totalQuestionCount: payload.diagnostics.totalQuestionCount,
+    missingQuestionIds: Object.freeze([]),
+    topSignalSelectionBasis: 'normalized_rank',
+    rankedSignalCount: payload.signals.length,
+    domainCount: payload.diagnostics.counts.domainCount,
+    zeroMass: payload.signals.every((signal) => signal.raw_score === 0),
+    zeroMassTopSignalFallbackApplied: false,
+    warnings: Object.freeze([...payload.diagnostics.warnings]),
+    generatedAt: payload.metadata.generatedAt,
+  };
+}
+
+function createCompatibilityPayload(
+  payload: SingleDomainResultPayload,
+): CanonicalResultPayload {
+  const topSignal = payload.signals[0] ?? null;
+
+  return {
+    metadata: {
+      assessmentKey: payload.metadata.assessmentKey,
+      assessmentTitle: payload.metadata.assessmentTitle,
+      mode: 'single_domain',
+      version: payload.metadata.version,
+      attemptId: payload.metadata.attemptId,
+      completedAt: payload.metadata.completedAt,
+      assessmentDescription: null,
+    },
+    intro: {
+      assessmentDescription: payload.intro.intro_paragraph,
+    },
+    hero: {
+      headline: payload.hero.hero_headline,
+      subheadline: payload.hero.hero_subheadline,
+      summary: payload.hero.hero_strength_paragraph,
+      narrative: payload.hero.hero_opening,
+      pressureOverlay: payload.hero.hero_tension_paragraph,
+      environmentOverlay: payload.hero.hero_close_paragraph,
+      primaryPattern: topSignal
+        ? {
+            label: topSignal.signal_label,
+            signalKey: topSignal.signal_key,
+            signalLabel: topSignal.signal_label,
+          }
+        : null,
+      heroPattern: null,
+      domainPairWinners: [],
+      traitTotals: [],
+      matchedPatterns: [],
+      domainHighlights: topSignal
+        ? [{
+            domainKey: payload.metadata.domainKey,
+            domainLabel: payload.metadata.domainKey,
+            primarySignalKey: topSignal.signal_key,
+            primarySignalLabel: topSignal.signal_label,
+            summary: payload.pairSummary.pair_strength_paragraph,
+          }]
+        : [],
+    },
+    domains: [],
+    actions: {
+      strengths: Object.freeze(
+        payload.application.strengths.map((item) => ({
+          signalKey: item.signal_key,
+          signalLabel: item.signal_label,
+          text: item.statement,
+        })),
+      ),
+      watchouts: Object.freeze(
+        payload.application.watchouts.map((item) => ({
+          signalKey: item.signal_key,
+          signalLabel: item.signal_label,
+          text: item.statement,
+        })),
+      ),
+      developmentFocus: Object.freeze(
+        payload.application.developmentFocus.map((item) => ({
+          signalKey: item.signal_key,
+          signalLabel: item.signal_label,
+          text: item.statement,
+        })),
+      ),
+    },
+    application: createCompatibilityApplicationSection(),
+    diagnostics: createCompatibilityDiagnostics(payload),
   };
 }
 
@@ -287,16 +468,37 @@ function toTopSignal(payload: CanonicalResultPayload): AssessmentResultTopSignal
   };
 }
 
+function toSingleDomainTopSignal(payload: SingleDomainResultPayload): AssessmentResultTopSignalViewModel | null {
+  const signal = payload.signals[0];
+  if (!signal) {
+    return null;
+  }
+
+  return {
+    signalId: signal.signal_key,
+    signalKey: signal.signal_key,
+    title: signal.signal_label,
+    domainId: payload.metadata.domainKey,
+    domainKey: payload.metadata.domainKey,
+    normalizedValue: signal.normalized_score,
+    rawTotal: signal.raw_score,
+    percentage: signal.normalized_score,
+    rank: 1,
+  };
+}
+
 function toListItem(record: PersistedReadyResultRecord): AssessmentResultListItem {
-  const payload = parseCanonicalPayload(record).payload as CanonicalResultPayload;
-  const topSignal = toTopSignal(payload);
+  const parsed = parseCanonicalPayload(record);
+  const topSignal = parsed.mode === 'single_domain'
+    ? toSingleDomainTopSignal(parsed.payload)
+    : toTopSignal(parsed.payload as CanonicalResultPayload);
 
   return {
     resultId: record.resultId,
     attemptId: record.attemptId,
     assessmentId: record.assessmentId,
     assessmentKey: record.assessmentKey,
-    mode: resolveAssessmentMode(record.mode),
+    mode: parsed.mode,
     assessmentTitle: record.assessmentTitle,
     version: record.version,
     readinessStatus: 'ready',
@@ -322,7 +524,9 @@ function tryToListItem(record: PersistedReadyResultRecord): AssessmentResultList
 
 function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResultDetailViewModel {
   const parsed = parseCanonicalPayload(record);
-  const payload = parsed.payload as CanonicalResultPayload;
+  const payload = parsed.mode === 'single_domain'
+    ? createCompatibilityPayload(parsed.payload)
+    : (parsed.payload as CanonicalResultPayload);
   const rankedSignals = toRankedSignals(payload);
   const domainSummaries = toDomainSummaries(payload);
   const topSignal = toTopSignal(payload);
@@ -335,7 +539,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     attemptId: record.attemptId,
     assessmentId: record.assessmentId,
     assessmentKey: record.assessmentKey,
-    mode: resolveAssessmentMode(record.mode ?? payload.metadata.mode),
+    mode: parsed.mode,
     assessmentTitle: record.assessmentTitle,
     version: record.version,
     metadata: payload.metadata,
@@ -357,6 +561,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     watchouts: toActionItems(payload.actions.watchouts),
     developmentFocus: toActionItems(payload.actions.developmentFocus),
     diagnostics: payload.diagnostics,
+    singleDomainResult: parsed.singleDomainResult,
     createdAt: record.createdAt,
     generatedAt: record.generatedAt,
   };

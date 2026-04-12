@@ -1,7 +1,7 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
-import type { CanonicalResultPayload } from '@/lib/engine/types';
 import type {
   AssessmentCompletionAttemptSummary,
+  AssessmentCompletionPayload,
   AssessmentCompletionPersistedResponse,
 } from '@/lib/server/assessment-completion-types';
 import type { AssessmentResultRecordSummary } from '@/lib/server/assessment-attempt-lifecycle-types';
@@ -12,6 +12,7 @@ type AttemptCompletionRow = {
   assessment_id: string;
   assessment_version_id: string;
   assessment_key: string;
+  assessment_mode: string | null;
   version_tag: string;
   lifecycle_status: AssessmentCompletionAttemptSummary['lifecycleStatus'];
   started_at: string;
@@ -30,7 +31,7 @@ type ResultRow = {
   generated_at: string | null;
   failure_reason: string | null;
   has_canonical_result_payload: boolean;
-  canonical_result_payload: CanonicalResultPayload | null;
+  canonical_result_payload: AssessmentCompletionPayload | null;
   created_at: string;
   updated_at: string;
 };
@@ -51,6 +52,7 @@ function mapAttemptCompletionRow(row: AttemptCompletionRow): AssessmentCompletio
     assessmentId: row.assessment_id,
     assessmentVersionId: row.assessment_version_id,
     assessmentKey: row.assessment_key,
+    assessmentMode: row.assessment_mode === 'single_domain' ? 'single_domain' : 'multi_domain',
     versionTag: row.version_tag,
     lifecycleStatus: row.lifecycle_status,
     startedAt: row.started_at,
@@ -64,7 +66,7 @@ function mapAttemptCompletionRow(row: AttemptCompletionRow): AssessmentCompletio
 
 function mapResultRow(
   row: ResultRow,
-): AssessmentResultRecordSummary & { canonicalResultPayload: CanonicalResultPayload | null } {
+): AssessmentResultRecordSummary & { canonicalResultPayload: AssessmentCompletionPayload | null } {
   return {
     resultId: row.result_id,
     attemptId: row.attempt_id,
@@ -102,6 +104,7 @@ export async function getAttemptForCompletion(
       t.assessment_id,
       t.assessment_version_id,
       a.assessment_key,
+      COALESCE(av.mode, a.mode) AS assessment_mode,
       av.version AS version_tag,
       t.lifecycle_status,
       t.started_at,
@@ -125,7 +128,7 @@ export async function getAttemptForCompletion(
 export async function getExistingResultForAttempt(
   db: Queryable,
   attemptId: string,
-): Promise<(AssessmentResultRecordSummary & { canonicalResultPayload: CanonicalResultPayload | null }) | null> {
+): Promise<(AssessmentResultRecordSummary & { canonicalResultPayload: AssessmentCompletionPayload | null }) | null> {
   const result = await db.query<ResultRow>(
     `
     SELECT
@@ -269,7 +272,7 @@ export async function upsertReadyResult(
     attemptId: string;
     assessmentId: string;
     assessmentVersionId: string;
-    payload: CanonicalResultPayload;
+    payload: AssessmentCompletionPayload;
   },
 ): Promise<string> {
   const result = await db.query<{ result_id: string }>(

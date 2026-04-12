@@ -22,6 +22,7 @@ import {
   type AssessmentCompletionPersistedResponse,
   type AssessmentCompletionServiceResult,
 } from '@/lib/server/assessment-completion-types';
+import { buildSingleDomainResultPayload } from '@/lib/server/single-domain-completion';
 import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
 export type AssessmentCompletionServiceDeps = {
@@ -118,7 +119,9 @@ export function createAssessmentCompletionService(
           success: true,
           attemptId: attempt.attemptId,
           resultId: existingResult.resultId,
-          mode: 'multi_domain',
+          mode: existingResult.canonicalResultPayload
+            ? resolveAssessmentMode(existingResult.canonicalResultPayload.metadata.mode)
+            : attempt.assessmentMode,
           lifecycleStatus: 'ready',
           resultStatus: 'ready',
           hasResult: true,
@@ -133,7 +136,7 @@ export function createAssessmentCompletionService(
           success: true,
           attemptId: attempt.attemptId,
           resultId: existingResult.resultId,
-          mode: 'multi_domain',
+          mode: attempt.assessmentMode,
           lifecycleStatus: 'completed_processing',
           resultStatus: 'processing',
           hasResult: true,
@@ -175,11 +178,17 @@ export function createAssessmentCompletionService(
       try {
         // Runtime bridge: the attempt is pinned to a concrete published version id,
         // so completion resolves the exact definition that attempt started against.
-        const payload = await executeEngine({
-          repository,
-          assessmentVersionId: attempt.assessmentVersionId,
-          responses: responseSet,
-        });
+        const payload = attempt.assessmentMode === 'single_domain'
+          ? await buildSingleDomainResultPayload({
+              db: deps.db,
+              assessmentVersionId: attempt.assessmentVersionId,
+              responses: responseSet,
+            })
+          : await executeEngine({
+              repository,
+              assessmentVersionId: attempt.assessmentVersionId,
+              responses: responseSet,
+            });
 
         const resultId = await upsertReadyResult(deps.db, {
           attemptId: attempt.attemptId,

@@ -1,0 +1,701 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
+import { createResultReadModelService } from '@/lib/server/result-read-model';
+import { buildSingleDomainResultPayload } from '@/lib/server/single-domain-completion';
+import type { AssessmentCompletionPayload } from '@/lib/server/assessment-completion-types';
+import type {
+  ApplicationStatementsRow,
+  BalancingSectionsRow,
+  DomainFramingRow,
+  HeroPairsRow,
+  PairSummariesRow,
+  SignalChaptersRow,
+} from '@/lib/types/single-domain-language';
+
+type AttemptState = {
+  attemptId: string;
+  userId: string;
+  assessmentId: string;
+  assessmentVersionId: string;
+  assessmentKey: string;
+  assessmentMode: 'single_domain' | 'multi_domain';
+  versionTag: string;
+  lifecycleStatus: 'IN_PROGRESS' | 'SUBMITTED' | 'FAILED' | 'RESULT_READY';
+  startedAt: string;
+  submittedAt: string | null;
+  completedAt: string | null;
+  lastActivityAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type ResponseState = {
+  responseId: string;
+  attemptId: string;
+  questionId: string;
+  selectedOptionId: string;
+  respondedAt: string;
+  updatedAt: string;
+};
+
+type ResultState = {
+  resultId: string;
+  attemptId: string;
+  assessmentId: string;
+  assessmentVersionId: string;
+  pipelineStatus: 'RUNNING' | 'COMPLETED' | 'FAILED';
+  readinessStatus: 'PROCESSING' | 'READY' | 'FAILED';
+  canonicalResultPayload: AssessmentCompletionPayload | null;
+  failureReason: string | null;
+  generatedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type RuntimeFixture = {
+  context: {
+    assessment_id: string;
+    assessment_key: string;
+    assessment_title: string;
+    assessment_description: string | null;
+    assessment_version_id: string;
+    assessment_version_tag: string;
+    assessment_mode: string | null;
+  };
+  domains: Array<{
+    domain_id: string;
+    domain_key: string;
+    domain_label: string;
+    domain_description: string | null;
+    domain_order_index: number;
+  }>;
+  signals: Array<{
+    signal_id: string;
+    signal_key: string;
+    signal_label: string;
+    signal_description: string | null;
+    signal_order_index: number;
+    domain_id: string;
+  }>;
+  questions: Array<{
+    question_id: string;
+    question_key: string;
+    prompt: string;
+    question_order_index: number;
+    domain_id: string;
+    domain_key: string;
+  }>;
+  options: Array<{
+    option_id: string;
+    option_key: string;
+    option_label: string | null;
+    option_text: string;
+    option_order_index: number;
+    question_id: string | null;
+  }>;
+  weights: Array<{
+    option_signal_weight_id: string;
+    option_id: string;
+    signal_id: string | null;
+    signal_key: string | null;
+    weight: string;
+    source_weight_key: string | null;
+  }>;
+  language: {
+    DOMAIN_FRAMING: DomainFramingRow[];
+    HERO_PAIRS: HeroPairsRow[];
+    SIGNAL_CHAPTERS: SignalChaptersRow[];
+    BALANCING_SECTIONS: BalancingSectionsRow[];
+    PAIR_SUMMARIES: PairSummariesRow[];
+    APPLICATION_STATEMENTS: ApplicationStatementsRow[];
+  };
+};
+
+const PAIR_KEYS = [
+  'vision_delivery',
+  'vision_people',
+  'vision_rigor',
+  'delivery_people',
+  'delivery_rigor',
+  'people_rigor',
+] as const;
+
+function buildRuntimeFixture(): RuntimeFixture {
+  return {
+    context: {
+      assessment_id: 'assessment-1',
+      assessment_key: 'role-focus',
+      assessment_title: 'Role Focus',
+      assessment_description: 'Single-domain assessment',
+      assessment_version_id: 'version-1',
+      assessment_version_tag: '1.0.0',
+      assessment_mode: 'single_domain',
+    },
+    domains: [{
+      domain_id: 'domain-1',
+      domain_key: 'leadership-style',
+      domain_label: 'Leadership style',
+      domain_description: null,
+      domain_order_index: 0,
+    }],
+    signals: ([
+      ['signal-vision', 'vision', 'Vision', 0],
+      ['signal-delivery', 'delivery', 'Delivery', 1],
+      ['signal-people', 'people', 'People', 2],
+      ['signal-rigor', 'rigor', 'Rigor', 3],
+    ] as const).map(([id, key, label, orderIndex]) => ({
+      signal_id: id,
+      signal_key: key,
+      signal_label: label,
+      signal_description: null,
+      signal_order_index: orderIndex,
+      domain_id: 'domain-1',
+    })),
+    questions: ['q01', 'q02', 'q03', 'q04'].map((key, index) => ({
+      question_id: `question-${index + 1}`,
+      question_key: key,
+      prompt: `Question ${index + 1}`,
+      question_order_index: index,
+      domain_id: 'domain-1',
+      domain_key: 'leadership-style',
+    })),
+    options: ([
+      ['option-1a', 'q01_a', 'question-1', 0],
+      ['option-1b', 'q01_b', 'question-1', 1],
+      ['option-2a', 'q02_a', 'question-2', 0],
+      ['option-2b', 'q02_b', 'question-2', 1],
+      ['option-3a', 'q03_a', 'question-3', 0],
+      ['option-3b', 'q03_b', 'question-3', 1],
+      ['option-4a', 'q04_a', 'question-4', 0],
+      ['option-4b', 'q04_b', 'question-4', 1],
+    ] as const).map(([id, key, questionId, orderIndex]) => ({
+      option_id: id,
+      option_key: key,
+      option_label: key.endsWith('a') ? 'A' : 'B',
+      option_text: `Text ${key}`,
+      option_order_index: orderIndex,
+      question_id: questionId,
+    })),
+    weights: [
+      ['weight-1', 'option-1a', 'signal-vision', 'vision', '3'],
+      ['weight-2', 'option-1a', 'signal-delivery', 'delivery', '2'],
+      ['weight-3', 'option-1b', 'signal-rigor', 'rigor', '1'],
+      ['weight-4', 'option-2a', 'signal-vision', 'vision', '2'],
+      ['weight-5', 'option-2b', 'signal-people', 'people', '2'],
+      ['weight-6', 'option-3a', 'signal-delivery', 'delivery', '3'],
+      ['weight-7', 'option-3b', 'signal-rigor', 'rigor', '3'],
+      ['weight-8', 'option-4a', 'signal-people', 'people', '3'],
+      ['weight-9', 'option-4b', 'signal-rigor', 'rigor', '1'],
+    ].map(([id, optionId, signalId, signalKey, weight]) => ({
+      option_signal_weight_id: id,
+      option_id: optionId,
+      signal_id: signalId,
+      signal_key: signalKey,
+      weight,
+      source_weight_key: `${optionId}|${signalKey}`,
+    })),
+    language: {
+      DOMAIN_FRAMING: [{
+        domain_key: 'leadership-style',
+        section_title: 'Leadership style',
+        intro_paragraph: 'This domain introduces how you tend to lead.',
+        meaning_paragraph: 'It explains the practical meaning of the pattern.',
+        bridge_to_signals: 'The ranked signals show how that pattern is distributed.',
+        blueprint_context_line: 'This is the current blueprint context line.',
+      }],
+      HERO_PAIRS: PAIR_KEYS.map((pair_key) => ({
+        pair_key,
+        hero_headline: `Hero ${pair_key}`,
+        hero_subheadline: `Subheadline ${pair_key}`,
+        hero_opening: `Opening ${pair_key}`,
+        hero_strength_paragraph: `Strength ${pair_key}`,
+        hero_tension_paragraph: `Tension ${pair_key}`,
+        hero_close_paragraph: `Close ${pair_key}`,
+      })),
+      SIGNAL_CHAPTERS: ['vision', 'delivery', 'people', 'rigor'].map((signal_key) => ({
+        signal_key,
+        position_primary_label: 'Primary',
+        position_secondary_label: 'Secondary',
+        position_supporting_label: 'Supporting',
+        position_underplayed_label: 'Underplayed',
+        chapter_intro_primary: `${signal_key} primary intro`,
+        chapter_intro_secondary: `${signal_key} secondary intro`,
+        chapter_intro_supporting: `${signal_key} supporting intro`,
+        chapter_intro_underplayed: `${signal_key} underplayed intro`,
+        chapter_how_it_shows_up: `${signal_key} shows up`,
+        chapter_value_outcome: `${signal_key} outcome`,
+        chapter_value_team_effect: `${signal_key} team effect`,
+        chapter_risk_behaviour: `${signal_key} risk behaviour`,
+        chapter_risk_impact: `${signal_key} risk impact`,
+        chapter_development: `${signal_key} development`,
+      })),
+      BALANCING_SECTIONS: PAIR_KEYS.map((pair_key) => ({
+        pair_key,
+        balancing_section_title: `Balance ${pair_key}`,
+        current_pattern_paragraph: `Current ${pair_key}`,
+        practical_meaning_paragraph: `Meaning ${pair_key}`,
+        system_risk_paragraph: `Risk ${pair_key}`,
+        rebalance_intro: `Rebalance ${pair_key}`,
+        rebalance_action_1: `${pair_key} action 1`,
+        rebalance_action_2: `${pair_key} action 2`,
+        rebalance_action_3: `${pair_key} action 3`,
+      })),
+      PAIR_SUMMARIES: PAIR_KEYS.map((pair_key) => ({
+        pair_key,
+        pair_section_title: `Section ${pair_key}`,
+        pair_headline: `Headline ${pair_key}`,
+        pair_opening_paragraph: `Opening ${pair_key}`,
+        pair_strength_paragraph: `Strength ${pair_key}`,
+        pair_tension_paragraph: `Tension ${pair_key}`,
+        pair_close_paragraph: `Close ${pair_key}`,
+      })),
+      APPLICATION_STATEMENTS: [
+        ['vision', 'Vision'],
+        ['delivery', 'Delivery'],
+        ['people', 'People'],
+        ['rigor', 'Rigor'],
+      ].map(([signal_key, label]) => ({
+        signal_key,
+        strength_statement_1: `${label} strength 1`,
+        strength_statement_2: `${label} strength 2`,
+        watchout_statement_1: `${label} watchout 1`,
+        watchout_statement_2: `${label} watchout 2`,
+        development_statement_1: `${label} development 1`,
+        development_statement_2: `${label} development 2`,
+      })),
+    },
+  };
+}
+
+function buildResponseSet(includeQuestion4 = true) {
+  return {
+    attemptId: 'attempt-1',
+    assessmentKey: 'role-focus',
+    versionTag: '1.0.0',
+    status: 'submitted' as const,
+    submittedAt: '2026-04-12T10:00:00.000Z',
+    responsesByQuestionId: {
+      'question-1': {
+        responseId: 'response-1',
+        attemptId: 'attempt-1',
+        questionId: 'question-1',
+        value: { selectedOptionId: 'option-1a' },
+        updatedAt: '2026-04-12T09:57:00.000Z',
+      },
+      'question-2': {
+        responseId: 'response-2',
+        attemptId: 'attempt-1',
+        questionId: 'question-2',
+        value: { selectedOptionId: 'option-2a' },
+        updatedAt: '2026-04-12T09:58:00.000Z',
+      },
+      'question-3': {
+        responseId: 'response-3',
+        attemptId: 'attempt-1',
+        questionId: 'question-3',
+        value: { selectedOptionId: 'option-3a' },
+        updatedAt: '2026-04-12T09:59:00.000Z',
+      },
+      ...(includeQuestion4
+        ? {
+            'question-4': {
+              responseId: 'response-4',
+              attemptId: 'attempt-1',
+              questionId: 'question-4',
+              value: { selectedOptionId: 'option-4a' },
+              updatedAt: '2026-04-12T10:00:00.000Z',
+            },
+          }
+        : {}),
+    },
+  };
+}
+
+function createDb(config?: {
+  attempts?: AttemptState[];
+  responses?: ResponseState[];
+  results?: ResultState[];
+}) {
+  const runtime = buildRuntimeFixture();
+  const attempts = [...(config?.attempts ?? [{
+    attemptId: 'attempt-1',
+    userId: 'user-1',
+    assessmentId: 'assessment-1',
+    assessmentVersionId: 'version-1',
+    assessmentKey: 'role-focus',
+    assessmentMode: 'single_domain' as const,
+    versionTag: '1.0.0',
+    lifecycleStatus: 'IN_PROGRESS' as const,
+    startedAt: '2026-04-12T09:50:00.000Z',
+    submittedAt: null,
+    completedAt: null,
+    lastActivityAt: '2026-04-12T10:00:00.000Z',
+    createdAt: '2026-04-12T09:50:00.000Z',
+    updatedAt: '2026-04-12T10:00:00.000Z',
+  }])];
+  const responses = [...(config?.responses ?? [
+    { responseId: 'response-1', attemptId: 'attempt-1', questionId: 'question-1', selectedOptionId: 'option-1a', respondedAt: '2026-04-12T09:57:00.000Z', updatedAt: '2026-04-12T09:57:00.000Z' },
+    { responseId: 'response-2', attemptId: 'attempt-1', questionId: 'question-2', selectedOptionId: 'option-2a', respondedAt: '2026-04-12T09:58:00.000Z', updatedAt: '2026-04-12T09:58:00.000Z' },
+    { responseId: 'response-3', attemptId: 'attempt-1', questionId: 'question-3', selectedOptionId: 'option-3a', respondedAt: '2026-04-12T09:59:00.000Z', updatedAt: '2026-04-12T09:59:00.000Z' },
+    { responseId: 'response-4', attemptId: 'attempt-1', questionId: 'question-4', selectedOptionId: 'option-4a', respondedAt: '2026-04-12T10:00:00.000Z', updatedAt: '2026-04-12T10:00:00.000Z' },
+  ])];
+  const results = [...(config?.results ?? [])];
+  let resultSequence = results.length + 1;
+
+  return {
+    attempts,
+    results,
+    db: {
+      async query<T>(text: string, params?: unknown[]) {
+        const sql = text.replace(/\s+/g, ' ').trim();
+
+        if (sql.includes('FROM attempts t') && sql.includes('WHERE t.id = $1')) {
+          const row = attempts.find((attempt) => attempt.attemptId === (params?.[0] as string));
+          return {
+            rows: (row
+              ? [{
+                  attempt_id: row.attemptId,
+                  user_id: row.userId,
+                  assessment_id: row.assessmentId,
+                  assessment_version_id: row.assessmentVersionId,
+                  assessment_key: row.assessmentKey,
+                  assessment_mode: row.assessmentMode,
+                  version_tag: row.versionTag,
+                  lifecycle_status: row.lifecycleStatus,
+                  started_at: row.startedAt,
+                  submitted_at: row.submittedAt,
+                  completed_at: row.completedAt,
+                  last_activity_at: row.lastActivityAt,
+                  created_at: row.createdAt,
+                  updated_at: row.updatedAt,
+                }]
+              : []) as T[],
+          };
+        }
+
+        if (sql.includes('FROM results WHERE attempt_id = $1')) {
+          const row = results.find((result) => result.attemptId === (params?.[0] as string));
+          return {
+            rows: (row
+              ? [{
+                  result_id: row.resultId,
+                  attempt_id: row.attemptId,
+                  pipeline_status: row.pipelineStatus,
+                  readiness_status: row.readinessStatus,
+                  generated_at: row.generatedAt,
+                  failure_reason: row.failureReason,
+                  has_canonical_result_payload: row.canonicalResultPayload !== null,
+                  canonical_result_payload: row.canonicalResultPayload,
+                  created_at: row.createdAt,
+                  updated_at: row.updatedAt,
+                }]
+              : []) as T[],
+          };
+        }
+
+        if (sql.includes('SELECT DISTINCT ON (r.question_id)')) {
+          return {
+            rows: responses.map((row) => ({
+              response_id: row.responseId,
+              attempt_id: row.attemptId,
+              question_id: row.questionId,
+              selected_option_id: row.selectedOptionId,
+              responded_at: row.respondedAt,
+              updated_at: row.updatedAt,
+            })) as T[],
+          };
+        }
+
+        if (sql.includes("lifecycle_status = 'SUBMITTED'")) {
+          const attempt = attempts.find((entry) => entry.attemptId === (params?.[0] as string));
+          if (attempt) {
+            attempt.lifecycleStatus = 'SUBMITTED';
+            attempt.submittedAt = attempt.submittedAt ?? '2026-04-12T10:00:00.000Z';
+            attempt.completedAt = attempt.completedAt ?? '2026-04-12T10:00:00.000Z';
+          }
+          return { rows: [] as T[] };
+        }
+
+        if (sql.includes("lifecycle_status = 'RESULT_READY'")) {
+          const attempt = attempts.find((entry) => entry.attemptId === (params?.[0] as string));
+          if (attempt) {
+            attempt.lifecycleStatus = 'RESULT_READY';
+            attempt.completedAt = '2026-04-12T10:00:00.000Z';
+          }
+          return { rows: [] as T[] };
+        }
+
+        if (sql.includes("lifecycle_status = 'FAILED'")) {
+          const attempt = attempts.find((entry) => entry.attemptId === (params?.[0] as string));
+          if (attempt) {
+            attempt.lifecycleStatus = 'FAILED';
+            attempt.completedAt = '2026-04-12T10:00:00.000Z';
+          }
+          return { rows: [] as T[] };
+        }
+
+        if (sql.includes("'RUNNING', 'PROCESSING'")) {
+          const [attemptId, assessmentId, assessmentVersionId] = params as [string, string, string];
+          const row = {
+            resultId: `result-${resultSequence++}`,
+            attemptId,
+            assessmentId,
+            assessmentVersionId,
+            pipelineStatus: 'RUNNING' as const,
+            readinessStatus: 'PROCESSING' as const,
+            canonicalResultPayload: null,
+            failureReason: null,
+            generatedAt: null,
+            createdAt: '2026-04-12T10:00:00.000Z',
+            updatedAt: '2026-04-12T10:00:00.000Z',
+          };
+          results.splice(0, results.length, row);
+          return { rows: ([{ result_id: row.resultId }] as unknown[]) as T[] };
+        }
+
+        if (sql.includes("'COMPLETED', 'READY'")) {
+          const payload = JSON.parse((params as [string, string, string, string])[3]) as AssessmentCompletionPayload;
+          const current = results[0]!;
+          current.pipelineStatus = 'COMPLETED';
+          current.readinessStatus = 'READY';
+          current.canonicalResultPayload = payload;
+          current.failureReason = null;
+          current.generatedAt = '2026-04-12T10:00:00.000Z';
+          return { rows: ([{ result_id: current.resultId }] as unknown[]) as T[] };
+        }
+
+        if (sql.includes("'FAILED', 'FAILED'")) {
+          const current = results[0]!;
+          current.pipelineStatus = 'FAILED';
+          current.readinessStatus = 'FAILED';
+          current.canonicalResultPayload = null;
+          current.failureReason = (params as [string, string, string, string])[3];
+          return { rows: ([{ result_id: current.resultId }] as unknown[]) as T[] };
+        }
+
+        if (sql.includes('FROM assessment_versions av INNER JOIN assessments a ON a.id = av.assessment_id WHERE av.id = $1')) {
+          return { rows: [runtime.context] as T[] };
+        }
+
+        if (sql.includes('FROM domains WHERE assessment_version_id = $1')) {
+          return { rows: runtime.domains as T[] };
+        }
+
+        if (sql.includes('FROM signals s WHERE s.assessment_version_id = $1')) {
+          return { rows: runtime.signals as T[] };
+        }
+
+        if (sql.includes('FROM questions q LEFT JOIN domains d ON d.id = q.domain_id')) {
+          return { rows: runtime.questions as T[] };
+        }
+
+        if (sql.includes('FROM options o WHERE o.assessment_version_id = $1')) {
+          return { rows: runtime.options as T[] };
+        }
+
+        if (sql.includes('FROM option_signal_weights osw INNER JOIN options o ON o.id = osw.option_id LEFT JOIN signals s ON s.id = osw.signal_id')) {
+          return { rows: runtime.weights as T[] };
+        }
+
+        if (sql.includes('FROM assessment_version_single_domain_framing')) {
+          return { rows: runtime.language.DOMAIN_FRAMING as T[] };
+        }
+
+        if (sql.includes('FROM assessment_version_single_domain_hero_pairs')) {
+          return { rows: runtime.language.HERO_PAIRS as T[] };
+        }
+
+        if (sql.includes('FROM assessment_version_single_domain_signal_chapters')) {
+          return { rows: runtime.language.SIGNAL_CHAPTERS as T[] };
+        }
+
+        if (sql.includes('FROM assessment_version_single_domain_balancing_sections')) {
+          return { rows: runtime.language.BALANCING_SECTIONS as T[] };
+        }
+
+        if (sql.includes('FROM assessment_version_single_domain_pair_summaries')) {
+          return { rows: runtime.language.PAIR_SUMMARIES as T[] };
+        }
+
+        if (sql.includes('FROM assessment_version_single_domain_application_statements')) {
+          return { rows: runtime.language.APPLICATION_STATEMENTS as T[] };
+        }
+
+        if (sql.includes('ORDER BY COALESCE(r.generated_at, r.created_at) DESC, r.id DESC')) {
+          return {
+            rows: results
+              .filter((row) => row.readinessStatus === 'READY')
+              .map((row) => ({
+                result_id: row.resultId,
+                attempt_id: row.attemptId,
+                assessment_id: row.assessmentId,
+                assessment_key: 'role-focus',
+                assessment_mode: 'single_domain',
+                assessment_title: 'Role Focus',
+                version_tag: '1.0.0',
+                readiness_status: row.readinessStatus,
+                generated_at: row.generatedAt,
+                created_at: row.createdAt,
+                canonical_result_payload: row.canonicalResultPayload,
+              })) as T[],
+          };
+        }
+
+        if (sql.includes('WHERE r.id = $1')) {
+          const row = results.find((entry) => entry.resultId === (params?.[0] as string));
+          return {
+            rows: (row
+              ? [{
+                  result_id: row.resultId,
+                  attempt_id: row.attemptId,
+                  assessment_id: row.assessmentId,
+                  assessment_key: 'role-focus',
+                  assessment_mode: 'single_domain',
+                  assessment_title: 'Role Focus',
+                  version_tag: '1.0.0',
+                  readiness_status: row.readinessStatus,
+                  generated_at: row.generatedAt,
+                  created_at: row.createdAt,
+                  canonical_result_payload: row.canonicalResultPayload,
+                }]
+              : []) as T[],
+          };
+        }
+
+        throw new Error(`Unhandled SQL in single-domain completion test: ${sql}`);
+      },
+    },
+  };
+}
+
+test('single-domain payload assembles deterministically from authored runtime data', async () => {
+  const harness = createDb();
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  assert.equal(payload.metadata.mode, 'single_domain');
+  assert.equal(payload.diagnostics.topPair, 'vision_delivery');
+  assert.deepEqual(payload.signals.map((signal) => signal.signal_key), ['vision', 'delivery', 'people', 'rigor']);
+  assert.deepEqual(payload.signals.map((signal) => signal.raw_score), [5, 5, 3, 0]);
+  assert.deepEqual(payload.signals.map((signal) => signal.position), ['primary', 'secondary', 'supporting', 'underplayed']);
+  assert.equal(payload.intro.section_title, 'Leadership style');
+  assert.equal(payload.hero.hero_headline, 'Hero vision_delivery');
+  assert.equal(payload.balancing.pair_key, 'vision_delivery');
+  assert.equal(payload.pairSummary.pair_headline, 'Headline vision_delivery');
+  assert.deepEqual(payload.application.strengths.map((item) => item.statement), ['Vision strength 1', 'Delivery strength 2', 'People strength 2']);
+  assert.deepEqual(payload.application.watchouts.map((item) => item.statement), ['Vision watchout 1', 'Delivery watchout 2', 'Rigor watchout 2']);
+  assert.deepEqual(payload.application.developmentFocus.map((item) => item.statement), ['Rigor development 1', 'People development 2', 'Delivery development 2']);
+});
+
+test('single-domain completion marks ready only when the canonical payload is structurally complete', async () => {
+  const harness = createDb();
+  const service = createAssessmentCompletionService({ db: harness.db });
+  const result = await service.completeAssessmentAttempt({ attemptId: 'attempt-1', userId: 'user-1' });
+
+  assert.equal(result.mode, 'single_domain');
+  assert.equal(result.resultStatus, 'ready');
+  assert.equal(harness.attempts[0]?.lifecycleStatus, 'RESULT_READY');
+  assert.equal(harness.results[0]?.readinessStatus, 'READY');
+  assert.equal(harness.results[0]?.canonicalResultPayload?.metadata.mode, 'single_domain');
+});
+
+test('incomplete single-domain attempts fail and never become ready', async () => {
+  const harness = createDb({
+    responses: [
+      { responseId: 'response-1', attemptId: 'attempt-1', questionId: 'question-1', selectedOptionId: 'option-1a', respondedAt: '2026-04-12T09:57:00.000Z', updatedAt: '2026-04-12T09:57:00.000Z' },
+      { responseId: 'response-2', attemptId: 'attempt-1', questionId: 'question-2', selectedOptionId: 'option-2a', respondedAt: '2026-04-12T09:58:00.000Z', updatedAt: '2026-04-12T09:58:00.000Z' },
+      { responseId: 'response-3', attemptId: 'attempt-1', questionId: 'question-3', selectedOptionId: 'option-3a', respondedAt: '2026-04-12T09:59:00.000Z', updatedAt: '2026-04-12T09:59:00.000Z' },
+    ],
+  });
+  const service = createAssessmentCompletionService({ db: harness.db });
+
+  await assert.rejects(() => service.completeAssessmentAttempt({ attemptId: 'attempt-1', userId: 'user-1' }), /every question to be answered/i);
+  assert.equal(harness.attempts[0]?.lifecycleStatus, 'FAILED');
+  assert.equal(harness.results[0]?.readinessStatus, 'FAILED');
+});
+
+test('single-domain result retrieval returns the payload cleanly without affecting list semantics', async () => {
+  const harness = createDb();
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  harness.results.push({
+    resultId: 'result-read',
+    attemptId: 'attempt-1',
+    assessmentId: 'assessment-1',
+    assessmentVersionId: 'version-1',
+    pipelineStatus: 'COMPLETED',
+    readinessStatus: 'READY',
+    canonicalResultPayload: payload,
+    failureReason: null,
+    generatedAt: '2026-04-12T10:00:00.000Z',
+    createdAt: '2026-04-12T10:00:00.000Z',
+    updatedAt: '2026-04-12T10:00:00.000Z',
+  });
+
+  const service = createResultReadModelService({ db: harness.db });
+  const list = await service.listAssessmentResults({ userId: 'user-1' });
+  const detail = await service.getAssessmentResultDetail({ userId: 'user-1', resultId: 'result-read' });
+
+  assert.equal(list[0]?.mode, 'single_domain');
+  assert.equal(list[0]?.topSignal?.signalKey, 'vision');
+  assert.equal(detail.mode, 'single_domain');
+  assert.equal(detail.singleDomainResult?.hero.hero_headline, 'Hero vision_delivery');
+});
+
+test('multi-domain attempts still route through the injected multi-domain engine path', async () => {
+  const harness = createDb({
+    attempts: [{
+      attemptId: 'attempt-2',
+      userId: 'user-1',
+      assessmentId: 'assessment-1',
+      assessmentVersionId: 'version-2',
+      assessmentKey: 'wplp80',
+      assessmentMode: 'multi_domain',
+      versionTag: '1.0.0',
+      lifecycleStatus: 'IN_PROGRESS',
+      startedAt: '2026-04-12T09:50:00.000Z',
+      submittedAt: null,
+      completedAt: null,
+      lastActivityAt: '2026-04-12T10:00:00.000Z',
+      createdAt: '2026-04-12T09:50:00.000Z',
+      updatedAt: '2026-04-12T10:00:00.000Z',
+    }],
+    responses: [{
+      responseId: 'response-md-1',
+      attemptId: 'attempt-2',
+      questionId: 'question-1',
+      selectedOptionId: 'option-1a',
+      respondedAt: '2026-04-12T10:00:00.000Z',
+      updatedAt: '2026-04-12T10:00:00.000Z',
+    }],
+  });
+  let engineCalls = 0;
+  const service = createAssessmentCompletionService({
+    db: harness.db,
+    executeEngine: async () => {
+      engineCalls += 1;
+      return {
+        metadata: { assessmentKey: 'wplp80', assessmentTitle: 'WPLP-80', version: '1.0.0', attemptId: 'attempt-2', completedAt: '2026-04-12T10:00:00.000Z' },
+        intro: { assessmentDescription: null },
+        hero: { headline: 'Multi hero', subheadline: null, summary: null, narrative: 'Narrative', pressureOverlay: null, environmentOverlay: null, primaryPattern: { label: 'Vision', signalKey: 'vision', signalLabel: 'Vision' }, heroPattern: null, domainPairWinners: [], traitTotals: [], matchedPatterns: [], domainHighlights: [] },
+        domains: [],
+        actions: { strengths: [], watchouts: [], developmentFocus: [] },
+        application: { thesis: { headline: '', summary: '', sourceKeys: { heroPatternKey: '' } }, signatureContribution: { title: '', summary: '', items: [] }, patternRisks: { title: '', summary: '', items: [] }, rangeBuilder: { title: '', summary: '', items: [] }, actionPlan30: { keepDoing: '', watchFor: '', practiceNext: '', askOthers: '' } },
+        diagnostics: { readinessStatus: 'ready', scoring: { scoringMethod: 'option_signal_weights_only', totalQuestions: 1, answeredQuestions: 1, unansweredQuestions: 0, totalResponsesProcessed: 1, totalWeightsApplied: 1, totalScoreMass: 1, zeroScoreSignalCount: 0, zeroAnswerSubmission: false, warnings: [], generatedAt: '2026-04-12T10:00:00.000Z' }, normalization: { normalizationMethod: 'largest_remainder_integer_percentages', totalScoreMass: 1, zeroMass: false, globalPercentageSum: 100, domainPercentageSums: {}, roundingAdjustmentsApplied: 0, zeroScoreSignalCount: 0, warnings: [], generatedAt: '2026-04-12T10:00:00.000Z' }, answeredQuestionCount: 1, totalQuestionCount: 1, missingQuestionIds: [], topSignalSelectionBasis: 'normalized_rank', rankedSignalCount: 1, domainCount: 0, zeroMass: false, zeroMassTopSignalFallbackApplied: false, warnings: [], generatedAt: '2026-04-12T10:00:00.000Z' },
+      };
+    },
+  });
+
+  const result = await service.completeAssessmentAttempt({ attemptId: 'attempt-2', userId: 'user-1' });
+  assert.equal(engineCalls, 1);
+  assert.equal(result.mode, 'multi_domain');
+});
