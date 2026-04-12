@@ -13,3 +13,12 @@ pnpm-debug.log*
 ~$*.xlsx
 .codex-artifacts/
 .codex-dev.err.log
+# Codex / temp
+.codex-temp/
+tmp-*.png
+tmp-lighthouse/
+mnt/
+
+# OS / misc
+.DS_Store
+Thumbs.db

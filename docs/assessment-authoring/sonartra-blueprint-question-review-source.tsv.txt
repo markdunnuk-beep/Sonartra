@@ -1,0 +1,91 @@
+question_id 	 question 	 domain 	 signal 
+1	When starting a new initiative, what do you do first?	Operating Style	driver
+2	How would you describe your natural pace at work?	Operating Style	driver
+3	When priorities shift suddenly, what is your instinct?	Operating Style	driver
+4	What kind of work do you naturally gravitate towards?	Operating Style	driver
+5	When there is little clarity, what do you do?	Operating Style	driver
+6	When working on something important, how do you handle detail?	Operating Style	driver
+7	When receiving feedback, what is your instinct?	Operating Style	driver
+8	When making decisions, what do you rely on most?	Operating Style	driver
+9	In meetings, how do you usually contribute?	Operating Style	driver
+10	How would others describe how you work?	Operating Style	driver
+11	What gives you the strongest sense of progress at work?	Core Drivers	achievement
+12	What motivates you most in your work?	Core Drivers	achievement
+13	When you feel most satisfied at work, what has usually happened?	Core Drivers	achievement
+14	What are you most likely to prioritise when time is limited?	Core Drivers	achievement
+15	What type of success matters most to you?	Core Drivers	achievement
+16	What drives you to keep pushing forward?	Core Drivers	achievement
+17	When facing a difficult choice, what matters most?	Core Drivers	achievement
+18	What kind of recognition matters most to you?	Core Drivers	achievement
+19	What type of work environment motivates you most?	Core Drivers	achievement
+20	When you look back on your work, what matters most?	Core Drivers	achievement
+21	When leading a team, what do you focus on most?	Leadership Approach	results
+22	How do you define success for your team?	Leadership Approach	results
+23	When performance drops, what is your instinct?	Leadership Approach	results
+24	In meetings, how do you tend to lead?	Leadership Approach	results
+25	When setting expectations, what matters most?	Leadership Approach	results
+26	What do you emphasise most in your leadership?	Leadership Approach	results
+27	When making team decisions, what do you prioritise?	Leadership Approach	results
+28	How do you typically manage accountability?	Leadership Approach	results
+29	What do others rely on you for most as a leader?	Leadership Approach	results
+30	How would your leadership style be described?	Leadership Approach	results
+31	When you strongly disagree with someone, what do you do?	Tension Response	compete
+32	In a tense discussion, what is your instinct?	Tension Response	compete
+33	When conflict arises, how do you typically respond?	Tension Response	compete
+34	When you feel challenged, what do you do?	Tension Response	compete
+35	When discussions become heated, how do you respond?	Tension Response	compete
+36	How do you approach difficult conversations?	Tension Response	compete
+37	When progress is blocked by disagreement, what do you do?	Tension Response	compete
+38	How do you handle opposing views?	Tension Response	compete
+39	When tensions rise in a team, what do you do?	Tension Response	compete
+40	How do others experience you in conflict?	Tension Response	compete
+41	How do you generally view risk?	Operating Style	driver
+42	What kind of decisions do you prefer to make?	Operating Style	driver
+43	In high-stakes situations, what do you prioritise?	Operating Style	driver
+44	When making judgement calls, what do you trust most?	Operating Style	driver
+45	What level of uncertainty are you comfortable with?	Operating Style	driver
+46	When under pressure, what drives your decisions most?	Core Drivers	achievement
+47	If forced to choose, what would you prioritise?	Core Drivers	achievement
+48	What frustrates you most when things go wrong?	Core Drivers	achievement
+49	What gives you confidence in your work?	Core Drivers	achievement
+50	What do you naturally protect most in your work?	Core Drivers	achievement
+51	Under pressure, how do you lead?	Leadership Approach	results
+52	If forced to choose, what matters most?	Leadership Approach	results
+53	What frustrates you most in a team?	Leadership Approach	results
+54	What gives you confidence in a team?	Leadership Approach	results
+55	What do you protect most as a leader?	Leadership Approach	results
+56	Under pressure in conflict, what is your instinct?	Tension Response	compete
+57	If forced to choose in a disagreement, what matters most?	Tension Response	compete
+58	What frustrates you most in conflict?	Tension Response	compete
+59	What gives you confidence in tense situations?	Tension Response	compete
+60	What do you instinctively protect in conflict?	Tension Response	compete
+61	What type of environment brings out your best work?	Environment Fit	competitive
+62	What kind of culture motivates you most?	Environment Fit	competitive
+63	When choosing a role, what matters most?	Environment Fit	competitive
+64	What kind of team environment suits you best?	Environment Fit	competitive
+65	What energises you most at work?	Environment Fit	competitive
+66	What type of pace suits you best?	Environment Fit	competitive
+67	What kind of leadership environment works best for you?	Environment Fit	competitive
+68	What kind of expectations do you prefer?	Environment Fit	competitive
+69	What kind of environment helps you stay engaged?	Environment Fit	competitive
+70	What kind of workplace do you prefer overall?	Environment Fit	competitive
+71	If forced to choose, what matters most?	Environment Fit	competitive
+72	What frustrates you most in a workplace?	Environment Fit	competitive
+73	What would you struggle with most long-term?	Environment Fit	competitive
+74	What gives you confidence in an organisation?	Environment Fit	competitive
+75	What do you naturally seek out at work?	Environment Fit	competitive
+76	When pressure increases, what is your first instinct?	Pressure Response	control
+77	How does your behaviour change under sustained pressure?	Pressure Response	control
+78	When things feel out of control, what do you do?	Pressure Response	control
+79	When deadlines are intense, how do you respond?	Pressure Response	control
+80	How do others experience you under pressure?	Pressure Response	control
+81	When things start to slip, what do you do?	Pressure Response	control
+82	What happens to your decision-making under pressure?	Pressure Response	control
+83	When workload increases sharply, what do you do?	Pressure Response	control
+84	When under pressure, what do you rely on most?	Pressure Response	control
+85	What is your natural reaction to pressure overall?	Pressure Response	control
+86	If pressure keeps increasing, what are you most likely to do?	Pressure Response	control
+87	What frustrates you most under pressure?	Pressure Response	control
+88	What gives you confidence under pressure?	Pressure Response	control
+89	What do you instinctively protect under pressure?	Pressure Response	control
+90	If others misunderstand your behaviour under pressure, what is most likely?	Pressure Response	control
