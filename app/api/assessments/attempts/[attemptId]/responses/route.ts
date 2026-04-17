@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 
 import { getDbPool } from '@/lib/server/db';
 import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
+import {
+  requireCurrentUser,
+  isAuthenticatedUserRequiredError,
+  isDisabledUserAccessError,
+} from '@/lib/server/request-user';
 
 type SaveResponseBody = {
   assessmentKey?: string;
@@ -17,8 +22,24 @@ export async function POST(
     }>;
   },
 ) {
-  const userId = request.headers.get('x-user-id');
-  if (!userId) {
+  let requestUser;
+
+  try {
+    requestUser = await requireCurrentUser();
+  } catch (error) {
+    if (isAuthenticatedUserRequiredError(error)) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+
+    if (isDisabledUserAccessError(error)) {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+    }
+
+    const message = error instanceof Error ? error.message : 'internal_error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+
+  if (!requestUser) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
@@ -38,7 +59,7 @@ export async function POST(
 
   try {
     const result = await service.saveAssessmentResponse({
-      userId,
+      userId: requestUser.userId,
       assessmentKey: body.assessmentKey,
       attemptId,
       questionId: body.questionId,

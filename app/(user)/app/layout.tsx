@@ -1,5 +1,4 @@
 import { UserAppShell } from '@/components/user/user-app-shell';
-import { isApprovedAdminEmail } from '@/lib/server/admin-access';
 import { getRequestUserContext } from '@/lib/server/request-user';
 
 function getUserShellLabel(params: {
@@ -18,7 +17,7 @@ export default async function UserAppLayout({
 
   return (
     <UserAppShell
-      canAccessAdmin={isApprovedAdminEmail(requestUser.userEmail)}
+      canAccessAdmin={requestUser.isAdmin}
       userLabel={getUserShellLabel(requestUser)}
     >
       {children}

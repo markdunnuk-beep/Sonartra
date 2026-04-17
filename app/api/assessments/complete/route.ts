@@ -8,6 +8,11 @@ import {
   AssessmentCompletionPersistenceError,
   AssessmentCompletionStateError,
 } from '@/lib/server/assessment-completion-types';
+import {
+  requireCurrentUser,
+  isAuthenticatedUserRequiredError,
+  isDisabledUserAccessError,
+} from '@/lib/server/request-user';
 
 const globalForAssessmentCompletion = globalThis as typeof globalThis & {
   sonartraCompletionPool?: Pool;
@@ -28,8 +33,24 @@ type CompletionRequestBody = {
 };
 
 export async function POST(request: Request) {
-  const userId = request.headers.get('x-user-id');
-  if (!userId) {
+  let requestUser;
+
+  try {
+    requestUser = await requireCurrentUser();
+  } catch (error) {
+    if (isAuthenticatedUserRequiredError(error)) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+
+    if (isDisabledUserAccessError(error)) {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+    }
+
+    const message = error instanceof Error ? error.message : 'internal_error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+
+  if (!requestUser) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
@@ -45,7 +66,7 @@ export async function POST(request: Request) {
   try {
     const result = await service.completeAssessmentAttempt({
       attemptId: body.attemptId,
-      userId,
+      userId: requestUser.userId,
     });
 
     return NextResponse.json(result, { status: 200 });

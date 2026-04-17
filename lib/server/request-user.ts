@@ -1,43 +1,115 @@
-import { headers } from 'next/headers';
+import { auth, currentUser } from '@clerk/nextjs/server';
+
+import { getDbPool } from '@/lib/server/db';
+import {
+  syncInternalUserFromClerkProfile,
+  type ClerkUserProfileLike,
+  type InternalUserRecord,
+} from '@/lib/server/internal-user-sync';
+
+export type RequestUserRole = InternalUserRecord['role'];
+export type RequestUserStatus = InternalUserRecord['status'];
 
 export type RequestUserContext = {
   userId: string;
-  userEmail: string | null;
+  clerkUserId: string;
+  userEmail: string;
+  userName: string | null;
+  userRole: RequestUserRole;
+  userStatus: RequestUserStatus;
+  isAdmin: boolean;
 };
 
-const MISSING_REQUEST_USER_ID_ERROR = 'Authenticated user id is required for user app routes';
+export class AuthenticatedUserRequiredError extends Error {
+  constructor() {
+    super('Authenticated Clerk user is required for server-side user resolution');
+    this.name = 'AuthenticatedUserRequiredError';
+  }
+}
 
-export function resolveUserIdFromHeaders(requestHeaders: Headers): string {
-  const userId =
-    requestHeaders.get('x-user-id') ??
-    process.env.SONARTRA_DEV_USER_ID ??
-    null;
+export class ClerkUserProfileRequiredError extends Error {
+  constructor() {
+    super('Authenticated Clerk profile is required for internal user synchronisation');
+    this.name = 'ClerkUserProfileRequiredError';
+  }
+}
 
-  if (!userId) {
-    throw new Error(MISSING_REQUEST_USER_ID_ERROR);
+export class DisabledUserAccessError extends Error {
+  constructor() {
+    super('Disabled users cannot access authenticated app routes');
+    this.name = 'DisabledUserAccessError';
+  }
+}
+
+type ClerkAuthState = {
+  userId: string | null;
+};
+
+type RequireCurrentUserDependencies = {
+  auth(): Promise<ClerkAuthState>;
+  currentUser(): Promise<ClerkUserProfileLike | null>;
+  syncInternalUserFromClerkProfile(
+    clerkUser: ClerkUserProfileLike,
+  ): Promise<InternalUserRecord>;
+};
+
+function mapRequestUserContext(user: InternalUserRecord): RequestUserContext {
+  return {
+    userId: user.id,
+    clerkUserId: user.clerkUserId,
+    userEmail: user.email,
+    userName: user.name,
+    userRole: user.role,
+    userStatus: user.status,
+    isAdmin: user.role === 'admin',
+  };
+}
+
+export function isAuthenticatedUserRequiredError(error: unknown): boolean {
+  return error instanceof AuthenticatedUserRequiredError;
+}
+
+export function isDisabledUserAccessError(error: unknown): boolean {
+  return error instanceof DisabledUserAccessError;
+}
+
+export async function requireCurrentUserWithDependencies(
+  dependencies: RequireCurrentUserDependencies,
+): Promise<RequestUserContext> {
+  const authState = await dependencies.auth();
+
+  if (!authState.userId) {
+    throw new AuthenticatedUserRequiredError();
   }
 
-  return userId;
+  const clerkUser = await dependencies.currentUser();
+  if (!clerkUser || clerkUser.id !== authState.userId) {
+    throw new ClerkUserProfileRequiredError();
+  }
+
+  const internalUser = await dependencies.syncInternalUserFromClerkProfile(clerkUser);
+
+  if (internalUser.status === 'disabled') {
+    throw new DisabledUserAccessError();
+  }
+
+  return mapRequestUserContext(internalUser);
 }
 
-export function isMissingRequestUserError(error: unknown): boolean {
-  return error instanceof Error && error.message === MISSING_REQUEST_USER_ID_ERROR;
-}
-
-export function resolveUserEmailFromHeaders(requestHeaders: Headers): string | null {
-  return requestHeaders.get('x-user-email') ?? process.env.SONARTRA_DEV_USER_EMAIL ?? null;
+export async function requireCurrentUser(): Promise<RequestUserContext> {
+  return requireCurrentUserWithDependencies({
+    auth,
+    currentUser,
+    syncInternalUserFromClerkProfile: (clerkUser) =>
+      syncInternalUserFromClerkProfile(getDbPool(), clerkUser),
+  });
 }
 
 export async function getRequestUserId(): Promise<string> {
-  const requestHeaders = await headers();
-  return resolveUserIdFromHeaders(requestHeaders);
+  const requestUser = await requireCurrentUser();
+  return requestUser.userId;
 }
 
 export async function getRequestUserContext(): Promise<RequestUserContext> {
-  const requestHeaders = await headers();
-
-  return {
-    userId: resolveUserIdFromHeaders(requestHeaders),
-    userEmail: resolveUserEmailFromHeaders(requestHeaders),
-  };
+  return requireCurrentUser();
 }
