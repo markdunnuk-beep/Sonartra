@@ -36,3 +36,23 @@ test('admin shell sidebar constrains horizontal overflow at the container', () =
   assert.match(source, /sonartra-shell-nav-track space-y-2/);
   assert.match(source, /min-h-12 w-full items-center/);
 });
+
+test('admin shell mobile drawer uses explicit overlay semantics and scroll locking', () => {
+  const source = readSource(adminShellPath);
+
+  assert.match(source, /const mobileSidebarCollapsed = collapsed && !mobileOpen;/);
+  assert.match(source, /document\.body\.dataset\.adminMobileScrollLock = 'true';/);
+  assert.match(source, /htmlStyle\.overflow = 'hidden';/);
+  assert.match(source, /bodyStyle\.overflow = 'hidden';/);
+  assert.match(source, /bodyStyle\.touchAction = 'none';/);
+  assert.match(source, /delete document\.body\.dataset\.adminMobileScrollLock;/);
+  assert.match(source, /window\.addEventListener\('keydown', handleKeyDown\);/);
+  assert.match(source, /if \(event\.key === 'Escape'\) \{\s*setMobileOpen\(false\);/);
+  assert.match(source, /role=\{mobileOpen \? 'dialog' : 'complementary'\}/);
+  assert.match(source, /aria-modal=\{mobileOpen \? true : undefined\}/);
+  assert.match(source, /data-admin-mobile-drawer=\{mobileOpen \? 'open' : 'closed'\}/);
+  assert.match(source, /data-admin-mobile-overlay="open"/);
+  assert.match(source, /Controlled admin navigation\. Close to return to the current record\./);
+  assert.match(source, /aria-hidden=\{mobileOpen \? true : undefined\}/);
+  assert.match(source, /aria-expanded=\{mobileOpen\}/);
+});
