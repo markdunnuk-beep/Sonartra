@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DisabledUserAccessError, ClerkUserProfileRequiredError } from '@/lib/server/request-user';
+import {
+  AuthenticatedUserRequiredError,
+  DisabledUserAccessError,
+  ClerkUserProfileRequiredError,
+} from '@/lib/server/request-user';
 import { requireUserAppRequestUserContextWithDependencies } from '@/lib/server/user-app-access';
 
 test('user app access returns the request context for an active persisted user', async () => {
@@ -32,6 +36,21 @@ test('user app access redirects to the public home route when Clerk profile reso
       requireUserAppRequestUserContextWithDependencies({
         async getRequestUserContext() {
           throw new ClerkUserProfileRequiredError();
+        },
+        redirect(path: string): never {
+          throw new Error(`REDIRECT:${path}`);
+        },
+      }),
+    /REDIRECT:\//,
+  );
+});
+
+test('user app access redirects to the public home route when no authenticated session exists', async () => {
+  await assert.rejects(
+    () =>
+      requireUserAppRequestUserContextWithDependencies({
+        async getRequestUserContext() {
+          throw new AuthenticatedUserRequiredError();
         },
         redirect(path: string): never {
           throw new Error(`REDIRECT:${path}`);
