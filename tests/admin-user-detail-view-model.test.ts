@@ -5,6 +5,7 @@ import {
   buildAdminUserDetailViewModel,
   projectAdminUserDetailViewModel,
 } from '@/lib/server/admin-user-detail';
+import { ADMIN_USERS_COMPLETED_RESULT_FIXTURE } from '@/lib/server/admin-users-completed-result-fixture';
 
 test('non-existent admin user detail resolves safely to null', async () => {
   const viewModel = await buildAdminUserDetailViewModel({
@@ -208,6 +209,51 @@ test('completed assignments resolve canonical result links through assignment to
   assert.equal(viewModel?.currentAssessmentLabel, null);
   assert.equal(viewModel?.currentStateLabel, 'Execution Style - Completed');
   assert.equal(viewModel?.assignments[0]?.resultHref, '/app/results/single-domain/result-2');
+});
+
+test('completed-result QA fixture detail row stays history locked with the canonical result link', () => {
+  const viewModel = projectAdminUserDetailViewModel([
+    {
+      user_id: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.userId,
+      user_name: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.name,
+      user_email: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.email,
+      user_status: 'active',
+      user_role: 'user',
+      user_created_at: '2026-04-10T08:55:00.000Z',
+      organisation_id: null,
+      assignment_id: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.assignmentId,
+      assignment_status: 'completed',
+      assignment_order_index: 0,
+      assessment_version_id: 'fixture-version-id',
+      attempt_id: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.attemptId,
+      assigned_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.assignedAt,
+      started_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.startedAt,
+      completed_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+      assignment_updated_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+      attempt_last_activity_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+      attempt_updated_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+      attempt_created_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.startedAt,
+      result_id: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.resultId,
+      result_generated_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+      result_created_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+      assessment_title: 'WPLP-80',
+      assessment_mode: 'multi_domain',
+    },
+  ]);
+
+  assert.equal(viewModel?.email, ADMIN_USERS_COMPLETED_RESULT_FIXTURE.email);
+  assert.equal(viewModel?.currentStateLabel, 'WPLP-80 - Completed');
+  assert.equal(viewModel?.controls.assignments[0]?.eligibilityLabel, 'History locked');
+  assert.equal(viewModel?.controls.assignments[0]?.blockedReason, 'Result exists - history locked.');
+  assert.equal(viewModel?.controls.assignments[0]?.canRemove, false);
+  assert.equal(
+    viewModel?.controls.assignments[0]?.resultHref,
+    `/app/results/${ADMIN_USERS_COMPLETED_RESULT_FIXTURE.resultId}`,
+  );
+  assert.equal(
+    viewModel?.assignments[0]?.resultHref,
+    `/app/results/${ADMIN_USERS_COMPLETED_RESULT_FIXTURE.resultId}`,
+  );
 });
 
 test('assignments without attempts or results and missing optional fields do not crash the projection', () => {

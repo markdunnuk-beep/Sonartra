@@ -6,6 +6,7 @@ import {
   parseAdminUsersListFilters,
   projectAdminUsersListViewModel,
 } from '@/lib/server/admin-users-list';
+import { ADMIN_USERS_COMPLETED_RESULT_FIXTURE } from '@/lib/server/admin-users-completed-result-fixture';
 
 test('invalid admin users filter params fail safely to canonical defaults', () => {
   const filters = parseAdminUsersListFilters({
@@ -186,6 +187,40 @@ test('in-progress and completed states derive from canonical assignment sequenci
   assert.equal(completedViewModel.items[0]?.progressState, 'completed');
   assert.equal(completedViewModel.items[0]?.currentAssessmentLabel, null);
   assert.equal(completedViewModel.items[0]?.userStatus, 'disabled');
+});
+
+test('completed-result QA fixture remains visible in the admin users list as a completed record', () => {
+  const viewModel = projectAdminUsersListViewModel({
+    filters: { query: '', status: 'all', progress: 'all' },
+    rows: [
+      {
+        user_id: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.userId,
+        user_name: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.name,
+        user_email: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.email,
+        user_status: 'active',
+        organisation_id: null,
+        assignment_id: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.assignmentId,
+        assignment_status: 'completed',
+        assignment_order_index: 0,
+        assigned_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.assignedAt,
+        started_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.startedAt,
+        completed_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+        assignment_updated_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+        attempt_last_activity_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+        attempt_updated_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+        attempt_created_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.startedAt,
+        result_generated_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+        result_created_at: ADMIN_USERS_COMPLETED_RESULT_FIXTURE.completedAt,
+        assessment_title: 'WPLP-80',
+      },
+    ],
+  });
+
+  assert.equal(viewModel.filteredUsers, 1);
+  assert.equal(viewModel.items[0]?.email, ADMIN_USERS_COMPLETED_RESULT_FIXTURE.email);
+  assert.equal(viewModel.items[0]?.progressState, 'completed');
+  assert.equal(viewModel.items[0]?.currentAssessmentLabel, null);
+  assert.equal(viewModel.items[0]?.nextAssessmentLabel, null);
 });
 
 test('search filters by name and email', () => {

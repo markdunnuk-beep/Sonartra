@@ -21,3 +21,10 @@ npm run db:migrate
 WPLP-80 structured seed files remain under `db/seed/wplp80/`.
 
 Task 4 introduces schema only; WPLP-80 inserts come in Task 5.
+
+For local Admin Users QA, a dedicated completed-result fixture can be created after the core seed path:
+
+```bash
+npm run seed:wplp80
+npm run seed:admin-users-fixture
+```

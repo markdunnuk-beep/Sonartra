@@ -229,22 +229,24 @@ for (const domain of seeds.domains) {
       const result = await client.query<IdRow>(
         `
         INSERT INTO options (
+          assessment_version_id,
           question_id,
           option_key,
           option_label,
           option_text,
           order_index
         )
-        VALUES ($1, $2, $3, $4, $5)
+        VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (question_id, option_key)
         DO UPDATE SET
+          assessment_version_id = EXCLUDED.assessment_version_id,
           option_label = EXCLUDED.option_label,
           option_text = EXCLUDED.option_text,
           order_index = EXCLUDED.order_index,
           updated_at = NOW()
         RETURNING id
         `,
-        [questionId, option.key, option.label, option.text, option.order],
+        [assessmentVersionId, questionId, option.key, option.label, option.text, option.order],
       );
 
       optionIdByKey.set(option.key, result.rows[0]?.id);
