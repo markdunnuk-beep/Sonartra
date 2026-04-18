@@ -568,8 +568,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
             <section
               id={TOP_LEVEL_SECTION_IDS.intro}
               aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.intro}
-              className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-4 md:space-y-5`}
-              style={getRevealStyle(0)}
+              className={`${RESULTS_ANCHOR_TARGET_CLASS} space-y-4 md:space-y-5`}
             >
               <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.intro} className="sr-only">
                 Introduction

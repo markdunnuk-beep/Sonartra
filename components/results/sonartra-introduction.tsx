@@ -150,7 +150,9 @@ export function SonartraIntroduction({
 
         @media (prefers-reduced-motion: no-preference) {
           .sonartra-intro-reveal {
-            animation: sonartra-intro-reveal 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+            will-change: opacity, transform;
+            backface-visibility: hidden;
+            animation: sonartra-intro-reveal 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
           }
 
           [data-sonartra-intro-reveal='meta'] {
@@ -158,27 +160,27 @@ export function SonartraIntroduction({
           }
 
           [data-sonartra-intro-reveal='header'] {
-            animation-delay: 60ms;
+            animation-delay: 120ms;
           }
 
           [data-sonartra-intro-reveal='supporting'] {
-            animation-delay: 140ms;
+            animation-delay: 240ms;
           }
 
           [data-sonartra-intro-reveal='step-1'] {
-            animation-delay: 200ms;
+            animation-delay: 360ms;
           }
 
           [data-sonartra-intro-reveal='step-2'] {
-            animation-delay: 260ms;
+            animation-delay: 480ms;
           }
 
           [data-sonartra-intro-reveal='step-3'] {
-            animation-delay: 320ms;
+            animation-delay: 600ms;
           }
 
           [data-sonartra-introduction-visual='true'].sonartra-intro-reveal {
-            animation-delay: 380ms;
+            animation-delay: 640ms;
           }
 
           .sonartra-intro-connector-flow-vertical {
@@ -205,7 +207,7 @@ export function SonartraIntroduction({
         @keyframes sonartra-intro-reveal {
           from {
             opacity: 0;
-            transform: translateY(8px);
+            transform: translateY(4px);
           }
 
           to {
