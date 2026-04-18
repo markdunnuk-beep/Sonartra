@@ -39,6 +39,10 @@ test('admin user detail component keeps the operational record layout and wires 
 
   assert.match(componentSource, /Assessment timeline/);
   assert.match(componentSource, /View result/);
+  assert.match(componentSource, /data-assignment-timeline-row="true"/);
+  assert.match(componentSource, /data-assignment-timeline-state=\{tone\}/);
+  assert.match(componentSource, /data-assignment-timeline-result="ready"/);
+  assert.match(componentSource, /Result ready/);
   assert.match(componentSource, /rounded-full border border-white\/12 bg-white\/\[0\.06\]/);
   assert.match(componentSource, /No canonical result yet/);
   assert.match(componentSource, /rounded-2xl border border-white\/8 bg-black\/10 px-4 py-3/);
@@ -70,6 +74,20 @@ test('admin user detail component keeps the operational record layout and wires 
   assert.match(controlsSource, /resultStateLabel/);
   assert.match(controlsSource, /executionStateLabel/);
   assert.match(controlsSource, /Canonical result/);
+  assert.match(controlsSource, /data-assignment-row="true"/);
+  assert.match(controlsSource, /data-assignment-state=\{tone\}/);
+  assert.match(controlsSource, /data-assignment-removal=\{assignment\.canRemove \? 'safe' : 'blocked'\}/);
+  assert.match(controlsSource, /data-assignment-actions=\{assignment\.canRemove \? 'safe-removal' : 'locked-removal'\}/);
+  assert.match(controlsSource, /Safe removal/);
+  assert.match(controlsSource, /Removal locked/);
+  assert.match(controlsSource, /Editable queue/);
+  assert.match(controlsSource, /Fixed history/);
+  assert.match(controlsSource, /Started history/);
+  assert.match(controlsSource, /Completed history/);
+  assert.match(controlsSource, /Result ready/);
+  assert.match(controlsSource, /Canonical result ready/);
+  assert.match(controlsSource, /This queued row is still in play\./);
+  assert.match(controlsSource, /This row now reads as part of the fixed record\./);
   assert.match(controlsSource, /controls\.ruleSummary/);
   assert.match(registrySource, /href=\{item\.detailHref\}/);
 });

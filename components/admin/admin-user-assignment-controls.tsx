@@ -21,6 +21,7 @@ import {
   removeAdminUserAssignmentAction,
   reorderAdminUserAssignmentAction,
 } from '@/lib/server/admin-user-assignment-controls';
+import type { AdminUserDetailAssignmentControlViewModel } from '@/lib/server/admin-user-detail';
 
 function getMutationFeedbackMessage(value: string | null): string | null {
   switch (value) {
@@ -72,6 +73,111 @@ function PendingButton({
       {pending ? pendingLabel : idleLabel}
     </button>
   );
+}
+
+type AssignmentVisualTone =
+  | 'editable'
+  | 'fixed'
+  | 'started'
+  | 'completed'
+  | 'result_ready';
+
+function getAssignmentVisualTone(
+  assignment: AdminUserDetailAssignmentControlViewModel,
+): AssignmentVisualTone {
+  if (assignment.resultHref) {
+    return 'result_ready';
+  }
+
+  if (assignment.status === 'completed') {
+    return 'completed';
+  }
+
+  if (assignment.status === 'in_progress' || assignment.executionStateLabel === 'Historically active') {
+    return 'started';
+  }
+
+  if (assignment.canRemove || assignment.canMoveEarlier || assignment.canMoveLater) {
+    return 'editable';
+  }
+
+  return 'fixed';
+}
+
+function getAssignmentVisualToneLabel(tone: AssignmentVisualTone): string {
+  switch (tone) {
+    case 'editable':
+      return 'Editable queue';
+    case 'fixed':
+      return 'Fixed history';
+    case 'started':
+      return 'Started history';
+    case 'completed':
+      return 'Completed history';
+    case 'result_ready':
+      return 'Result ready';
+  }
+}
+
+function getAssignmentRowClassName(tone: AssignmentVisualTone): string {
+  switch (tone) {
+    case 'editable':
+      return 'border-[rgba(142,162,255,0.22)] bg-[linear-gradient(180deg,rgba(142,162,255,0.12),rgba(255,255,255,0.03))] shadow-[inset_0_0_0_1px_rgba(142,162,255,0.08)]';
+    case 'fixed':
+      return 'border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.025))]';
+    case 'started':
+      return 'border-[rgba(255,184,107,0.2)] bg-[linear-gradient(180deg,rgba(255,184,107,0.1),rgba(255,255,255,0.03))] shadow-[inset_0_0_0_1px_rgba(255,184,107,0.06)]';
+    case 'completed':
+      return 'border-[rgba(116,209,177,0.16)] bg-[linear-gradient(180deg,rgba(116,209,177,0.08),rgba(255,255,255,0.03))]';
+    case 'result_ready':
+      return 'border-[rgba(116,209,177,0.26)] bg-[linear-gradient(180deg,rgba(116,209,177,0.14),rgba(255,255,255,0.03))] shadow-[0_0_0_1px_rgba(116,209,177,0.08),inset_0_1px_0_rgba(255,255,255,0.04)]';
+  }
+}
+
+function getAssignmentRailClassName(tone: AssignmentVisualTone): string {
+  switch (tone) {
+    case 'editable':
+      return 'bg-[rgba(142,162,255,0.9)]';
+    case 'fixed':
+      return 'bg-white/16';
+    case 'started':
+      return 'bg-[rgba(255,184,107,0.9)]';
+    case 'completed':
+      return 'bg-[rgba(116,209,177,0.58)]';
+    case 'result_ready':
+      return 'bg-[rgba(116,209,177,0.92)]';
+  }
+}
+
+function getAssignmentTonePillClassName(tone: AssignmentVisualTone): string {
+  switch (tone) {
+    case 'editable':
+      return 'border-[rgba(142,162,255,0.24)] bg-[rgba(142,162,255,0.12)] text-[rgba(228,234,255,0.9)]';
+    case 'fixed':
+      return 'border-white/12 bg-black/10 text-white/62';
+    case 'started':
+      return 'border-[rgba(255,184,107,0.2)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.9)]';
+    case 'completed':
+      return 'border-[rgba(116,209,177,0.18)] bg-[rgba(116,209,177,0.09)] text-[rgba(214,246,233,0.82)]';
+    case 'result_ready':
+      return 'border-[rgba(116,209,177,0.24)] bg-[rgba(116,209,177,0.14)] text-[rgba(214,246,233,0.9)]';
+  }
+}
+
+function getActionPanelClassName(tone: AssignmentVisualTone, canRemove: boolean): string {
+  if (tone === 'editable' && canRemove) {
+    return 'border-[rgba(142,162,255,0.18)] bg-[rgba(142,162,255,0.08)]';
+  }
+
+  if (tone === 'result_ready' || tone === 'completed') {
+    return 'border-[rgba(116,209,177,0.14)] bg-[rgba(116,209,177,0.06)]';
+  }
+
+  if (tone === 'started') {
+    return 'border-[rgba(255,184,107,0.14)] bg-[rgba(255,184,107,0.06)]';
+  }
+
+  return 'border-white/10 bg-black/10';
 }
 
 function ReorderForm({
@@ -266,78 +372,143 @@ export function AdminUserAssignmentControls({
             </p>
           </SurfaceCard>
         ) : (
-          controls.assignments.map((assignment) => (
-            <SurfaceCard className="p-4" key={assignment.id}>
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex min-h-10 items-center rounded-full border border-white/12 bg-white/[0.06] px-3 py-2 text-sm font-medium text-white">
-                      {assignment.orderLabel}
-                    </span>
-                    <LabelPill className="border-white/12 bg-white/[0.06] text-white/74">
-                      {assignment.statusLabel}
-                    </LabelPill>
-                    <LabelPill className="border-white/12 bg-black/10 text-white/68">
-                      {assignment.eligibilityLabel}
-                    </LabelPill>
+          controls.assignments.map((assignment) => {
+            const tone = getAssignmentVisualTone(assignment);
+
+            return (
+              <SurfaceCard
+                className={cn('overflow-hidden p-0', getAssignmentRowClassName(tone))}
+                key={assignment.id}
+              >
+                <article
+                  className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_22rem]"
+                  data-assignment-row="true"
+                  data-assignment-removal={assignment.canRemove ? 'safe' : 'blocked'}
+                  data-assignment-state={tone}
+                  data-assignment-status={assignment.status}
+                >
+                  <div className="flex min-w-0 gap-4 px-4 py-4 sm:px-5">
+                    <div
+                      className={cn(
+                        'hidden w-1 self-stretch rounded-full sm:block',
+                        getAssignmentRailClassName(tone),
+                      )}
+                    />
+
+                    <div className="min-w-0 flex-1 space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex min-h-10 items-center rounded-full border border-white/12 bg-white/[0.06] px-3 py-2 text-sm font-medium text-white">
+                          {assignment.orderLabel}
+                        </span>
+                        <LabelPill className="border-white/12 bg-white/[0.06] text-white/74">
+                          {assignment.statusLabel}
+                        </LabelPill>
+                        <LabelPill className={getAssignmentTonePillClassName(tone)}>
+                          {getAssignmentVisualToneLabel(tone)}
+                        </LabelPill>
+                        <LabelPill className="border-white/12 bg-black/10 text-white/68">
+                          {assignment.eligibilityLabel}
+                        </LabelPill>
+                        <LabelPill
+                          className={cn(
+                            'border-white/12 bg-black/10 text-white/62',
+                            assignment.canRemove &&
+                              'border-[rgba(142,162,255,0.18)] bg-[rgba(142,162,255,0.1)] text-[rgba(228,234,255,0.82)]',
+                          )}
+                        >
+                          {assignment.canRemove ? 'Safe removal' : 'Removal locked'}
+                        </LabelPill>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                          <h3 className="text-base font-semibold tracking-[-0.02em] text-white">
+                            {assignment.assessmentLabel}
+                          </h3>
+                          {assignment.resultHref ? (
+                            <Link
+                              className="rounded-full border border-[rgba(116,209,177,0.24)] bg-[rgba(116,209,177,0.14)] px-3 py-1 text-xs uppercase tracking-[0.12em] text-[rgba(214,246,233,0.88)] transition hover:border-[rgba(116,209,177,0.34)]"
+                              href={assignment.resultHref}
+                            >
+                              Canonical result ready
+                            </Link>
+                          ) : null}
+                        </div>
+                        <p className="text-sm text-white/56">
+                          Current sequence position {assignment.orderIndex + 1}.
+                        </p>
+                      </div>
+
+                      <div className="grid gap-2 text-sm leading-6 text-white/56 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+                        <p data-assignment-guidance="true">
+                          {assignment.blockedReason ? (
+                            assignment.blockedReason
+                          ) : (
+                            'This untouched assignment remains in the editable suffix and can be moved or removed safely.'
+                          )}
+                        </p>
+                        <div className="flex flex-wrap gap-2" data-assignment-signals="true">
+                          <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.12em] text-white/52">
+                            {assignment.executionStateLabel}
+                          </span>
+                          <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.12em] text-white/52">
+                            {assignment.attemptStateLabel}
+                          </span>
+                          <span
+                            className={cn(
+                              'rounded-full border px-3 py-1 text-xs uppercase tracking-[0.12em]',
+                              assignment.resultHref
+                                ? 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.11)] text-[rgba(214,246,233,0.84)]'
+                                : 'border-white/10 bg-black/10 text-white/52',
+                            )}
+                          >
+                            {assignment.resultStateLabel}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <h3 className="text-base font-semibold tracking-[-0.02em] text-white">
-                      {assignment.assessmentLabel}
-                    </h3>
-                    <p className="text-sm text-white/56">
-                      Current sequence position {assignment.orderIndex + 1}.
-                    </p>
+                  <div
+                    className={cn(
+                      'border-t border-white/8 px-4 py-4 sm:px-5 lg:border-l lg:border-t-0',
+                      getActionPanelClassName(tone, assignment.canRemove),
+                    )}
+                    data-assignment-actions={assignment.canRemove ? 'safe-removal' : 'locked-removal'}
+                  >
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/40">
+                          Action state
+                        </p>
+                        <p className="text-sm text-white/68">
+                          {assignment.canRemove
+                            ? 'This queued row is still in play.'
+                            : 'This row now reads as part of the fixed record.'}
+                        </p>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                        <ReorderForm
+                          assignmentId={assignment.id}
+                          direction="up"
+                          disabled={!assignment.canMoveEarlier}
+                          userId={userId}
+                        />
+                        <ReorderForm
+                          assignmentId={assignment.id}
+                          direction="down"
+                          disabled={!assignment.canMoveLater}
+                          userId={userId}
+                        />
+                        <RemoveForm assignmentId={assignment.id} disabled={!assignment.canRemove} userId={userId} />
+                      </div>
+                    </div>
                   </div>
-
-                  {assignment.blockedReason ? (
-                    <p className="text-sm leading-6 text-white/52">{assignment.blockedReason}</p>
-                  ) : (
-                    <p className="text-sm leading-6 text-white/52">
-                      This untouched assignment can move within the editable suffix or be removed safely.
-                    </p>
-                  )}
-
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.12em] text-white/52">
-                      {assignment.executionStateLabel}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.12em] text-white/52">
-                      {assignment.attemptStateLabel}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.12em] text-white/52">
-                      {assignment.resultStateLabel}
-                    </span>
-                    {assignment.resultHref ? (
-                      <Link
-                        className="rounded-full border border-[rgba(116,209,177,0.2)] bg-[rgba(116,209,177,0.08)] px-3 py-1 text-xs uppercase tracking-[0.12em] text-[rgba(214,246,233,0.84)] transition hover:border-[rgba(116,209,177,0.32)]"
-                        href={assignment.resultHref}
-                      >
-                        Canonical result
-                      </Link>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <ReorderForm
-                    assignmentId={assignment.id}
-                    direction="up"
-                    disabled={!assignment.canMoveEarlier}
-                    userId={userId}
-                  />
-                  <ReorderForm
-                    assignmentId={assignment.id}
-                    direction="down"
-                    disabled={!assignment.canMoveLater}
-                    userId={userId}
-                  />
-                  <RemoveForm assignmentId={assignment.id} disabled={!assignment.canRemove} userId={userId} />
-                </div>
-              </div>
-            </SurfaceCard>
-          ))
+                </article>
+              </SurfaceCard>
+            );
+          })
         )}
       </div>
     </div>

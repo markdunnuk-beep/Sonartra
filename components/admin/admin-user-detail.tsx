@@ -9,6 +9,7 @@ import {
   PageFrame,
   SectionHeader,
   SurfaceCard,
+  cn,
 } from '@/components/shared/user-app-ui';
 import type {
   AdminUserDetailAssignmentViewModel,
@@ -48,6 +49,65 @@ function getAssignmentStatusPillClass(status: AdminUserDetailAssignmentViewModel
   }
 }
 
+type TimelineAssignmentTone = 'queued' | 'started' | 'completed' | 'result_ready';
+
+function getTimelineAssignmentTone(
+  assignment: AdminUserDetailAssignmentViewModel,
+): TimelineAssignmentTone {
+  if (assignment.resultHref) {
+    return 'result_ready';
+  }
+
+  if (assignment.status === 'completed') {
+    return 'completed';
+  }
+
+  if (assignment.status === 'in_progress') {
+    return 'started';
+  }
+
+  return 'queued';
+}
+
+function getTimelineAssignmentFrameClassName(tone: TimelineAssignmentTone): string {
+  switch (tone) {
+    case 'queued':
+      return 'border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]';
+    case 'started':
+      return 'border-[rgba(255,184,107,0.18)] bg-[linear-gradient(180deg,rgba(255,184,107,0.08),rgba(255,255,255,0.03))]';
+    case 'completed':
+      return 'border-[rgba(116,209,177,0.16)] bg-[linear-gradient(180deg,rgba(116,209,177,0.07),rgba(255,255,255,0.02))]';
+    case 'result_ready':
+      return 'border-[rgba(116,209,177,0.24)] bg-[linear-gradient(180deg,rgba(116,209,177,0.12),rgba(255,255,255,0.03))] shadow-[0_0_0_1px_rgba(116,209,177,0.06)]';
+  }
+}
+
+function getTimelineAssignmentRailClassName(tone: TimelineAssignmentTone): string {
+  switch (tone) {
+    case 'queued':
+      return 'bg-[rgba(142,162,255,0.88)]';
+    case 'started':
+      return 'bg-[rgba(255,184,107,0.9)]';
+    case 'completed':
+      return 'bg-[rgba(116,209,177,0.58)]';
+    case 'result_ready':
+      return 'bg-[rgba(116,209,177,0.92)]';
+  }
+}
+
+function getTimelineAssignmentToneLabel(tone: TimelineAssignmentTone): string {
+  switch (tone) {
+    case 'queued':
+      return 'Queued';
+    case 'started':
+      return 'Started';
+    case 'completed':
+      return 'Completed';
+    case 'result_ready':
+      return 'Result ready';
+  }
+}
+
 function TimelineDate({
   label,
   value,
@@ -79,48 +139,90 @@ function AssignmentTimeline({
 
   return (
     <div className="space-y-3">
-      {assignments.map((assignment) => (
-        <SurfaceCard className="overflow-hidden p-0" key={assignment.id}>
-          <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex min-h-10 items-center rounded-full border border-white/12 bg-white/[0.06] px-3 py-2 text-sm font-medium text-white">
-                    {assignment.orderLabel}
-                  </span>
-                  <LabelPill className={getAssignmentStatusPillClass(assignment.status)}>
-                    {assignment.statusLabel}
-                  </LabelPill>
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
-                    {assignment.assessmentLabel}
-                  </h3>
-                  <p className="text-sm text-white/56">
-                    Deterministic sequence position {assignment.orderIndex + 1}.
-                  </p>
+      {assignments.map((assignment) => {
+        const tone = getTimelineAssignmentTone(assignment);
+
+        return (
+          <SurfaceCard
+            className={cn('overflow-hidden p-0', getTimelineAssignmentFrameClassName(tone))}
+            key={assignment.id}
+          >
+            <article
+              className="overflow-hidden"
+              data-assignment-timeline-row="true"
+              data-assignment-timeline-state={tone}
+              data-assignment-timeline-status={assignment.status}
+            >
+              <div className="flex gap-4 border-b border-white/8 bg-white/[0.03] px-5 py-4">
+                <div
+                  className={cn(
+                    'hidden w-1 rounded-full sm:block',
+                    getTimelineAssignmentRailClassName(tone),
+                  )}
+                />
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex min-h-10 items-center rounded-full border border-white/12 bg-white/[0.06] px-3 py-2 text-sm font-medium text-white">
+                          {assignment.orderLabel}
+                        </span>
+                        <LabelPill className={getAssignmentStatusPillClass(assignment.status)}>
+                          {assignment.statusLabel}
+                        </LabelPill>
+                        <LabelPill
+                          className={cn(
+                            'border-white/12 bg-black/10 text-white/62',
+                            tone === 'result_ready' &&
+                              'border-[rgba(116,209,177,0.24)] bg-[rgba(116,209,177,0.14)] text-[rgba(214,246,233,0.88)]',
+                            tone === 'started' &&
+                              'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.11)] text-[rgba(255,227,187,0.88)]',
+                          )}
+                        >
+                          {getTimelineAssignmentToneLabel(tone)}
+                        </LabelPill>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
+                          {assignment.assessmentLabel}
+                        </h3>
+                        <p className="text-sm text-white/56">
+                          Deterministic sequence position {assignment.orderIndex + 1}.
+                        </p>
+                      </div>
+                    </div>
+
+                    {assignment.resultHref ? (
+                      <div
+                        className="flex flex-col items-start gap-2"
+                        data-assignment-timeline-result="ready"
+                      >
+                        <p className="text-[0.72rem] uppercase tracking-[0.16em] text-[rgba(214,246,233,0.62)]">
+                          Canonical result
+                        </p>
+                        <ButtonLink className="self-start" href={assignment.resultHref}>
+                          View result
+                        </ButtonLink>
+                      </div>
+                    ) : (
+                      <p className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-2 text-sm text-white/46">
+                        No canonical result yet
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {assignment.resultHref ? (
-                <ButtonLink className="self-start" href={assignment.resultHref}>
-                  View result
-                </ButtonLink>
-              ) : (
-                <p className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-2 text-sm text-white/46">
-                  No canonical result yet
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid gap-3 p-5 sm:grid-cols-3">
-            <TimelineDate label="Assigned" value={assignment.assignedAtLabel} />
-            <TimelineDate label="Started" value={assignment.startedAtLabel} />
-            <TimelineDate label="Completed" value={assignment.completedAtLabel} />
-          </div>
-        </SurfaceCard>
-      ))}
+              <div className="grid gap-3 p-5 sm:grid-cols-3">
+                <TimelineDate label="Assigned" value={assignment.assignedAtLabel} />
+                <TimelineDate label="Started" value={assignment.startedAtLabel} />
+                <TimelineDate label="Completed" value={assignment.completedAtLabel} />
+              </div>
+            </article>
+          </SurfaceCard>
+        );
+      })}
     </div>
   );
 }
