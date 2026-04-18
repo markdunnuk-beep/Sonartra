@@ -26,10 +26,10 @@ const PROCESSING_REDIRECT_SETTLE_MS = 220;
 
 function formatFailureMessage(lastError: string | null): string {
   if (!lastError) {
-    return 'The canonical completion flow did not finish successfully.';
+    return 'Please return to your workspace and try again.';
   }
 
-  return `The canonical completion flow failed: ${lastError.replace(/_/g, ' ')}.`;
+  return `Please return to your workspace. ${lastError.replace(/_/g, ' ')}.`;
 }
 
 export function AssessmentProcessingState({
@@ -141,29 +141,31 @@ export function AssessmentProcessingState({
   if (pollFailure) {
     return (
       <section className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-5 py-10 sm:px-6 lg:px-8">
-        <div className="sonartra-card mx-auto w-full max-w-[40rem] space-y-5 px-7 py-8 sm:px-10 sm:py-10">
-          <div className="space-y-2">
-            <p className="sonartra-type-eyebrow text-white/40">Completion status</p>
-            <h1 className="text-[1.55rem] font-semibold leading-[1.08] tracking-[-0.03em] text-white sm:text-[1.85rem]">
-              Processing could not be completed
+        <div className="border-white/7 relative mx-auto w-full max-w-[44rem] overflow-hidden rounded-[2rem] border bg-[radial-gradient(circle_at_top_left,rgba(145,168,214,0.09),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_22px_62px_rgba(0,0,0,0.2)] sm:px-10 sm:py-10 md:px-12">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_22%,transparent_78%,rgba(255,255,255,0.012))]" />
+          <div className="relative mx-auto max-w-[35rem] space-y-6">
+          <div className="space-y-3">
+            <p className="sonartra-report-kicker">Completion status</p>
+            <h1 className="text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[2.2rem]">
+              We couldn&apos;t complete your result
             </h1>
-            <p className="max-w-[34rem] text-sm leading-7 text-white/60 sm:text-[0.95rem]">
+            <p className="max-w-[32rem] text-[0.98rem] leading-7 text-white/60">
               {formatFailureMessage(pollFailure)}
             </p>
           </div>
 
-          <p className="text-sm leading-7 text-white/52">
-            This attempt is no longer editable from the runner. Return to the assessment workspace
-            to continue from the canonical lifecycle state.
+          <p className="max-w-[32rem] text-[0.95rem] leading-7 text-white/52">
+            This assessment is no longer editable from the runner. Continue from your workspace.
           </p>
 
-          <div className="flex flex-wrap gap-3 border-t border-white/8 pt-4">
+          <div className="flex flex-wrap gap-3 border-t border-white/8 pt-5">
             <Link
               href={`/app/assessments#${assessmentKey}`}
               className="sonartra-button sonartra-button-secondary sonartra-focus-ring"
             >
               Back to workspace
             </Link>
+          </div>
           </div>
         </div>
       </section>
