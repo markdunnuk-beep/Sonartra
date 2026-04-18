@@ -18,6 +18,7 @@
     "review:wplp80-domain-language": "tsx scripts/review-wplp80-domain-interpretations.ts"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.2.3",
     "dotenv": "^17.3.1",
     "next": "latest",
     "pg": "^8.20.0",

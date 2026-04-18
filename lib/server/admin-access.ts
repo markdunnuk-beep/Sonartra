@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import {
   getRequestUserContext,
   isAuthenticatedUserRequiredError,
+  isClerkUserProfileRequiredError,
   isDisabledUserAccessError,
   type RequestUserContext,
 } from '@/lib/server/request-user';
@@ -24,7 +25,11 @@ export async function requireAdminUserWithDependencies(
   try {
     requestUser = await dependencies.getRequestUserContext();
   } catch (error) {
-    if (isAuthenticatedUserRequiredError(error) || isDisabledUserAccessError(error)) {
+    if (
+      isAuthenticatedUserRequiredError(error) ||
+      isClerkUserProfileRequiredError(error) ||
+      isDisabledUserAccessError(error)
+    ) {
       dependencies.redirect('/');
     }
 

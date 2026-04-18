@@ -1,5 +1,5 @@
 import { UserAppShell } from '@/components/user/user-app-shell';
-import { getRequestUserContext } from '@/lib/server/request-user';
+import { requireUserAppRequestUserContext } from '@/lib/server/user-app-access';
 
 function getUserShellLabel(params: {
   userId: string;
@@ -13,7 +13,7 @@ export default async function UserAppLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const requestUser = await getRequestUserContext();
+  const requestUser = await requireUserAppRequestUserContext();
 
   return (
     <UserAppShell

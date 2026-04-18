@@ -11,6 +11,7 @@ import {
 import {
   requireCurrentUser,
   isAuthenticatedUserRequiredError,
+  isClerkUserProfileRequiredError,
   isDisabledUserAccessError,
 } from '@/lib/server/request-user';
 
@@ -39,6 +40,10 @@ export async function POST(request: Request) {
     requestUser = await requireCurrentUser();
   } catch (error) {
     if (isAuthenticatedUserRequiredError(error)) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+
+    if (isClerkUserProfileRequiredError(error)) {
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
 

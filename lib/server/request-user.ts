@@ -69,6 +69,10 @@ export function isAuthenticatedUserRequiredError(error: unknown): boolean {
   return error instanceof AuthenticatedUserRequiredError;
 }
 
+export function isClerkUserProfileRequiredError(error: unknown): boolean {
+  return error instanceof ClerkUserProfileRequiredError;
+}
+
 export function isDisabledUserAccessError(error: unknown): boolean {
   return error instanceof DisabledUserAccessError;
 }

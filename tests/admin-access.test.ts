@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { requireAdminRequestUserContextWithDependencies } from '@/lib/server/admin-access';
 import {
   AuthenticatedUserRequiredError,
+  ClerkUserProfileRequiredError,
   DisabledUserAccessError,
 } from '@/lib/server/request-user';
 
@@ -51,6 +52,21 @@ test('admin access redirects disabled users to the public home route', async () 
       requireAdminRequestUserContextWithDependencies({
         async getRequestUserContext() {
           throw new DisabledUserAccessError();
+        },
+        redirect(path: string): never {
+          throw new Error(`REDIRECT:${path}`);
+        },
+      }),
+    /REDIRECT:\//,
+  );
+});
+
+test('admin access redirects to the public home route when Clerk profile resolution fails', async () => {
+  await assert.rejects(
+    () =>
+      requireAdminRequestUserContextWithDependencies({
+        async getRequestUserContext() {
+          throw new ClerkUserProfileRequiredError();
         },
         redirect(path: string): never {
           throw new Error(`REDIRECT:${path}`);

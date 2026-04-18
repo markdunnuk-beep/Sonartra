@@ -5,6 +5,7 @@ import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-se
 import {
   requireCurrentUser,
   isAuthenticatedUserRequiredError,
+  isClerkUserProfileRequiredError,
   isDisabledUserAccessError,
 } from '@/lib/server/request-user';
 
@@ -28,6 +29,10 @@ export async function POST(
     requestUser = await requireCurrentUser();
   } catch (error) {
     if (isAuthenticatedUserRequiredError(error)) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+
+    if (isClerkUserProfileRequiredError(error)) {
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
 

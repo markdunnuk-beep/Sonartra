@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   AuthenticatedUserRequiredError,
+  ClerkUserProfileRequiredError,
   DisabledUserAccessError,
   requireCurrentUserWithDependencies,
 } from '@/lib/server/request-user';
@@ -104,5 +105,32 @@ test('requireCurrentUser rejects disabled internal users after sync resolution',
         },
       }),
     DisabledUserAccessError,
+  );
+});
+
+test('requireCurrentUser fails closed when the authenticated Clerk profile cannot be resolved', async () => {
+  await assert.rejects(
+    () =>
+      requireCurrentUserWithDependencies({
+        async auth() {
+          return { userId: 'user_123' };
+        },
+        async currentUser() {
+          return {
+            id: 'user_other',
+            primaryEmailAddressId: 'email_123',
+            emailAddresses: [
+              {
+                id: 'email_123',
+                emailAddress: 'ada@example.com',
+              },
+            ],
+          };
+        },
+        async syncInternalUserFromClerkProfile() {
+          throw new Error('unexpected sync');
+        },
+      }),
+    ClerkUserProfileRequiredError,
   );
 });
