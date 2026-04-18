@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { AdminUserAssignmentControls } from '@/components/admin/admin-user-assignment-controls';
 import {
   ButtonLink,
   EmptyState,
@@ -8,7 +9,6 @@ import {
   PageFrame,
   SectionHeader,
   SurfaceCard,
-  cn,
 } from '@/components/shared/user-app-ui';
 import type {
   AdminUserDetailAssignmentViewModel,
@@ -180,20 +180,10 @@ export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewM
         <SectionHeader
           eyebrow="Controls"
           title="Assignment controls"
-          description="Sequencing and assignment mutations land in the next implementation step."
+          description="Add, reorder, or remove only the assignment records that remain safely outside historical execution."
         />
 
-        <SurfaceCard dashed muted className={cn('p-5')}>
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-white">
-              Assignment controls are intentionally deferred
-            </h2>
-            <p className="max-w-2xl text-sm leading-7 text-white/62">
-              This page currently exposes the persisted assignment record only. Task 6 adds the
-              mutation surface for sequencing and assignment changes.
-            </p>
-          </div>
-        </SurfaceCard>
+        <AdminUserAssignmentControls controls={viewModel.controls} userId={viewModel.id} />
       </section>
 
       <section className="sonartra-section">

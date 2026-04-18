@@ -1,4 +1,8 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
+import {
+  listPublishedAssessmentInventory,
+  type PublishedAssessmentInventoryItem,
+} from '@/lib/server/published-assessment-inventory';
 import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
 export type AdminUserDetailAssignmentViewModel = {
@@ -12,6 +16,41 @@ export type AdminUserDetailAssignmentViewModel = {
   startedAtLabel: string | null;
   completedAtLabel: string | null;
   resultHref: string | null;
+};
+
+export type AdminUserDetailAssignmentControlViewModel = {
+  id: string;
+  assessmentLabel: string;
+  status: 'not_assigned' | 'assigned' | 'in_progress' | 'completed';
+  statusLabel: 'Not assigned' | 'Assigned' | 'In progress' | 'Completed';
+  orderIndex: number;
+  orderLabel: string;
+  canMoveEarlier: boolean;
+  canMoveLater: boolean;
+  canRemove: boolean;
+  blockedReason: string | null;
+};
+
+export type AdminUserDetailAssignmentOptionViewModel = {
+  assessmentId: string;
+  assessmentVersionId: string;
+  assessmentLabel: string;
+  versionLabel: string;
+  optionLabel: string;
+};
+
+export type AdminUserDetailInsertPositionOptionViewModel = {
+  value: string;
+  label: string;
+  hint: string;
+};
+
+export type AdminUserDetailControlsViewModel = {
+  ruleSummary: string;
+  assignmentOptions: readonly AdminUserDetailAssignmentOptionViewModel[];
+  insertPositionOptions: readonly AdminUserDetailInsertPositionOptionViewModel[];
+  assignments: readonly AdminUserDetailAssignmentControlViewModel[];
+  addDisabledReason: string | null;
 };
 
 export type AdminUserDetailViewModel = {
@@ -28,6 +67,7 @@ export type AdminUserDetailViewModel = {
   currentAssessmentLabel: string | null;
   nextAssessmentLabel: string | null;
   lastActivityLabel: string;
+  controls: AdminUserDetailControlsViewModel;
   assignments: readonly AdminUserDetailAssignmentViewModel[];
 };
 
@@ -42,6 +82,8 @@ type AdminUserDetailRow = {
   assignment_id: string | null;
   assignment_status: 'not_assigned' | 'assigned' | 'in_progress' | 'completed' | null;
   assignment_order_index: number | null;
+  assessment_version_id: string | null;
+  attempt_id: string | null;
   assigned_at: string | null;
   started_at: string | null;
   completed_at: string | null;
@@ -61,9 +103,11 @@ type AdminUserDetailAssignmentSeed = {
   assessmentLabel: string;
   status: 'not_assigned' | 'assigned' | 'in_progress' | 'completed';
   orderIndex: number;
+  assessmentVersionId: string | null;
   assignedAt: string | null;
   startedAt: string | null;
   completedAt: string | null;
+  attemptId: string | null;
   resultId: string | null;
   assessmentMode: string | null;
   lastActivityAt: string | null;
@@ -79,6 +123,119 @@ type AdminUserDetailSeed = {
   createdAt: string;
   assignments: AdminUserDetailAssignmentSeed[];
 };
+
+const ASSIGNMENT_CONTROLS_RULE_SUMMARY =
+  'Only untouched assigned rows after the historical prefix can move or be removed. Started and completed records stay fixed.';
+
+function isBaseMutableAssignment(assignment: AdminUserDetailAssignmentSeed): boolean {
+  return (
+    assignment.status === 'assigned' &&
+    assignment.attemptId === null &&
+    assignment.startedAt === null &&
+    assignment.completedAt === null &&
+    assignment.resultId === null
+  );
+}
+
+function getLastLockedAssignmentIndex(assignments: readonly AdminUserDetailAssignmentSeed[]): number {
+  let lastLockedIndex = -1;
+
+  assignments.forEach((assignment, index) => {
+    if (!isBaseMutableAssignment(assignment)) {
+      lastLockedIndex = index;
+    }
+  });
+
+  return lastLockedIndex;
+}
+
+function buildInsertPositionOptions(
+  assignments: readonly AdminUserDetailAssignmentSeed[],
+): readonly AdminUserDetailInsertPositionOptionViewModel[] {
+  const lastLockedIndex = getLastLockedAssignmentIndex(assignments);
+  const startIndex = Math.max(lastLockedIndex + 1, 0);
+  const options: AdminUserDetailInsertPositionOptionViewModel[] = [];
+
+  for (let targetIndex = startIndex; targetIndex <= assignments.length; targetIndex += 1) {
+    const targetAssignment = assignments[targetIndex] ?? null;
+
+    options.push({
+      value: String(targetIndex),
+      label: `Step ${targetIndex + 1}`,
+      hint: targetAssignment
+        ? `Insert before ${targetAssignment.assessmentLabel}.`
+        : assignments.length === 0
+          ? 'Start the sequence here.'
+          : 'Append after the editable queue.',
+    });
+  }
+
+  return Object.freeze(options);
+}
+
+function buildAssignmentOptions(
+  assignments: readonly AdminUserDetailAssignmentSeed[],
+  publishedAssessments: readonly PublishedAssessmentInventoryItem[],
+): readonly AdminUserDetailAssignmentOptionViewModel[] {
+  const assignedVersionIds = new Set(
+    assignments
+      .map((assignment) => assignment.assessmentVersionId)
+      .filter((value): value is string => Boolean(value)),
+  );
+
+  return Object.freeze(
+    publishedAssessments
+      .filter((assessment) => !assignedVersionIds.has(assessment.assessmentVersionId))
+      .map((assessment) => ({
+        assessmentId: assessment.assessmentId,
+        assessmentVersionId: assessment.assessmentVersionId,
+        assessmentLabel: assessment.title,
+        versionLabel: assessment.versionTag,
+        optionLabel: `${assessment.title} - ${assessment.versionTag}`,
+      })),
+  );
+}
+
+function buildControlsViewModel(params: {
+  assignments: readonly AdminUserDetailAssignmentSeed[];
+  publishedAssessments: readonly PublishedAssessmentInventoryItem[];
+}): AdminUserDetailControlsViewModel {
+  const { assignments } = params;
+  const lastLockedIndex = getLastLockedAssignmentIndex(assignments);
+  const firstEditableIndex = Math.max(lastLockedIndex + 1, 0);
+  const assignmentOptions = buildAssignmentOptions(assignments, params.publishedAssessments);
+  const insertPositionOptions = buildInsertPositionOptions(assignments);
+
+  return {
+    ruleSummary: ASSIGNMENT_CONTROLS_RULE_SUMMARY,
+    assignmentOptions,
+    insertPositionOptions,
+    assignments: Object.freeze(
+      assignments.map((assignment, index) => {
+        const isEditable = isBaseMutableAssignment(assignment) && index >= firstEditableIndex;
+
+        return {
+          id: assignment.id,
+          assessmentLabel: assignment.assessmentLabel,
+          status: assignment.status,
+          statusLabel: getAssignmentStatusLabel(assignment.status),
+          orderIndex: assignment.orderIndex,
+          orderLabel: `Step ${assignment.orderIndex + 1}`,
+          canMoveEarlier: isEditable && index > firstEditableIndex,
+          canMoveLater: isEditable && index < assignments.length - 1,
+          canRemove: isEditable,
+          blockedReason: isEditable
+            ? null
+            : isBaseMutableAssignment(assignment)
+              ? 'Assignments before historical execution stay fixed.'
+              : 'Started and completed assignments stay fixed to preserve history.',
+        };
+      }),
+    ),
+    addDisabledReason:
+      assignmentOptions.length === 0 ? 'No unassigned published assessment versions are available.' : null,
+  };
+}
 
 function toTimestamp(value: string | null): number {
   if (!value) {
@@ -184,7 +341,10 @@ function buildCurrentStateLabel(assignments: readonly AdminUserDetailAssignmentS
   return `${lastCompletedAssignment?.assessmentLabel ?? 'Latest assessment'} - Completed`;
 }
 
-function mapAdminUserDetailViewModel(seed: AdminUserDetailSeed): AdminUserDetailViewModel {
+function mapAdminUserDetailViewModel(
+  seed: AdminUserDetailSeed,
+  publishedAssessments: readonly PublishedAssessmentInventoryItem[],
+): AdminUserDetailViewModel {
   const assignments = [...seed.assignments].sort(compareAssignments);
   const currentAssignment = assignments.find((assignment) => assignment.status !== 'completed') ?? null;
   const nextAssignment =
@@ -207,6 +367,10 @@ function mapAdminUserDetailViewModel(seed: AdminUserDetailSeed): AdminUserDetail
     currentAssessmentLabel: currentAssignment?.assessmentLabel ?? null,
     nextAssessmentLabel: nextAssignment?.assessmentLabel ?? null,
     lastActivityLabel: formatLastActivityLabel(lastActivityAt),
+    controls: buildControlsViewModel({
+      assignments,
+      publishedAssessments,
+    }),
     assignments: Object.freeze(
       assignments.map((assignment) => ({
         id: assignment.id,
@@ -228,6 +392,7 @@ function mapAdminUserDetailViewModel(seed: AdminUserDetailSeed): AdminUserDetail
 
 export function projectAdminUserDetailViewModel(
   rows: readonly AdminUserDetailRow[],
+  publishedAssessments: readonly PublishedAssessmentInventoryItem[] = [],
 ): AdminUserDetailViewModel | null {
   const firstRow = rows[0];
   if (!firstRow) {
@@ -255,9 +420,11 @@ export function projectAdminUserDetailViewModel(
       assessmentLabel: row.assessment_title,
       status: row.assignment_status,
       orderIndex: row.assignment_order_index,
+      assessmentVersionId: row.assessment_version_id,
       assignedAt: row.assigned_at,
       startedAt: row.started_at,
       completedAt: row.completed_at,
+      attemptId: row.attempt_id,
       resultId: row.result_id,
       assessmentMode: row.assessment_mode,
       lastActivityAt: getLatestTimestamp([
@@ -274,7 +441,7 @@ export function projectAdminUserDetailViewModel(
     });
   }
 
-  return mapAdminUserDetailViewModel(seed);
+  return mapAdminUserDetailViewModel(seed, publishedAssessments);
 }
 
 async function getAdminUserDetailRows(
@@ -294,6 +461,8 @@ async function getAdminUserDetailRows(
       ua.id AS assignment_id,
       ua.status AS assignment_status,
       ua.order_index AS assignment_order_index,
+      ua.assessment_version_id::text AS assessment_version_id,
+      ua.attempt_id::text AS attempt_id,
       ua.assigned_at,
       ua.started_at,
       ua.completed_at,
@@ -329,5 +498,10 @@ export async function buildAdminUserDetailViewModel(params: {
   userId: string;
 }): Promise<AdminUserDetailViewModel | null> {
   const rows = await getAdminUserDetailRows(params.db, params.userId);
-  return projectAdminUserDetailViewModel(rows);
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const publishedAssessments = await listPublishedAssessmentInventory(params.db);
+  return projectAdminUserDetailViewModel(rows, publishedAssessments);
 }

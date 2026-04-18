@@ -30,12 +30,12 @@ test('admin user detail route reuses the shared admin runtime foundation and fai
   assert.doesNotMatch(detailSource, /@clerk\/nextjs|currentUser\(|auth\(/);
 });
 
-test('admin user detail component remains an operational record with timeline and deferred controls only', () => {
+test('admin user detail component keeps the operational record layout and wires the safe assignment controls', () => {
   const componentSource = readSource('components', 'admin', 'admin-user-detail.tsx');
   const registrySource = readSource('components', 'admin', 'admin-users-registry.tsx');
+  const controlsSource = readSource('components', 'admin', 'admin-user-assignment-controls.tsx');
 
   assert.match(componentSource, /Assessment timeline/);
-  assert.match(componentSource, /Assignment controls are intentionally deferred/);
   assert.match(componentSource, /View result/);
   assert.match(componentSource, /rounded-full border border-white\/12 bg-white\/\[0\.06\]/);
   assert.match(componentSource, /No canonical result yet/);
@@ -51,5 +51,14 @@ test('admin user detail component remains an operational record with timeline an
   assert.doesNotMatch(componentSource, /label: 'Current assessment'/);
   assert.doesNotMatch(componentSource, /label: 'Next assessment'/);
   assert.doesNotMatch(componentSource, /label: 'Last activity'/);
+  assert.match(componentSource, /AdminUserAssignmentControls/);
+  assert.match(controlsSource, /useActionState\(\s*createAdminUserAssignmentAction,/);
+  assert.match(controlsSource, /useActionState\(\s*reorderAdminUserAssignmentAction,/);
+  assert.match(controlsSource, /useActionState\(\s*removeAdminUserAssignmentAction,/);
+  assert.match(controlsSource, /Add assignment/);
+  assert.match(controlsSource, /Move earlier/);
+  assert.match(controlsSource, /Move later/);
+  assert.match(controlsSource, /Remove/);
+  assert.match(controlsSource, /controls\.ruleSummary/);
   assert.match(registrySource, /href=\{item\.detailHref\}/);
 });
