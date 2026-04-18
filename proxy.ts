@@ -1,12 +1,18 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 import { isDevAdminBypassEnabled } from '@/lib/server/dev-admin-bypass';
+import { isDevUserAppBypassEnabled } from '@/lib/server/dev-user-app-bypass';
 
 const isUserAppRoute = createRouteMatcher(['/app(.*)']);
+const isAssessmentApiRoute = createRouteMatcher(['/api/assessments(.*)']);
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
 
 export default clerkMiddleware(async (auth, request) => {
-  if (isUserAppRoute(request)) {
+  if (isUserAppRoute(request) && !isDevUserAppBypassEnabled()) {
+    await auth.protect();
+  }
+
+  if (isAssessmentApiRoute(request) && !isDevUserAppBypassEnabled()) {
     await auth.protect();
   }
 

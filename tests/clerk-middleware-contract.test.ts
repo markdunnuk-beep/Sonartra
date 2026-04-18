@@ -14,9 +14,21 @@ test('repo defines Clerk middleware for authenticated app and admin route reques
     source,
     /import\s+\{\s*isDevAdminBypassEnabled\s*\}\s+from\s+'@\/lib\/server\/dev-admin-bypass';/,
   );
+  assert.match(
+    source,
+    /import\s+\{\s*isDevUserAppBypassEnabled\s*\}\s+from\s+'@\/lib\/server\/dev-user-app-bypass';/,
+  );
   assert.match(source, /const isUserAppRoute = createRouteMatcher\(\['\/app\(\.\*\)'\]\);/);
+  assert.match(
+    source,
+    /const isAssessmentApiRoute = createRouteMatcher\(\['\/api\/assessments\(\.\*\)'\]\);/,
+  );
   assert.match(source, /const isAdminRoute = createRouteMatcher\(\['\/admin\(\.\*\)'\]\);/);
-  assert.match(source, /if \(isUserAppRoute\(request\)\) \{/);
+  assert.match(source, /if \(isUserAppRoute\(request\) && !isDevUserAppBypassEnabled\(\)\) \{/);
+  assert.match(
+    source,
+    /if \(isAssessmentApiRoute\(request\) && !isDevUserAppBypassEnabled\(\)\) \{/,
+  );
   assert.match(source, /if \(isAdminRoute\(request\) && !isDevAdminBypassEnabled\(\)\) \{/);
   assert.match(source, /await auth\.protect\(\);/);
   assert.match(source, /export const config =/);

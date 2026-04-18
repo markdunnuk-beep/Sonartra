@@ -2,6 +2,10 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 
 import { getDbPool } from '@/lib/server/db';
 import {
+  getDevUserAppBypassClerkProfile,
+  isDevUserAppBypassEnabled,
+} from '@/lib/server/dev-user-app-bypass';
+import {
   syncInternalUserFromClerkProfile,
   type ClerkUserProfileLike,
   type InternalUserRecord,
@@ -101,6 +105,19 @@ export async function requireCurrentUserWithDependencies(
 }
 
 export async function requireCurrentUser(): Promise<RequestUserContext> {
+  if (isDevUserAppBypassEnabled()) {
+    const internalUser = await syncInternalUserFromClerkProfile(
+      getDbPool(),
+      getDevUserAppBypassClerkProfile(),
+    );
+
+    if (internalUser.status === 'disabled') {
+      throw new DisabledUserAccessError();
+    }
+
+    return mapRequestUserContext(internalUser);
+  }
+
   return requireCurrentUserWithDependencies({
     auth,
     currentUser,
