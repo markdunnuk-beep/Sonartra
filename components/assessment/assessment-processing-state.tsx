@@ -69,10 +69,11 @@ export function AssessmentProcessingState({
   const redirectTimerRef = useRef<number | null>(null);
   const pollTimerRef = useRef<number | null>(null);
   const longWaitTimerRef = useRef<number | null>(null);
+  const stateHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const [resolvedReadyHref, setResolvedReadyHref] = useState<string | null>(readyHref);
   const [pollFailure, setPollFailure] = useState<string | null>(null);
   const [recoveryHref, setRecoveryHref] = useState<string | null>(null);
-  const [statusCheckFailureCount, setStatusCheckFailureCount] = useState(0);
+  const [, setStatusCheckFailureCount] = useState(0);
   const [isLongWait, setIsLongWait] = useState(
     isAssessmentProcessingLongWait(Date.now() - startedAtRef.current),
   );
@@ -225,14 +226,26 @@ export function AssessmentProcessingState({
     };
   }, [resolvedReadyHref, router, stage]);
 
+  useEffect(() => {
+    if (!pollFailure && !isLongWait) {
+      return;
+    }
+
+    stateHeadingRef.current?.focus();
+  }, [isLongWait, pollFailure]);
+
   if (pollFailure) {
     const isReturnToAssessment = pollFailure === 'assessment_in_progress' && recoveryHref;
 
     return (
       <ProcessingShell>
-        <div className="space-y-3">
+        <div role="alert" aria-live="assertive" aria-atomic="true" className="space-y-3">
           <p className="sonartra-report-kicker">Completion status</p>
-          <h1 className="text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[2.2rem]">
+          <h1
+            ref={stateHeadingRef}
+            tabIndex={-1}
+            className="text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white outline-none sm:text-[2.2rem]"
+          >
             {isReturnToAssessment ? 'Your assessment is still open' : 'We couldn&apos;t complete your result'}
           </h1>
           <p className="max-w-[32rem] text-[0.98rem] leading-7 text-white/60">
@@ -271,9 +284,13 @@ export function AssessmentProcessingState({
   if (isLongWait) {
     return (
       <ProcessingShell>
-        <div className="space-y-3">
+        <div role="status" aria-live="polite" aria-atomic="true" className="space-y-3">
           <p className="sonartra-report-kicker">Completion status</p>
-          <h1 className="text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[2.2rem]">
+          <h1
+            ref={stateHeadingRef}
+            tabIndex={-1}
+            className="text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white outline-none sm:text-[2.2rem]"
+          >
             {stage === 'submitting'
               ? 'This is taking longer than expected'
               : 'Your result is still being prepared'}

@@ -809,19 +809,30 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
             <div className="space-y-4">
               {saveError ? (
-                <p className="sonartra-motion-banner sonartra-type-body-secondary rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-100">
+                <p
+                  role="alert"
+                  className="sonartra-motion-banner sonartra-type-body-secondary rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-100"
+                >
                   {saveError}
                 </p>
               ) : null}
 
               {submitError ? (
-                <p className="sonartra-motion-banner sonartra-type-body-secondary rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-100">
+                <p
+                  role="alert"
+                  className="sonartra-motion-banner sonartra-type-body-secondary rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-100"
+                >
                   {submitError}
                 </p>
               ) : null}
 
               {getCompletionMessage() ? (
-                <div className="sonartra-motion-banner sonartra-runner-completion-card space-y-2 rounded-[1.1rem] border px-4 py-3.5">
+                <div
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="sonartra-motion-banner sonartra-runner-completion-card space-y-2 rounded-[1.1rem] border px-4 py-3.5"
+                >
                   <p className="sonartra-type-eyebrow text-white/40">Completion status</p>
                   <p className="sonartra-type-body-secondary text-white/72">
                     {getCompletionMessage()}
