@@ -127,9 +127,6 @@ export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewM
       ? { label: 'Organisation', value: viewModel.organisationName }
       : null,
     { label: 'Joined', value: viewModel.createdAtDisplay },
-    { label: 'Current assessment', value: viewModel.currentAssessmentLabel ?? 'No assignment yet' },
-    { label: 'Next assessment', value: viewModel.nextAssessmentLabel ?? 'None queued' },
-    { label: 'Last activity', value: viewModel.lastActivityLabel },
   ].filter((item): item is { label: string; value: string } => item !== null);
 
   return (
@@ -155,16 +152,18 @@ export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewM
               {showsSecondaryEmail ? (
                 <p className="text-sm leading-7 text-white/66 [overflow-wrap:anywhere]">{viewModel.email}</p>
               ) : null}
-              <p className="max-w-2xl text-sm leading-7 text-white/72">{viewModel.currentStateLabel}</p>
+              <p className="max-w-2xl text-sm leading-7 text-white/72">
+                Internal user record for assignment sequencing and result access.
+              </p>
             </div>
           </div>
 
           <div className="w-full max-w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/62 xl:w-auto xl:max-w-[19rem] xl:shrink-0">
-            Assignment sequencing and result access from persisted internal state only.
+            {viewModel.currentStateLabel}
           </div>
         </div>
 
-        <div className="grid gap-3 pt-5 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-3 pt-5 sm:grid-cols-2 xl:grid-cols-2">
           {identityMeta.map((item) => (
             <MetaItem key={item.label} label={item.label} value={item.value} />
           ))}
@@ -173,7 +172,27 @@ export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewM
 
       <section className="sonartra-section">
         <SectionHeader
-          eyebrow="Current"
+          eyebrow="Controls"
+          title="Assignment controls"
+          description="Sequencing and assignment mutations land in the next implementation step."
+        />
+
+        <SurfaceCard dashed muted className={cn('p-5')}>
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-white">
+              Assignment controls are intentionally deferred
+            </h2>
+            <p className="max-w-2xl text-sm leading-7 text-white/62">
+              This page currently exposes the persisted assignment record only. Task 6 adds the
+              mutation surface for sequencing and assignment changes.
+            </p>
+          </div>
+        </SurfaceCard>
+      </section>
+
+      <section className="sonartra-section">
+        <SectionHeader
+          eyebrow="State"
           title="Current and next state"
           description="Derived from the canonical assignment order without mutable shortcuts."
         />
@@ -208,26 +227,6 @@ export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewM
         />
 
         <AssignmentTimeline assignments={viewModel.assignments} />
-      </section>
-
-      <section className="sonartra-section">
-        <SectionHeader
-          eyebrow="Controls"
-          title="Assignment controls"
-          description="Sequencing and assignment mutations land in the next implementation step."
-        />
-
-        <SurfaceCard dashed muted className={cn('p-5')}>
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-white">
-              Assignment controls are intentionally deferred
-            </h2>
-            <p className="max-w-2xl text-sm leading-7 text-white/62">
-              This page currently exposes the persisted assignment record only. Task 6 adds the
-              mutation surface for sequencing and assignment changes.
-            </p>
-          </div>
-        </SurfaceCard>
       </section>
     </PageFrame>
   );

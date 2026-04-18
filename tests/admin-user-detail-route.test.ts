@@ -39,6 +39,14 @@ test('admin user detail component remains an operational record with timeline an
   assert.match(componentSource, /View result/);
   assert.match(componentSource, /\[overflow-wrap:anywhere\]/);
   assert.match(componentSource, /showsSecondaryEmail/);
-  assert.match(componentSource, /xl:flex-row xl:items-start xl:justify-between/);
+  assert.match(componentSource, /SectionHeader\s*\n\s*eyebrow=\"Controls\"/);
+  assert.match(componentSource, /SectionHeader\s*\n\s*eyebrow=\"State\"/);
+  assert.match(componentSource, /SectionHeader\s*\n\s*eyebrow=\"Timeline\"/);
+  assert.match(componentSource, /Internal user record for assignment sequencing and result access\./);
+  assert.ok(componentSource.indexOf('eyebrow="Controls"') < componentSource.indexOf('eyebrow="State"'));
+  assert.ok(componentSource.indexOf('eyebrow="State"') < componentSource.indexOf('eyebrow="Timeline"'));
+  assert.doesNotMatch(componentSource, /label: 'Current assessment'/);
+  assert.doesNotMatch(componentSource, /label: 'Next assessment'/);
+  assert.doesNotMatch(componentSource, /label: 'Last activity'/);
   assert.match(registrySource, /href=\{item\.detailHref\}/);
 });
