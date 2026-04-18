@@ -22,7 +22,7 @@ type AssessmentProcessingStateProps = {
 };
 
 const PROCESSING_POLL_INTERVAL_MS = 1200;
-const PROCESSING_REDIRECT_SETTLE_MS = 220;
+const PROCESSING_REDIRECT_SETTLE_MS = 260;
 
 function formatFailureMessage(lastError: string | null): string {
   if (!lastError) {
@@ -50,6 +50,14 @@ export function AssessmentProcessingState({
       setResolvedReadyHref(readyHref);
     }
   }, [readyHref]);
+
+  useEffect(() => {
+    if (!resolvedReadyHref) {
+      return;
+    }
+
+    router.prefetch(resolvedReadyHref);
+  }, [resolvedReadyHref, router]);
 
   useEffect(() => {
     if (stage !== 'processing' || resolvedReadyHref) {
@@ -144,28 +152,28 @@ export function AssessmentProcessingState({
         <div className="border-white/7 relative mx-auto w-full max-w-[44rem] overflow-hidden rounded-[2rem] border bg-[radial-gradient(circle_at_top_left,rgba(145,168,214,0.09),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_22px_62px_rgba(0,0,0,0.2)] sm:px-10 sm:py-10 md:px-12">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_22%,transparent_78%,rgba(255,255,255,0.012))]" />
           <div className="relative mx-auto max-w-[35rem] space-y-6">
-          <div className="space-y-3">
-            <p className="sonartra-report-kicker">Completion status</p>
-            <h1 className="text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[2.2rem]">
-              We couldn&apos;t complete your result
-            </h1>
-            <p className="max-w-[32rem] text-[0.98rem] leading-7 text-white/60">
-              {formatFailureMessage(pollFailure)}
+            <div className="space-y-3">
+              <p className="sonartra-report-kicker">Completion status</p>
+              <h1 className="text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[2.2rem]">
+                We couldn&apos;t complete your result
+              </h1>
+              <p className="max-w-[32rem] text-[0.98rem] leading-7 text-white/60">
+                {formatFailureMessage(pollFailure)}
+              </p>
+            </div>
+
+            <p className="max-w-[32rem] text-[0.95rem] leading-7 text-white/52">
+              This assessment is no longer editable from the runner. Continue from your workspace.
             </p>
-          </div>
 
-          <p className="max-w-[32rem] text-[0.95rem] leading-7 text-white/52">
-            This assessment is no longer editable from the runner. Continue from your workspace.
-          </p>
-
-          <div className="flex flex-wrap gap-3 border-t border-white/8 pt-5">
-            <Link
-              href={`/app/assessments#${assessmentKey}`}
-              className="sonartra-button sonartra-button-secondary sonartra-focus-ring"
-            >
-              Back to workspace
-            </Link>
-          </div>
+            <div className="flex flex-wrap gap-3 border-t border-white/8 pt-5">
+              <Link
+                href={`/app/assessments#${assessmentKey}`}
+                className="sonartra-button sonartra-button-secondary sonartra-focus-ring"
+              >
+                Back to workspace
+              </Link>
+            </div>
           </div>
         </div>
       </section>
