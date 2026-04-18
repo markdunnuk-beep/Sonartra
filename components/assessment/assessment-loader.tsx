@@ -1,4 +1,7 @@
+'use client';
+
 import { cn } from '@/components/shared/user-app-ui';
+import { clampProgress, useAssessmentLoaderProgress } from '@/lib/assessment/loader-progress';
 
 export type AssessmentLoaderProps = {
   title: string;
@@ -6,40 +9,9 @@ export type AssessmentLoaderProps = {
   variant?: 'initialising' | 'processing';
   progressMode?: 'simulated' | 'controlled';
   progressValue?: number;
+  isComplete?: boolean;
   className?: string;
 };
-
-function clampProgress(value: number): number {
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-
-  return Math.min(100, Math.max(0, value));
-}
-
-function resolveProgress(params: {
-  variant: NonNullable<AssessmentLoaderProps['variant']>;
-  progressMode: NonNullable<AssessmentLoaderProps['progressMode']>;
-  progressValue: number | undefined;
-}): { width: number; ariaValueNow: number | undefined; ariaValueText: string } {
-  if (params.progressMode === 'controlled') {
-    const width = clampProgress(params.progressValue ?? 0);
-
-    return {
-      width,
-      ariaValueNow: width,
-      ariaValueText: `${width}%`,
-    };
-  }
-
-  const width = params.variant === 'processing' ? 68 : 60;
-
-  return {
-    width,
-    ariaValueNow: undefined,
-    ariaValueText: 'In progress',
-  };
-}
 
 function AssessmentLoaderMark({
   variant,
@@ -74,13 +46,23 @@ export function AssessmentLoader({
   variant = 'initialising',
   progressMode = 'simulated',
   progressValue,
+  isComplete = false,
   className,
 }: AssessmentLoaderProps) {
-  const progress = resolveProgress({
+  const loaderProgress = useAssessmentLoaderProgress({
     variant,
     progressMode,
-    progressValue,
+    isComplete,
   });
+  const controlledWidth = clampProgress(progressValue ?? 0);
+  const width = progressMode === 'controlled' ? controlledWidth : loaderProgress.progress;
+  const ariaValueNow = progressMode === 'controlled' ? controlledWidth : undefined;
+  const ariaValueText =
+    progressMode === 'controlled'
+      ? `${controlledWidth}%`
+      : isComplete && width >= 100
+        ? 'Complete'
+        : 'In progress';
 
   return (
     <section
@@ -114,8 +96,8 @@ export function AssessmentLoader({
               aria-label={variant === 'processing' ? 'Result processing progress' : 'Assessment preparation progress'}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-valuenow={progress.ariaValueNow}
-              aria-valuetext={progress.ariaValueText}
+              aria-valuenow={ariaValueNow}
+              aria-valuetext={ariaValueText}
               className="h-1 w-full overflow-hidden rounded-full bg-white/10"
             >
               <div
@@ -125,7 +107,7 @@ export function AssessmentLoader({
                     ? 'bg-[linear-gradient(90deg,rgba(226,232,255,0.76),rgba(255,255,255,0.96))]'
                     : 'bg-[linear-gradient(90deg,rgba(142,162,255,0.64),rgba(236,241,255,0.94))]',
                 )}
-                style={{ width: `${progress.width}%` }}
+                style={{ width: `${width}%` }}
               />
             </div>
             <p className="sr-only">
