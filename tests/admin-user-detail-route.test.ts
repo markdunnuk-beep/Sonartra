@@ -17,6 +17,8 @@ test('admin user detail route reuses the shared admin runtime foundation and fai
     pageSource,
     /import\s+\{\s*buildAdminUserDetailViewModel\s*\}\s+from\s+'@\/lib\/server\/admin-user-detail';/,
   );
+  assert.match(pageSource, /searchParams:\s*Promise<\{\s*assignmentMutation\?: string\s*\}>;/);
+  assert.match(pageSource, /mutationFeedbackKey=\{resolvedSearchParams\.assignmentMutation \?\? null\}/);
   assert.match(pageSource, /if \(!viewModel\) \{\s*notFound\(\);/);
   assert.doesNotMatch(pageSource, /@clerk\/nextjs|currentUser\(|auth\(/);
 
@@ -52,6 +54,7 @@ test('admin user detail component keeps the operational record layout and wires 
   assert.doesNotMatch(componentSource, /label: 'Next assessment'/);
   assert.doesNotMatch(componentSource, /label: 'Last activity'/);
   assert.match(componentSource, /AdminUserAssignmentControls/);
+  assert.match(componentSource, /mutationFeedbackKey: string \| null/);
   assert.match(controlsSource, /useActionState\(\s*createAdminUserAssignmentAction,/);
   assert.match(controlsSource, /useActionState\(\s*reorderAdminUserAssignmentAction,/);
   assert.match(controlsSource, /useActionState\(\s*removeAdminUserAssignmentAction,/);
@@ -59,6 +62,14 @@ test('admin user detail component keeps the operational record layout and wires 
   assert.match(controlsSource, /Move earlier/);
   assert.match(controlsSource, /Move later/);
   assert.match(controlsSource, /Remove/);
+  assert.match(controlsSource, /Assignment added\./);
+  assert.match(controlsSource, /Sequence updated\./);
+  assert.match(controlsSource, /Assignment removed\./);
+  assert.match(controlsSource, /controls\.editableSummary/);
+  assert.match(controlsSource, /attemptStateLabel/);
+  assert.match(controlsSource, /resultStateLabel/);
+  assert.match(controlsSource, /executionStateLabel/);
+  assert.match(controlsSource, /Canonical result/);
   assert.match(controlsSource, /controls\.ruleSummary/);
   assert.match(registrySource, /href=\{item\.detailHref\}/);
 });

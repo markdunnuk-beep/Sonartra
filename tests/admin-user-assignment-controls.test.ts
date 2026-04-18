@@ -4,11 +4,16 @@ import assert from 'node:assert/strict';
 import {
   createAdminUserAssignmentActionWithDependencies,
   createAdminUserAssignmentRecord,
+  removeAdminUserAssignmentActionWithDependencies,
   removeAdminUserAssignmentRecord,
+  reorderAdminUserAssignmentActionWithDependencies,
   reorderAdminUserAssignmentRecord,
 } from '@/lib/server/admin-user-assignment-controls';
 import { projectAdminUserDetailViewModel } from '@/lib/server/admin-user-detail';
-import { initialAdminAssignmentCreateFormState } from '@/lib/admin/admin-user-assignment-controls';
+import {
+  initialAdminAssignmentCreateFormState,
+  initialAdminAssignmentMutationState,
+} from '@/lib/admin/admin-user-assignment-controls';
 
 type StoredAssignment = {
   id: string;
@@ -270,6 +275,107 @@ test('admin can add a valid assignment and normalize order deterministically', a
   );
 });
 
+test('successful mutations redirect with clear feedback markers', async () => {
+  const fake = createFakeDb({
+    users: [{ id: 'user-1' }],
+    publishedVersions: [{ assessmentId: 'assessment-3', assessmentVersionId: 'version-3' }],
+    assignments: [
+      {
+        id: 'assignment-1',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        status: 'completed',
+        orderIndex: 0,
+        assignedAt: '2026-04-01T09:00:00.000Z',
+        startedAt: '2026-04-01T09:05:00.000Z',
+        completedAt: '2026-04-01T09:20:00.000Z',
+        attemptId: 'attempt-1',
+        resultId: 'result-1',
+      },
+      {
+        id: 'assignment-2',
+        userId: 'user-1',
+        assessmentId: 'assessment-2',
+        assessmentVersionId: 'version-2',
+        status: 'assigned',
+        orderIndex: 1,
+        assignedAt: '2026-04-02T09:00:00.000Z',
+        startedAt: null,
+        completedAt: null,
+        attemptId: null,
+        resultId: null,
+      },
+    ],
+  });
+  const redirectPaths: string[] = [];
+
+  function buildDependencies() {
+    return {
+      requireAdminUser: async () => undefined,
+      getDbPool() {
+        return { connect: async () => fake.client };
+      },
+      revalidatePath() {},
+      redirect(path: string): never {
+        redirectPaths.push(path);
+        throw new Error(`REDIRECT:${path}`);
+      },
+    };
+  }
+
+  const createFormData = new FormData();
+  createFormData.set('userId', 'user-1');
+  createFormData.set('assessmentId', 'assessment-3');
+  createFormData.set('assessmentVersionId', 'version-3');
+  createFormData.set('targetOrderIndex', '1');
+
+  await assert.rejects(
+    () =>
+      createAdminUserAssignmentActionWithDependencies(
+        initialAdminAssignmentCreateFormState,
+        createFormData,
+        buildDependencies(),
+      ),
+    /REDIRECT:\/admin\/users\/user-1\?assignmentMutation=added/,
+  );
+
+  const reorderFormData = new FormData();
+  reorderFormData.set('userId', 'user-1');
+  reorderFormData.set('assignmentId', 'assignment-2');
+  reorderFormData.set('direction', 'up');
+
+  await assert.rejects(
+    () =>
+      reorderAdminUserAssignmentActionWithDependencies(
+        initialAdminAssignmentMutationState,
+        reorderFormData,
+        buildDependencies(),
+      ),
+    /REDIRECT:\/admin\/users\/user-1\?assignmentMutation=reordered/,
+  );
+
+  const removeFormData = new FormData();
+  removeFormData.set('userId', 'user-1');
+  removeFormData.set('assignmentId', 'assignment-2');
+
+  await assert.rejects(
+    () =>
+      removeAdminUserAssignmentActionWithDependencies(
+        initialAdminAssignmentMutationState,
+        removeFormData,
+        buildDependencies(),
+      ),
+    /REDIRECT:\/admin\/users\/user-1\?assignmentMutation=removed/,
+  );
+
+  assert.deepEqual(redirectPaths, [
+    '/admin/users/user-1?assignmentMutation=added',
+    '/admin/users/user-1?assignmentMutation=reordered',
+    '/admin/users/user-1?assignmentMutation=removed',
+  ]);
+});
+
 test('invalid assignment input is rejected safely before touching persistence', async () => {
   let connectCalls = 0;
   const formData = new FormData();
@@ -391,6 +497,62 @@ test('non-admin cannot perform assignment mutations', async () => {
     result.formError,
     'The assignment could not be created. Review the selection and try again.',
   );
+});
+
+test('blocked reorder returns a clear failure message', async () => {
+  const fake = createFakeDb({
+    users: [{ id: 'user-1' }],
+    publishedVersions: [],
+    assignments: [
+      {
+        id: 'assignment-1',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        status: 'completed',
+        orderIndex: 0,
+        assignedAt: '2026-04-01T09:00:00.000Z',
+        startedAt: '2026-04-01T09:05:00.000Z',
+        completedAt: '2026-04-01T09:20:00.000Z',
+        attemptId: 'attempt-1',
+        resultId: 'result-1',
+      },
+      {
+        id: 'assignment-2',
+        userId: 'user-1',
+        assessmentId: 'assessment-2',
+        assessmentVersionId: 'version-2',
+        status: 'assigned',
+        orderIndex: 1,
+        assignedAt: '2026-04-02T09:00:00.000Z',
+        startedAt: null,
+        completedAt: null,
+        attemptId: null,
+        resultId: null,
+      },
+    ],
+  });
+  const formData = new FormData();
+  formData.set('userId', 'user-1');
+  formData.set('assignmentId', 'assignment-2');
+  formData.set('direction', 'up');
+
+  const result = await reorderAdminUserAssignmentActionWithDependencies(
+    initialAdminAssignmentMutationState,
+    formData,
+    {
+      requireAdminUser: async () => undefined,
+      getDbPool() {
+        return { connect: async () => fake.client };
+      },
+      revalidatePath() {},
+      redirect() {
+        throw new Error('should not redirect');
+      },
+    },
+  );
+
+  assert.equal(result.formError, 'That move would cross the fixed historical sequence.');
 });
 
 test('started or completed assignments cannot be removed unsafely', async () => {

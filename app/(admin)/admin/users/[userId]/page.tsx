@@ -6,10 +6,13 @@ import { getDbPool } from '@/lib/server/db';
 
 export default async function AdminUserDetailPage({
   params,
+  searchParams,
 }: Readonly<{
   params: Promise<{ userId: string }>;
+  searchParams: Promise<{ assignmentMutation?: string }>;
 }>) {
   const { userId } = await params;
+  const resolvedSearchParams = await searchParams;
   const viewModel = await buildAdminUserDetailViewModel({
     db: getDbPool(),
     userId,
@@ -19,5 +22,10 @@ export default async function AdminUserDetailPage({
     notFound();
   }
 
-  return <AdminUserDetail viewModel={viewModel} />;
+  return (
+    <AdminUserDetail
+      mutationFeedbackKey={resolvedSearchParams.assignmentMutation ?? null}
+      viewModel={viewModel}
+    />
+  );
 }

@@ -56,6 +56,7 @@ type UserRecord = {
 };
 
 type ReorderDirection = 'up' | 'down';
+type AssignmentMutationSuccessKey = 'added' | 'reordered' | 'removed';
 
 const TEMP_ORDER_OFFSET = 1000000;
 const CREATE_ASSIGNMENT_GENERIC_ERROR =
@@ -478,6 +479,13 @@ function revalidateAdminUserPaths(
   dependencies.revalidatePath(`/admin/users/${userId}`);
 }
 
+function buildAdminUserDetailRedirectPath(
+  userId: string,
+  mutation: AssignmentMutationSuccessKey,
+): string {
+  return `/admin/users/${userId}?assignmentMutation=${mutation}`;
+}
+
 export async function createAdminUserAssignmentAction(
   previousState: AdminAssignmentCreateFormState,
   formData: FormData,
@@ -545,7 +553,7 @@ export async function createAdminUserAssignmentActionWithDependencies(
   }
 
   revalidateAdminUserPaths(dependencies, values.userId);
-  dependencies.redirect(`/admin/users/${values.userId}`);
+  dependencies.redirect(buildAdminUserDetailRedirectPath(values.userId, 'added'));
 }
 
 export async function reorderAdminUserAssignmentAction(
@@ -594,7 +602,7 @@ export async function reorderAdminUserAssignmentActionWithDependencies(
   }
 
   revalidateAdminUserPaths(dependencies, userId);
-  dependencies.redirect(`/admin/users/${userId}`);
+  dependencies.redirect(buildAdminUserDetailRedirectPath(userId, 'reordered'));
 }
 
 export async function removeAdminUserAssignmentAction(
@@ -640,5 +648,5 @@ export async function removeAdminUserAssignmentActionWithDependencies(
   }
 
   revalidateAdminUserPaths(dependencies, userId);
-  dependencies.redirect(`/admin/users/${userId}`);
+  dependencies.redirect(buildAdminUserDetailRedirectPath(userId, 'removed'));
 }

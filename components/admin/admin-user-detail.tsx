@@ -125,7 +125,13 @@ function AssignmentTimeline({
   );
 }
 
-export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewModel }) {
+export function AdminUserDetail({
+  viewModel,
+  mutationFeedbackKey,
+}: {
+  viewModel: AdminUserDetailViewModel;
+  mutationFeedbackKey: string | null;
+}) {
   const showsSecondaryEmail =
     viewModel.name.localeCompare(viewModel.email, 'en', { sensitivity: 'base' }) !== 0;
   const identityMeta = [
@@ -183,7 +189,11 @@ export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewM
           description="Add, reorder, or remove only the assignment records that remain safely outside historical execution."
         />
 
-        <AdminUserAssignmentControls controls={viewModel.controls} userId={viewModel.id} />
+        <AdminUserAssignmentControls
+          controls={viewModel.controls}
+          mutationFeedbackKey={mutationFeedbackKey}
+          userId={viewModel.id}
+        />
       </section>
 
       <section className="sonartra-section">

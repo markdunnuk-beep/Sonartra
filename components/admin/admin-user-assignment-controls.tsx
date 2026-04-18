@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
@@ -20,6 +21,19 @@ import {
   removeAdminUserAssignmentAction,
   reorderAdminUserAssignmentAction,
 } from '@/lib/server/admin-user-assignment-controls';
+
+function getMutationFeedbackMessage(value: string | null): string | null {
+  switch (value) {
+    case 'added':
+      return 'Assignment added.';
+    case 'reordered':
+      return 'Sequence updated.';
+    case 'removed':
+      return 'Assignment removed.';
+    default:
+      return null;
+  }
+}
 
 function PendingButton({
   idleLabel,
@@ -120,9 +134,11 @@ function RemoveForm({
 export function AdminUserAssignmentControls({
   userId,
   controls,
+  mutationFeedbackKey,
 }: Readonly<{
   userId: string;
   controls: AdminUserDetailControlsViewModel;
+  mutationFeedbackKey: string | null;
 }>) {
   const [createState, createAction] = useActionState(
     createAdminUserAssignmentAction,
@@ -142,6 +158,7 @@ export function AdminUserAssignmentControls({
     controls.assignmentOptions.find((option) => option.assessmentVersionId === selectedAssessmentVersionId) ??
     controls.assignmentOptions[0] ??
     null;
+  const mutationFeedbackMessage = getMutationFeedbackMessage(mutationFeedbackKey);
 
   const safeValues = {
     userId,
@@ -152,7 +169,14 @@ export function AdminUserAssignmentControls({
 
   return (
     <div className="space-y-4">
-      <AdminFeedbackNotice tone="neutral">{controls.ruleSummary}</AdminFeedbackNotice>
+      {mutationFeedbackMessage ? (
+        <AdminFeedbackNotice tone="success">{mutationFeedbackMessage}</AdminFeedbackNotice>
+      ) : null}
+
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(16rem,0.9fr)]">
+        <AdminFeedbackNotice tone="neutral">{controls.ruleSummary}</AdminFeedbackNotice>
+        <AdminFeedbackNotice tone="neutral">{controls.editableSummary}</AdminFeedbackNotice>
+      </div>
 
       <SurfaceCard className="p-5">
         <form action={createAction} className="space-y-4">
@@ -223,6 +247,10 @@ export function AdminUserAssignmentControls({
             </div>
           </div>
 
+          <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3 text-sm leading-6 text-white/58">
+            New rows enter only inside the editable suffix. Fixed historical rows stay in place so attempt and result history remains canonical.
+          </div>
+
           {controls.addDisabledReason ? (
             <AdminFeedbackNotice tone="warning">{controls.addDisabledReason}</AdminFeedbackNotice>
           ) : null}
@@ -249,6 +277,9 @@ export function AdminUserAssignmentControls({
                     <LabelPill className="border-white/12 bg-white/[0.06] text-white/74">
                       {assignment.statusLabel}
                     </LabelPill>
+                    <LabelPill className="border-white/12 bg-black/10 text-white/68">
+                      {assignment.eligibilityLabel}
+                    </LabelPill>
                   </div>
 
                   <div className="space-y-1">
@@ -267,6 +298,26 @@ export function AdminUserAssignmentControls({
                       This untouched assignment can move within the editable suffix or be removed safely.
                     </p>
                   )}
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.12em] text-white/52">
+                      {assignment.executionStateLabel}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.12em] text-white/52">
+                      {assignment.attemptStateLabel}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.12em] text-white/52">
+                      {assignment.resultStateLabel}
+                    </span>
+                    {assignment.resultHref ? (
+                      <Link
+                        className="rounded-full border border-[rgba(116,209,177,0.2)] bg-[rgba(116,209,177,0.08)] px-3 py-1 text-xs uppercase tracking-[0.12em] text-[rgba(214,246,233,0.84)] transition hover:border-[rgba(116,209,177,0.32)]"
+                        href={assignment.resultHref}
+                      >
+                        Canonical result
+                      </Link>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3">

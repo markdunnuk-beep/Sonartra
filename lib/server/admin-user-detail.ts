@@ -25,6 +25,11 @@ export type AdminUserDetailAssignmentControlViewModel = {
   statusLabel: 'Not assigned' | 'Assigned' | 'In progress' | 'Completed';
   orderIndex: number;
   orderLabel: string;
+  eligibilityLabel: string;
+  executionStateLabel: string;
+  attemptStateLabel: string;
+  resultStateLabel: string;
+  resultHref: string | null;
   canMoveEarlier: boolean;
   canMoveLater: boolean;
   canRemove: boolean;
@@ -47,6 +52,7 @@ export type AdminUserDetailInsertPositionOptionViewModel = {
 
 export type AdminUserDetailControlsViewModel = {
   ruleSummary: string;
+  editableSummary: string;
   assignmentOptions: readonly AdminUserDetailAssignmentOptionViewModel[];
   insertPositionOptions: readonly AdminUserDetailInsertPositionOptionViewModel[];
   assignments: readonly AdminUserDetailAssignmentControlViewModel[];
@@ -126,6 +132,60 @@ type AdminUserDetailSeed = {
 
 const ASSIGNMENT_CONTROLS_RULE_SUMMARY =
   'Only untouched assigned rows after the historical prefix can move or be removed. Started and completed records stay fixed.';
+
+function getBlockedReason(params: {
+  assignment: AdminUserDetailAssignmentSeed;
+  index: number;
+  firstEditableIndex: number;
+}): string | null {
+  const { assignment, index, firstEditableIndex } = params;
+
+  if (assignment.resultId) {
+    return 'Result exists - history locked.';
+  }
+
+  if (assignment.status === 'completed' || assignment.completedAt) {
+    return 'Completed - history locked.';
+  }
+
+  if (assignment.status === 'in_progress' || assignment.startedAt || assignment.attemptId) {
+    return 'Started - cannot reorder or remove.';
+  }
+
+  if (assignment.status === 'assigned' && index < firstEditableIndex) {
+    return 'Historical row - fixed in sequence.';
+  }
+
+  return 'Locked - cannot change.';
+}
+
+function getExecutionStateLabel(assignment: AdminUserDetailAssignmentSeed): string {
+  if (assignment.resultId) {
+    return 'Result linked';
+  }
+
+  if (assignment.attemptId || assignment.startedAt || assignment.status === 'in_progress') {
+    return 'Historically active';
+  }
+
+  return 'Untouched';
+}
+
+function getEligibilityLabel(params: {
+  assignment: AdminUserDetailAssignmentSeed;
+  index: number;
+  firstEditableIndex: number;
+}): string {
+  if (isBaseMutableAssignment(params.assignment) && params.index >= params.firstEditableIndex) {
+    return 'Editable';
+  }
+
+  if (isBaseMutableAssignment(params.assignment)) {
+    return 'Fixed sequence';
+  }
+
+  return 'History locked';
+}
 
 function isBaseMutableAssignment(assignment: AdminUserDetailAssignmentSeed): boolean {
   return (
@@ -208,11 +268,24 @@ function buildControlsViewModel(params: {
 
   return {
     ruleSummary: ASSIGNMENT_CONTROLS_RULE_SUMMARY,
+    editableSummary:
+      assignments.length === 0
+        ? 'No sequence exists yet.'
+        : firstEditableIndex >= assignments.length
+          ? 'All current rows are historically fixed.'
+          : `Editable queue starts at Step ${firstEditableIndex + 1}.`,
     assignmentOptions,
     insertPositionOptions,
     assignments: Object.freeze(
       assignments.map((assignment, index) => {
         const isEditable = isBaseMutableAssignment(assignment) && index >= firstEditableIndex;
+        const blockedReason = isEditable
+          ? null
+          : getBlockedReason({
+              assignment,
+              index,
+              firstEditableIndex,
+            });
 
         return {
           id: assignment.id,
@@ -221,14 +294,21 @@ function buildControlsViewModel(params: {
           statusLabel: getAssignmentStatusLabel(assignment.status),
           orderIndex: assignment.orderIndex,
           orderLabel: `Step ${assignment.orderIndex + 1}`,
+          eligibilityLabel: getEligibilityLabel({
+            assignment,
+            index,
+            firstEditableIndex,
+          }),
+          executionStateLabel: getExecutionStateLabel(assignment),
+          attemptStateLabel: assignment.attemptId ? 'Attempt linked' : 'No attempt',
+          resultStateLabel: assignment.resultId ? 'Result linked' : 'No result',
+          resultHref: assignment.resultId
+            ? getAssessmentResultHref(assignment.resultId, assignment.assessmentMode)
+            : null,
           canMoveEarlier: isEditable && index > firstEditableIndex,
           canMoveLater: isEditable && index < assignments.length - 1,
           canRemove: isEditable,
-          blockedReason: isEditable
-            ? null
-            : isBaseMutableAssignment(assignment)
-              ? 'Assignments before historical execution stay fixed.'
-              : 'Started and completed assignments stay fixed to preserve history.',
+          blockedReason,
         };
       }),
     ),
