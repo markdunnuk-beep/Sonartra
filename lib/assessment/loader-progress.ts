@@ -48,6 +48,12 @@ const LOADER_PROGRESS_CONFIG: Record<AssessmentLoaderVariant, LoaderProgressConf
   },
 };
 
+export function getAssessmentLoaderMinimumVisibleMs(
+  variant: AssessmentLoaderVariant,
+): number {
+  return LOADER_PROGRESS_CONFIG[variant].minimumVisibleMs;
+}
+
 export function clampProgress(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;

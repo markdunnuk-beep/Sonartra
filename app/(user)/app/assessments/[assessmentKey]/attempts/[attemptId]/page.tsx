@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { AssessmentRunnerClient } from '@/app/(user)/app/assessments/[assessmentKey]/attempts/[attemptId]/assessment-runner-client';
+import { AssessmentProcessingState } from '@/components/assessment/assessment-processing-state';
 import { getDbPool } from '@/lib/server/db';
 import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
 import {
@@ -56,27 +57,11 @@ export default async function AssessmentAttemptRunnerPage({
   return (
     <main className="space-y-5">
       {runner.status === 'completed_processing' ? (
-        <section className="sonartra-panel space-y-4">
-          <h2 className="text-2xl font-semibold text-white">Processing result</h2>
-          <p className="text-sm text-white/65">
-            Your responses have been submitted. The canonical completion flow is still processing
-            this attempt.
-          </p>
-          <div className="flex gap-3">
-            <Link
-              href="/app/results"
-              className="inline-flex items-center justify-center rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-            >
-              Open results
-            </Link>
-            <Link
-              href="/app/assessments"
-              className="inline-flex items-center justify-center rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-            >
-              Back to workspace
-            </Link>
-          </div>
-        </section>
+        <AssessmentProcessingState
+          assessmentKey={runner.assessmentKey}
+          attemptId={runner.attemptId}
+          stage="processing"
+        />
       ) : null}
 
       {runner.status === 'error' ? (

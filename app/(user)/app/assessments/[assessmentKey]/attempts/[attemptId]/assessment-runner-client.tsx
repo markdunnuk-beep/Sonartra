@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { CSSProperties } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+import { AssessmentProcessingState } from '@/components/assessment/assessment-processing-state';
 import { cn } from '@/components/shared/user-app-ui';
 import { getRunnerState } from '@/lib/assessment-runner/runner-state';
 import {
@@ -137,6 +138,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [completionState, setCompletionState] = useState<CompletionUiState>('idle');
+  const [completionReadyHref, setCompletionReadyHref] = useState<string | null>(null);
   const [compactNavigatorOpen, setCompactNavigatorOpen] = useState(false);
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const submitLockedRef = useRef(false);
@@ -278,6 +280,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
     submitLockedRef.current = true;
     setSubmitError(null);
+    setCompletionReadyHref(null);
     setCompletionState('submitting');
 
     try {
@@ -305,21 +308,22 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
       if (body.resultStatus === 'ready' && body.resultId) {
         setCompletionState('redirecting');
-        router.replace(getAssessmentResultHref(body.resultId, body.mode));
+        setCompletionReadyHref(getAssessmentResultHref(body.resultId, body.mode));
         return;
       }
 
       if (body.resultStatus === 'processing') {
         setCompletionState('processing');
-        router.refresh();
         return;
       }
 
       setSubmitError(body.error ?? 'Completion could not be finalized.');
+      setCompletionReadyHref(null);
       setCompletionState('idle');
       router.refresh();
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Unable to complete assessment');
+      setCompletionReadyHref(null);
       setCompletionState('idle');
       router.refresh();
     } finally {
@@ -357,6 +361,17 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
           Back to workspace
         </Link>
       </section>
+    );
+  }
+
+  if (completionState !== 'idle') {
+    return (
+      <AssessmentProcessingState
+        assessmentKey={runner.assessmentKey}
+        attemptId={runner.attemptId}
+        stage={completionState}
+        readyHref={completionReadyHref}
+      />
     );
   }
 
@@ -705,13 +720,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                               'min-w-[12rem] shadow-[0_18px_40px_rgba(255,255,255,0.1)]',
                           })}
                         >
-                          {completionState === 'submitting'
-                            ? 'Submitting...'
-                            : completionState === 'processing'
-                              ? 'Opening processing state...'
-                              : completionState === 'redirecting'
-                                ? 'Opening result...'
-                                : 'Complete Assessment'}
+                          Complete Assessment
                         </button>
                         <p className="sonartra-type-caption text-white/44">
                           Review remains available until you choose to complete.
@@ -886,13 +895,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       minWidthClassName: 'min-w-[12rem]',
                     })}
                   >
-                    {completionState === 'submitting'
-                      ? 'Submitting...'
-                      : completionState === 'processing'
-                        ? 'Opening processing state...'
-                        : completionState === 'redirecting'
-                          ? 'Opening result...'
-                          : 'Complete Assessment'}
+                    Complete Assessment
                   </button>
                 ) : null}
               </div>
@@ -946,13 +949,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       minWidthClassName: 'min-w-[10rem]',
                     })}
                   >
-                    {completionState === 'submitting'
-                      ? 'Submitting...'
-                      : completionState === 'processing'
-                        ? 'Opening processing state...'
-                        : completionState === 'redirecting'
-                          ? 'Opening result...'
-                          : 'Complete Assessment'}
+                    Complete Assessment
                   </button>
                 </div>
               </div>
