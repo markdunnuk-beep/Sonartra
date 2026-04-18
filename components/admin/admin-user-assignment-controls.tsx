@@ -107,16 +107,39 @@ function getAssignmentVisualTone(
 function getAssignmentVisualToneLabel(tone: AssignmentVisualTone): string {
   switch (tone) {
     case 'editable':
-      return 'Editable queue';
+      return 'Editable';
     case 'fixed':
-      return 'Fixed history';
+      return 'Fixed';
     case 'started':
-      return 'Started history';
+      return 'Started';
     case 'completed':
-      return 'Completed history';
+      return 'Completed';
     case 'result_ready':
       return 'Result ready';
   }
+}
+
+function getActionStateMessage(
+  tone: AssignmentVisualTone,
+  canRemove: boolean,
+): string {
+  if (tone === 'result_ready') {
+    return 'Completed with a canonical result. Sequence locked.';
+  }
+
+  if (tone === 'completed') {
+    return 'Completed history. Sequence locked.';
+  }
+
+  if (tone === 'started') {
+    return 'Execution started. Sequence locked.';
+  }
+
+  if (canRemove) {
+    return 'Queued and safe to move or remove.';
+  }
+
+  return 'Historical row. Sequence locked.';
 }
 
 function getAssignmentRowClassName(tone: AssignmentVisualTone): string {
@@ -482,9 +505,7 @@ export function AdminUserAssignmentControls({
                           Action state
                         </p>
                         <p className="text-sm text-white/68">
-                          {assignment.canRemove
-                            ? 'This queued row is still in play.'
-                            : 'This row now reads as part of the fixed record.'}
+                          {getActionStateMessage(tone, assignment.canRemove)}
                         </p>
                       </div>
 
