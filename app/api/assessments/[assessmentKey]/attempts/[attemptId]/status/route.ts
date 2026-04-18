@@ -88,6 +88,10 @@ export async function GET(
       {
         status:
           runner.status === 'completed_processing' ? 'processing' : runner.status,
+        href:
+          runner.status === 'in_progress'
+            ? `/app/assessments/${assessmentKey}/attempts/${attemptId}`
+            : null,
       },
       { status: 200 },
     );

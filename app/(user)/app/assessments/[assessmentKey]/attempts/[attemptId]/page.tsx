@@ -65,23 +65,34 @@ export default async function AssessmentAttemptRunnerPage({
       ) : null}
 
       {runner.status === 'error' ? (
-        <section className="sonartra-panel space-y-4">
-          <h2 className="text-2xl font-semibold text-white">Attempt needs review</h2>
-          <p className="text-sm text-white/65">
-            {runner.lastError
-              ? `The last completion attempt failed: ${runner.lastError.replace(/_/g, ' ')}.`
-              : 'The last completion attempt failed and cannot be edited from the runner.'}
-          </p>
-          <p className="text-sm text-white/55">
-            MVP behavior keeps failed attempts out of the editable runner. Recovery happens from
-            the assessment workspace.
-          </p>
-          <Link
-            href={`/app/assessments#${runner.assessmentKey}`}
-            className="inline-flex items-center justify-center rounded-md border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-          >
-            Back to workspace
-          </Link>
+        <section className="border-white/7 relative overflow-hidden rounded-[2rem] border bg-[radial-gradient(circle_at_top_left,rgba(145,168,214,0.09),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_22px_62px_rgba(0,0,0,0.2)] sm:px-10 sm:py-10 md:px-12">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_22%,transparent_78%,rgba(255,255,255,0.012))]" />
+          <div className="relative mx-auto max-w-[35rem] space-y-6">
+            <div className="space-y-3">
+              <p className="sonartra-report-kicker">Completion status</p>
+              <h2 className="text-[1.95rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[2.2rem]">
+                We couldn&apos;t complete your result
+              </h2>
+              <p className="max-w-[32rem] text-[0.98rem] leading-7 text-white/60">
+                {runner.lastError
+                  ? `Please return to your workspace. ${runner.lastError.replace(/_/g, ' ')}.`
+                  : 'Please return to your workspace and try again.'}
+              </p>
+            </div>
+
+            <p className="max-w-[32rem] text-[0.95rem] leading-7 text-white/52">
+              This assessment is no longer editable from the runner. Continue from your workspace.
+            </p>
+
+            <div className="flex flex-wrap gap-3 border-t border-white/8 pt-5">
+              <Link
+                href={`/app/assessments#${runner.assessmentKey}`}
+                className="sonartra-button sonartra-button-secondary sonartra-focus-ring"
+              >
+                Back to workspace
+              </Link>
+            </div>
+          </div>
         </section>
       ) : null}
 
