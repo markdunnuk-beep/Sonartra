@@ -1,6 +1,11 @@
 import { redirect } from 'next/navigation';
 
 import {
+  getDevAdminBypassRequestUser,
+  isDevAdminBypassEnabled,
+  type DevAdminBypassEnvironment,
+} from '@/lib/server/dev-admin-bypass';
+import {
   getRequestUserContext,
   isAuthenticatedUserRequiredError,
   isClerkUserProfileRequiredError,
@@ -9,6 +14,7 @@ import {
 } from '@/lib/server/request-user';
 
 type RequireAdminUserDependencies = {
+  env: DevAdminBypassEnvironment;
   getRequestUserContext(): Promise<RequestUserContext>;
   redirect(path: string): never;
 };
@@ -20,6 +26,10 @@ export function isAdminUser(requestUser: RequestUserContext): boolean {
 export async function requireAdminUserWithDependencies(
   dependencies: RequireAdminUserDependencies,
 ): Promise<RequestUserContext> {
+  if (isDevAdminBypassEnabled(dependencies.env)) {
+    return getDevAdminBypassRequestUser();
+  }
+
   let requestUser: RequestUserContext;
 
   try {
@@ -45,6 +55,7 @@ export async function requireAdminUserWithDependencies(
 
 export async function requireAdminUser(): Promise<RequestUserContext> {
   return requireAdminUserWithDependencies({
+    env: process.env,
     getRequestUserContext,
     redirect,
   });
