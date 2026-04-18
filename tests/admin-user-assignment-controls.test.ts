@@ -47,10 +47,12 @@ function createFakeDb(initialState: FakeState) {
   const state = cloneState(initialState);
   let snapshot: FakeState | null = null;
   let nextId = 100;
+  const queries: string[] = [];
 
   const client = {
     async query<T>(sql: string, params: readonly unknown[] = []) {
       const text = sql.replace(/\s+/g, ' ').trim();
+      queries.push(text);
 
       if (text === 'BEGIN') {
         snapshot = cloneState(state);
@@ -178,6 +180,7 @@ function createFakeDb(initialState: FakeState) {
   return {
     client,
     state,
+    queries,
   };
 }
 
@@ -272,6 +275,11 @@ test('admin can add a valid assignment and normalize order deterministically', a
       ['version-3', 1],
       ['version-2', 2],
     ],
+  );
+
+  assert.ok(
+    fake.queries.some((query) => query.includes('FOR UPDATE OF ua')),
+    'assignment loader should only lock the assignment rows during mutations',
   );
 });
 

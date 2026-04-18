@@ -161,7 +161,7 @@ async function loadUserAssignmentsForUpdate(
     LEFT JOIN results r ON r.attempt_id = ua.attempt_id
     WHERE ua.user_id = $1::uuid
     ORDER BY ua.order_index ASC, ua.id ASC
-    FOR UPDATE
+    FOR UPDATE OF ua
     `,
     [userId],
   );
