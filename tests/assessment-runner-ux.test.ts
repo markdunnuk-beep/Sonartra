@@ -3,10 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import {
-  getResumeQuestionIndex,
-  shouldShowAssessmentIntro,
-} from '@/lib/assessment-runner/runner-ux';
+import { getResumeQuestionIndex } from '@/lib/assessment-runner/runner-ux';
 
 const runnerClientPath = join(
   process.cwd(),
@@ -57,49 +54,15 @@ test('resume prefers the first unanswered question for sparse response patterns'
   assert.equal(index, 1);
 });
 
-test('fresh attempts with zero saved responses show the intro when published intro content exists', () => {
-  const visible = shouldShowAssessmentIntro({
-    answeredQuestions: 0,
-    assessmentIntro: {
-      introTitle: 'Welcome',
-    },
-  });
-
-  assert.equal(visible, true);
-});
-
-test('resumed attempts bypass the intro once saved responses exist', () => {
-  const visible = shouldShowAssessmentIntro({
-    answeredQuestions: 1,
-    assessmentIntro: {
-      introTitle: 'Welcome',
-    },
-  });
-
-  assert.equal(visible, false);
-});
-
-test('runner bypasses the intro safely when no published intro content exists', () => {
-  const visible = shouldShowAssessmentIntro({
-    answeredQuestions: 0,
-    assessmentIntro: null,
-  });
-
-  assert.equal(visible, false);
-});
-
-test('runner client keeps intro and question phases within the same shell and stable hierarchy', () => {
+test('runner client keeps the question and completion phases within the same shell and stable hierarchy', () => {
   const source = readFileSync(runnerClientPath, 'utf8');
 
-  assert.match(source, /data-runner-phase="intro"/);
-  assert.match(source, /data-runner-phase=\{activePhase\}/);
+  assert.match(source, /data-runner-phase=\{completionState !== 'idle' \? 'completion' : 'question'\}/);
   assert.match(source, /data-runner-state=\{runnerState\}/);
   assert.match(source, /<h1 className="sonartra-type-page-title mt-2 max-w-\[16ch\]">/);
   assert.match(source, /Assessment runner/);
-  assert.match(source, /sonartra-runner-stage overflow-hidden/);
   assert.match(source, /sonartra-runner-stage min-h-\[34rem\]/);
   assert.match(source, /sonartra-runner-support-card/);
-  assert.match(source, /RunnerMetaStat label="Questions" value=\{`\$\{totalQuestions\}`\}/);
   assert.match(
     source,
     /\{modeCopy\.navigationLabel\} \{currentQuestionNumber\} of \{totalQuestions\}/,
@@ -205,7 +168,7 @@ test('runner client adjusts navigation and CTA hierarchy for review mode without
   assert.match(source, /'Responses ready for review'/);
   assert.match(source, /'Ready to submit'/);
   assert.match(source, /Review remains available until you choose to complete\./);
-  assert.match(source, /'Complete Assessment'/);
+  assert.match(source, /Complete Assessment/);
   assert.match(source, /onClick=\{handleSubmit\}/);
 });
 

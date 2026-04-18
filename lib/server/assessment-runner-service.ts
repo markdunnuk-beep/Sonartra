@@ -16,6 +16,7 @@ import {
 } from '@/lib/server/assessment-runner-queries';
 import type {
   AssessmentRunnerEntryResolution,
+  AssessmentRunnerLandingResolution,
   AssessmentRunnerSubmitResult,
   AssessmentRunnerViewModel,
   SaveAssessmentResponseResult,
@@ -32,13 +33,17 @@ export type AssessmentRunnerServiceDeps = {
   db: Queryable;
   definitionRepository?: Pick<
     ReturnType<typeof createAssessmentDefinitionRepository>,
-    'getAssessmentDefinitionByVersion'
+    'getPublishedAssessmentDefinitionByKey' | 'getAssessmentDefinitionByVersion'
   >;
   lifecycleService?: ReturnType<typeof createAssessmentAttemptLifecycleService>;
   completionService?: ReturnType<typeof createAssessmentCompletionService>;
 };
 
 export type AssessmentRunnerService = {
+  resolveAssessmentLanding(params: {
+    userId: string;
+    assessmentKey: string;
+  }): Promise<AssessmentRunnerLandingResolution>;
   resolveAssessmentEntry(params: {
     userId: string;
     assessmentKey: string;
@@ -64,6 +69,10 @@ export type AssessmentRunnerService = {
 
 function getRunnerHref(params: { assessmentKey: string; attemptId: string }): string {
   return `/app/assessments/${params.assessmentKey}/attempts/${params.attemptId}`;
+}
+
+function getAssessmentStartHref(assessmentKey: string): string {
+  return `/app/assessments/${assessmentKey}/start`;
 }
 
 function getResultHref(resultId: string | null): string {
@@ -114,6 +123,75 @@ export function createAssessmentRunnerService(
   const resultReadModel = createResultReadModelService({ db: deps.db });
 
   return {
+    async resolveAssessmentLanding(params) {
+      const lifecycle = await lifecycleService.getAssessmentAttemptLifecycle({
+        userId: params.userId,
+        assessmentKey: params.assessmentKey,
+      });
+
+      if (lifecycle.status === 'ready') {
+        const readyResult = lifecycle.latestResultId
+          ? (await resultReadModel.listAssessmentResults({ userId: params.userId }))
+              .find((result) => result.resultId === lifecycle.latestResultId)
+          : null;
+
+        return {
+          kind: 'result',
+          assessmentKey: params.assessmentKey,
+          resultId: lifecycle.latestResultId,
+          href: lifecycle.latestResultId
+            ? getAssessmentResultHref(lifecycle.latestResultId, readyResult?.mode)
+            : getResultHref(null),
+        };
+      }
+
+      if (lifecycle.status === 'completed_processing' || lifecycle.status === 'in_progress') {
+        if (!lifecycle.attemptId) {
+          return {
+            kind: 'workspace',
+            assessmentKey: params.assessmentKey,
+            href: getWorkspaceHref(params.assessmentKey),
+          };
+        }
+
+        return {
+          kind: 'runner',
+          assessmentKey: params.assessmentKey,
+          attemptId: lifecycle.attemptId,
+          href: getRunnerHref({
+            assessmentKey: params.assessmentKey,
+            attemptId: lifecycle.attemptId,
+          }),
+        };
+      }
+
+      if (lifecycle.status === 'error') {
+        return {
+          kind: 'workspace',
+          assessmentKey: params.assessmentKey,
+          href: getWorkspaceHref(params.assessmentKey),
+        };
+      }
+
+      const definition = await definitionRepository.getPublishedAssessmentDefinitionByKey(
+        params.assessmentKey,
+      );
+
+      if (!definition?.assessmentIntro) {
+        return this.resolveAssessmentEntry(params);
+      }
+
+      return {
+        kind: 'introduction',
+        assessmentKey: params.assessmentKey,
+        assessmentTitle: definition.assessment.title,
+        assessmentDescription: definition.assessment.description,
+        totalQuestions: lifecycle.totalQuestions,
+        assessmentIntro: definition.assessmentIntro,
+        continueHref: getAssessmentStartHref(params.assessmentKey),
+      };
+    },
+
     async resolveAssessmentEntry(params) {
       const lifecycle = await lifecycleService.getAssessmentAttemptLifecycle({
         userId: params.userId,

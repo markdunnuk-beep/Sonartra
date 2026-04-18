@@ -2,11 +2,6 @@ type RunnerQuestionResumeState = {
   selectedOptionId: string | null;
 };
 
-type AssessmentIntroGateState = {
-  answeredQuestions: number;
-  assessmentIntro: object | null;
-};
-
 export function getResumeQuestionIndex(
   questions: readonly RunnerQuestionResumeState[],
 ): number {
@@ -23,10 +18,4 @@ export function getResumeQuestionIndex(
   }
 
   return questions.length - 1;
-}
-
-export function shouldShowAssessmentIntro(
-  state: AssessmentIntroGateState,
-): boolean {
-  return state.answeredQuestions === 0 && state.assessmentIntro !== null;
 }

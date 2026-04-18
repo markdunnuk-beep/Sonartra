@@ -294,6 +294,101 @@ test('entry resolution creates or reuses runner path for start and resume states
   });
 });
 
+test('landing resolution returns introduction for not-started users without creating an attempt', async () => {
+  let startCalls = 0;
+
+  const service = createAssessmentRunnerService({
+    db: createFakeDb({ attempts: [] }),
+    lifecycleService: {
+      async getAssessmentAttemptLifecycle() {
+        return {
+          attemptId: null,
+          assessmentId: 'assessment-1',
+          assessmentKey: 'wplp80',
+          assessmentVersionId: 'version-1',
+          versionTag: '1.0.0',
+          status: 'not_started',
+          startedAt: null,
+          updatedAt: null,
+          completedAt: null,
+          totalQuestions: 10,
+          answeredQuestions: 0,
+          completionPercentage: 0,
+          latestResultId: null,
+          latestResultReady: false,
+          latestResultStatus: null,
+          lastError: null,
+        };
+      },
+      async startAssessmentAttempt() {
+        startCalls += 1;
+
+        return {
+          attemptId: 'attempt-1',
+          assessmentId: 'assessment-1',
+          assessmentKey: 'wplp80',
+          assessmentVersionId: 'version-1',
+          versionTag: '1.0.0',
+          status: 'in_progress',
+          startedAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          completedAt: null,
+          totalQuestions: 10,
+          answeredQuestions: 0,
+          completionPercentage: 0,
+          latestResultId: null,
+          latestResultReady: false,
+          latestResultStatus: null,
+          lastError: null,
+        };
+      },
+      async getOrCreateInProgressAttempt() {
+        throw new Error('not_used');
+      },
+    },
+    definitionRepository: {
+      async getPublishedAssessmentDefinitionByKey() {
+        return buildDefinition({
+          assessmentIntro: {
+            introTitle: 'Welcome to WPLP-80',
+            introSummary: 'Measure the patterns that shape how you work.',
+            introHowItWorks: 'Work through each prompt in order.',
+            estimatedTimeOverride: 'About 18 minutes',
+            instructions: 'Answer honestly.',
+            confidentialityNote: 'Responses remain confidential.',
+          },
+        });
+      },
+      async getAssessmentDefinitionByVersion() {
+        return null;
+      },
+    },
+  });
+
+  const resolution = await service.resolveAssessmentLanding({
+    userId: 'user-1',
+    assessmentKey: 'wplp80',
+  });
+
+  assert.deepEqual(resolution, {
+    kind: 'introduction',
+    assessmentKey: 'wplp80',
+    assessmentTitle: 'WPLP-80',
+    assessmentDescription: 'Signals',
+    totalQuestions: 10,
+    assessmentIntro: {
+      introTitle: 'Welcome to WPLP-80',
+      introSummary: 'Measure the patterns that shape how you work.',
+      introHowItWorks: 'Work through each prompt in order.',
+      estimatedTimeOverride: 'About 18 minutes',
+      instructions: 'Answer honestly.',
+      confidentialityNote: 'Responses remain confidential.',
+    },
+    continueHref: '/app/assessments/wplp80/start',
+  });
+  assert.equal(startCalls, 0);
+});
+
 test('runner view model loads ordered questions and saved responses for owned attempt', async () => {
   const service = createAssessmentRunnerService({
     db: createFakeDb({

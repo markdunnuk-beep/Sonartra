@@ -452,7 +452,73 @@ test('leadership clean entry exposes a single Start CTA and no resume leak', () 
   assert.match(item.statusDetail, /40 questions ready to begin/i);
 });
 
-test('leadership entry resolution creates one attempt and repeated entry reuses it', async () => {
+test('leadership landing shows introduction first and does not create an attempt before continue', async () => {
+  const harness = createLifecycleHarness();
+  const lifecycleService = createAssessmentAttemptLifecycleService({
+    db: harness.db,
+  });
+  const service = createAssessmentRunnerService({
+    db: harness.db,
+    lifecycleService,
+    definitionRepository: {
+      async getPublishedAssessmentDefinitionByKey() {
+        return {
+          assessment: {
+            id: 'assessment-leadership',
+            key: 'leadership',
+            title: 'Leadership',
+            description: 'Leadership assessment',
+            estimatedTimeMinutes: null,
+            createdAt: '2026-04-18T09:00:00.000Z',
+            updatedAt: '2026-04-18T09:00:00.000Z',
+          },
+          version: {
+            id: 'version-leadership',
+            assessmentId: 'assessment-leadership',
+            versionTag: '2026.04',
+            status: 'published',
+            isPublished: true,
+            publishedAt: '2026-04-18T09:00:00.000Z',
+            createdAt: '2026-04-18T09:00:00.000Z',
+            updatedAt: '2026-04-18T09:00:00.000Z',
+          },
+          assessmentIntro: {
+            introTitle: 'Leadership assessment',
+            introSummary: 'Measure how your leadership patterns show up under pressure.',
+            introHowItWorks: 'Move through each prompt and choose the answer that fits best.',
+            estimatedTimeOverride: 'About 15 minutes',
+            instructions: 'Answer based on how you usually operate.',
+            confidentialityNote: 'Your responses remain private.',
+          },
+          heroDefinition: null,
+          domains: [],
+          signals: [],
+          questions: [],
+        };
+      },
+      async getAssessmentDefinitionByVersion() {
+        return null;
+      },
+    },
+  });
+
+  const first = await service.resolveAssessmentLanding({
+    userId: 'user-leadership',
+    assessmentKey: 'leadership',
+  });
+  const second = await service.resolveAssessmentLanding({
+    userId: 'user-leadership',
+    assessmentKey: 'leadership',
+  });
+
+  assert.equal(first.kind, 'introduction');
+  assert.equal(second.kind, 'introduction');
+  assert.equal(first.continueHref, '/app/assessments/leadership/start');
+  assert.equal(second.continueHref, '/app/assessments/leadership/start');
+  assert.equal(harness.attempts.length, 0);
+});
+
+test('leadership start route creates one attempt and repeated entry reuses it', async () => {
   const harness = createLifecycleHarness();
   const lifecycleService = createAssessmentAttemptLifecycleService({
     db: harness.db,
@@ -479,13 +545,101 @@ test('leadership entry resolution creates one attempt and repeated entry reuses 
   assert.equal(harness.attempts[0]?.lifecycleStatus, 'IN_PROGRESS');
 });
 
+test('leadership landing bypasses introduction for in-progress and ready states', async () => {
+  const inProgressHarness = createLifecycleHarness({
+    attempts: [{
+      attemptId: 'attempt-1',
+      userId: 'user-leadership',
+      assessmentId: 'assessment-leadership',
+      assessmentVersionId: 'version-leadership',
+      lifecycleStatus: 'IN_PROGRESS',
+      startedAt: '2026-04-18T09:00:00.000Z',
+      submittedAt: null,
+      completedAt: null,
+      lastActivityAt: '2026-04-18T09:00:00.000Z',
+      createdAt: '2026-04-18T09:00:00.000Z',
+      updatedAt: '2026-04-18T09:00:00.000Z',
+    }],
+  });
+  const inProgressService = createAssessmentRunnerService({
+    db: inProgressHarness.db,
+    lifecycleService: createAssessmentAttemptLifecycleService({
+      db: inProgressHarness.db,
+    }),
+  });
+
+  const inProgress = await inProgressService.resolveAssessmentLanding({
+    userId: 'user-leadership',
+    assessmentKey: 'leadership',
+  });
+
+  assert.deepEqual(inProgress, {
+    kind: 'runner',
+    assessmentKey: 'leadership',
+    attemptId: 'attempt-1',
+    href: '/app/assessments/leadership/attempts/attempt-1',
+  });
+
+  const readyService = createAssessmentRunnerService({
+    db: inProgressHarness.db,
+    lifecycleService: {
+      async getAssessmentAttemptLifecycle() {
+        return {
+          attemptId: 'attempt-1',
+          assessmentId: 'assessment-leadership',
+          assessmentKey: 'leadership',
+          assessmentVersionId: 'version-leadership',
+          versionTag: '2026.04',
+          status: 'ready',
+          startedAt: '2026-04-18T09:00:00.000Z',
+          updatedAt: '2026-04-18T09:03:00.000Z',
+          completedAt: '2026-04-18T09:03:00.000Z',
+          totalQuestions: 40,
+          answeredQuestions: 40,
+          completionPercentage: 100,
+          latestResultId: 'result-ready',
+          latestResultReady: true,
+          latestResultStatus: 'READY',
+          lastError: null,
+        };
+      },
+      async startAssessmentAttempt() {
+        throw new Error('not_used');
+      },
+      async getOrCreateInProgressAttempt() {
+        throw new Error('not_used');
+      },
+    } as ReturnType<typeof createAssessmentAttemptLifecycleService>,
+    definitionRepository: {
+      async getPublishedAssessmentDefinitionByKey() {
+        return null;
+      },
+      async getAssessmentDefinitionByVersion() {
+        return null;
+      },
+    },
+  });
+
+  const ready = await readyService.resolveAssessmentLanding({
+    userId: 'user-leadership',
+    assessmentKey: 'leadership',
+  });
+
+  assert.equal(ready.kind, 'result');
+  assert.equal(ready.resultId, 'result-ready');
+});
+
 test('leadership entry and attempt routes keep the starting and processing handoffs explicit', () => {
   const entryPageSource = readFileSync(
     path.join(process.cwd(), 'app', '(user)', 'app', 'assessments', '[assessmentKey]', 'page.tsx'),
     'utf8',
   );
-  const entryLoadingSource = readFileSync(
-    path.join(process.cwd(), 'app', '(user)', 'app', 'assessments', '[assessmentKey]', 'loading.tsx'),
+  const startPageSource = readFileSync(
+    path.join(process.cwd(), 'app', '(user)', 'app', 'assessments', '[assessmentKey]', 'start', 'page.tsx'),
+    'utf8',
+  );
+  const startLoadingSource = readFileSync(
+    path.join(process.cwd(), 'app', '(user)', 'app', 'assessments', '[assessmentKey]', 'start', 'loading.tsx'),
     'utf8',
   );
   const attemptPageSource = readFileSync(
@@ -493,10 +647,12 @@ test('leadership entry and attempt routes keep the starting and processing hando
     'utf8',
   );
 
-  assert.match(entryPageSource, /const STARTING_MINIMUM_VISIBLE_MS = 800;/);
-  assert.match(entryPageSource, /if \(resolution\.kind === 'runner'\)/);
-  assert.match(entryLoadingSource, /title="Preparing your assessment"/);
-  assert.match(entryLoadingSource, /variant="initialising"/);
+  assert.match(entryPageSource, /resolveAssessmentLanding/);
+  assert.match(entryPageSource, /AssessmentIntroductionPage/);
+  assert.match(startPageSource, /const STARTING_MINIMUM_VISIBLE_MS = 800;/);
+  assert.match(startPageSource, /resolveAssessmentEntry/);
+  assert.match(startLoadingSource, /title="Preparing your assessment"/);
+  assert.match(startLoadingSource, /variant="initialising"/);
   assert.match(attemptPageSource, /runner\.status === 'completed_processing'/);
   assert.match(attemptPageSource, /<AssessmentProcessingState/);
   assert.match(attemptPageSource, /stage="processing"/);

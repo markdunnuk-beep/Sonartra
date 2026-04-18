@@ -69,6 +69,18 @@ export type AssessmentRunnerEntryResolution =
       href: string;
     };
 
+export type AssessmentRunnerLandingResolution =
+  | AssessmentRunnerEntryResolution
+  | {
+      kind: 'introduction';
+      assessmentKey: string;
+      assessmentTitle: string;
+      assessmentDescription: string | null;
+      totalQuestions: number;
+      assessmentIntro: RuntimeAssessmentIntro;
+      continueHref: string;
+    };
+
 export type SaveAssessmentResponseResult = {
   attemptId: string;
   questionId: string;

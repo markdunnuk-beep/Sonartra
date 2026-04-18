@@ -4,8 +4,10 @@
 
 - `tests/leadership-flow-regression.test.ts`
   - clean entry projects a single `Start` CTA for Leadership
-  - repeated entry resolution reuses the same in-progress attempt
-  - entry/loading source still enforces the 800 ms starting handoff and `Preparing your assessment` loader copy
+  - landing resolution holds a not-started user on the restored introduction state without creating an attempt
+  - repeated `/start` resolution reuses the same in-progress attempt
+  - the restored landing/start split still enforces the 800 ms starting handoff and `Preparing your assessment` loader copy
+  - in-progress and ready states bypass the introduction correctly
   - submit-to-processing returns the runner processing handoff and refresh keeps the same attempt
   - invalid or foreign runner routes fail cleanly
 
@@ -38,3 +40,4 @@ These still need live or browser-based QA because they are visual and timing-sen
 - There is still no browser-automation assertion for animation tone or first-paint composition.
 - The new regression file protects route and lifecycle seams, not pixel output.
 - Full live auth/session verification remains a manual QA responsibility.
+- The restored introduction page itself still needs live visual QA for pacing and composition.
