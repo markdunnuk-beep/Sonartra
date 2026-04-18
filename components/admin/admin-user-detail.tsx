@@ -56,9 +56,9 @@ function TimelineDate({
   value: string | null;
 }) {
   return (
-    <div className="space-y-1">
+    <div className="rounded-2xl border border-white/8 bg-black/10 px-4 py-3">
       <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/38">{label}</p>
-      <p className="text-sm text-white/68">{value ?? 'Not available'}</p>
+      <p className="pt-2 text-sm text-white/68">{value ?? 'Not available'}</p>
     </div>
   );
 }
@@ -80,35 +80,41 @@ function AssignmentTimeline({
   return (
     <div className="space-y-3">
       {assignments.map((assignment) => (
-        <SurfaceCard className="p-5" key={assignment.id}>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <LabelPill>{assignment.orderLabel}</LabelPill>
-                <LabelPill className={getAssignmentStatusPillClass(assignment.status)}>
-                  {assignment.statusLabel}
-                </LabelPill>
+        <SurfaceCard className="overflow-hidden p-0" key={assignment.id}>
+          <div className="border-b border-white/8 bg-white/[0.03] px-5 py-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex min-h-10 items-center rounded-full border border-white/12 bg-white/[0.06] px-3 py-2 text-sm font-medium text-white">
+                    {assignment.orderLabel}
+                  </span>
+                  <LabelPill className={getAssignmentStatusPillClass(assignment.status)}>
+                    {assignment.statusLabel}
+                  </LabelPill>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
+                    {assignment.assessmentLabel}
+                  </h3>
+                  <p className="text-sm text-white/56">
+                    Deterministic sequence position {assignment.orderIndex + 1}.
+                  </p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
-                  {assignment.assessmentLabel}
-                </h3>
-                <p className="text-sm text-white/56">
-                  Deterministic sequence position {assignment.orderIndex + 1}.
-                </p>
-              </div>
-            </div>
 
-            {assignment.resultHref ? (
-              <ButtonLink className="self-start" href={assignment.resultHref}>
-                View result
-              </ButtonLink>
-            ) : (
-              <p className="text-sm text-white/46">No canonical result yet</p>
-            )}
+              {assignment.resultHref ? (
+                <ButtonLink className="self-start" href={assignment.resultHref}>
+                  View result
+                </ButtonLink>
+              ) : (
+                <p className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-2 text-sm text-white/46">
+                  No canonical result yet
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="grid gap-4 pt-5 sm:grid-cols-3">
+          <div className="grid gap-3 p-5 sm:grid-cols-3">
             <TimelineDate label="Assigned" value={assignment.assignedAtLabel} />
             <TimelineDate label="Started" value={assignment.startedAtLabel} />
             <TimelineDate label="Completed" value={assignment.completedAtLabel} />

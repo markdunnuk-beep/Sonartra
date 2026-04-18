@@ -92,6 +92,14 @@ function getSecondaryIdentity(item: AdminUsersListItemViewModel): string | null 
   return item.name.localeCompare(item.email, 'en', { sensitivity: 'base' }) === 0 ? null : item.email;
 }
 
+function getPrimaryIdentity(item: AdminUsersListItemViewModel): string {
+  return item.name;
+}
+
+function getIdentityEyebrow(item: AdminUsersListItemViewModel): string {
+  return getSecondaryIdentity(item) ? 'Name on record' : 'Email-only record';
+}
+
 function UsersToolbar({ filters }: { filters: AdminUsersListFilters }) {
   return (
     <SurfaceCard className="p-5">
@@ -185,10 +193,15 @@ function UsersTable({
             {items.map((item) => (
               <tr className="border-t border-white/6" key={item.id}>
                 <td className="px-5 py-4 align-top">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-white">{item.name}</p>
+                  <div className="space-y-1.5">
+                    <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/38">
+                      {getIdentityEyebrow(item)}
+                    </p>
+                    <p className="text-sm font-medium text-white [overflow-wrap:anywhere]">
+                      {getPrimaryIdentity(item)}
+                    </p>
                     {getSecondaryIdentity(item) ? (
-                      <p className="text-sm text-white/56">{item.email}</p>
+                      <p className="text-sm text-white/56 [overflow-wrap:anywhere]">{item.email}</p>
                     ) : null}
                   </div>
                 </td>
@@ -219,7 +232,7 @@ function UsersTable({
                     className="text-sm font-medium text-white/72 transition hover:text-white"
                     href={item.detailHref}
                   >
-                    View user
+                    Open record
                   </Link>
                 </td>
               </tr>
@@ -244,9 +257,12 @@ function UsersCards({
         <SurfaceCard className="p-5" key={item.id}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-3">
-              <div className="space-y-1">
+              <div className="space-y-1.5">
+                <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/38">
+                  {getIdentityEyebrow(item)}
+                </p>
                 <p className="text-base font-semibold tracking-[-0.02em] text-white [overflow-wrap:anywhere]">
-                  {item.name}
+                  {getPrimaryIdentity(item)}
                 </p>
                 {getSecondaryIdentity(item) ? (
                   <p className="text-sm text-white/56 [overflow-wrap:anywhere]">{item.email}</p>
@@ -264,7 +280,7 @@ function UsersCards({
             </div>
 
             <ButtonLink className="self-start" href={item.detailHref}>
-              View user
+              Open record
             </ButtonLink>
           </div>
 
@@ -328,7 +344,7 @@ export function AdminUsersRegistry({ viewModel }: { viewModel: AdminUsersListPag
 
         <UsersToolbar filters={viewModel.filters} />
 
-        <div className="hidden flex-wrap gap-2 pt-4 md:flex">
+        <div className="hidden flex-wrap gap-2 pt-4 lg:flex">
           <FilterChip
             active={viewModel.filters.status === 'all'}
             href={buildFilterHref({ filters: viewModel.filters, overrides: { status: 'all' } })}

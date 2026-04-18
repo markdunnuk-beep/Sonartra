@@ -37,6 +37,9 @@ test('admin user detail component remains an operational record with timeline an
   assert.match(componentSource, /Assessment timeline/);
   assert.match(componentSource, /Assignment controls are intentionally deferred/);
   assert.match(componentSource, /View result/);
+  assert.match(componentSource, /rounded-full border border-white\/12 bg-white\/\[0\.06\]/);
+  assert.match(componentSource, /No canonical result yet/);
+  assert.match(componentSource, /rounded-2xl border border-white\/8 bg-black\/10 px-4 py-3/);
   assert.match(componentSource, /\[overflow-wrap:anywhere\]/);
   assert.match(componentSource, /showsSecondaryEmail/);
   assert.match(componentSource, /SectionHeader\s*\n\s*eyebrow=\"Controls\"/);
