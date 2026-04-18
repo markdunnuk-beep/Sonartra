@@ -564,105 +564,107 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     <PageFrame className="space-y-10 md:space-y-12">
       <div className="xl:mx-auto xl:grid xl:max-w-[114rem] xl:grid-cols-[minmax(0,1fr)_minmax(10.75rem,12.25rem)] xl:gap-7 2xl:gap-9">
         <div className="min-w-0 max-w-none space-y-10 md:space-y-12">
-          <section
-            id={TOP_LEVEL_SECTION_IDS.intro}
-            aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.intro}
-            className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-3 md:space-y-4`}
-            style={getRevealStyle(0)}
-          >
-            <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.intro} className="sr-only">
-              Introduction
-            </h2>
-            <SonartraIntroduction metadataItems={introMetadataItems} />
-            <ResultSectionIntent
-              sectionId={TOP_LEVEL_SECTION_IDS.intro}
-              className="mt-3 max-w-[52rem] px-1 md:mt-4 md:px-2"
-            />
-          </section>
-
-          <ResultReadingProgress className="max-w-[92rem] px-1 md:px-2 xl:hidden" />
-
-          <div className="space-y-4 pt-1 md:space-y-5 md:pt-1.5">
-            <NarrativeBridge className="max-w-[38rem] text-[0.88rem] leading-6 text-white/46 md:text-[0.91rem] md:leading-7">
-              The clearest pattern comes first.
-            </NarrativeBridge>
-
-            {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
+          <div className="space-y-7 md:space-y-9">
             <section
-              id={TOP_LEVEL_SECTION_IDS.hero}
-              aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.hero}
-              className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-10 sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14`}
-              style={getRevealStyle(1)}
+              id={TOP_LEVEL_SECTION_IDS.intro}
+              aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.intro}
+              className={`${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal space-y-4 md:space-y-5`}
+              style={getRevealStyle(0)}
             >
-              <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.hero} className="sr-only">
-                Your pattern
+              <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.intro} className="sr-only">
+                Introduction
               </h2>
-              <div className="w-full space-y-9 md:space-y-11">
-                <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-10 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:gap-12">
-                  <div className="space-y-8 md:space-y-9">
-                    <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
-                      <SectionEyebrow>Results report</SectionEyebrow>
-                      <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
-                      <span>{result.assessmentTitle}</span>
-                    </div>
+              <SonartraIntroduction metadataItems={introMetadataItems} />
+              <ResultSectionIntent
+                sectionId={TOP_LEVEL_SECTION_IDS.intro}
+                className="max-w-[48rem] px-1 text-white/52 md:px-2"
+              />
+            </section>
 
-                    <div className="space-y-6 md:space-y-8">
-                      {heroHeadline ? (
-                        <h1 className="sonartra-type-display max-w-[11ch] text-[3.15rem] tracking-[-0.055em] md:text-[5rem]">
-                          {heroHeadline}
-                        </h1>
-                      ) : null}
-                      <ResultSectionIntent
-                        sectionId={TOP_LEVEL_SECTION_IDS.hero}
-                        className="max-w-[52ch]"
-                      />
-                      {heroSubheadline ? (
-                        <p className="sonartra-report-body-soft max-w-[46rem] text-[0.98rem] leading-8 text-white/66 sm:text-[1.03rem] md:text-[1.08rem] md:leading-8">
-                          {heroSubheadline}
-                        </p>
-                      ) : null}
-                      <div className="sonartra-report-prose max-w-[58rem] space-y-6 border-l border-white/8 pl-5 md:space-y-7 md:pl-7">
-                        {heroPatternLabel ? (
-                          <p className="sonartra-report-kicker text-white/58">{heroPatternLabel}</p>
+            <div className="space-y-5 md:space-y-6">
+              <NarrativeBridge className="max-w-[34rem] text-[0.86rem] leading-6 text-white/42 md:text-[0.9rem] md:leading-7">
+                The clearest pattern comes first.
+              </NarrativeBridge>
+
+              {/* Source-contract marker for tests: <section className="rounded-[2rem] border border-white/6" */}
+              <section
+                id={TOP_LEVEL_SECTION_IDS.hero}
+                aria-labelledby={TOP_LEVEL_SECTION_HEADING_IDS.hero}
+                className={`border-white/6 ${RESULTS_ANCHOR_TARGET_CLASS} sonartra-motion-reveal sonartra-report-hero rounded-[2rem] border px-7 py-10 sm:px-8 sm:py-11 md:px-12 md:py-14 lg:px-14`}
+                style={getRevealStyle(1)}
+              >
+                <h2 id={TOP_LEVEL_SECTION_HEADING_IDS.hero} className="sr-only">
+                  Your pattern
+                </h2>
+                <div className="w-full space-y-9 md:space-y-11">
+                  <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-10 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:gap-12">
+                    <div className="space-y-8 md:space-y-9">
+                      <div className="sonartra-report-kicker flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <SectionEyebrow>Results report</SectionEyebrow>
+                        <span className="bg-white/18 hidden h-1 w-1 rounded-full md:inline-block" />
+                        <span>{result.assessmentTitle}</span>
+                      </div>
+
+                      <div className="space-y-6 md:space-y-8">
+                        {heroHeadline ? (
+                          <h1 className="sonartra-type-display max-w-[11ch] text-[3.15rem] tracking-[-0.055em] md:text-[5rem]">
+                            {heroHeadline}
+                          </h1>
                         ) : null}
-                        {heroSummary ? (
-                          <p className="sonartra-report-summary text-[1.08rem] leading-8 text-white/82 sm:text-[1.13rem] md:text-[1.22rem] md:leading-10">
-                            {heroSummary}
+                        <ResultSectionIntent
+                          sectionId={TOP_LEVEL_SECTION_IDS.hero}
+                          className="max-w-[48ch] text-white/54"
+                        />
+                        {heroSubheadline ? (
+                          <p className="sonartra-report-body-soft max-w-[42rem] text-[0.96rem] leading-8 text-white/62 sm:text-[1.01rem] md:text-[1.06rem] md:leading-8">
+                            {heroSubheadline}
                           </p>
                         ) : null}
-                        {heroNarrative ? (
-                          <p className="sonartra-report-body max-w-[54rem] text-[1rem] leading-8 text-white/78 sm:text-[1.05rem] md:text-[1.1rem] md:leading-9">
-                            {heroNarrative}
-                          </p>
-                        ) : null}
-                        {pressureOverlay || environmentOverlay ? (
-                          <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
-                            {pressureOverlay ? (
-                              <EditorialAside
-                                label="When Under Pressure"
-                                text={pressureOverlay}
-                              />
-                            ) : null}
-                            {environmentOverlay ? (
-                              <EditorialAside
-                                label="Ideal Environment"
-                                text={environmentOverlay}
-                              />
-                            ) : null}
-                          </div>
-                        ) : null}
+                        <div className="sonartra-report-prose max-w-[56rem] space-y-5 border-l border-white/8 pl-5 md:space-y-6 md:pl-7">
+                          {heroPatternLabel ? (
+                            <p className="sonartra-report-kicker text-white/54">{heroPatternLabel}</p>
+                          ) : null}
+                          {heroSummary ? (
+                            <p className="sonartra-report-summary text-[1.08rem] leading-8 text-white/82 sm:text-[1.13rem] md:text-[1.2rem] md:leading-10">
+                              {heroSummary}
+                            </p>
+                          ) : null}
+                          {heroNarrative ? (
+                            <p className="sonartra-report-body max-w-[52rem] text-[0.99rem] leading-8 text-white/76 sm:text-[1.03rem] md:text-[1.08rem] md:leading-9">
+                              {heroNarrative}
+                            </p>
+                          ) : null}
+                          {pressureOverlay || environmentOverlay ? (
+                            <div className="grid gap-x-8 gap-y-5 border-t border-white/7 pt-6 sm:grid-cols-2">
+                              {pressureOverlay ? (
+                                <EditorialAside
+                                  label="When Under Pressure"
+                                  text={pressureOverlay}
+                                />
+                              ) : null}
+                              {environmentOverlay ? (
+                                <EditorialAside
+                                  label="Ideal Environment"
+                                  text={environmentOverlay}
+                                />
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <HeroPatternMedallion
-                    patternKey={heroPatternKey}
-                    label={heroPatternLabel}
-                    className="mx-auto md:mx-0 md:mt-1"
-                  />
+                    <HeroPatternMedallion
+                      patternKey={heroPatternKey}
+                      label={heroPatternLabel}
+                      className="mx-auto md:mx-0 md:mt-1"
+                    />
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+
+              <ResultReadingProgress className="max-w-[92rem] px-1 md:px-2 xl:hidden" />
+            </div>
           </div>
 
           <div className="space-y-7 pt-5 md:space-y-8 md:pt-9">
