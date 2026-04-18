@@ -37,5 +37,8 @@ test('admin user detail component remains an operational record with timeline an
   assert.match(componentSource, /Assessment timeline/);
   assert.match(componentSource, /Assignment controls are intentionally deferred/);
   assert.match(componentSource, /View result/);
+  assert.match(componentSource, /\[overflow-wrap:anywhere\]/);
+  assert.match(componentSource, /showsSecondaryEmail/);
+  assert.match(componentSource, /xl:flex-row xl:items-start xl:justify-between/);
   assert.match(registrySource, /href=\{item\.detailHref\}/);
 });

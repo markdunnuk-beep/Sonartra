@@ -88,6 +88,10 @@ function FilterChip({
   );
 }
 
+function getSecondaryIdentity(item: AdminUsersListItemViewModel): string | null {
+  return item.name.localeCompare(item.email, 'en', { sensitivity: 'base' }) === 0 ? null : item.email;
+}
+
 function UsersToolbar({ filters }: { filters: AdminUsersListFilters }) {
   return (
     <SurfaceCard className="p-5">
@@ -162,7 +166,7 @@ function UsersTable({
   items: readonly AdminUsersListItemViewModel[];
 }) {
   return (
-    <SurfaceCard className="overflow-hidden p-0">
+    <SurfaceCard className="hidden overflow-hidden p-0 xl:block">
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse">
           <thead className="bg-white/[0.03] text-left">
@@ -183,7 +187,9 @@ function UsersTable({
                 <td className="px-5 py-4 align-top">
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-white">{item.name}</p>
-                    <p className="text-sm text-white/56">{item.email}</p>
+                    {getSecondaryIdentity(item) ? (
+                      <p className="text-sm text-white/56">{item.email}</p>
+                    ) : null}
                   </div>
                 </td>
                 <td className="px-5 py-4 align-top">
@@ -225,9 +231,75 @@ function UsersTable({
   );
 }
 
+function UsersCards({
+  hasOrganisationColumn,
+  items,
+}: {
+  hasOrganisationColumn: boolean;
+  items: readonly AdminUsersListItemViewModel[];
+}) {
+  return (
+    <div className="grid gap-4 xl:hidden">
+      {items.map((item) => (
+        <SurfaceCard className="p-5" key={item.id}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 space-y-3">
+              <div className="space-y-1">
+                <p className="text-base font-semibold tracking-[-0.02em] text-white [overflow-wrap:anywhere]">
+                  {item.name}
+                </p>
+                {getSecondaryIdentity(item) ? (
+                  <p className="text-sm text-white/56 [overflow-wrap:anywhere]">{item.email}</p>
+                ) : null}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <LabelPill className={getUserStatusPillClass(item.userStatus)}>
+                  {item.userStatusLabel}
+                </LabelPill>
+                <LabelPill className={getProgressPillClass(item.progressState)}>
+                  {item.progressStateLabel}
+                </LabelPill>
+              </div>
+            </div>
+
+            <ButtonLink className="self-start" href={item.detailHref}>
+              View user
+            </ButtonLink>
+          </div>
+
+          <div className="grid gap-3 pt-4 sm:grid-cols-2">
+            {hasOrganisationColumn ? (
+              <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/38">Organisation</p>
+                <p className="pt-2 text-sm text-white/68">{item.organisationName ?? 'Not set'}</p>
+              </div>
+            ) : null}
+
+            <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+              <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/38">Current assessment</p>
+              <p className="pt-2 text-sm text-white/72">{item.currentAssessmentLabel ?? 'No assignment yet'}</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+              <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/38">Last activity</p>
+              <p className="pt-2 text-sm text-white/62">{item.lastActivityLabel}</p>
+            </div>
+
+            <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+              <p className="text-[0.72rem] uppercase tracking-[0.16em] text-white/38">Next assessment</p>
+              <p className="pt-2 text-sm text-white/62">{item.nextAssessmentLabel ?? 'None queued'}</p>
+            </div>
+          </div>
+        </SurfaceCard>
+      ))}
+    </div>
+  );
+}
+
 export function AdminUsersRegistry({ viewModel }: { viewModel: AdminUsersListPageViewModel }) {
   return (
-    <PageFrame>
+    <PageFrame className="min-w-0 overflow-x-hidden">
       <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-2">
@@ -256,7 +328,7 @@ export function AdminUsersRegistry({ viewModel }: { viewModel: AdminUsersListPag
 
         <UsersToolbar filters={viewModel.filters} />
 
-        <div className="flex flex-wrap gap-2 pt-4">
+        <div className="hidden flex-wrap gap-2 pt-4 md:flex">
           <FilterChip
             active={viewModel.filters.status === 'all'}
             href={buildFilterHref({ filters: viewModel.filters, overrides: { status: 'all' } })}
@@ -319,10 +391,16 @@ export function AdminUsersRegistry({ viewModel }: { viewModel: AdminUsersListPag
             action={<ButtonLink href={buildUsersResetHref()}>Reset filters</ButtonLink>}
           />
         ) : (
-          <UsersTable
-            hasOrganisationColumn={viewModel.hasOrganisationColumn}
-            items={viewModel.items}
-          />
+          <>
+            <UsersCards
+              hasOrganisationColumn={viewModel.hasOrganisationColumn}
+              items={viewModel.items}
+            />
+            <UsersTable
+              hasOrganisationColumn={viewModel.hasOrganisationColumn}
+              items={viewModel.items}
+            />
+          </>
         )}
       </section>
     </PageFrame>

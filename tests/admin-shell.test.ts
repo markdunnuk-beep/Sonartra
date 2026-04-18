@@ -28,8 +28,11 @@ test('admin dashboard nav item is active only on dashboard routes', () => {
 test('admin shell sidebar constrains horizontal overflow at the container', () => {
   const source = readSource(adminShellPath);
 
-  assert.match(source, /box-border flex w-\[18\.5rem\] flex-col overflow-x-hidden/);
+  assert.match(source, /min-h-screen overflow-x-clip/);
+  assert.match(source, /max-w-\[calc\(100vw-1rem\)\]/);
+  assert.match(source, /box-border flex w-\[18\.5rem\] max-w-\[calc\(100vw-1rem\)\] flex-col overflow-x-hidden/);
   assert.match(source, /overflow-y-auto overflow-x-hidden pb-4/);
+  assert.match(source, /min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip/);
   assert.match(source, /sonartra-shell-nav-track space-y-2/);
   assert.match(source, /min-h-12 w-full items-center/);
 });

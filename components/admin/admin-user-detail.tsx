@@ -120,6 +120,8 @@ function AssignmentTimeline({
 }
 
 export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewModel }) {
+  const showsSecondaryEmail =
+    viewModel.name.localeCompare(viewModel.email, 'en', { sensitivity: 'base' }) !== 0;
   const identityMeta = [
     viewModel.organisationName
       ? { label: 'Organisation', value: viewModel.organisationName }
@@ -131,14 +133,14 @@ export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewM
   ].filter((item): item is { label: string; value: string } => item !== null);
 
   return (
-    <PageFrame>
+    <PageFrame className="min-w-0 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <ButtonLink href="/admin/users">Back to users</ButtonLink>
       </div>
 
       <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <LabelPill className={getUserStatusPillClass(viewModel.userStatus)}>
                 {viewModel.userStatusLabel}
@@ -146,16 +148,18 @@ export function AdminUserDetail({ viewModel }: { viewModel: AdminUserDetailViewM
               <LabelPill className={getRolePillClass(viewModel.role)}>{viewModel.roleLabel}</LabelPill>
             </div>
 
-            <div className="space-y-2">
-              <h1 className="max-w-3xl text-[2rem] font-semibold tracking-[-0.03em] text-white lg:text-[2.35rem]">
+            <div className="min-w-0 space-y-2">
+              <h1 className="max-w-full text-[clamp(1.8rem,4vw,2.35rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-white [overflow-wrap:anywhere]">
                 {viewModel.name}
               </h1>
-              <p className="text-sm leading-7 text-white/66">{viewModel.email}</p>
-              <p className="text-sm leading-7 text-white/72">{viewModel.currentStateLabel}</p>
+              {showsSecondaryEmail ? (
+                <p className="text-sm leading-7 text-white/66 [overflow-wrap:anywhere]">{viewModel.email}</p>
+              ) : null}
+              <p className="max-w-2xl text-sm leading-7 text-white/72">{viewModel.currentStateLabel}</p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/62">
+          <div className="w-full max-w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/62 xl:w-auto xl:max-w-[19rem] xl:shrink-0">
             Assignment sequencing and result access from persisted internal state only.
           </div>
         </div>

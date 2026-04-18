@@ -150,11 +150,11 @@ export function AdminShell({
   }, [collapsed]);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(96,119,255,0.08),_transparent_32%),linear-gradient(180deg,rgba(9,17,31,0.98),rgba(8,15,28,1))]">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1680px]">
+    <div className="min-h-screen overflow-x-clip bg-[radial-gradient(circle_at_top,_rgba(96,119,255,0.08),_transparent_32%),linear-gradient(180deg,rgba(9,17,31,0.98),rgba(8,15,28,1))]">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1680px] overflow-x-clip">
         <aside
           className={cn(
-            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 box-border flex w-[18.5rem] flex-col overflow-x-hidden bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
+            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 box-border flex w-[18.5rem] max-w-[calc(100vw-1rem)] flex-col overflow-x-hidden bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300 lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
             collapsed ? 'lg:w-[5.75rem]' : 'lg:w-[18.5rem]',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
             'lg:sticky',
@@ -270,7 +270,7 @@ export function AdminShell({
           />
         ) : null}
 
-        <div className="flex min-h-screen flex-1 flex-col">
+        <div className="min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip">
           <div className="border-white/6 flex items-center justify-between border-b px-4 py-4 lg:hidden">
             <button
               aria-label="Open sidebar"
@@ -293,8 +293,8 @@ export function AdminShell({
             <div className="w-11" />
           </div>
 
-          <div className="flex-1 px-2 py-2 lg:px-5 lg:py-5">
-            <div className="border-white/6 min-h-full rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+          <div className="flex-1 overflow-x-clip px-2 py-2 lg:px-5 lg:py-5">
+            <div className="border-white/6 min-h-full min-w-0 rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl">
               <div className="border-white/6 flex items-center justify-between gap-4 border-b px-5 py-4 lg:px-8 lg:py-5">
                 <div className="min-w-0">
                   <p className="sonartra-shell-session-label">Phase 5</p>

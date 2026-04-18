@@ -30,6 +30,10 @@ test('admin users registry stays on internal persisted data and deterministic se
   const viewModelSource = readSource('lib', 'server', 'admin-users-list.ts');
 
   assert.match(registrySource, /Operational user registry/);
+  assert.match(registrySource, /<UsersCards/);
+  assert.match(registrySource, /className=\"hidden overflow-hidden p-0 xl:block\"/);
+  assert.match(registrySource, /className=\"grid gap-4 xl:hidden\"/);
+  assert.match(registrySource, /ButtonLink className=\"self-start\" href=\{item\.detailHref\}/);
   assert.match(viewModelSource, /currentAssessmentLabel/);
   assert.match(viewModelSource, /nextAssessmentLabel/);
   assert.match(viewModelSource, /assignment\.status !== 'completed'/);
