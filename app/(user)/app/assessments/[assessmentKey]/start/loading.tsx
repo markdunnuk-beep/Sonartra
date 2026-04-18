@@ -1,6 +1,6 @@
 import { AssessmentLoader } from '@/components/assessment/assessment-loader';
 
-export default function AssessmentEntryLoading() {
+export default function AssessmentStartLoading() {
   return (
     <AssessmentLoader
       title="Preparing your assessment"
