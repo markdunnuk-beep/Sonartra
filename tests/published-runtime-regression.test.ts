@@ -332,6 +332,26 @@ function createPublishedRuntimeHarness(): PublishedRuntimeHarness {
         return { rows: [] as T[] };
       }
 
+      if (sql.includes('FROM assessment_version_application_thesis WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_application_contribution WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_application_risk WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_application_development WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_application_action_prompts WHERE assessment_version_id = $1')) {
+        return { rows: [] as T[] };
+      }
+
       if (sql.includes('FROM domains WHERE assessment_version_id = $1 ORDER BY order_index ASC, id ASC')) {
         const versionId = params?.[0] as string;
         return { rows: [...(versionId === publishedVersionId ? domains : [])] as T[] };
