@@ -23,8 +23,10 @@ import type {
 import { createRealtimeVoiceAdapter } from '@/lib/voice/realtime/realtime-voice-adapter';
 import type {
   RealtimeVoiceAdapter,
+  RealtimeVoiceBootstrapError,
   RealtimeVoiceBootstrapPayload,
   RealtimeVoiceConnectionState,
+  RealtimeVoiceRuntimeErrorCode,
 } from '@/lib/voice/realtime/realtime-voice.types';
 
 type VoiceRuntimeClientProps = {
@@ -40,16 +42,109 @@ type BootstrapResponse =
     }
   | {
       ok: false;
-      data?: null;
-      error: string;
+      data: null;
+      error: RealtimeVoiceBootstrapError;
     };
+
+type RuntimeDiagnostic = {
+  stage:
+    | 'idle'
+    | 'microphone'
+    | 'bootstrap'
+    | 'negotiation'
+    | 'session_initialization'
+    | 'connected'
+    | 'disconnected'
+    | 'error';
+  code: RealtimeVoiceRuntimeErrorCode | null;
+};
+
+const VOICE_DEBUG_ENABLED = process.env.NEXT_PUBLIC_VOICE_DEBUG === 'true';
+
+function getRuntimeStageLabel(stage: RuntimeDiagnostic['stage']): string {
+  switch (stage) {
+    case 'microphone':
+      return 'Microphone';
+    case 'bootstrap':
+      return 'Bootstrap';
+    case 'negotiation':
+      return 'Negotiation';
+    case 'session_initialization':
+      return 'Session initialisation';
+    case 'connected':
+      return 'Connected';
+    case 'disconnected':
+      return 'Disconnected';
+    case 'error':
+      return 'Error';
+    case 'idle':
+    default:
+      return 'Idle';
+  }
+}
+
+function mapBootstrapErrorToMessage(error: RealtimeVoiceBootstrapError): string {
+  switch (error.code) {
+    case 'missing_server_api_key':
+      return 'Voice runtime is not configured on the server.';
+    case 'provider_bootstrap_failed':
+      return 'Voice session could not be initialised by the realtime provider.';
+    case 'malformed_provider_response':
+      return 'Server bootstrap did not return a valid client session.';
+    case 'unauthorized':
+      return 'Sign in is required before a voice session can start.';
+    case 'forbidden':
+      return 'Voice session access is not available for this account.';
+    case 'unsupported_runtime_configuration':
+      return 'Voice runtime is configured with an unsupported setup.';
+    case 'internal_error':
+    default:
+      return error.message || 'Voice session bootstrap failed before the realtime connection started.';
+  }
+}
+
+function mapRuntimeErrorCodeToMessage(code: RealtimeVoiceRuntimeErrorCode, fallback: string): string {
+  switch (code) {
+    case 'microphone_denied':
+      return 'Microphone access was denied.';
+    case 'browser_unsupported':
+      return 'This browser does not support the required voice runtime APIs.';
+    case 'provider_bootstrap_failed':
+    case 'missing_server_api_key':
+    case 'malformed_provider_response':
+    case 'unauthorized':
+    case 'forbidden':
+    case 'unsupported_runtime_configuration':
+      return fallback;
+    case 'peer_connection_failed':
+      return 'Voice session could not start a peer connection.';
+    case 'negotiation_failed':
+      return 'Realtime negotiation failed after microphone access.';
+    case 'session_init_failed':
+      return 'Voice session connected, but realtime session initialisation did not complete.';
+    case 'data_channel_failed':
+      return 'Voice session connected, but the realtime control channel failed.';
+    case 'disconnected':
+      return 'Voice session disconnected before it was ready.';
+    case 'internal_error':
+    case 'unknown':
+    default:
+      return fallback;
+  }
+}
 
 function mapRuntimeLabel(state: RealtimeVoiceConnectionState): string {
   switch (state) {
     case 'requesting_microphone':
       return 'Requesting microphone';
+    case 'bootstrapping':
+      return 'Bootstrapping session';
     case 'connecting':
       return 'Connecting';
+    case 'negotiating':
+      return 'Negotiating realtime session';
+    case 'session_initializing':
+      return 'Initialising session';
     case 'connected':
       return 'Connected';
     case 'listening':
@@ -75,7 +170,10 @@ function mapRuntimeTone(
     case 'speaking':
       return 'ready';
     case 'requesting_microphone':
+    case 'bootstrapping':
     case 'connecting':
+    case 'negotiating':
+    case 'session_initializing':
       return 'in_progress';
     default:
       return 'not_started';
@@ -116,11 +214,27 @@ export function VoiceRuntimeClient({
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
   const [transcriptPreview, setTranscriptPreview] = useState<string | null>(null);
   const [turnSnapshot, setTurnSnapshot] = useState<VoiceTurnManagerSnapshot | null>(null);
+  const [runtimeDiagnostic, setRuntimeDiagnostic] = useState<RuntimeDiagnostic>({
+    stage: 'idle',
+    code: null,
+  });
+
+  function debugLog(label: string, details?: Record<string, unknown>): void {
+    if (!VOICE_DEBUG_ENABLED) {
+      return;
+    }
+
+    console.debug('[voice-runtime]', label, details ?? {});
+  }
 
   questionRequestHandlerRef.current = (request: VoiceTurnManagerQuestionRequest): void => {
     const adapter = adapterRef.current;
     if (!adapter) {
       setRuntimeError('Voice runtime is not connected to deliver the current canonical question.');
+      setRuntimeDiagnostic({
+        stage: 'error',
+        code: 'session_init_failed',
+      });
       return;
     }
 
@@ -222,12 +336,22 @@ export function VoiceRuntimeClient({
     setRuntimeError(null);
     setTranscriptPreview(null);
     setRuntimeState('requesting_microphone');
+    setRuntimeDiagnostic({
+      stage: 'microphone',
+      code: null,
+    });
+    debugLog('requesting_microphone');
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      setRuntimeState('connecting');
+      setRuntimeState('bootstrapping');
+      setRuntimeDiagnostic({
+        stage: 'bootstrap',
+        code: null,
+      });
+      debugLog('microphone_granted');
 
       const bootstrapResponse = await fetch('/api/voice/realtime-session', {
         method: 'POST',
@@ -237,13 +361,16 @@ export function VoiceRuntimeClient({
         body: JSON.stringify({ assessmentKey }),
       });
 
-      if (!bootstrapResponse.ok) {
-        throw new Error('Voice session bootstrap failed.');
-      }
-
       const bootstrapResult = (await bootstrapResponse.json()) as BootstrapResponse;
       if (!bootstrapResult.ok || !bootstrapResult.data) {
-        throw new Error('Voice session bootstrap failed.');
+        debugLog('bootstrap_failed', {
+          status: bootstrapResponse.status,
+          code: bootstrapResult.error.code,
+        });
+        throw new RuntimeClientError(
+          bootstrapResult.error.code,
+          mapBootstrapErrorToMessage(bootstrapResult.error),
+        );
       }
 
       const adapter = createRealtimeVoiceAdapter(bootstrapResult.data.provider);
@@ -252,18 +379,57 @@ export function VoiceRuntimeClient({
         switch (event.type) {
           case 'connecting':
             setRuntimeState('connecting');
+            setRuntimeDiagnostic({
+              stage: 'negotiation',
+              code: null,
+            });
+            debugLog('adapter_connecting');
+            break;
+          case 'negotiating':
+            setRuntimeState('negotiating');
+            setRuntimeDiagnostic({
+              stage: 'negotiation',
+              code: null,
+            });
+            debugLog('adapter_negotiating');
+            break;
+          case 'session_initializing':
+            setRuntimeState('session_initializing');
+            setRuntimeDiagnostic({
+              stage: 'session_initialization',
+              code: null,
+            });
+            debugLog('adapter_session_initializing');
             break;
           case 'connected':
             setRuntimeState('connected');
+            setRuntimeDiagnostic({
+              stage: 'connected',
+              code: null,
+            });
+            debugLog('adapter_connected');
             break;
           case 'listening':
             setRuntimeState('listening');
+            setRuntimeDiagnostic({
+              stage: 'connected',
+              code: null,
+            });
             break;
           case 'speaking':
             setRuntimeState('speaking');
+            setRuntimeDiagnostic({
+              stage: 'connected',
+              code: null,
+            });
             break;
           case 'disconnected':
             setRuntimeState('disconnected');
+            setRuntimeDiagnostic({
+              stage: 'disconnected',
+              code: 'disconnected',
+            });
+            debugLog('adapter_disconnected');
             break;
           case 'transcript_partial':
             setTranscriptPreview(event.text);
@@ -273,7 +439,14 @@ export function VoiceRuntimeClient({
             break;
           case 'error':
             setRuntimeState('error');
-            setRuntimeError(event.message);
+            setRuntimeDiagnostic({
+              stage: 'error',
+              code: event.code,
+            });
+            setRuntimeError(mapRuntimeErrorCodeToMessage(event.code, event.message));
+            debugLog('adapter_error', {
+              code: event.code,
+            });
             break;
           default:
             break;
@@ -284,6 +457,7 @@ export function VoiceRuntimeClient({
         bootstrap: bootstrapResult.data,
         stream,
       });
+      debugLog('adapter_connect_resolved');
 
       adapter.updateSession({
         instructions: buildVoiceRuntimeSessionInstructions({
@@ -293,6 +467,7 @@ export function VoiceRuntimeClient({
         outputModalities: ['audio'],
       });
       await adapter.startListening();
+      debugLog('session_ready_for_question_delivery');
 
       const latestSnapshot = manager.getSnapshot();
       if (latestSnapshot.status === 'completed') {
@@ -307,15 +482,30 @@ export function VoiceRuntimeClient({
     } catch (error) {
       await cleanup();
 
+      const runtimeErrorCode =
+        error instanceof DOMException && error.name === 'NotAllowedError'
+          ? 'microphone_denied'
+          : error instanceof RuntimeClientError
+            ? error.code
+            : 'unknown';
       const message =
         error instanceof DOMException && error.name === 'NotAllowedError'
           ? 'Microphone access was denied.'
-          : error instanceof Error
+          : error instanceof RuntimeClientError
             ? error.message
-            : 'Voice runtime could not connect.';
+            : error instanceof Error
+              ? error.message
+              : 'Voice runtime could not connect.';
 
       setRuntimeState('error');
       setRuntimeError(message);
+      setRuntimeDiagnostic({
+        stage: 'error',
+        code: runtimeErrorCode,
+      });
+      debugLog('connect_failed', {
+        code: runtimeErrorCode,
+      });
     }
   }
 
@@ -323,18 +513,30 @@ export function VoiceRuntimeClient({
     await cleanup();
     setRuntimeState('disconnected');
     setTranscriptPreview(null);
+    setRuntimeDiagnostic({
+      stage: 'disconnected',
+      code: null,
+    });
   }
 
   function repeatQuestion(): void {
     const manager = turnManagerRef.current;
     if (!manager) {
       setRuntimeError('Voice question delivery is unavailable.');
+      setRuntimeDiagnostic({
+        stage: 'error',
+        code: 'session_init_failed',
+      });
       return;
     }
 
     const snapshot = manager.getSnapshot();
     if (snapshot.status === 'completed') {
       setRuntimeError('All canonical questions have already been delivered.');
+      setRuntimeDiagnostic({
+        stage: 'error',
+        code: 'session_init_failed',
+      });
       return;
     }
 
@@ -345,12 +547,20 @@ export function VoiceRuntimeClient({
     const manager = turnManagerRef.current;
     if (!manager) {
       setRuntimeError('Voice question delivery is unavailable.');
+      setRuntimeDiagnostic({
+        stage: 'error',
+        code: 'session_init_failed',
+      });
       return;
     }
 
     const snapshot = manager.getSnapshot();
     if (snapshot.status === 'completed') {
       setRuntimeError('All canonical questions have already been delivered.');
+      setRuntimeDiagnostic({
+        stage: 'error',
+        code: 'session_init_failed',
+      });
       return;
     }
 
@@ -416,6 +626,7 @@ export function VoiceRuntimeClient({
 
         <div className="grid gap-3 md:grid-cols-4">
           <MetaItem label="Runtime state" value={mapRuntimeLabel(runtimeState)} />
+          <MetaItem label="Connection stage" value={getRuntimeStageLabel(runtimeDiagnostic.stage)} />
           <MetaItem label="Assessment key" value={assessmentKey} />
           <MetaItem
             label="Current question"
@@ -433,7 +644,18 @@ export function VoiceRuntimeClient({
 
         {runtimeError ? (
           <div className="rounded-[1rem] border border-[rgba(255,126,126,0.18)] bg-[rgba(84,19,19,0.32)] px-4 py-3 text-sm leading-7 text-[rgba(255,214,214,0.88)]">
-            {runtimeError}
+            <p>{runtimeError}</p>
+            {runtimeState === 'error' ? (
+              <div className="mt-3 flex flex-wrap gap-3">
+                <button
+                  className="sonartra-button sonartra-button-secondary"
+                  onClick={() => void connect()}
+                  type="button"
+                >
+                  Retry voice session
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
@@ -525,7 +747,29 @@ export function VoiceRuntimeClient({
             <p className="mt-2 text-sm leading-7 text-white/80">{transcriptPreview}</p>
           </div>
         ) : null}
+
+        {VOICE_DEBUG_ENABLED ? (
+          <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3">
+            <p className="text-[0.68rem] uppercase tracking-[0.22em] text-white/38">
+              Voice debug
+            </p>
+            <p className="mt-2 text-sm leading-7 text-white/74">
+              Stage: {getRuntimeStageLabel(runtimeDiagnostic.stage)}
+              {runtimeDiagnostic.code ? ` · Code: ${runtimeDiagnostic.code}` : ''}
+            </p>
+          </div>
+        ) : null}
       </div>
     </SurfaceCard>
   );
+}
+
+class RuntimeClientError extends Error {
+  constructor(
+    public readonly code: RealtimeVoiceRuntimeErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'RuntimeClientError';
+  }
 }

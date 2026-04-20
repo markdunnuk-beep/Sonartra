@@ -4,6 +4,7 @@ import type {
   RealtimeVoiceAdapterEvent,
   RealtimeVoiceAdapterListener,
   RealtimeVoiceClientEvent,
+  RealtimeVoiceRuntimeErrorCode,
   RealtimeVoiceResponseRequest,
   RealtimeVoiceSessionConfig,
 } from '@/lib/voice/realtime/realtime-voice.types';
@@ -33,6 +34,7 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
   private audioElement: HTMLAudioElement | null = null;
   private stream: MediaStream | null = null;
   private listening = false;
+  private pendingClientEvents: RealtimeVoiceClientEvent[] = [];
 
   subscribe(listener: RealtimeVoiceAdapterListener): () => void {
     this.listeners.add(listener);
@@ -55,68 +57,89 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
     this.audioElement.addEventListener('pause', this.handleAudioPause);
     this.audioElement.addEventListener('ended', this.handleAudioPause);
 
-    const peerConnection = new RTCPeerConnection();
-    this.peerConnection = peerConnection;
+    try {
+      const peerConnection = new RTCPeerConnection();
+      this.peerConnection = peerConnection;
 
-    peerConnection.ontrack = (event) => {
-      if (this.audioElement) {
-        this.audioElement.srcObject = event.streams[0] ?? null;
+      peerConnection.ontrack = (event) => {
+        if (this.audioElement) {
+          this.audioElement.srcObject = event.streams[0] ?? null;
+        }
+      };
+
+      peerConnection.onconnectionstatechange = () => {
+        if (!this.peerConnection) {
+          return;
+        }
+
+        if (this.peerConnection.connectionState === 'connected') {
+          this.emit({ type: 'connected' });
+        }
+
+        if (
+          this.peerConnection.connectionState === 'failed'
+          || this.peerConnection.connectionState === 'closed'
+          || this.peerConnection.connectionState === 'disconnected'
+        ) {
+          this.emit({ type: 'disconnected' });
+        }
+      };
+
+      const dataChannel = peerConnection.createDataChannel('oai-events');
+      this.dataChannel = dataChannel;
+      dataChannel.addEventListener('message', this.handleDataChannelMessage);
+      dataChannel.addEventListener('error', this.handleDataChannelError);
+      dataChannel.addEventListener('close', this.handleDataChannelClose);
+
+      for (const track of params.stream.getTracks()) {
+        peerConnection.addTrack(track, params.stream);
       }
-    };
 
-    peerConnection.onconnectionstatechange = () => {
-      if (!this.peerConnection) {
-        return;
+      this.emit({ type: 'negotiating' });
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${params.bootstrap.session.clientSecret}`,
+          'Content-Type': 'application/sdp',
+        },
+        body: offer.sdp ?? '',
+      });
+
+      if (!sdpResponse.ok) {
+        throw new RealtimeAdapterError(
+          'negotiation_failed',
+          `Realtime negotiation failed (${sdpResponse.status}).`,
+        );
       }
 
-      if (this.peerConnection.connectionState === 'connected') {
-        this.emit({ type: 'connected' });
+      const answerSdp = await sdpResponse.text();
+      await peerConnection.setRemoteDescription({
+        type: 'answer',
+        sdp: answerSdp,
+      });
+
+      this.emit({ type: 'session_initializing' });
+      await this.waitForDataChannelOpen(dataChannel);
+    } catch (error) {
+      await this.disconnect();
+
+      if (error instanceof RealtimeAdapterError) {
+        throw error;
       }
 
-      if (
-        this.peerConnection.connectionState === 'failed'
-        || this.peerConnection.connectionState === 'closed'
-        || this.peerConnection.connectionState === 'disconnected'
-      ) {
-        this.emit({ type: 'disconnected' });
-      }
-    };
-
-    const dataChannel = peerConnection.createDataChannel('oai-events');
-    this.dataChannel = dataChannel;
-    dataChannel.addEventListener('message', this.handleDataChannelMessage);
-    dataChannel.addEventListener('error', this.handleDataChannelError);
-    dataChannel.addEventListener('close', this.handleDataChannelClose);
-
-    for (const track of params.stream.getTracks()) {
-      peerConnection.addTrack(track, params.stream);
+      throw new RealtimeAdapterError(
+        'peer_connection_failed',
+        error instanceof Error ? error.message : 'Peer connection setup failed.',
+      );
     }
-
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-
-    const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${params.bootstrap.session.clientSecret}`,
-        'Content-Type': 'application/sdp',
-      },
-      body: offer.sdp ?? '',
-    });
-
-    if (!sdpResponse.ok) {
-      throw new Error(`Voice provider connection failed (${sdpResponse.status}).`);
-    }
-
-    const answerSdp = await sdpResponse.text();
-    await peerConnection.setRemoteDescription({
-      type: 'answer',
-      sdp: answerSdp,
-    });
   }
 
   async disconnect(): Promise<void> {
     this.listening = false;
+    this.pendingClientEvents = [];
 
     if (this.dataChannel) {
       this.dataChannel.removeEventListener('message', this.handleDataChannelMessage);
@@ -200,7 +223,12 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
   }
 
   sendClientEvent(event: RealtimeVoiceClientEvent): void {
-    if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
+    if (!this.dataChannel) {
+      return;
+    }
+
+    if (this.dataChannel.readyState !== 'open') {
+      this.pendingClientEvents.push(event);
       return;
     }
 
@@ -243,7 +271,7 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
           this.emit({ type: this.listening ? 'listening' : 'connected' });
           break;
         case 'error':
-          this.emit({ type: 'error', message: getEventMessage(event) });
+          this.emit({ type: 'error', code: 'session_init_failed', message: getEventMessage(event) });
           break;
         default:
           break;
@@ -251,6 +279,7 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
     } catch {
       this.emit({
         type: 'error',
+        code: 'session_init_failed',
         message: 'Voice runtime emitted an unreadable event payload.',
       });
     }
@@ -259,6 +288,7 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
   private handleDataChannelError = () => {
     this.emit({
       type: 'error',
+      code: 'data_channel_failed',
       message: 'Voice runtime data channel failed.',
     });
   };
@@ -274,4 +304,65 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
   private handleAudioPause = () => {
     this.emit({ type: this.listening ? 'listening' : 'connected' });
   };
+
+  private async waitForDataChannelOpen(dataChannel: RTCDataChannel): Promise<void> {
+    if (dataChannel.readyState === 'open') {
+      this.flushPendingClientEvents();
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const timeoutId = window.setTimeout(() => {
+        cleanup();
+        reject(new RealtimeAdapterError('session_init_failed', 'Realtime session initialisation timed out.'));
+      }, 10000);
+
+      const handleOpen = () => {
+        cleanup();
+        this.flushPendingClientEvents();
+        resolve();
+      };
+
+      const handleFailure = () => {
+        cleanup();
+        reject(new RealtimeAdapterError('data_channel_failed', 'Realtime session data channel did not open.'));
+      };
+
+      const cleanup = () => {
+        window.clearTimeout(timeoutId);
+        dataChannel.removeEventListener('open', handleOpen);
+        dataChannel.removeEventListener('error', handleFailure);
+        dataChannel.removeEventListener('close', handleFailure);
+      };
+
+      dataChannel.addEventListener('open', handleOpen, { once: true });
+      dataChannel.addEventListener('error', handleFailure, { once: true });
+      dataChannel.addEventListener('close', handleFailure, { once: true });
+    });
+  }
+
+  private flushPendingClientEvents(): void {
+    if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
+      return;
+    }
+
+    while (this.pendingClientEvents.length > 0) {
+      const event = this.pendingClientEvents.shift();
+      if (!event) {
+        continue;
+      }
+
+      this.dataChannel.send(JSON.stringify(event));
+    }
+  }
+}
+
+class RealtimeAdapterError extends Error {
+  constructor(
+    public readonly code: RealtimeVoiceRuntimeErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'RealtimeAdapterError';
+  }
 }

@@ -6,25 +6,24 @@ import {
   isDisabledUserAccessError,
   requireCurrentUser,
 } from '@/lib/server/request-user';
-import type { RealtimeVoiceBootstrapPayload } from '@/lib/voice/realtime/realtime-voice.types';
+import type {
+  RealtimeVoiceBootstrapError,
+  RealtimeVoiceBootstrapPayload,
+} from '@/lib/voice/realtime/realtime-voice.types';
 
 type RealtimeBootstrapRequest = {
   assessmentKey?: string;
 };
 
 type OpenAIClientSecretResponse = {
-  expires_at: number;
-  value?: string;
-  session?: {
-    client_secret?: {
-      value?: string;
-      expires_at?: number;
-    };
-    model?: string;
-    audio?: {
-      output?: {
-        voice?: string;
-      };
+  client_secret?: {
+    value?: string;
+    expires_at?: number;
+  };
+  model?: string;
+  audio?: {
+    output?: {
+      voice?: string;
     };
   };
 };
@@ -39,13 +38,11 @@ function getRealtimeVoice(): string {
 
 function buildSessionConfig(): string {
   return JSON.stringify({
-    session: {
-      type: 'realtime',
-      model: getRealtimeModel(),
-      audio: {
-        output: {
-          voice: getRealtimeVoice(),
-        },
+    type: 'realtime',
+    model: getRealtimeModel(),
+    audio: {
+      output: {
+        voice: getRealtimeVoice(),
       },
     },
   });
@@ -54,8 +51,8 @@ function buildSessionConfig(): string {
 function mapClientSecretResponse(
   payload: OpenAIClientSecretResponse,
 ): RealtimeVoiceBootstrapPayload | null {
-  const clientSecret = payload.session?.client_secret?.value ?? payload.value;
-  const expiresAt = payload.session?.client_secret?.expires_at ?? payload.expires_at;
+  const clientSecret = payload.client_secret?.value;
+  const expiresAt = payload.client_secret?.expires_at;
 
   if (!clientSecret || !expiresAt) {
     return null;
@@ -64,12 +61,26 @@ function mapClientSecretResponse(
   return {
     provider: 'openai',
     session: {
-      model: payload.session?.model ?? getRealtimeModel(),
-      voice: payload.session?.audio?.output?.voice ?? getRealtimeVoice(),
+      model: payload.model ?? getRealtimeModel(),
+      voice: payload.audio?.output?.voice ?? getRealtimeVoice(),
       expiresAt,
       clientSecret,
     },
   };
+}
+
+function errorResponse(
+  status: number,
+  error: RealtimeVoiceBootstrapError,
+) {
+  return NextResponse.json(
+    {
+      ok: false,
+      data: null,
+      error,
+    },
+    { status },
+  );
 }
 
 export async function POST(request: Request) {
@@ -80,14 +91,23 @@ export async function POST(request: Request) {
       isAuthenticatedUserRequiredError(error)
       || isClerkUserProfileRequiredError(error)
     ) {
-      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+      return errorResponse(401, {
+        code: 'unauthorized',
+        message: 'Sign in is required to start a voice session.',
+      });
     }
 
     if (isDisabledUserAccessError(error)) {
-      return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+      return errorResponse(403, {
+        code: 'forbidden',
+        message: 'Voice session access is not available for this account.',
+      });
     }
 
-    return NextResponse.json({ error: 'internal_error' }, { status: 500 });
+    return errorResponse(500, {
+      code: 'internal_error',
+      message: 'Voice session bootstrap could not be initialised.',
+    });
   }
 
   try {
@@ -95,10 +115,10 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.OPENAI_API_KEY?.trim();
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'voice_bootstrap_unavailable' },
-        { status: 503 },
-      );
+      return errorResponse(503, {
+        code: 'missing_server_api_key',
+        message: 'Voice runtime is not configured on the server.',
+      });
     }
 
     const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
@@ -112,20 +132,30 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: 'voice_bootstrap_failed' },
-        { status: 502 },
-      );
+      const providerBody = await response.text().catch(() => '');
+      console.error('voice realtime bootstrap provider failure', {
+        status: response.status,
+        body: providerBody.slice(0, 500),
+      });
+
+      return errorResponse(502, {
+        code: 'provider_bootstrap_failed',
+        message: 'The realtime provider could not create a client voice session.',
+      });
     }
 
     const payload = (await response.json()) as OpenAIClientSecretResponse;
     const bootstrap = mapClientSecretResponse(payload);
 
     if (!bootstrap) {
-      return NextResponse.json(
-        { error: 'voice_bootstrap_invalid' },
-        { status: 502 },
-      );
+      console.error('voice realtime bootstrap malformed provider response', {
+        keys: Object.keys(payload ?? {}),
+      });
+
+      return errorResponse(502, {
+        code: 'malformed_provider_response',
+        message: 'The realtime provider returned an incomplete client session.',
+      });
     }
 
     return NextResponse.json(
@@ -138,6 +168,9 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error('voice realtime bootstrap failed', error);
-    return NextResponse.json({ error: 'voice_bootstrap_failed' }, { status: 500 });
+    return errorResponse(500, {
+      code: 'internal_error',
+      message: 'Voice session bootstrap failed before the realtime connection started.',
+    });
   }
 }
