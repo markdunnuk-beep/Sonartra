@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
+  commitVoiceAnswerToCanonicalResponseAction,
   resolveVoiceAnswerAction,
   settleResolvedVoiceAnswerAction,
   startVoiceSessionAction,
+  type VoiceCanonicalCommitActionPayload,
   type VoiceAnswerResolutionActionPayload,
   type VoiceAnswerSettlementActionPayload,
 } from '@/app/(user)/app/voice-assessments/actions';
@@ -235,6 +237,14 @@ function mapAnswerGateLabel(state: VoiceConfirmationState): string {
       return 'Corrected';
     case 'rejected':
       return 'Rejected';
+    case 'ready_to_commit':
+      return 'Ready to commit';
+    case 'committed':
+      return 'Committed';
+    case 'commit_failed':
+      return 'Commit failed';
+    case 'invalid_resolution_state':
+      return 'Commit blocked';
     case 'runtime_error':
       return 'Resolution error';
     case 'pending':
@@ -269,6 +279,9 @@ export function VoiceRuntimeClient({
   const [settlementOutcome, setSettlementOutcome] = useState<VoiceAnswerSettlementActionPayload | null>(null);
   const [settlementMessage, setSettlementMessage] = useState<string | null>(null);
   const [isSettling, setIsSettling] = useState(false);
+  const [commitOutcome, setCommitOutcome] = useState<VoiceCanonicalCommitActionPayload | null>(null);
+  const [commitMessage, setCommitMessage] = useState<string | null>(null);
+  const [isCommitting, setIsCommitting] = useState(false);
 
   function debugLog(label: string, details?: Record<string, unknown>): void {
     if (!VOICE_DEBUG_ENABLED) {
@@ -370,6 +383,8 @@ export function VoiceRuntimeClient({
     setResolutionMessage(null);
     setSettlementOutcome(null);
     setSettlementMessage(null);
+    setCommitOutcome(null);
+    setCommitMessage(null);
     turnManagerRef.current?.setAnswerConfirmationState('pending');
   }, [turnSnapshot?.activeQuestion?.questionId]);
 
@@ -421,6 +436,8 @@ export function VoiceRuntimeClient({
     setResolutionOutcome(null);
     setSettlementMessage(null);
     setSettlementOutcome(null);
+    setCommitMessage(null);
+    setCommitOutcome(null);
     setVoiceSessionId(null);
     manager.setAnswerConfirmationState('pending');
     manager.resetCurrentQuestionDelivery();
@@ -660,9 +677,9 @@ export function VoiceRuntimeClient({
 
       setSettlementOutcome(result.data);
       if (result.data.status === 'confirmed') {
-        manager.setAnswerConfirmationState('confirmed');
+        manager.setAnswerConfirmationState('ready_to_commit');
       } else if (result.data.status === 'corrected') {
-        manager.setAnswerConfirmationState('corrected');
+        manager.setAnswerConfirmationState('ready_to_commit');
       } else {
         manager.setAnswerConfirmationState('rejected');
       }
@@ -674,6 +691,51 @@ export function VoiceRuntimeClient({
       );
     } finally {
       setIsSettling(false);
+    }
+  }
+
+  async function commitCurrentAnswer(): Promise<void> {
+    const activeQuestion = turnSnapshot?.activeQuestion;
+    const manager = turnManagerRef.current;
+
+    if (!activeQuestion || !manager) {
+      setCommitMessage('No active question is available for canonical response write.');
+      return;
+    }
+
+    setIsCommitting(true);
+    setCommitMessage(null);
+
+    try {
+      const activeVoiceSessionId = await ensureVoiceSession();
+      const result = await commitVoiceAnswerToCanonicalResponseAction({
+        voiceSessionId: activeVoiceSessionId,
+        questionId: activeQuestion.questionId,
+      });
+
+      if (!result.ok || !result.data) {
+        throw new Error(result.error ?? 'Canonical response write failed.');
+      }
+
+      setCommitOutcome(result.data);
+
+      if (result.data.status === 'invalid_resolution_state') {
+        manager.setAnswerConfirmationState('invalid_resolution_state');
+        setCommitMessage(
+          'This voice answer is not in a confirmed state yet, so it cannot be written to canonical responses.',
+        );
+        return;
+      }
+
+      manager.setAnswerConfirmationState('committed');
+    } catch (error) {
+      manager.setAnswerConfirmationState('commit_failed');
+      setCommitOutcome(null);
+      setCommitMessage(
+        error instanceof Error ? error.message : 'Canonical response write failed.',
+      );
+    } finally {
+      setIsCommitting(false);
     }
   }
 
@@ -723,7 +785,7 @@ export function VoiceRuntimeClient({
     }
 
     if (!snapshot.canAdvance) {
-      setRuntimeError('Confirm or correct the current answer before advancing to the next question.');
+      setRuntimeError('Commit the current confirmed answer into canonical responses before advancing to the next question.');
       setRuntimeDiagnostic({
         stage: 'error',
         code: 'session_init_failed',
@@ -746,6 +808,8 @@ export function VoiceRuntimeClient({
     setResolutionMessage(null);
     setSettlementMessage(null);
     setSettlementOutcome(null);
+    setCommitMessage(null);
+    setCommitOutcome(null);
 
     try {
       const activeVoiceSessionId = await ensureVoiceSession();
@@ -793,13 +857,33 @@ export function VoiceRuntimeClient({
     && turnSnapshot?.status === 'ready'
     && turnSnapshot.activeQuestion !== null
     && !isResolving
+    && !isSettling
+    && !isCommitting;
+  const canCommitAnswer =
+    connected
+    && turnSnapshot?.status === 'ready'
+    && turnSnapshot.activeQuestion !== null
+    && turnSnapshot.answerConfirmationState === 'ready_to_commit'
+    && !isCommitting
     && !isSettling;
 
   function renderResolutionOutcome() {
-    if (resolutionMessage || settlementMessage) {
+    if (resolutionMessage || settlementMessage || commitMessage) {
       return (
         <div className="rounded-[1rem] border border-[rgba(255,126,126,0.18)] bg-[rgba(84,19,19,0.32)] px-4 py-3 text-sm leading-7 text-[rgba(255,214,214,0.88)]">
-          {settlementMessage ?? resolutionMessage}
+          {commitMessage ?? settlementMessage ?? resolutionMessage}
+        </div>
+      );
+    }
+
+    if (commitOutcome?.status === 'committed') {
+      return (
+        <div className="rounded-[1rem] border border-[rgba(111,214,163,0.18)] bg-[rgba(18,71,54,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(219,255,239,0.9)]">
+          Canonical response saved. This question now counts toward the assessment attempt:
+          {' '}
+          {commitOutcome.answeredQuestions} of {commitOutcome.totalQuestions}
+          {' '}
+          answered.
         </div>
       );
     }
@@ -812,7 +896,7 @@ export function VoiceRuntimeClient({
           {settlementOutcome.finalSelectedOptionLabel ?? 'Option'}
           {' '}
           {settlementOutcome.finalSelectedOptionText ?? ''}
-          . This answer is confirmed locally and can advance when you are ready.
+          . This answer is confirmed locally and is ready for canonical response write.
         </div>
       );
     }
@@ -825,7 +909,7 @@ export function VoiceRuntimeClient({
           {settlementOutcome.finalSelectedOptionLabel ?? 'Option'}
           {' '}
           {settlementOutcome.finalSelectedOptionText ?? ''}
-          . This corrected option is now the intended local answer for this question.
+          . This corrected option is now the intended local answer and is ready for canonical response write.
         </div>
       );
     }
@@ -853,7 +937,7 @@ export function VoiceRuntimeClient({
           {resolutionOutcome.confidence !== null
             ? ` (${Math.round(resolutionOutcome.confidence * 100)}% confidence)`
             : ''}
-          . Final local confirmation is being recorded.
+          . Final local confirmation is being recorded before canonical response write.
         </div>
       );
     }
@@ -1041,7 +1125,7 @@ export function VoiceRuntimeClient({
                     Runtime controls
                   </p>
                   <p className="mt-2 text-sm leading-7 text-white/64">
-                    Repeat the current authored prompt. The next question only unlocks after the current answer is confirmed or corrected.
+                    Repeat the current authored prompt. The next question only unlocks after the current answer is confirmed or corrected and written into canonical responses.
                   </p>
                 </div>
 
@@ -1099,12 +1183,21 @@ export function VoiceRuntimeClient({
                 <LabelPill className="bg-white/[0.04] text-white/74">
                   {voiceSessionId ? 'Audit session active' : 'Audit session starts on first resolution'}
                 </LabelPill>
+                <button
+                  className="sonartra-button sonartra-button-secondary"
+                  disabled={!canCommitAnswer}
+                  onClick={() => void commitCurrentAnswer()}
+                  type="button"
+                >
+                  {isCommitting ? 'Writing canonical response' : 'Commit to assessment'}
+                </button>
               </div>
 
               {renderResolutionOutcome()}
 
               {turnSnapshot.activeQuestion.options.length > 0
               && resolutionOutcome?.canCorrect
+              && commitOutcome?.status !== 'committed'
               && settlementOutcome?.status !== 'confirmed'
               && settlementOutcome?.status !== 'corrected' ? (
                 <div className="space-y-3">

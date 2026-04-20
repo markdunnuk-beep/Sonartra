@@ -13,6 +13,7 @@ import {
   VoiceSessionConflictError,
   VoiceSessionForbiddenError,
   VoiceSessionNotFoundError,
+  VoiceSessionResolutionStateError,
   VoiceSessionValidationError,
 } from '@/lib/server/voice/voice-session.service';
 import { createVoiceAttemptOrchestrator } from '@/lib/server/voice/voice-attempt-orchestrator';
@@ -72,6 +73,28 @@ export type VoiceAnswerSettlementActionPayload = {
   wasConfirmed: boolean;
   auditResolutionId: string;
 };
+
+export type VoiceCanonicalCommitActionPayload =
+  | {
+      status: 'committed';
+      voiceSessionId: string;
+      questionId: string;
+      selectedOptionId: string;
+      answeredQuestions: number;
+      totalQuestions: number;
+      completionPercentage: number;
+      auditResolutionId: string;
+    }
+  | {
+      status: 'invalid_resolution_state';
+      voiceSessionId: string;
+      questionId: string;
+      selectedOptionId: null;
+      answeredQuestions: null;
+      totalQuestions: null;
+      completionPercentage: null;
+      auditResolutionId: string | null;
+    };
 
 function failure<T>(error: string): VoiceActionResult<T> {
   return {
@@ -341,6 +364,56 @@ export async function settleResolvedVoiceAnswerAction(params: {
       error: null,
     };
   } catch (error) {
+    return mapVoiceActionError(error);
+  }
+}
+
+export async function commitVoiceAnswerToCanonicalResponseAction(params: {
+  voiceSessionId: string;
+  questionId: string;
+}): Promise<VoiceActionResult<VoiceCanonicalCommitActionPayload>> {
+  const service = createVoiceSessionService();
+
+  try {
+    const userId = await requireVoiceActionUserId();
+    const committed = await service.commitVoiceAnswerToCanonicalResponse({
+      userId,
+      voiceSessionId: params.voiceSessionId,
+      questionId: params.questionId,
+    });
+
+    return {
+      ok: true,
+      data: {
+        status: 'committed',
+        voiceSessionId: params.voiceSessionId,
+        questionId: params.questionId,
+        selectedOptionId: committed.committedOptionId,
+        answeredQuestions: committed.response.answeredQuestions,
+        totalQuestions: committed.response.totalQuestions,
+        completionPercentage: committed.response.completionPercentage,
+        auditResolutionId: committed.audit.id,
+      },
+      error: null,
+    };
+  } catch (error) {
+    if (error instanceof VoiceSessionResolutionStateError) {
+      return {
+        ok: true,
+        data: {
+          status: 'invalid_resolution_state',
+          voiceSessionId: params.voiceSessionId,
+          questionId: params.questionId,
+          selectedOptionId: null,
+          answeredQuestions: null,
+          totalQuestions: null,
+          completionPercentage: null,
+          auditResolutionId: null,
+        },
+        error: null,
+      };
+    }
+
     return mapVoiceActionError(error);
   }
 }

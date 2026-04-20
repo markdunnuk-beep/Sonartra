@@ -73,7 +73,7 @@ test('voice turn manager repeats the current question and advances in canonical 
 
   manager.requestInitialQuestion();
   manager.markCurrentQuestionSpoken();
-  manager.setAnswerConfirmationState('confirmed');
+  manager.setAnswerConfirmationState('committed');
   manager.repeatCurrentQuestion();
   const nextSnapshot = manager.advanceToNextQuestion();
 
@@ -93,7 +93,7 @@ test('voice turn manager completes after the final canonical question', () => {
 
   manager.requestInitialQuestion();
   manager.markCurrentQuestionSpoken();
-  manager.setAnswerConfirmationState('corrected');
+  manager.setAnswerConfirmationState('committed');
   const completedSnapshot = manager.advanceToNextQuestion();
 
   assert.equal(completedSnapshot.status, 'completed');
@@ -126,9 +126,9 @@ test('voice turn manager blocks progression until the current answer is confirme
 
   const blockedSnapshot = manager.advanceToNextQuestion();
   assert.equal(blockedSnapshot.status, 'ready');
-  assert.match(blockedSnapshot.error ?? '', /confirmed or corrected/i);
+  assert.match(blockedSnapshot.error ?? '', /committed/i);
 
-  manager.setAnswerConfirmationState('confirmed');
+  manager.setAnswerConfirmationState('committed');
   const nextSnapshot = manager.advanceToNextQuestion();
   assert.equal(nextSnapshot.status, 'ready');
   assert.equal(nextSnapshot.activeQuestionNumber, 2);

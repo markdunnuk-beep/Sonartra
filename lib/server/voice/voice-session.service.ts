@@ -1,5 +1,18 @@
 import { getDbPool } from '@/lib/server/db';
 import {
+  createAssessmentRunnerService,
+  type AssessmentRunnerService,
+} from '@/lib/server/assessment-runner-service';
+import {
+  AssessmentRunnerForbiddenError,
+  AssessmentRunnerNotFoundError,
+  AssessmentRunnerStateError,
+  AssessmentRunnerValidationError,
+  type SaveAssessmentResponseResult,
+} from '@/lib/server/assessment-runner-types';
+import { getAttemptForRunner } from '@/lib/server/assessment-runner-queries';
+import type { Queryable } from '@/lib/engine/repository-sql';
+import {
   createVoiceSessionRepository,
   VoiceSessionConflictError,
   VoiceSessionForbiddenError,
@@ -26,6 +39,13 @@ export {
   VoiceSessionNotFoundError,
   VoiceSessionValidationError,
 } from '@/lib/server/voice/voice-session.repository';
+
+export class VoiceSessionResolutionStateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'VoiceSessionResolutionStateError';
+  }
+}
 
 type VoiceSessionService = {
   startVoiceSession(params: {
@@ -96,10 +116,25 @@ type VoiceSessionService = {
     audit: VoiceResponseResolution;
     selectedOption: VoiceResolutionAttemptPayload['matchedOption'];
   }>;
+  commitVoiceAnswerToCanonicalResponse(params: {
+    userId: string;
+    voiceSessionId: string;
+    questionId: string;
+  }): Promise<{
+    audit: VoiceResponseResolution;
+    committedOptionId: string;
+    response: SaveAssessmentResponseResult;
+  }>;
 };
 
-export function createVoiceSessionService(): VoiceSessionService {
-  const repository = createVoiceSessionRepository({ db: getDbPool() });
+export function createVoiceSessionService(deps?: {
+  db?: Queryable;
+  assessmentRunnerService?: Pick<AssessmentRunnerService, 'saveAssessmentResponse'>;
+}): VoiceSessionService {
+  const db = deps?.db ?? getDbPool();
+  const repository = createVoiceSessionRepository({ db });
+  const assessmentRunnerService =
+    deps?.assessmentRunnerService ?? createAssessmentRunnerService({ db });
 
   return {
     async startVoiceSession(params) {
@@ -276,6 +311,74 @@ export function createVoiceSessionService(): VoiceSessionService {
         selectedOption:
           question.options.find((option) => option.optionId === finalSelectedOptionId) ?? null,
       };
+    },
+
+    async commitVoiceAnswerToCanonicalResponse(params) {
+      const session = await repository.getOwnedVoiceSession({
+        voiceSessionId: params.voiceSessionId,
+        userId: params.userId,
+      });
+
+      const attempt = await getAttemptForRunner(db, session.attemptId);
+      if (!attempt) {
+        throw new VoiceSessionNotFoundError(
+          `Attempt ${session.attemptId} linked to voice session ${params.voiceSessionId} was not found`,
+        );
+      }
+
+      if (attempt.userId !== params.userId) {
+        throw new VoiceSessionForbiddenError(
+          `Attempt ${attempt.attemptId} does not belong to user ${params.userId}`,
+        );
+      }
+
+      const latestAttempt = await repository.getLatestResolutionAttempt({
+        voiceSessionId: params.voiceSessionId,
+        questionId: params.questionId,
+      });
+
+      const finalSelectedOptionId =
+        latestAttempt.finalSelectedOptionId ?? latestAttempt.inferredOptionId;
+
+      if (!latestAttempt.wasConfirmed || !finalSelectedOptionId) {
+        throw new VoiceSessionResolutionStateError(
+          `Question ${params.questionId} does not have a confirmed voice resolution ready for canonical persistence.`,
+        );
+      }
+
+      try {
+        const response = await assessmentRunnerService.saveAssessmentResponse({
+          userId: params.userId,
+          assessmentKey: attempt.assessmentKey,
+          attemptId: attempt.attemptId,
+          questionId: params.questionId,
+          selectedOptionId: finalSelectedOptionId,
+        });
+
+        return {
+          audit: latestAttempt,
+          committedOptionId: finalSelectedOptionId,
+          response,
+        };
+      } catch (error) {
+        if (error instanceof AssessmentRunnerValidationError) {
+          throw new VoiceSessionValidationError(error.message);
+        }
+
+        if (error instanceof AssessmentRunnerForbiddenError) {
+          throw new VoiceSessionForbiddenError(error.message);
+        }
+
+        if (error instanceof AssessmentRunnerNotFoundError) {
+          throw new VoiceSessionNotFoundError(error.message);
+        }
+
+        if (error instanceof AssessmentRunnerStateError) {
+          throw new VoiceSessionValidationError(error.message);
+        }
+
+        throw error;
+      }
     },
   };
 }
