@@ -12,6 +12,7 @@ import {
   SurfaceCard,
   cn,
 } from '@/components/shared/user-app-ui';
+import type { ReactNode } from 'react';
 
 type VoiceShellRequestState = 'loading' | 'request_error' | 'prepared';
 
@@ -20,6 +21,7 @@ type VoiceAssessmentShellProps = {
   requestState: VoiceShellRequestState;
   preparation: VoiceAssessmentPreparationResult | null;
   requestError?: string | null;
+  runtimePanel?: ReactNode;
 };
 
 function DisabledCta({ label }: { label: string }) {
@@ -157,6 +159,7 @@ export function VoiceAssessmentShell({
   requestState,
   preparation,
   requestError,
+  runtimePanel,
 }: Readonly<VoiceAssessmentShellProps>) {
   const copy = mapPreparedStateCopy(preparation);
   const preparedData = requestState === 'prepared' ? preparation?.data ?? null : null;
@@ -308,7 +311,7 @@ export function VoiceAssessmentShell({
                 <BodyText className="max-w-3xl text-white/68">{copy.note}</BodyText>
               </div>
 
-              <DisabledCta label="Start voice session" />
+              {runtimePanel ? null : <DisabledCta label="Start voice session" />}
             </div>
           </SurfaceCard>
 
@@ -371,26 +374,28 @@ export function VoiceAssessmentShell({
               description="This shell prepares the user for voice entry without yet opening microphone, provider, or transcript flows."
             />
 
-            <SurfaceCard className="p-5">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                <div className="space-y-2">
-                  <h3 className="text-[1.2rem] font-semibold tracking-[-0.02em] text-white">
-                    Start voice session is intentionally disabled
-                  </h3>
-                  <p className="max-w-3xl text-sm leading-7 text-white/64">
-                    The next task will wire the live voice runtime into this prepared assessment state. This task stops
-                    at the client-side preparation handoff.
-                  </p>
-                </div>
+            {runtimePanel ?? (
+              <SurfaceCard className="p-5">
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="space-y-2">
+                    <h3 className="text-[1.2rem] font-semibold tracking-[-0.02em] text-white">
+                      Start voice session is intentionally disabled
+                    </h3>
+                    <p className="max-w-3xl text-sm leading-7 text-white/64">
+                      The next task will wire the live voice runtime into this prepared assessment state. This task stops
+                      at the client-side preparation handoff.
+                    </p>
+                  </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <DisabledCta label="Start voice session" />
-                  <ButtonLink href="/app/assessments" variant="secondary">
-                    Back to assessments
-                  </ButtonLink>
+                  <div className="flex flex-wrap gap-3">
+                    <DisabledCta label="Start voice session" />
+                    <ButtonLink href="/app/assessments" variant="secondary">
+                      Back to assessments
+                    </ButtonLink>
+                  </div>
                 </div>
-              </div>
-            </SurfaceCard>
+              </SurfaceCard>
+            )}
           </section>
         </>
       ) : null}

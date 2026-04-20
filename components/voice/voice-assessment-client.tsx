@@ -4,6 +4,7 @@ import { useEffect, useState, startTransition } from 'react';
 
 import { prepareVoiceAssessmentAction } from '@/app/(user)/app/voice-assessments/actions';
 import { VoiceAssessmentShell } from '@/components/voice/voice-assessment-shell';
+import { VoiceRuntimeClient } from '@/components/voice/voice-runtime-client';
 import type { VoiceAssessmentPreparationResult } from '@/lib/server/voice/voice-attempt-orchestrator';
 
 type VoiceAssessmentClientProps = {
@@ -85,6 +86,13 @@ export function VoiceAssessmentClient({
       requestState={state.requestState}
       preparation={state.preparation}
       requestError={state.requestError}
+      runtimePanel={
+        state.requestState === 'prepared'
+        && (state.preparation.state === 'ready_to_start'
+          || state.preparation.state === 'resumed_in_progress')
+          ? <VoiceRuntimeClient assessmentKey={assessmentKey} />
+          : null
+      }
     />
   );
 }
