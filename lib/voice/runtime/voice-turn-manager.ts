@@ -142,7 +142,7 @@ export function createVoiceTurnManager(params: {
       assessment: params.assessment,
       questions: params.questions,
       activeQuestionIndex: snapshot.activeQuestionIndex,
-      questionHasBeenSpoken: true,
+      questionHasBeenSpoken: snapshot.questionHasBeenSpoken,
       status: 'ready',
       lastRequestReason: reason,
       error: null,
@@ -181,6 +181,46 @@ export function createVoiceTurnManager(params: {
       }
 
       return requestActiveQuestion('initial');
+    },
+
+    resetCurrentQuestionDelivery() {
+      if (snapshot.status !== 'ready' || snapshot.activeQuestionIndex === null || !snapshot.activeQuestion) {
+        return snapshot;
+      }
+
+      return setSnapshot(
+        buildSnapshot({
+          assessment: params.assessment,
+          questions: params.questions,
+          activeQuestionIndex: snapshot.activeQuestionIndex,
+          questionHasBeenSpoken: false,
+          status: 'ready',
+          lastRequestReason: null,
+          error: null,
+        }),
+      );
+    },
+
+    markCurrentQuestionSpoken() {
+      if (snapshot.status !== 'ready' || snapshot.activeQuestionIndex === null || !snapshot.activeQuestion) {
+        return snapshot;
+      }
+
+      if (snapshot.questionHasBeenSpoken) {
+        return snapshot;
+      }
+
+      return setSnapshot(
+        buildSnapshot({
+          assessment: params.assessment,
+          questions: params.questions,
+          activeQuestionIndex: snapshot.activeQuestionIndex,
+          questionHasBeenSpoken: true,
+          status: 'ready',
+          lastRequestReason: snapshot.lastRequestReason,
+          error: null,
+        }),
+      );
     },
 
     repeatCurrentQuestion() {

@@ -52,6 +52,8 @@ export interface VoiceTurnManager {
   getSnapshot(): VoiceTurnManagerSnapshot;
   subscribe(listener: (snapshot: VoiceTurnManagerSnapshot) => void): () => void;
   requestInitialQuestion(): VoiceTurnManagerSnapshot;
+  resetCurrentQuestionDelivery(): VoiceTurnManagerSnapshot;
+  markCurrentQuestionSpoken(): VoiceTurnManagerSnapshot;
   repeatCurrentQuestion(): VoiceTurnManagerSnapshot;
   advanceToNextQuestion(): VoiceTurnManagerSnapshot;
 }

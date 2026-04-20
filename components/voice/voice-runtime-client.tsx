@@ -118,12 +118,22 @@ function mapRuntimeErrorCodeToMessage(code: RealtimeVoiceRuntimeErrorCode, fallb
       return fallback;
     case 'peer_connection_failed':
       return 'Voice session could not start a peer connection.';
+    case 'offer_creation_failed':
+      return 'Realtime negotiation could not create an offer.';
+    case 'local_description_failed':
+      return 'Realtime negotiation could not prepare the local session description.';
     case 'negotiation_failed':
       return 'Realtime negotiation failed after microphone access.';
+    case 'remote_description_failed':
+      return 'Realtime negotiation returned an invalid remote session description.';
     case 'session_init_failed':
       return 'Voice session connected, but realtime session initialisation did not complete.';
     case 'data_channel_failed':
       return 'Voice session connected, but the realtime control channel failed.';
+    case 'first_response_failed':
+      return 'The first question could not be delivered.';
+    case 'remote_audio_failed':
+      return 'Audio playback could not be started.';
     case 'disconnected':
       return 'Voice session disconnected before it was ready.';
     case 'internal_error':
@@ -229,6 +239,7 @@ export function VoiceRuntimeClient({
 
   questionRequestHandlerRef.current = (request: VoiceTurnManagerQuestionRequest): void => {
     const adapter = adapterRef.current;
+    const manager = turnManagerRef.current;
     if (!adapter) {
       setRuntimeError('Voice runtime is not connected to deliver the current canonical question.');
       setRuntimeDiagnostic({
@@ -238,22 +249,43 @@ export function VoiceRuntimeClient({
       return;
     }
 
-    adapter.createResponse({
-      conversation: 'none',
-      outputModalities: ['audio'],
-      metadata: {
-        topic: 'sonartra_question_delivery',
-        questionId: request.question.questionId,
-        questionNumber: String(request.question.questionNumber),
-        reason: request.reason,
-      },
-      instructions: buildVoiceQuestionDeliveryInstructions({
-        assessment: request.assessment,
-        question: request.question,
-        totalQuestionCount: request.totalQuestionCount,
-        reason: request.reason,
-      }),
-    });
+    void adapter
+      .createResponse({
+        conversation: 'none',
+        outputModalities: ['audio'],
+        metadata: {
+          topic: 'sonartra_question_delivery',
+          questionId: request.question.questionId,
+          questionNumber: String(request.question.questionNumber),
+          reason: request.reason,
+        },
+        instructions: buildVoiceQuestionDeliveryInstructions({
+          assessment: request.assessment,
+          question: request.question,
+          totalQuestionCount: request.totalQuestionCount,
+          reason: request.reason,
+        }),
+      })
+      .then(() => {
+        manager?.markCurrentQuestionSpoken();
+        debugLog('question_dispatch_acknowledged', {
+          questionId: request.question.questionId,
+          questionNumber: request.question.questionNumber,
+        });
+      })
+      .catch((error) => {
+        const code: RealtimeVoiceRuntimeErrorCode = 'first_response_failed';
+        setRuntimeState('error');
+        setRuntimeDiagnostic({
+          stage: 'error',
+          code,
+        });
+        setRuntimeError(
+          error instanceof Error
+            ? mapRuntimeErrorCodeToMessage(code, error.message)
+            : mapRuntimeErrorCodeToMessage(code, 'The first question could not be delivered.'),
+        );
+      });
   };
 
   useEffect(() => {
@@ -335,6 +367,7 @@ export function VoiceRuntimeClient({
 
     setRuntimeError(null);
     setTranscriptPreview(null);
+    manager.resetCurrentQuestionDelivery();
     setRuntimeState('requesting_microphone');
     setRuntimeDiagnostic({
       stage: 'microphone',
@@ -459,7 +492,7 @@ export function VoiceRuntimeClient({
       });
       debugLog('adapter_connect_resolved');
 
-      adapter.updateSession({
+      await adapter.updateSession({
         instructions: buildVoiceRuntimeSessionInstructions({
           assessment: snapshot.assessment,
           totalQuestionCount: snapshot.totalQuestionCount,
@@ -601,7 +634,12 @@ export function VoiceRuntimeClient({
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {connected || runtimeState === 'connecting' || runtimeState === 'requesting_microphone' ? (
+            {connected
+              || runtimeState === 'requesting_microphone'
+              || runtimeState === 'bootstrapping'
+              || runtimeState === 'connecting'
+              || runtimeState === 'negotiating'
+              || runtimeState === 'session_initializing' ? (
               <button
                 className="sonartra-button sonartra-button-secondary"
                 onClick={() => void disconnect()}

@@ -20,6 +20,16 @@ type OpenAIClientSecretResponse = {
     value?: string;
     expires_at?: number;
   };
+  value?: string;
+  expires_at?: number;
+  session?: {
+    model?: string;
+    audio?: {
+      output?: {
+        voice?: string;
+      };
+    };
+  };
   model?: string;
   audio?: {
     output?: {
@@ -38,11 +48,13 @@ function getRealtimeVoice(): string {
 
 function buildSessionConfig(): string {
   return JSON.stringify({
-    type: 'realtime',
-    model: getRealtimeModel(),
-    audio: {
-      output: {
-        voice: getRealtimeVoice(),
+    session: {
+      type: 'realtime',
+      model: getRealtimeModel(),
+      audio: {
+        output: {
+          voice: getRealtimeVoice(),
+        },
       },
     },
   });
@@ -51,8 +63,8 @@ function buildSessionConfig(): string {
 function mapClientSecretResponse(
   payload: OpenAIClientSecretResponse,
 ): RealtimeVoiceBootstrapPayload | null {
-  const clientSecret = payload.client_secret?.value;
-  const expiresAt = payload.client_secret?.expires_at;
+  const clientSecret = payload.client_secret?.value ?? payload.value;
+  const expiresAt = payload.client_secret?.expires_at ?? payload.expires_at;
 
   if (!clientSecret || !expiresAt) {
     return null;
@@ -61,8 +73,8 @@ function mapClientSecretResponse(
   return {
     provider: 'openai',
     session: {
-      model: payload.model ?? getRealtimeModel(),
-      voice: payload.audio?.output?.voice ?? getRealtimeVoice(),
+      model: payload.model ?? payload.session?.model ?? getRealtimeModel(),
+      voice: payload.audio?.output?.voice ?? payload.session?.audio?.output?.voice ?? getRealtimeVoice(),
       expiresAt,
       clientSecret,
     },
@@ -129,6 +141,7 @@ export async function POST(request: Request) {
       },
       body: buildSessionConfig(),
       cache: 'no-store',
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!response.ok) {

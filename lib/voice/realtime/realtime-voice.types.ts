@@ -59,9 +59,14 @@ export type RealtimeVoiceRuntimeErrorCode =
   | 'browser_unsupported'
   | 'microphone_denied'
   | 'peer_connection_failed'
+  | 'offer_creation_failed'
+  | 'local_description_failed'
   | 'negotiation_failed'
+  | 'remote_description_failed'
   | 'session_init_failed'
   | 'data_channel_failed'
+  | 'first_response_failed'
+  | 'remote_audio_failed'
   | 'disconnected'
   | 'unknown';
 
@@ -91,8 +96,8 @@ export interface RealtimeVoiceAdapter {
   disconnect(): Promise<void>;
   startListening(): Promise<void>;
   stopListening(): Promise<void>;
-  updateSession(config: RealtimeVoiceSessionConfig): void;
-  createResponse(request: RealtimeVoiceResponseRequest): void;
+  updateSession(config: RealtimeVoiceSessionConfig): Promise<void>;
+  createResponse(request: RealtimeVoiceResponseRequest): Promise<void>;
   sendClientEvent(event: RealtimeVoiceClientEvent): void;
   subscribe(listener: RealtimeVoiceAdapterListener): () => void;
 }
