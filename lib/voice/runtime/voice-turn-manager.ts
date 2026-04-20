@@ -10,7 +10,7 @@ import type {
 import type { VoiceConfirmationState } from '@/lib/voice/resolution/voice-resolution.types';
 
 function canAdvanceWithAnswerState(state: VoiceConfirmationState): boolean {
-  return state === 'confirmed' || state === 'corrected';
+  return state === 'committed';
 }
 
 function buildSnapshot(params: {
@@ -307,7 +307,7 @@ export function createVoiceTurnManager(params: {
             answerConfirmationState: snapshot.answerConfirmationState,
             status: 'ready',
             lastRequestReason: snapshot.lastRequestReason,
-            error: 'The current question must be confirmed or corrected before the runtime can advance.',
+            error: 'The current question must be committed to canonical responses before the runtime can advance.',
           }),
         );
       }

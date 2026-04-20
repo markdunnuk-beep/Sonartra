@@ -16,6 +16,10 @@ export type VoiceConfirmationState =
   | 'confirmed'
   | 'corrected'
   | 'rejected'
+  | 'ready_to_commit'
+  | 'committed'
+  | 'commit_failed'
+  | 'invalid_resolution_state'
   | 'runtime_error';
 
 export type VoiceResolutionOption = {
