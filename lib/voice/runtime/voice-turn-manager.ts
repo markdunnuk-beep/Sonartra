@@ -7,12 +7,18 @@ import type {
   VoiceTurnManagerSnapshot,
   VoiceTurnRequestReason,
 } from '@/lib/voice/runtime/voice-turn-manager.types';
+import type { VoiceConfirmationState } from '@/lib/voice/resolution/voice-resolution.types';
+
+function canAdvanceWithAnswerState(state: VoiceConfirmationState): boolean {
+  return state === 'confirmed' || state === 'corrected';
+}
 
 function buildSnapshot(params: {
   assessment: VoiceRuntimeAssessmentContext;
   questions: readonly VoiceRuntimeQuestion[];
   activeQuestionIndex: number | null;
   questionHasBeenSpoken: boolean;
+  answerConfirmationState: VoiceConfirmationState;
   status: VoiceTurnManagerSnapshot['status'];
   lastRequestReason: VoiceTurnManagerSnapshot['lastRequestReason'];
   error: string | null;
@@ -30,6 +36,8 @@ function buildSnapshot(params: {
     activeQuestionNumber: activeQuestion?.questionNumber ?? null,
     activeQuestion,
     questionHasBeenSpoken: activeQuestion ? params.questionHasBeenSpoken : false,
+    answerConfirmationState: activeQuestion ? params.answerConfirmationState : 'pending',
+    canAdvance: activeQuestion ? canAdvanceWithAnswerState(params.answerConfirmationState) : false,
     lastRequestReason: params.lastRequestReason,
     error: params.error,
   };
@@ -46,6 +54,7 @@ function getInitialSnapshot(params: {
       questions: params.questions,
       activeQuestionIndex: null,
       questionHasBeenSpoken: false,
+      answerConfirmationState: 'pending',
       status: 'error',
       lastRequestReason: null,
       error: 'No canonical questions are available for this voice session.',
@@ -58,6 +67,7 @@ function getInitialSnapshot(params: {
       questions: params.questions,
       activeQuestionIndex: null,
       questionHasBeenSpoken: false,
+      answerConfirmationState: 'pending',
       status: 'completed',
       lastRequestReason: null,
       error: null,
@@ -73,6 +83,7 @@ function getInitialSnapshot(params: {
       questions: params.questions,
       activeQuestionIndex: null,
       questionHasBeenSpoken: false,
+      answerConfirmationState: 'pending',
       status: 'error',
       lastRequestReason: null,
       error: 'The prepared voice question index is invalid for this assessment.',
@@ -84,6 +95,7 @@ function getInitialSnapshot(params: {
     questions: params.questions,
     activeQuestionIndex: params.currentQuestionIndex,
     questionHasBeenSpoken: false,
+    answerConfirmationState: 'pending',
     status: 'ready',
     lastRequestReason: null,
     error: null,
@@ -131,6 +143,7 @@ export function createVoiceTurnManager(params: {
           questions: params.questions,
           activeQuestionIndex: snapshot.activeQuestionIndex,
           questionHasBeenSpoken: snapshot.questionHasBeenSpoken,
+          answerConfirmationState: snapshot.answerConfirmationState,
           status: 'error',
           lastRequestReason: snapshot.lastRequestReason,
           error: 'There is no active canonical question available to deliver.',
@@ -143,6 +156,7 @@ export function createVoiceTurnManager(params: {
       questions: params.questions,
       activeQuestionIndex: snapshot.activeQuestionIndex,
       questionHasBeenSpoken: snapshot.questionHasBeenSpoken,
+      answerConfirmationState: snapshot.answerConfirmationState,
       status: 'ready',
       lastRequestReason: reason,
       error: null,
@@ -176,7 +190,7 @@ export function createVoiceTurnManager(params: {
     },
 
     requestInitialQuestion() {
-      if (snapshot.questionHasBeenSpoken) {
+      if (snapshot.questionHasBeenSpoken || snapshot.lastRequestReason === 'initial') {
         return snapshot;
       }
 
@@ -194,6 +208,7 @@ export function createVoiceTurnManager(params: {
           questions: params.questions,
           activeQuestionIndex: snapshot.activeQuestionIndex,
           questionHasBeenSpoken: false,
+          answerConfirmationState: 'pending',
           status: 'ready',
           lastRequestReason: null,
           error: null,
@@ -216,6 +231,26 @@ export function createVoiceTurnManager(params: {
           questions: params.questions,
           activeQuestionIndex: snapshot.activeQuestionIndex,
           questionHasBeenSpoken: true,
+          answerConfirmationState: snapshot.answerConfirmationState,
+          status: 'ready',
+          lastRequestReason: snapshot.lastRequestReason,
+          error: null,
+        }),
+      );
+    },
+
+    setAnswerConfirmationState(state) {
+      if (snapshot.status !== 'ready' || snapshot.activeQuestionIndex === null || !snapshot.activeQuestion) {
+        return snapshot;
+      }
+
+      return setSnapshot(
+        buildSnapshot({
+          assessment: params.assessment,
+          questions: params.questions,
+          activeQuestionIndex: snapshot.activeQuestionIndex,
+          questionHasBeenSpoken: snapshot.questionHasBeenSpoken,
+          answerConfirmationState: state,
           status: 'ready',
           lastRequestReason: snapshot.lastRequestReason,
           error: null,
@@ -231,6 +266,7 @@ export function createVoiceTurnManager(params: {
             questions: params.questions,
             activeQuestionIndex: snapshot.activeQuestionIndex,
             questionHasBeenSpoken: snapshot.questionHasBeenSpoken,
+            answerConfirmationState: snapshot.answerConfirmationState,
             status: 'error',
             lastRequestReason: snapshot.lastRequestReason,
             error: 'The current question cannot be repeated because no active question is available.',
@@ -253,9 +289,25 @@ export function createVoiceTurnManager(params: {
             questions: params.questions,
             activeQuestionIndex: snapshot.activeQuestionIndex,
             questionHasBeenSpoken: snapshot.questionHasBeenSpoken,
+            answerConfirmationState: snapshot.answerConfirmationState,
             status: 'error',
             lastRequestReason: snapshot.lastRequestReason,
             error: 'The next question cannot be delivered because no active question is available.',
+          }),
+        );
+      }
+
+      if (!canAdvanceWithAnswerState(snapshot.answerConfirmationState)) {
+        return setSnapshot(
+          buildSnapshot({
+            assessment: params.assessment,
+            questions: params.questions,
+            activeQuestionIndex: snapshot.activeQuestionIndex,
+            questionHasBeenSpoken: snapshot.questionHasBeenSpoken,
+            answerConfirmationState: snapshot.answerConfirmationState,
+            status: 'ready',
+            lastRequestReason: snapshot.lastRequestReason,
+            error: 'The current question must be confirmed or corrected before the runtime can advance.',
           }),
         );
       }
@@ -268,6 +320,7 @@ export function createVoiceTurnManager(params: {
             questions: params.questions,
             activeQuestionIndex: null,
             questionHasBeenSpoken: false,
+            answerConfirmationState: 'pending',
             status: 'completed',
             lastRequestReason: 'advance',
             error: null,
@@ -280,6 +333,7 @@ export function createVoiceTurnManager(params: {
         questions: params.questions,
         activeQuestionIndex: nextIndex,
         questionHasBeenSpoken: false,
+        answerConfirmationState: 'pending',
         status: 'ready',
         lastRequestReason: 'advance',
         error: null,

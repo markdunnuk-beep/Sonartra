@@ -1,3 +1,5 @@
+import type { VoiceConfirmationState } from '@/lib/voice/resolution/voice-resolution.types';
+
 export type VoiceRuntimeAssessmentContext = {
   assessmentKey: string;
   title: string;
@@ -30,6 +32,8 @@ export type VoiceTurnManagerSnapshot = {
   activeQuestionNumber: number | null;
   activeQuestion: VoiceRuntimeQuestion | null;
   questionHasBeenSpoken: boolean;
+  answerConfirmationState: VoiceConfirmationState;
+  canAdvance: boolean;
   lastRequestReason: VoiceTurnRequestReason | null;
   error: string | null;
 };
@@ -54,6 +58,7 @@ export interface VoiceTurnManager {
   requestInitialQuestion(): VoiceTurnManagerSnapshot;
   resetCurrentQuestionDelivery(): VoiceTurnManagerSnapshot;
   markCurrentQuestionSpoken(): VoiceTurnManagerSnapshot;
+  setAnswerConfirmationState(state: VoiceConfirmationState): VoiceTurnManagerSnapshot;
   repeatCurrentQuestion(): VoiceTurnManagerSnapshot;
   advanceToNextQuestion(): VoiceTurnManagerSnapshot;
 }
