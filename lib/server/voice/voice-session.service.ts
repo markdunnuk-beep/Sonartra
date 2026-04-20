@@ -7,7 +7,11 @@ import {
   VoiceSessionValidationError,
 } from '@/lib/server/voice/voice-session.repository';
 import { resolveVoiceOption } from '@/lib/voice/resolution/voice-option-resolution';
-import type { VoiceResolutionAttemptPayload } from '@/lib/voice/resolution/voice-resolution.types';
+import type {
+  VoiceResolutionAttemptPayload,
+  VoiceResolutionSettlementIntent,
+  VoiceResolutionSettlementStatus,
+} from '@/lib/voice/resolution/voice-resolution.types';
 import type {
   VoiceResponseResolution,
   VoiceSession,
@@ -80,6 +84,17 @@ type VoiceSessionService = {
     outcome: VoiceResolutionAttemptPayload['result'];
     matchedOption: VoiceResolutionAttemptPayload['matchedOption'];
     audit: VoiceResponseResolution;
+  }>;
+  settleResolvedVoiceAnswer(params: {
+    userId: string;
+    voiceSessionId: string;
+    questionId: string;
+    intent: VoiceResolutionSettlementIntent;
+    correctedOptionId?: string | null;
+  }): Promise<{
+    status: VoiceResolutionSettlementStatus;
+    audit: VoiceResponseResolution;
+    selectedOption: VoiceResolutionAttemptPayload['matchedOption'];
   }>;
 };
 
@@ -186,6 +201,11 @@ export function createVoiceSessionService(): VoiceSessionService {
             inferredOptionId: null,
             confidence: null,
             sourceExcerpt: params.sourceExcerpt.trim(),
+            confirmationMode: 'require_retry',
+            candidateOptionLabel: null,
+            candidateOptionText: null,
+            canRetry: true,
+            canCorrect: false,
             internalReason:
               error instanceof Error ? error.message : 'resolution_runtime_error',
           },
@@ -205,6 +225,56 @@ export function createVoiceSessionService(): VoiceSessionService {
         outcome: resolution.result,
         matchedOption: resolution.matchedOption,
         audit,
+      };
+    },
+
+    async settleResolvedVoiceAnswer(params) {
+      await repository.getOwnedVoiceSession({
+        voiceSessionId: params.voiceSessionId,
+        userId: params.userId,
+      });
+
+      const latestAttempt = await repository.getLatestResolutionAttempt({
+        voiceSessionId: params.voiceSessionId,
+        questionId: params.questionId,
+      });
+
+      const question = await repository.getResolutionQuestionForVoiceSession({
+        voiceSessionId: params.voiceSessionId,
+        questionId: params.questionId,
+      });
+
+      if (params.intent === 'reject') {
+        return {
+          status: 'rejected',
+          audit: latestAttempt,
+          selectedOption: null,
+        };
+      }
+
+      const finalSelectedOptionId =
+        params.intent === 'correct'
+          ? params.correctedOptionId ?? null
+          : latestAttempt.inferredOptionId;
+
+      if (!finalSelectedOptionId) {
+        throw new VoiceSessionValidationError(
+          `Question ${params.questionId} does not have a candidate option available to confirm.`,
+        );
+      }
+
+      const audit = await repository.finalizeVoiceResolution({
+        voiceSessionId: params.voiceSessionId,
+        questionId: params.questionId,
+        finalSelectedOptionId,
+        wasConfirmed: true,
+      });
+
+      return {
+        status: params.intent === 'correct' ? 'corrected' : 'confirmed',
+        audit,
+        selectedOption:
+          question.options.find((option) => option.optionId === finalSelectedOptionId) ?? null,
       };
     },
   };

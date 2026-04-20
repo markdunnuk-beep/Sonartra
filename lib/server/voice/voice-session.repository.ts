@@ -315,6 +315,10 @@ export type VoiceSessionRepository = {
     voiceSessionId: string;
     questionId: string;
   }): Promise<VoiceResolutionQuestion>;
+  getLatestResolutionAttempt(params: {
+    voiceSessionId: string;
+    questionId: string;
+  }): Promise<VoiceResponseResolution>;
 };
 
 export function createVoiceSessionRepository(params: {
@@ -748,6 +752,49 @@ export function createVoiceSessionRepository(params: {
           })),
         ),
       };
+    },
+
+    async getLatestResolutionAttempt(input) {
+      const session = await getVoiceSessionOwnershipRecord(db, input.voiceSessionId);
+
+      if (!session) {
+        throw new VoiceSessionNotFoundError(`Voice session ${input.voiceSessionId} was not found`);
+      }
+
+      await validateQuestionForAssessmentVersion(db, {
+        assessmentVersionId: session.assessment_version_id,
+        questionId: input.questionId,
+      });
+
+      const result = await db.query<VoiceResponseResolutionRow>(
+        `
+        SELECT
+          id,
+          voice_session_id,
+          question_id,
+          inferred_option_id,
+          final_selected_option_id,
+          confidence,
+          was_confirmed,
+          source_excerpt,
+          created_at
+        FROM voice_response_resolutions
+        WHERE voice_session_id = $1
+          AND question_id = $2
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+        `,
+        [input.voiceSessionId, input.questionId],
+      );
+
+      const row = result.rows[0];
+      if (!row) {
+        throw new VoiceSessionNotFoundError(
+          `No resolution attempt exists for question ${input.questionId} in voice session ${input.voiceSessionId}`,
+        );
+      }
+
+      return mapVoiceResponseResolutionRow(row);
     },
   };
 }

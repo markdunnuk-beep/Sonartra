@@ -4,6 +4,7 @@ import type {
   VoiceResolutionQuestion,
   VoiceResolutionResult,
 } from '@/lib/voice/resolution/voice-resolution.types';
+import { getVoiceConfirmationMode } from '@/lib/voice/resolution/voice-confirmation-policy';
 
 const LOW_CONFIDENCE_THRESHOLD = 0.78;
 const RESOLVED_THRESHOLD = 0.88;
@@ -239,14 +240,27 @@ function buildResult(params: {
   status: VoiceResolutionResult['status'];
   inferredOptionId?: string | null;
   confidence?: number | null;
+  candidateOptionLabel?: string | null;
+  candidateOptionText?: string | null;
   internalReason?: string | null;
 }): VoiceResolutionResult {
+  const confirmationMode = getVoiceConfirmationMode({
+    status: params.status,
+    confidence: params.confidence ?? null,
+    inferredOptionId: params.inferredOptionId ?? null,
+  });
+
   return {
     status: params.status,
     questionId: params.questionId,
     inferredOptionId: params.inferredOptionId ?? null,
     confidence: params.confidence ?? null,
     sourceExcerpt: params.sourceExcerpt,
+    confirmationMode,
+    candidateOptionLabel: params.candidateOptionLabel ?? null,
+    candidateOptionText: params.candidateOptionText ?? null,
+    canRetry: true,
+    canCorrect: params.status !== 'runtime_error',
     internalReason: params.internalReason ?? null,
   };
 }
@@ -306,6 +320,8 @@ export function resolveVoiceOption(params: {
         status,
         inferredOptionId: explicitMatch.option.optionId,
         confidence: explicitMatch.confidence,
+        candidateOptionLabel: explicitMatch.option.label,
+        candidateOptionText: explicitMatch.option.text,
         internalReason: explicitMatch.reason,
       }),
       matchedOption: explicitMatch.option,
@@ -354,6 +370,8 @@ export function resolveVoiceOption(params: {
       status,
       inferredOptionId: bestMatch.option.optionId,
       confidence: Number(bestMatch.confidence.toFixed(2)),
+      candidateOptionLabel: bestMatch.option.label,
+      candidateOptionText: bestMatch.option.text,
       internalReason: bestMatch.reason,
     }),
     matchedOption: bestMatch.option,

@@ -5,6 +5,19 @@ export type VoiceResolutionStatus =
   | 'invalid_input'
   | 'runtime_error';
 
+export type VoiceConfirmationMode =
+  | 'auto_accept'
+  | 'require_confirmation'
+  | 'require_retry';
+
+export type VoiceConfirmationState =
+  | 'pending'
+  | VoiceConfirmationMode
+  | 'confirmed'
+  | 'corrected'
+  | 'rejected'
+  | 'runtime_error';
+
 export type VoiceResolutionOption = {
   optionId: string;
   label: string | null;
@@ -23,6 +36,11 @@ export type VoiceResolutionResult = {
   inferredOptionId: string | null;
   confidence: number | null;
   sourceExcerpt: string;
+  confirmationMode: VoiceConfirmationMode;
+  candidateOptionLabel: string | null;
+  candidateOptionText: string | null;
+  canRetry: boolean;
+  canCorrect: boolean;
   internalReason: string | null;
 };
 
@@ -30,3 +48,7 @@ export type VoiceResolutionAttemptPayload = {
   result: VoiceResolutionResult;
   matchedOption: VoiceResolutionOption | null;
 };
+
+export type VoiceResolutionSettlementIntent = 'confirm' | 'reject' | 'correct';
+
+export type VoiceResolutionSettlementStatus = 'confirmed' | 'corrected' | 'rejected';

@@ -16,7 +16,12 @@ import {
   VoiceSessionValidationError,
 } from '@/lib/server/voice/voice-session.service';
 import { createVoiceAttemptOrchestrator } from '@/lib/server/voice/voice-attempt-orchestrator';
-import type { VoiceResolutionStatus } from '@/lib/voice/resolution/voice-resolution.types';
+import type {
+  VoiceConfirmationMode,
+  VoiceResolutionSettlementIntent,
+  VoiceResolutionSettlementStatus,
+  VoiceResolutionStatus,
+} from '@/lib/voice/resolution/voice-resolution.types';
 import type {
   VoiceResponseResolution,
   VoiceSession,
@@ -46,11 +51,25 @@ export type VoiceAnswerResolutionActionPayload = {
   voiceSessionId: string;
   questionId: string;
   status: VoiceResolutionStatus;
+  confirmationMode: VoiceConfirmationMode;
   inferredOptionId: string | null;
   inferredOptionLabel: string | null;
   inferredOptionText: string | null;
   confidence: number | null;
   sourceExcerpt: string;
+  canRetry: boolean;
+  canCorrect: boolean;
+  auditResolutionId: string;
+};
+
+export type VoiceAnswerSettlementActionPayload = {
+  voiceSessionId: string;
+  questionId: string;
+  status: VoiceResolutionSettlementStatus;
+  finalSelectedOptionId: string | null;
+  finalSelectedOptionLabel: string | null;
+  finalSelectedOptionText: string | null;
+  wasConfirmed: boolean;
   auditResolutionId: string;
 };
 
@@ -272,12 +291,52 @@ export async function resolveVoiceAnswerAction(params: {
         voiceSessionId: params.voiceSessionId,
         questionId: resolution.outcome.questionId,
         status: resolution.outcome.status,
+        confirmationMode: resolution.outcome.confirmationMode,
         inferredOptionId: resolution.outcome.inferredOptionId,
-        inferredOptionLabel: resolution.matchedOption?.label ?? null,
-        inferredOptionText: resolution.matchedOption?.text ?? null,
+        inferredOptionLabel: resolution.outcome.candidateOptionLabel,
+        inferredOptionText: resolution.outcome.candidateOptionText,
         confidence: resolution.outcome.confidence,
         sourceExcerpt: resolution.outcome.sourceExcerpt,
+        canRetry: resolution.outcome.canRetry,
+        canCorrect: resolution.outcome.canCorrect,
         auditResolutionId: resolution.audit.id,
+      },
+      error: null,
+    };
+  } catch (error) {
+    return mapVoiceActionError(error);
+  }
+}
+
+export async function settleResolvedVoiceAnswerAction(params: {
+  voiceSessionId: string;
+  questionId: string;
+  intent: VoiceResolutionSettlementIntent;
+  correctedOptionId?: string | null;
+}): Promise<VoiceActionResult<VoiceAnswerSettlementActionPayload>> {
+  const service = createVoiceSessionService();
+
+  try {
+    const userId = await requireVoiceActionUserId();
+    const settlement = await service.settleResolvedVoiceAnswer({
+      userId,
+      voiceSessionId: params.voiceSessionId,
+      questionId: params.questionId,
+      intent: params.intent,
+      correctedOptionId: params.correctedOptionId ?? null,
+    });
+
+    return {
+      ok: true,
+      data: {
+        voiceSessionId: params.voiceSessionId,
+        questionId: params.questionId,
+        status: settlement.status,
+        finalSelectedOptionId: settlement.audit.finalSelectedOptionId,
+        finalSelectedOptionLabel: settlement.selectedOption?.label ?? null,
+        finalSelectedOptionText: settlement.selectedOption?.text ?? null,
+        wasConfirmed: settlement.audit.wasConfirmed,
+        auditResolutionId: settlement.audit.id,
       },
       error: null,
     };

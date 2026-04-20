@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import {
   resolveVoiceAnswerAction,
+  settleResolvedVoiceAnswerAction,
   startVoiceSessionAction,
   type VoiceAnswerResolutionActionPayload,
+  type VoiceAnswerSettlementActionPayload,
 } from '@/app/(user)/app/voice-assessments/actions';
 import {
   ButtonLink,
@@ -19,6 +21,10 @@ import {
   buildVoiceQuestionDeliveryInstructions,
   buildVoiceRuntimeSessionInstructions,
 } from '@/lib/voice/runtime/voice-runtime-prompt';
+import type {
+  VoiceConfirmationState,
+  VoiceResolutionSettlementIntent,
+} from '@/lib/voice/resolution/voice-resolution.types';
 import { createVoiceTurnManager } from '@/lib/voice/runtime/voice-turn-manager';
 import type {
   VoiceTurnManager,
@@ -215,6 +221,28 @@ function mapTurnStatusLabel(snapshot: VoiceTurnManagerSnapshot | null): string {
   }
 }
 
+function mapAnswerGateLabel(state: VoiceConfirmationState): string {
+  switch (state) {
+    case 'auto_accept':
+      return 'Auto-accepting candidate';
+    case 'require_confirmation':
+      return 'Awaiting confirmation';
+    case 'require_retry':
+      return 'Needs retry or correction';
+    case 'confirmed':
+      return 'Confirmed';
+    case 'corrected':
+      return 'Corrected';
+    case 'rejected':
+      return 'Rejected';
+    case 'runtime_error':
+      return 'Resolution error';
+    case 'pending':
+    default:
+      return 'Pending answer';
+  }
+}
+
 export function VoiceRuntimeClient({
   assessmentKey,
   preparedData,
@@ -238,6 +266,9 @@ export function VoiceRuntimeClient({
   const [resolutionOutcome, setResolutionOutcome] = useState<VoiceAnswerResolutionActionPayload | null>(null);
   const [resolutionMessage, setResolutionMessage] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
+  const [settlementOutcome, setSettlementOutcome] = useState<VoiceAnswerSettlementActionPayload | null>(null);
+  const [settlementMessage, setSettlementMessage] = useState<string | null>(null);
+  const [isSettling, setIsSettling] = useState(false);
 
   function debugLog(label: string, details?: Record<string, unknown>): void {
     if (!VOICE_DEBUG_ENABLED) {
@@ -337,6 +368,9 @@ export function VoiceRuntimeClient({
     setAnswerExcerpt('');
     setResolutionOutcome(null);
     setResolutionMessage(null);
+    setSettlementOutcome(null);
+    setSettlementMessage(null);
+    turnManagerRef.current?.setAnswerConfirmationState('pending');
   }, [turnSnapshot?.activeQuestion?.questionId]);
 
   async function cleanup(): Promise<void> {
@@ -385,7 +419,10 @@ export function VoiceRuntimeClient({
     setTranscriptPreview(null);
     setResolutionMessage(null);
     setResolutionOutcome(null);
+    setSettlementMessage(null);
+    setSettlementOutcome(null);
     setVoiceSessionId(null);
+    manager.setAnswerConfirmationState('pending');
     manager.resetCurrentQuestionDelivery();
     setRuntimeState('requesting_microphone');
     setRuntimeDiagnostic({
@@ -593,6 +630,53 @@ export function VoiceRuntimeClient({
     return sessionResult.data.id;
   }
 
+  async function settleCurrentAnswer(
+    intent: VoiceResolutionSettlementIntent,
+    correctedOptionId?: string | null,
+  ): Promise<void> {
+    const activeQuestion = turnSnapshot?.activeQuestion;
+    const manager = turnManagerRef.current;
+
+    if (!activeQuestion || !manager) {
+      setSettlementMessage('No active question is available for confirmation.');
+      return;
+    }
+
+    setIsSettling(true);
+    setSettlementMessage(null);
+
+    try {
+      const activeVoiceSessionId = await ensureVoiceSession();
+      const result = await settleResolvedVoiceAnswerAction({
+        voiceSessionId: activeVoiceSessionId,
+        questionId: activeQuestion.questionId,
+        intent,
+        correctedOptionId: correctedOptionId ?? null,
+      });
+
+      if (!result.ok || !result.data) {
+        throw new Error(result.error ?? 'Voice answer confirmation failed.');
+      }
+
+      setSettlementOutcome(result.data);
+      if (result.data.status === 'confirmed') {
+        manager.setAnswerConfirmationState('confirmed');
+      } else if (result.data.status === 'corrected') {
+        manager.setAnswerConfirmationState('corrected');
+      } else {
+        manager.setAnswerConfirmationState('rejected');
+      }
+    } catch (error) {
+      manager.setAnswerConfirmationState('runtime_error');
+      setSettlementOutcome(null);
+      setSettlementMessage(
+        error instanceof Error ? error.message : 'Voice answer confirmation failed.',
+      );
+    } finally {
+      setIsSettling(false);
+    }
+  }
+
   function repeatQuestion(): void {
     const manager = turnManagerRef.current;
     if (!manager) {
@@ -638,6 +722,15 @@ export function VoiceRuntimeClient({
       return;
     }
 
+    if (!snapshot.canAdvance) {
+      setRuntimeError('Confirm or correct the current answer before advancing to the next question.');
+      setRuntimeDiagnostic({
+        stage: 'error',
+        code: 'session_init_failed',
+      });
+      return;
+    }
+
     manager.advanceToNextQuestion();
   }
 
@@ -651,6 +744,8 @@ export function VoiceRuntimeClient({
 
     setIsResolving(true);
     setResolutionMessage(null);
+    setSettlementMessage(null);
+    setSettlementOutcome(null);
 
     try {
       const activeVoiceSessionId = await ensureVoiceSession();
@@ -665,7 +760,13 @@ export function VoiceRuntimeClient({
       }
 
       setResolutionOutcome(result.data);
+      turnManagerRef.current?.setAnswerConfirmationState(result.data.confirmationMode);
+
+      if (result.data.confirmationMode === 'auto_accept' && result.data.inferredOptionId) {
+        await settleCurrentAnswer('confirm');
+      }
     } catch (error) {
+      turnManagerRef.current?.setAnswerConfirmationState('runtime_error');
       setResolutionOutcome(null);
       setResolutionMessage(
         error instanceof Error ? error.message : 'Voice answer resolution failed.',
@@ -685,18 +786,54 @@ export function VoiceRuntimeClient({
     runtimeState === 'connected'
     || runtimeState === 'listening'
     || runtimeState === 'speaking';
-  const canControlQuestions = connected && turnSnapshot?.status === 'ready';
+  const canRepeatQuestions = connected && turnSnapshot?.status === 'ready';
+  const canAdvanceQuestions = canRepeatQuestions && Boolean(turnSnapshot?.canAdvance);
   const canResolveAnswer =
     connected
     && turnSnapshot?.status === 'ready'
     && turnSnapshot.activeQuestion !== null
-    && !isResolving;
+    && !isResolving
+    && !isSettling;
 
   function renderResolutionOutcome() {
-    if (resolutionMessage) {
+    if (resolutionMessage || settlementMessage) {
       return (
         <div className="rounded-[1rem] border border-[rgba(255,126,126,0.18)] bg-[rgba(84,19,19,0.32)] px-4 py-3 text-sm leading-7 text-[rgba(255,214,214,0.88)]">
-          {resolutionMessage}
+          {settlementMessage ?? resolutionMessage}
+        </div>
+      );
+    }
+
+    if (settlementOutcome?.status === 'confirmed') {
+      return (
+        <div className="rounded-[1rem] border border-[rgba(111,214,163,0.18)] bg-[rgba(18,71,54,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(219,255,239,0.9)]">
+          Captured answer:
+          {' '}
+          {settlementOutcome.finalSelectedOptionLabel ?? 'Option'}
+          {' '}
+          {settlementOutcome.finalSelectedOptionText ?? ''}
+          . This answer is confirmed locally and can advance when you are ready.
+        </div>
+      );
+    }
+
+    if (settlementOutcome?.status === 'corrected') {
+      return (
+        <div className="rounded-[1rem] border border-[rgba(111,214,163,0.18)] bg-[rgba(18,71,54,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(219,255,239,0.9)]">
+          Corrected answer:
+          {' '}
+          {settlementOutcome.finalSelectedOptionLabel ?? 'Option'}
+          {' '}
+          {settlementOutcome.finalSelectedOptionText ?? ''}
+          . This corrected option is now the intended local answer for this question.
+        </div>
+      );
+    }
+
+    if (settlementOutcome?.status === 'rejected') {
+      return (
+        <div className="rounded-[1rem] border border-[rgba(255,196,97,0.2)] bg-[rgba(77,53,13,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(255,233,191,0.88)]">
+          The inferred candidate was rejected. Ask the user to answer again or choose the intended authored option below.
         </div>
       );
     }
@@ -705,10 +842,10 @@ export function VoiceRuntimeClient({
       return null;
     }
 
-    if (resolutionOutcome.status === 'resolved') {
+    if (resolutionOutcome.confirmationMode === 'auto_accept') {
       return (
         <div className="rounded-[1rem] border border-[rgba(111,214,163,0.18)] bg-[rgba(18,71,54,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(219,255,239,0.9)]">
-          Resolved candidate:
+          High-confidence candidate captured:
           {' '}
           {resolutionOutcome.inferredOptionLabel ?? 'Option'}
           {' '}
@@ -716,19 +853,43 @@ export function VoiceRuntimeClient({
           {resolutionOutcome.confidence !== null
             ? ` (${Math.round(resolutionOutcome.confidence * 100)}% confidence)`
             : ''}
+          . Final local confirmation is being recorded.
         </div>
       );
     }
 
-    if (resolutionOutcome.status === 'low_confidence') {
+    if (resolutionOutcome.confirmationMode === 'require_confirmation') {
       return (
-        <div className="rounded-[1rem] border border-[rgba(255,196,97,0.2)] bg-[rgba(77,53,13,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(255,233,191,0.88)]">
-          Low-confidence candidate:
-          {' '}
-          {resolutionOutcome.inferredOptionLabel ?? 'Option'}
-          {' '}
-          {resolutionOutcome.inferredOptionText ?? ''}
-          . Ask the user to confirm or restate the answer before continuing.
+        <div className="space-y-3 rounded-[1rem] border border-[rgba(255,196,97,0.2)] bg-[rgba(77,53,13,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(255,233,191,0.88)]">
+          <p>
+            I heard this as:
+            {' '}
+            {resolutionOutcome.inferredOptionLabel ?? 'Option'}
+            {' '}
+            {resolutionOutcome.inferredOptionText ?? ''}
+            {resolutionOutcome.confidence !== null
+              ? ` (${Math.round(resolutionOutcome.confidence * 100)}% confidence)`
+              : ''}
+            . Confirm before the runtime advances.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="sonartra-button sonartra-button-primary"
+              disabled={isSettling}
+              onClick={() => void settleCurrentAnswer('confirm')}
+              type="button"
+            >
+              {isSettling ? 'Saving confirmation' : 'Confirm answer'}
+            </button>
+            <button
+              className="sonartra-button sonartra-button-secondary"
+              disabled={isSettling}
+              onClick={() => void settleCurrentAnswer('reject')}
+              type="button"
+            >
+              Ask again
+            </button>
+          </div>
         </div>
       );
     }
@@ -751,7 +912,7 @@ export function VoiceRuntimeClient({
 
     return (
       <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3 text-sm leading-7 text-white/72">
-        No single authored option could be inferred from the current answer. Ask the user to answer again more clearly.
+        No single authored option can be accepted yet. Ask the user to answer again or choose the intended authored option explicitly.
       </div>
     );
   }
@@ -822,6 +983,10 @@ export function VoiceRuntimeClient({
             label="Question spoken"
             value={turnSnapshot?.questionHasBeenSpoken ? 'Yes' : 'No'}
           />
+          <MetaItem
+            label="Answer gate"
+            value={mapAnswerGateLabel(turnSnapshot?.answerConfirmationState ?? 'pending')}
+          />
         </div>
 
         {runtimeError ? (
@@ -876,14 +1041,14 @@ export function VoiceRuntimeClient({
                     Runtime controls
                   </p>
                   <p className="mt-2 text-sm leading-7 text-white/64">
-                    Repeat the current authored prompt or advance manually to the next canonical question.
+                    Repeat the current authored prompt. The next question only unlocks after the current answer is confirmed or corrected.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
                   <button
                     className="sonartra-button sonartra-button-secondary"
-                    disabled={!canControlQuestions}
+                    disabled={!canRepeatQuestions}
                     onClick={repeatQuestion}
                     type="button"
                   >
@@ -891,7 +1056,7 @@ export function VoiceRuntimeClient({
                   </button>
                   <button
                     className="sonartra-button sonartra-button-primary"
-                    disabled={!canControlQuestions}
+                    disabled={!canAdvanceQuestions}
                     onClick={nextQuestion}
                     type="button"
                   >
@@ -937,6 +1102,30 @@ export function VoiceRuntimeClient({
               </div>
 
               {renderResolutionOutcome()}
+
+              {turnSnapshot.activeQuestion.options.length > 0
+              && resolutionOutcome?.canCorrect
+              && settlementOutcome?.status !== 'confirmed'
+              && settlementOutcome?.status !== 'corrected' ? (
+                <div className="space-y-3">
+                  <p className="text-[0.68rem] uppercase tracking-[0.22em] text-white/38">
+                    Correction options
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    {turnSnapshot.activeQuestion.options.map((option) => (
+                      <button
+                        key={option.optionId}
+                        className="sonartra-button sonartra-button-secondary"
+                        disabled={isSettling}
+                        onClick={() => void settleCurrentAnswer('correct', option.optionId)}
+                        type="button"
+                      >
+                        {option.label ? `${option.label} - ${option.text}` : option.text}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         ) : null}
