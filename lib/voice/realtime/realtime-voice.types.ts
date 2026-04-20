@@ -25,6 +25,18 @@ export type RealtimeVoiceClientEvent = {
   [key: string]: unknown;
 };
 
+export type RealtimeVoiceSessionConfig = {
+  instructions?: string;
+  outputModalities?: Array<'audio' | 'text'>;
+};
+
+export type RealtimeVoiceResponseRequest = {
+  instructions?: string;
+  outputModalities?: Array<'audio' | 'text'>;
+  conversation?: 'default' | 'none';
+  metadata?: Record<string, string>;
+};
+
 export type RealtimeVoiceAdapterEvent =
   | { type: 'connecting' }
   | { type: 'connected' }
@@ -49,6 +61,8 @@ export interface RealtimeVoiceAdapter {
   disconnect(): Promise<void>;
   startListening(): Promise<void>;
   stopListening(): Promise<void>;
+  updateSession(config: RealtimeVoiceSessionConfig): void;
+  createResponse(request: RealtimeVoiceResponseRequest): void;
   sendClientEvent(event: RealtimeVoiceClientEvent): void;
   subscribe(listener: RealtimeVoiceAdapterListener): () => void;
 }

@@ -4,6 +4,8 @@ import type {
   RealtimeVoiceAdapterEvent,
   RealtimeVoiceAdapterListener,
   RealtimeVoiceClientEvent,
+  RealtimeVoiceResponseRequest,
+  RealtimeVoiceSessionConfig,
 } from '@/lib/voice/realtime/realtime-voice.types';
 
 function getEventMessage(event: unknown): string {
@@ -175,6 +177,28 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
     this.emit({ type: 'connected' });
   }
 
+  updateSession(config: RealtimeVoiceSessionConfig): void {
+    this.sendClientEvent({
+      type: 'session.update',
+      session: {
+        instructions: config.instructions,
+        output_modalities: config.outputModalities,
+      },
+    });
+  }
+
+  createResponse(request: RealtimeVoiceResponseRequest): void {
+    this.sendClientEvent({
+      type: 'response.create',
+      response: {
+        conversation: request.conversation === 'none' ? 'none' : undefined,
+        instructions: request.instructions,
+        output_modalities: request.outputModalities,
+        metadata: request.metadata,
+      },
+    });
+  }
+
   sendClientEvent(event: RealtimeVoiceClientEvent): void {
     if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
       return;
@@ -201,17 +225,22 @@ export class OpenAIRealtimeAdapter implements RealtimeVoiceAdapter {
 
       switch (event.type) {
         case 'response.audio_transcript.delta':
+        case 'response.output_audio_transcript.delta':
           if (event.delta) {
             this.emit({ type: 'transcript_partial', text: event.delta });
           }
           break;
         case 'response.audio_transcript.done':
+        case 'response.output_audio_transcript.done':
           if (event.transcript) {
             this.emit({ type: 'transcript_final', text: event.transcript });
           }
           break;
         case 'input_audio_buffer.speech_started':
           this.emit({ type: 'listening' });
+          break;
+        case 'input_audio_buffer.speech_stopped':
+          this.emit({ type: this.listening ? 'listening' : 'connected' });
           break;
         case 'error':
           this.emit({ type: 'error', message: getEventMessage(event) });

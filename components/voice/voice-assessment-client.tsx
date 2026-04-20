@@ -90,7 +90,12 @@ export function VoiceAssessmentClient({
         state.requestState === 'prepared'
         && (state.preparation.state === 'ready_to_start'
           || state.preparation.state === 'resumed_in_progress')
-          ? <VoiceRuntimeClient assessmentKey={assessmentKey} />
+          ? (
+              <VoiceRuntimeClient
+                assessmentKey={assessmentKey}
+                preparedData={state.preparation.data}
+              />
+            )
           : null
       }
     />

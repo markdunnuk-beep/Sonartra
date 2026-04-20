@@ -319,7 +319,7 @@ export function VoiceAssessmentShell({
             <SectionHeader
               eyebrow="Session Context"
               title="Prepared assessment state"
-              description="The canonical attempt and ordered question sequence are ready. Live voice connection is the next step, but remains disabled in this task."
+              description="The canonical attempt and ordered question sequence are ready. Live voice connection now attaches to this prepared assessment state."
             />
 
             <div className="grid gap-4 xl:grid-cols-[1.35fr_0.9fr]">
@@ -370,8 +370,8 @@ export function VoiceAssessmentShell({
           <section className="sonartra-section">
             <SectionHeader
               eyebrow="Next Step"
-              title="Session handoff"
-              description="This shell prepares the user for voice entry without yet opening microphone, provider, or transcript flows."
+              title="Guided voice runtime"
+              description="The live runtime now handles connection and canonical question delivery, while answer handling and persistence remain outside this layer."
             />
 
             {runtimePanel ?? (
@@ -382,8 +382,8 @@ export function VoiceAssessmentShell({
                       Start voice session is intentionally disabled
                     </h3>
                     <p className="max-w-3xl text-sm leading-7 text-white/64">
-                      The next task will wire the live voice runtime into this prepared assessment state. This task stops
-                      at the client-side preparation handoff.
+                      The prepared voice assessment is ready, but the runtime panel is not currently available in this
+                      view.
                     </p>
                   </div>
 
