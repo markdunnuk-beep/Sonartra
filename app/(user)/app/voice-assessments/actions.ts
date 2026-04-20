@@ -1,11 +1,13 @@
 'use server';
 
+import { getDbPool } from '@/lib/server/db';
 import {
   isAuthenticatedUserRequiredError,
   isClerkUserProfileRequiredError,
   isDisabledUserAccessError,
   requireCurrentUser,
 } from '@/lib/server/request-user';
+import type { VoiceAssessmentPreparationResult } from '@/lib/server/voice/voice-attempt-orchestrator';
 import {
   createVoiceSessionService,
   VoiceSessionConflictError,
@@ -13,6 +15,7 @@ import {
   VoiceSessionNotFoundError,
   VoiceSessionValidationError,
 } from '@/lib/server/voice/voice-session.service';
+import { createVoiceAttemptOrchestrator } from '@/lib/server/voice/voice-attempt-orchestrator';
 import type {
   VoiceResponseResolution,
   VoiceSession,
@@ -111,6 +114,30 @@ export async function startVoiceSessionAction(params: {
     return {
       ok: true,
       data: session,
+      error: null,
+    };
+  } catch (error) {
+    return mapVoiceActionError(error);
+  }
+}
+
+export async function prepareVoiceAssessmentAction(
+  assessmentKey: string,
+): Promise<VoiceActionResult<VoiceAssessmentPreparationResult>> {
+  const orchestrator = createVoiceAttemptOrchestrator({
+    db: getDbPool(),
+  });
+
+  try {
+    const userId = await requireVoiceActionUserId();
+    const preparation = await orchestrator.prepareVoiceAssessment({
+      userId,
+      assessmentKey,
+    });
+
+    return {
+      ok: true,
+      data: preparation,
       error: null,
     };
   } catch (error) {

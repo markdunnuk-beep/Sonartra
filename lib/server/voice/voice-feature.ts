@@ -1,5 +1,10 @@
 const DEFAULT_SUPPORTED_ASSESSMENT_KEYS = ['wplp80'] as const;
 
+export type VoiceAssessmentSupportState =
+  | 'feature_disabled'
+  | 'unsupported_assessment'
+  | 'supported';
+
 function parseSupportedAssessmentKeys(value: string | undefined): readonly string[] {
   if (!value) {
     return DEFAULT_SUPPORTED_ASSESSMENT_KEYS;
@@ -27,4 +32,16 @@ export function isVoiceAssessmentSupportedForKey(assessmentKey: string): boolean
   }
 
   return getVoiceAssessmentSupportedKeys().includes(assessmentKey.toLowerCase());
+}
+
+export function getVoiceAssessmentSupportState(
+  assessmentKey: string,
+): VoiceAssessmentSupportState {
+  if (!isVoiceAssessmentFeatureEnabled()) {
+    return 'feature_disabled';
+  }
+
+  return isVoiceAssessmentSupportedForKey(assessmentKey)
+    ? 'supported'
+    : 'unsupported_assessment';
 }
