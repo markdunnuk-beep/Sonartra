@@ -9,6 +9,7 @@ import {
   StatusPill,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
+import { isVoiceAssessmentFeatureEnabled } from '@/lib/server/voice/voice-feature';
 import { formatAssessmentEstimatedDuration } from '@/lib/ui/assessment-duration';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
@@ -24,6 +25,7 @@ function formatDate(value: string): string {
 
 export default async function UserWorkspacePage() {
   const userId = await getRequestUserId();
+  const voiceFeatureEnabled = isVoiceAssessmentFeatureEnabled();
   const viewModel = await createWorkspaceService({
     db: getDbPool(),
   }).getWorkspaceViewModel({ userId });
@@ -106,6 +108,45 @@ export default async function UserWorkspacePage() {
             description="Published assessments will appear here when they are available for this user."
           />
         )}
+      </section>
+
+      <section className="sonartra-section">
+        <SectionHeader
+          eyebrow="Voice Assessment"
+          title="Guided voice delivery"
+          description="A dedicated product surface for voice-based assessment delivery is now visible in the user app, but live runtime remains intentionally disconnected."
+        />
+
+        <SurfaceCard accent className="overflow-hidden p-6 lg:p-7">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <LabelPill>Preview surface</LabelPill>
+                <StatusPill
+                  status={voiceFeatureEnabled ? 'in_progress' : 'not_started'}
+                  label={voiceFeatureEnabled ? 'Available in limited MVP shell' : 'Unavailable in this environment'}
+                />
+              </div>
+              <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.35rem]">
+                Voice sits beside the assessment runner, not outside the platform.
+              </h2>
+              <p className="max-w-3xl text-sm leading-7 text-white/66">
+                Open a dedicated voice route for supported assessments and review the controlled MVP shell.
+                No microphone access, transcript capture, or scoring handoff starts from this entry point yet.
+              </p>
+            </div>
+
+            {voiceFeatureEnabled ? (
+              <ButtonLink href="/app/voice-assessments" variant="primary">
+                Open Voice Assessment
+              </ButtonLink>
+            ) : (
+              <div className="sonartra-button sonartra-button-secondary cursor-not-allowed border-white/10 bg-white/[0.04] text-white/42 opacity-80">
+                Voice unavailable
+              </div>
+            )}
+          </div>
+        </SurfaceCard>
       </section>
 
       <section className="sonartra-section">

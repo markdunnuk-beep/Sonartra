@@ -137,6 +137,25 @@ function NavIcon({ icon, active }: { icon: UserAppNavItem['icon']; active: boole
           />
         </svg>
       );
+    case 'voice':
+      return (
+        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+          <path
+            d="M12 4.75a3 3 0 0 1 3 3v4.5a3 3 0 1 1-6 0v-4.5a3 3 0 0 1 3-3Z"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+          <path
+            d="M6.75 11.75a5.25 5.25 0 1 0 10.5 0M12 17v2.25M9 19.25h6"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+          />
+        </svg>
+      );
     case 'settings':
       return (
         <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
@@ -240,10 +259,12 @@ function SidebarSection({
 export function UserAppShell({
   children,
   canAccessAdmin,
+  canAccessVoice,
   userLabel,
 }: Readonly<{
   children: React.ReactNode;
   canAccessAdmin: boolean;
+  canAccessVoice: boolean;
   userLabel: string;
 }>) {
   const pathname = usePathname();
@@ -255,7 +276,7 @@ export function UserAppShell({
     return window.localStorage.getItem(SHELL_COLLAPSE_STORAGE_KEY) === 'true';
   });
   const [mobileOpen, setMobileOpen] = useState(false);
-  const navSections = getUserAppNavSections({ canAccessAdmin });
+  const navSections = getUserAppNavSections({ canAccessAdmin, canAccessVoice });
   const isAssessmentRunnerRoute = /^\/app\/assessments\/[^/]+\/attempts\/[^/]+\/?$/.test(pathname);
   const shellDesktopBreakpoint = isAssessmentRunnerRoute ? 'xl' : 'lg';
 
