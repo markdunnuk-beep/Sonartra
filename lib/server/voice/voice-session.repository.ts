@@ -7,6 +7,7 @@ import type {
   VoiceSessionStatus,
   VoiceSessionTurn,
 } from '@/lib/types/voice';
+import type { VoiceResolutionQuestion } from '@/lib/voice/resolution/voice-resolution.types';
 
 type VoiceSessionRow = {
   id: string;
@@ -77,6 +78,15 @@ type QuestionVersionRow = {
 
 type OptionQuestionRow = {
   id: string;
+};
+
+type VoiceResolutionQuestionRow = {
+  question_id: string;
+  prompt: string;
+  option_id: string;
+  option_label: string | null;
+  option_text: string;
+  option_order_index: number;
 };
 
 export class VoiceSessionNotFoundError extends Error {
@@ -301,6 +311,10 @@ export type VoiceSessionRepository = {
     voiceSessionId: string;
     userId: string;
   }): Promise<VoiceSession>;
+  getResolutionQuestionForVoiceSession(params: {
+    voiceSessionId: string;
+    questionId: string;
+  }): Promise<VoiceResolutionQuestion>;
 };
 
 export function createVoiceSessionRepository(params: {
@@ -684,6 +698,56 @@ export function createVoiceSessionRepository(params: {
       }
 
       return mapVoiceSessionRow(row);
+    },
+
+    async getResolutionQuestionForVoiceSession(input) {
+      const session = await getVoiceSessionOwnershipRecord(db, input.voiceSessionId);
+
+      if (!session) {
+        throw new VoiceSessionNotFoundError(`Voice session ${input.voiceSessionId} was not found`);
+      }
+
+      await validateQuestionForAssessmentVersion(db, {
+        assessmentVersionId: session.assessment_version_id,
+        questionId: input.questionId,
+      });
+
+      const result = await db.query<VoiceResolutionQuestionRow>(
+        `
+        SELECT
+          q.id AS question_id,
+          q.prompt,
+          o.id AS option_id,
+          o.option_label,
+          o.option_text,
+          o.order_index AS option_order_index
+        FROM questions q
+        INNER JOIN options o ON o.question_id = q.id
+        WHERE q.id = $1
+          AND q.assessment_version_id = $2
+        ORDER BY o.order_index ASC, o.id ASC
+        `,
+        [input.questionId, session.assessment_version_id],
+      );
+
+      const rows = result.rows;
+      if (rows.length === 0) {
+        throw new VoiceSessionNotFoundError(
+          `Question ${input.questionId} has no authored options for voice resolution.`,
+        );
+      }
+
+      return {
+        questionId: rows[0].question_id,
+        prompt: rows[0].prompt,
+        options: Object.freeze(
+          rows.map((row) => ({
+            optionId: row.option_id,
+            label: row.option_label,
+            text: row.option_text,
+          })),
+        ),
+      };
     },
   };
 }

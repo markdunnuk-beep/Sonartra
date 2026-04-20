@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
+  resolveVoiceAnswerAction,
+  startVoiceSessionAction,
+  type VoiceAnswerResolutionActionPayload,
+} from '@/app/(user)/app/voice-assessments/actions';
+import {
   ButtonLink,
   LabelPill,
   MetaItem,
@@ -228,6 +233,11 @@ export function VoiceRuntimeClient({
     stage: 'idle',
     code: null,
   });
+  const [voiceSessionId, setVoiceSessionId] = useState<string | null>(null);
+  const [answerExcerpt, setAnswerExcerpt] = useState('');
+  const [resolutionOutcome, setResolutionOutcome] = useState<VoiceAnswerResolutionActionPayload | null>(null);
+  const [resolutionMessage, setResolutionMessage] = useState<string | null>(null);
+  const [isResolving, setIsResolving] = useState(false);
 
   function debugLog(label: string, details?: Record<string, unknown>): void {
     if (!VOICE_DEBUG_ENABLED) {
@@ -323,6 +333,12 @@ export function VoiceRuntimeClient({
     preparedData.delivery.questions,
   ]);
 
+  useEffect(() => {
+    setAnswerExcerpt('');
+    setResolutionOutcome(null);
+    setResolutionMessage(null);
+  }, [turnSnapshot?.activeQuestion?.questionId]);
+
   async function cleanup(): Promise<void> {
     const adapter = adapterRef.current;
     adapterRef.current = null;
@@ -367,6 +383,9 @@ export function VoiceRuntimeClient({
 
     setRuntimeError(null);
     setTranscriptPreview(null);
+    setResolutionMessage(null);
+    setResolutionOutcome(null);
+    setVoiceSessionId(null);
     manager.resetCurrentQuestionDelivery();
     setRuntimeState('requesting_microphone');
     setRuntimeDiagnostic({
@@ -552,6 +571,28 @@ export function VoiceRuntimeClient({
     });
   }
 
+  async function ensureVoiceSession(): Promise<string> {
+    if (voiceSessionId) {
+      return voiceSessionId;
+    }
+
+    const sessionResult = await startVoiceSessionAction({
+      attemptId: preparedData.attempt.attemptId,
+      assessmentId: preparedData.assessment.assessmentId,
+      assessmentVersionId: preparedData.assessment.assessmentVersionId,
+      provider: 'openai',
+      model: 'gpt-realtime-mini',
+      locale: null,
+    });
+
+    if (!sessionResult.ok || !sessionResult.data) {
+      throw new Error(sessionResult.error ?? 'Voice session audit could not be started.');
+    }
+
+    setVoiceSessionId(sessionResult.data.id);
+    return sessionResult.data.id;
+  }
+
   function repeatQuestion(): void {
     const manager = turnManagerRef.current;
     if (!manager) {
@@ -600,6 +641,40 @@ export function VoiceRuntimeClient({
     manager.advanceToNextQuestion();
   }
 
+  async function resolveCurrentAnswer(): Promise<void> {
+    const activeQuestion = turnSnapshot?.activeQuestion;
+    if (!activeQuestion) {
+      setResolutionMessage('No active question is available for resolution.');
+      setResolutionOutcome(null);
+      return;
+    }
+
+    setIsResolving(true);
+    setResolutionMessage(null);
+
+    try {
+      const activeVoiceSessionId = await ensureVoiceSession();
+      const result = await resolveVoiceAnswerAction({
+        voiceSessionId: activeVoiceSessionId,
+        questionId: activeQuestion.questionId,
+        sourceExcerpt: answerExcerpt,
+      });
+
+      if (!result.ok || !result.data) {
+        throw new Error(result.error ?? 'Voice answer resolution failed.');
+      }
+
+      setResolutionOutcome(result.data);
+    } catch (error) {
+      setResolutionOutcome(null);
+      setResolutionMessage(
+        error instanceof Error ? error.message : 'Voice answer resolution failed.',
+      );
+    } finally {
+      setIsResolving(false);
+    }
+  }
+
   useEffect(() => {
     return () => {
       void cleanup();
@@ -611,6 +686,75 @@ export function VoiceRuntimeClient({
     || runtimeState === 'listening'
     || runtimeState === 'speaking';
   const canControlQuestions = connected && turnSnapshot?.status === 'ready';
+  const canResolveAnswer =
+    connected
+    && turnSnapshot?.status === 'ready'
+    && turnSnapshot.activeQuestion !== null
+    && !isResolving;
+
+  function renderResolutionOutcome() {
+    if (resolutionMessage) {
+      return (
+        <div className="rounded-[1rem] border border-[rgba(255,126,126,0.18)] bg-[rgba(84,19,19,0.32)] px-4 py-3 text-sm leading-7 text-[rgba(255,214,214,0.88)]">
+          {resolutionMessage}
+        </div>
+      );
+    }
+
+    if (!resolutionOutcome) {
+      return null;
+    }
+
+    if (resolutionOutcome.status === 'resolved') {
+      return (
+        <div className="rounded-[1rem] border border-[rgba(111,214,163,0.18)] bg-[rgba(18,71,54,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(219,255,239,0.9)]">
+          Resolved candidate:
+          {' '}
+          {resolutionOutcome.inferredOptionLabel ?? 'Option'}
+          {' '}
+          {resolutionOutcome.inferredOptionText ?? ''}
+          {resolutionOutcome.confidence !== null
+            ? ` (${Math.round(resolutionOutcome.confidence * 100)}% confidence)`
+            : ''}
+        </div>
+      );
+    }
+
+    if (resolutionOutcome.status === 'low_confidence') {
+      return (
+        <div className="rounded-[1rem] border border-[rgba(255,196,97,0.2)] bg-[rgba(77,53,13,0.28)] px-4 py-3 text-sm leading-7 text-[rgba(255,233,191,0.88)]">
+          Low-confidence candidate:
+          {' '}
+          {resolutionOutcome.inferredOptionLabel ?? 'Option'}
+          {' '}
+          {resolutionOutcome.inferredOptionText ?? ''}
+          . Ask the user to confirm or restate the answer before continuing.
+        </div>
+      );
+    }
+
+    if (resolutionOutcome.status === 'invalid_input') {
+      return (
+        <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3 text-sm leading-7 text-white/72">
+          A current answer excerpt is required before the voice runtime can attempt resolution.
+        </div>
+      );
+    }
+
+    if (resolutionOutcome.status === 'runtime_error') {
+      return (
+        <div className="rounded-[1rem] border border-[rgba(255,126,126,0.18)] bg-[rgba(84,19,19,0.32)] px-4 py-3 text-sm leading-7 text-[rgba(255,214,214,0.88)]">
+          Voice answer resolution could not complete for this question.
+        </div>
+      );
+    }
+
+    return (
+      <div className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3 text-sm leading-7 text-white/72">
+        No single authored option could be inferred from the current answer. Ask the user to answer again more clearly.
+      </div>
+    );
+  }
 
   return (
     <SurfaceCard className="p-5">
@@ -704,7 +848,7 @@ export function VoiceRuntimeClient({
         ) : null}
 
         {turnSnapshot?.status === 'ready' && turnSnapshot.activeQuestion ? (
-          <div className="grid gap-4 xl:grid-cols-[1.35fr_0.9fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.2fr_0.9fr]">
             <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-5">
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
@@ -759,6 +903,44 @@ export function VoiceRuntimeClient({
           </div>
         ) : null}
 
+        {turnSnapshot?.status === 'ready' && turnSnapshot.activeQuestion ? (
+          <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-5">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-[0.68rem] uppercase tracking-[0.22em] text-white/38">
+                  Answer resolution
+                </p>
+                <p className="max-w-3xl text-sm leading-7 text-white/64">
+                  Submit the current answer excerpt for bounded resolution against this question&apos;s authored option set.
+                </p>
+              </div>
+
+              <textarea
+                className="min-h-[7rem] w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm leading-7 text-white outline-none transition focus:border-white/18"
+                onChange={(event) => setAnswerExcerpt(event.target.value)}
+                placeholder="Enter the user's current answer excerpt"
+                value={answerExcerpt}
+              />
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  className="sonartra-button sonartra-button-primary"
+                  disabled={!canResolveAnswer}
+                  onClick={() => void resolveCurrentAnswer()}
+                  type="button"
+                >
+                  {isResolving ? 'Resolving answer' : 'Resolve current answer'}
+                </button>
+                <LabelPill className="bg-white/[0.04] text-white/74">
+                  {voiceSessionId ? 'Audit session active' : 'Audit session starts on first resolution'}
+                </LabelPill>
+              </div>
+
+              {renderResolutionOutcome()}
+            </div>
+          </div>
+        ) : null}
+
         {turnSnapshot?.status === 'completed' ? (
           <div className="rounded-[1.2rem] border border-white/8 bg-black/10 p-5">
             <div className="space-y-3">
@@ -793,7 +975,7 @@ export function VoiceRuntimeClient({
             </p>
             <p className="mt-2 text-sm leading-7 text-white/74">
               Stage: {getRuntimeStageLabel(runtimeDiagnostic.stage)}
-              {runtimeDiagnostic.code ? ` · Code: ${runtimeDiagnostic.code}` : ''}
+              {runtimeDiagnostic.code ? ` - Code: ${runtimeDiagnostic.code}` : ''}
             </p>
           </div>
         ) : null}

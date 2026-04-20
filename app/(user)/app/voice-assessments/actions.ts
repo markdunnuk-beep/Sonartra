@@ -16,6 +16,7 @@ import {
   VoiceSessionValidationError,
 } from '@/lib/server/voice/voice-session.service';
 import { createVoiceAttemptOrchestrator } from '@/lib/server/voice/voice-attempt-orchestrator';
+import type { VoiceResolutionStatus } from '@/lib/voice/resolution/voice-resolution.types';
 import type {
   VoiceResponseResolution,
   VoiceSession,
@@ -39,6 +40,18 @@ type VoiceActionResult<T> =
 type VoiceFailurePayload = {
   session: VoiceSession;
   event: VoiceSessionEvent | null;
+};
+
+export type VoiceAnswerResolutionActionPayload = {
+  voiceSessionId: string;
+  questionId: string;
+  status: VoiceResolutionStatus;
+  inferredOptionId: string | null;
+  inferredOptionLabel: string | null;
+  inferredOptionText: string | null;
+  confidence: number | null;
+  sourceExcerpt: string;
+  auditResolutionId: string;
 };
 
 function failure<T>(error: string): VoiceActionResult<T> {
@@ -230,6 +243,42 @@ export async function finalizeResolutionAction(params: {
     return {
       ok: true,
       data: resolution,
+      error: null,
+    };
+  } catch (error) {
+    return mapVoiceActionError(error);
+  }
+}
+
+export async function resolveVoiceAnswerAction(params: {
+  voiceSessionId: string;
+  questionId: string;
+  sourceExcerpt: string;
+}): Promise<VoiceActionResult<VoiceAnswerResolutionActionPayload>> {
+  const service = createVoiceSessionService();
+
+  try {
+    const userId = await requireVoiceActionUserId();
+    const resolution = await service.resolveVoiceAnswer({
+      userId,
+      voiceSessionId: params.voiceSessionId,
+      questionId: params.questionId,
+      sourceExcerpt: params.sourceExcerpt,
+    });
+
+    return {
+      ok: true,
+      data: {
+        voiceSessionId: params.voiceSessionId,
+        questionId: resolution.outcome.questionId,
+        status: resolution.outcome.status,
+        inferredOptionId: resolution.outcome.inferredOptionId,
+        inferredOptionLabel: resolution.matchedOption?.label ?? null,
+        inferredOptionText: resolution.matchedOption?.text ?? null,
+        confidence: resolution.outcome.confidence,
+        sourceExcerpt: resolution.outcome.sourceExcerpt,
+        auditResolutionId: resolution.audit.id,
+      },
       error: null,
     };
   } catch (error) {

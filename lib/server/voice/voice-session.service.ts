@@ -6,6 +6,8 @@ import {
   VoiceSessionNotFoundError,
   VoiceSessionValidationError,
 } from '@/lib/server/voice/voice-session.repository';
+import { resolveVoiceOption } from '@/lib/voice/resolution/voice-option-resolution';
+import type { VoiceResolutionAttemptPayload } from '@/lib/voice/resolution/voice-resolution.types';
 import type {
   VoiceResponseResolution,
   VoiceSession,
@@ -68,6 +70,16 @@ type VoiceSessionService = {
   }): Promise<{
     session: VoiceSession;
     event: VoiceSessionEvent | null;
+  }>;
+  resolveVoiceAnswer(params: {
+    userId: string;
+    voiceSessionId: string;
+    questionId: string;
+    sourceExcerpt: string;
+  }): Promise<{
+    outcome: VoiceResolutionAttemptPayload['result'];
+    matchedOption: VoiceResolutionAttemptPayload['matchedOption'];
+    audit: VoiceResponseResolution;
   }>;
 };
 
@@ -147,6 +159,53 @@ export function createVoiceSessionService(): VoiceSessionService {
         eventType: params.eventType ?? null,
         payloadJson: params.payloadJson ?? null,
       });
+    },
+
+    async resolveVoiceAnswer(params) {
+      await repository.getOwnedVoiceSession({
+        voiceSessionId: params.voiceSessionId,
+        userId: params.userId,
+      });
+
+      const question = await repository.getResolutionQuestionForVoiceSession({
+        voiceSessionId: params.voiceSessionId,
+        questionId: params.questionId,
+      });
+
+      let resolution: VoiceResolutionAttemptPayload;
+      try {
+        resolution = resolveVoiceOption({
+          question,
+          transcript: params.sourceExcerpt,
+        });
+      } catch (error) {
+        resolution = {
+          result: {
+            status: 'runtime_error',
+            questionId: params.questionId,
+            inferredOptionId: null,
+            confidence: null,
+            sourceExcerpt: params.sourceExcerpt.trim(),
+            internalReason:
+              error instanceof Error ? error.message : 'resolution_runtime_error',
+          },
+          matchedOption: null,
+        };
+      }
+
+      const audit = await repository.recordResolutionAttempt({
+        voiceSessionId: params.voiceSessionId,
+        questionId: params.questionId,
+        inferredOptionId: resolution.result.inferredOptionId,
+        confidence: resolution.result.confidence,
+        sourceExcerpt: resolution.result.sourceExcerpt,
+      });
+
+      return {
+        outcome: resolution.result,
+        matchedOption: resolution.matchedOption,
+        audit,
+      };
     },
   };
 }
