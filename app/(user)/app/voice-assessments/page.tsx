@@ -7,7 +7,6 @@ import {
   SectionHeader,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
-import { VoiceAssessmentShell } from '@/components/voice/voice-assessment-shell';
 import { getDbPool } from '@/lib/server/db';
 import { listPublishedAssessmentInventory } from '@/lib/server/published-assessment-inventory';
 import {
@@ -18,7 +17,20 @@ import {
 
 export default async function VoiceAssessmentsIndexPage() {
   if (!isVoiceAssessmentFeatureEnabled()) {
-    return <VoiceAssessmentShell state="feature_unavailable" />;
+    return (
+      <PageFrame>
+        <PageHeader
+          eyebrow="Voice Assessment"
+          title="Voice delivery unavailable"
+          description="Voice delivery is disabled in this environment. The standard assessment path remains active."
+        />
+        <EmptyState
+          title="Voice assessment is not enabled"
+          description="This authenticated environment is currently serving the standard assessment runner only."
+          action={<ButtonLink href="/app/assessments">Browse standard assessments</ButtonLink>}
+        />
+      </PageFrame>
+    );
   }
 
   const inventory = await listPublishedAssessmentInventory(getDbPool());
