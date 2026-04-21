@@ -25,11 +25,13 @@ function FocusGroup({
   items,
   className,
   itemClassName,
+  titleClassName,
 }: {
   title: string;
   items: readonly string[];
   className?: string;
   itemClassName?: string;
+  titleClassName?: string;
 }) {
   if (items.length === 0) {
     return null;
@@ -44,7 +46,13 @@ function FocusGroup({
         .filter(Boolean)
         .join(' ')}
     >
-      <p className="sonartra-report-kicker text-white/42">{title}</p>
+      <p
+        className={['sonartra-report-kicker text-white/42', titleClassName]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {title}
+      </p>
       <div className="sonartra-single-domain-focus-grid">
         {items.map((item, index) => (
           <p
@@ -53,6 +61,48 @@ function FocusGroup({
               'sonartra-single-domain-focus-item sonartra-report-body-soft text-white/76',
               index === 0 ? 'text-white/82' : '',
               itemClassName,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {item}
+          </p>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ApplicationGroup({
+  title,
+  items,
+  className,
+}: {
+  title: string;
+  items: readonly string[];
+  className?: string;
+}) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <section
+      className={[
+        'sonartra-single-domain-application-card rounded-[1.35rem] border px-5 py-5',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <p className="sonartra-report-kicker text-white/38">{title}</p>
+      <div className="mt-4 space-y-0">
+        {items.map((item, index) => (
+          <p
+            key={`${title}-${item}`}
+            className={[
+              'sonartra-report-body-soft text-white/78 text-[0.96rem] leading-7',
+              index > 0 ? 'border-white/6 mt-3 border-t pt-3' : '',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -79,7 +129,7 @@ export function SingleDomainResultSection({
       <section
         id={section.key}
         aria-labelledby={headingId}
-        className="results-anchor-target sonartra-motion-reveal sonartra-single-domain-section sonartra-report-hero border-white/8 md:py-15 rounded-[2.2rem] border px-7 py-11 sm:px-8 sm:py-12 md:px-12 lg:px-14"
+        className="results-anchor-target sonartra-motion-reveal sonartra-single-domain-section sonartra-report-hero border-white/8 rounded-[2.35rem] border px-8 py-14 sm:px-9 sm:py-14 md:px-14 md:py-16 lg:px-16 lg:py-[4.75rem]"
         style={getRevealStyle(step)}
       >
         <div className="space-y-8 md:space-y-10">
@@ -87,7 +137,7 @@ export function SingleDomainResultSection({
             <SectionEyebrow label="Hero" />
             <h2
               id={headingId}
-              className="sonartra-type-display max-w-[10ch] text-[3.15rem] tracking-[-0.058em] md:text-[5.25rem]"
+              className="sonartra-type-display max-w-[10ch] text-[3.3rem] tracking-[-0.06em] md:text-[5.55rem] lg:text-[5.9rem]"
             >
               {headline}
             </h2>
@@ -99,17 +149,17 @@ export function SingleDomainResultSection({
           </div>
 
           {summary ? (
-            <p className="sonartra-report-summary text-white/84 max-w-[56rem] text-[1.08rem] leading-8 md:text-[1.24rem] md:leading-10">
+            <p className="sonartra-report-summary text-white/84 max-w-[54rem] text-[1.08rem] leading-8 md:text-[1.24rem] md:leading-10">
               {summary}
             </p>
           ) : null}
 
           {supporting.length > 0 ? (
-            <div className="border-white/7 grid gap-5 border-t pt-7 sm:grid-cols-2">
+            <div className="border-white/7 grid gap-5 border-t pt-7 sm:grid-cols-2 sm:gap-6 md:pt-8">
               {supporting.map((paragraph, index) => (
                 <p
                   key={`${section.key}-${index + 1}`}
-                  className="sonartra-report-body-soft text-white/66 max-w-[34rem]"
+                  className="sonartra-report-body-soft text-white/64 max-w-[34rem]"
                 >
                   {paragraph}
                 </p>
@@ -133,7 +183,7 @@ export function SingleDomainResultSection({
           <SectionEyebrow label="Drivers" />
           <h2
             id={headingId}
-            className="text-[2.1rem] font-semibold tracking-[-0.045em] text-white md:text-[2.7rem]"
+            className="text-[2.08rem] font-semibold tracking-[-0.045em] text-white md:text-[2.7rem]"
           >
             What is creating this pattern
           </h2>
@@ -144,8 +194,8 @@ export function SingleDomainResultSection({
           />
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)] lg:gap-6">
-          <div className="space-y-5">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.16fr)_minmax(18.5rem,0.84fr)] lg:gap-6">
+          <div>
             {section.focusItems
               .filter((item) => item.label === 'Primary driver')
               .map((item) => (
@@ -153,11 +203,14 @@ export function SingleDomainResultSection({
                   key={item.label}
                   title={item.label}
                   items={item.content}
-                  className="border-white/8 bg-white/[0.03] px-6 py-6"
-                  itemClassName="text-[0.98rem] leading-7"
+                  className="sonartra-single-domain-driver-primary px-6 py-6 md:px-7 md:py-7"
+                  titleClassName="text-white/48"
+                  itemClassName="text-[1.03rem] leading-8 text-white/84"
                 />
               ))}
+          </div>
 
+          <div className="space-y-4">
             {section.focusItems
               .filter((item) => item.label === 'Secondary driver')
               .map((item) => (
@@ -165,12 +218,12 @@ export function SingleDomainResultSection({
                   key={item.label}
                   title={item.label}
                   items={item.content}
-                  className="border-white/7 bg-white/[0.018]"
+                  className="sonartra-single-domain-driver-secondary"
+                  titleClassName="text-white/38"
+                  itemClassName="text-white/76"
                 />
               ))}
-          </div>
 
-          <div className="space-y-5">
             {section.focusItems
               .filter((item) => item.label === 'Supporting context')
               .map((item) => (
@@ -178,7 +231,9 @@ export function SingleDomainResultSection({
                   key={item.label}
                   title={item.label}
                   items={item.content}
-                  className="border-white/7 bg-white/[0.012]"
+                  className="sonartra-single-domain-driver-supporting"
+                  titleClassName="text-white/32"
+                  itemClassName="text-white/64"
                 />
               ))}
             {section.focusItems
@@ -188,7 +243,9 @@ export function SingleDomainResultSection({
                   key={item.label}
                   title={item.label}
                   items={item.content}
-                  className="border-amber-200/18 sonartra-single-domain-surface-warm bg-amber-200/[0.06]"
+                  className="sonartra-single-domain-driver-limitation"
+                  titleClassName="text-amber-100/64"
+                  itemClassName="text-white/74"
                 />
               ))}
           </div>
@@ -220,13 +277,19 @@ export function SingleDomainResultSection({
           />
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.04fr)_minmax(0,0.98fr)_minmax(0,0.98fr)] lg:gap-5">
           {section.focusItems.map((item) => (
-            <FocusGroup
+            <ApplicationGroup
               key={item.label}
               title={item.label}
               items={item.content}
-              className="border-white/8 h-full bg-white/[0.02]"
+              className={
+                item.label === 'Notice'
+                  ? 'border-amber-200/14 bg-amber-200/[0.04]'
+                  : item.label === 'Develop'
+                    ? 'border-sky-200/12 bg-sky-200/[0.035]'
+                    : 'border-white/8 bg-white/[0.02]'
+              }
             />
           ))}
         </div>
@@ -237,9 +300,9 @@ export function SingleDomainResultSection({
   const [headline, ...body] = section.paragraphs;
   const sectionClasses = {
     intro: 'space-y-7 md:space-y-8',
-    pair: 'space-y-6 rounded-[1.9rem] border px-6 py-7 md:px-8 md:py-8 sonartra-single-domain-surface-muted',
+    pair: 'max-w-[59rem] space-y-6 rounded-[1.75rem] border border-white/6 bg-white/[0.012] px-6 py-7 md:px-8 md:py-8',
     limitation:
-      'space-y-6 rounded-[1.9rem] border px-6 py-7 md:px-8 md:py-8 sonartra-single-domain-surface-warm',
+      'space-y-6 rounded-[1.95rem] border px-6 py-7 md:px-8 md:py-8 sonartra-single-domain-surface-warm',
   }[section.key];
 
   return (

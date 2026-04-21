@@ -140,14 +140,14 @@ export function ResultReadingRail({
       className={cn('hidden xl:block xl:w-[11.75rem] xl:shrink-0', className)}
       data-result-reading-rail="true"
     >
-      <div className="bg-[#09101d]/58 sticky top-[6.1rem] space-y-3 rounded-[1.6rem] border border-white/[0.06] px-3 py-4 shadow-[0_20px_44px_rgba(0,0,0,0.14)] backdrop-blur-md">
-        <div className="space-y-3 pb-2 pl-1">
+      <div className="bg-[#09101d]/54 sticky top-[5.7rem] space-y-3 rounded-[1.45rem] border border-white/[0.055] px-3.5 py-4 shadow-[0_18px_38px_rgba(0,0,0,0.12)] backdrop-blur-md">
+        <div className="space-y-2.5 pb-2 pl-1">
           <Image
             src="/images/sonartra-logo.svg"
             alt="Sonartra"
             width={174}
             height={28}
-            className="h-auto w-[150px] opacity-[0.9]"
+            className="h-auto w-[142px] opacity-[0.86]"
           />
           <p className="text-white/28 text-[0.62rem] font-medium uppercase tracking-[0.16em]">
             Reading rail
