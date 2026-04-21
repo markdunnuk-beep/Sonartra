@@ -4,13 +4,38 @@ import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
 import type { SingleDomainNarrativeBuilderSection } from '@/lib/assessment-language/single-domain-builder-mappers';
 
 const DRIVER_ROLE_LABELS = [
-  'primary_driver',
-  'secondary_driver',
-  'supporting_context',
-  'range_limitation',
+  {
+    key: 'primary_driver',
+    description: 'The strongest signal shaping the pattern.',
+  },
+  {
+    key: 'secondary_driver',
+    description: 'The reinforcing signal behind the pattern.',
+  },
+  {
+    key: 'supporting_context',
+    description: 'Useful context that adds shape without owning the pattern.',
+  },
+  {
+    key: 'range_limitation',
+    description: 'A weaker or underplayed signal that limits range rather than sitting as neutral background.',
+  },
 ] as const;
 
-const APPLICATION_FOCUS_LABELS = ['rely on', 'notice', 'develop'] as const;
+const APPLICATION_FOCUS_LABELS = [
+  {
+    key: 'rely on',
+    description: 'What the person should trust in the established pattern.',
+  },
+  {
+    key: 'notice',
+    description: 'What should be monitored when the pattern starts to narrow.',
+  },
+  {
+    key: 'develop',
+    description: 'What needs deliberate range-building and follow-through.',
+  },
+] as const;
 
 function getValidationTone(state: SingleDomainNarrativeBuilderSection['validationState']): string {
   return state === 'ready'
@@ -48,6 +73,8 @@ export function SingleDomainSectionPanel({
   return (
     <SurfaceCard
       className="space-y-5 p-5 lg:p-6"
+      accent={section.key === 'hero'}
+      dashed={section.key === 'limitation'}
       muted={section.status === 'waiting'}
     >
       <div
@@ -101,17 +128,27 @@ export function SingleDomainSectionPanel({
       {section.key === 'drivers' ? (
         <div className="space-y-3">
           <p className="text-sm font-medium text-white">Driver roles</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {DRIVER_ROLE_LABELS.map((role) => (
-              <LabelPill
+              <div
                 className={cn(
-                  'border-white/10 bg-white/[0.04] text-white/68',
-                  role === 'range_limitation' && 'border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.88)]',
+                  'rounded-[0.95rem] border p-4',
+                  role.key === 'range_limitation'
+                    ? 'border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)]'
+                    : 'border-white/8 bg-black/10',
                 )}
-                key={role}
+                key={role.key}
               >
-                {role}
-              </LabelPill>
+                <LabelPill
+                  className={cn(
+                    'border-white/10 bg-white/[0.04] text-white/68',
+                    role.key === 'range_limitation' && 'border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.88)]',
+                  )}
+                >
+                  {role.key}
+                </LabelPill>
+                <p className="mt-3 text-sm leading-6 text-white/58">{role.description}</p>
+              </div>
             ))}
           </div>
         </div>
@@ -120,11 +157,14 @@ export function SingleDomainSectionPanel({
       {section.key === 'application' ? (
         <div className="space-y-3">
           <p className="text-sm font-medium text-white">Application focus</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-3 md:grid-cols-3">
             {APPLICATION_FOCUS_LABELS.map((item) => (
-              <LabelPill className="border-white/10 bg-white/[0.04] text-white/68" key={item}>
-                {item}
-              </LabelPill>
+              <div className="rounded-[0.95rem] border border-white/8 bg-black/10 p-4" key={item.key}>
+                <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
+                  {item.key}
+                </LabelPill>
+                <p className="mt-3 text-sm leading-6 text-white/58">{item.description}</p>
+              </div>
             ))}
           </div>
         </div>
