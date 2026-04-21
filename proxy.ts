@@ -16,7 +16,11 @@ export default clerkMiddleware(async (auth, request) => {
     await auth.protect();
   }
 
-  if (isAdminRoute(request) && !isDevAdminBypassEnabled()) {
+  if (
+    isAdminRoute(request)
+    && !isDevAdminBypassEnabled()
+    && !isDevUserAppBypassEnabled()
+  ) {
     await auth.protect();
   }
 });

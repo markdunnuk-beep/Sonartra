@@ -29,7 +29,10 @@ test('repo defines Clerk middleware for authenticated app and admin route reques
     source,
     /if \(isAssessmentApiRoute\(request\) && !isDevUserAppBypassEnabled\(\)\) \{/,
   );
-  assert.match(source, /if \(isAdminRoute\(request\) && !isDevAdminBypassEnabled\(\)\) \{/);
+  assert.match(
+    source,
+    /if \(\s*isAdminRoute\(request\)\s*&& !isDevAdminBypassEnabled\(\)\s*&& !isDevUserAppBypassEnabled\(\)\s*\) \{/,
+  );
   assert.match(source, /await auth\.protect\(\);/);
   assert.match(source, /export const config =/);
   assert.match(source, /'\/\(\(\?!_next/);
