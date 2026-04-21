@@ -40,22 +40,31 @@ function buildPayload(signalCount = 4): SingleDomainResultPayload {
       hero_tension_paragraph: 'This is the hero tension paragraph.',
       hero_close_paragraph: 'This is the hero close paragraph.',
     },
-    signals: allSignals.slice(0, signalCount).map(([signalKey, signalLabel, rank, normalizedScore, positionLabel], index) => ({
-      signal_key: signalKey,
-      signal_label: signalLabel,
-      rank,
-      normalized_score: normalizedScore,
-      raw_score: signalCount - index,
-      position: rank === 1 ? 'primary' : rank === 2 ? 'secondary' : rank === signalCount ? 'underplayed' : 'supporting',
-      position_label: positionLabel,
-      chapter_intro: `${signalLabel} intro`,
-      chapter_how_it_shows_up: `${signalLabel} shows up`,
-      chapter_value_outcome: `${signalLabel} outcome`,
-      chapter_value_team_effect: `${signalLabel} team effect`,
-      chapter_risk_behaviour: `${signalLabel} risk behaviour`,
-      chapter_risk_impact: `${signalLabel} risk impact`,
-      chapter_development: `${signalLabel} development`,
-    })),
+    signals: allSignals
+      .slice(0, signalCount)
+      .map(([signalKey, signalLabel, rank, normalizedScore, positionLabel], index) => ({
+        signal_key: signalKey,
+        signal_label: signalLabel,
+        rank,
+        normalized_score: normalizedScore,
+        raw_score: signalCount - index,
+        position:
+          rank === 1
+            ? 'primary'
+            : rank === 2
+              ? 'secondary'
+              : rank === signalCount
+                ? 'underplayed'
+                : 'supporting',
+        position_label: positionLabel,
+        chapter_intro: `${signalLabel} intro`,
+        chapter_how_it_shows_up: `${signalLabel} shows up`,
+        chapter_value_outcome: `${signalLabel} outcome`,
+        chapter_value_team_effect: `${signalLabel} team effect`,
+        chapter_risk_behaviour: `${signalLabel} risk behaviour`,
+        chapter_risk_impact: `${signalLabel} risk impact`,
+        chapter_development: `${signalLabel} development`,
+      })),
     balancing: {
       pair_key: 'vision_delivery',
       balancing_section_title: 'Balancing your approach',
@@ -79,10 +88,20 @@ function buildPayload(signalCount = 4): SingleDomainResultPayload {
         { signal_key: 'vision', signal_label: 'Vision', rank: 1, statement: 'Vision strength' },
       ],
       watchouts: [
-        { signal_key: 'delivery', signal_label: 'Delivery', rank: 2, statement: 'Delivery watchout' },
+        {
+          signal_key: 'delivery',
+          signal_label: 'Delivery',
+          rank: 2,
+          statement: 'Delivery watchout',
+        },
       ],
       developmentFocus: [
-        { signal_key: 'rigor', signal_label: 'Rigor', rank: signalCount, statement: 'Rigor development' },
+        {
+          signal_key: 'rigor',
+          signal_label: 'Rigor',
+          rank: signalCount,
+          statement: 'Rigor development',
+        },
       ],
     },
     diagnostics: {
@@ -125,7 +144,7 @@ test('single-domain results view model exposes the locked six-section reading st
 
 test('single-domain results view model maps weaker signals into range limitations and application carry-through', () => {
   const payload = buildPayload(4);
-  payload.signals = payload.signals.map((signal) => (
+  payload.signals = payload.signals.map((signal) =>
     signal.signal_key === 'rigor'
       ? {
           ...signal,
@@ -133,8 +152,8 @@ test('single-domain results view model maps weaker signals into range limitation
           chapter_risk_impact: 'Rigor risk impact.',
           chapter_development: 'Rigor development line.',
         }
-      : signal
-  ));
+      : signal,
+  );
 
   const viewModel = createSingleDomainResultsViewModel(payload);
   const drivers = viewModel.report.sections.find((section) => section.key === 'drivers');
@@ -144,21 +163,53 @@ test('single-domain results view model maps weaker signals into range limitation
   assert.ok(drivers);
   assert.ok(limitation);
   assert.ok(application);
-  assert.match(drivers.focusItems.find((item) => item.label === 'Range limitation')?.content.join(' ') ?? '', /Rigor risk impact/);
+  assert.match(
+    drivers.focusItems.find((item) => item.label === 'Range limitation')?.content.join(' ') ?? '',
+    /Rigor risk impact/,
+  );
   assert.match(limitation.paragraphs.join(' '), /Rigor/i);
-  assert.match(application.focusItems.find((item) => item.label === 'Develop')?.content.join(' ') ?? '', /Rigor development/);
+  assert.match(
+    application.focusItems.find((item) => item.label === 'Develop')?.content.join(' ') ?? '',
+    /Rigor development/,
+  );
 });
 
 test('single-domain results view model cleans internal labels and raw pair keys before rendering', () => {
   const payload = buildPayload(4);
   payload.hero.pair_key = 'results_vision';
   payload.hero.hero_subheadline = 'This comes from the persisted integrated meaning.';
-  payload.intro.bridge_to_signals = 'The ranked signals show the report and vision pattern, not results_vision.';
+  payload.intro.bridge_to_signals =
+    'The ranked signals show the report and vision pattern, not results_vision.';
   payload.pairSummary.pair_headline = 'Integrated meaning';
 
   const viewModel = createSingleDomainResultsViewModel(payload);
 
   assert.equal(viewModel.pairLabel, 'Delivery and Vision');
-  assert.doesNotMatch(viewModel.report.sections.flatMap((section) => section.paragraphs).join(' '), /persisted|results_vision/i);
-  assert.match(viewModel.report.sections.find((section) => section.key === 'pair')?.paragraphs[0] ?? '', /Combined meaning/i);
+  assert.doesNotMatch(
+    viewModel.report.sections.flatMap((section) => section.paragraphs).join(' '),
+    /persisted|results_vision/i,
+  );
+  assert.match(
+    viewModel.report.sections.find((section) => section.key === 'pair')?.paragraphs[0] ?? '',
+    /Combined meaning/i,
+  );
+});
+
+test('single-domain results view model normalizes narrow release-copy inconsistencies in persisted text', () => {
+  const payload = buildPayload(4);
+  payload.hero.hero_tension_paragraph = 'The Trade Off is that control can tighten too far.';
+  payload.balancing.system_risk_paragraph =
+    'people: Over Reliance on structure can reduce adaptability.';
+
+  const viewModel = createSingleDomainResultsViewModel(payload);
+  const hero = viewModel.report.sections.find((section) => section.key === 'hero');
+  const limitation = viewModel.report.sections.find((section) => section.key === 'limitation');
+
+  assert.ok(hero);
+  assert.ok(limitation);
+  assert.match(hero.paragraphs.join(' '), /The trade-off is that control can tighten too far\./);
+  assert.match(
+    limitation.paragraphs.join(' '),
+    /Overreliance on structure can reduce adaptability\./,
+  );
 });

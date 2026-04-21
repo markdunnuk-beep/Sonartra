@@ -92,11 +92,7 @@ test('candidate selection supports observer-driven reading progression', () => {
 
 test('final application section overtakes lingering domain sections only when clearly in view', () => {
   const staysOnDomain = pickActiveSectionCandidate({
-    orderedSectionIds: [
-      'domains',
-      'domain-pressure-response',
-      'application',
-    ],
+    orderedSectionIds: ['domains', 'domain-pressure-response', 'application'],
     currentActiveSectionId: 'domain-pressure-response',
     observations: buildObservationMap([
       { id: 'domains', intersectionRatio: 0.12, centerDistanceRatio: 0.88 },
@@ -108,11 +104,7 @@ test('final application section overtakes lingering domain sections only when cl
   assert.equal(staysOnDomain, 'domain-pressure-response');
 
   const switchesToApplication = pickActiveSectionCandidate({
-    orderedSectionIds: [
-      'domains',
-      'domain-pressure-response',
-      'application',
-    ],
+    orderedSectionIds: ['domains', 'domain-pressure-response', 'application'],
     currentActiveSectionId: 'domain-pressure-response',
     observations: buildObservationMap([
       { id: 'domains', intersectionRatio: 0.08, centerDistanceRatio: 0.94 },
@@ -181,4 +173,30 @@ test('candidate selection is not a simplistic top-edge-only tracker', () => {
   });
 
   assert.equal(nextSection, 'hero');
+});
+
+test('candidate selection stabilizes after anchor navigation until the target section is clearly dominant', () => {
+  const orderedSectionIds = ['intro', 'hero', 'drivers', 'pair', 'limitation', 'application'];
+
+  const duringSmoothScroll = pickActiveSectionCandidate({
+    orderedSectionIds,
+    currentActiveSectionId: 'hero',
+    observations: buildObservationMap([
+      { id: 'hero', intersectionRatio: 0.42, centerDistanceRatio: 0.31 },
+      { id: 'drivers', intersectionRatio: 0.45, centerDistanceRatio: 0.24 },
+    ]),
+  });
+
+  assert.equal(duringSmoothScroll, 'hero');
+
+  const afterSmoothScrollSettles = pickActiveSectionCandidate({
+    orderedSectionIds,
+    currentActiveSectionId: duringSmoothScroll,
+    observations: buildObservationMap([
+      { id: 'hero', intersectionRatio: 0.11, centerDistanceRatio: 0.92 },
+      { id: 'drivers', intersectionRatio: 0.68, centerDistanceRatio: 0.14 },
+    ]),
+  });
+
+  assert.equal(afterSmoothScrollSettles, 'drivers');
 });
