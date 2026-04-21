@@ -1,8 +1,7 @@
 'use client';
 
 import { useAdminAssessmentAuthoring } from '@/components/admin/admin-assessment-authoring-context';
-import { SingleDomainLanguageImport } from '@/components/admin/single-domain-language-import';
-import { SingleDomainBuilderStage } from '@/components/admin/single-domain-builder-stage';
+import { SingleDomainNarrativeBuilder } from '@/components/admin/assessments/single-domain-narrative-builder';
 import { ButtonLink, CardTitle, LabelPill, SecondaryText, SurfaceCard } from '@/components/shared/user-app-ui';
 import {
   SingleDomainDomainAuthoring,
@@ -17,24 +16,6 @@ import {
   getSingleDomainBuilderNextAction,
   getSingleDomainBuilderProgress,
 } from '@/lib/admin/single-domain-builder-stepper';
-
-function getSingleDomainLanguageStageSummary(
-  validation: ReturnType<typeof useAdminAssessmentAuthoring>['singleDomainLanguageValidation'],
-): { value: string; detail: string } {
-  if (validation.overallReady) {
-    return { value: 'Ready', detail: 'Current locked dataset completeness.' };
-  }
-
-  if (validation.datasets.every((dataset) => dataset.status === 'waiting')) {
-    return { value: 'Waiting', detail: 'Earlier structure must exist before language can be assessed.' };
-  }
-
-  if (validation.datasets.some((dataset) => dataset.actualRowCount > 0)) {
-    return { value: 'In progress', detail: 'Some locked datasets have authored rows, but the set is incomplete.' };
-  }
-
-  return { value: 'Not started', detail: 'Locked datasets have not been authored yet.' };
-}
 
 export const singleDomainSignalsStepCopy = {
   intro:
@@ -59,17 +40,11 @@ function useReadinessMetrics() {
   const assessment = useAdminAssessmentAuthoring();
   const domainCount = assessment.authoredDomains.length;
   const signalCount = assessment.availableSignals.length;
-  const questionCount = assessment.authoredQuestions.length;
-  const responseCount = assessment.weightingSummary.totalOptions;
-  const mappingCount = assessment.weightingSummary.totalMappings;
 
   return {
     assessment,
     domainCount,
     signalCount,
-    questionCount,
-    responseCount,
-    mappingCount,
   };
 }
 
@@ -215,55 +190,7 @@ export function SingleDomainWeightingsPageContent() {
 }
 
 export function SingleDomainLanguagePageContent() {
-  const { assessment, signalCount } = useReadinessMetrics();
-  const languageStageSummary = getSingleDomainLanguageStageSummary(assessment.singleDomainLanguageValidation);
-
-  return (
-    <SingleDomainBuilderStage
-      stepKey="language"
-      eyebrow="Language"
-      title="Language"
-      description="Reserve the single-domain language stage for the six locked dataset families."
-      intro="This is a single-domain language stage inside the full builder, not a standalone language editor. It is reserved for the six locked dataset families: domain framing, hero pairs, signal chapters, balancing sections, pair summaries, and application statements."
-      guardrails={[
-        'Language remains one stage inside the full assessment builder.',
-        'The six locked dataset families define the future single-domain language payload.',
-        'Language authoring follows structure; it does not replace domain, signal, question, response, or weighting steps.',
-      ]}
-      readiness={[
-        {
-          label: 'Language status',
-          value: languageStageSummary.value,
-          detail: languageStageSummary.detail,
-        },
-        { label: 'Signals available', value: String(signalCount), detail: 'Signal chapters depend on authored signals.' },
-        { label: 'Dataset families', value: '6 locked', detail: 'Structured single-domain language datasets.' },
-        {
-          label: 'Expected pairs',
-          value: String(assessment.singleDomainLanguageValidation.expectedPairCount),
-          detail: 'Derived from the authored signal set.',
-        },
-      ]}
-      checklist={assessment.singleDomainLanguageValidation.datasets.map((dataset) => ({
-        label: dataset.label,
-        status: dataset.status === 'ready' ? 'ready' : 'attention',
-        detail: dataset.status === 'waiting'
-          ? dataset.detail
-          : dataset.countRule === 'exact'
-            ? `${dataset.actualRowCount}/${dataset.expectedRowCount} rows loaded.`
-            : `${dataset.actualRowCount} row${dataset.actualRowCount === 1 ? '' : 's'} loaded; 1+ required.`,
-      }))}
-      nextIntent="Import each locked dataset through the strict schema contract only. Review readiness updates from the persisted row counts and the current authored signal set."
-    >
-      {assessment.latestDraftVersion ? (
-        <SingleDomainLanguageImport
-          assessmentVersionId={assessment.latestDraftVersion.assessmentVersionId}
-          datasetValidation={assessment.singleDomainLanguageValidation.datasets}
-          isEditableAssessmentVersion={assessment.latestDraftVersion.status === 'draft'}
-        />
-      ) : null}
-    </SingleDomainBuilderStage>
-  );
+  return <SingleDomainNarrativeBuilder />;
 }
 
 export function SingleDomainReviewPageContent() {
