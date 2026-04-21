@@ -97,7 +97,7 @@ function UtilityIconButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className={cn(className, disabled && 'cursor-not-allowed text-white/34 hover:text-white/34')}
+      className={cn(className, disabled && 'text-white/34 hover:text-white/34 cursor-not-allowed')}
     >
       {children}
     </button>
@@ -140,15 +140,18 @@ export function ResultReadingRail({
       className={cn('hidden xl:block xl:w-[11.75rem] xl:shrink-0', className)}
       data-result-reading-rail="true"
     >
-      <div className="sticky top-[6.35rem] space-y-3">
-        <div className="pb-5 pl-1">
+      <div className="bg-[#09101d]/58 sticky top-[6.1rem] space-y-3 rounded-[1.6rem] border border-white/[0.06] px-3 py-4 shadow-[0_20px_44px_rgba(0,0,0,0.14)] backdrop-blur-md">
+        <div className="space-y-3 pb-2 pl-1">
           <Image
             src="/images/sonartra-logo.svg"
             alt="Sonartra"
             width={174}
             height={28}
-            className="w-[150px] h-auto opacity-[0.9]"
+            className="h-auto w-[150px] opacity-[0.9]"
           />
+          <p className="text-white/28 text-[0.62rem] font-medium uppercase tracking-[0.16em]">
+            Reading rail
+          </p>
         </div>
         <ul className="sonartra-result-rail-track relative space-y-0.5 pl-1.5" role="list">
           {sectionsConfig.topLevelSections.map((section) => {
@@ -158,9 +161,13 @@ export function ResultReadingRail({
               (subsection) => subsection.parentId === section.id,
             );
             const isPassed =
-              activeSectionOrder !== null && section.order < activeSectionOrder && !isTopLevelActive;
+              activeSectionOrder !== null &&
+              section.order < activeSectionOrder &&
+              !isTopLevelActive;
             const isUpcoming =
-              activeSectionOrder !== null && section.order > activeSectionOrder && !isTopLevelActive;
+              activeSectionOrder !== null &&
+              section.order > activeSectionOrder &&
+              !isTopLevelActive;
             const isNext = activeSectionOrder !== null && section.order === activeSectionOrder + 1;
 
             return (
@@ -182,19 +189,21 @@ export function ResultReadingRail({
                               : 'idle'
                   }
                   className={cn(
-                    'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring group relative block rounded-[0.95rem] px-3 py-2 text-[0.79rem] leading-5 tracking-[0.01em] text-white/47 outline-none',
+                    'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring text-white/47 group relative block rounded-[0.95rem] px-3 py-2 text-[0.79rem] leading-5 tracking-[0.01em] outline-none',
                     'hover:text-white/67 focus-visible:text-white/84',
                     isPassed && 'text-white/58',
-                    isTopLevelActive && 'bg-white/[0.032] text-white/84 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]',
+                    isTopLevelActive &&
+                      'text-white/84 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]',
                     isNext && 'text-white/56',
                   )}
                 >
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.6rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-white/[0.18] bg-[#0b1221] opacity-100 scale-100',
+                      'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.6rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-white/[0.18] bg-[#0b1221] opacity-100',
                       isPassed && 'border-white/[0.18] bg-white/[0.16]',
-                      isTopLevelActive && 'border-white/[0.3] bg-white/[0.34] shadow-[0_0_0_5px_rgba(255,255,255,0.04)]',
+                      isTopLevelActive &&
+                        'border-white/[0.3] bg-white/[0.34] shadow-[0_0_0_6px_rgba(255,255,255,0.035)]',
                       isUpcoming && 'border-white/[0.14] bg-white/[0.06]',
                     )}
                   />
@@ -214,7 +223,7 @@ export function ResultReadingRail({
                       {isTopLevelActive ? (
                         <span
                           aria-hidden="true"
-                          className="block text-[0.58rem] font-medium uppercase tracking-[0.18em] text-white/42"
+                          className="text-white/42 block text-[0.58rem] font-medium uppercase tracking-[0.18em]"
                         >
                           {isExactTopLevelActive ? 'Now reading' : 'Current chapter'}
                         </span>
@@ -222,7 +231,7 @@ export function ResultReadingRail({
                       {isNext ? (
                         <span
                           aria-hidden="true"
-                          className="block text-[0.58rem] font-medium uppercase tracking-[0.18em] text-white/28"
+                          className="text-white/28 block text-[0.58rem] font-medium uppercase tracking-[0.18em]"
                         >
                           Up next
                         </span>
@@ -234,67 +243,68 @@ export function ResultReadingRail({
                 {hasNestedDomainSections ? (
                   <ul
                     aria-label="Domain chapters"
-                    className="mt-1.5 space-y-0.5 pl-4.5"
+                    className="pl-4.5 mt-1.5 space-y-0.5"
                     role="list"
                   >
                     {sectionsConfig.subsections
                       .filter((domainSection) => domainSection.parentId === section.id)
                       .map((domainSection) => {
-                      const isDomainSubsectionActive = activeSectionId === domainSection.id;
-                      const isPassedDomainSubsection =
-                        activeSectionOrder !== null && domainSection.order < activeSectionOrder;
-                      const isUpcomingDomainSubsection =
-                        activeSectionOrder !== null && domainSection.order > activeSectionOrder;
-                      const isNextDomainSubsection =
-                        activeSectionOrder !== null && domainSection.order === activeSectionOrder + 1;
+                        const isDomainSubsectionActive = activeSectionId === domainSection.id;
+                        const isPassedDomainSubsection =
+                          activeSectionOrder !== null && domainSection.order < activeSectionOrder;
+                        const isUpcomingDomainSubsection =
+                          activeSectionOrder !== null && domainSection.order > activeSectionOrder;
+                        const isNextDomainSubsection =
+                          activeSectionOrder !== null &&
+                          domainSection.order === activeSectionOrder + 1;
 
-                      return (
-                        <li key={domainSection.id}>
-                          <a
-                            href={`#${domainSection.id}`}
-                            aria-current={isDomainSubsectionActive ? 'location' : undefined}
-                            data-reading-state={
-                              isDomainSubsectionActive
-                                ? 'current'
-                                : isNextDomainSubsection
-                                  ? 'next'
-                                  : isPassedDomainSubsection
-                                    ? 'passed'
-                                    : isUpcomingDomainSubsection
-                                      ? 'upcoming'
-                                      : 'idle'
-                            }
-                            className={cn(
-                              'sonartra-motion-nav-item sonartra-result-rail-item-subtle sonartra-focus-ring group relative block rounded-[0.8rem] px-3 py-1.5 text-[0.74rem] leading-5 tracking-[0.012em] text-white/41 outline-none',
-                              'hover:text-white/62 focus-visible:text-white/82',
-                              isPassedDomainSubsection && 'text-white/50',
-                              isDomainSubsectionActive &&
-                                'bg-white/[0.024] text-white/79 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]',
-                              isNextDomainSubsection && 'text-white/52',
-                            )}
-                          >
-                            <span
-                              aria-hidden="true"
+                        return (
+                          <li key={domainSection.id}>
+                            <a
+                              href={`#${domainSection.id}`}
+                              aria-current={isDomainSubsectionActive ? 'location' : undefined}
+                              data-reading-state={
+                                isDomainSubsectionActive
+                                  ? 'current'
+                                  : isNextDomainSubsection
+                                    ? 'next'
+                                    : isPassedDomainSubsection
+                                      ? 'passed'
+                                      : isUpcomingDomainSubsection
+                                        ? 'upcoming'
+                                        : 'idle'
+                              }
                               className={cn(
-                                'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.88rem] top-1/2 h-px w-3 rounded-full bg-white/[0.12] opacity-100 scale-100',
-                                isPassedDomainSubsection && 'bg-white/[0.2]',
-                                isDomainSubsectionActive && 'bg-white/[0.4]',
+                                'sonartra-motion-nav-item sonartra-result-rail-item-subtle sonartra-focus-ring text-white/41 group relative block rounded-[0.8rem] px-3 py-1.5 text-[0.74rem] leading-5 tracking-[0.012em] outline-none',
+                                'hover:text-white/62 focus-visible:text-white/82',
+                                isPassedDomainSubsection && 'text-white/50',
+                                isDomainSubsectionActive &&
+                                  'text-white/79 bg-white/[0.03] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]',
+                                isNextDomainSubsection && 'text-white/52',
                               )}
-                            />
-                            <span className="relative flex min-w-0 items-center gap-2">
+                            >
                               <span
                                 aria-hidden="true"
                                 className={cn(
-                                  'h-1 w-1 rounded-full bg-white/[0.22]',
-                                  isPassedDomainSubsection && 'bg-white/[0.3]',
-                                  isDomainSubsectionActive && 'bg-white/[0.54]',
+                                  'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.88rem] top-1/2 h-px w-3 scale-100 rounded-full bg-white/[0.12] opacity-100',
+                                  isPassedDomainSubsection && 'bg-white/[0.2]',
+                                  isDomainSubsectionActive && 'bg-white/[0.4]',
                                 )}
                               />
-                              <span className="block min-w-0">{domainSection.label}</span>
-                            </span>
-                          </a>
-                        </li>
-                      );
+                              <span className="relative flex min-w-0 items-center gap-2">
+                                <span
+                                  aria-hidden="true"
+                                  className={cn(
+                                    'h-1 w-1 rounded-full bg-white/[0.22]',
+                                    isPassedDomainSubsection && 'bg-white/[0.3]',
+                                    isDomainSubsectionActive && 'bg-white/[0.54]',
+                                  )}
+                                />
+                                <span className="block min-w-0">{domainSection.label}</span>
+                              </span>
+                            </a>
+                          </li>
+                        );
                       })}
                   </ul>
                 ) : null}
@@ -306,10 +316,7 @@ export function ResultReadingRail({
         {utilityActions ? (
           <div className="mt-1.5 border-t border-white/[0.06] pt-3.5">
             <div className="flex items-center gap-2" aria-label="Report utilities" role="group">
-              <UtilityIconButton
-                label="Share on LinkedIn"
-                onClick={handleLinkedInShare}
-              >
+              <UtilityIconButton label="Share on LinkedIn" onClick={handleLinkedInShare}>
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 24 24"
@@ -320,7 +327,7 @@ export function ResultReadingRail({
               </UtilityIconButton>
             </div>
             <p
-              className="mt-2.5 min-h-4 text-[0.63rem] tracking-[0.02em] text-white/31"
+              className="text-white/31 mt-2.5 min-h-4 text-[0.63rem] tracking-[0.02em]"
               aria-live="polite"
             >
               {utilityFeedback}

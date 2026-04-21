@@ -33,7 +33,7 @@ function resolveTopLevelSectionId(
     (section) => section.id === activeSectionId,
   );
 
-  return activeTopLevelSection?.id ?? (sectionsConfig.topLevelSections[0]?.id ?? 'intro');
+  return activeTopLevelSection?.id ?? sectionsConfig.topLevelSections[0]?.id ?? 'intro';
 }
 
 function resolveActiveSectionId(
@@ -68,7 +68,9 @@ export function ResultReadingProgress({
   const activeTopLevelSection = sectionsConfig.topLevelSections[activeTopLevelIndex];
   const activeStepNumber = activeTopLevelIndex + 1;
   const totalSteps = sectionsConfig.topLevelSections.length;
-  const nextSection = sectionsConfig.sections.find((section) => section.order === activeSection.order + 1);
+  const nextSection = sectionsConfig.sections.find(
+    (section) => section.order === activeSection.order + 1,
+  );
   const activeSubsection = activeSection.level === 'subsection' ? activeSection : null;
   const nextTopLevelSection = sectionsConfig.topLevelSections[activeTopLevelIndex + 1] ?? null;
   const currentPrimaryLabel = activeSubsection?.label ?? activeTopLevelSection?.label;
@@ -78,7 +80,7 @@ export function ResultReadingProgress({
     nextSection?.level === 'subsection'
       ? sectionsConfig.sectionsById[nextSection.parentId ?? '']?.label
       : nextSection?.level === 'section' && activeSubsection
-        ? nextTopLevelSection?.label ?? nextSection?.label
+        ? (nextTopLevelSection?.label ?? nextSection?.label)
         : null;
 
   return (
@@ -87,12 +89,12 @@ export function ResultReadingProgress({
       className={cn('xl:hidden', className)}
       data-result-reading-progress="true"
     >
-      <div className="sticky top-16 z-20 border-b border-white/[0.08] bg-[#080b13]/84 px-4 py-2.5 backdrop-blur-md">
+      <div className="bg-[#080b13]/86 sticky top-16 z-20 border-b border-white/[0.08] px-3 py-2.5 backdrop-blur-md sm:px-4">
         <div className="sonartra-result-mobile-progress-surface rounded-[1rem] border border-white/[0.07] px-3.5 py-3">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2.5">
-                <p className="text-[0.65rem] font-medium uppercase tracking-[0.16em] text-white/44">
+                <p className="text-white/44 text-[0.65rem] font-medium uppercase tracking-[0.16em]">
                   Now reading
                 </p>
                 <span
@@ -104,12 +106,12 @@ export function ResultReadingProgress({
               </div>
 
               {currentContextLabel ? (
-                <p className="mt-1 text-[0.64rem] font-medium uppercase tracking-[0.14em] text-white/34">
+                <p className="text-white/34 mt-1 text-[0.64rem] font-medium uppercase tracking-[0.14em]">
                   {currentContextLabel}
                 </p>
               ) : null}
 
-              <p className="mt-0.5 text-[0.95rem] font-medium leading-5 tracking-[0.01em] text-white/86">
+              <p className="text-white/86 mt-0.5 text-[0.95rem] font-medium leading-5 tracking-[0.01em]">
                 {currentPrimaryLabel}
               </p>
             </div>
@@ -124,9 +126,9 @@ export function ResultReadingProgress({
                     key={section.id}
                     className={cn(
                       'sonartra-motion-progress block h-1.5 rounded-full',
-                      isActive && 'w-5 bg-white/58',
-                      isPassed && 'w-2.5 bg-white/28',
-                      !isActive && !isPassed && 'w-2.5 bg-white/12',
+                      isActive && 'bg-white/58 w-5',
+                      isPassed && 'bg-white/28 w-2.5',
+                      !isActive && !isPassed && 'bg-white/12 w-2.5',
                     )}
                   />
                 );
@@ -144,11 +146,11 @@ export function ResultReadingProgress({
                 <p className="text-[0.6rem] font-medium uppercase tracking-[0.16em] text-white/30">
                   Up next
                 </p>
-                <p className="mt-0.5 truncate text-[0.78rem] font-medium leading-5 tracking-[0.01em] text-white/62">
+                <p className="text-white/62 mt-0.5 truncate text-[0.78rem] font-medium leading-5 tracking-[0.01em]">
                   {nextLabel}
                 </p>
                 {nextContextLabel && nextContextLabel !== nextLabel ? (
-                  <p className="text-[0.66rem] leading-4 tracking-[0.01em] text-white/38">
+                  <p className="text-white/38 text-[0.66rem] leading-4 tracking-[0.01em]">
                     within {nextContextLabel}
                   </p>
                 ) : null}
@@ -157,7 +159,8 @@ export function ResultReadingProgress({
           ) : null}
 
           <div className="sr-only" aria-live="polite">
-            Currently reading step {activeStepNumber} of {totalSteps}: {activeTopLevelSection?.label}
+            Currently reading step {activeStepNumber} of {totalSteps}:{' '}
+            {activeTopLevelSection?.label}
             {activeSubsection ? `. Current subsection: ${activeSubsection.label}.` : '.'}
             {nextLabel ? ` Up next: ${nextLabel}.` : ''}
           </div>

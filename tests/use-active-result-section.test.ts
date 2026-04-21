@@ -137,6 +137,19 @@ test('stability logic keeps current section for weak neighbouring visibility', (
   assert.equal(nextSection, 'domain-leadership-approach');
 });
 
+test('stability logic keeps current section when centre shift is still marginal', () => {
+  const nextSection = pickActiveSectionCandidate({
+    orderedSectionIds: RESULT_READING_SECTION_IDS,
+    currentActiveSectionId: 'hero',
+    observations: buildObservationMap([
+      { id: 'hero', intersectionRatio: 0.31, centerDistanceRatio: 0.34 },
+      { id: 'domains', intersectionRatio: 0.44, centerDistanceRatio: 0.22 },
+    ]),
+  });
+
+  assert.equal(nextSection, 'hero');
+});
+
 test('progress state remains top-level domains while a domain subsection is active', () => {
   const state = toActiveResultSectionState('domain-pressure-response');
 

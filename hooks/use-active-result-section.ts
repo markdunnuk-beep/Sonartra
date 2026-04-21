@@ -48,21 +48,21 @@ function clamp(value: number, min: number, max: number): number {
 function getSectionScore(observation: SectionObservation, isCurrent: boolean): number {
   const centerWeight = 1 - clamp(observation.centerDistanceRatio, 0, 1);
   const visibilityWeight = clamp(observation.intersectionRatio, 0, 1);
-  const stickinessBonus = isCurrent ? 0.08 : 0;
+  const stickinessBonus = isCurrent ? 0.1 : 0;
 
   return visibilityWeight * 0.72 + centerWeight * 0.28 + stickinessBonus;
 }
 
 function getSwitchMargin(candidateObservation: SectionObservation): number {
-  if (candidateObservation.intersectionRatio >= 0.58) {
+  if (candidateObservation.intersectionRatio >= 0.64) {
     return 0.05;
   }
 
-  if (candidateObservation.intersectionRatio >= 0.4) {
-    return 0.08;
+  if (candidateObservation.intersectionRatio >= 0.46) {
+    return 0.085;
   }
 
-  return 0.12;
+  return 0.14;
 }
 
 function isDomainSubsectionInConfig(
@@ -81,7 +81,9 @@ export function getSafeDefaultActiveState(
   sectionsConfig: ResultReadingSectionsConfig = DEFAULT_RESULT_READING_SECTIONS,
 ): ActiveSectionState {
   const firstValidSectionId =
-    orderedSectionIds.find((sectionId) => sectionsConfig.sectionsById[sectionId]?.level === 'section') ??
+    orderedSectionIds.find(
+      (sectionId) => sectionsConfig.sectionsById[sectionId]?.level === 'section',
+    ) ??
     DEFAULT_ACTIVE_SECTION_ID ??
     'intro';
 
@@ -100,8 +102,8 @@ export function toActiveResultSectionState(
     ? resolvedSectionId
     : null;
   const activeTopLevelSectionId = activeDomainSectionId
-    ? sectionsConfig.sectionsById[activeDomainSectionId]?.parentId ?? fallbackSectionId
-    : sectionsConfig.sectionsById[resolvedSectionId]?.id ?? fallbackSectionId;
+    ? (sectionsConfig.sectionsById[activeDomainSectionId]?.parentId ?? fallbackSectionId)
+    : (sectionsConfig.sectionsById[resolvedSectionId]?.id ?? fallbackSectionId);
 
   const activeTopLevelIndex = Math.max(
     0,
@@ -178,6 +180,17 @@ export function pickActiveSectionCandidate({
     }
   }
 
+  const centerDistanceLead =
+    currentObservation.centerDistanceRatio - bestCandidate.centerDistanceRatio;
+
+  if (
+    currentObservation.intersectionRatio >= 0.22 &&
+    bestCandidate.intersectionRatio < 0.52 &&
+    centerDistanceLead < 0.18
+  ) {
+    return currentActiveSectionId;
+  }
+
   if (scoreMargin < getSwitchMargin(bestCandidate)) {
     return currentActiveSectionId;
   }
@@ -241,7 +254,9 @@ export function useActiveResultSectionWithConfig(
       return;
     }
 
-    const byTopOffset = [...trackedElements].sort((first, second) => first.offsetTop - second.offsetTop);
+    const byTopOffset = [...trackedElements].sort(
+      (first, second) => first.offsetTop - second.offsetTop,
+    );
     const orderedTrackedSectionIds = byTopOffset.map((element) => element.id);
     const observations = new Map<string, SectionObservation>();
     let frameId: number | null = null;
