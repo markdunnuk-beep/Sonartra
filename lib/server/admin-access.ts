@@ -5,6 +5,7 @@ import {
   isDevAdminBypassEnabled,
   type DevAdminBypassEnvironment,
 } from '@/lib/server/dev-admin-bypass';
+import { isDevUserAppBypassEnabled } from '@/lib/server/dev-user-app-bypass';
 import {
   getRequestUserContext,
   isAuthenticatedUserRequiredError,
@@ -12,15 +13,40 @@ import {
   isDisabledUserAccessError,
   type RequestUserContext,
 } from '@/lib/server/request-user';
+import { isSingleDomainQaFixtureUser } from '@/lib/server/single-domain-qa-result-fixture';
 
 type RequireAdminUserDependencies = {
-  env: DevAdminBypassEnvironment;
+  env: DevAdminBypassEnvironment & {
+    DEV_USER_BYPASS?: string;
+  };
   getRequestUserContext(): Promise<RequestUserContext>;
   redirect(path: string): never;
 };
 
 export function isAdminUser(requestUser: RequestUserContext): boolean {
   return requestUser.userRole === 'admin';
+}
+
+function canElevateDevQaUserToAdmin(params: {
+  env: RequireAdminUserDependencies['env'];
+  requestUser: RequestUserContext;
+}): boolean {
+  return (
+    isDevUserAppBypassEnabled(params.env) &&
+    isSingleDomainQaFixtureUser({
+      clerkUserId: params.requestUser.clerkUserId,
+      userEmail: params.requestUser.userEmail,
+    }) &&
+    params.requestUser.userStatus === 'active'
+  );
+}
+
+function elevateRequestUserToAdmin(requestUser: RequestUserContext): RequestUserContext {
+  return {
+    ...requestUser,
+    userRole: 'admin',
+    isAdmin: true,
+  };
 }
 
 export async function requireAdminUserWithDependencies(
@@ -44,6 +70,15 @@ export async function requireAdminUserWithDependencies(
     }
 
     throw error;
+  }
+
+  if (
+    canElevateDevQaUserToAdmin({
+      env: dependencies.env,
+      requestUser,
+    })
+  ) {
+    return elevateRequestUserToAdmin(requestUser);
   }
 
   if (!isAdminUser(requestUser)) {

@@ -114,3 +114,30 @@ test('application validation rejects invalid focus areas and unresolved signals'
     /signal_key "reflective" is not resolvable/i,
   );
 });
+
+test('import validation enforces strict section_key ownership for the target contract', () => {
+  const context = buildSingleDomainImportValidationContext({
+    datasetKey: 'SINGLE_DOMAIN_PAIR',
+    currentDomainKey: 'leadership-style',
+    signalKeys: ['directive', 'supportive'],
+  });
+
+  const result = validateSingleDomainImportRows(context, [
+    {
+      domain_key: 'leadership-style',
+      section_key: 'hero',
+      pair_key: 'directive_supportive',
+      pair_label: 'Directive + Supportive',
+      interaction_claim: 'The pair acts quickly.',
+      synergy_claim: 'The pair coordinates effort.',
+      tension_claim: 'The pair can tighten too soon.',
+      pair_outcome: 'The pair creates visible momentum.',
+    },
+  ]);
+
+  assert.equal(result.success, false);
+  assert.match(
+    result.validationErrors.map((issue) => issue.message).join('\n'),
+    /section_key must be "pair"/i,
+  );
+});

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { getSingleDomainImportHeaderColumns } from '@/lib/assessment-language/single-domain-import-headers';
 import { mapSingleDomainNarrativeRowsToLegacyDataset } from '@/lib/assessment-language/single-domain-import-mappers';
 import { parseSingleDomainImportInput } from '@/lib/assessment-language/single-domain-import-parsers';
 
@@ -19,6 +20,36 @@ test('parseSingleDomainImportInput accepts the locked intro header and row shape
   assert.equal(result.rows[0]?.section_key, 'intro');
 });
 
+test('parseSingleDomainImportInput enforces the exact header contract for all six datasets', () => {
+  const samples = {
+    SINGLE_DOMAIN_INTRO:
+      'leadership-style|intro|Leadership style|What this domain measures|Where it applies|How to read it|Optional note',
+    SINGLE_DOMAIN_HERO:
+      'leadership-style|hero|directive_structured|Firm structured delivery|The defining pattern.|How it expands.|Why it works.',
+    SINGLE_DOMAIN_DRIVERS:
+      'leadership-style|drivers|directive_structured|directive|primary_driver|driver_primary|Directive sets the pace.|core|1',
+    SINGLE_DOMAIN_PAIR:
+      'leadership-style|pair|directive_structured|Directive + Structured|How they interact.|What the synergy creates.|Where it tightens.|Overall outcome.',
+    SINGLE_DOMAIN_LIMITATION:
+      'leadership-style|limitation|directive_structured|Compressed reconsideration|The pattern narrows.|Range gets tighter.|reflective|Reflective range arrives late.',
+    SINGLE_DOMAIN_APPLICATION:
+      'leadership-style|application|directive_structured|rely_on|applied_strength|directive|Use fast decision clarity.|driver_primary|1',
+  } as const;
+
+  for (const datasetKey of Object.keys(samples) as Array<keyof typeof samples>) {
+    const rawInput = [
+      getSingleDomainImportHeaderColumns(datasetKey).join('|'),
+      samples[datasetKey],
+    ].join('\n');
+
+    const result = parseSingleDomainImportInput(datasetKey, rawInput);
+
+    assert.equal(result.success, true, datasetKey);
+    assert.equal(result.parseErrors.length, 0, datasetKey);
+    assert.equal(result.rows.length, 1, datasetKey);
+  }
+});
+
 test('parseSingleDomainImportInput rejects reordered headers', () => {
   const rawInput = [
     'section_key|domain_key|domain_title|domain_definition|domain_scope|interpretation_guidance|intro_note',
@@ -29,6 +60,18 @@ test('parseSingleDomainImportInput rejects reordered headers', () => {
 
   assert.equal(result.success, false);
   assert.equal(result.rows.length, 0);
+  assert.match(result.parseErrors[0]?.message ?? '', /Invalid headers/);
+});
+
+test('parseSingleDomainImportInput fails clearly when a six-section dataset uses another section header order', () => {
+  const rawInput = [
+    getSingleDomainImportHeaderColumns('SINGLE_DOMAIN_PAIR').join('|'),
+    'leadership-style|application|directive_structured|rely_on|applied_strength|directive|Use fast decision clarity.|driver_primary|1',
+  ].join('\n');
+
+  const result = parseSingleDomainImportInput('SINGLE_DOMAIN_APPLICATION', rawInput);
+
+  assert.equal(result.success, false);
   assert.match(result.parseErrors[0]?.message ?? '', /Invalid headers/);
 });
 

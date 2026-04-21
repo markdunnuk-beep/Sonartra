@@ -191,3 +191,30 @@ test('admin access cannot enable the dev bypass in production', async () => {
   assert.equal(resolved, true);
   assert.equal(result.clerkUserId, 'user_1');
 });
+
+test('admin access elevates the deterministic QA bypass user for local admin verification', async () => {
+  const result = await requireAdminRequestUserContextWithDependencies({
+    env: {
+      NODE_ENV: 'development',
+      DEV_USER_BYPASS: 'true',
+    },
+    async getRequestUserContext() {
+      return {
+        userId: '00000000-0000-0000-0000-00000000qa01',
+        clerkUserId: 'dev_user_app_bypass',
+        userEmail: 'qa-user@sonartra.local',
+        userName: 'QA User',
+        userRole: 'user',
+        userStatus: 'active',
+        isAdmin: false,
+      };
+    },
+    redirect(path: string): never {
+      throw new Error(`unexpected redirect to ${path}`);
+    },
+  });
+
+  assert.equal(result.userEmail, 'qa-user@sonartra.local');
+  assert.equal(result.userRole, 'admin');
+  assert.equal(result.isAdmin, true);
+});

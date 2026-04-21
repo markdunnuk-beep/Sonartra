@@ -5,6 +5,10 @@ import {
   getDevUserAppBypassClerkProfile,
   isDevUserAppBypassEnabled,
 } from '@/lib/server/dev-user-app-bypass';
+import {
+  SINGLE_DOMAIN_QA_RESULT_FIXTURE,
+  getSingleDomainQaResultHref,
+} from '@/lib/server/single-domain-qa-result-fixture';
 
 test('dev user app bypass only activates outside production when explicitly enabled', () => {
   assert.equal(
@@ -45,4 +49,15 @@ test('dev user app bypass exposes a deterministic QA user profile', () => {
       },
     ],
   });
+});
+
+test('dev user bypass profile stays aligned with the single-domain QA result fixture user', () => {
+  const profile = getDevUserAppBypassClerkProfile();
+
+  assert.equal(profile.id, SINGLE_DOMAIN_QA_RESULT_FIXTURE.clerkUserId);
+  assert.equal(profile.emailAddresses[0]?.emailAddress, SINGLE_DOMAIN_QA_RESULT_FIXTURE.email);
+  assert.equal(
+    getSingleDomainQaResultHref(),
+    `/app/results/single-domain/${SINGLE_DOMAIN_QA_RESULT_FIXTURE.resultId}`,
+  );
 });

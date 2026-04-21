@@ -40,7 +40,10 @@ test('single-domain builder step navigation renders the dedicated eight-step rai
 
   assert.match(stepperSource, /aria-label="Single-domain builder steps"/);
   assert.match(stepperSource, /Step \{activeIndex \+ 1\} of \{steps.length\}/);
-  assert.match(stepperSource, /Every stage stays viewable so readiness can\s+be checked without route access changing the underlying status/);
+  assert.match(
+    stepperSource,
+    /Every stage stays viewable so readiness can\s+be checked without route access changing the underlying status/,
+  );
   assert.match(stepperSource, /authoring stages complete/);
   assert.match(stepperSource, /getAssessmentBuilderStepPath/);
   assert.match(stepperSource, /Current step/);
@@ -64,11 +67,47 @@ test('language step now routes into the locked six-section narrative builder she
     'assessments',
     'single-domain-narrative-builder.tsx',
   );
+  const composerPreviewSource = readSource(
+    'components',
+    'admin',
+    'assessments',
+    'single-domain-composer-preview.tsx',
+  );
 
   assert.match(pageSource, /return <SingleDomainNarrativeBuilder \/>;/);
-  assert.match(builderSource, /section-first contract: intro, hero, drivers, pair, limitation, and application/i);
+  assert.match(builderSource, /<SingleDomainComposerPreview \/>/);
+  assert.match(composerPreviewSource, /id="single-domain-composer-preview"/);
+  assert.match(
+    builderSource,
+    /section-first contract: intro, hero, drivers, pair, limitation, and application/i,
+  );
   assert.match(builderSource, /Narrative readiness/);
-  assert.doesNotMatch(builderSource, /domain framing, hero pairs, signal chapters, balancing sections, pair summaries, and application statements/i);
+  assert.doesNotMatch(
+    builderSource,
+    /domain framing, hero pairs, signal chapters, balancing sections, pair summaries, and application statements/i,
+  );
+});
+
+test('single-domain builder model keeps six section-native import contracts and no legacy dataset-family labels', () => {
+  const mapperSource = readSource('lib', 'assessment-language', 'single-domain-builder-mappers.ts');
+  const navSource = readSource(
+    'components',
+    'admin',
+    'assessments',
+    'single-domain-section-nav.tsx',
+  );
+
+  assert.match(mapperSource, /intro: 'Intro import contract'/);
+  assert.match(mapperSource, /hero: 'Hero import contract'/);
+  assert.match(mapperSource, /drivers: 'Drivers import contract'/);
+  assert.match(mapperSource, /pair: 'Pair import contract'/);
+  assert.match(mapperSource, /limitation: 'Limitation import contract'/);
+  assert.match(mapperSource, /application: 'Application import contract'/);
+  assert.match(navSource, /Locked six-section order/);
+  assert.doesNotMatch(
+    navSource,
+    /DOMAIN_FRAMING|HERO_PAIRS|SIGNAL_CHAPTERS|BALANCING_SECTIONS|PAIR_SUMMARIES|APPLICATION_STATEMENTS/,
+  );
 });
 
 test('review step renders the seven readiness scaffold categories', () => {
