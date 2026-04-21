@@ -140,6 +140,7 @@ test('single-domain results view model exposes the locked six-section reading st
     ['intro', 'hero', 'drivers', 'pair', 'limitation', 'application'],
   );
   assert.equal(viewModel.pairLabel, 'Vision and Delivery');
+  assert.deepEqual(viewModel.metadataItems.map((item) => item.emphasis), [undefined, undefined, undefined, undefined]);
 });
 
 test('single-domain results view model maps weaker signals into range limitations and application carry-through', () => {

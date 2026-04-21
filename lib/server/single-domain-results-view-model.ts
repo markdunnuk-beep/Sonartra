@@ -11,6 +11,7 @@ import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result
 export type SingleDomainResultsMetadataItem = {
   label: string;
   value: string;
+  emphasis?: boolean;
 };
 
 export type SingleDomainResultsViewModel = {
