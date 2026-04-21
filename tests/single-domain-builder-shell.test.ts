@@ -56,11 +56,19 @@ test('signals step copy keeps signal count flexible and avoids a fixed four-sign
   assert.match(source, /do not assume a fixed four-signal structure/i);
 });
 
-test('language step references the six locked dataset families', () => {
-  const source = readSource('components', 'admin', 'single-domain-builder-pages.tsx');
+test('language step now routes into the locked six-section narrative builder shell', () => {
+  const pageSource = readSource('components', 'admin', 'single-domain-builder-pages.tsx');
+  const builderSource = readSource(
+    'components',
+    'admin',
+    'assessments',
+    'single-domain-narrative-builder.tsx',
+  );
 
-  assert.match(source, /six locked dataset families/i);
-  assert.match(source, /domain framing, hero pairs, signal chapters, balancing sections, pair summaries, and application statements/i);
+  assert.match(pageSource, /return <SingleDomainNarrativeBuilder \/>;/);
+  assert.match(builderSource, /section-first contract: intro, hero, drivers, pair, limitation, and application/i);
+  assert.match(builderSource, /Narrative readiness/);
+  assert.doesNotMatch(builderSource, /domain framing, hero pairs, signal chapters, balancing sections, pair summaries, and application statements/i);
 });
 
 test('review step renders the seven readiness scaffold categories', () => {
