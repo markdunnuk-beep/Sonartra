@@ -283,7 +283,7 @@ export function SingleDomainSectionPanel({
                 </p>
               </div>
               <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
-                {section.datasetKey}
+                {section.datasetLabel}
               </LabelPill>
             </div>
             <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-words rounded-[0.85rem] border border-white/8 bg-black/20 p-3 text-xs leading-6 text-white/72">
@@ -311,7 +311,7 @@ export function SingleDomainSectionPanel({
                 {importState.summary.existingRowCount}
               </p>
               <p className="mt-2 text-sm leading-6 text-white/56">
-                Legacy-compatible rows currently stored before this import.
+                Rows currently stored in this section before the next import.
               </p>
             </div>
             <div className="rounded-[0.95rem] border border-white/8 bg-black/10 p-4">

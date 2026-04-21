@@ -20,6 +20,15 @@ import {
 
 type PreviewMode = 'draft' | 'fixture';
 
+function formatSourceDatasetLabel(sourceDatasetKey: string): string {
+  return sourceDatasetKey
+    .toLowerCase()
+    .replace(/^single_domain_/, '')
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 function PreviewModeButton({
   label,
   active,
@@ -136,8 +145,16 @@ function buildPreviewState(params: {
 
 export function SingleDomainComposerPreview() {
   const assessment = useAdminAssessmentAuthoring();
-  const [mode, setMode] = useState<PreviewMode>('draft');
+  const [selectedMode, setSelectedMode] = useState<PreviewMode>(() => (
+    buildSingleDomainDraftPreviewInput(assessment).success ? 'draft' : 'fixture'
+  ));
   const [fixtureId, setFixtureId] = useState<string>(SINGLE_DOMAIN_PREVIEW_FIXTURES[0]?.id ?? '');
+
+  const draftPreviewAvailable = useMemo(
+    () => buildSingleDomainDraftPreviewInput(assessment).success,
+    [assessment],
+  );
+  const mode = selectedMode === 'draft' && !draftPreviewAvailable ? 'fixture' : selectedMode;
 
   const previewState = useMemo(
     () => buildPreviewState({
@@ -160,8 +177,8 @@ export function SingleDomainComposerPreview() {
             </SecondaryText>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <PreviewModeButton active={mode === 'draft'} label="Draft preview" onClick={() => setMode('draft')} />
-            <PreviewModeButton active={mode === 'fixture'} label="Fixture preview" onClick={() => setMode('fixture')} />
+            <PreviewModeButton active={mode === 'draft'} label="Draft preview" onClick={() => setSelectedMode('draft')} />
+            <PreviewModeButton active={mode === 'fixture'} label="Fixture preview" onClick={() => setSelectedMode('fixture')} />
           </div>
         </div>
 
@@ -194,6 +211,11 @@ export function SingleDomainComposerPreview() {
               ? previewState.note
               : previewState.reason}
           </p>
+          {selectedMode === 'draft' && !draftPreviewAvailable ? (
+            <div className="rounded-[1rem] border border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] px-4 py-3 text-sm leading-6 text-[rgba(255,227,187,0.88)]">
+              Draft preview is not available yet. The panel has switched to a fixture so the full six-section report can still be reviewed here.
+            </div>
+          ) : null}
           {mode === 'fixture' ? (
             <label className="space-y-2">
               <span className="block text-sm font-medium text-white">Fixture</span>
@@ -284,7 +306,7 @@ export function SingleDomainComposerPreview() {
                     <div className="flex flex-wrap items-center gap-2">
                       <LabelPill>{section.key}</LabelPill>
                       <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
-                        {section.provenance.sourceDatasetKey}
+                        {formatSourceDatasetLabel(section.provenance.sourceDatasetKey)}
                       </LabelPill>
                       <LabelPill
                         className={cn(

@@ -24,6 +24,7 @@ export type SingleDomainNarrativeBuilderSection = {
   validationMessages: readonly string[];
   allowedClaimOwnership: readonly string[];
   datasetKey: SingleDomainNarrativeDatasetKey;
+  datasetLabel: string;
   importHeader: string;
   currentRowCount: number;
   expectedRowCount: number;
@@ -67,6 +68,15 @@ const SECTION_DATASET_KEYS: Record<SingleDomainNarrativeSectionKey, SingleDomain
   pair: 'SINGLE_DOMAIN_PAIR',
   limitation: 'SINGLE_DOMAIN_LIMITATION',
   application: 'SINGLE_DOMAIN_APPLICATION',
+};
+
+const SECTION_DATASET_LABELS: Record<SingleDomainNarrativeSectionKey, string> = {
+  intro: 'Intro import contract',
+  hero: 'Hero import contract',
+  drivers: 'Drivers import contract',
+  pair: 'Pair import contract',
+  limitation: 'Limitation import contract',
+  application: 'Application import contract',
 };
 
 const LEGACY_VALIDATION_DATASET_KEYS = {
@@ -194,6 +204,7 @@ export function buildSingleDomainNarrativeBuilderModel(
       validationMessages: buildValidationMessages(contract.section, assessment, counts.detail),
       allowedClaimOwnership: SINGLE_DOMAIN_ALLOWED_CLAIMS_BY_SECTION[contract.section],
       datasetKey: SECTION_DATASET_KEYS[contract.section],
+      datasetLabel: SECTION_DATASET_LABELS[contract.section],
       importHeader: SINGLE_DOMAIN_NARRATIVE_DATASET_COLUMNS[SECTION_DATASET_KEYS[contract.section]].join('|'),
       currentRowCount: counts.currentRowCount,
       expectedRowCount: counts.expectedRowCount,

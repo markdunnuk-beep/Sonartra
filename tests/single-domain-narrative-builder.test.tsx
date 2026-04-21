@@ -340,6 +340,8 @@ test('narrative builder renders the six locked sections, readiness summary, and 
   assert.match(markup, /Pipe-delimited section import/);
   assert.match(markup, /Composer preview/);
   assert.match(markup, /Publish blockers/);
+  assert.match(markup, /Intro import contract/);
+  assert.doesNotMatch(markup, /SINGLE_DOMAIN_INTRO/);
   assert.match(markup, /single-domain-section-intro/);
   assert.match(markup, /single-domain-section-application/);
   assert.doesNotMatch(markup, /Domain framing/);

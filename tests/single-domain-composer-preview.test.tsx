@@ -296,5 +296,28 @@ test('single-domain composer preview renders draft and fixture modes with full r
   assert.match(markup, /Pair/);
   assert.match(markup, /Limitation/);
   assert.match(markup, /Application/);
-  assert.match(markup, /SINGLE_DOMAIN_DRIVERS/);
+  assert.match(markup, /Drivers/);
+  assert.doesNotMatch(markup, /SINGLE_DOMAIN_DRIVERS/);
+});
+
+test('single-domain composer preview falls back to fixture mode when draft preview is unavailable', () => {
+  const assessment = createAssessment({
+    DOMAIN_FRAMING: [],
+    HERO_PAIRS: [],
+    SIGNAL_CHAPTERS: [],
+    BALANCING_SECTIONS: [],
+    PAIR_SUMMARIES: [],
+    APPLICATION_STATEMENTS: [],
+  });
+
+  const markup = renderToStaticMarkup(
+    <AdminAssessmentAuthoringProvider assessment={assessment}>
+      <SingleDomainComposerPreview />
+    </AdminAssessmentAuthoringProvider>,
+  );
+
+  assert.match(markup, /Fixture preview/);
+  assert.match(markup, /Composed report/);
+  assert.match(markup, /This preview assembles the locked six-section narrative into one report flow/i);
+  assert.doesNotMatch(markup, /Preview unavailable/);
 });
