@@ -52,9 +52,11 @@ function getValidationTone(state: SingleDomainNarrativeBuilderSection['validatio
 function ActionStub({
   title,
   description,
+  buttonLabel = 'Coming in a later task',
 }: Readonly<{
   title: string;
   description: string;
+  buttonLabel?: string;
 }>) {
   return (
     <div className="rounded-[0.95rem] border border-white/8 bg-black/10 p-4">
@@ -65,7 +67,7 @@ function ActionStub({
         disabled
         type="button"
       >
-        Coming in a later task
+        {buttonLabel}
       </button>
     </div>
   );
@@ -376,8 +378,9 @@ export function SingleDomainSectionPanel({
 
         <div className="grid gap-3 xl:grid-cols-3">
           <ActionStub
+            buttonLabel="Live in this builder"
             title="Composer preview"
-            description="Composer preview will validate the locked section contract against a single preview input shape."
+            description="Use the composer preview panel above to review this section inside the full report flow with diagnostics and provenance."
           />
           <ActionStub
             title="Publish blockers"

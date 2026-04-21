@@ -346,9 +346,9 @@ test('narrative builder renders the six locked sections, readiness summary, and 
   assert.doesNotMatch(markup, /Hero pairs/);
   assert.doesNotMatch(markup, /Balancing sections/);
 
-  assert.ok(markup.indexOf('Intro') < markup.indexOf('Hero'));
-  assert.ok(markup.indexOf('Hero') < markup.indexOf('Drivers'));
-  assert.ok(markup.indexOf('Drivers') < markup.indexOf('Pair'));
-  assert.ok(markup.indexOf('Pair') < markup.indexOf('Limitation'));
-  assert.ok(markup.indexOf('Limitation') < markup.indexOf('Application'));
+  assert.ok(markup.indexOf('single-domain-section-intro') < markup.indexOf('single-domain-section-hero'));
+  assert.ok(markup.indexOf('single-domain-section-hero') < markup.indexOf('single-domain-section-drivers'));
+  assert.ok(markup.indexOf('single-domain-section-drivers') < markup.indexOf('single-domain-section-pair'));
+  assert.ok(markup.indexOf('single-domain-section-pair') < markup.indexOf('single-domain-section-limitation'));
+  assert.ok(markup.indexOf('single-domain-section-limitation') < markup.indexOf('single-domain-section-application'));
 });

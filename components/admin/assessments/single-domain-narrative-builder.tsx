@@ -1,6 +1,7 @@
 'use client';
 
 import { useAdminAssessmentAuthoring } from '@/components/admin/admin-assessment-authoring-context';
+import { SingleDomainComposerPreview } from '@/components/admin/assessments/single-domain-composer-preview';
 import { SingleDomainSectionNav } from '@/components/admin/assessments/single-domain-section-nav';
 import { SingleDomainSectionPanel } from '@/components/admin/assessments/single-domain-section-panel';
 import { CardTitle, LabelPill, SectionHeader, SecondaryText, SurfaceCard } from '@/components/shared/user-app-ui';
@@ -61,6 +62,8 @@ export function SingleDomainNarrativeBuilder() {
           </div>
         </div>
       </SurfaceCard>
+
+      <SingleDomainComposerPreview />
 
       <SingleDomainSectionNav sections={model.sections} />
 
