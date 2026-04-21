@@ -22,13 +22,30 @@ test('reading rail renders expected top-level section labels', () => {
 });
 
 test('reading rail renders utility actions beneath navigation with accessible labels', () => {
-  const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
+  const markup = renderToStaticMarkup(
+    <ResultReadingRail
+      activeSectionIdOverride={null}
+      utilityActions={{
+        linkedInPostBody: 'Share body',
+        linkedInAnalytics: {
+          resultId: 'result-1',
+          assessmentKey: 'role-focus',
+          assessmentTitle: 'Role Focus',
+          heroPatternKey: 'vision_delivery',
+          heroHeadlinePresent: true,
+          heroSummaryPresent: true,
+          heroNarrativePresent: true,
+          source: 'results_page',
+          surface: 'linkedin_share_panel',
+        },
+      }}
+    />,
+  );
 
   assert.match(markup, /aria-label="Report utilities"/);
   assert.match(markup, /aria-label="Share on LinkedIn"/);
-  assert.match(markup, /aria-label="Share by email"/);
-  assert.match(markup, /aria-label="Download PDF"/);
-  assert.match(markup, /PDF export coming soon/);
+  assert.doesNotMatch(markup, /aria-label="Share by email"/);
+  assert.doesNotMatch(markup, /aria-label="Download PDF"/);
 });
 
 test('reading rail renders nested domain items beneath How It Shows Up without numbering', () => {
@@ -113,13 +130,31 @@ test('rail provides restrained current and next reading cues', () => {
 });
 
 test('reading rail links remain keyboard-focusable anchors with visible focus classes', () => {
-  const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
+  const markup = renderToStaticMarkup(
+    <ResultReadingRail
+      activeSectionIdOverride={null}
+      utilityActions={{
+        linkedInPostBody: 'Share body',
+        linkedInAnalytics: {
+          resultId: 'result-1',
+          assessmentKey: 'role-focus',
+          assessmentTitle: 'Role Focus',
+          heroPatternKey: 'vision_delivery',
+          heroHeadlinePresent: true,
+          heroSummaryPresent: true,
+          heroNarrativePresent: true,
+          source: 'results_page',
+          surface: 'linkedin_share_panel',
+        },
+      }}
+    />,
+  );
 
   const anchorCount = markup.match(/<a /g)?.length ?? 0;
   const focusClassCount = markup.match(/sonartra-focus-ring/g)?.length ?? 0;
 
-  assert.equal(anchorCount, 11);
-  assert.equal(focusClassCount, 13);
+  assert.equal(anchorCount, 10);
+  assert.equal(focusClassCount, 11);
   assert.match(markup, /data-result-reading-rail="true"/);
   assert.match(markup, /<nav[^>]*aria-label="Report reading navigation"/);
   assert.match(markup, /<ul aria-label="Domain chapters"/);
@@ -128,14 +163,17 @@ test('reading rail links remain keyboard-focusable anchors with visible focus cl
 test('reading rail can render the single-domain section model without affecting default multi-domain behavior', () => {
   const markup = renderToStaticMarkup(
     <ResultReadingRail
-      activeSectionIdOverride="signals"
+      activeSectionIdOverride="drivers"
       sectionsConfig={SINGLE_DOMAIN_RESULT_READING_SECTIONS}
     />,
   );
 
-  assert.match(markup, />Inside This Domain</);
-  assert.match(markup, />Balancing Your Approach</);
-  assert.match(markup, />How This Shows Up</);
+  assert.match(markup, />Intro</);
+  assert.match(markup, />Hero</);
+  assert.match(markup, />Drivers</);
+  assert.match(markup, />Pair</);
+  assert.match(markup, />Limitation</);
+  assert.match(markup, />Application</);
   assert.doesNotMatch(markup, /aria-label="Domain chapters"/);
-  assert.equal(markup.match(/<a /g)?.length ?? 0, 7);
+  assert.equal(markup.match(/<a /g)?.length ?? 0, 6);
 });

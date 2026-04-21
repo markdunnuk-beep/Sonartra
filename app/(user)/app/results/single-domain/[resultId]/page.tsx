@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { SingleDomainResultsReport } from '@/components/results/single-domain-results-report';
+import { SingleDomainResultReport } from '@/components/results/single-domain-result-report';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
@@ -40,7 +40,7 @@ export default async function SingleDomainResultPage(
   }
 
   return (
-    <SingleDomainResultsReport
+    <SingleDomainResultReport
       result={createSingleDomainResultsViewModel(detail.singleDomainResult)}
     />
   );

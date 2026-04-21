@@ -1,6 +1,7 @@
 import {
   SINGLE_DOMAIN_ALLOWED_CLAIMS_BY_SECTION,
   SINGLE_DOMAIN_NARRATIVE_SECTION_CONTRACTS,
+  SINGLE_DOMAIN_DRIVER_ROLE_TO_CLAIM_TYPE,
   validateSingleDomainNarrativePreview,
 } from '@/lib/assessment-language/single-domain-narrative-schema';
 import type {
@@ -19,6 +20,7 @@ import type {
 import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 import type { AdminAssessmentDetailViewModel } from '@/lib/server/admin-assessment-detail';
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
+import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
 export type ResultComposerPreviewInput = SingleDomainNarrativePreviewInput;
 
@@ -79,7 +81,198 @@ const SECTION_TITLES: Record<SingleDomainNarrativeSectionKey, string> = {
   pair: 'Pair',
   limitation: 'Limitation',
   application: 'Application',
-};
+    };
+
+function getSignalDriverRole(
+  signal: SingleDomainResultPayload['signals'][number],
+): SingleDomainDriversImportRow['driver_role'] {
+  if (signal.position === 'underplayed' || signal.normalized_score <= 0 || signal.raw_score <= 0) {
+    return 'range_limitation';
+  }
+
+  if (signal.position === 'primary' || signal.rank === 1) {
+    return 'primary_driver';
+  }
+
+  if (signal.position === 'secondary' || signal.rank === 2) {
+    return 'secondary_driver';
+  }
+
+  return 'supporting_context';
+}
+
+function getSignalDriverMateriality(
+  role: SingleDomainDriversImportRow['driver_role'],
+): SingleDomainDriversImportRow['materiality'] {
+  switch (role) {
+    case 'range_limitation':
+      return 'material_underplay';
+    case 'supporting_context':
+      return 'supporting';
+    case 'primary_driver':
+    case 'secondary_driver':
+    default:
+      return 'core';
+  }
+}
+
+function getSignalDriverClaimText(
+  signal: SingleDomainResultPayload['signals'][number],
+  role: SingleDomainDriversImportRow['driver_role'],
+): string {
+  if (role === 'range_limitation') {
+    return (
+      signal.chapter_risk_impact
+      || signal.chapter_development
+      || signal.chapter_intro
+    );
+  }
+
+  return (
+    signal.chapter_intro
+    || signal.chapter_how_it_shows_up
+    || signal.chapter_value_outcome
+  );
+}
+
+export function buildSingleDomainResultComposerInput(
+  payload: SingleDomainResultPayload,
+): ResultComposerPreviewInput {
+  const orderedSignals = [...payload.signals].sort((left, right) => (
+    left.rank - right.rank || left.signal_key.localeCompare(right.signal_key)
+  ));
+  const activePairKey = payload.hero.pair_key || payload.pairSummary.pair_key || payload.balancing.pair_key;
+  const weakerSignal = orderedSignals.find(
+    (signal) => getSignalDriverRole(signal) === 'range_limitation',
+  ) ?? orderedSignals[orderedSignals.length - 1] ?? null;
+
+  const drivers = orderedSignals.map<SingleDomainDriversImportRow>((signal) => {
+    const driverRole = getSignalDriverRole(signal);
+
+    return {
+      domain_key: payload.metadata.domainKey,
+      section_key: 'drivers',
+      pair_key: activePairKey,
+      signal_key: signal.signal_key,
+      driver_role: driverRole,
+      claim_type: SINGLE_DOMAIN_DRIVER_ROLE_TO_CLAIM_TYPE[driverRole],
+      claim_text: getSignalDriverClaimText(signal, driverRole),
+      materiality: getSignalDriverMateriality(driverRole),
+      priority: String(signal.rank),
+    };
+  });
+
+  const underplayedSignals = new Set(
+    drivers
+      .filter((row) => row.driver_role === 'range_limitation')
+      .map((row) => row.signal_key),
+  );
+
+  const applicationRows: SingleDomainApplicationImportRow[] = [
+    ...payload.application.strengths.map((item, index) => ({
+      domain_key: payload.metadata.domainKey,
+      section_key: 'application' as const,
+      pair_key: activePairKey,
+      focus_area: 'rely_on' as const,
+      guidance_type: 'applied_strength' as const,
+      signal_key: item.signal_key,
+      guidance_text: item.statement,
+      linked_claim_type: 'applied_strength' as const,
+      priority: String(index + 1),
+    })),
+    ...payload.application.watchouts.map((item, index) => {
+      const isUnderplayed = underplayedSignals.has(item.signal_key);
+      return {
+        domain_key: payload.metadata.domainKey,
+        section_key: 'application' as const,
+        pair_key: activePairKey,
+        focus_area: 'notice' as const,
+        guidance_type: isUnderplayed ? 'range_recovery_action' as const : 'watchout' as const,
+        signal_key: item.signal_key,
+        guidance_text: item.statement,
+        linked_claim_type: isUnderplayed ? 'driver_range_limitation' as const : 'watchout' as const,
+        priority: String(index + 1),
+      };
+    }),
+    ...payload.application.developmentFocus.map((item, index) => {
+      const isUnderplayed = underplayedSignals.has(item.signal_key);
+      return {
+        domain_key: payload.metadata.domainKey,
+        section_key: 'application' as const,
+        pair_key: activePairKey,
+        focus_area: 'develop' as const,
+        guidance_type: isUnderplayed ? 'range_recovery_action' as const : 'development_focus' as const,
+        signal_key: item.signal_key,
+        guidance_text: item.statement,
+        linked_claim_type: isUnderplayed ? 'driver_range_limitation' as const : 'development_focus' as const,
+        priority: String(index + 1),
+      };
+    }),
+  ];
+
+  return {
+    domain_key: payload.metadata.domainKey,
+    domain_title: payload.intro.section_title,
+    pair_key: activePairKey,
+    ranked_signals: orderedSignals.map((signal) => ({
+      signal_key: signal.signal_key,
+      signal_label: signal.signal_label,
+      rank: signal.rank,
+      normalized_score: signal.normalized_score,
+      materially_underplayed: getSignalDriverRole(signal) === 'range_limitation',
+    })),
+    driver_rows: orderedSignals.map((signal) => ({
+      signal_key: signal.signal_key,
+      signal_label: signal.signal_label,
+      rank: signal.rank,
+      driver_role: getSignalDriverRole(signal),
+      materiality: getSignalDriverMateriality(getSignalDriverRole(signal)),
+      claim_text: getSignalDriverClaimText(signal, getSignalDriverRole(signal)),
+    })),
+    sections: {
+      intro: {
+        domain_key: payload.metadata.domainKey,
+        section_key: 'intro',
+        domain_title: payload.intro.section_title,
+        domain_definition: payload.intro.intro_paragraph,
+        domain_scope: payload.intro.meaning_paragraph,
+        interpretation_guidance: payload.intro.bridge_to_signals,
+        intro_note: payload.intro.blueprint_context_line,
+      },
+      hero: {
+        domain_key: payload.metadata.domainKey,
+        section_key: 'hero',
+        pair_key: activePairKey,
+        pattern_label: payload.hero.hero_headline,
+        hero_statement: payload.hero.hero_opening,
+        hero_expansion: payload.hero.hero_strength_paragraph,
+        hero_strength: payload.hero.hero_tension_paragraph || payload.hero.hero_close_paragraph,
+      },
+      drivers,
+      pair: {
+        domain_key: payload.metadata.domainKey,
+        section_key: 'pair',
+        pair_key: activePairKey,
+        pair_label: payload.pairSummary.pair_headline,
+        interaction_claim: payload.pairSummary.pair_opening_paragraph,
+        synergy_claim: payload.pairSummary.pair_strength_paragraph,
+        tension_claim: payload.pairSummary.pair_tension_paragraph,
+        pair_outcome: payload.pairSummary.pair_close_paragraph,
+      },
+      limitation: {
+        domain_key: payload.metadata.domainKey,
+        section_key: 'limitation',
+        pair_key: activePairKey,
+        limitation_label: payload.balancing.balancing_section_title,
+        pattern_cost: payload.balancing.current_pattern_paragraph,
+        range_narrowing: payload.balancing.practical_meaning_paragraph,
+        weaker_signal_key: weakerSignal?.signal_key ?? '',
+        weaker_signal_link: payload.balancing.system_risk_paragraph || payload.balancing.rebalance_intro,
+      },
+      application: applicationRows,
+    },
+  };
+}
 
 function hasText(value: string | null | undefined): boolean {
   return typeof value === 'string' && value.trim().length > 0;

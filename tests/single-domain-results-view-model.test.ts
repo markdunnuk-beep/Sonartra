@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import {
-  createSingleDomainResultsViewModel,
-  SINGLE_DOMAIN_RESULTS_BRIDGE_LINE,
-} from '@/lib/server/single-domain-results-view-model';
+import { createSingleDomainResultsViewModel } from '@/lib/server/single-domain-results-view-model';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
 function buildPayload(signalCount = 4): SingleDomainResultPayload {
@@ -108,227 +105,60 @@ function buildPayload(signalCount = 4): SingleDomainResultPayload {
   };
 }
 
-test('single-domain results view model exposes the intended reading structure and bridge line', () => {
+test('single-domain results view model exposes the locked six-section reading structure', () => {
   const viewModel = createSingleDomainResultsViewModel(buildPayload());
 
   assert.deepEqual(
+    viewModel.readingSections.topLevelSections.map((section) => section.id),
+    ['intro', 'hero', 'drivers', 'pair', 'limitation', 'application'],
+  );
+  assert.deepEqual(
     viewModel.readingSections.topLevelSections.map((section) => section.label),
-    [
-      'Leadership style',
-      'Behaviour pattern',
-      'Inside this domain',
-      'Balancing your approach',
-      'How this shows up',
-      'Application',
-    ],
+    ['Intro', 'Hero', 'Drivers', 'Pair', 'Limitation', 'Application'],
   );
-  assert.equal(viewModel.bridgeLine, SINGLE_DOMAIN_RESULTS_BRIDGE_LINE);
-  assert.deepEqual(viewModel.hero.pairSignalLabels, ['Vision', 'Delivery']);
   assert.deepEqual(
-    viewModel.readingSections.topLevelSections.map((section) => section.intentPrompt),
-    [
-      'What this domain says about the way you operate.',
-      'The clearest read of the pattern leading this domain.',
-      'How the signal mix creates the pattern you see here.',
-      'Where this pattern helps, where it can narrow your range, and how to bring it back into balance.',
-      'How the leading tendencies work together when this domain is at its most recognisable.',
-      'Practical points to lean on, watch for, and develop from here.',
-    ],
+    viewModel.report.sections.map((section) => section.key),
+    ['intro', 'hero', 'drivers', 'pair', 'limitation', 'application'],
   );
+  assert.equal(viewModel.pairLabel, 'Vision and Delivery');
 });
 
-test('single-domain results view model keeps persisted signal counts variable and ordered by rank', () => {
-  const viewModel = createSingleDomainResultsViewModel(buildPayload(5));
-
-  assert.equal(viewModel.signals.length, 5);
-  assert.deepEqual(
-    viewModel.signals.map((signal) => signal.signalKey),
-    ['vision', 'delivery', 'people', 'rigor', 'clarity'],
-  );
-  assert.equal(viewModel.signals[4]?.normalizedScore, 8);
-});
-
-test('single-domain results view model derives narrative tiers from persisted position and score weight', () => {
+test('single-domain results view model maps weaker signals into range limitations and application carry-through', () => {
   const payload = buildPayload(4);
   payload.signals = payload.signals.map((signal) => (
-    signal.signal_key === 'delivery'
-      ? { ...signal, normalized_score: 0, raw_score: 0, position: 'secondary' }
-      : signal
-  ));
-
-  const viewModel = createSingleDomainResultsViewModel(payload);
-
-  assert.equal(viewModel.signals[0]?.tier, 'primary');
-  assert.equal(viewModel.signals[0]?.semanticState, 'dominant');
-  assert.equal(viewModel.signals[1]?.tier, 'underplayed');
-  assert.equal(viewModel.signals[1]?.semanticState, 'underplayed');
-  assert.equal(viewModel.signals[2]?.tier, 'supporting');
-  assert.equal(viewModel.signals[2]?.semanticState, 'contextual');
-  assert.equal(viewModel.signals[3]?.tier, 'underplayed');
-  assert.deepEqual(
-    viewModel.signals[0]?.narrativeSections.map((section) => section.label),
-    ['How it shows up', 'What it adds', 'Effect on others', 'When it overreaches', 'What to watch', 'How to stretch it'],
-  );
-  assert.deepEqual(
-    viewModel.signals[1]?.narrativeSections.map((section) => section.label),
-    ['What to watch', 'How to stretch it'],
-  );
-});
-
-test('single-domain results view model blocks strong-presence wording for zero-score signals', () => {
-  const payload = buildPayload(4);
-  payload.signals = payload.signals.map((signal) => (
-    signal.signal_key === 'delivery'
+    signal.signal_key === 'rigor'
       ? {
           ...signal,
-          normalized_score: 0,
-          raw_score: 0,
-          position: 'secondary',
-          chapter_intro: 'Delivery plays a strong role in how you operate.',
-          chapter_risk_impact: 'You rely on delivery even when conditions change quickly.',
-          chapter_development: 'This is central to how you stay effective.',
+          position: 'underplayed',
+          chapter_risk_impact: 'Rigor risk impact.',
+          chapter_development: 'Rigor development line.',
         }
       : signal
   ));
 
   const viewModel = createSingleDomainResultsViewModel(payload);
-  const deliverySignal = viewModel.signals.find((signal) => signal.signalKey === 'delivery');
+  const drivers = viewModel.report.sections.find((section) => section.key === 'drivers');
+  const limitation = viewModel.report.sections.find((section) => section.key === 'limitation');
+  const application = viewModel.report.sections.find((section) => section.key === 'application');
 
-  assert.ok(deliverySignal);
-  assert.equal(deliverySignal.tier, 'underplayed');
-  assert.equal(deliverySignal.semanticState, 'underplayed');
-  assert.match(deliverySignal.chapterIntro, /less present|not a primary driver/i);
-  assert.match(deliverySignal.riskImpact, /not a primary driver|less relied on|back seat/i);
-  assert.doesNotMatch(
-    `${deliverySignal.chapterIntro} ${deliverySignal.riskImpact} ${deliverySignal.developmentLine}`,
-    /plays a strong role|strongly shapes|drives your behaviour|you rely on|central to how you|core part of your approach/i,
-  );
+  assert.ok(drivers);
+  assert.ok(limitation);
+  assert.ok(application);
+  assert.match(drivers.focusItems.find((item) => item.label === 'Range limitation')?.content.join(' ') ?? '', /Rigor risk impact/);
+  assert.match(limitation.paragraphs.join(' '), /Rigor/i);
+  assert.match(application.focusItems.find((item) => item.label === 'Develop')?.content.join(' ') ?? '', /Rigor development/);
 });
 
-test('single-domain results view model downgrades dominant phrasing for underplayed and supporting semantics', () => {
-  const payload = buildPayload(4);
-  payload.signals = payload.signals.map((signal) => {
-    if (signal.signal_key === 'people') {
-      return {
-        ...signal,
-        chapter_intro: 'People is central to how you operate in this domain.',
-        chapter_how_it_shows_up: 'People strongly shapes how you behave with others.',
-      };
-    }
-
-    if (signal.signal_key === 'rigor') {
-      return {
-        ...signal,
-        chapter_intro: 'Rigor drives your behaviour and sets the tone.',
-        chapter_risk_impact: 'Rigor is a core part of your approach.',
-      };
-    }
-
-    return signal;
-  });
-
-  const viewModel = createSingleDomainResultsViewModel(payload);
-  const peopleSignal = viewModel.signals.find((signal) => signal.signalKey === 'people');
-  const rigorSignal = viewModel.signals.find((signal) => signal.signalKey === 'rigor');
-
-  assert.ok(peopleSignal);
-  assert.equal(peopleSignal.tier, 'supporting');
-  assert.equal(peopleSignal.semanticState, 'contextual');
-  assert.match(peopleSignal.chapterIntro, /supporting position|adds context/i);
-  assert.doesNotMatch(
-    `${peopleSignal.chapterIntro} ${peopleSignal.howItShowsUp}`,
-    /central to how you|strongly shapes/i,
-  );
-
-  assert.ok(rigorSignal);
-  assert.equal(rigorSignal.tier, 'underplayed');
-  assert.match(rigorSignal.chapterIntro, /less present|back seat/i);
-  assert.doesNotMatch(
-    `${rigorSignal.chapterIntro} ${rigorSignal.riskImpact}`,
-    /drives your behaviour|core part of your approach|sets the tone/i,
-  );
-});
-
-test('single-domain results view model preserves strong primary language while moderating secondary copy', () => {
-  const payload = buildPayload(4);
-  payload.signals = payload.signals.map((signal) => {
-    if (signal.signal_key === 'vision') {
-      return {
-        ...signal,
-        chapter_intro: 'Vision plays a strong role and drives your behaviour in this domain.',
-      };
-    }
-
-    if (signal.signal_key === 'delivery') {
-      return {
-        ...signal,
-        chapter_intro: 'Delivery plays a strong role and is central to how you operate.',
-      };
-    }
-
-    return signal;
-  });
-
-  const viewModel = createSingleDomainResultsViewModel(payload);
-  const visionSignal = viewModel.signals.find((signal) => signal.signalKey === 'vision');
-  const deliverySignal = viewModel.signals.find((signal) => signal.signalKey === 'delivery');
-
-  assert.ok(visionSignal);
-  assert.equal(visionSignal.tier, 'primary');
-  assert.match(visionSignal.chapterIntro, /plays a strong role/i);
-
-  assert.ok(deliverySignal);
-  assert.equal(deliverySignal.tier, 'secondary');
-  assert.equal(deliverySignal.semanticState, 'reinforcing');
-  assert.match(deliverySignal.chapterIntro, /steady support|behind the leading signal/i);
-  assert.doesNotMatch(deliverySignal.chapterIntro, /plays a strong role|central to how you/i);
-});
-
-test('single-domain results view model maps balancing, pair summary, and application from persisted fields only', () => {
-  const viewModel = createSingleDomainResultsViewModel(buildPayload(3));
-
-  assert.equal(viewModel.balancing.sectionTitle, 'Balancing your approach');
-  assert.equal(viewModel.pairSummary.headline, 'combined meaning');
-  assert.equal(viewModel.application.strengths[0]?.statement, 'Vision strength');
-  assert.equal(viewModel.application.watchouts[0]?.statement, 'Delivery watchout');
-  assert.equal(viewModel.application.developmentFocus[0]?.statement, 'Rigor development');
-});
-
-test('single-domain results view model replaces raw single-domain signal and pair labels with approved display labels', () => {
+test('single-domain results view model cleans internal labels and raw pair keys before rendering', () => {
   const payload = buildPayload(4);
   payload.hero.pair_key = 'results_vision';
-  payload.signals = payload.signals.map((signal) => {
-    if (signal.signal_key === 'vision') {
-      return {
-        ...signal,
-        signal_label: 'VISION',
-      };
-    }
-
-    if (signal.signal_key === 'delivery') {
-      return {
-        ...signal,
-        signal_key: 'results',
-        signal_label: 'REPORT',
-        chapter_intro: 'REPORT plays a strong role in how you operate.',
-      };
-    }
-
-    return signal;
-  });
-  payload.application.watchouts = [
-    { signal_key: 'results', signal_label: 'report', rank: 2, statement: 'Watchout statement' },
-  ];
+  payload.hero.hero_subheadline = 'This comes from the persisted integrated meaning.';
+  payload.intro.bridge_to_signals = 'The ranked signals show the report and vision pattern, not results_vision.';
+  payload.pairSummary.pair_headline = 'Integrated meaning';
 
   const viewModel = createSingleDomainResultsViewModel(payload);
 
-  assert.equal(viewModel.hero.pairLabel, 'Delivery and Vision');
-  assert.deepEqual(viewModel.hero.pairSignalLabels, ['Delivery', 'Vision']);
-  assert.equal(viewModel.signals[1]?.signalLabel, 'Delivery');
-  assert.match(viewModel.signals[1]?.chapterIntro ?? '', /Delivery gives this domain steady support/i);
-  assert.equal(viewModel.application.watchouts[0]?.signal_label, 'Delivery');
-  assert.doesNotMatch(
-    JSON.stringify(viewModel),
-    /\bREPORT\b|\breport and vision\b|\breport × vision\b|\bresults_vision\b/i,
-  );
+  assert.equal(viewModel.pairLabel, 'Delivery and Vision');
+  assert.doesNotMatch(viewModel.report.sections.flatMap((section) => section.paragraphs).join(' '), /persisted|results_vision/i);
+  assert.match(viewModel.report.sections.find((section) => section.key === 'pair')?.paragraphs[0] ?? '', /Combined meaning/i);
 });

@@ -63,13 +63,13 @@ test('unknown sections safely resolve to first canonical top-level step', () => 
 test('progress component can follow the single-domain top-level sequence', () => {
   const markup = renderToStaticMarkup(
     <ResultReadingProgress
-      activeSectionIdOverride="balancing"
+      activeSectionIdOverride="limitation"
       sectionsConfig={SINGLE_DOMAIN_RESULT_READING_SECTIONS}
     />,
   );
 
-  assert.match(markup, />Balancing Your Approach</);
-  assert.match(markup, />04</);
-  assert.match(markup, />How This Shows Up</);
+  assert.match(markup, />Limitation</);
+  assert.match(markup, />05</);
+  assert.match(markup, />Application</);
   assert.equal(markup.match(/sonartra-motion-progress block h-1\.5 rounded-full/g)?.length ?? 0, 6);
 });
