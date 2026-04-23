@@ -140,16 +140,16 @@ export function ResultReadingRail({
       className={cn('hidden xl:block xl:w-[11.75rem] xl:shrink-0', className)}
       data-result-reading-rail="true"
     >
-      <div className="sticky top-[5.7rem] space-y-3 rounded-[1.45rem] border border-white/[0.05] bg-[#09101d]/38 px-3.5 py-4 shadow-[0_14px_32px_rgba(0,0,0,0.09)] backdrop-blur-[14px]">
-        <div className="space-y-2.5 pb-2 pl-1">
+      <div className="sticky top-[5.7rem] space-y-3 rounded-[1.35rem] border border-white/[0.04] bg-[#09101d]/24 px-3 py-3.5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] backdrop-blur-[12px]">
+        <div className="space-y-2 pb-1.5 pl-1">
           <Image
             src="/images/sonartra-logo.svg"
             alt="Sonartra"
             width={174}
             height={28}
-            className="h-auto w-[142px] opacity-[0.86]"
+            className="h-auto w-[136px] opacity-[0.8]"
           />
-          <p className="text-white/28 text-[0.62rem] font-medium uppercase tracking-[0.16em]">
+          <p className="text-white/22 text-[0.58rem] font-medium uppercase tracking-[0.18em]">
             Reading rail
           </p>
         </div>
@@ -189,31 +189,31 @@ export function ResultReadingRail({
                               : 'idle'
                   }
                   className={cn(
-                    'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring text-white/47 group relative block rounded-[0.95rem] px-3 py-2 text-[0.79rem] leading-5 tracking-[0.01em] outline-none',
-                    'hover:text-white/67 focus-visible:text-white/84',
-                    isPassed && 'text-white/58',
+                    'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring text-white/40 group relative block rounded-[0.9rem] px-3 py-2 text-[0.78rem] leading-5 tracking-[0.01em] outline-none',
+                    'hover:bg-white/[0.018] hover:text-white/62 focus-visible:text-white/82',
+                    isPassed && 'bg-white/[0.012] text-white/52',
                     isTopLevelActive &&
-                      'text-white/84 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]',
-                    isNext && 'text-white/56',
+                      'bg-white/[0.028] text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.028)]',
+                    isNext && 'text-white/48',
                   )}
                 >
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.6rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-white/[0.18] bg-[#0b1221] opacity-100',
-                      isPassed && 'border-white/[0.18] bg-white/[0.16]',
+                      'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.58rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-white/[0.12] bg-[#0c1322] opacity-100',
+                      isPassed && 'border-[rgba(142,162,255,0.14)] bg-[rgba(142,162,255,0.16)]',
                       isTopLevelActive &&
-                        'border-white/[0.3] bg-white/[0.34] shadow-[0_0_0_6px_rgba(255,255,255,0.035)]',
-                      isUpcoming && 'border-white/[0.14] bg-white/[0.06]',
+                        'border-[rgba(194,205,255,0.28)] bg-[rgba(194,205,255,0.26)] shadow-[0_0_0_5px_rgba(142,162,255,0.055)]',
+                      isUpcoming && 'border-white/[0.1] bg-white/[0.035]',
                     )}
                   />
                   <span className="relative flex min-w-0 items-start gap-2.5">
                     <span
                       aria-hidden="true"
                       className={cn(
-                        'pt-0.5 text-[0.64rem] font-medium tracking-[0.14em] text-white/30',
-                        (isTopLevelActive || isExactTopLevelActive) && 'text-white/48',
-                        isPassed && 'text-white/37',
+                        'pt-0.5 text-[0.63rem] font-medium tracking-[0.16em] text-white/24',
+                        (isTopLevelActive || isExactTopLevelActive) && 'text-white/42',
+                        isPassed && 'text-white/32',
                       )}
                     >
                       {String(section.order).padStart(2, '0')}
@@ -223,15 +223,23 @@ export function ResultReadingRail({
                       {isTopLevelActive ? (
                         <span
                           aria-hidden="true"
-                          className="text-white/42 block text-[0.58rem] font-medium uppercase tracking-[0.18em]"
+                          className="block text-[0.54rem] font-medium uppercase tracking-[0.2em] text-white/34"
                         >
                           {isExactTopLevelActive ? 'Now reading' : 'Current chapter'}
+                        </span>
+                      ) : null}
+                      {isPassed ? (
+                        <span
+                          aria-hidden="true"
+                          className="block text-[0.54rem] font-medium uppercase tracking-[0.2em] text-[rgba(142,162,255,0.42)]"
+                        >
+                          Read
                         </span>
                       ) : null}
                       {isNext ? (
                         <span
                           aria-hidden="true"
-                          className="text-white/28 block text-[0.58rem] font-medium uppercase tracking-[0.18em]"
+                          className="block text-[0.54rem] font-medium uppercase tracking-[0.2em] text-white/24"
                         >
                           Up next
                         </span>
@@ -275,29 +283,29 @@ export function ResultReadingRail({
                                         : 'idle'
                               }
                               className={cn(
-                                'sonartra-motion-nav-item sonartra-result-rail-item-subtle sonartra-focus-ring text-white/41 group relative block rounded-[0.8rem] px-3 py-1.5 text-[0.74rem] leading-5 tracking-[0.012em] outline-none',
-                                'hover:text-white/62 focus-visible:text-white/82',
-                                isPassedDomainSubsection && 'text-white/50',
+                                'sonartra-motion-nav-item sonartra-result-rail-item-subtle sonartra-focus-ring text-white/35 group relative block rounded-[0.78rem] px-3 py-1.5 text-[0.73rem] leading-5 tracking-[0.012em] outline-none',
+                                'hover:bg-white/[0.015] hover:text-white/56 focus-visible:text-white/78',
+                                isPassedDomainSubsection && 'bg-white/[0.01] text-white/45',
                                 isDomainSubsectionActive &&
-                                  'text-white/79 bg-white/[0.03] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]',
-                                isNextDomainSubsection && 'text-white/52',
+                                  'bg-white/[0.022] text-white/72 shadow-[inset_0_1px_0_rgba(255,255,255,0.026)]',
+                                isNextDomainSubsection && 'text-white/46',
                               )}
                             >
                               <span
                                 aria-hidden="true"
                                 className={cn(
-                                  'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.88rem] top-1/2 h-px w-3 scale-100 rounded-full bg-white/[0.12] opacity-100',
-                                  isPassedDomainSubsection && 'bg-white/[0.2]',
-                                  isDomainSubsectionActive && 'bg-white/[0.4]',
+                                  'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.88rem] top-1/2 h-px w-3 scale-100 rounded-full bg-white/[0.08] opacity-100',
+                                  isPassedDomainSubsection && 'bg-[rgba(142,162,255,0.22)]',
+                                  isDomainSubsectionActive && 'bg-[rgba(194,205,255,0.34)]',
                                 )}
                               />
                               <span className="relative flex min-w-0 items-center gap-2">
                                 <span
                                   aria-hidden="true"
                                   className={cn(
-                                    'h-1 w-1 rounded-full bg-white/[0.22]',
-                                    isPassedDomainSubsection && 'bg-white/[0.3]',
-                                    isDomainSubsectionActive && 'bg-white/[0.54]',
+                                    'h-1 w-1 rounded-full bg-white/[0.16]',
+                                    isPassedDomainSubsection && 'bg-[rgba(142,162,255,0.3)]',
+                                    isDomainSubsectionActive && 'bg-[rgba(194,205,255,0.5)]',
                                   )}
                                 />
                                 <span className="block min-w-0">{domainSection.label}</span>
@@ -314,7 +322,7 @@ export function ResultReadingRail({
         </ul>
 
         {utilityActions ? (
-          <div className="mt-1.5 border-t border-white/[0.06] pt-3.5">
+          <div className="mt-1.5 border-t border-white/[0.05] pt-3">
             <div className="flex items-center gap-2" aria-label="Report utilities" role="group">
               <UtilityIconButton label="Share on LinkedIn" onClick={handleLinkedInShare}>
                 <svg

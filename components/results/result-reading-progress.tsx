@@ -89,29 +89,29 @@ export function ResultReadingProgress({
       className={cn('xl:hidden', className)}
       data-result-reading-progress="true"
     >
-      <div className="bg-[#080b13]/86 sticky top-16 z-20 border-b border-white/[0.08] px-3 py-2.5 backdrop-blur-md sm:px-4">
-        <div className="sonartra-result-mobile-progress-surface rounded-[1rem] border border-white/[0.07] px-3.5 py-3">
+      <div className="sticky top-16 z-20 border-b border-white/[0.06] bg-[#080b13]/78 px-3 py-2.5 backdrop-blur-md sm:px-4">
+        <div className="sonartra-result-mobile-progress-surface rounded-[0.95rem] border border-white/[0.055] px-3.5 py-3">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2.5">
-                <p className="text-white/44 text-[0.65rem] font-medium uppercase tracking-[0.16em]">
+                <p className="text-white/34 text-[0.62rem] font-medium uppercase tracking-[0.18em]">
                   Now reading
                 </p>
                 <span
                   aria-hidden="true"
-                  className="inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-white/[0.08] px-1.5 text-[0.62rem] font-medium tracking-[0.08em] text-white/55"
+                  className="inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.018] px-1.5 text-[0.6rem] font-medium tracking-[0.1em] text-white/48"
                 >
                   {String(activeStepNumber).padStart(2, '0')}
                 </span>
               </div>
 
               {currentContextLabel ? (
-                <p className="text-white/34 mt-1 text-[0.64rem] font-medium uppercase tracking-[0.14em]">
+                <p className="mt-1 text-[0.62rem] font-medium uppercase tracking-[0.16em] text-white/28">
                   {currentContextLabel}
                 </p>
               ) : null}
 
-              <p className="text-white/86 mt-0.5 text-[0.95rem] font-medium leading-5 tracking-[0.01em]">
+              <p className="mt-0.5 text-[0.93rem] font-medium leading-5 tracking-[0.01em] text-white/82">
                 {currentPrimaryLabel}
               </p>
             </div>
@@ -126,9 +126,9 @@ export function ResultReadingProgress({
                     key={section.id}
                     className={cn(
                       'sonartra-motion-progress block h-1.5 rounded-full',
-                      isActive && 'bg-white/58 w-5',
-                      isPassed && 'bg-white/28 w-2.5',
-                      !isActive && !isPassed && 'bg-white/12 w-2.5',
+                      isActive && 'w-5 bg-[rgba(194,205,255,0.56)]',
+                      isPassed && 'w-2.5 bg-[rgba(142,162,255,0.26)]',
+                      !isActive && !isPassed && 'w-2.5 bg-white/[0.08]',
                     )}
                   />
                 );
@@ -137,20 +137,20 @@ export function ResultReadingProgress({
           </div>
 
           {nextLabel ? (
-            <div className="mt-2.5 flex items-start gap-2.5 border-t border-white/[0.06] pt-2.5">
+            <div className="mt-2.5 flex items-start gap-2.5 border-t border-white/[0.05] pt-2.5">
               <span
                 aria-hidden="true"
-                className="mt-[0.34rem] h-1.5 w-1.5 shrink-0 rounded-full bg-white/[0.22]"
+                className="mt-[0.34rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[rgba(142,162,255,0.22)]"
               />
               <div className="min-w-0">
-                <p className="text-[0.6rem] font-medium uppercase tracking-[0.16em] text-white/30">
+                <p className="text-[0.58rem] font-medium uppercase tracking-[0.18em] text-white/26">
                   Up next
                 </p>
-                <p className="text-white/62 mt-0.5 truncate text-[0.78rem] font-medium leading-5 tracking-[0.01em]">
+                <p className="mt-0.5 truncate text-[0.77rem] font-medium leading-5 tracking-[0.01em] text-white/58">
                   {nextLabel}
                 </p>
                 {nextContextLabel && nextContextLabel !== nextLabel ? (
-                  <p className="text-white/38 text-[0.66rem] leading-4 tracking-[0.01em]">
+                  <p className="text-[0.64rem] leading-4 tracking-[0.01em] text-white/34">
                     within {nextContextLabel}
                   </p>
                 ) : null}
