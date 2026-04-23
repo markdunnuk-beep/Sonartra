@@ -192,6 +192,12 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /sonartra-single-domain-driver-layout/);
   assert.match(markup, /sonartra-single-domain-driver-support-rail/);
   assert.match(markup, /sonartra-single-domain-driver-context-stack/);
+  assert.match(markup, /sonartra-single-domain-section-pair/);
+  assert.match(markup, /sonartra-single-domain-section-limitation/);
+  assert.match(markup, /sonartra-single-domain-application-grid/);
+  assert.match(markup, /sonartra-single-domain-application-rely/);
+  assert.match(markup, /sonartra-single-domain-application-notice/);
+  assert.match(markup, /sonartra-single-domain-application-develop/);
   assert.match(markup, />Primary driver</);
   assert.match(markup, />Secondary driver</);
   assert.match(markup, />Supporting context</);
@@ -199,7 +205,8 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, />Rely on</);
   assert.match(markup, />Notice</);
   assert.match(markup, />Develop</);
-  assert.match(markup, /amber-200/);
+  assert.match(markup, /sonartra-single-domain-section-limitation/);
+  assert.match(markup, /sonartra-single-domain-application-notice/);
 });
 
 test('single-domain results report carries weaker-signal range language into limitation and application', () => {

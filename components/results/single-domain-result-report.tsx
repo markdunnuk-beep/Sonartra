@@ -41,7 +41,7 @@ export function SingleDomainResultReport({ result }: { result: SingleDomainResul
     <PageFrame className="space-y-9 md:space-y-11">
       <article className="sonartra-single-domain-report relative isolate">
         <div className="relative xl:mx-auto xl:grid xl:max-w-[114rem] xl:grid-cols-[minmax(0,1fr)_minmax(11rem,12.25rem)] xl:gap-8 2xl:gap-10">
-          <div className="min-w-0 max-w-none space-y-10 md:space-y-14 xl:pr-6">
+          <div className="sonartra-single-domain-report-flow min-w-0 max-w-none xl:pr-6">
             {introSection ? (
               <header
                 id={introSection.key}
