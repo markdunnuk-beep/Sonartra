@@ -176,6 +176,15 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   );
 
   assert.match(markup, /sonartra-report-hero/);
+  assert.match(markup, /sonartra-single-domain-meta-strip/);
+  assert.match(markup, />Completed</);
+  assert.match(markup, />Time</);
+  assert.match(markup, />Assessment</);
+  assert.match(markup, />Version</);
+  assert.match(markup, />Leading pair</);
+  assert.match(markup, /12 Apr 2026/);
+  assert.match(markup, /\d{2}:\d{2}/);
+  assert.match(markup, /Vision and Delivery/);
   assert.match(markup, />Primary driver</);
   assert.match(markup, />Secondary driver</);
   assert.match(markup, />Supporting context</);

@@ -34,8 +34,9 @@
 html {
   scroll-behavior: smooth;
   background:
-    radial-gradient(circle at top, rgba(96, 119, 255, 0.08), transparent 30%),
-    linear-gradient(180deg, #0a1020 0%, #09111f 44%, #08101c 100%);
+    radial-gradient(circle at top center, rgba(118, 137, 255, 0.12), transparent 34%),
+    radial-gradient(circle at 14% 8%, rgba(142, 162, 255, 0.07), transparent 28%),
+    linear-gradient(180deg, #0c1424 0%, #09111f 28%, #08101b 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -62,8 +63,9 @@ html {
 body {
   @apply text-foreground antialiased;
   background:
-    radial-gradient(circle at top, rgba(96, 119, 255, 0.08), transparent 30%),
-    linear-gradient(180deg, #0a1020 0%, #09111f 44%, #08101c 100%);
+    radial-gradient(circle at top center, rgba(118, 137, 255, 0.12), transparent 34%),
+    radial-gradient(circle at 14% 8%, rgba(142, 162, 255, 0.07), transparent 28%),
+    linear-gradient(180deg, #0c1424 0%, #09111f 28%, #08101b 100%);
   color: var(--sonartra-text);
   font-family: var(--font-sonartra-sans);
 }
@@ -667,13 +669,13 @@ main {
 
   .sonartra-report-hero {
     background:
-      radial-gradient(circle at top left, rgba(142, 162, 255, 0.13), transparent 34%),
-      radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.028), transparent 34%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.014)),
-      rgba(10, 17, 31, 0.72);
+      radial-gradient(circle at top left, rgba(142, 162, 255, 0.16), transparent 34%),
+      radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.05), transparent 24%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.014)),
+      rgba(9, 16, 29, 0.74);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.04),
-      0 24px 60px rgba(0, 0, 0, 0.16);
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 30px 74px rgba(0, 0, 0, 0.18);
   }
 
   .sonartra-single-domain-report {
@@ -684,11 +686,13 @@ main {
     content: '';
     pointer-events: none;
     position: absolute;
-    inset: 0;
+    inset: -4rem 0 auto;
+    height: 22rem;
     background:
-      radial-gradient(circle at top, rgba(142, 162, 255, 0.08), transparent 36%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent 24%);
-    opacity: 0.72;
+      radial-gradient(circle at top center, rgba(142, 162, 255, 0.12), transparent 42%),
+      radial-gradient(circle at 10% 18%, rgba(255, 255, 255, 0.045), transparent 20%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent 68%);
+    opacity: 0.88;
   }
 
   .sonartra-single-domain-section {
@@ -700,18 +704,22 @@ main {
     position: absolute;
     left: 0;
     right: 0;
-    top: -1.4rem;
+    top: -1.1rem;
     height: 1px;
     background: linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.08),
-      rgba(255, 255, 255, 0.03) 42%,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.025) 42%,
       transparent
     );
   }
 
   .sonartra-single-domain-section:first-child::before {
     display: none;
+  }
+
+  .sonartra-single-domain-intro {
+    padding-top: 0.25rem;
   }
 
   .sonartra-single-domain-intro-copy-grid {
@@ -744,6 +752,34 @@ main {
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.008)),
       rgba(8, 12, 22, 0.18);
+  }
+
+  .sonartra-single-domain-meta-strip {
+    display: grid;
+    gap: 0.9rem 1.3rem;
+    align-items: start;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+    padding: 0.95rem 0;
+  }
+
+  .sonartra-single-domain-meta-strip-item {
+    min-width: 0;
+    display: grid;
+    gap: 0.18rem;
+  }
+
+  @media (min-width: 640px) {
+    .sonartra-single-domain-meta-strip {
+      grid-template-columns: repeat(2, minmax(0, max-content));
+    }
+  }
+
+  @media (min-width: 880px) {
+    .sonartra-single-domain-meta-strip {
+      grid-template-columns: repeat(5, minmax(0, max-content));
+      gap: 0.9rem 1.5rem;
+    }
   }
 
   .sonartra-single-domain-surface-warm {

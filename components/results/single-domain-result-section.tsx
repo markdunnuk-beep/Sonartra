@@ -129,37 +129,37 @@ export function SingleDomainResultSection({
       <section
         id={section.key}
         aria-labelledby={headingId}
-        className="results-anchor-target sonartra-motion-reveal sonartra-single-domain-section sonartra-report-hero border-white/8 rounded-[2.35rem] border px-8 py-14 sm:px-9 sm:py-14 md:px-14 md:py-16 lg:px-16 lg:py-[4.75rem]"
+        className="results-anchor-target sonartra-motion-reveal sonartra-single-domain-section sonartra-report-hero rounded-[2.5rem] border border-white/[0.07] px-7 py-12 sm:px-9 sm:py-13 md:px-14 md:py-[4.35rem] lg:px-[4.5rem] lg:py-[5.1rem]"
         style={getRevealStyle(step)}
       >
-        <div className="space-y-8 md:space-y-10">
-          <div className="space-y-4 md:space-y-5">
-            <SectionEyebrow label="Hero" />
+        <div className="space-y-7 md:space-y-9">
+          <div className="space-y-4 md:space-y-6">
+            <SectionEyebrow label={section.title} />
             <h2
               id={headingId}
-              className="sonartra-type-display max-w-[10ch] text-[3.3rem] tracking-[-0.06em] md:text-[5.55rem] lg:text-[5.9rem]"
+              className="sonartra-type-display max-w-[9ch] text-[3.45rem] tracking-[-0.068em] md:text-[5.95rem] lg:text-[6.45rem]"
             >
               {headline}
             </h2>
             <ResultSectionIntent
               sectionId={section.key}
               sectionsConfig={sectionsConfig}
-              className="max-w-[48ch]"
+              className="max-w-[46ch]"
             />
           </div>
 
           {summary ? (
-            <p className="sonartra-report-summary text-white/84 max-w-[54rem] text-[1.08rem] leading-8 md:text-[1.24rem] md:leading-10">
+            <p className="sonartra-report-summary max-w-[54rem] text-white/85 text-[1.08rem] leading-8 md:text-[1.28rem] md:leading-10">
               {summary}
             </p>
           ) : null}
 
           {supporting.length > 0 ? (
-            <div className="border-white/7 grid gap-5 border-t pt-7 sm:grid-cols-2 sm:gap-6 md:pt-8">
+            <div className="grid gap-5 border-t border-white/[0.065] pt-7 sm:grid-cols-2 sm:gap-6 md:pt-8">
               {supporting.map((paragraph, index) => (
                 <p
                   key={`${section.key}-${index + 1}`}
-                  className="sonartra-report-body-soft text-white/64 max-w-[34rem]"
+                  className="sonartra-report-body-soft max-w-[34rem] text-white/62"
                 >
                   {paragraph}
                 </p>
