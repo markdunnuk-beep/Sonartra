@@ -185,6 +185,13 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /12 Apr 2026/);
   assert.match(markup, /\d{2}:\d{2}/);
   assert.match(markup, /Vision and Delivery/);
+  assert.match(markup, /Main cause/);
+  assert.match(markup, /Reinforcing cause/);
+  assert.match(markup, /Supporting layer/);
+  assert.match(markup, /Missing range/);
+  assert.match(markup, /sonartra-single-domain-driver-layout/);
+  assert.match(markup, /sonartra-single-domain-driver-support-rail/);
+  assert.match(markup, /sonartra-single-domain-driver-context-stack/);
   assert.match(markup, />Primary driver</);
   assert.match(markup, />Secondary driver</);
   assert.match(markup, />Supporting context</);

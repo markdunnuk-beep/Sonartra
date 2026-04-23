@@ -26,12 +26,14 @@ function FocusGroup({
   className,
   itemClassName,
   titleClassName,
+  preface,
 }: {
   title: string;
   items: readonly string[];
   className?: string;
   itemClassName?: string;
   titleClassName?: string;
+  preface?: string;
 }) {
   if (items.length === 0) {
     return null;
@@ -46,13 +48,20 @@ function FocusGroup({
         .filter(Boolean)
         .join(' ')}
     >
-      <p
-        className={['sonartra-report-kicker text-white/42', titleClassName]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {title}
-      </p>
+      <div className="space-y-2">
+        {preface ? (
+          <p className="text-[0.62rem] font-medium uppercase tracking-[0.18em] text-white/28">
+            {preface}
+          </p>
+        ) : null}
+        <p
+          className={['sonartra-report-kicker text-white/42', titleClassName]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {title}
+        </p>
+      </div>
       <div className="sonartra-single-domain-focus-grid">
         {items.map((item, index) => (
           <p
@@ -172,6 +181,11 @@ export function SingleDomainResultSection({
   }
 
   if (section.key === 'drivers') {
+    const primaryDriver = section.focusItems.find((item) => item.label === 'Primary driver');
+    const secondaryDriver = section.focusItems.find((item) => item.label === 'Secondary driver');
+    const supportingContext = section.focusItems.find((item) => item.label === 'Supporting context');
+    const rangeLimitation = section.focusItems.find((item) => item.label === 'Range limitation');
+
     return (
       <section
         id={section.key}
@@ -194,60 +208,55 @@ export function SingleDomainResultSection({
           />
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.16fr)_minmax(18.5rem,0.84fr)] lg:gap-6">
-          <div>
-            {section.focusItems
-              .filter((item) => item.label === 'Primary driver')
-              .map((item) => (
-                <FocusGroup
-                  key={item.label}
-                  title={item.label}
-                  items={item.content}
-                  className="sonartra-single-domain-driver-primary px-6 py-6 md:px-7 md:py-7"
-                  titleClassName="text-white/48"
-                  itemClassName="text-[1.03rem] leading-8 text-white/84"
-                />
-              ))}
+        <div className="sonartra-single-domain-driver-layout">
+          <div className="sonartra-single-domain-driver-main">
+            {primaryDriver ? (
+              <FocusGroup
+                title={primaryDriver.label}
+                items={primaryDriver.content}
+                preface="Main cause"
+                className="sonartra-single-domain-driver-primary px-6 py-6 md:px-7 md:py-7 lg:px-8 lg:py-8"
+                titleClassName="text-white/58"
+                itemClassName="text-[1.06rem] leading-8 text-white/86 md:text-[1.08rem] md:leading-9"
+              />
+            ) : null}
           </div>
 
-          <div className="space-y-4">
-            {section.focusItems
-              .filter((item) => item.label === 'Secondary driver')
-              .map((item) => (
-                <FocusGroup
-                  key={item.label}
-                  title={item.label}
-                  items={item.content}
-                  className="sonartra-single-domain-driver-secondary"
-                  titleClassName="text-white/38"
-                  itemClassName="text-white/76"
-                />
-              ))}
+          <div className="sonartra-single-domain-driver-support-rail">
+            {secondaryDriver ? (
+              <FocusGroup
+                title={secondaryDriver.label}
+                items={secondaryDriver.content}
+                preface="Reinforcing cause"
+                className="sonartra-single-domain-driver-secondary px-5 py-5 md:px-6 md:py-6"
+                titleClassName="text-white/42"
+                itemClassName="text-white/78"
+              />
+            ) : null}
 
-            {section.focusItems
-              .filter((item) => item.label === 'Supporting context')
-              .map((item) => (
+            <div className="sonartra-single-domain-driver-context-stack">
+              {supportingContext ? (
                 <FocusGroup
-                  key={item.label}
-                  title={item.label}
-                  items={item.content}
+                  title={supportingContext.label}
+                  items={supportingContext.content}
+                  preface="Supporting layer"
                   className="sonartra-single-domain-driver-supporting"
-                  titleClassName="text-white/32"
-                  itemClassName="text-white/64"
+                  titleClassName="text-white/28"
+                  itemClassName="text-white/60"
                 />
-              ))}
-            {section.focusItems
-              .filter((item) => item.label === 'Range limitation')
-              .map((item) => (
+              ) : null}
+
+              {rangeLimitation ? (
                 <FocusGroup
-                  key={item.label}
-                  title={item.label}
-                  items={item.content}
+                  title={rangeLimitation.label}
+                  items={rangeLimitation.content}
+                  preface="Missing range"
                   className="sonartra-single-domain-driver-limitation"
-                  titleClassName="text-amber-100/64"
-                  itemClassName="text-white/74"
+                  titleClassName="text-amber-100/68"
+                  itemClassName="text-white/75"
                 />
-              ))}
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
