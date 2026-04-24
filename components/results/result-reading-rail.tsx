@@ -183,7 +183,7 @@ export function ResultReadingRail({
                         : isNext
                           ? 'next'
                           : isPassed
-                            ? 'passed'
+                            ? 'read'
                             : isUpcoming
                               ? 'upcoming'
                               : 'idle'
@@ -191,7 +191,7 @@ export function ResultReadingRail({
                   className={cn(
                     'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring text-white/40 group relative block rounded-[0.9rem] px-3 py-2 text-[0.78rem] leading-5 tracking-[0.01em] outline-none',
                     'hover:bg-white/[0.018] hover:text-white/62 focus-visible:text-white/82',
-                    isPassed && 'bg-white/[0.012] text-white/52',
+                    isPassed && 'sonartra-result-rail-item-read',
                     isTopLevelActive &&
                       'bg-white/[0.028] text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.028)]',
                     isNext && 'text-white/48',
@@ -201,7 +201,7 @@ export function ResultReadingRail({
                     aria-hidden="true"
                     className={cn(
                       'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.58rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-white/[0.12] bg-[#0c1322] opacity-100',
-                      isPassed && 'border-[rgba(142,162,255,0.14)] bg-[rgba(142,162,255,0.16)]',
+                      isPassed && 'sonartra-result-rail-marker-read',
                       isTopLevelActive &&
                         'border-[rgba(194,205,255,0.28)] bg-[rgba(194,205,255,0.26)] shadow-[0_0_0_5px_rgba(142,162,255,0.055)]',
                       isUpcoming && 'border-white/[0.1] bg-white/[0.035]',
@@ -213,7 +213,7 @@ export function ResultReadingRail({
                       className={cn(
                         'pt-0.5 text-[0.63rem] font-medium tracking-[0.16em] text-white/24',
                         (isTopLevelActive || isExactTopLevelActive) && 'text-white/42',
-                        isPassed && 'text-white/32',
+                        isPassed && 'sonartra-result-rail-number-read',
                       )}
                     >
                       {String(section.order).padStart(2, '0')}
@@ -231,7 +231,7 @@ export function ResultReadingRail({
                       {isPassed ? (
                         <span
                           aria-hidden="true"
-                          className="block text-[0.54rem] font-medium uppercase tracking-[0.2em] text-[rgba(142,162,255,0.42)]"
+                          className="sonartra-result-rail-read-label block text-[0.54rem] font-medium uppercase tracking-[0.2em]"
                         >
                           Read
                         </span>
@@ -277,7 +277,7 @@ export function ResultReadingRail({
                                   : isNextDomainSubsection
                                     ? 'next'
                                     : isPassedDomainSubsection
-                                      ? 'passed'
+                                      ? 'read'
                                       : isUpcomingDomainSubsection
                                         ? 'upcoming'
                                         : 'idle'
@@ -285,7 +285,7 @@ export function ResultReadingRail({
                               className={cn(
                                 'sonartra-motion-nav-item sonartra-result-rail-item-subtle sonartra-focus-ring text-white/35 group relative block rounded-[0.78rem] px-3 py-1.5 text-[0.73rem] leading-5 tracking-[0.012em] outline-none',
                                 'hover:bg-white/[0.015] hover:text-white/56 focus-visible:text-white/78',
-                                isPassedDomainSubsection && 'bg-white/[0.01] text-white/45',
+                                isPassedDomainSubsection && 'sonartra-result-rail-item-read',
                                 isDomainSubsectionActive &&
                                   'bg-white/[0.022] text-white/72 shadow-[inset_0_1px_0_rgba(255,255,255,0.026)]',
                                 isNextDomainSubsection && 'text-white/46',
@@ -295,7 +295,7 @@ export function ResultReadingRail({
                                 aria-hidden="true"
                                 className={cn(
                                   'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.88rem] top-1/2 h-px w-3 scale-100 rounded-full bg-white/[0.08] opacity-100',
-                                  isPassedDomainSubsection && 'bg-[rgba(142,162,255,0.22)]',
+                                  isPassedDomainSubsection && 'sonartra-result-rail-marker-read',
                                   isDomainSubsectionActive && 'bg-[rgba(194,205,255,0.34)]',
                                 )}
                               />
@@ -304,7 +304,8 @@ export function ResultReadingRail({
                                   aria-hidden="true"
                                   className={cn(
                                     'h-1 w-1 rounded-full bg-white/[0.16]',
-                                    isPassedDomainSubsection && 'bg-[rgba(142,162,255,0.3)]',
+                                    isPassedDomainSubsection &&
+                                      'bg-[rgba(128,166,139,0.38)]',
                                     isDomainSubsectionActive && 'bg-[rgba(194,205,255,0.5)]',
                                   )}
                                 />

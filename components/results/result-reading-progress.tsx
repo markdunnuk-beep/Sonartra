@@ -127,7 +127,7 @@ export function ResultReadingProgress({
                     className={cn(
                       'sonartra-motion-progress block h-1.5 rounded-full',
                       isActive && 'w-5 bg-[rgba(194,205,255,0.56)]',
-                      isPassed && 'w-2.5 bg-[rgba(142,162,255,0.26)]',
+                      isPassed && 'w-2.5 bg-[rgba(128,166,139,0.34)]',
                       !isActive && !isPassed && 'w-2.5 bg-white/[0.08]',
                     )}
                   />

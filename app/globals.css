@@ -75,7 +75,7 @@ main {
 }
 
 .results-anchor-target {
-  scroll-margin-top: 6.5rem;
+  scroll-margin-top: 7.25rem;
 }
 
 .sonartra-panel {
@@ -272,6 +272,21 @@ main {
     transition-timing-function: cubic-bezier(0.22, 0.82, 0.24, 1);
   }
 
+  .sonartra-result-rail-item-read {
+    color: rgba(177, 205, 185, 0.62);
+    background: rgba(128, 166, 139, 0.025);
+  }
+
+  .sonartra-result-rail-marker.sonartra-result-rail-marker-read {
+    border-color: rgba(128, 166, 139, 0.22);
+    background-color: rgba(128, 166, 139, 0.2);
+  }
+
+  .sonartra-result-rail-number-read,
+  .sonartra-result-rail-read-label {
+    color: rgba(177, 205, 185, 0.5);
+  }
+
   .sonartra-result-rail-marker {
     transform-origin: 50% 54%;
     transition-property: opacity, transform;
@@ -287,7 +302,7 @@ main {
 
   .sonartra-result-mobile-progress-surface {
     background:
-      radial-gradient(circle at top left, rgba(142, 162, 255, 0.08), transparent 42%),
+      radial-gradient(circle at top left, rgba(128, 166, 139, 0.055), transparent 38%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.014)),
       rgba(8, 13, 24, 0.22);
     box-shadow:
@@ -640,7 +655,7 @@ main {
 
   .sonartra-report-kicker {
     @apply sonartra-type-eyebrow;
-    color: rgba(207, 218, 243, 0.44);
+    color: rgba(207, 218, 243, 0.5);
   }
 
   .sonartra-report-title {
@@ -655,7 +670,7 @@ main {
 
   .sonartra-report-body-soft {
     @apply sonartra-type-body-secondary;
-    color: rgba(207, 218, 243, 0.56);
+    color: rgba(207, 218, 243, 0.6);
   }
 
   .sonartra-report-summary {
