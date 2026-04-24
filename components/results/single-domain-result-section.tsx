@@ -216,8 +216,8 @@ export function SingleDomainResultSection({
                 items={primaryDriver.content}
                 preface="Main cause"
                 className="sonartra-single-domain-driver-primary px-6 py-6 md:px-7 md:py-7 lg:px-8 lg:py-8"
-                titleClassName="text-white/58"
-                itemClassName="text-[1.06rem] leading-8 text-white/86 md:text-[1.08rem] md:leading-9"
+                titleClassName="sonartra-single-domain-driver-primary-label"
+                itemClassName="sonartra-single-domain-driver-primary-text text-[1.08rem] leading-8 md:text-[1.18rem] md:leading-9"
               />
             ) : null}
           </div>
@@ -229,8 +229,8 @@ export function SingleDomainResultSection({
                 items={secondaryDriver.content}
                 preface="Reinforcing cause"
                 className="sonartra-single-domain-driver-secondary px-5 py-5 md:px-6 md:py-6"
-                titleClassName="text-white/42"
-                itemClassName="text-white/78"
+                titleClassName="sonartra-single-domain-driver-secondary-label"
+                itemClassName="text-white/70"
               />
             ) : null}
 
@@ -242,7 +242,7 @@ export function SingleDomainResultSection({
                   preface="Supporting layer"
                   className="sonartra-single-domain-driver-supporting"
                   titleClassName="text-white/28"
-                  itemClassName="text-white/60"
+                  itemClassName="text-white/58"
                 />
               ) : null}
 
@@ -286,21 +286,23 @@ export function SingleDomainResultSection({
           />
         </div>
 
-        <div className="sonartra-single-domain-application-grid">
-          {section.focusItems.map((item) => (
-            <ApplicationGroup
-              key={item.label}
-              title={item.label}
-              items={item.content}
-              className={
-                item.label === 'Notice'
-                  ? 'sonartra-single-domain-application-notice'
-                  : item.label === 'Develop'
-                    ? 'sonartra-single-domain-application-develop'
-                    : 'sonartra-single-domain-application-rely'
-              }
-            />
-          ))}
+        <div className="sonartra-single-domain-application-frame">
+          <div className="sonartra-single-domain-application-grid">
+            {section.focusItems.map((item) => (
+              <ApplicationGroup
+                key={item.label}
+                title={item.label}
+                items={item.content}
+                className={
+                  item.label === 'Notice'
+                    ? 'sonartra-single-domain-application-notice'
+                    : item.label === 'Develop'
+                      ? 'sonartra-single-domain-application-develop'
+                      : 'sonartra-single-domain-application-rely'
+                }
+              />
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -309,9 +311,9 @@ export function SingleDomainResultSection({
   const [headline, ...body] = section.paragraphs;
   const sectionClasses = {
     intro: 'space-y-7 md:space-y-8',
-    pair: 'sonartra-single-domain-section-pair max-w-[52rem] space-y-4 px-0 py-0',
+    pair: 'sonartra-single-domain-section-pair max-w-[58rem] space-y-5 px-0 py-0',
     limitation:
-      'sonartra-single-domain-section-limitation space-y-6 px-0 py-0',
+      'sonartra-single-domain-section-limitation space-y-6 px-5 py-6 md:px-7 md:py-7',
   }[section.key];
 
   return (
@@ -332,8 +334,8 @@ export function SingleDomainResultSection({
             section.key === 'intro'
               ? 'max-w-[12ch] text-[3rem] font-semibold tracking-[-0.055em] text-white md:text-[4.2rem]'
               : section.key === 'pair'
-                ? 'max-w-[16ch] text-[1.84rem] font-semibold tracking-[-0.04em] text-white md:text-[2.18rem]'
-              : 'text-[2.1rem] font-semibold tracking-[-0.045em] text-white md:text-[2.7rem]'
+                ? 'max-w-[18ch] text-[1.95rem] font-semibold tracking-[-0.04em] text-white md:text-[2.35rem]'
+              : 'text-[2.35rem] font-semibold leading-[1.02] tracking-[-0.048em] text-white md:text-[3.05rem]'
           }
         >
           {headline}
@@ -348,9 +350,9 @@ export function SingleDomainResultSection({
       <div
         className={
           section.key === 'pair'
-            ? 'space-y-3 pt-1'
+            ? 'sonartra-single-domain-pair-body space-y-3 pt-1'
             : section.key === 'limitation'
-              ? 'space-y-4 border-t border-white/[0.055] pt-6'
+              ? 'sonartra-single-domain-limitation-body space-y-4 border-t border-white/[0.07] pt-6'
               : 'border-white/7 space-y-4 border-t pt-6'
         }
       >
@@ -360,14 +362,14 @@ export function SingleDomainResultSection({
             className={
               index === 0
                 ? section.key === 'pair'
-                  ? 'sonartra-report-summary max-w-[48rem] text-[0.98rem] leading-8 text-white/78'
+                  ? 'sonartra-report-summary max-w-[48rem] text-[1.02rem] leading-8 text-white/82'
                   : section.key === 'limitation'
-                    ? 'sonartra-report-summary max-w-[52rem] text-white/84'
+                    ? 'sonartra-report-summary max-w-[52rem] text-[1.06rem] leading-8 text-white/88 md:text-[1.12rem] md:leading-9'
                     : 'sonartra-report-summary max-w-[54rem] text-white/80'
                 : section.key === 'pair'
-                  ? 'sonartra-report-body-soft max-w-[48rem] text-white/58'
+                  ? 'sonartra-report-body-soft max-w-[48rem] text-white/66'
                   : section.key === 'limitation'
-                    ? 'sonartra-report-body-soft max-w-[52rem] text-white/74'
+                    ? 'sonartra-report-body-soft max-w-[52rem] text-white/72'
                     : 'sonartra-report-body-soft text-white/74 max-w-[56rem]'
             }
           >
