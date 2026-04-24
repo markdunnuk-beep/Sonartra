@@ -146,7 +146,7 @@ export function SingleDomainResultSection({
             <SectionEyebrow label={section.title} />
             <h2
               id={headingId}
-              className="sonartra-type-display max-w-[9ch] text-[3.45rem] tracking-[-0.068em] md:text-[5.95rem] lg:text-[6.45rem]"
+              className="sonartra-type-display max-w-[9.4ch] text-[clamp(3.15rem,15vw,4.45rem)] leading-[0.92] tracking-[-0.068em] md:text-[clamp(5.45rem,9vw,6.45rem)]"
             >
               {headline}
             </h2>
@@ -164,11 +164,11 @@ export function SingleDomainResultSection({
           ) : null}
 
           {supporting.length > 0 ? (
-            <div className="grid gap-5 border-t border-white/[0.065] pt-7 sm:grid-cols-2 sm:gap-6 md:pt-8">
+            <div className="sonartra-single-domain-hero-support grid gap-5 border-t border-white/[0.075] pt-7 sm:grid-cols-2 sm:gap-6 md:pt-8">
               {supporting.map((paragraph, index) => (
                 <p
                   key={`${section.key}-${index + 1}`}
-                  className="sonartra-report-body-soft max-w-[34rem] text-white/62"
+                  className="sonartra-report-body-soft max-w-[34rem]"
                 >
                   {paragraph}
                 </p>
