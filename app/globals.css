@@ -674,7 +674,7 @@ main {
   }
 
   .sonartra-report-summary {
-    @apply text-[1rem] font-normal leading-8 tracking-[0];
+    @apply text-[1rem] font-normal leading-8 tracking-[0] md:text-[1.06rem] md:leading-9;
     color: rgba(228, 236, 255, 0.74);
   }
 
@@ -682,15 +682,119 @@ main {
     @apply max-w-[68ch];
   }
 
+  .sonartra-report-page-frame {
+    @apply space-y-8 md:space-y-10;
+  }
+
+  .sonartra-report-shell {
+    position: relative;
+  }
+
+  .sonartra-report-shell-layout {
+    position: relative;
+    width: 100%;
+  }
+
+  .sonartra-report-body-flow {
+    display: grid;
+    gap: 2.9rem;
+    min-width: 0;
+    max-width: 74rem;
+  }
+
+  .sonartra-report-shell-rail {
+    min-width: 0;
+  }
+
+  .sonartra-report-reading-measure {
+    max-width: 72ch;
+  }
+
+  .sonartra-report-header {
+    @apply space-y-6 md:space-y-7;
+  }
+
+  .sonartra-report-header-stack {
+    @apply max-w-[72ch] space-y-5 md:space-y-6;
+  }
+
+  .sonartra-report-title-stack {
+    @apply space-y-3.5 md:space-y-4;
+  }
+
+  .sonartra-report-page-title {
+    @apply max-w-[17ch] text-[clamp(2.35rem,8vw,3.3rem)] font-semibold leading-[1.02] tracking-[-0.026em] text-white md:text-[clamp(3.05rem,5vw,4rem)] lg:max-w-[18ch];
+  }
+
+  .sonartra-report-header-lead {
+    @apply max-w-[60ch] text-[0.98rem] leading-7 md:text-[1.04rem] md:leading-8;
+    color: rgba(224, 233, 255, 0.68);
+  }
+
+  .sonartra-report-header-content {
+    @apply max-w-[72ch];
+  }
+
+  .sonartra-report-chapter {
+    @apply space-y-6 md:space-y-7;
+  }
+
+  .sonartra-report-chapter-header {
+    @apply max-w-[72ch] space-y-3.5 md:space-y-4;
+  }
+
+  .sonartra-report-chapter-title {
+    @apply max-w-[18ch] text-[clamp(1.95rem,7vw,2.42rem)] font-semibold leading-[1.08] tracking-[-0.024em] text-white md:text-[clamp(2.35rem,4vw,3rem)];
+  }
+
+  .sonartra-report-chapter-feature .sonartra-report-chapter-title {
+    @apply text-[clamp(2.65rem,10vw,4rem)] leading-[0.98] tracking-[-0.036em] md:text-[clamp(3.35rem,6vw,4.95rem)];
+  }
+
+  .sonartra-report-chapter-lead {
+    @apply max-w-[62ch];
+  }
+
+  .sonartra-report-chapter-content {
+    min-width: 0;
+  }
+
   .sonartra-report-hero {
     background:
-      radial-gradient(circle at top left, rgba(142, 162, 255, 0.16), transparent 34%),
-      radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.05), transparent 24%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.014)),
-      rgba(9, 16, 29, 0.74);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.042), rgba(255, 255, 255, 0.012)),
+      rgba(9, 16, 29, 0.66);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 30px 74px rgba(0, 0, 0, 0.18);
+      inset 0 1px 0 rgba(255, 255, 255, 0.045),
+      0 18px 46px rgba(0, 0, 0, 0.14);
+  }
+
+  @media (min-width: 1280px) {
+    .sonartra-report-shell-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 74rem) minmax(10rem, 11.5rem);
+      gap: 2rem;
+      max-width: 92rem;
+      margin-inline: auto;
+      align-items: start;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .sonartra-report-shell-layout {
+      grid-template-columns: minmax(0, 76rem) minmax(10rem, 11.5rem);
+      max-width: 94rem;
+      gap: 2.5rem;
+    }
+
+    .sonartra-report-body-flow {
+      max-width: 76rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .sonartra-report-body-flow {
+      gap: 4rem;
+    }
   }
 
   .sonartra-single-domain-report {
@@ -734,8 +838,7 @@ main {
   }
 
   .sonartra-single-domain-report-flow {
-    display: grid;
-    gap: 2.5rem;
+    gap: 2.9rem;
   }
 
   .sonartra-single-domain-report-flow > #hero {
@@ -753,7 +856,7 @@ main {
 
   @media (min-width: 768px) {
     .sonartra-single-domain-report-flow {
-      gap: 3.5rem;
+      gap: 4rem;
     }
 
     .sonartra-single-domain-report-flow > #hero {
@@ -780,15 +883,13 @@ main {
 
   .sonartra-single-domain-intro-copy-grid {
     display: grid;
-    gap: 1rem;
+    gap: 1.1rem;
+    max-width: 72ch;
   }
 
   @media (min-width: 1280px) {
     .sonartra-single-domain-intro-copy-grid {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      column-gap: 2rem;
-      row-gap: 1rem;
-      align-items: start;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 

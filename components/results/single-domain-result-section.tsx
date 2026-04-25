@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 
+import { ReportChapter } from '@/components/results/report-chapter';
 import { ResultSectionIntent } from '@/components/results/result-section-intent';
 import type { ComposedNarrativeSection } from '@/lib/assessment-language/single-domain-composer';
 import type { ResultReadingSectionsConfig } from '@/lib/results/result-reading-sections';
@@ -14,10 +15,6 @@ function getRevealStyle(step = 0): CSSProperties {
   return {
     '--sonartra-motion-delay': `${step * 60}ms`,
   } as CSSProperties;
-}
-
-function SectionEyebrow({ label }: { label: string }) {
-  return <p className="sonartra-report-kicker">{label}</p>;
 }
 
 function FocusGroup({
@@ -135,48 +132,43 @@ export function SingleDomainResultSection({
     const [headline, summary, ...supporting] = section.paragraphs;
 
     return (
-      <section
+      <ReportChapter
         id={section.key}
-        aria-labelledby={headingId}
-        className="results-anchor-target sonartra-motion-reveal sonartra-single-domain-section sonartra-report-hero rounded-[2.5rem] border border-white/[0.07] px-7 py-12 sm:px-9 sm:py-13 md:px-14 md:py-[4.35rem] lg:px-[4.5rem] lg:py-[5.1rem]"
+        titleId={headingId}
+        eyebrow={section.title}
+        title={headline}
+        lead={
+          <ResultSectionIntent
+            sectionId={section.key}
+            sectionsConfig={sectionsConfig}
+            className="max-w-[46ch]"
+          />
+        }
+        variant="feature"
+        className="sonartra-report-hero rounded-[1.5rem] border border-white/[0.07] px-6 py-10 sm:px-8 sm:py-12 md:px-11 md:py-14 lg:px-14 lg:py-16"
+        titleClassName="max-w-[13ch]"
+        contentClassName="space-y-7 md:space-y-8"
         style={getRevealStyle(step)}
       >
-        <div className="space-y-7 md:space-y-9">
-          <div className="space-y-4 md:space-y-6">
-            <SectionEyebrow label={section.title} />
-            <h2
-              id={headingId}
-              className="sonartra-type-display max-w-[9.4ch] text-[clamp(3.15rem,15vw,4.45rem)] leading-[0.92] tracking-[-0.068em] md:text-[clamp(5.45rem,9vw,6.45rem)]"
-            >
-              {headline}
-            </h2>
-            <ResultSectionIntent
-              sectionId={section.key}
-              sectionsConfig={sectionsConfig}
-              className="max-w-[46ch]"
-            />
+        {summary ? (
+          <p className="sonartra-report-summary sonartra-report-reading-measure text-white/85">
+            {summary}
+          </p>
+        ) : null}
+
+        {supporting.length > 0 ? (
+          <div className="sonartra-single-domain-hero-support grid gap-5 border-t border-white/[0.075] pt-7 md:pt-8">
+            {supporting.map((paragraph, index) => (
+              <p
+                key={`${section.key}-${index + 1}`}
+                className="sonartra-report-body-soft max-w-[68ch]"
+              >
+                {paragraph}
+              </p>
+            ))}
           </div>
-
-          {summary ? (
-            <p className="sonartra-report-summary max-w-[54rem] text-white/85 text-[1.08rem] leading-8 md:text-[1.28rem] md:leading-10">
-              {summary}
-            </p>
-          ) : null}
-
-          {supporting.length > 0 ? (
-            <div className="sonartra-single-domain-hero-support grid gap-5 border-t border-white/[0.075] pt-7 sm:grid-cols-2 sm:gap-6 md:pt-8">
-              {supporting.map((paragraph, index) => (
-                <p
-                  key={`${section.key}-${index + 1}`}
-                  className="sonartra-report-body-soft max-w-[34rem]"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </section>
+        ) : null}
+      </ReportChapter>
     );
   }
 
@@ -187,27 +179,21 @@ export function SingleDomainResultSection({
     const rangeLimitation = section.focusItems.find((item) => item.label === 'Range limitation');
 
     return (
-      <section
+      <ReportChapter
         id={section.key}
-        aria-labelledby={headingId}
-        className="results-anchor-target sonartra-motion-reveal sonartra-single-domain-section space-y-8 md:space-y-10"
-        style={getRevealStyle(step)}
-      >
-        <div className="space-y-4">
-          <SectionEyebrow label="Drivers" />
-          <h2
-            id={headingId}
-            className="text-[2.08rem] font-semibold tracking-[-0.045em] text-white md:text-[2.7rem]"
-          >
-            What is creating this pattern
-          </h2>
+        titleId={headingId}
+        eyebrow="Drivers"
+        title="What is creating this pattern"
+        lead={
           <ResultSectionIntent
             sectionId={section.key}
             sectionsConfig={sectionsConfig}
             className="max-w-[54ch]"
           />
-        </div>
-
+        }
+        className="space-y-8 md:space-y-10"
+        style={getRevealStyle(step)}
+      >
         <div className="sonartra-single-domain-driver-layout">
           <div className="sonartra-single-domain-driver-main">
             {primaryDriver ? (
@@ -259,33 +245,27 @@ export function SingleDomainResultSection({
             </div>
           </div>
         </div>
-      </section>
+      </ReportChapter>
     );
   }
 
   if (section.key === 'application') {
     return (
-      <section
+      <ReportChapter
         id={section.key}
-        aria-labelledby={headingId}
-        className="results-anchor-target sonartra-motion-reveal sonartra-single-domain-section sonartra-single-domain-section-application space-y-7 md:space-y-8"
-        style={getRevealStyle(step)}
-      >
-        <div className="space-y-3.5">
-          <SectionEyebrow label="Application" />
-          <h2
-            id={headingId}
-            className="text-[2.02rem] font-semibold tracking-[-0.045em] text-white md:text-[2.45rem]"
-          >
-            What to rely on, notice, and develop
-          </h2>
+        titleId={headingId}
+        eyebrow="Application"
+        title="What to rely on, notice, and develop"
+        lead={
           <ResultSectionIntent
             sectionId={section.key}
             sectionsConfig={sectionsConfig}
             className="max-w-[54ch]"
           />
-        </div>
-
+        }
+        className="sonartra-single-domain-section-application space-y-7 md:space-y-8"
+        style={getRevealStyle(step)}
+      >
         <div className="sonartra-single-domain-application-frame">
           <div className="sonartra-single-domain-application-grid">
             {section.focusItems.map((item) => (
@@ -304,7 +284,7 @@ export function SingleDomainResultSection({
             ))}
           </div>
         </div>
-      </section>
+      </ReportChapter>
     );
   }
 
@@ -317,36 +297,23 @@ export function SingleDomainResultSection({
   }[section.key];
 
   return (
-    <section
+    <ReportChapter
       id={section.key}
-      aria-labelledby={headingId}
-      className={[
-        'results-anchor-target sonartra-motion-reveal sonartra-single-domain-section',
-        sectionClasses,
-      ].join(' ')}
-      style={getRevealStyle(step)}
-    >
-      <div className="space-y-4">
-        <SectionEyebrow label={section.title} />
-        <h2
-          id={headingId}
-          className={
-            section.key === 'intro'
-              ? 'max-w-[12ch] text-[3rem] font-semibold tracking-[-0.055em] text-white md:text-[4.2rem]'
-              : section.key === 'pair'
-                ? 'max-w-[18ch] text-[1.95rem] font-semibold tracking-[-0.04em] text-white md:text-[2.35rem]'
-              : 'text-[2.35rem] font-semibold leading-[1.02] tracking-[-0.048em] text-white md:text-[3.05rem]'
-          }
-        >
-          {headline}
-        </h2>
+      titleId={headingId}
+      eyebrow={section.title}
+      title={headline}
+      lead={
         <ResultSectionIntent
           sectionId={section.key}
           sectionsConfig={sectionsConfig}
           className="max-w-[54ch]"
         />
-      </div>
-
+      }
+      className={[
+        sectionClasses,
+      ].join(' ')}
+      style={getRevealStyle(step)}
+    >
       <div
         className={
           section.key === 'pair'
@@ -377,6 +344,6 @@ export function SingleDomainResultSection({
           </p>
         ))}
       </div>
-    </section>
+    </ReportChapter>
   );
 }
