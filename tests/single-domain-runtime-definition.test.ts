@@ -544,8 +544,11 @@ test('missing language datasets fail readiness explicitly where required', async
 
   assert.equal(readiness.isReady, false);
   assert.ok(readiness.issues.some((issue) => issue.code === 'domain_framing_count_mismatch'));
-  assert.ok(readiness.issues.some((issue) => issue.code === 'hero_pairs_count_mismatch'));
   assert.ok(readiness.issues.some((issue) => issue.code === 'signal_chapters_count_mismatch'));
+  assert.ok(readiness.issues.some((issue) => issue.code === 'application_statements_count_mismatch'));
+  assert.equal(readiness.issues.some((issue) => issue.code === 'hero_pairs_count_mismatch'), false);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'balancing_sections_count_mismatch'), false);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'pair_summaries_count_mismatch'), false);
 });
 
 test('readiness bridge exposes explicit issues, counts, and expectations', async () => {

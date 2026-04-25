@@ -190,7 +190,7 @@ test('draft preview input adapts imported draft bundle rows into the locked prev
         pair_key: 'directive_structured',
         hero_headline: 'Firm structured delivery',
         hero_subheadline: 'Fast and orderly',
-        hero_opening: 'The pattern moves quickly and organizes quickly.',
+        hero_opening: 'The Directive and Structured pattern moves quickly and organises quickly.',
         hero_strength_paragraph: 'It converts direction into visible structure.',
         hero_tension_paragraph: 'It can narrow the space for reconsideration.',
         hero_close_paragraph: 'The result is disciplined execution.',
@@ -309,5 +309,135 @@ test('draft preview input adapts imported draft bundle rows into the locked prev
 
   const report = composeSingleDomainReport(preview.input);
   assert.match(report.sections[1]?.paragraphs.join(' ') ?? '', /Firm structured delivery/);
-  assert.match(report.sections[4]?.paragraphs.join(' ') ?? '', /Reflective range can arrive too late/);
+  assert.match(
+    report.sections[4]?.paragraphs.join(' ') ?? '',
+    /When Directive dominates without enough Reflective/,
+  );
+});
+
+test('draft preview uses signal-level fallback for unauthored pairs without reusing another pair', () => {
+  const assessment = createAssessment({
+    DOMAIN_FRAMING: [
+      {
+        domain_key: 'leadership-style',
+        section_title: 'Leadership style',
+        intro_paragraph: 'This domain measures day-to-day leadership stance.',
+        meaning_paragraph: 'It focuses on how direction and support are expressed.',
+        bridge_to_signals: 'Read strong signals as defaults and weak signals as range limits.',
+        blueprint_context_line: 'Use the six-section flow to read the result.',
+      },
+    ],
+    HERO_PAIRS: [
+      {
+        pair_key: 'directive_structured',
+        hero_headline: 'Firm structured delivery',
+        hero_subheadline: 'Fast and orderly',
+        hero_opening: 'The Directive and Structured pattern moves quickly and organises quickly.',
+        hero_strength_paragraph: 'It converts direction into visible structure.',
+        hero_tension_paragraph: 'It can narrow the space for reconsideration.',
+        hero_close_paragraph: 'The result is disciplined execution.',
+      },
+    ],
+    SIGNAL_CHAPTERS: [
+      {
+        signal_key: 'directive',
+        position_primary_label: 'Primary driver',
+        position_secondary_label: 'Secondary driver',
+        position_supporting_label: 'Supporting context',
+        position_underplayed_label: 'Range limitation',
+        chapter_intro_primary: 'Directive pace sets the pattern.',
+        chapter_intro_secondary: '',
+        chapter_intro_supporting: '',
+        chapter_intro_underplayed: '',
+        chapter_how_it_shows_up: '',
+        chapter_value_outcome: '',
+        chapter_value_team_effect: '',
+        chapter_risk_behaviour: '',
+        chapter_risk_impact: '',
+        chapter_development: '',
+      },
+      {
+        signal_key: 'structured',
+        position_primary_label: 'Primary driver',
+        position_secondary_label: 'Secondary driver',
+        position_supporting_label: 'Supporting context',
+        position_underplayed_label: 'Range limitation',
+        chapter_intro_primary: '',
+        chapter_intro_secondary: 'Structured order reinforces the pattern.',
+        chapter_intro_supporting: '',
+        chapter_intro_underplayed: '',
+        chapter_how_it_shows_up: '',
+        chapter_value_outcome: '',
+        chapter_value_team_effect: '',
+        chapter_risk_behaviour: '',
+        chapter_risk_impact: '',
+        chapter_development: '',
+      },
+      {
+        signal_key: 'reflective',
+        position_primary_label: 'Primary driver',
+        position_secondary_label: 'Secondary driver',
+        position_supporting_label: 'Supporting context',
+        position_underplayed_label: 'Range limitation',
+        chapter_intro_primary: '',
+        chapter_intro_secondary: '',
+        chapter_intro_supporting: '',
+        chapter_intro_underplayed: 'Reflective range is materially underplayed.',
+        chapter_how_it_shows_up: '',
+        chapter_value_outcome: '',
+        chapter_value_team_effect: '',
+        chapter_risk_behaviour: '',
+        chapter_risk_impact: '',
+        chapter_development: '',
+      },
+    ],
+    BALANCING_SECTIONS: [],
+    PAIR_SUMMARIES: [
+      {
+        pair_key: 'directive_structured',
+        pair_section_title: 'Directive + Structured',
+        pair_headline: 'Directive + Structured',
+        pair_opening_paragraph: 'The Directive and Structured pair decides early and codifies quickly.',
+        pair_strength_paragraph: 'It combines speed with order.',
+        pair_tension_paragraph: 'It can harden too soon.',
+        pair_close_paragraph: 'The combined pattern favors visible progress.',
+      },
+    ],
+    APPLICATION_STATEMENTS: [
+      {
+        signal_key: 'directive',
+        strength_statement_1: 'Use your pace to move work forward.',
+        strength_statement_2: '',
+        watchout_statement_1: '',
+        watchout_statement_2: '',
+        development_statement_1: '',
+        development_statement_2: '',
+      },
+      {
+        signal_key: 'reflective',
+        strength_statement_1: '',
+        strength_statement_2: '',
+        watchout_statement_1: 'Notice when urgency is outrunning reflection.',
+        watchout_statement_2: '',
+        development_statement_1: 'Build a pause before the final call.',
+        development_statement_2: '',
+      },
+    ],
+  });
+
+  const preview = buildSingleDomainDraftPreviewInput(assessment, 'directive_reflective');
+
+  assert.equal(preview.success, true);
+  if (!preview.success) {
+    return;
+  }
+
+  const report = composeSingleDomainReport(preview.input);
+  const pairText = report.sections.find((section) => section.key === 'pair')?.paragraphs.join(' ') ?? '';
+  const limitationText = report.sections.find((section) => section.key === 'limitation')?.paragraphs.join(' ') ?? '';
+
+  assert.match(pairText, /The combination of Directive and Reflective creates a pattern where/);
+  assert.doesNotMatch(pairText, /Directive \+ Structured/);
+  assert.match(limitationText, /When Directive dominates without enough Reflective/);
+  assert.match(limitationText, /Reflective range is materially underplayed/);
 });

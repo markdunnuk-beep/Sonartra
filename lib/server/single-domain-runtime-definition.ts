@@ -740,12 +740,12 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.HERO_PAIRS !== expectedLanguageRowCounts.HERO_PAIRS) {
+  if (languageRowCounts.HERO_PAIRS > expectedLanguageRowCounts.HERO_PAIRS) {
     issues.push(
       createIssue(
         'hero_pairs_count_mismatch',
         'language',
-        `HERO_PAIRS must contain exactly ${expectedLanguageRowCounts.HERO_PAIRS} row${expectedLanguageRowCounts.HERO_PAIRS === 1 ? '' : 's'}.`,
+        `HERO_PAIRS must contain no more than ${expectedLanguageRowCounts.HERO_PAIRS} signal-derived pair row${expectedLanguageRowCounts.HERO_PAIRS === 1 ? '' : 's'}. Missing pairs use runtime fallback language.`,
       ),
     );
   }
@@ -758,21 +758,21 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.BALANCING_SECTIONS !== expectedLanguageRowCounts.BALANCING_SECTIONS) {
+  if (languageRowCounts.BALANCING_SECTIONS > expectedLanguageRowCounts.BALANCING_SECTIONS) {
     issues.push(
       createIssue(
         'balancing_sections_count_mismatch',
         'language',
-        `BALANCING_SECTIONS must contain exactly ${expectedLanguageRowCounts.BALANCING_SECTIONS} row${expectedLanguageRowCounts.BALANCING_SECTIONS === 1 ? '' : 's'}.`,
+        `BALANCING_SECTIONS must contain no more than ${expectedLanguageRowCounts.BALANCING_SECTIONS} signal-derived pair row${expectedLanguageRowCounts.BALANCING_SECTIONS === 1 ? '' : 's'}. Missing pairs use runtime fallback language.`,
       ),
     );
   }
-  if (languageRowCounts.PAIR_SUMMARIES !== expectedLanguageRowCounts.PAIR_SUMMARIES) {
+  if (languageRowCounts.PAIR_SUMMARIES > expectedLanguageRowCounts.PAIR_SUMMARIES) {
     issues.push(
       createIssue(
         'pair_summaries_count_mismatch',
         'language',
-        `PAIR_SUMMARIES must contain exactly ${expectedLanguageRowCounts.PAIR_SUMMARIES} row${expectedLanguageRowCounts.PAIR_SUMMARIES === 1 ? '' : 's'}.`,
+        `PAIR_SUMMARIES must contain no more than ${expectedLanguageRowCounts.PAIR_SUMMARIES} signal-derived pair row${expectedLanguageRowCounts.PAIR_SUMMARIES === 1 ? '' : 's'}. Missing pairs use runtime fallback language.`,
       ),
     );
   }

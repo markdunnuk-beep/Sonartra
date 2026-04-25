@@ -230,6 +230,99 @@ function toIntro(row: DomainFramingRow): SingleDomainResultIntro {
   };
 }
 
+function normalizeText(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function compactText(value: string): string {
+  return normalizeText(value).replace(/[^a-z0-9]+/g, ' ');
+}
+
+function hasText(value: string | null | undefined): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function firstText(...values: Array<string | null | undefined>): string {
+  return values.find(hasText)?.trim() ?? '';
+}
+
+function getSignalByKey(
+  signals: readonly SingleDomainResultSignal[],
+  signalKey: string,
+): SingleDomainResultSignal | null {
+  return signals.find((signal) => signal.signal_key === signalKey) ?? null;
+}
+
+function getPairSignals(params: {
+  pairKey: string;
+  signals: readonly SingleDomainResultSignal[];
+}): {
+  primary: SingleDomainResultSignal;
+  secondary: SingleDomainResultSignal;
+  weaker: SingleDomainResultSignal;
+} {
+  const [leftSignalKey, rightSignalKey] = params.pairKey.split('_');
+  const sortedSignals = [...params.signals].sort((left, right) => left.rank - right.rank);
+  const pairSignals = [leftSignalKey, rightSignalKey]
+    .map((signalKey) => signalKey ? getSignalByKey(params.signals, signalKey) : null)
+    .filter((signal): signal is SingleDomainResultSignal => Boolean(signal))
+    .sort((left, right) => left.rank - right.rank);
+  const primary =
+    pairSignals[0]
+    ?? sortedSignals[0]
+    ?? (leftSignalKey ? getSignalByKey(params.signals, leftSignalKey) : null);
+  const secondary =
+    pairSignals.find((signal) => signal.signal_key !== primary?.signal_key)
+    ?? sortedSignals.find((signal) => signal.signal_key !== primary?.signal_key)
+    ?? (rightSignalKey ? getSignalByKey(params.signals, rightSignalKey) : null)
+    ?? sortedSignals.find((signal) => signal.signal_key !== primary?.signal_key);
+  const weaker =
+    sortedSignals.find((signal) => signal.position === 'underplayed')
+    ?? sortedSignals[sortedSignals.length - 1];
+
+  if (!primary || !secondary || !weaker) {
+    throw new SingleDomainCompletionError(
+      `Unable to build fallback language for pair "${params.pairKey}".`,
+    );
+  }
+
+  return { primary, secondary, weaker };
+}
+
+function pairLanguageReferencesSignals(params: {
+  pairKey: string;
+  rowText: string;
+  primary: SingleDomainResultSignal;
+  secondary: SingleDomainResultSignal;
+}): boolean {
+  const normalized = compactText(params.rowText);
+  const pairKeyToken = compactText(params.pairKey);
+  const reversedPairKeyToken = compactText(params.pairKey.split('_').reverse().join('_'));
+  const primaryTokens = [
+    params.primary.signal_key,
+    params.primary.signal_label,
+  ].map(compactText).filter(Boolean);
+  const secondaryTokens = [
+    params.secondary.signal_key,
+    params.secondary.signal_label,
+  ].map(compactText).filter(Boolean);
+
+  if (normalized.includes(pairKeyToken) || normalized.includes(reversedPairKeyToken)) {
+    return true;
+  }
+
+  return primaryTokens.some((token) => normalized.includes(token))
+    && secondaryTokens.some((token) => normalized.includes(token));
+}
+
+function warnPairFallback(section: 'hero' | 'pair' | 'limitation', pairKey: string): void {
+  if (process.env.SONARTRA_DEBUG_SINGLE_DOMAIN_FALLBACK !== 'true') {
+    return;
+  }
+
+  console.warn(`[single-domain] ${section} fallback language used for pair_key="${pairKey}".`);
+}
+
 function toHero(row: HeroPairsRow, pairKey: string): SingleDomainResultHero {
   return {
     pair_key: pairKey,
@@ -239,6 +332,33 @@ function toHero(row: HeroPairsRow, pairKey: string): SingleDomainResultHero {
     hero_strength_paragraph: row.hero_strength_paragraph,
     hero_tension_paragraph: row.hero_tension_paragraph,
     hero_close_paragraph: row.hero_close_paragraph,
+  };
+}
+
+function toHeroFallback(params: {
+  pairKey: string;
+  primary: SingleDomainResultSignal;
+  secondary: SingleDomainResultSignal;
+}): SingleDomainResultHero {
+  warnPairFallback('hero', params.pairKey);
+
+  return {
+    pair_key: params.pairKey,
+    hero_headline: `${params.primary.signal_label} and ${params.secondary.signal_label}`,
+    hero_subheadline: `A result led by ${params.primary.signal_label} with ${params.secondary.signal_label} close behind.`,
+    hero_opening: `This result is led by ${params.primary.signal_label}, with ${params.secondary.signal_label} providing the strongest secondary signal.`,
+    hero_strength_paragraph: firstText(
+      params.primary.chapter_intro,
+      params.primary.chapter_how_it_shows_up,
+      params.primary.chapter_value_outcome,
+    ),
+    hero_tension_paragraph: firstText(
+      params.secondary.chapter_risk_impact,
+      params.secondary.chapter_risk_behaviour,
+      params.secondary.chapter_development,
+      params.secondary.chapter_intro,
+    ),
+    hero_close_paragraph: `Read this as a controlled signal-level synthesis, not as pair-specific authored language.`,
   };
 }
 
@@ -258,6 +378,40 @@ function toBalancing(row: BalancingSectionsRow, pairKey: string): SingleDomainRe
   };
 }
 
+function toBalancingFallback(params: {
+  pairKey: string;
+  primary: SingleDomainResultSignal;
+  weaker: SingleDomainResultSignal;
+}): SingleDomainResultBalancing {
+  warnPairFallback('limitation', params.pairKey);
+
+  const primaryLimitation = firstText(
+    params.primary.chapter_risk_impact,
+    params.primary.chapter_risk_behaviour,
+    params.primary.chapter_development,
+    params.primary.chapter_intro,
+  );
+  const weakerTension = firstText(
+    params.weaker.chapter_risk_impact,
+    params.weaker.chapter_development,
+    params.weaker.chapter_intro,
+  );
+
+  return {
+    pair_key: params.pairKey,
+    balancing_section_title: `When ${params.primary.signal_label} needs more ${params.weaker.signal_label}`,
+    current_pattern_paragraph: `When ${params.primary.signal_label} dominates without enough ${params.weaker.signal_label}, the pattern may become narrower than the situation requires.`,
+    practical_meaning_paragraph: primaryLimitation,
+    system_risk_paragraph: weakerTension,
+    rebalance_intro: `${params.weaker.signal_key}: ${weakerTension}`,
+    rebalance_actions: Object.freeze([
+      `Use ${params.weaker.signal_label} as an explicit check before the pattern hardens.`,
+      primaryLimitation,
+      weakerTension,
+    ]),
+  };
+}
+
 function toPairSummary(row: PairSummariesRow, pairKey: string): SingleDomainResultPairSummary {
   return {
     pair_key: pairKey,
@@ -268,6 +422,103 @@ function toPairSummary(row: PairSummariesRow, pairKey: string): SingleDomainResu
     pair_tension_paragraph: row.pair_tension_paragraph,
     pair_close_paragraph: row.pair_close_paragraph,
   };
+}
+
+function toPairSummaryFallback(params: {
+  pairKey: string;
+  primary: SingleDomainResultSignal;
+  secondary: SingleDomainResultSignal;
+}): SingleDomainResultPairSummary {
+  warnPairFallback('pair', params.pairKey);
+
+  const primarySummary = firstText(
+    params.primary.chapter_intro,
+    params.primary.chapter_how_it_shows_up,
+    params.primary.chapter_value_outcome,
+  );
+  const secondarySummary = firstText(
+    params.secondary.chapter_intro,
+    params.secondary.chapter_how_it_shows_up,
+    params.secondary.chapter_value_outcome,
+  );
+
+  return {
+    pair_key: params.pairKey,
+    pair_section_title: `${params.primary.signal_label} and ${params.secondary.signal_label}`,
+    pair_headline: `${params.primary.signal_label} and ${params.secondary.signal_label}`,
+    pair_opening_paragraph: `The combination of ${params.primary.signal_label} and ${params.secondary.signal_label} creates a pattern where the strongest signal sets the main emphasis and the second signal shapes how that emphasis is expressed.`,
+    pair_strength_paragraph: primarySummary,
+    pair_tension_paragraph: secondarySummary,
+    pair_close_paragraph: `This is a signal-level synthesis because no pair-specific authored language exists for ${params.pairKey}.`,
+  };
+}
+
+function getSpecificHeroRow(params: {
+  row: HeroPairsRow | undefined;
+  pairKey: string;
+  primary: SingleDomainResultSignal;
+  secondary: SingleDomainResultSignal;
+}): HeroPairsRow | null {
+  if (!params.row) {
+    return null;
+  }
+
+  const rowText = [
+    params.row.hero_headline,
+    params.row.hero_subheadline,
+    params.row.hero_opening,
+    params.row.hero_strength_paragraph,
+    params.row.hero_tension_paragraph,
+    params.row.hero_close_paragraph,
+  ].join(' ');
+
+  return pairLanguageReferencesSignals({ ...params, rowText }) ? params.row : null;
+}
+
+function getSpecificBalancingRow(params: {
+  row: BalancingSectionsRow | undefined;
+  pairKey: string;
+  primary: SingleDomainResultSignal;
+  secondary: SingleDomainResultSignal;
+}): BalancingSectionsRow | null {
+  if (!params.row) {
+    return null;
+  }
+
+  const rowText = [
+    params.row.balancing_section_title,
+    params.row.current_pattern_paragraph,
+    params.row.practical_meaning_paragraph,
+    params.row.system_risk_paragraph,
+    params.row.rebalance_intro,
+    params.row.rebalance_action_1,
+    params.row.rebalance_action_2,
+    params.row.rebalance_action_3,
+  ].join(' ');
+
+  return pairLanguageReferencesSignals({ ...params, rowText }) ? params.row : null;
+}
+
+function getSpecificPairSummaryRow(params: {
+  row: PairSummariesRow | undefined;
+  pairKey: string;
+  primary: SingleDomainResultSignal;
+  secondary: SingleDomainResultSignal;
+}): PairSummariesRow | null {
+  if (!params.row) {
+    return null;
+  }
+
+  const rowText = [
+    params.row.pair_section_title,
+    params.row.pair_headline,
+    params.row.pair_opening_paragraph,
+    params.row.pair_strength_paragraph,
+    params.row.pair_tension_paragraph,
+    params.row.pair_close_paragraph,
+  ].join(' ');
+
+  return pairLanguageReferencesSignals({ ...params, rowText }) ? params.row : null;
 }
 
 function buildApplicationStatements(params: {
@@ -398,18 +649,6 @@ export async function buildSingleDomainResultPayload(params: {
     maps.framingByDomainKey.get(runtimeDefinition.domain.key),
     `Missing DOMAIN_FRAMING row for domain "${runtimeDefinition.domain.key}".`,
   );
-  const heroRow = requireRow(
-    maps.heroByPairKey.get(topPairKey),
-    `Missing HERO_PAIRS row for pair "${topPairKey}".`,
-  );
-  const balancingRow = requireRow(
-    maps.balancingByPairKey.get(topPairKey),
-    `Missing BALANCING_SECTIONS row for pair "${topPairKey}".`,
-  );
-  const pairSummaryRow = requireRow(
-    maps.pairSummaryByPairKey.get(topPairKey),
-    `Missing PAIR_SUMMARIES row for pair "${topPairKey}".`,
-  );
 
   const signals: readonly SingleDomainResultSignal[] = Object.freeze(
     rankedSignals.map((signal) => {
@@ -441,6 +680,28 @@ export async function buildSingleDomainResultPayload(params: {
       });
     }),
   );
+  const pairSignals = getPairSignals({
+    pairKey: topPairKey,
+    signals,
+  });
+  const heroRow = getSpecificHeroRow({
+    row: maps.heroByPairKey.get(topPairKey),
+    pairKey: topPairKey,
+    primary: pairSignals.primary,
+    secondary: pairSignals.secondary,
+  });
+  const balancingRow = getSpecificBalancingRow({
+    row: maps.balancingByPairKey.get(topPairKey),
+    pairKey: topPairKey,
+    primary: pairSignals.primary,
+    secondary: pairSignals.secondary,
+  });
+  const pairSummaryRow = getSpecificPairSummaryRow({
+    row: maps.pairSummaryByPairKey.get(topPairKey),
+    pairKey: topPairKey,
+    primary: pairSignals.primary,
+    secondary: pairSignals.secondary,
+  });
 
   const application = buildApplicationStatements({
     rankedSignals: signals,
@@ -459,10 +720,34 @@ export async function buildSingleDomainResultPayload(params: {
       completedAt: params.responses.submittedAt,
     }),
     intro: Object.freeze(toIntro(introRow)),
-    hero: Object.freeze(toHero(heroRow, topPairKey)),
+    hero: Object.freeze(
+      heroRow
+        ? toHero(heroRow, topPairKey)
+        : toHeroFallback({
+            pairKey: topPairKey,
+            primary: pairSignals.primary,
+            secondary: pairSignals.secondary,
+          }),
+    ),
     signals,
-    balancing: Object.freeze(toBalancing(balancingRow, topPairKey)),
-    pairSummary: Object.freeze(toPairSummary(pairSummaryRow, topPairKey)),
+    balancing: Object.freeze(
+      balancingRow
+        ? toBalancing(balancingRow, topPairKey)
+        : toBalancingFallback({
+            pairKey: topPairKey,
+            primary: pairSignals.primary,
+            weaker: pairSignals.weaker,
+          }),
+    ),
+    pairSummary: Object.freeze(
+      pairSummaryRow
+        ? toPairSummary(pairSummaryRow, topPairKey)
+        : toPairSummaryFallback({
+            pairKey: topPairKey,
+            primary: pairSignals.primary,
+            secondary: pairSignals.secondary,
+          }),
+    ),
     application: Object.freeze(application),
     diagnostics: Object.freeze({
       readinessStatus: 'ready' as const,

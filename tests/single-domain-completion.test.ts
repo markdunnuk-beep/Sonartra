@@ -378,6 +378,20 @@ function createDb(config?: {
           row.pair_key = 'delivery_vision';
         });
     },
+    removePairLanguage(pairKey: string) {
+      runtime.language.HERO_PAIRS = runtime.language.HERO_PAIRS.filter((row) => row.pair_key !== pairKey);
+      runtime.language.BALANCING_SECTIONS = runtime.language.BALANCING_SECTIONS.filter((row) => row.pair_key !== pairKey);
+      runtime.language.PAIR_SUMMARIES = runtime.language.PAIR_SUMMARIES.filter((row) => row.pair_key !== pairKey);
+    },
+    cloneTopPairLanguageAcrossPairs() {
+      const hero = runtime.language.HERO_PAIRS.find((row) => row.pair_key === 'vision_delivery')!;
+      const balancing = runtime.language.BALANCING_SECTIONS.find((row) => row.pair_key === 'vision_delivery')!;
+      const pairSummary = runtime.language.PAIR_SUMMARIES.find((row) => row.pair_key === 'vision_delivery')!;
+
+      runtime.language.HERO_PAIRS = PAIR_KEYS.map((pair_key) => ({ ...hero, pair_key }));
+      runtime.language.BALANCING_SECTIONS = PAIR_KEYS.map((pair_key) => ({ ...balancing, pair_key }));
+      runtime.language.PAIR_SUMMARIES = PAIR_KEYS.map((pair_key) => ({ ...pairSummary, pair_key }));
+    },
     db: {
       async query<T>(text: string, params?: unknown[]) {
         const sql = text.replace(/\s+/g, ' ').trim();
@@ -856,6 +870,90 @@ test('single-domain payload resolves reversed pair language rows to runtime pair
   assert.equal(payload.balancing.pair_key, 'vision_delivery');
   assert.equal(payload.pairSummary.pair_key, 'vision_delivery');
   assert.equal(payload.hero.hero_headline, 'Hero vision_delivery');
+});
+
+test('single-domain payload falls back when active pair language is missing', async () => {
+  const harness = createDb();
+  harness.removePairLanguage('vision_delivery');
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  assert.equal(payload.diagnostics.topPair, 'vision_delivery');
+  assert.equal(payload.hero.hero_headline, 'Vision and Delivery');
+  assert.equal(payload.pairSummary.pair_headline, 'Vision and Delivery');
+  assert.match(
+    payload.pairSummary.pair_opening_paragraph,
+    /The combination of Vision and Delivery creates a pattern where/,
+  );
+  assert.match(
+    payload.balancing.current_pattern_paragraph,
+    /When Vision dominates without enough Rigor/,
+  );
+  assert.deepEqual(
+    payload.application.strengths.map((item) => item.statement),
+    ['Vision strength 1', 'Delivery strength 2', 'People strength 2'],
+  );
+});
+
+test('single-domain payload ignores cloned non-target pair rows and uses signal fallback', async () => {
+  const harness = createDb();
+  harness.cloneTopPairLanguageAcrossPairs();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: {
+      attemptId: 'attempt-1',
+      assessmentKey: 'role-focus',
+      versionTag: '1.0.0',
+      status: 'submitted',
+      submittedAt: '2026-04-12T10:00:00.000Z',
+      responsesByQuestionId: {
+        'question-1': {
+          responseId: 'response-1',
+          attemptId: 'attempt-1',
+          questionId: 'question-1',
+          value: { selectedOptionId: 'option-1b' },
+          updatedAt: '2026-04-12T09:57:00.000Z',
+        },
+        'question-2': {
+          responseId: 'response-2',
+          attemptId: 'attempt-1',
+          questionId: 'question-2',
+          value: { selectedOptionId: 'option-2b' },
+          updatedAt: '2026-04-12T09:58:00.000Z',
+        },
+        'question-3': {
+          responseId: 'response-3',
+          attemptId: 'attempt-1',
+          questionId: 'question-3',
+          value: { selectedOptionId: 'option-3a' },
+          updatedAt: '2026-04-12T09:59:00.000Z',
+        },
+        'question-4': {
+          responseId: 'response-4',
+          attemptId: 'attempt-1',
+          questionId: 'question-4',
+          value: { selectedOptionId: 'option-4a' },
+          updatedAt: '2026-04-12T10:00:00.000Z',
+        },
+      },
+    },
+  });
+
+  assert.equal(payload.diagnostics.topPair, 'delivery_people');
+  assert.equal(payload.hero.hero_headline, 'People and Delivery');
+  assert.equal(payload.pairSummary.pair_headline, 'People and Delivery');
+  assert.doesNotMatch(payload.hero.hero_headline, /vision_delivery/);
+  assert.doesNotMatch(payload.pairSummary.pair_opening_paragraph, /vision_delivery/);
+  assert.match(
+    payload.pairSummary.pair_opening_paragraph,
+    /The combination of People and Delivery creates a pattern where/,
+  );
 });
 
 test('single-domain completion marks ready only when the canonical payload is structurally complete', async () => {

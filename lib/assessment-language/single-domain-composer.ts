@@ -282,11 +282,175 @@ function toParagraphs(...values: Array<string | null | undefined>): readonly str
   return values.filter(hasText).map((value) => value!.trim());
 }
 
+function getSignalLabel(
+  input: ResultComposerPreviewInput,
+  signalKey: string | null | undefined,
+): string {
+  if (!signalKey) {
+    return 'the signal';
+  }
+
+  return input.ranked_signals.find((signal) => signal.signal_key === signalKey)?.signal_label
+    ?? signalKey;
+}
+
+function getPairSignalKeys(pairKey: string): readonly [string, string] | null {
+  const [primaryKey, secondaryKey] = pairKey.split('_');
+
+  if (!primaryKey || !secondaryKey) {
+    return null;
+  }
+
+  return [primaryKey, secondaryKey];
+}
+
+function getPairSignalLabels(input: ResultComposerPreviewInput): {
+  primaryKey: string;
+  secondaryKey: string;
+  primaryLabel: string;
+  secondaryLabel: string;
+} {
+  const pairSignalKeys = getPairSignalKeys(input.pair_key);
+  const ranked = [...input.ranked_signals].sort((left, right) => left.rank - right.rank);
+  const rankedPairSignals = pairSignalKeys
+    ? ranked.filter((signal) => pairSignalKeys.includes(signal.signal_key))
+    : [];
+  const primaryKey = rankedPairSignals[0]?.signal_key ?? ranked[0]?.signal_key ?? pairSignalKeys?.[0] ?? '';
+  const secondaryKey = rankedPairSignals.find((signal) => signal.signal_key !== primaryKey)?.signal_key
+    ?? ranked.find((signal) => signal.signal_key !== primaryKey)?.signal_key
+    ?? pairSignalKeys?.find((signalKey) => signalKey !== primaryKey)
+    ?? primaryKey;
+
+  return {
+    primaryKey,
+    secondaryKey,
+    primaryLabel: getSignalLabel(input, primaryKey),
+    secondaryLabel: getSignalLabel(input, secondaryKey),
+  };
+}
+
+function findDriverClaim(
+  input: ResultComposerPreviewInput,
+  signalKey: string,
+  preferredRoles: readonly SingleDomainDriversImportRow['driver_role'][],
+): string {
+  const rows = sortRowsByPriority(input.sections.drivers)
+    .filter((row) => row.signal_key === signalKey);
+  const preferred = rows.find((row) => preferredRoles.includes(row.driver_role));
+
+  return preferred?.claim_text ?? rows[0]?.claim_text ?? '';
+}
+
+function getWeakerSignalKey(input: ResultComposerPreviewInput): string {
+  return input.sections.limitation.weaker_signal_key
+    || input.sections.drivers.find((row) => row.driver_role === 'range_limitation')?.signal_key
+    || [...input.ranked_signals].sort((left, right) => right.rank - left.rank)[0]?.signal_key
+    || '';
+}
+
+function buildFallbackHeroParagraphs(input: ResultComposerPreviewInput): readonly string[] {
+  const pair = getPairSignalLabels(input);
+  const primaryClaim = findDriverClaim(input, pair.primaryKey, ['primary_driver']);
+  const secondaryClaim = findDriverClaim(input, pair.secondaryKey, ['secondary_driver']);
+
+  return toParagraphs(
+    `${pair.primaryLabel} and ${pair.secondaryLabel}`,
+    `This result is led by ${pair.primaryLabel}, with ${pair.secondaryLabel} providing the strongest secondary signal.`,
+    primaryClaim,
+    secondaryClaim,
+  );
+}
+
+function buildFallbackPairParagraphs(input: ResultComposerPreviewInput): readonly string[] {
+  const pair = getPairSignalLabels(input);
+  const primaryClaim = findDriverClaim(input, pair.primaryKey, ['primary_driver']);
+  const secondaryClaim = findDriverClaim(input, pair.secondaryKey, ['secondary_driver']);
+
+  return toParagraphs(
+    `${pair.primaryLabel} and ${pair.secondaryLabel}`,
+    `The combination of ${pair.primaryLabel} and ${pair.secondaryLabel} creates a pattern where the strongest signal sets the main emphasis and the second signal shapes how that emphasis is expressed.`,
+    primaryClaim,
+    secondaryClaim,
+    `This is a signal-level synthesis because no pair-specific authored language exists for ${input.pair_key}.`,
+  );
+}
+
+function buildFallbackLimitationParagraphs(input: ResultComposerPreviewInput): readonly string[] {
+  const pair = getPairSignalLabels(input);
+  const weakerKey = getWeakerSignalKey(input);
+  const weakerLabel = getSignalLabel(input, weakerKey);
+  const primaryLimitation = findDriverClaim(input, pair.primaryKey, [
+    'range_limitation',
+    'primary_driver',
+  ]);
+  const weakerTension = findDriverClaim(input, weakerKey, ['range_limitation']);
+
+  return toParagraphs(
+    `When ${pair.primaryLabel} needs more ${weakerLabel}`,
+    `When ${pair.primaryLabel} dominates without enough ${weakerLabel}, the pattern may become narrower than the situation requires.`,
+    primaryLimitation,
+    weakerKey && weakerTension ? `${weakerKey}: ${weakerTension}` : weakerTension,
+  );
+}
+
 function splitStoredParagraphs(value: string): readonly string[] {
   return value
     .split(/\r?\n+/)
     .map((entry) => entry.trim())
     .filter(Boolean);
+}
+
+function compactText(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+}
+
+function legacyPairLanguageReferencesSignals(params: {
+  pairKey: string;
+  rowText: string;
+  primarySignalKey: string;
+  secondarySignalKey: string;
+  primarySignalLabel: string;
+  secondarySignalLabel: string;
+}): boolean {
+  const normalized = compactText(params.rowText);
+  const pairKeyToken = compactText(params.pairKey);
+  const reversedPairKeyToken = compactText(params.pairKey.split('_').reverse().join('_'));
+  const primaryTokens = [
+    params.primarySignalKey,
+    params.primarySignalLabel,
+  ].map(compactText).filter(Boolean);
+  const secondaryTokens = [
+    params.secondarySignalKey,
+    params.secondarySignalLabel,
+  ].map(compactText).filter(Boolean);
+
+  if (normalized.includes(pairKeyToken) || normalized.includes(reversedPairKeyToken)) {
+    return true;
+  }
+
+  return primaryTokens.some((token) => normalized.includes(token))
+    && secondaryTokens.some((token) => normalized.includes(token));
+}
+
+function getSpecificLegacyPairRow<TRow>(params: {
+  row: TRow | undefined;
+  pairKey: string;
+  primarySignalKey: string;
+  secondarySignalKey: string;
+  primarySignalLabel: string;
+  secondarySignalLabel: string;
+  fields: (row: TRow) => readonly string[];
+}): TRow | undefined {
+  if (!params.row) {
+    return undefined;
+  }
+
+  return legacyPairLanguageReferencesSignals({
+    ...params,
+    rowText: params.fields(params.row).join(' '),
+  })
+    ? params.row
+    : undefined;
 }
 
 function buildSignalPairOptions(signalKeys: readonly string[]): readonly string[] {
@@ -537,6 +701,59 @@ export function buildSingleDomainDraftPreviewInput(
   const limitationRow = assessment.singleDomainLanguageBundle.BALANCING_SECTIONS.find(
     (row) => row.pair_key === activePairKey,
   );
+  const [primarySignalKey, secondarySignalKey] = getPairSignalKeys(activePairKey) ?? ['', ''];
+  const primarySignal = assessment.availableSignals.find((signal) => signal.signalKey === primarySignalKey);
+  const secondarySignal = assessment.availableSignals.find((signal) => signal.signalKey === secondarySignalKey);
+  const specificHeroRow = getSpecificLegacyPairRow({
+    row: heroRow,
+    pairKey: activePairKey,
+    primarySignalKey,
+    secondarySignalKey,
+    primarySignalLabel: primarySignal?.signalLabel ?? primarySignalKey,
+    secondarySignalLabel: secondarySignal?.signalLabel ?? secondarySignalKey,
+    fields: (row) => [
+      row.hero_headline,
+      row.hero_subheadline,
+      row.hero_opening,
+      row.hero_strength_paragraph,
+      row.hero_tension_paragraph,
+      row.hero_close_paragraph,
+    ],
+  });
+  const specificPairRow = getSpecificLegacyPairRow({
+    row: pairRow,
+    pairKey: activePairKey,
+    primarySignalKey,
+    secondarySignalKey,
+    primarySignalLabel: primarySignal?.signalLabel ?? primarySignalKey,
+    secondarySignalLabel: secondarySignal?.signalLabel ?? secondarySignalKey,
+    fields: (row) => [
+      row.pair_section_title,
+      row.pair_headline,
+      row.pair_opening_paragraph,
+      row.pair_strength_paragraph,
+      row.pair_tension_paragraph,
+      row.pair_close_paragraph,
+    ],
+  });
+  const specificLimitationRow = getSpecificLegacyPairRow({
+    row: limitationRow,
+    pairKey: activePairKey,
+    primarySignalKey,
+    secondarySignalKey,
+    primarySignalLabel: primarySignal?.signalLabel ?? primarySignalKey,
+    secondarySignalLabel: secondarySignal?.signalLabel ?? secondarySignalKey,
+    fields: (row) => [
+      row.balancing_section_title,
+      row.current_pattern_paragraph,
+      row.practical_meaning_paragraph,
+      row.system_risk_paragraph,
+      row.rebalance_intro,
+      row.rebalance_action_1,
+      row.rebalance_action_2,
+      row.rebalance_action_3,
+    ],
+  });
 
   const driverRows = buildDriverRowsFromLegacy(
     assessment.singleDomainLanguageBundle,
@@ -589,35 +806,35 @@ export function buildSingleDomainDraftPreviewInput(
         domain_key: domain.domainKey,
         section_key: 'hero',
         pair_key: activePairKey,
-        pattern_label: heroRow?.hero_headline ?? '',
-        hero_statement: heroRow?.hero_opening ?? '',
-        hero_expansion: heroRow?.hero_strength_paragraph ?? '',
-        hero_strength: heroRow?.hero_subheadline ?? heroRow?.hero_tension_paragraph ?? '',
+        pattern_label: specificHeroRow?.hero_headline ?? '',
+        hero_statement: specificHeroRow?.hero_opening ?? '',
+        hero_expansion: specificHeroRow?.hero_strength_paragraph ?? '',
+        hero_strength: specificHeroRow?.hero_subheadline ?? specificHeroRow?.hero_tension_paragraph ?? '',
       },
       drivers: driverRows,
       pair: {
         domain_key: domain.domainKey,
         section_key: 'pair',
         pair_key: activePairKey,
-        pair_label: pairRow?.pair_section_title ?? pairRow?.pair_headline ?? '',
-        interaction_claim: pairRow?.pair_opening_paragraph ?? '',
-        synergy_claim: pairRow?.pair_strength_paragraph ?? '',
-        tension_claim: pairRow?.pair_tension_paragraph ?? '',
-        pair_outcome: pairRow?.pair_close_paragraph ?? '',
+        pair_label: specificPairRow?.pair_section_title ?? specificPairRow?.pair_headline ?? '',
+        interaction_claim: specificPairRow?.pair_opening_paragraph ?? '',
+        synergy_claim: specificPairRow?.pair_strength_paragraph ?? '',
+        tension_claim: specificPairRow?.pair_tension_paragraph ?? '',
+        pair_outcome: specificPairRow?.pair_close_paragraph ?? '',
       },
       limitation: {
         domain_key: domain.domainKey,
         section_key: 'limitation',
         pair_key: activePairKey,
-        limitation_label: limitationRow?.balancing_section_title ?? '',
-        pattern_cost: limitationRow?.current_pattern_paragraph ?? '',
-        range_narrowing: limitationRow?.practical_meaning_paragraph ?? '',
+        limitation_label: specificLimitationRow?.balancing_section_title ?? '',
+        pattern_cost: specificLimitationRow?.current_pattern_paragraph ?? '',
+        range_narrowing: specificLimitationRow?.practical_meaning_paragraph ?? '',
         weaker_signal_key:
-          limitationRow?.rebalance_intro?.split(':')[0]?.trim()
-            && underplayedSignals.has(limitationRow.rebalance_intro.split(':')[0].trim())
-            ? limitationRow.rebalance_intro.split(':')[0].trim()
+          specificLimitationRow?.rebalance_intro?.split(':')[0]?.trim()
+            && underplayedSignals.has(specificLimitationRow.rebalance_intro.split(':')[0].trim())
+            ? specificLimitationRow.rebalance_intro.split(':')[0].trim()
             : [...underplayedSignals][0] ?? '',
-        weaker_signal_link: limitationRow?.system_risk_paragraph ?? limitationRow?.rebalance_action_1 ?? '',
+        weaker_signal_link: specificLimitationRow?.system_risk_paragraph ?? specificLimitationRow?.rebalance_action_1 ?? '',
       },
       application: applicationRows,
     },
@@ -778,6 +995,27 @@ export function composeSingleDomainReport(
   input: ResultComposerPreviewInput,
 ): ComposedSingleDomainReport {
   const previewValidation = validateSingleDomainNarrativePreview(input);
+  const heroParagraphs = toParagraphs(
+    input.sections.hero.pattern_label,
+    input.sections.hero.hero_statement,
+    input.sections.hero.hero_expansion,
+    input.sections.hero.hero_strength,
+  );
+  const pairParagraphs = toParagraphs(
+    input.sections.pair.pair_label,
+    input.sections.pair.interaction_claim,
+    input.sections.pair.synergy_claim,
+    input.sections.pair.tension_claim,
+    input.sections.pair.pair_outcome,
+  );
+  const limitationParagraphs = toParagraphs(
+    input.sections.limitation.limitation_label,
+    input.sections.limitation.pattern_cost,
+    input.sections.limitation.range_narrowing,
+    input.sections.limitation.weaker_signal_key && input.sections.limitation.weaker_signal_link
+      ? `${input.sections.limitation.weaker_signal_key}: ${input.sections.limitation.weaker_signal_link}`
+      : input.sections.limitation.weaker_signal_link,
+  );
 
   const sections: ComposedNarrativeSection[] = SINGLE_DOMAIN_NARRATIVE_SECTION_CONTRACTS.map(
     (contract) => {
@@ -801,12 +1039,7 @@ export function composeSingleDomainReport(
             key: contract.section,
             title: SECTION_TITLES[contract.section],
             question: contract.question,
-            paragraphs: toParagraphs(
-              input.sections.hero.pattern_label,
-              input.sections.hero.hero_statement,
-              input.sections.hero.hero_expansion,
-              input.sections.hero.hero_strength,
-            ),
+            paragraphs: heroParagraphs.length > 0 ? heroParagraphs : buildFallbackHeroParagraphs(input),
             focusItems: [],
             provenance: buildProvenance(input, contract.section),
           };
@@ -824,13 +1057,7 @@ export function composeSingleDomainReport(
             key: contract.section,
             title: SECTION_TITLES[contract.section],
             question: contract.question,
-            paragraphs: toParagraphs(
-              input.sections.pair.pair_label,
-              input.sections.pair.interaction_claim,
-              input.sections.pair.synergy_claim,
-              input.sections.pair.tension_claim,
-              input.sections.pair.pair_outcome,
-            ),
+            paragraphs: pairParagraphs.length > 0 ? pairParagraphs : buildFallbackPairParagraphs(input),
             focusItems: [],
             provenance: buildProvenance(input, contract.section),
           };
@@ -839,14 +1066,9 @@ export function composeSingleDomainReport(
             key: contract.section,
             title: SECTION_TITLES[contract.section],
             question: contract.question,
-            paragraphs: toParagraphs(
-              input.sections.limitation.limitation_label,
-              input.sections.limitation.pattern_cost,
-              input.sections.limitation.range_narrowing,
-              input.sections.limitation.weaker_signal_key && input.sections.limitation.weaker_signal_link
-                ? `${input.sections.limitation.weaker_signal_key}: ${input.sections.limitation.weaker_signal_link}`
-                : input.sections.limitation.weaker_signal_link,
-            ),
+            paragraphs: limitationParagraphs.length > 0
+              ? limitationParagraphs
+              : buildFallbackLimitationParagraphs(input),
             focusItems: [],
             provenance: buildProvenance(input, contract.section),
           };
