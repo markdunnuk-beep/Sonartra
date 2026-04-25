@@ -215,10 +215,12 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.doesNotMatch(markup, /sonartra-single-domain-driver-context-stack/);
   assert.match(markup, /sonartra-single-domain-section-pair/);
   assert.match(markup, /sonartra-single-domain-section-limitation/);
-  assert.match(markup, /sonartra-single-domain-application-grid/);
-  assert.match(markup, /sonartra-single-domain-application-rely/);
-  assert.match(markup, /sonartra-single-domain-application-notice/);
-  assert.match(markup, /sonartra-single-domain-application-develop/);
+  assert.match(markup, /sonartra-single-domain-application-flow/);
+  assert.match(markup, /sonartra-single-domain-application-entry-rely/);
+  assert.match(markup, /sonartra-single-domain-application-entry-notice/);
+  assert.match(markup, /sonartra-single-domain-application-entry-develop/);
+  assert.doesNotMatch(markup, /sonartra-single-domain-application-grid/);
+  assert.doesNotMatch(markup, /sonartra-single-domain-application-card/);
   assert.match(markup, />Primary driver</);
   assert.match(markup, />Secondary driver</);
   assert.match(markup, />Supporting context</);
@@ -228,8 +230,10 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, />Rely on</);
   assert.match(markup, />Notice</);
   assert.match(markup, />Develop</);
+  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Rely on<\/h3>/);
+  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Notice<\/h3>/);
+  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Develop<\/h3>/);
   assert.match(markup, /sonartra-single-domain-section-limitation/);
-  assert.match(markup, /sonartra-single-domain-application-notice/);
 });
 
 test('single-domain results report carries weaker-signal range language into limitation and application', () => {

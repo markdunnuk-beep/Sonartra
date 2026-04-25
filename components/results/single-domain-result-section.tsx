@@ -62,7 +62,7 @@ function SignalDriverEntry({
   );
 }
 
-function ApplicationGroup({
+function ApplicationActionEntry({
   title,
   items,
   className,
@@ -77,21 +77,18 @@ function ApplicationGroup({
 
   return (
     <section
-      className={[
-        'sonartra-single-domain-application-card px-4 py-4 md:px-5 md:py-5',
-        className,
-      ]
+      className={['sonartra-single-domain-application-entry', className]
         .filter(Boolean)
         .join(' ')}
     >
-      <p className="sonartra-report-kicker text-white/34">{title}</p>
-      <div className="mt-3 space-y-0">
+      <h3 className="sonartra-single-domain-application-entry-title">{title}</h3>
+      <div className="sonartra-single-domain-application-entry-body">
         {items.map((item, index) => (
           <p
             key={`${title}-${item}`}
             className={[
-              'sonartra-report-body-soft text-[0.95rem] leading-7 text-white/76',
-              index > 0 ? 'mt-2.5 pt-2.5' : '',
+              'sonartra-report-body-soft',
+              index === 0 ? 'text-white/80' : 'text-white/68',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -225,23 +222,21 @@ export function SingleDomainResultSection({
         className="sonartra-single-domain-section-application space-y-7 md:space-y-8"
         style={getRevealStyle(step)}
       >
-        <div className="sonartra-single-domain-application-frame">
-          <div className="sonartra-single-domain-application-grid">
-            {section.focusItems.map((item) => (
-              <ApplicationGroup
-                key={item.label}
-                title={item.label}
-                items={item.content}
-                className={
-                  item.label === 'Notice'
-                    ? 'sonartra-single-domain-application-notice'
-                    : item.label === 'Develop'
-                      ? 'sonartra-single-domain-application-develop'
-                      : 'sonartra-single-domain-application-rely'
-                }
-              />
-            ))}
-          </div>
+        <div className="sonartra-single-domain-application-flow">
+          {section.focusItems.map((item) => (
+            <ApplicationActionEntry
+              key={item.label}
+              title={item.label}
+              items={item.content}
+              className={
+                item.label === 'Notice'
+                  ? 'sonartra-single-domain-application-entry-notice'
+                  : item.label === 'Develop'
+                    ? 'sonartra-single-domain-application-entry-develop'
+                    : 'sonartra-single-domain-application-entry-rely'
+              }
+            />
+          ))}
         </div>
       </ReportChapter>
     );

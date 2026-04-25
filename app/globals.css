@@ -1050,50 +1050,44 @@ main {
     }
   }
 
-  .sonartra-single-domain-application-card {
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    padding-left: 1rem;
-  }
-
-  .sonartra-single-domain-application-card p + p {
-    border-top: 0;
-  }
-
-  .sonartra-single-domain-application-grid {
+  .sonartra-single-domain-application-flow {
     display: grid;
-    gap: 1.25rem;
+    gap: 1.55rem;
+    max-width: 72ch;
   }
 
-  .sonartra-single-domain-application-frame {
-    border-top: 1px solid rgba(255, 255, 255, 0.065);
-    padding-top: 1.4rem;
+  .sonartra-single-domain-application-entry {
+    display: grid;
+    gap: 0.95rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.075);
+    padding-top: 1.3rem;
   }
 
-  .sonartra-single-domain-application-rely {
-    border-color: rgba(223, 232, 255, 0.08);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.006)),
-      rgba(255, 255, 255, 0.004);
+  .sonartra-single-domain-application-entry:first-child {
+    border-top-color: rgba(255, 255, 255, 0.12);
   }
 
-  .sonartra-single-domain-application-notice {
-    border-color: rgba(251, 191, 36, 0.12);
-    background:
-      linear-gradient(180deg, rgba(251, 191, 36, 0.024), rgba(251, 191, 36, 0.01)),
-      transparent;
+  .sonartra-single-domain-application-entry-title {
+    @apply text-[1.25rem] font-semibold leading-7 tracking-[-0.014em] md:text-[1.42rem] md:leading-8;
+    color: rgba(255, 255, 255, 0.88);
   }
 
-  .sonartra-single-domain-application-develop {
-    border-color: rgba(125, 211, 252, 0.1);
-    background:
-      linear-gradient(180deg, rgba(125, 211, 252, 0.024), rgba(125, 211, 252, 0.01)),
-      transparent;
+  .sonartra-single-domain-application-entry-body {
+    display: grid;
+    gap: 0.9rem;
   }
 
-  @media (min-width: 1040px) {
-    .sonartra-single-domain-application-grid {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr) minmax(0, 0.95fr);
-      gap: 1.4rem;
+  .sonartra-single-domain-application-entry-notice {
+    border-top-color: rgba(251, 191, 36, 0.18);
+  }
+
+  .sonartra-single-domain-application-entry-develop {
+    border-top-color: rgba(125, 211, 252, 0.16);
+  }
+
+  @media (min-width: 768px) {
+    .sonartra-single-domain-application-flow {
+      gap: 1.85rem;
     }
   }
 
@@ -1180,10 +1174,6 @@ main {
   }
 
   @media (min-width: 768px) {
-    .sonartra-single-domain-application-card {
-      padding-left: 1.15rem;
-    }
-
     .sonartra-single-domain-section-limitation {
       padding-left: 1.65rem;
       padding-right: 1.65rem;
@@ -1193,9 +1183,6 @@ main {
       padding: 1.65rem;
     }
 
-    .sonartra-single-domain-application-frame {
-      padding-top: 1.7rem;
-    }
   }
 
   .sonartra-report-divider {
