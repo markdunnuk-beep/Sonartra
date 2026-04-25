@@ -771,7 +771,7 @@ main {
       gap: 2rem;
       max-width: 92rem;
       margin-inline: auto;
-      align-items: start;
+      align-items: stretch;
     }
   }
 

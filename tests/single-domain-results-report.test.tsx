@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { SingleDomainResultsReport } from '@/components/results/single-domain-results-report';
 import { createSingleDomainResultsViewModel } from '@/lib/server/single-domain-results-view-model';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
+
+const globalsPath = join(process.cwd(), 'app', 'globals.css');
 
 function buildPayload(): SingleDomainResultPayload {
   return {
@@ -171,6 +175,17 @@ test('single-domain results report renders the locked six-section flow and six r
 
   assert.match(markup, /data-result-reading-rail="true"/);
   assert.doesNotMatch(markup, /sonartra-report-shell-rail/);
+});
+
+test('single-domain report shell lets desktop reading rail use the full sticky containing height', () => {
+  const cssSource = readFileSync(globalsPath, 'utf8');
+  const desktopShellLayoutRule = cssSource.match(
+    /@media \(min-width: 1280px\) \{[\s\S]*?\.sonartra-report-shell-layout\s*\{(?<rule>[\s\S]*?)\n    \}/,
+  )?.groups?.rule;
+
+  assert.ok(desktopShellLayoutRule);
+  assert.match(desktopShellLayoutRule, /align-items: stretch;/);
+  assert.doesNotMatch(desktopShellLayoutRule, /align-items: start;/);
 });
 
 test('single-domain results report keeps hero, drivers, limitation, and application visually distinct', () => {
