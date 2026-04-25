@@ -11,6 +11,7 @@ import {
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import { buildSingleDomainResultPayload } from '@/lib/server/single-domain-completion';
 import type { AssessmentCompletionPayload } from '@/lib/server/assessment-completion-types';
+import { isSingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
@@ -391,6 +392,30 @@ function createDb(config?: {
       runtime.language.HERO_PAIRS = PAIR_KEYS.map((pair_key) => ({ ...hero, pair_key }));
       runtime.language.BALANCING_SECTIONS = PAIR_KEYS.map((pair_key) => ({ ...balancing, pair_key }));
       runtime.language.PAIR_SUMMARIES = PAIR_KEYS.map((pair_key) => ({ ...pairSummary, pair_key }));
+    },
+    blankPositionSpecificLanguageLikeSectionFirstImports() {
+      runtime.language.SIGNAL_CHAPTERS.forEach((row) => {
+        if (row.signal_key === 'vision') {
+          row.chapter_intro_primary = '';
+        }
+        if (row.signal_key === 'delivery') {
+          row.chapter_intro_secondary = '';
+        }
+        if (row.signal_key === 'people') {
+          row.chapter_intro_supporting = '';
+        }
+        if (row.signal_key === 'rigor') {
+          row.chapter_intro_underplayed = '';
+          row.chapter_risk_behaviour = '';
+          row.chapter_risk_impact = '';
+          row.chapter_development = '';
+        }
+      });
+      runtime.language.BALANCING_SECTIONS.forEach((row) => {
+        row.system_risk_paragraph = '';
+        row.rebalance_action_2 = '';
+        row.rebalance_action_3 = '';
+      });
     },
     db: {
       async query<T>(text: string, params?: unknown[]) {
@@ -899,6 +924,34 @@ test('single-domain payload falls back when active pair language is missing', as
   );
 });
 
+test('single-domain payload maps sparse section-first language into required payload fields', async () => {
+  const harness = createDb();
+  harness.blankPositionSpecificLanguageLikeSectionFirstImports();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  assert.equal(isSingleDomainResultPayload(payload), true);
+  assert.equal(payload.signals[0]?.signal_key, 'vision');
+  assert.equal(payload.signals[0]?.chapter_intro, 'vision shows up');
+  assert.equal(payload.signals[1]?.signal_key, 'delivery');
+  assert.equal(payload.signals[1]?.chapter_intro, 'delivery shows up');
+  assert.equal(payload.signals[2]?.signal_key, 'people');
+  assert.equal(payload.signals[2]?.chapter_intro, 'people shows up');
+  assert.equal(payload.signals[3]?.signal_key, 'rigor');
+  assert.equal(payload.signals[3]?.chapter_intro, 'rigor shows up');
+  assert.equal(payload.signals[3]?.chapter_risk_impact, 'rigor shows up');
+  assert.equal(payload.balancing.system_risk_paragraph, 'Rebalance vision_delivery');
+  assert.deepEqual(payload.balancing.rebalance_actions, [
+    'vision_delivery action 1',
+    'Rebalance vision_delivery',
+    'Rebalance vision_delivery',
+  ]);
+});
+
 test('single-domain payload ignores cloned non-target pair rows and uses signal fallback', async () => {
   const harness = createDb();
   harness.cloneTopPairLanguageAcrossPairs();
@@ -966,6 +1019,7 @@ test('single-domain completion marks ready only when the canonical payload is st
   assert.equal(harness.attempts[0]?.lifecycleStatus, 'RESULT_READY');
   assert.equal(harness.results[0]?.readinessStatus, 'READY');
   assert.equal(harness.results[0]?.canonicalResultPayload?.metadata.mode, 'single_domain');
+  assert.equal(isSingleDomainResultPayload(harness.results[0]?.canonicalResultPayload), true);
 });
 
 test('incomplete single-domain attempts fail and never become ready', async () => {

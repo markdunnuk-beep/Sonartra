@@ -23,6 +23,7 @@ import {
   type AssessmentCompletionServiceResult,
 } from '@/lib/server/assessment-completion-types';
 import { buildSingleDomainResultPayload } from '@/lib/server/single-domain-completion';
+import { isSingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
 export type AssessmentCompletionServiceDeps = {
@@ -189,6 +190,15 @@ export function createAssessmentCompletionService(
               assessmentVersionId: attempt.assessmentVersionId,
               responses: responseSet,
             });
+
+        if (
+          attempt.assessmentMode === 'single_domain'
+          && !isSingleDomainResultPayload(payload)
+        ) {
+          throw new AssessmentCompletionPersistenceError(
+            `Generated single-domain result payload is malformed for attempt ${attempt.attemptId}`,
+          );
+        }
 
         const resultId = await upsertReadyResult(deps.db, {
           attemptId: attempt.attemptId,

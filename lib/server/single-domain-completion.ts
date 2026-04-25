@@ -26,6 +26,7 @@ import type {
   SingleDomainResultSignal,
   SingleDomainSignalPosition,
 } from '@/lib/types/single-domain-result';
+import { isSingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import type { Queryable } from '@/lib/engine/repository-sql';
 
 const FALLBACK_VERSION_TIMESTAMP = '1970-01-01T00:00:00.000Z';
@@ -141,24 +142,56 @@ function getPositionLabel(params: {
   switch (params.position) {
     case 'primary':
       return {
-        label: params.row.position_primary_label,
-        intro: params.row.chapter_intro_primary,
+        label: firstText(params.row.position_primary_label, 'Primary'),
+        intro: firstText(
+          params.row.chapter_intro_primary,
+          params.row.chapter_how_it_shows_up,
+          params.row.chapter_value_outcome,
+          params.row.chapter_value_team_effect,
+          params.row.chapter_risk_impact,
+          params.row.chapter_risk_behaviour,
+          params.row.chapter_development,
+        ),
       };
     case 'secondary':
       return {
-        label: params.row.position_secondary_label,
-        intro: params.row.chapter_intro_secondary,
+        label: firstText(params.row.position_secondary_label, 'Secondary'),
+        intro: firstText(
+          params.row.chapter_intro_secondary,
+          params.row.chapter_how_it_shows_up,
+          params.row.chapter_value_outcome,
+          params.row.chapter_value_team_effect,
+          params.row.chapter_risk_impact,
+          params.row.chapter_risk_behaviour,
+          params.row.chapter_development,
+        ),
       };
     case 'underplayed':
       return {
-        label: params.row.position_underplayed_label,
-        intro: params.row.chapter_intro_underplayed,
+        label: firstText(params.row.position_underplayed_label, 'Underplayed'),
+        intro: firstText(
+          params.row.chapter_intro_underplayed,
+          params.row.chapter_risk_impact,
+          params.row.chapter_risk_behaviour,
+          params.row.chapter_development,
+          params.row.chapter_how_it_shows_up,
+          params.row.chapter_value_outcome,
+          params.row.chapter_value_team_effect,
+        ),
       };
     case 'supporting':
     default:
       return {
-        label: params.row.position_supporting_label,
-        intro: params.row.chapter_intro_supporting,
+        label: firstText(params.row.position_supporting_label, 'Supporting'),
+        intro: firstText(
+          params.row.chapter_intro_supporting,
+          params.row.chapter_how_it_shows_up,
+          params.row.chapter_value_outcome,
+          params.row.chapter_value_team_effect,
+          params.row.chapter_risk_impact,
+          params.row.chapter_risk_behaviour,
+          params.row.chapter_development,
+        ),
       };
   }
 }
@@ -244,6 +277,110 @@ function hasText(value: string | null | undefined): value is string {
 
 function firstText(...values: Array<string | null | undefined>): string {
   return values.find(hasText)?.trim() ?? '';
+}
+
+function requireText(value: string, message: string): string {
+  if (hasText(value)) {
+    return value.trim();
+  }
+
+  throw new SingleDomainCompletionError(message);
+}
+
+function buildSignalChapterPayload(params: {
+  row: SignalChaptersRow;
+  signalKey: string;
+  signalLabel: string;
+  rank: number;
+  normalizedScore: number;
+  rawScore: number;
+  position: SingleDomainSignalPosition;
+}): SingleDomainResultSignal {
+  const positionLanguage = getPositionLabel({
+    row: params.row,
+    position: params.position,
+  });
+  const chapterIntro = requireText(
+    positionLanguage.intro,
+    `Missing usable signal chapter intro language for signal "${params.signalKey}" in position "${params.position}".`,
+  );
+  const chapterHowItShowsUp = requireText(
+    firstText(
+      params.row.chapter_how_it_shows_up,
+      chapterIntro,
+      params.row.chapter_value_outcome,
+      params.row.chapter_value_team_effect,
+    ),
+    `Missing usable signal chapter behaviour language for signal "${params.signalKey}".`,
+  );
+  const chapterValueOutcome = requireText(
+    firstText(
+      params.row.chapter_value_outcome,
+      params.row.chapter_value_team_effect,
+      chapterIntro,
+      chapterHowItShowsUp,
+    ),
+    `Missing usable signal chapter outcome language for signal "${params.signalKey}".`,
+  );
+  const chapterValueTeamEffect = requireText(
+    firstText(
+      params.row.chapter_value_team_effect,
+      params.row.chapter_value_outcome,
+      chapterIntro,
+      chapterHowItShowsUp,
+    ),
+    `Missing usable signal chapter team-effect language for signal "${params.signalKey}".`,
+  );
+  const chapterRiskBehaviour = requireText(
+    firstText(
+      params.row.chapter_risk_behaviour,
+      params.row.chapter_risk_impact,
+      params.row.chapter_development,
+      chapterIntro,
+      chapterHowItShowsUp,
+    ),
+    `Missing usable signal chapter risk behaviour language for signal "${params.signalKey}".`,
+  );
+  const chapterRiskImpact = requireText(
+    firstText(
+      params.row.chapter_risk_impact,
+      params.row.chapter_risk_behaviour,
+      params.row.chapter_development,
+      chapterRiskBehaviour,
+      chapterIntro,
+    ),
+    `Missing usable signal chapter risk impact language for signal "${params.signalKey}".`,
+  );
+  const chapterDevelopment = requireText(
+    firstText(
+      params.row.chapter_development,
+      params.row.chapter_risk_impact,
+      params.row.chapter_risk_behaviour,
+      chapterRiskImpact,
+      chapterIntro,
+    ),
+    `Missing usable signal chapter development language for signal "${params.signalKey}".`,
+  );
+
+  return Object.freeze({
+    signal_key: params.signalKey,
+    signal_label: params.signalLabel,
+    rank: params.rank,
+    normalized_score: params.normalizedScore,
+    raw_score: params.rawScore,
+    position: params.position,
+    position_label: requireText(
+      positionLanguage.label,
+      `Missing position label for signal "${params.signalKey}" in position "${params.position}".`,
+    ),
+    chapter_intro: chapterIntro,
+    chapter_how_it_shows_up: chapterHowItShowsUp,
+    chapter_value_outcome: chapterValueOutcome,
+    chapter_value_team_effect: chapterValueTeamEffect,
+    chapter_risk_behaviour: chapterRiskBehaviour,
+    chapter_risk_impact: chapterRiskImpact,
+    chapter_development: chapterDevelopment,
+  } satisfies SingleDomainResultSignal);
 }
 
 function getSignalByKey(
@@ -363,17 +500,45 @@ function toHeroFallback(params: {
 }
 
 function toBalancing(row: BalancingSectionsRow, pairKey: string): SingleDomainResultBalancing {
+  const currentPattern = requireText(
+    row.current_pattern_paragraph,
+    `Missing limitation current pattern language for pair "${pairKey}".`,
+  );
+  const practicalMeaning = requireText(
+    row.practical_meaning_paragraph,
+    `Missing limitation practical meaning language for pair "${pairKey}".`,
+  );
+  const systemRisk = firstText(
+    row.system_risk_paragraph,
+    row.rebalance_intro,
+    row.rebalance_action_1,
+    practicalMeaning,
+    currentPattern,
+  );
+  const action1 = firstText(row.rebalance_action_1, row.rebalance_intro, systemRisk);
+  const action2 = firstText(row.rebalance_action_2, row.rebalance_intro, practicalMeaning, systemRisk);
+  const action3 = firstText(row.rebalance_action_3, systemRisk, practicalMeaning, action2);
+
   return {
     pair_key: pairKey,
-    balancing_section_title: row.balancing_section_title,
-    current_pattern_paragraph: row.current_pattern_paragraph,
-    practical_meaning_paragraph: row.practical_meaning_paragraph,
-    system_risk_paragraph: row.system_risk_paragraph,
-    rebalance_intro: row.rebalance_intro,
+    balancing_section_title: requireText(
+      row.balancing_section_title,
+      `Missing limitation title language for pair "${pairKey}".`,
+    ),
+    current_pattern_paragraph: currentPattern,
+    practical_meaning_paragraph: practicalMeaning,
+    system_risk_paragraph: requireText(
+      systemRisk,
+      `Missing usable limitation risk language for pair "${pairKey}".`,
+    ),
+    rebalance_intro: requireText(
+      firstText(row.rebalance_intro, systemRisk, practicalMeaning),
+      `Missing usable limitation rebalance intro language for pair "${pairKey}".`,
+    ),
     rebalance_actions: Object.freeze([
-      row.rebalance_action_1,
-      row.rebalance_action_2,
-      row.rebalance_action_3,
+      requireText(action1, `Missing usable limitation action 1 language for pair "${pairKey}".`),
+      requireText(action2, `Missing usable limitation action 2 language for pair "${pairKey}".`),
+      requireText(action3, `Missing usable limitation action 3 language for pair "${pairKey}".`),
     ]),
   };
 }
@@ -657,26 +822,15 @@ export async function buildSingleDomainResultPayload(params: {
         `Missing SIGNAL_CHAPTERS row for signal "${signal.signalKey}".`,
       );
       const position = getSignalPosition(signal.rank, rankedSignals.length);
-      const positionLanguage = getPositionLabel({
-        row: chapterRow,
-        position,
-      });
 
-      return Object.freeze({
-        signal_key: signal.signalKey,
-        signal_label: signal.signalTitle,
+      return buildSignalChapterPayload({
+        row: chapterRow,
+        signalKey: signal.signalKey,
+        signalLabel: signal.signalTitle,
         rank: signal.rank,
-        normalized_score: signal.percentage,
-        raw_score: signal.rawTotal,
+        normalizedScore: signal.percentage,
+        rawScore: signal.rawTotal,
         position,
-        position_label: positionLanguage.label,
-        chapter_intro: positionLanguage.intro,
-        chapter_how_it_shows_up: chapterRow.chapter_how_it_shows_up,
-        chapter_value_outcome: chapterRow.chapter_value_outcome,
-        chapter_value_team_effect: chapterRow.chapter_value_team_effect,
-        chapter_risk_behaviour: chapterRow.chapter_risk_behaviour,
-        chapter_risk_impact: chapterRow.chapter_risk_impact,
-        chapter_development: chapterRow.chapter_development,
       });
     }),
   );
@@ -708,7 +862,7 @@ export async function buildSingleDomainResultPayload(params: {
     applicationBySignalKey: maps.applicationBySignalKey,
   });
 
-  return Object.freeze({
+  const payload = Object.freeze({
     metadata: Object.freeze({
       assessmentKey: runtimeDefinition.metadata.assessmentKey,
       assessmentTitle: runtimeDefinition.metadata.assessmentTitle,
@@ -770,4 +924,12 @@ export async function buildSingleDomainResultPayload(params: {
       ]),
     }),
   });
+
+  if (!isSingleDomainResultPayload(payload)) {
+    throw new SingleDomainCompletionError(
+      `Generated single-domain result payload is malformed for attempt "${params.responses.attemptId}".`,
+    );
+  }
+
+  return payload;
 }
