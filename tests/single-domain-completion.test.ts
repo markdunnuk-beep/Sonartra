@@ -417,6 +417,194 @@ function createDb(config?: {
         row.rebalance_action_3 = '';
       });
     },
+    useBlueprintSemanticFallbackFixture() {
+      runtime.context.assessment_id = 'blueprint-assessment';
+      runtime.context.assessment_key = 'blueprint-understand-how-you-lead';
+      runtime.context.assessment_title = 'Blueprint - Understand how you lead';
+      runtime.context.assessment_version_id = 'blueprint-version';
+      runtime.domains[0]!.domain_key = 'leadership-approach';
+      runtime.domains[0]!.domain_label = 'Leadership approach';
+      runtime.signals = ([
+        ['signal-process', 'process', 'Process', 0],
+        ['signal-results', 'results', 'Results', 1],
+        ['signal-people', 'people', 'People', 2],
+        ['signal-vision', 'vision', 'Vision', 3],
+      ] as const).map(([id, key, label, orderIndex]) => ({
+        signal_id: id,
+        signal_key: key,
+        signal_label: label,
+        signal_description: null,
+        signal_order_index: orderIndex,
+        domain_id: 'domain-1',
+      }));
+      runtime.weights = [
+        ['weight-1', 'option-1a', 'signal-results', 'results', '3'],
+        ['weight-2', 'option-1a', 'signal-process', 'process', '2'],
+        ['weight-3', 'option-2a', 'signal-results', 'results', '3'],
+        ['weight-4', 'option-2a', 'signal-process', 'process', '2'],
+        ['weight-5', 'option-3a', 'signal-results', 'results', '2'],
+        ['weight-6', 'option-3a', 'signal-process', 'process', '2'],
+        ['weight-7', 'option-3a', 'signal-people', 'people', '2'],
+        ['weight-8', 'option-4a', 'signal-results', 'results', '2'],
+        ['weight-9', 'option-4a', 'signal-process', 'process', '2'],
+        ['weight-10', 'option-4a', 'signal-people', 'people', '2'],
+        ['weight-11', 'option-4a', 'signal-vision', 'vision', '2'],
+        ['weight-12', 'option-1b', 'signal-vision', 'vision', '1'],
+        ['weight-13', 'option-2b', 'signal-vision', 'vision', '1'],
+        ['weight-14', 'option-3b', 'signal-vision', 'vision', '1'],
+        ['weight-15', 'option-4b', 'signal-vision', 'vision', '1'],
+      ].map(([id, optionId, signalId, signalKey, weight]) => ({
+        option_signal_weight_id: id,
+        option_id: optionId,
+        signal_id: signalId,
+        signal_key: signalKey,
+        weight,
+        source_weight_key: `${optionId}|${signalKey}`,
+      }));
+
+      const pairKeys = [
+        'process_results',
+        'process_people',
+        'process_vision',
+        'results_people',
+        'results_vision',
+        'people_vision',
+      ];
+
+      runtime.language.DOMAIN_FRAMING = [{
+        domain_key: 'leadership-approach',
+        section_title: 'Leadership approach',
+        intro_paragraph: 'This domain introduces how you lead.',
+        meaning_paragraph: 'It explains the practical meaning of the pattern.',
+        bridge_to_signals: 'The ranked signals show how that pattern is distributed.',
+        blueprint_context_line: 'This is the current blueprint context line.',
+      }];
+      runtime.language.HERO_PAIRS = pairKeys.map((pair_key) => ({
+        pair_key,
+        hero_headline: `Hero ${pair_key}`,
+        hero_subheadline: `Subheadline ${pair_key}`,
+        hero_opening: `Opening ${pair_key}`,
+        hero_strength_paragraph: `Strength ${pair_key}`,
+        hero_tension_paragraph: `Tension ${pair_key}`,
+        hero_close_paragraph: `Close ${pair_key}`,
+      }));
+      runtime.language.PAIR_SUMMARIES = pairKeys.map((pair_key) => ({
+        pair_key,
+        pair_section_title: `Section ${pair_key}`,
+        pair_headline: `Headline ${pair_key}`,
+        pair_opening_paragraph: `Opening ${pair_key}`,
+        pair_strength_paragraph: `Strength ${pair_key}`,
+        pair_tension_paragraph: `Tension ${pair_key}`,
+        pair_close_paragraph: `Close ${pair_key}`,
+      }));
+      runtime.language.BALANCING_SECTIONS = pairKeys.map((pair_key) => ({
+        pair_key,
+        balancing_section_title: pair_key === 'process_results'
+          ? 'When structure outruns commitment'
+          : `Balance ${pair_key}`,
+        current_pattern_paragraph: pair_key === 'process_results'
+          ? 'The cost of this pattern is that structure and outcomes can receive more attention than how people are responding.'
+          : `Current ${pair_key}`,
+        practical_meaning_paragraph: pair_key === 'process_results'
+          ? 'The limitation appears when the situation needs more patience, listening, or a better read of how people feel about the work.'
+          : `Meaning ${pair_key}`,
+        system_risk_paragraph: pair_key === 'process_results'
+          ? 'The People signal is therefore the missing range to develop around this result.'
+          : `Risk ${pair_key}`,
+        rebalance_intro: pair_key === 'process_results'
+          ? 'people: The People signal is therefore the missing range to develop around this result.'
+          : `Rebalance ${pair_key}`,
+        rebalance_action_1: pair_key === 'process_results'
+          ? 'Bring people into the thinking before the plan is fixed.'
+          : `${pair_key} action 1`,
+        rebalance_action_2: '',
+        rebalance_action_3: '',
+      }));
+      runtime.language.SIGNAL_CHAPTERS = [
+        {
+          signal_key: 'results',
+          position_primary_label: 'Primary driver',
+          position_secondary_label: 'Secondary driver',
+          position_supporting_label: 'Supporting context',
+          position_underplayed_label: 'Range limitation',
+          chapter_intro_primary: '',
+          chapter_intro_secondary: 'Results strengthens this pattern by adding urgency and focus.',
+          chapter_intro_supporting: 'Results sits behind the pattern as a supporting influence.',
+          chapter_intro_underplayed: 'Results is the weaker range in this result.',
+          chapter_how_it_shows_up: 'Results strengthens this pattern by adding urgency and focus.',
+          chapter_value_outcome: 'Results helps keep work moving and outcome focused.',
+          chapter_value_team_effect: 'Results helps others understand what progress requires.',
+          chapter_risk_behaviour: 'Results is the weaker range in this result.',
+          chapter_risk_impact: 'Results is the weaker range in this result.',
+          chapter_development: 'Results is the weaker range in this result.',
+        },
+        {
+          signal_key: 'process',
+          position_primary_label: 'Primary driver',
+          position_secondary_label: 'Secondary driver',
+          position_supporting_label: 'Supporting context',
+          position_underplayed_label: 'Range limitation',
+          chapter_intro_primary: 'Process is the main driver of this pattern.',
+          chapter_intro_secondary: '',
+          chapter_intro_supporting: 'Process sits behind the pattern as a supporting influence.',
+          chapter_intro_underplayed: 'Process is the weaker range in this result.',
+          chapter_how_it_shows_up: 'Process is the main driver of this pattern.',
+          chapter_value_outcome: '',
+          chapter_value_team_effect: '',
+          chapter_risk_behaviour: 'Process is the weaker range in this result.',
+          chapter_risk_impact: 'Process is the weaker range in this result.',
+          chapter_development: 'Process is the weaker range in this result.',
+        },
+        {
+          signal_key: 'people',
+          position_primary_label: 'Primary driver',
+          position_secondary_label: 'Secondary driver',
+          position_supporting_label: 'Supporting context',
+          position_underplayed_label: 'Range limitation',
+          chapter_intro_primary: 'People is the main driver of this pattern.',
+          chapter_intro_secondary: 'People strengthens this pattern by shaping engagement.',
+          chapter_intro_supporting: '',
+          chapter_intro_underplayed: 'People is the weaker range in this result.',
+          chapter_how_it_shows_up: 'People is the main driver of this pattern.',
+          chapter_value_outcome: '',
+          chapter_value_team_effect: '',
+          chapter_risk_behaviour: 'People is the weaker range in this result.',
+          chapter_risk_impact: 'People is the weaker range in this result.',
+          chapter_development: 'People is the weaker range in this result.',
+        },
+        {
+          signal_key: 'vision',
+          position_primary_label: 'Primary driver',
+          position_secondary_label: 'Secondary driver',
+          position_supporting_label: 'Supporting context',
+          position_underplayed_label: 'Range limitation',
+          chapter_intro_primary: 'Vision is the main driver of this pattern.',
+          chapter_intro_secondary: 'Vision strengthens this pattern by giving the work direction.',
+          chapter_intro_supporting: 'Vision sits behind the pattern as a supporting influence.',
+          chapter_intro_underplayed: '',
+          chapter_how_it_shows_up: 'Vision is the main driver of this pattern.',
+          chapter_value_outcome: '',
+          chapter_value_team_effect: '',
+          chapter_risk_behaviour: '',
+          chapter_risk_impact: '',
+          chapter_development: '',
+        },
+      ];
+      runtime.language.APPLICATION_STATEMENTS = [
+        ['results', 'Results'],
+        ['process', 'Process'],
+        ['people', 'People'],
+        ['vision', 'Vision'],
+      ].map(([signal_key, label]) => ({
+        signal_key,
+        strength_statement_1: `${label} strength 1`,
+        strength_statement_2: `${label} strength 2`,
+        watchout_statement_1: `${label} watchout 1`,
+        watchout_statement_2: `${label} watchout 2`,
+        development_statement_1: `${label} development 1`,
+        development_statement_2: `${label} development 2`,
+      }));
+    },
     db: {
       async query<T>(text: string, params?: unknown[]) {
         const sql = text.replace(/\s+/g, ' ').trim();
@@ -950,6 +1138,57 @@ test('single-domain payload maps sparse section-first language into required pay
     'Rebalance vision_delivery',
     'Rebalance vision_delivery',
   ]);
+});
+
+test('single-domain completion replaces semantically incompatible driver fallbacks with neutral text', async () => {
+  const harness = createDb();
+  harness.useBlueprintSemanticFallbackFixture();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'blueprint-version',
+    responses: buildResponseSet(),
+  });
+
+  const textFor = (signalKey: string) => {
+    const signal = payload.signals.find((entry) => entry.signal_key === signalKey);
+    assert.ok(signal, `Expected signal ${signalKey}`);
+    return [
+      signal.chapter_intro,
+      signal.chapter_how_it_shows_up,
+      signal.chapter_value_outcome,
+      signal.chapter_value_team_effect,
+      signal.chapter_risk_behaviour,
+      signal.chapter_risk_impact,
+      signal.chapter_development,
+    ].join('\n');
+  };
+
+  assert.equal(isSingleDomainResultPayload(payload), true);
+  assert.equal(payload.diagnostics.topPair, 'process_results');
+  assert.deepEqual(payload.signals.map((signal) => signal.signal_key), ['results', 'process', 'people', 'vision']);
+  assert.deepEqual(payload.signals.map((signal) => signal.position), ['primary', 'secondary', 'supporting', 'underplayed']);
+
+  assert.doesNotMatch(textFor('process'), /\bmain\s+driver\b/i);
+  assert.doesNotMatch(textFor('people'), /\bmain\s+driver\b/i);
+  assert.doesNotMatch(textFor('vision'), /\bmain\s+driver\b/i);
+  assert.doesNotMatch(textFor('results'), /\bweaker\s+range\b/i);
+  assert.doesNotMatch(payload.balancing.practical_meaning_paragraph, /Results is the weaker range/i);
+  assert.equal(payload.balancing.balancing_section_title, 'When structure outruns commitment');
+  assert.match(payload.balancing.system_risk_paragraph, /People signal is therefore the missing range/i);
+  assert.ok(
+    payload.diagnostics.warnings.some((warning) => (
+      warning.includes('signal_key=vision')
+      && warning.includes('missing_role=range_limitation')
+      && warning.includes('generated=true')
+    )),
+  );
+  assert.ok(
+    payload.diagnostics.warnings.some((warning) => (
+      warning.includes('signal_key=process')
+      && warning.includes('missing_role=secondary_driver')
+    )),
+  );
 });
 
 test('single-domain payload ignores cloned non-target pair rows and uses signal fallback', async () => {
