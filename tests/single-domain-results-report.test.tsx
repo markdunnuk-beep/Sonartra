@@ -216,5 +216,35 @@ test('single-domain results report carries weaker-signal range language into lim
 
   assert.match(markup, /Rigor creates a range gap here/);
   assert.match(markup, /Rigor development/);
-  assert.match(markup, /Rigor: watchout paragraph/);
+  assert.match(markup, /Rigor: System risk paragraph/);
+});
+
+test('single-domain results view model preserves authored body casing and formats labels only', () => {
+  const payload = buildPayload();
+  payload.hero.pair_key = 'results_process';
+  payload.hero.hero_strength_paragraph =
+    'The risk is over-relying on performance-critical follow-through and outcome-focused pressure.';
+  payload.signals[0]!.chapter_intro =
+    'Vision can under-read the room when follow-through becomes the only measure.';
+  payload.pairSummary.pair_key = 'results_process';
+  payload.pairSummary.pair_opening_paragraph =
+    'Process and results should remain lower-case when authored that way in a sentence.';
+  payload.balancing.pair_key = 'results_process';
+  payload.balancing.system_risk_paragraph =
+    'People can be under-read when the plan becomes performance-critical too early.';
+
+  const viewModel = createSingleDomainResultsViewModel(payload);
+  const markup = renderToStaticMarkup(<SingleDomainResultsReport result={viewModel} />);
+
+  assert.equal(viewModel.pairLabel, 'Results and Process');
+  assert.match(markup, /over-relying on performance-critical follow-through/);
+  assert.match(markup, /outcome-focused pressure/);
+  assert.match(markup, /under-read the room/);
+  assert.match(markup, /Process and results should remain lower-case/);
+  assert.match(markup, /performance-critical too early/);
+  assert.doesNotMatch(markup, /Over Relying/);
+  assert.doesNotMatch(markup, /Under Read/);
+  assert.doesNotMatch(markup, /Performance Critical/);
+  assert.doesNotMatch(markup, /Follow Through/);
+  assert.doesNotMatch(markup, /Outcome Focused/);
 });

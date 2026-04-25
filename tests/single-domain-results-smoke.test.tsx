@@ -52,7 +52,7 @@ function buildPayload(attemptId: string): SingleDomainResultPayload {
       hero_subheadline: 'Identity line.',
       hero_opening: 'You move work forward through visible direction and clear execution.',
       hero_strength_paragraph: 'This gives the pattern momentum and practical clarity.',
-      hero_tension_paragraph: 'The Trade Off is that pace can harden into control.',
+      hero_tension_paragraph: 'The trade-off is that pace can harden into control.',
       hero_close_paragraph:
         'The strongest version of the pattern keeps direction clear without becoming rigid.',
     },
@@ -127,7 +127,7 @@ function buildPayload(attemptId: string): SingleDomainResultPayload {
       balancing_section_title: 'Balancing your approach',
       current_pattern_paragraph: 'Current pattern paragraph.',
       practical_meaning_paragraph: 'Practical meaning paragraph.',
-      system_risk_paragraph: 'people: Over Reliance on structure can reduce adaptability.',
+      system_risk_paragraph: 'people: overreliance on structure can reduce adaptability.',
       rebalance_intro: 'Rebalance intro.',
       rebalance_actions: ['Action one', 'Action two', 'Action three'],
     },
@@ -311,5 +311,5 @@ test('single-domain smoke path reaches detail rendering from the results list en
   }
 
   assert.match(markup, /The trade-off is that pace can harden into control\./);
-  assert.match(markup, /Overreliance on structure can reduce adaptability\./);
+  assert.match(markup, /overreliance on structure can reduce adaptability\./);
 });

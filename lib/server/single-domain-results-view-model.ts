@@ -7,6 +7,11 @@ import {
 import { createSingleDomainResultReadingSections } from '@/lib/results/single-domain-reading-sections';
 import type { ResultReadingSectionsConfig } from '@/lib/results/result-reading-sections';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
+import {
+  preserveAuthoredText,
+  toSentenceCaseSafe,
+  toTitleCaseForLabel,
+} from '@/lib/utils/text-formatting';
 
 export type SingleDomainResultsMetadataItem = {
   label: string;
@@ -23,26 +28,9 @@ export type SingleDomainResultsViewModel = {
   report: ComposedSingleDomainReport;
 };
 
-const COPY_REPLACEMENTS: ReadonlyArray<readonly [pattern: RegExp, replacement: string]> =
-  Object.freeze([
-    [/\bpersisted\b/gi, ''],
-    [/\brecomputing in the ui\b/gi, 'working it out again here'],
-    [/\brecomputing\b/gi, 'working it out again'],
-    [/\bintegrated meaning\b/gi, 'combined meaning'],
-    [/\bbalancing diagnosis\b/gi, 'range limitation'],
-    [/\bruntime definition\b/gi, 'current picture'],
-    [/\bcanonical\b/gi, ''],
-    [/\branked signals\b/gi, 'leading tendencies'],
-    [/\bnormalized signal weight\b/gi, 'overall emphasis'],
-    [/\bnormalized\b/gi, 'overall'],
-    [/\bsystem risk\b/gi, 'watchout'],
-    [/\bblueprint context\b/gi, 'focus'],
-  ]);
-
 const SINGLE_DOMAIN_SIGNAL_DISPLAY_LABELS = new Map<string, string>([
-  ['results', 'Delivery'],
-  ['result', 'Delivery'],
-  ['report', 'Delivery'],
+  ['results', 'Results'],
+  ['result', 'Result'],
   ['delivery', 'Delivery'],
   ['vision', 'Vision'],
   ['people', 'People'],
@@ -50,17 +38,6 @@ const SINGLE_DOMAIN_SIGNAL_DISPLAY_LABELS = new Map<string, string>([
   ['rigor', 'Rigor'],
   ['clarity', 'Clarity'],
 ]);
-
-const APPROVED_SINGLE_DOMAIN_SIGNAL_TOKENS = Array.from(SINGLE_DOMAIN_SIGNAL_DISPLAY_LABELS.keys())
-  .sort((left, right) => right.length - left.length)
-  .join('|');
-
-function cleanWhitespace(value: string): string {
-  return value
-    .replace(/\s{2,}/g, ' ')
-    .replace(/\s+([,.!?;:])/g, '$1')
-    .trim();
-}
 
 function normalizeDisplayLookupKey(value: string): string {
   return value
@@ -95,72 +72,21 @@ function resolveApprovedPairDisplayLabel(value: string | null | undefined): stri
 }
 
 function formatRawKeyLabel(value: string): string {
-  return cleanWhitespace(
-    value
-      .split(/[_-]+/)
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join(' '),
-  );
+  return toTitleCaseForLabel(value);
 }
 
-function replaceApprovedPairDisplayLabels(value: string): string {
-  return value.replace(
-    new RegExp(
-      `\\b(${APPROVED_SINGLE_DOMAIN_SIGNAL_TOKENS})\\b\\s*(?:Ã—|x|and)\\s*\\b(${APPROVED_SINGLE_DOMAIN_SIGNAL_TOKENS})\\b`,
-      'gi',
-    ),
-    (match, left, right) => {
-      const leftLabel = resolveApprovedSignalDisplayLabel(left);
-      const rightLabel = resolveApprovedSignalDisplayLabel(right);
-
-      if (!leftLabel || !rightLabel) {
-        return match;
-      }
-
-      return `${leftLabel} and ${rightLabel}`;
-    },
-  );
+function formatDisplayLabel(value: string): string {
+  return resolveApprovedPairDisplayLabel(value)
+    ?? resolveApprovedSignalDisplayLabel(value)
+    ?? toSentenceCaseSafe(value);
 }
 
-function replaceLeadingSignalKeyLabel(value: string): string {
-  return value.replace(/^([a-z][a-z_-]*):/i, (match, key) => {
+function formatNarrativeText(value: string): string {
+  return preserveAuthoredText(value).replace(/^([a-z][a-z_-]*):\s/i, (match, key) => {
     const label = resolveApprovedSignalDisplayLabel(key);
-    return label ? `${label}:` : match;
+
+    return label ? `${label}: ` : match;
   });
-}
-
-function normalizeReleaseCopyTerms(value: string): string {
-  return value
-    .replace(/\bThe Trade Off\b/g, 'The trade-off')
-    .replace(/\bthe trade off\b/g, 'the trade-off')
-    .replace(/\bTrade Off\b/g, 'trade-off')
-    .replace(/\btrade off\b/g, 'trade-off')
-    .replace(/\bSix Section\b/g, 'six-section')
-    .replace(/\bsix section\b/g, 'six-section')
-    .replace(/\bOver Reliance\b/g, 'Overreliance')
-    .replace(/\bover reliance\b/g, 'overreliance');
-}
-
-function cleanResultCopy(value: string): string {
-  let cleaned = value;
-
-  for (const [pattern, replacement] of COPY_REPLACEMENTS) {
-    cleaned = cleaned.replace(pattern, replacement);
-  }
-
-  cleaned = normalizeReleaseCopyTerms(cleaned);
-  cleaned = replaceApprovedPairDisplayLabels(cleaned);
-  cleaned = replaceLeadingSignalKeyLabel(cleaned);
-
-  cleaned = cleaned.replace(
-    /\b[a-z]+(?:[_-][a-z]+)+\b/gi,
-    (match) => resolveApprovedPairDisplayLabel(match) ?? formatRawKeyLabel(match),
-  );
-
-  cleaned = normalizeReleaseCopyTerms(cleaned);
-
-  return cleanWhitespace(cleaned);
 }
 
 function formatResultTimestamp(value: string | null): {
@@ -193,10 +119,11 @@ function formatResultTimestamp(value: string | null): {
 function cleanComposedSection(section: ComposedNarrativeSection): ComposedNarrativeSection {
   return {
     ...section,
-    paragraphs: section.paragraphs.map((paragraph) => cleanResultCopy(paragraph)),
+    title: formatDisplayLabel(section.title),
+    paragraphs: section.paragraphs.map((paragraph) => formatNarrativeText(paragraph)),
     focusItems: section.focusItems.map((item) => ({
-      label: cleanResultCopy(item.label),
-      content: item.content.map((entry) => cleanResultCopy(entry)),
+      label: formatDisplayLabel(item.label),
+      content: item.content.map((entry) => formatNarrativeText(entry)),
     })),
   };
 }
@@ -204,8 +131,8 @@ function cleanComposedSection(section: ComposedNarrativeSection): ComposedNarrat
 function cleanComposedReport(report: ComposedSingleDomainReport): ComposedSingleDomainReport {
   return {
     ...report,
-    domainTitle: cleanResultCopy(report.domainTitle),
-    pairKey: cleanResultCopy(report.pairKey),
+    domainTitle: preserveAuthoredText(report.domainTitle),
+    pairKey: report.pairKey,
     sections: report.sections.map((section) => cleanComposedSection(section)),
   };
 }
@@ -218,7 +145,7 @@ export function createSingleDomainResultsViewModel(
   );
   const pairLabel =
     resolveApprovedPairDisplayLabel(payload.hero.pair_key) ??
-    cleanResultCopy(payload.hero.pair_key);
+    formatRawKeyLabel(payload.hero.pair_key);
   const report = cleanComposedReport(
     composeSingleDomainReport(buildSingleDomainResultComposerInput(payload)),
   );
