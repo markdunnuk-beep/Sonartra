@@ -265,6 +265,68 @@ test('single-domain results report carries weaker-signal range language into lim
   assert.match(markup, /Rigor: System risk paragraph/);
 });
 
+test('single-domain results report aligns limitation prefix with accepted pair balancing text', () => {
+  const payload = buildPayload();
+  payload.hero.pair_key = 'process_results';
+  payload.pairSummary.pair_key = 'process_results';
+  payload.balancing.pair_key = 'process_results';
+  payload.diagnostics.topPair = 'process_results';
+  payload.signals = [
+    {
+      ...payload.signals[0]!,
+      signal_key: 'results',
+      signal_label: 'Results',
+      rank: 1,
+      normalized_score: 38,
+      raw_score: 38,
+      position: 'primary',
+      position_label: 'Primary',
+    },
+    {
+      ...payload.signals[1]!,
+      signal_key: 'process',
+      signal_label: 'Process',
+      rank: 2,
+      normalized_score: 31,
+      raw_score: 31,
+      position: 'secondary',
+      position_label: 'Secondary',
+    },
+    {
+      ...payload.signals[2]!,
+      signal_key: 'people',
+      signal_label: 'People',
+      rank: 3,
+      normalized_score: 19,
+      raw_score: 19,
+      position: 'supporting',
+      position_label: 'Supporting',
+    },
+    {
+      ...payload.signals[3]!,
+      signal_key: 'vision',
+      signal_label: 'Vision',
+      rank: 4,
+      normalized_score: 12,
+      raw_score: 12,
+      position: 'underplayed',
+      position_label: 'Underplayed',
+    },
+  ];
+  payload.balancing.balancing_section_title = 'When structure outruns commitment';
+  payload.balancing.system_risk_paragraph =
+    'The People signal is therefore the missing range to develop around this result.';
+  payload.balancing.rebalance_intro =
+    'people: The People signal is therefore the missing range to develop around this result.';
+
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
+  );
+
+  assert.doesNotMatch(markup, /Vision:\s+The People signal/i);
+  assert.match(markup, /People:\s+The People signal is therefore the missing range/i);
+});
+
 test('single-domain results view model preserves authored body casing and formats labels only', () => {
   const payload = buildPayload();
   payload.hero.pair_key = 'results_process';

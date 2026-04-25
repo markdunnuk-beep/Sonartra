@@ -135,6 +135,104 @@ function getSignalDriverClaimText(
   );
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractLeadingSignalPrefix(
+  value: string | null | undefined,
+  signalKeys: ReadonlySet<string>,
+): {
+  signalKey: string;
+  text: string;
+} | null {
+  if (!value) {
+    return null;
+  }
+
+  const match = value.match(/^\s*([a-z][a-z0-9_-]*)\s*:\s*(.+)$/i);
+  if (!match?.[1] || !match[2]) {
+    return null;
+  }
+
+  const signalKey = match[1].toLowerCase();
+  if (!signalKeys.has(signalKey)) {
+    return null;
+  }
+
+  return {
+    signalKey,
+    text: match[2].trim(),
+  };
+}
+
+function findFirstNamedSignalKey(
+  value: string | null | undefined,
+  signals: readonly SingleDomainResultPayload['signals'][number][],
+): string {
+  if (!value) {
+    return '';
+  }
+
+  const candidates = signals.flatMap((signal) => {
+    const tokens = [signal.signal_key, signal.signal_label]
+      .map((token) => token.trim())
+      .filter(Boolean);
+
+    return tokens.map((token) => {
+      const match = new RegExp(`(^|[^a-z0-9])${escapeRegExp(token)}([^a-z0-9]|$)`, 'i').exec(value);
+      return match?.index === undefined
+        ? null
+        : {
+            signalKey: signal.signal_key,
+            index: match.index,
+          };
+    }).filter((candidate): candidate is { signalKey: string; index: number } => Boolean(candidate));
+  });
+
+  const firstCandidate = candidates.sort((left, right) => (
+    left.index - right.index || left.signalKey.localeCompare(right.signalKey)
+  ))[0];
+
+  return firstCandidate?.signalKey ?? '';
+}
+
+function resolveLimitationWeakerSignalKey(options: {
+  rankedWeakerSignalKey: string;
+  selectedLink: string;
+  rebalanceIntro: string;
+  signals: readonly SingleDomainResultPayload['signals'][number][];
+}): string {
+  const signalKeys = new Set(options.signals.map((signal) => signal.signal_key));
+  const selectedLinkPrefix = extractLeadingSignalPrefix(options.selectedLink, signalKeys);
+  const rebalanceIntroPrefix = extractLeadingSignalPrefix(options.rebalanceIntro, signalKeys);
+  const firstNamedSignalKey = findFirstNamedSignalKey(options.selectedLink, options.signals);
+  const explicitSignalKey = selectedLinkPrefix?.signalKey ?? rebalanceIntroPrefix?.signalKey ?? '';
+
+  if (explicitSignalKey && firstNamedSignalKey && explicitSignalKey !== firstNamedSignalKey) {
+    return '';
+  }
+
+  if (explicitSignalKey) {
+    return explicitSignalKey;
+  }
+
+  if (firstNamedSignalKey) {
+    return firstNamedSignalKey;
+  }
+
+  return options.rankedWeakerSignalKey;
+}
+
+function stripKnownSignalPrefix(
+  value: string,
+  signals: readonly SingleDomainResultPayload['signals'][number][],
+): string {
+  const prefix = extractLeadingSignalPrefix(value, new Set(signals.map((signal) => signal.signal_key)));
+
+  return prefix?.text ?? value;
+}
+
 export function buildSingleDomainResultComposerInput(
   payload: SingleDomainResultPayload,
 ): ResultComposerPreviewInput {
@@ -145,6 +243,13 @@ export function buildSingleDomainResultComposerInput(
   const weakerSignal = orderedSignals.find(
     (signal) => getSignalDriverRole(signal) === 'range_limitation',
   ) ?? orderedSignals[orderedSignals.length - 1] ?? null;
+  const limitationWeakerSignalLink = payload.balancing.system_risk_paragraph || payload.balancing.rebalance_intro;
+  const limitationWeakerSignalKey = resolveLimitationWeakerSignalKey({
+    rankedWeakerSignalKey: weakerSignal?.signal_key ?? '',
+    selectedLink: limitationWeakerSignalLink,
+    rebalanceIntro: payload.balancing.rebalance_intro,
+    signals: orderedSignals,
+  });
 
   const drivers = orderedSignals.map<SingleDomainDriversImportRow>((signal) => {
     const driverRole = getSignalDriverRole(signal);
@@ -266,8 +371,8 @@ export function buildSingleDomainResultComposerInput(
         limitation_label: payload.balancing.balancing_section_title,
         pattern_cost: payload.balancing.current_pattern_paragraph,
         range_narrowing: payload.balancing.practical_meaning_paragraph,
-        weaker_signal_key: weakerSignal?.signal_key ?? '',
-        weaker_signal_link: payload.balancing.system_risk_paragraph || payload.balancing.rebalance_intro,
+        weaker_signal_key: limitationWeakerSignalKey,
+        weaker_signal_link: stripKnownSignalPrefix(limitationWeakerSignalLink, orderedSignals),
       },
       application: applicationRows,
     },
