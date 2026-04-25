@@ -17,6 +17,66 @@ function getRevealStyle(step = 0): CSSProperties {
   } as CSSProperties;
 }
 
+function splitSentences(text: string) {
+  return (
+    text
+      .match(/[^.!?]+[.!?]+(?:["')\]]+)?|[^.!?]+$/g)
+      ?.map((sentence) => sentence.trim())
+      .filter(Boolean) ?? [text]
+  );
+}
+
+function chunkSentences(sentences: readonly string[], chunkSize = 3) {
+  const chunks: string[] = [];
+
+  for (let index = 0; index < sentences.length; index += chunkSize) {
+    chunks.push(sentences.slice(index, index + chunkSize).join(' '));
+  }
+
+  return chunks;
+}
+
+function ProseWithDisclosure({
+  text,
+  className,
+  visibleSentenceCount = 3,
+  minSentencesForDisclosure = 6,
+  disclosureLabel = 'Read supporting detail',
+}: {
+  text: string;
+  className: string;
+  visibleSentenceCount?: number;
+  minSentencesForDisclosure?: number;
+  disclosureLabel?: string;
+}) {
+  const sentences = splitSentences(text);
+
+  if (sentences.length < minSentencesForDisclosure) {
+    return <p className={className}>{text}</p>;
+  }
+
+  const visibleText = sentences.slice(0, visibleSentenceCount).join(' ');
+  const supportingChunks = chunkSentences(sentences.slice(visibleSentenceCount));
+
+  return (
+    <div className="sonartra-prose-disclosure">
+      <p className={className}>{visibleText}</p>
+      <details className="sonartra-prose-details">
+        <summary>
+          <span>{disclosureLabel}</span>
+        </summary>
+        <div className="sonartra-prose-details-body">
+          {supportingChunks.map((chunk, index) => (
+            <p key={`${index}-${chunk}`} className={className}>
+              {chunk}
+            </p>
+          ))}
+        </div>
+      </details>
+    </div>
+  );
+}
+
 function SignalDriverEntry({
   position,
   meta,
@@ -45,17 +105,17 @@ function SignalDriverEntry({
 
       <div className="sonartra-single-domain-driver-entry-body">
         {items.map((item, index) => (
-          <p
+          <ProseWithDisclosure
             key={`${position}-${item}`}
+            text={item}
             className={[
               'sonartra-report-body-soft',
               index === 0 ? 'text-white/78' : 'text-white/64',
             ]
               .filter(Boolean)
               .join(' ')}
-          >
-            {item}
-          </p>
+            disclosureLabel={`Read more about ${position.toLowerCase()}`}
+          />
         ))}
       </div>
     </section>
@@ -84,17 +144,19 @@ function ApplicationActionEntry({
       <h3 className="sonartra-single-domain-application-entry-title">{title}</h3>
       <div className="sonartra-single-domain-application-entry-body">
         {items.map((item, index) => (
-          <p
+          <ProseWithDisclosure
             key={`${title}-${item}`}
+            text={item}
             className={[
               'sonartra-report-body-soft',
               index === 0 ? 'text-white/78' : 'text-white/64',
             ]
               .filter(Boolean)
               .join(' ')}
-          >
-            {item}
-          </p>
+            minSentencesForDisclosure={5}
+            visibleSentenceCount={2}
+            disclosureLabel={`Read more about ${title.toLowerCase()}`}
+          />
         ))}
       </div>
     </section>
@@ -139,12 +201,13 @@ export function SingleDomainResultSection({
         {supporting.length > 0 ? (
           <div className="sonartra-single-domain-hero-support grid gap-5 border-t border-white/[0.075] pt-7 md:pt-8">
             {supporting.map((paragraph, index) => (
-              <p
+              <ProseWithDisclosure
                 key={`${section.key}-${index + 1}`}
+                text={paragraph}
                 className="sonartra-report-body-soft max-w-[68ch]"
-              >
-                {paragraph}
-              </p>
+                visibleSentenceCount={3}
+                disclosureLabel="Read supporting context"
+              />
             ))}
           </div>
         ) : null}
@@ -278,8 +341,9 @@ export function SingleDomainResultSection({
         }
       >
         {body.map((paragraph, index) => (
-          <p
+          <ProseWithDisclosure
             key={`${section.key}-${index + 1}`}
+            text={paragraph}
             className={
               index === 0
                 ? section.key === 'pair'
@@ -293,9 +357,16 @@ export function SingleDomainResultSection({
                     ? 'sonartra-report-body-soft max-w-[52rem] text-white/66'
                     : 'sonartra-report-body-soft text-white/66 max-w-[56rem]'
             }
-          >
-            {paragraph}
-          </p>
+            visibleSentenceCount={section.key === 'pair' ? 2 : 3}
+            minSentencesForDisclosure={section.key === 'pair' ? 5 : 6}
+            disclosureLabel={
+              section.key === 'pair'
+                ? 'Read pair detail'
+                : section.key === 'limitation'
+                  ? 'Read range detail'
+                  : 'Read supporting detail'
+            }
+          />
         ))}
       </div>
     </ReportChapter>

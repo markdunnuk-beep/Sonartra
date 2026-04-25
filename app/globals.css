@@ -962,6 +962,67 @@ main {
     color: rgba(220, 229, 250, 0.64);
   }
 
+  .sonartra-prose-disclosure {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .sonartra-prose-details {
+    max-width: 68ch;
+  }
+
+  .sonartra-prose-details summary {
+    @apply sonartra-focus-ring;
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.65rem;
+    color: rgba(207, 218, 243, 0.5);
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.35rem;
+    outline: none;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .sonartra-prose-details summary:hover {
+    color: rgba(228, 236, 255, 0.72);
+  }
+
+  .sonartra-prose-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .sonartra-prose-details summary::before {
+    content: '+';
+    display: inline-flex;
+    height: 1.05rem;
+    width: 1.05rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.018);
+    color: rgba(228, 236, 255, 0.58);
+    font-size: 0.82rem;
+    line-height: 1;
+  }
+
+  .sonartra-prose-details[open] summary::before {
+    content: '-';
+  }
+
+  .sonartra-prose-details-body {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1rem;
+    padding-left: 1.55rem;
+    border-left: 1px solid rgba(223, 232, 255, 0.055);
+  }
+
   .sonartra-single-domain-surface-warm {
     border-color: rgba(251, 191, 36, 0.16);
     background:

@@ -236,6 +236,25 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /sonartra-single-domain-section-limitation/);
 });
 
+test('single-domain results report reduces dense repeated prose with accessible disclosure', () => {
+  const payload = buildPayload();
+  payload.hero.hero_strength_paragraph =
+    'Results strengthens this pattern by adding urgency and focus. You push work forward and make progress visible. This helps prevent drift and keeps attention on outcomes. The risk is that pace can move ahead of delivery. Results strengthens this pattern by adding urgency and focus. You push for outcomes and help keep work moving. This prevents drift and maintains momentum.';
+  payload.signals[0]!.chapter_intro =
+    'Vision is the main driver of this pattern. You focus on where the work is going and why it matters. You define direction clearly. This helps create energy and forward movement. Vision is the main driver of this pattern. You focus on where the work is going and why it matters. The risk is that direction can feel clear to you before it is fully understood by others.';
+
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
+  );
+
+  assert.match(markup, /<details class="sonartra-prose-details">/);
+  assert.match(markup, /<summary><span>Read supporting context<\/span><\/summary>/);
+  assert.match(markup, /<summary><span>Read more about primary driver<\/span><\/summary>/);
+  assert.match(markup, /The risk is that direction can feel clear to you before it is fully understood by others\./);
+  assert.match(markup, /data-result-reading-rail="true"/);
+  assert.match(markup, /href="#drivers"/);
+});
+
 test('single-domain results report carries weaker-signal range language into limitation and application', () => {
   const markup = renderToStaticMarkup(
     <SingleDomainResultsReport result={createSingleDomainResultsViewModel(buildPayload())} />,
