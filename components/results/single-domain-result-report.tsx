@@ -57,7 +57,7 @@ export function SingleDomainResultReport({ result }: { result: SingleDomainResul
           >
             <div className="sonartra-report-reading-measure space-y-4 md:space-y-5">
               {introSection.paragraphs[0] ? (
-                <p className="sonartra-report-summary text-white/80">
+                <p className="sonartra-report-summary text-white/78">
                   {introSection.paragraphs[0]}
                 </p>
               ) : null}
@@ -66,7 +66,7 @@ export function SingleDomainResultReport({ result }: { result: SingleDomainResul
                 {introSection.paragraphs.slice(1, 3).map((paragraph) => (
                   <p
                     key={`intro-${paragraph}`}
-                    className="sonartra-report-body text-white/68"
+                    className="sonartra-report-body text-white/64"
                   >
                     {paragraph}
                   </p>

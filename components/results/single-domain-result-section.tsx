@@ -49,7 +49,7 @@ function SignalDriverEntry({
             key={`${position}-${item}`}
             className={[
               'sonartra-report-body-soft',
-              index === 0 ? 'text-white/80' : 'text-white/68',
+              index === 0 ? 'text-white/78' : 'text-white/64',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -88,7 +88,7 @@ function ApplicationActionEntry({
             key={`${title}-${item}`}
             className={[
               'sonartra-report-body-soft',
-              index === 0 ? 'text-white/80' : 'text-white/68',
+              index === 0 ? 'text-white/78' : 'text-white/64',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -131,7 +131,7 @@ export function SingleDomainResultSection({
         style={getRevealStyle(step)}
       >
         {summary ? (
-          <p className="sonartra-report-summary sonartra-report-reading-measure text-white/85">
+          <p className="sonartra-report-summary sonartra-report-reading-measure text-white/80">
             {summary}
           </p>
         ) : null}
@@ -283,15 +283,15 @@ export function SingleDomainResultSection({
             className={
               index === 0
                 ? section.key === 'pair'
-                  ? 'sonartra-report-summary max-w-[48rem] text-[1.02rem] leading-8 text-white/82'
+                  ? 'sonartra-report-summary max-w-[48rem] text-[1.02rem] leading-8 text-white/78'
                   : section.key === 'limitation'
-                    ? 'sonartra-report-summary max-w-[52rem] text-[1.06rem] leading-8 text-white/88 md:text-[1.12rem] md:leading-9'
-                    : 'sonartra-report-summary max-w-[54rem] text-white/80'
+                    ? 'sonartra-report-summary max-w-[52rem] text-[1.06rem] leading-8 text-white/80 md:text-[1.12rem] md:leading-9'
+                    : 'sonartra-report-summary max-w-[54rem] text-white/78'
                 : section.key === 'pair'
-                  ? 'sonartra-report-body-soft max-w-[48rem] text-white/66'
+                  ? 'sonartra-report-body-soft max-w-[48rem] text-white/64'
                   : section.key === 'limitation'
-                    ? 'sonartra-report-body-soft max-w-[52rem] text-white/72'
-                    : 'sonartra-report-body-soft text-white/74 max-w-[56rem]'
+                    ? 'sonartra-report-body-soft max-w-[52rem] text-white/66'
+                    : 'sonartra-report-body-soft text-white/66 max-w-[56rem]'
             }
           >
             {paragraph}
