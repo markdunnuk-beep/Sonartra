@@ -41,9 +41,13 @@ type PersistedResponseRow = {
   attempt_id: string;
   question_id: string;
   selected_option_id: string;
-  responded_at: string;
-  updated_at: string;
+  responded_at: Date | string;
+  updated_at: Date | string;
 };
+
+function toTimestampString(value: Date | string): string {
+  return value instanceof Date ? value.toISOString() : value;
+}
 
 function mapAttemptCompletionRow(row: AttemptCompletionRow): AssessmentCompletionAttemptSummary {
   return {
@@ -87,8 +91,8 @@ function mapPersistedResponseRow(row: PersistedResponseRow): AssessmentCompletio
     attemptId: row.attempt_id,
     questionId: row.question_id,
     selectedOptionId: row.selected_option_id,
-    respondedAt: row.responded_at,
-    updatedAt: row.updated_at,
+    respondedAt: toTimestampString(row.responded_at),
+    updatedAt: toTimestampString(row.updated_at),
   };
 }
 
