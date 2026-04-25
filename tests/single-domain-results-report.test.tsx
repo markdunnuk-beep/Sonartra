@@ -168,6 +168,9 @@ test('single-domain results report renders the locked six-section flow and six r
     assert.doesNotMatch(markup, new RegExp(`href=\"#${staleAnchor}\"`));
     assert.doesNotMatch(markup, new RegExp(`id=\"${staleAnchor}\"`));
   }
+
+  assert.match(markup, /data-result-reading-rail="true"/);
+  assert.doesNotMatch(markup, /sonartra-report-shell-rail/);
 });
 
 test('single-domain results report keeps hero, drivers, limitation, and application visually distinct', () => {

@@ -702,10 +702,6 @@ main {
     max-width: 74rem;
   }
 
-  .sonartra-report-shell-rail {
-    min-width: 0;
-  }
-
   .sonartra-report-reading-measure {
     max-width: 72ch;
   }

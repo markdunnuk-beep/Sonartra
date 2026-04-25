@@ -20,7 +20,7 @@ export function ReportShell({ children, rail, className, bodyClassName }: Report
       <article className="sonartra-report-shell sonartra-single-domain-report relative isolate">
         <div className={cn('sonartra-report-shell-layout', bodyClassName)}>
           {children}
-          {rail ? <div className="sonartra-report-shell-rail">{rail}</div> : null}
+          {rail}
         </div>
       </article>
     </PageFrame>
