@@ -1,4 +1,6 @@
-import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
+import {
+  resolveSingleDomainPairKey,
+} from '@/lib/assessment-language/single-domain-pair-keys';
 import { SINGLE_DOMAIN_DRIVER_ROLE_TO_CLAIM_TYPE } from '@/lib/assessment-language/single-domain-narrative-schema';
 import type {
   SingleDomainApplicationImportRow,
@@ -18,6 +20,7 @@ import {
   SINGLE_DOMAIN_CLAIM_OWNERSHIP_KEYS,
   SINGLE_DOMAIN_DRIVER_ROLES,
 } from '@/lib/assessment-language/single-domain-narrative-types';
+import { buildSingleDomainPairKey } from '@/lib/types/single-domain-runtime';
 
 export type SingleDomainImportValidationIssue = {
   lineNumber: number | null;
@@ -55,7 +58,7 @@ function hasKnownSignalKey(signalKeys: readonly string[], signalKey: string): bo
 }
 
 function hasKnownPairKey(pairKeys: readonly string[], pairKey: string): boolean {
-  return pairKeys.includes(pairKey);
+  return resolveSingleDomainPairKey(pairKeys, pairKey).success;
 }
 
 function validatePairKey(
@@ -64,19 +67,11 @@ function validatePairKey(
   lineNumber: number,
   issues: SingleDomainImportValidationIssue[],
 ): void {
-  const canonical = canonicalizeSignalPairKey(pairKey);
-  if (!canonical.success) {
+  const resolution = resolveSingleDomainPairKey(pairKeys, pairKey);
+  if (!resolution.success && resolution.reason === 'invalid_shape') {
     issues.push({
       lineNumber,
       message: `Line ${lineNumber}: pair_key "${pairKey}" must be a canonical two-signal key.`,
-    });
-    return;
-  }
-
-  if (canonical.canonicalSignalPair !== pairKey) {
-    issues.push({
-      lineNumber,
-      message: `Line ${lineNumber}: pair_key "${pairKey}" must already be canonicalized as "${canonical.canonicalSignalPair}".`,
     });
     return;
   }
@@ -87,6 +82,15 @@ function validatePairKey(
       message: `Line ${lineNumber}: pair_key "${pairKey}" is not resolvable for the current signal set.`,
     });
   }
+}
+
+function normalizePairKey(pairKeys: readonly string[], pairKey: string): string {
+  const resolution = resolveSingleDomainPairKey(pairKeys, pairKey);
+  if (!resolution.success) {
+    return pairKey;
+  }
+
+  return resolution.canonicalPairKey;
 }
 
 function validateSharedRowFields<TKey extends SingleDomainNarrativeDatasetKey>(
@@ -489,10 +493,7 @@ export function buildSingleDomainImportValidationContext(params: {
         continue;
       }
 
-      const canonical = canonicalizeSignalPairKey(`${left}_${right}`);
-      if (canonical.success) {
-        pairKeys.push(canonical.canonicalSignalPair);
-      }
+      pairKeys.push(buildSingleDomainPairKey(left, right));
     }
   }
 
@@ -503,6 +504,28 @@ export function buildSingleDomainImportValidationContext(params: {
     signalKeys: [...params.signalKeys],
     pairKeys,
   };
+}
+
+export function normalizeSingleDomainImportRowsForRuntimePairKeys<
+  TKey extends SingleDomainNarrativeDatasetKey,
+>(
+  context: SingleDomainImportValidationContext,
+  rows: readonly SingleDomainNarrativeImportRowMap[TKey][],
+): readonly SingleDomainNarrativeImportRowMap[TKey][] {
+  if (context.datasetKey === 'SINGLE_DOMAIN_INTRO') {
+    return rows;
+  }
+
+  return rows.map((row) => {
+    if (!('pair_key' in row)) {
+      return row;
+    }
+
+    return {
+      ...row,
+      pair_key: normalizePairKey(context.pairKeys, row.pair_key),
+    };
+  }) as readonly SingleDomainNarrativeImportRowMap[TKey][];
 }
 
 export function validateSingleDomainImportRows<TKey extends SingleDomainNarrativeDatasetKey>(

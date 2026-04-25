@@ -361,6 +361,23 @@ function createDb(config?: {
       runtime.weights[0]!.weight = '99';
       runtime.language.HERO_PAIRS[0]!.hero_headline = 'Changed hero headline';
     },
+    reverseTopPairLanguageKeys() {
+      runtime.language.HERO_PAIRS
+        .filter((row) => row.pair_key === 'vision_delivery')
+        .forEach((row) => {
+          row.pair_key = 'delivery_vision';
+        });
+      runtime.language.BALANCING_SECTIONS
+        .filter((row) => row.pair_key === 'vision_delivery')
+        .forEach((row) => {
+          row.pair_key = 'delivery_vision';
+        });
+      runtime.language.PAIR_SUMMARIES
+        .filter((row) => row.pair_key === 'vision_delivery')
+        .forEach((row) => {
+          row.pair_key = 'delivery_vision';
+        });
+    },
     db: {
       async query<T>(text: string, params?: unknown[]) {
         const sql = text.replace(/\s+/g, ' ').trim();
@@ -822,6 +839,23 @@ test('single-domain payload assembles deterministically from authored runtime da
   assert.deepEqual(payload.application.strengths.map((item) => item.statement), ['Vision strength 1', 'Delivery strength 2', 'People strength 2']);
   assert.deepEqual(payload.application.watchouts.map((item) => item.statement), ['Vision watchout 1', 'Delivery watchout 2', 'Rigor watchout 2']);
   assert.deepEqual(payload.application.developmentFocus.map((item) => item.statement), ['Rigor development 1', 'People development 2', 'Delivery development 2']);
+});
+
+test('single-domain payload resolves reversed pair language rows to runtime pair key', async () => {
+  const harness = createDb();
+  harness.reverseTopPairLanguageKeys();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  assert.equal(payload.diagnostics.topPair, 'vision_delivery');
+  assert.equal(payload.hero.pair_key, 'vision_delivery');
+  assert.equal(payload.balancing.pair_key, 'vision_delivery');
+  assert.equal(payload.pairSummary.pair_key, 'vision_delivery');
+  assert.equal(payload.hero.hero_headline, 'Hero vision_delivery');
 });
 
 test('single-domain completion marks ready only when the canonical payload is structurally complete', async () => {

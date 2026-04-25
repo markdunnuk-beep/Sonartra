@@ -17,10 +17,10 @@ import type {
   SingleDomainPairImportRow,
   SingleDomainPreviewSignal,
 } from '@/lib/assessment-language/single-domain-narrative-types';
-import { canonicalizeSignalPairKey } from '@/lib/admin/pair-language-import';
 import type { AdminAssessmentDetailViewModel } from '@/lib/server/admin-assessment-detail';
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
+import { buildSingleDomainPairKey } from '@/lib/types/single-domain-runtime';
 
 export type ResultComposerPreviewInput = SingleDomainNarrativePreviewInput;
 
@@ -300,10 +300,7 @@ function buildSignalPairOptions(signalKeys: readonly string[]): readonly string[
         continue;
       }
 
-      const canonical = canonicalizeSignalPairKey(`${left}_${right}`);
-      if (canonical.success) {
-        pairKeys.push(canonical.canonicalSignalPair);
-      }
+      pairKeys.push(buildSingleDomainPairKey(left, right));
     }
   }
 

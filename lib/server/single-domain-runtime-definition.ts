@@ -1,4 +1,5 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
+import { resolveSingleDomainPairKey } from '@/lib/assessment-language/single-domain-pair-keys';
 import { getSingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language';
 import type {
   SingleDomainDraftReadinessCounts,
@@ -280,7 +281,6 @@ function validateLanguageKeys(params: {
   issues: SingleDomainDraftReadinessIssue[];
 }): void {
   const signalKeySet = new Set(params.signalKeys);
-  const pairKeySet = new Set(params.pairKeys);
   const domainKey = params.domainKey;
 
   const framingKeys = [...new Set(params.languageBundle.DOMAIN_FRAMING.map((row) => row.domain_key))];
@@ -322,7 +322,9 @@ function validateLanguageKeys(params: {
   }
 
   const heroPairKeys = [...new Set(params.languageBundle.HERO_PAIRS.map((row) => row.pair_key))];
-  const invalidHeroPairKeys = heroPairKeys.filter((key) => !pairKeySet.has(key));
+  const invalidHeroPairKeys = heroPairKeys.filter(
+    (key) => !resolveSingleDomainPairKey(params.pairKeys, key).success,
+  );
   if (invalidHeroPairKeys.length > 0) {
     params.issues.push(
       createIssue(
@@ -335,7 +337,9 @@ function validateLanguageKeys(params: {
   }
 
   const balancingPairKeys = [...new Set(params.languageBundle.BALANCING_SECTIONS.map((row) => row.pair_key))];
-  const invalidBalancingPairKeys = balancingPairKeys.filter((key) => !pairKeySet.has(key));
+  const invalidBalancingPairKeys = balancingPairKeys.filter(
+    (key) => !resolveSingleDomainPairKey(params.pairKeys, key).success,
+  );
   if (invalidBalancingPairKeys.length > 0) {
     params.issues.push(
       createIssue(
@@ -348,7 +352,9 @@ function validateLanguageKeys(params: {
   }
 
   const pairSummaryKeys = [...new Set(params.languageBundle.PAIR_SUMMARIES.map((row) => row.pair_key))];
-  const invalidPairSummaryKeys = pairSummaryKeys.filter((key) => !pairKeySet.has(key));
+  const invalidPairSummaryKeys = pairSummaryKeys.filter(
+    (key) => !resolveSingleDomainPairKey(params.pairKeys, key).success,
+  );
   if (invalidPairSummaryKeys.length > 0) {
     params.issues.push(
       createIssue(

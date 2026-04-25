@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   buildSingleDomainImportValidationContext,
+  normalizeSingleDomainImportRowsForRuntimePairKeys,
   validateSingleDomainImportRows,
 } from '@/lib/assessment-language/single-domain-import-validators';
 
@@ -140,4 +141,103 @@ test('import validation enforces strict section_key ownership for the target con
     result.validationErrors.map((issue) => issue.message).join('\n'),
     /section_key must be "pair"/i,
   );
+});
+
+test('single-domain validation accepts runtime-ordered results_process pair keys', () => {
+  const context = buildSingleDomainImportValidationContext({
+    datasetKey: 'SINGLE_DOMAIN_PAIR',
+    currentDomainKey: 'leadership-approach',
+    signalKeys: ['results', 'process', 'vision', 'people'],
+  });
+
+  const result = validateSingleDomainImportRows(context, [
+    {
+      domain_key: 'leadership-approach',
+      section_key: 'pair',
+      pair_key: 'results_process',
+      pair_label: 'Results and Process',
+      interaction_claim: 'Results and Process combine around disciplined delivery.',
+      synergy_claim: 'The pair gives execution structure and commercial pressure.',
+      tension_claim: 'The pair can narrow the human range.',
+      pair_outcome: 'The best use of the pair makes structure build confidence.',
+    },
+  ]);
+
+  assert.equal(result.success, true);
+});
+
+test('single-domain validation accepts reversed pair keys and normalizes them to runtime order', () => {
+  const context = buildSingleDomainImportValidationContext({
+    datasetKey: 'SINGLE_DOMAIN_HERO',
+    currentDomainKey: 'leadership-approach',
+    signalKeys: ['results', 'process', 'vision', 'people'],
+  });
+  const rows = [
+    {
+      domain_key: 'leadership-approach',
+      section_key: 'hero' as const,
+      pair_key: 'process_results',
+      pattern_label: 'Disciplined delivery',
+      hero_statement: 'Direction becomes delivery.',
+      hero_expansion: 'The pattern makes work more ordered.',
+      hero_strength: 'The trade-off is a narrower people range.',
+    },
+  ];
+
+  const result = validateSingleDomainImportRows(context, rows);
+  const normalized = normalizeSingleDomainImportRowsForRuntimePairKeys(context, rows);
+
+  assert.equal(result.success, true);
+  assert.equal(normalized[0]?.pair_key, 'results_process');
+});
+
+test('pair-owned section imports no longer fail solely because pair order is runtime-first', () => {
+  const base = {
+    currentDomainKey: 'leadership-approach',
+    signalKeys: ['results', 'process', 'vision', 'people'],
+  };
+
+  const hero = validateSingleDomainImportRows(
+    buildSingleDomainImportValidationContext({ ...base, datasetKey: 'SINGLE_DOMAIN_HERO' }),
+    [{
+      domain_key: 'leadership-approach',
+      section_key: 'hero',
+      pair_key: 'results_process',
+      pattern_label: 'Disciplined delivery',
+      hero_statement: 'Direction becomes delivery.',
+      hero_expansion: 'The pattern makes work more ordered.',
+      hero_strength: 'The trade-off is a narrower people range.',
+    }],
+  );
+  const limitation = validateSingleDomainImportRows(
+    buildSingleDomainImportValidationContext({ ...base, datasetKey: 'SINGLE_DOMAIN_LIMITATION' }),
+    [{
+      domain_key: 'leadership-approach',
+      section_key: 'limitation',
+      pair_key: 'results_process',
+      limitation_label: 'When structure outruns commitment',
+      pattern_cost: 'The pattern can narrow the leadership field.',
+      range_narrowing: 'People signals may arrive too late.',
+      weaker_signal_key: 'people',
+      weaker_signal_link: 'People must be included earlier.',
+    }],
+  );
+  const application = validateSingleDomainImportRows(
+    buildSingleDomainImportValidationContext({ ...base, datasetKey: 'SINGLE_DOMAIN_APPLICATION' }),
+    [{
+      domain_key: 'leadership-approach',
+      section_key: 'application',
+      pair_key: 'results_process',
+      focus_area: 'notice',
+      guidance_type: 'watchout',
+      signal_key: 'people',
+      guidance_text: 'Notice weak commitment signals early.',
+      linked_claim_type: 'watchout',
+      priority: '1',
+    }],
+  );
+
+  assert.equal(hero.success, true);
+  assert.equal(limitation.success, true);
+  assert.equal(application.success, true);
 });

@@ -437,6 +437,29 @@ test('single-domain runtime loader assembles a deterministic runtime object from
   assert.equal(runtime.languageBundle.SIGNAL_CHAPTERS.length, 3);
 });
 
+test('single-domain runtime readiness accepts reversed pair language keys as aliases', async () => {
+  const fixture = buildFixture();
+  fixture.language.HERO_PAIRS = fixture.language.HERO_PAIRS.map((row) => (
+    row.pair_key === 'directive_supportive'
+      ? { ...row, pair_key: 'supportive_directive' }
+      : row
+  ));
+  fixture.language.BALANCING_SECTIONS = fixture.language.BALANCING_SECTIONS.map((row) => (
+    row.pair_key === 'directive_supportive'
+      ? { ...row, pair_key: 'supportive_directive' }
+      : row
+  ));
+  fixture.language.PAIR_SUMMARIES = fixture.language.PAIR_SUMMARIES.map((row) => (
+    row.pair_key === 'directive_supportive'
+      ? { ...row, pair_key: 'supportive_directive' }
+      : row
+  ));
+
+  const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
+
+  assert.equal(readiness.isReady, true);
+});
+
 test('unknown or undefined mode values never resolve through the single-domain runtime path', async () => {
   await assert.rejects(
     () => loadSingleDomainRuntimeDefinition(

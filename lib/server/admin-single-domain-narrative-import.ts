@@ -8,7 +8,11 @@ import {
   mapSingleDomainNarrativeRowsToLegacyDataset,
 } from '@/lib/assessment-language/single-domain-import-mappers';
 import { parseSingleDomainImportInput } from '@/lib/assessment-language/single-domain-import-parsers';
-import { buildSingleDomainImportValidationContext, validateSingleDomainImportRows } from '@/lib/assessment-language/single-domain-import-validators';
+import {
+  buildSingleDomainImportValidationContext,
+  normalizeSingleDomainImportRowsForRuntimePairKeys,
+  validateSingleDomainImportRows,
+} from '@/lib/assessment-language/single-domain-import-validators';
 import type { SingleDomainNarrativeDatasetKey } from '@/lib/assessment-language/single-domain-narrative-types';
 import { getAdminAssessmentDetailByKey } from '@/lib/server/admin-assessment-detail';
 import { getSingleDomainLanguageBundle, saveSingleDomainLanguageDataset } from '@/lib/server/assessment-version-single-domain-language';
@@ -253,7 +257,7 @@ export async function importSingleDomainNarrativeSectionForAssessmentVersionWith
 
   const legacyDataset = mapSingleDomainNarrativeRowsToLegacyDataset(
     command.datasetKey,
-    validated.rows,
+    normalizeSingleDomainImportRowsForRuntimePairKeys(validationContext, validated.rows),
   );
 
   try {

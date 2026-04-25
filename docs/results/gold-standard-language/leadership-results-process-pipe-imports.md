@@ -84,7 +84,7 @@ Key values:
 
 Validator note:
 
-The seeded result trace and requested task use `results_process`. The current `canonicalizeSignalPairKey` helper sorts two-signal keys alphabetically, which would canonicalise the same pair as `process_results`. These rows therefore preserve the seeded result key, but the current admin validator may reject the pair key until the validator and seeded/runtime pair-key convention are reconciled.
+The seeded result trace and requested task use `results_process`. The single-domain import path now treats authored/runtime signal order as canonical and accepts the reversed `process_results` form as a compatibility alias.
 
 ## 3. Pipe-delimited imports
 
@@ -168,7 +168,7 @@ Recommended import order:
 4. Import in the order listed above so the domain frame, pair-owned sections, signal drivers, and application rows become available for the preview.
 5. Review the builder preview for the locked section order: intro, hero, drivers, pair, limitation, application.
 6. Check that the weaker People thread appears in Drivers, Limitation, and Application without repeating the same wording.
-7. Before using these rows against a live admin import, resolve the `results_process` versus `process_results` validator convention if the builder rejects the seeded pair key.
+7. Confirm the preview preserves the `results_process` pair-owned sections without reporting pair-key order errors.
 
 Local validation commands:
 
@@ -180,15 +180,14 @@ node --test -r tsx tests/single-domain-import-parsers.test.ts tests/single-domai
 Generated-row validation outcome:
 
 - All six generated code blocks parse successfully with `parseSingleDomainImportInput`.
-- `SINGLE_DOMAIN_INTRO` validates successfully.
-- The pair-owned datasets currently fail `validateSingleDomainImportRows` because `results_process` is rejected as non-canonical and the validator expects `process_results`.
-- Do not paste these rows into the admin importer until that pair-key convention is resolved, or the builder is confirmed to accept the seeded `results_process` key through its live context.
+- All six generated code blocks validate successfully when checked against the seeded Leadership context: domain `leadership-approach`, signals `results`, `process`, `vision`, and `people`.
+- Pair-owned datasets no longer fail because of `results_process` pair-key order.
 
 ## 6. Risks / assumptions
 
 - `domain_key` is taken from the seeded result trace as `leadership-approach`.
 - `results_process` is preserved because it is the seeded result pair key and the requested target pair key.
-- Current validator canonicalisation appears to prefer alphabetically sorted pair keys, which would produce `process_results`. That is the main import risk.
+- `process_results` is a compatibility alias for validation/import, but the single-domain import path normalises aliases to the runtime-derived key before storage.
 - Application uses 15 rows rather than only 9 visible selection targets so later-selected signals have populated second statement slots.
 - The application row priorities are positive integer strings and are scoped per signal/focus/guidance grouping.
 - The rows avoid pipe characters inside cell text because the parser splits only on `|`.

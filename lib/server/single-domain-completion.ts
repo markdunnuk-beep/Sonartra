@@ -1,6 +1,7 @@
 import { loadRuntimeExecutionModel } from '@/lib/engine/runtime-loader';
 import { normalizeScoreResult } from '@/lib/engine/normalization';
 import { scoreAssessmentResponses } from '@/lib/engine/scoring';
+import { resolveSingleDomainPairKey } from '@/lib/assessment-language/single-domain-pair-keys';
 import type {
   RuntimeAssessmentDefinition,
   RuntimeResponseSet,
@@ -162,22 +163,37 @@ function getPositionLabel(params: {
   }
 }
 
+function createPairLanguageMap<TRow extends { pair_key: string }>(
+  runtimeDefinition: Awaited<ReturnType<typeof loadSingleDomainRuntimeDefinition>>,
+  rows: readonly TRow[],
+): ReadonlyMap<string, TRow> {
+  const runtimePairKeys = runtimeDefinition.derivedPairs.map((pair) => pair.pairKey);
+  const map = new Map<string, TRow>();
+
+  rows.forEach((row) => {
+    const resolution = resolveSingleDomainPairKey(runtimePairKeys, row.pair_key);
+    map.set(resolution.success ? resolution.canonicalPairKey : row.pair_key, row);
+  });
+
+  return map;
+}
+
 function createLanguageMaps(runtimeDefinition: Awaited<ReturnType<typeof loadSingleDomainRuntimeDefinition>>) {
   return {
     framingByDomainKey: new Map(
       runtimeDefinition.languageBundle.DOMAIN_FRAMING.map((row) => [row.domain_key, row]),
     ),
-    heroByPairKey: new Map(
-      runtimeDefinition.languageBundle.HERO_PAIRS.map((row) => [row.pair_key, row]),
-    ),
+    heroByPairKey: createPairLanguageMap(runtimeDefinition, runtimeDefinition.languageBundle.HERO_PAIRS),
     signalChapterBySignalKey: new Map(
       runtimeDefinition.languageBundle.SIGNAL_CHAPTERS.map((row) => [row.signal_key, row]),
     ),
-    balancingByPairKey: new Map(
-      runtimeDefinition.languageBundle.BALANCING_SECTIONS.map((row) => [row.pair_key, row]),
+    balancingByPairKey: createPairLanguageMap(
+      runtimeDefinition,
+      runtimeDefinition.languageBundle.BALANCING_SECTIONS,
     ),
-    pairSummaryByPairKey: new Map(
-      runtimeDefinition.languageBundle.PAIR_SUMMARIES.map((row) => [row.pair_key, row]),
+    pairSummaryByPairKey: createPairLanguageMap(
+      runtimeDefinition,
+      runtimeDefinition.languageBundle.PAIR_SUMMARIES,
     ),
     applicationBySignalKey: new Map(
       runtimeDefinition.languageBundle.APPLICATION_STATEMENTS.map((row) => [row.signal_key, row]),
@@ -214,9 +230,9 @@ function toIntro(row: DomainFramingRow): SingleDomainResultIntro {
   };
 }
 
-function toHero(row: HeroPairsRow): SingleDomainResultHero {
+function toHero(row: HeroPairsRow, pairKey: string): SingleDomainResultHero {
   return {
-    pair_key: row.pair_key,
+    pair_key: pairKey,
     hero_headline: row.hero_headline,
     hero_subheadline: row.hero_subheadline,
     hero_opening: row.hero_opening,
@@ -226,9 +242,9 @@ function toHero(row: HeroPairsRow): SingleDomainResultHero {
   };
 }
 
-function toBalancing(row: BalancingSectionsRow): SingleDomainResultBalancing {
+function toBalancing(row: BalancingSectionsRow, pairKey: string): SingleDomainResultBalancing {
   return {
-    pair_key: row.pair_key,
+    pair_key: pairKey,
     balancing_section_title: row.balancing_section_title,
     current_pattern_paragraph: row.current_pattern_paragraph,
     practical_meaning_paragraph: row.practical_meaning_paragraph,
@@ -242,9 +258,9 @@ function toBalancing(row: BalancingSectionsRow): SingleDomainResultBalancing {
   };
 }
 
-function toPairSummary(row: PairSummariesRow): SingleDomainResultPairSummary {
+function toPairSummary(row: PairSummariesRow, pairKey: string): SingleDomainResultPairSummary {
   return {
-    pair_key: row.pair_key,
+    pair_key: pairKey,
     pair_section_title: row.pair_section_title,
     pair_headline: row.pair_headline,
     pair_opening_paragraph: row.pair_opening_paragraph,
@@ -443,10 +459,10 @@ export async function buildSingleDomainResultPayload(params: {
       completedAt: params.responses.submittedAt,
     }),
     intro: Object.freeze(toIntro(introRow)),
-    hero: Object.freeze(toHero(heroRow)),
+    hero: Object.freeze(toHero(heroRow, topPairKey)),
     signals,
-    balancing: Object.freeze(toBalancing(balancingRow)),
-    pairSummary: Object.freeze(toPairSummary(pairSummaryRow)),
+    balancing: Object.freeze(toBalancing(balancingRow, topPairKey)),
+    pairSummary: Object.freeze(toPairSummary(pairSummaryRow, topPairKey)),
     application: Object.freeze(application),
     diagnostics: Object.freeze({
       readinessStatus: 'ready' as const,
