@@ -17,20 +17,16 @@ function getRevealStyle(step = 0): CSSProperties {
   } as CSSProperties;
 }
 
-function FocusGroup({
-  title,
+function SignalDriverEntry({
+  position,
+  meta,
   items,
   className,
-  itemClassName,
-  titleClassName,
-  preface,
 }: {
-  title: string;
+  position: string;
+  meta: string;
   items: readonly string[];
   className?: string;
-  itemClassName?: string;
-  titleClassName?: string;
-  preface?: string;
 }) {
   if (items.length === 0) {
     return null;
@@ -38,35 +34,22 @@ function FocusGroup({
 
   return (
     <section
-      className={[
-        'sonartra-single-domain-surface space-y-3 rounded-[1.45rem] border px-5 py-5',
-        className,
-      ]
+      className={['sonartra-single-domain-driver-entry', className]
         .filter(Boolean)
         .join(' ')}
     >
-      <div className="space-y-2">
-        {preface ? (
-          <p className="text-[0.62rem] font-medium uppercase tracking-[0.18em] text-white/28">
-            {preface}
-          </p>
-        ) : null}
-        <p
-          className={['sonartra-report-kicker text-white/42', titleClassName]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {title}
-        </p>
+      <div className="sonartra-single-domain-driver-entry-header">
+        <p className="sonartra-single-domain-driver-entry-meta">{meta}</p>
+        <h3 className="sonartra-single-domain-driver-entry-title">{position}</h3>
       </div>
-      <div className="sonartra-single-domain-focus-grid">
+
+      <div className="sonartra-single-domain-driver-entry-body">
         {items.map((item, index) => (
           <p
-            key={`${title}-${item}`}
+            key={`${position}-${item}`}
             className={[
-              'sonartra-single-domain-focus-item sonartra-report-body-soft text-white/76',
-              index === 0 ? 'text-white/82' : '',
-              itemClassName,
+              'sonartra-report-body-soft',
+              index === 0 ? 'text-white/80' : 'text-white/68',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -177,6 +160,20 @@ export function SingleDomainResultSection({
     const secondaryDriver = section.focusItems.find((item) => item.label === 'Secondary driver');
     const supportingContext = section.focusItems.find((item) => item.label === 'Supporting context');
     const rangeLimitation = section.focusItems.find((item) => item.label === 'Range limitation');
+    const driverEntries = [
+      {
+        item: primaryDriver,
+        meta: 'Main cause',
+        className: 'sonartra-single-domain-driver-entry-primary',
+      },
+      { item: secondaryDriver, meta: 'Reinforcing cause' },
+      { item: supportingContext, meta: 'Supporting layer' },
+      {
+        item: rangeLimitation,
+        meta: 'Missing range',
+        className: 'sonartra-single-domain-driver-entry-limitation',
+      },
+    ];
 
     return (
       <ReportChapter
@@ -194,56 +191,18 @@ export function SingleDomainResultSection({
         className="space-y-8 md:space-y-10"
         style={getRevealStyle(step)}
       >
-        <div className="sonartra-single-domain-driver-layout">
-          <div className="sonartra-single-domain-driver-main">
-            {primaryDriver ? (
-              <FocusGroup
-                title={primaryDriver.label}
-                items={primaryDriver.content}
-                preface="Main cause"
-                className="sonartra-single-domain-driver-primary px-6 py-6 md:px-7 md:py-7 lg:px-8 lg:py-8"
-                titleClassName="sonartra-single-domain-driver-primary-label"
-                itemClassName="sonartra-single-domain-driver-primary-text text-[1.08rem] leading-8 md:text-[1.18rem] md:leading-9"
+        <div className="sonartra-single-domain-driver-flow">
+          {driverEntries.map(({ item, meta, className }) =>
+            item ? (
+              <SignalDriverEntry
+                key={item.label}
+                position={item.label}
+                meta={meta}
+                items={item.content}
+                className={className}
               />
-            ) : null}
-          </div>
-
-          <div className="sonartra-single-domain-driver-support-rail">
-            {secondaryDriver ? (
-              <FocusGroup
-                title={secondaryDriver.label}
-                items={secondaryDriver.content}
-                preface="Reinforcing cause"
-                className="sonartra-single-domain-driver-secondary px-5 py-5 md:px-6 md:py-6"
-                titleClassName="sonartra-single-domain-driver-secondary-label"
-                itemClassName="text-white/70"
-              />
-            ) : null}
-
-            <div className="sonartra-single-domain-driver-context-stack">
-              {supportingContext ? (
-                <FocusGroup
-                  title={supportingContext.label}
-                  items={supportingContext.content}
-                  preface="Supporting layer"
-                  className="sonartra-single-domain-driver-supporting"
-                  titleClassName="text-white/28"
-                  itemClassName="text-white/58"
-                />
-              ) : null}
-
-              {rangeLimitation ? (
-                <FocusGroup
-                  title={rangeLimitation.label}
-                  items={rangeLimitation.content}
-                  preface="Missing range"
-                  className="sonartra-single-domain-driver-limitation"
-                  titleClassName="text-amber-100/68"
-                  itemClassName="text-white/75"
-                />
-              ) : null}
-            </div>
-          </div>
+            ) : null,
+          )}
         </div>
       </ReportChapter>
     );

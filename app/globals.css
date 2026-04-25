@@ -999,134 +999,58 @@ main {
     min-width: min(100%, 18.5rem);
   }
 
-  .sonartra-single-domain-driver-primary {
-    position: relative;
-    overflow: hidden;
-    border-color: rgba(223, 232, 255, 0.14);
-    background:
-      radial-gradient(circle at 8% 0%, rgba(159, 178, 255, 0.16), transparent 38%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.018)),
-      rgba(11, 18, 32, 0.48);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 24px 58px rgba(0, 0, 0, 0.18);
+  .sonartra-single-domain-driver-flow {
+    display: grid;
+    gap: 1.65rem;
+    max-width: 72ch;
   }
 
-  .sonartra-single-domain-driver-primary::before {
-    content: '';
-    position: absolute;
-    inset: 1rem auto 1rem 0;
-    width: 2px;
-    border-radius: 999px;
-    background: linear-gradient(
-      180deg,
-      rgba(226, 234, 255, 0.72),
-      rgba(142, 162, 255, 0.18)
-    );
+  .sonartra-single-domain-driver-entry {
+    display: grid;
+    gap: 0.95rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.075);
+    padding-top: 1.35rem;
   }
 
-  .sonartra-single-domain-driver-primary-label {
-    color: rgba(236, 241, 255, 0.74);
+  .sonartra-single-domain-driver-entry:first-child {
+    border-top-color: rgba(255, 255, 255, 0.12);
   }
 
-  .sonartra-single-domain-driver-primary-text {
-    color: rgba(236, 241, 255, 0.9);
+  .sonartra-single-domain-driver-entry-header {
+    display: grid;
+    gap: 0.28rem;
   }
 
-  .sonartra-single-domain-driver-secondary {
-    border-color: rgba(223, 232, 255, 0.06);
-    background:
-      radial-gradient(circle at top left, rgba(142, 162, 255, 0.035), transparent 52%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008)),
-      rgba(8, 12, 22, 0.16);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.02),
-      0 10px 26px rgba(0, 0, 0, 0.06);
-  }
-
-  .sonartra-single-domain-driver-secondary-label {
+  .sonartra-single-domain-driver-entry-meta {
+    @apply sonartra-type-eyebrow;
     color: rgba(207, 218, 243, 0.38);
   }
 
-  .sonartra-single-domain-driver-supporting {
-    border-color: rgba(223, 232, 255, 0.055);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0.006)),
-      rgba(255, 255, 255, 0.008);
-    box-shadow: none;
+  .sonartra-single-domain-driver-entry-title {
+    @apply text-[1.25rem] font-semibold leading-7 tracking-[-0.014em] md:text-[1.42rem] md:leading-8;
+    color: rgba(255, 255, 255, 0.88);
   }
 
-  .sonartra-single-domain-driver-limitation {
-    border-color: rgba(251, 191, 36, 0.13);
-    background:
-      radial-gradient(circle at top left, rgba(251, 191, 36, 0.045), transparent 42%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.008)),
-      rgba(24, 18, 10, 0.19);
-    box-shadow: none;
-  }
-
-  .sonartra-single-domain-driver-layout {
+  .sonartra-single-domain-driver-entry-body {
     display: grid;
-    gap: 1rem;
+    gap: 0.95rem;
   }
 
-  .sonartra-single-domain-driver-main,
-  .sonartra-single-domain-driver-support-rail,
-  .sonartra-single-domain-driver-context-stack {
-    min-width: 0;
+  .sonartra-single-domain-driver-entry-primary {
+    border-top-color: rgba(236, 241, 255, 0.16);
   }
 
-  .sonartra-single-domain-driver-support-rail {
-    display: grid;
-    gap: 0.85rem;
-    align-content: start;
+  .sonartra-single-domain-driver-entry-limitation {
+    border-top-color: rgba(251, 191, 36, 0.18);
   }
 
-  .sonartra-single-domain-driver-context-stack {
-    display: grid;
-    gap: 0.75rem;
-  }
-
-  .sonartra-single-domain-driver-context-stack .sonartra-single-domain-surface {
-    padding: 1rem 1.1rem;
-    border-radius: 1.2rem;
-  }
-
-  .sonartra-single-domain-driver-context-stack .sonartra-single-domain-focus-grid {
-    gap: 0.8rem;
-  }
-
-  .sonartra-single-domain-driver-context-stack .sonartra-single-domain-focus-item + .sonartra-single-domain-focus-item {
-    padding-top: 0.72rem;
+  .sonartra-single-domain-driver-entry-limitation .sonartra-single-domain-driver-entry-meta {
+    color: rgba(251, 226, 166, 0.58);
   }
 
   @media (min-width: 768px) {
-    .sonartra-single-domain-driver-layout {
-      gap: 1.15rem;
-    }
-
-    .sonartra-single-domain-driver-support-rail {
-      gap: 1rem;
-    }
-
-    .sonartra-single-domain-driver-context-stack {
-      gap: 0.85rem;
-    }
-  }
-
-  @media (min-width: 1100px) {
-    .sonartra-single-domain-driver-layout {
-      grid-template-columns: minmax(0, 1.34fr) minmax(18rem, 0.66fr);
-      gap: 1.55rem;
-      align-items: start;
-    }
-
-    .sonartra-single-domain-driver-main .sonartra-single-domain-surface {
-      min-height: 100%;
-    }
-
-    .sonartra-single-domain-driver-support-rail {
-      gap: 1.05rem;
+    .sonartra-single-domain-driver-flow {
+      gap: 1.95rem;
     }
   }
 

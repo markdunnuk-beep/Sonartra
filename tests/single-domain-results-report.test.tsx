@@ -189,9 +189,12 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /Reinforcing cause/);
   assert.match(markup, /Supporting layer/);
   assert.match(markup, /Missing range/);
-  assert.match(markup, /sonartra-single-domain-driver-layout/);
-  assert.match(markup, /sonartra-single-domain-driver-support-rail/);
-  assert.match(markup, /sonartra-single-domain-driver-context-stack/);
+  assert.match(markup, /sonartra-single-domain-driver-flow/);
+  assert.match(markup, /sonartra-single-domain-driver-entry-primary/);
+  assert.match(markup, /sonartra-single-domain-driver-entry-limitation/);
+  assert.doesNotMatch(markup, /sonartra-single-domain-driver-layout/);
+  assert.doesNotMatch(markup, /sonartra-single-domain-driver-support-rail/);
+  assert.doesNotMatch(markup, /sonartra-single-domain-driver-context-stack/);
   assert.match(markup, /sonartra-single-domain-section-pair/);
   assert.match(markup, /sonartra-single-domain-section-limitation/);
   assert.match(markup, /sonartra-single-domain-application-grid/);
@@ -202,6 +205,8 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, />Secondary driver</);
   assert.match(markup, />Supporting context</);
   assert.match(markup, />Range limitation</);
+  assert.match(markup, /<h3 class="sonartra-single-domain-driver-entry-title">Primary driver<\/h3>/);
+  assert.match(markup, /<h3 class="sonartra-single-domain-driver-entry-title">Secondary driver<\/h3>/);
   assert.match(markup, />Rely on</);
   assert.match(markup, />Notice</);
   assert.match(markup, />Develop</);
