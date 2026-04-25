@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { CSSProperties, ReactNode } from 'react';
 
 import { ApplicationPlan } from '@/components/results/application-plan';
@@ -524,6 +524,10 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     }
 
     throw error;
+  }
+
+  if (result.mode === 'single_domain' && result.singleDomainResult) {
+    redirect(`/app/results/single-domain/${resultId}`);
   }
 
   const domainRingModels = buildDomainSignalRingViewModel({

@@ -331,3 +331,25 @@ test('single-domain result route stays tied to persisted result retrieval and no
   assert.match(source, /if \(detail\.mode !== 'single_domain' \|\| !detail\.singleDomainResult\)/);
   assert.match(source, /notFound\(\)/);
 });
+
+test('generic result route redirects single-domain results to the canonical report route', () => {
+  const source = readFileSync(
+    join(
+      process.cwd(),
+      'app',
+      '(user)',
+      'app',
+      'results',
+      '[resultId]',
+      'page.tsx',
+    ),
+    'utf8',
+  );
+
+  assert.match(source, /import \{ notFound, redirect \} from 'next\/navigation';/);
+  assert.match(source, /getAssessmentResultDetail/);
+  assert.match(source, /if \(result\.mode === 'single_domain' && result\.singleDomainResult\)/);
+  assert.match(source, /redirect\(`\/app\/results\/single-domain\/\$\{resultId\}`\)/);
+  assert.match(source, /buildDomainSignalRingViewModel/);
+  assert.match(source, /No persisted domain summaries are available for this result/);
+});
