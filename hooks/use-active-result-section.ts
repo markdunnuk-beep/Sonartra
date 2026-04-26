@@ -9,13 +9,17 @@ import {
 } from '@/lib/results/result-reading-sections';
 
 const DEFAULT_ACTIVE_SECTION_ID = RESULT_READING_SECTION_IDS[0] ?? null;
-const OBSERVER_THRESHOLDS = [0, 0.15, 0.35, 0.55, 0.75, 1] as const;
+const OBSERVER_THRESHOLDS = [0, 0.08, 0.18, 0.32, 0.5, 0.68, 0.84, 1] as const;
+const READING_LINE_VIEWPORT_RATIO = 0.36;
+const ANCHOR_SCROLL_OFFSET_PX = 96;
 
 type SectionObservation = {
   id: string;
   isIntersecting: boolean;
   intersectionRatio: number;
   centerDistanceRatio: number;
+  readingLineDistanceRatio?: number;
+  hasPassedReadingLine?: boolean;
 };
 
 type ActiveSectionState = {
@@ -48,21 +52,37 @@ function clamp(value: number, min: number, max: number): number {
 function getSectionScore(observation: SectionObservation, isCurrent: boolean): number {
   const centerWeight = 1 - clamp(observation.centerDistanceRatio, 0, 1);
   const visibilityWeight = clamp(observation.intersectionRatio, 0, 1);
-  const stickinessBonus = isCurrent ? 0.1 : 0;
+  const readingLineWeight = 1 - clamp(
+    observation.readingLineDistanceRatio ?? observation.centerDistanceRatio,
+    0,
+    1,
+  );
+  const passedReadingLineBonus = observation.hasPassedReadingLine ? 0.08 : 0;
+  const stickinessBonus = isCurrent ? 0.055 : 0;
 
-  return visibilityWeight * 0.72 + centerWeight * 0.28 + stickinessBonus;
+  return (
+    visibilityWeight * 0.38 +
+    readingLineWeight * 0.42 +
+    centerWeight * 0.12 +
+    passedReadingLineBonus +
+    stickinessBonus
+  );
 }
 
 function getSwitchMargin(candidateObservation: SectionObservation): number {
-  if (candidateObservation.intersectionRatio >= 0.64) {
-    return 0.05;
+  if (candidateObservation.hasPassedReadingLine && candidateObservation.intersectionRatio >= 0.18) {
+    return 0.035;
   }
 
-  if (candidateObservation.intersectionRatio >= 0.46) {
-    return 0.085;
+  if (candidateObservation.intersectionRatio >= 0.58) {
+    return 0.045;
   }
 
-  return 0.14;
+  if (candidateObservation.intersectionRatio >= 0.38) {
+    return 0.065;
+  }
+
+  return 0.105;
 }
 
 function isDomainSubsectionInConfig(
@@ -171,9 +191,12 @@ export function pickActiveSectionCandidate({
     return currentActiveSectionId;
   }
 
-  if (currentObservation.intersectionRatio >= 0.26) {
+  if (
+    currentObservation.intersectionRatio >= 0.26 &&
+    !bestCandidate.hasPassedReadingLine
+  ) {
     const hasMeaningfulVisibilityLead =
-      bestCandidate.intersectionRatio >= currentObservation.intersectionRatio + 0.1;
+      bestCandidate.intersectionRatio >= currentObservation.intersectionRatio + 0.08;
 
     if (!hasMeaningfulVisibilityLead) {
       return currentActiveSectionId;
@@ -186,6 +209,7 @@ export function pickActiveSectionCandidate({
   if (
     currentObservation.intersectionRatio >= 0.22 &&
     bestCandidate.intersectionRatio < 0.52 &&
+    !bestCandidate.hasPassedReadingLine &&
     centerDistanceLead < 0.18
   ) {
     return currentActiveSectionId;
@@ -201,6 +225,7 @@ export function pickActiveSectionCandidate({
 function buildSectionObservation(element: HTMLElement): SectionObservation {
   const viewportHeight = Math.max(window.innerHeight || 0, 1);
   const viewportCenter = viewportHeight / 2;
+  const readingLine = viewportHeight * READING_LINE_VIEWPORT_RATIO;
   const rect = element.getBoundingClientRect();
   const visibleTop = Math.max(rect.top, 0);
   const visibleBottom = Math.min(rect.bottom, viewportHeight);
@@ -213,7 +238,30 @@ function buildSectionObservation(element: HTMLElement): SectionObservation {
     isIntersecting: visibleHeight > 0,
     intersectionRatio: clamp(visibleHeight / elementHeight, 0, 1),
     centerDistanceRatio: clamp(Math.abs(elementCenter - viewportCenter) / viewportCenter, 0, 2),
+    readingLineDistanceRatio: clamp(Math.abs(rect.top - readingLine) / readingLine, 0, 2),
+    hasPassedReadingLine: rect.top <= readingLine && rect.bottom > readingLine * 0.42,
   };
+}
+
+export function scrollToResultSection(sectionId: string): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const target = document.getElementById(sectionId);
+  if (!target) {
+    return false;
+  }
+
+  const top = target.getBoundingClientRect().top + window.scrollY - ANCHOR_SCROLL_OFFSET_PX;
+
+  window.history.replaceState(null, '', `#${sectionId}`);
+  window.scrollTo({
+    top: Math.max(top, 0),
+    behavior: 'smooth',
+  });
+
+  return true;
 }
 
 export function useActiveResultSection(): string | null {
@@ -312,6 +360,15 @@ export function useActiveResultSectionWithConfig(
                     0,
                     2,
                   ),
+                  readingLineDistanceRatio: clamp(
+                    Math.abs(rect.top - viewportHeight * READING_LINE_VIEWPORT_RATIO) /
+                      (viewportHeight * READING_LINE_VIEWPORT_RATIO),
+                    0,
+                    2,
+                  ),
+                  hasPassedReadingLine:
+                    rect.top <= viewportHeight * READING_LINE_VIEWPORT_RATIO &&
+                    rect.bottom > viewportHeight * READING_LINE_VIEWPORT_RATIO * 0.42,
                 });
               }
 
@@ -319,7 +376,7 @@ export function useActiveResultSectionWithConfig(
             },
             {
               root: null,
-              rootMargin: '-12% 0px -12% 0px',
+              rootMargin: '-8% 0px -18% 0px',
               threshold: OBSERVER_THRESHOLDS as unknown as number[],
             },
           );

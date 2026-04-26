@@ -1,10 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { type ReactNode, useState } from 'react';
+import { type MouseEvent, type ReactNode, useState } from 'react';
 
 import { cn } from '@/components/shared/user-app-ui';
-import { useActiveResultSectionWithConfig } from '@/hooks/use-active-result-section';
+import {
+  scrollToResultSection,
+  useActiveResultSectionWithConfig,
+} from '@/hooks/use-active-result-section';
 import {
   copyResultsLinkedInSharePost,
   trackResultsLinkedInOpenClicked,
@@ -116,6 +119,14 @@ export function ResultReadingRail({
   const activeSectionOrder = getSectionOrder(activeSectionId, sectionsConfig);
   const [utilityFeedback, setUtilityFeedback] = useState('');
 
+  function handleSectionAnchorClick(sectionId: string) {
+    return (event: MouseEvent<HTMLAnchorElement>) => {
+      if (scrollToResultSection(sectionId)) {
+        event.preventDefault();
+      }
+    };
+  }
+
   async function handleLinkedInShare() {
     if (!utilityActions) {
       return;
@@ -137,10 +148,13 @@ export function ResultReadingRail({
   return (
     <nav
       aria-label="Report reading navigation"
-      className={cn('hidden xl:block xl:w-[11.75rem] xl:shrink-0', className)}
+      className={cn(
+        'hidden xl:sticky xl:top-[5.7rem] xl:block xl:w-[11.75rem] xl:shrink-0 xl:self-start',
+        className,
+      )}
       data-result-reading-rail="true"
     >
-      <div className="sticky top-[5.7rem] space-y-3 rounded-[1.35rem] border border-white/[0.04] bg-[#09101d]/24 px-3 py-3.5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] backdrop-blur-[12px]">
+      <div className="space-y-3 rounded-[1.35rem] border border-white/[0.04] bg-[#09101d]/24 px-3 py-3.5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] backdrop-blur-[12px]">
         <div className="space-y-2 pb-1.5 pl-1">
           <Image
             src="/images/sonartra-logo.svg"
@@ -174,7 +188,8 @@ export function ResultReadingRail({
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
-                  aria-current={isExactTopLevelActive ? 'location' : undefined}
+                  aria-current={isExactTopLevelActive ? 'true' : undefined}
+                  onClick={handleSectionAnchorClick(section.id)}
                   data-reading-state={
                     isExactTopLevelActive
                       ? 'current'
@@ -270,7 +285,8 @@ export function ResultReadingRail({
                           <li key={domainSection.id}>
                             <a
                               href={`#${domainSection.id}`}
-                              aria-current={isDomainSubsectionActive ? 'location' : undefined}
+                              aria-current={isDomainSubsectionActive ? 'true' : undefined}
+                              onClick={handleSectionAnchorClick(domainSection.id)}
                               data-reading-state={
                                 isDomainSubsectionActive
                                   ? 'current'

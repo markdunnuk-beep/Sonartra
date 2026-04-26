@@ -55,7 +55,7 @@ html {
   }
 
   .sonartra-motion-nav-item:hover,
-  .sonartra-motion-nav-item[aria-current='location'] {
+  .sonartra-motion-nav-item[aria-current='true'] {
     transform: none;
   }
 }

@@ -13,7 +13,7 @@ test('result detail desktop layout uses widened container and rebalanced columns
 
   assert.match(pageSource, /xl:max-w-\[114rem\]/);
   assert.match(pageSource, /xl:grid-cols-\[minmax\(0,1fr\)_minmax\(10\.75rem,12\.25rem\)\]/);
-  assert.match(pageSource, /<main className="min-w-0 max-w-none/);
+  assert.match(pageSource, /<div className="min-w-0 max-w-none/);
   assert.match(pageSource, /<div className="w-full px-1 md:px-2 xl:px-0\.5">/);
   assert.match(pageSource, /ResultReadingRail\s+className="hidden xl:block xl:pt-1"/);
   assert.match(pageSource, /utilityActions=\{/);
@@ -25,7 +25,7 @@ test('global styles enable smooth anchors while respecting reduced motion', () =
   assert.match(cssSource, /html \{\n  scroll-behavior: smooth;/);
   assert.match(cssSource, /@media \(prefers-reduced-motion: reduce\) \{\n  html \{\n    scroll-behavior: auto;/);
   assert.match(cssSource, /\.sonartra-motion-progress,\n  \.sonartra-result-rail-item,[\s\S]*transition: none;/);
-  assert.match(cssSource, /\.sonartra-motion-nav-item\[aria-current='location'\] \{\n    transform: none;/);
+  assert.match(cssSource, /\.sonartra-motion-nav-item\[aria-current='true'\] \{\n    transform: none;/);
   assert.match(cssSource, /main \{\n  @apply mx-auto min-h-\[calc\(100vh-4rem\)\] w-full max-w-\[1320px\]/);
 });
 
@@ -51,8 +51,8 @@ test('active-section hook wiring remains single-path through rail and progress c
   );
 
   assert.doesNotMatch(pageSource, /useActiveResultSection/);
-  assert.match(railSource, /import \{ useActiveResultSection \} from '@\/hooks\/use-active-result-section';/);
-  assert.match(progressSource, /import \{ useActiveResultSection \} from '@\/hooks\/use-active-result-section';/);
-  assert.equal(railSource.match(/useActiveResultSection\(\)/g)?.length ?? 0, 1);
-  assert.equal(progressSource.match(/useActiveResultSection\(\)/g)?.length ?? 0, 1);
+  assert.match(railSource, /useActiveResultSectionWithConfig/);
+  assert.match(progressSource, /useActiveResultSectionWithConfig/);
+  assert.equal(railSource.match(/useActiveResultSectionWithConfig\(/g)?.length ?? 0, 1);
+  assert.equal(progressSource.match(/useActiveResultSectionWithConfig\(/g)?.length ?? 0, 1);
 });

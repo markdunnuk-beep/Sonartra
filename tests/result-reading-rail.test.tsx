@@ -70,9 +70,9 @@ test('reading rail renders nested domain items beneath How It Shows Up without n
 test('active top-level section receives aria-current semantics', () => {
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride="hero" />);
 
-  assert.match(markup, /href="#hero"[^>]*aria-current="location"/);
-  assert.doesNotMatch(markup, /href="#intro"[^>]*aria-current="location"/);
-  assert.doesNotMatch(markup, /href="#application"[^>]*aria-current="location"/);
+  assert.match(markup, /href="#hero"[^>]*aria-current="true"/);
+  assert.doesNotMatch(markup, /href="#intro"[^>]*aria-current="true"/);
+  assert.doesNotMatch(markup, /href="#application"[^>]*aria-current="true"/);
 });
 
 test('only the active domain subsection receives aria-current semantics', () => {
@@ -80,11 +80,11 @@ test('only the active domain subsection receives aria-current semantics', () => 
     <ResultReadingRail activeSectionIdOverride="domain-core-drivers" />,
   );
 
-  assert.doesNotMatch(markup, /href="#domains"[^>]*aria-current="location"/);
-  assert.match(markup, /href="#domain-core-drivers"[^>]*aria-current="location"/);
-  assert.doesNotMatch(markup, /href="#domain-operating-style"[^>]*aria-current="location"/);
+  assert.doesNotMatch(markup, /href="#domains"[^>]*aria-current="true"/);
+  assert.match(markup, /href="#domain-core-drivers"[^>]*aria-current="true"/);
+  assert.doesNotMatch(markup, /href="#domain-operating-style"[^>]*aria-current="true"/);
 
-  const currentCount = markup.match(/aria-current="location"/g)?.length ?? 0;
+  const currentCount = markup.match(/aria-current="true"/g)?.length ?? 0;
   assert.equal(currentCount, 1);
 });
 
