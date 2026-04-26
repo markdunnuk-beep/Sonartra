@@ -32,8 +32,12 @@ function MetadataCard({
 }
 
 function OpeningEvidencePanel({
+  lead,
+  proofItems,
   items,
 }: {
+  lead: SingleDomainResultsViewModel['openingSummary']['evidenceLead'];
+  proofItems: SingleDomainResultsViewModel['openingSummary']['proofItems'];
   items: SingleDomainResultsViewModel['openingSummary']['evidenceItems'];
 }) {
   return (
@@ -41,8 +45,23 @@ function OpeningEvidencePanel({
       <div className="sonartra-single-domain-evidence-panel-header">
         <p className="sonartra-report-kicker">Why this result was generated</p>
         <p className="sonartra-single-domain-evidence-panel-note">
-          Based on the pattern in your completed responses.
+          {lead}
         </p>
+      </div>
+
+      <div className="sonartra-single-domain-proof-grid" aria-label="Signal rank evidence">
+        {proofItems.map((item) => (
+          <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-proof-item">
+            <div>
+              <p className="sonartra-single-domain-proof-label">{item.label}</p>
+              <p className="sonartra-single-domain-proof-value">{item.value}</p>
+            </div>
+            {item.scoreLabel ? (
+              <span className="sonartra-single-domain-proof-score">{item.scoreLabel}</span>
+            ) : null}
+            <p className="sonartra-single-domain-proof-detail">{item.detail}</p>
+          </div>
+        ))}
       </div>
 
       <dl className="sonartra-single-domain-evidence-list">
@@ -102,7 +121,11 @@ export function SingleDomainResultReport({ result }: { result: SingleDomainResul
                 </div>
               </div>
 
-              <OpeningEvidencePanel items={result.openingSummary.evidenceItems} />
+              <OpeningEvidencePanel
+                lead={result.openingSummary.evidenceLead}
+                proofItems={result.openingSummary.proofItems}
+                items={result.openingSummary.evidenceItems}
+              />
             </div>
 
             <MetadataCard items={result.metadataItems} pairLabel={result.pairLabel} />

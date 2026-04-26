@@ -198,9 +198,21 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /Vision-led pattern, reinforced by Delivery/);
   assert.match(markup, /Pair opening paragraph/);
   assert.match(markup, /Why this result was generated/);
+  assert.match(markup, /Built from 24\/24 completed responses, ordered to match the result headline/);
+  assert.match(markup, /Signal rank evidence/);
+  assert.match(markup, /sonartra-single-domain-proof-grid/);
+  assert.match(markup, /sonartra-single-domain-proof-item/);
+  assert.match(markup, /Primary signal/);
+  assert.match(markup, /Reinforcing signal/);
+  assert.match(markup, /Least available range/);
+  assert.match(markup, /Response base/);
+  assert.match(markup, /38%/);
+  assert.match(markup, /31%/);
+  assert.match(markup, /12%/);
+  assert.match(markup, /24\/24 completed responses/);
   assert.match(markup, /Signal pattern/);
   assert.match(markup, /Vision appears strongest, Delivery reinforces it, and Rigor is the least available range/);
-  assert.match(markup, /Ranked from 24 completed responses/);
+  assert.match(markup, /Ranked from 24\/24 completed responses/);
   assert.match(markup, /Missing range/);
   assert.match(markup, /Rigor: Balancing your approach/);
   assert.match(markup, /sonartra-single-domain-meta-strip/);
@@ -332,6 +344,10 @@ test('single-domain results report aligns limitation prefix with accepted pair b
     <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
   );
 
+  assert.match(markup, /Results-led pattern, reinforced by Process/);
+  assert.match(markup, />Leading pair</);
+  assert.match(markup, />Results and Process</);
+  assert.match(markup, /Shown primary-first to match the headline\./);
   assert.doesNotMatch(markup, /Vision:\s+The People signal/i);
   assert.match(markup, /People:\s+The People signal is therefore the missing range/i);
 });

@@ -25,11 +25,20 @@ export type SingleDomainResultsEvidenceItem = {
   detail?: string;
 };
 
+export type SingleDomainResultsProofItem = {
+  label: string;
+  value: string;
+  detail: string;
+  scoreLabel?: string;
+};
+
 export type SingleDomainResultsOpeningSummary = {
   eyebrow: string;
   title: string;
   diagnosis: string;
   implication: string;
+  evidenceLead: string;
+  proofItems: readonly SingleDomainResultsProofItem[];
   evidenceItems: readonly SingleDomainResultsEvidenceItem[];
 };
 
@@ -167,6 +176,14 @@ function createOpeningSummary(
   const underplayedLabel = underplayed?.signal_label
     ? formatDisplayLabel(underplayed.signal_label)
     : 'least available range';
+  const responseCount = payload.diagnostics.answeredQuestionCount;
+  const totalQuestionCount = payload.diagnostics.totalQuestionCount;
+  const responseBase = totalQuestionCount > 0
+    ? `${responseCount}/${totalQuestionCount} completed responses`
+    : `${responseCount} completed responses`;
+  const headlinePairLabel = secondary
+    ? `${primaryLabel} and ${secondaryLabel}`
+    : pairLabel;
 
   const signalPattern = secondary
     ? `${primaryLabel} appears strongest, ${secondaryLabel} reinforces it, and ${underplayedLabel} is the least available range.`
@@ -179,16 +196,50 @@ function createOpeningSummary(
       : `${primaryLabel}-led pattern`,
     diagnosis: formatNarrativeText(payload.pairSummary.pair_opening_paragraph),
     implication: formatNarrativeText(payload.balancing.current_pattern_paragraph),
+    evidenceLead: `Built from ${responseBase}, ordered to match the result headline.`,
+    proofItems: [
+      ...(primary
+        ? [{
+            label: 'Primary signal',
+            value: primaryLabel,
+            detail: `Rank ${primary.rank} in this completed result.`,
+            scoreLabel: `${primary.normalized_score}%`,
+          }]
+        : []),
+      ...(secondary
+        ? [{
+            label: 'Reinforcing signal',
+            value: secondaryLabel,
+            detail: `Rank ${secondary.rank} in this completed result.`,
+            scoreLabel: `${secondary.normalized_score}%`,
+          }]
+        : []),
+      ...(underplayed
+        ? [{
+            label: 'Least available range',
+            value: underplayedLabel,
+            detail: `Rank ${underplayed.rank} in this completed result.`,
+            scoreLabel: `${underplayed.normalized_score}%`,
+          }]
+        : []),
+      {
+        label: 'Response base',
+        value: responseBase,
+        detail: 'Normal assessment completion, not a preview or imported result.',
+      },
+    ],
     evidenceItems: [
       {
         label: 'Leading pair',
-        value: pairLabel,
-        detail: formatNarrativeText(payload.hero.hero_opening),
+        value: headlinePairLabel,
+        detail: pairLabel === headlinePairLabel
+          ? formatNarrativeText(payload.hero.hero_opening)
+          : `Shown primary-first to match the headline. ${formatNarrativeText(payload.hero.hero_opening)}`,
       },
       {
         label: 'Signal pattern',
         value: signalPattern,
-        detail: `Ranked from ${payload.diagnostics.answeredQuestionCount} completed responses.`,
+        detail: `Ranked from ${responseBase}.`,
       },
       {
         label: 'Missing range',
