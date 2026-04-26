@@ -199,7 +199,7 @@ export function createVoiceAttemptOrchestrator(params: {
         return {
           state: 'unsupported_assessment',
           data: null,
-          error: `Assessment ${input.assessmentKey} is not supported for voice MVP.`,
+          error: `Assessment ${input.assessmentKey} is not supported for voice delivery.`,
         };
       }
 

@@ -61,8 +61,8 @@ function mapPreparedStateCopy(
       return {
         title: 'Voice delivery not configured for this assessment',
         description:
-          'This assessment is available in the standard runner, but it is not part of the voice MVP surface.',
-        statusLabel: 'Unsupported for voice MVP',
+          'This assessment is available in the standard runner, but it is not currently configured for voice delivery.',
+        statusLabel: 'Unsupported for voice delivery',
         statusTone: 'not_started',
         note: 'Only explicitly supported assessments are surfaced for voice delivery so comparability stays controlled.',
       };

@@ -43,7 +43,7 @@ export default async function VoiceAssessmentsIndexPage() {
       <PageHeader
         eyebrow="Voice Assessment"
         title="Voice delivery preview"
-        description="Browse the assessments that have an MVP voice shell in the authenticated app."
+        description="Browse the assessments that have a voice delivery shell in the authenticated app."
       />
 
       {supportedAssessments.length === 0 ? (

@@ -124,14 +124,14 @@ export default async function UserWorkspacePage() {
                 <LabelPill>Preview surface</LabelPill>
                 <StatusPill
                   status={voiceFeatureEnabled ? 'in_progress' : 'not_started'}
-                  label={voiceFeatureEnabled ? 'Available in limited MVP shell' : 'Unavailable in this environment'}
+                  label={voiceFeatureEnabled ? 'Available in limited voice shell' : 'Unavailable in this environment'}
                 />
               </div>
               <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.35rem]">
                 Voice sits beside the assessment runner, not outside the platform.
               </h2>
               <p className="max-w-3xl text-sm leading-7 text-white/66">
-                Open a dedicated voice route for supported assessments and review the controlled MVP shell.
+                Open a dedicated voice route for supported assessments and review the controlled voice shell.
                 No microphone access, transcript capture, or scoring handoff starts from this entry point yet.
               </p>
             </div>

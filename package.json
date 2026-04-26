@@ -2,7 +2,7 @@
   "name": "sonartra",
   "version": "1.0.0",
   "private": true,
-  "description": "Sonartra MVP Engine App foundation",
+  "description": "Sonartra assessment intelligence platform",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

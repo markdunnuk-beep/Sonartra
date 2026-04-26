@@ -11,8 +11,9 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Sonartra MVP',
-  description: 'Engine-first assessment platform foundation',
+  applicationName: 'Sonartra',
+  title: 'Sonartra',
+  description: 'Assessment intelligence for behavioural insight and applied development.',
 };
 
 export default function RootLayout({

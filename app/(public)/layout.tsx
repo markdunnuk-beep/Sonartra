@@ -20,7 +20,7 @@ export default function PublicLayout({
     <>
       <header className="border-b border-white/10 bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-          <span className="text-sm font-semibold tracking-[0.2em] text-white/80">SONARTRA MVP</span>
+          <span className="text-sm font-semibold tracking-[0.2em] text-white/80">SONARTRA</span>
           <nav className="hidden gap-4 text-sm text-white/70 lg:flex">
             {navItems.map((item) => (
               <Link className="transition hover:text-white" href={item.href} key={item.href}>
