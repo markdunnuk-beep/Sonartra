@@ -99,6 +99,7 @@ function createLanguageRowCounts(bundle: Awaited<ReturnType<typeof getSingleDoma
   return {
     DOMAIN_FRAMING: bundle.DOMAIN_FRAMING.length,
     HERO_PAIRS: bundle.HERO_PAIRS.length,
+    DRIVER_CLAIMS: bundle.DRIVER_CLAIMS?.length ?? 0,
     SIGNAL_CHAPTERS: bundle.SIGNAL_CHAPTERS.length,
     BALANCING_SECTIONS: bundle.BALANCING_SECTIONS.length,
     PAIR_SUMMARIES: bundle.PAIR_SUMMARIES.length,
@@ -266,6 +267,7 @@ function buildLanguageExpectations(signalCount: number, derivedPairCount: number
   return {
     DOMAIN_FRAMING: 1,
     HERO_PAIRS: derivedPairCount,
+    DRIVER_CLAIMS: 0,
     SIGNAL_CHAPTERS: signalCount,
     BALANCING_SECTIONS: derivedPairCount,
     PAIR_SUMMARIES: derivedPairCount,
@@ -426,6 +428,7 @@ function createRuntimeDefinition(params: {
     languageBundle: Object.freeze({
       DOMAIN_FRAMING: Object.freeze([...params.languageBundle.DOMAIN_FRAMING]),
       HERO_PAIRS: Object.freeze([...params.languageBundle.HERO_PAIRS]),
+      DRIVER_CLAIMS: Object.freeze([...(params.languageBundle.DRIVER_CLAIMS ?? [])]),
       SIGNAL_CHAPTERS: Object.freeze([...params.languageBundle.SIGNAL_CHAPTERS]),
       BALANCING_SECTIONS: Object.freeze([...params.languageBundle.BALANCING_SECTIONS]),
       PAIR_SUMMARIES: Object.freeze([...params.languageBundle.PAIR_SUMMARIES]),

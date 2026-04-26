@@ -21,9 +21,13 @@ const SINGLE_DOMAIN_LANGUAGE_DATASET_META = {
     label: 'Hero Pairs',
     description: 'Pair-owned hero opening language for the derived signal pairs in this single-domain draft.',
   },
+  DRIVER_CLAIMS: {
+    label: 'Driver Claims',
+    description: 'Pair-scoped driver section claims resolved by pair, signal, and driver role.',
+  },
   SIGNAL_CHAPTERS: {
     label: 'Signal Chapters',
-    description: 'Per-signal chapter language for the authored signal set, including position labels and interpretation copy.',
+    description: 'Legacy per-signal chapter language and compatibility copy for the authored signal set.',
   },
   BALANCING_SECTIONS: {
     label: 'Balancing Sections',
@@ -49,7 +53,9 @@ export const SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS = Object.freeze(
       label: SINGLE_DOMAIN_LANGUAGE_DATASET_META[key].label,
       description: SINGLE_DOMAIN_LANGUAGE_DATASET_META[key].description,
       expectedHeaders: SINGLE_DOMAIN_LANGUAGE_DATASET_COLUMNS[key],
-      primaryKey: SINGLE_DOMAIN_LANGUAGE_DATASET_COLUMNS[key][0],
+      primaryKey: key === 'DRIVER_CLAIMS'
+        ? 'driver_claim_key'
+        : SINGLE_DOMAIN_LANGUAGE_DATASET_COLUMNS[key][0],
     } satisfies SingleDomainLanguageDatasetDefinition),
   ),
 );

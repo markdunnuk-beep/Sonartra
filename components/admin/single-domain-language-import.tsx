@@ -80,6 +80,11 @@ function buildDatasetPlaceholder(datasetKey: SingleDomainLanguageDatasetKey, hea
         headerLine,
         'directive_supportive|Momentum with steadiness|You combine pace with relational awareness.|You tend to bring clear movement without losing the people context.|At your best this creates direction others can trust.|Under pressure, speed and care can pull against each other.|This pair works best when pace stays visible and well-directed.',
       ].join('\n');
+    case 'DRIVER_CLAIMS':
+      return [
+        headerLine,
+        'leadership-style|directive_supportive|directive|primary_driver|driver_primary|Directive sets the strongest driver in this pair by turning intent into visible movement.|core|1',
+      ].join('\n');
     case 'SIGNAL_CHAPTERS':
       return [
         headerLine,

@@ -96,6 +96,7 @@ test('compareMigrationFilenames sorts migration files deterministically', () => 
   assert.deepEqual(
     [
       '202604120002_assessment_mode.sql',
+      '202604260001_pair_scoped_single_domain_driver_claims.sql',
       '202604120001_assessment_version_single_domain_language.sql',
       '202604080002_application_language_priority.sql',
       '202604080001_assessment_version_application_language.sql',
@@ -121,6 +122,7 @@ test('compareMigrationFilenames sorts migration files deterministically', () => 
       '202604080002_application_language_priority.sql',
       '202604120001_assessment_version_single_domain_language.sql',
       '202604120002_assessment_mode.sql',
+      '202604260001_pair_scoped_single_domain_driver_claims.sql',
     ],
   );
 });
@@ -136,6 +138,7 @@ test('loadMigrationsFromDirectory loads sorted sql files only', async () => {
   await writeFile(join(root, '202604080002_application_language_priority.sql'), 'SELECT 8;');
   await writeFile(join(root, '202604120001_assessment_version_single_domain_language.sql'), 'SELECT 9;');
   await writeFile(join(root, '202604120002_assessment_mode.sql'), 'SELECT 10;');
+  await writeFile(join(root, '202604260001_pair_scoped_single_domain_driver_claims.sql'), 'SELECT 11;');
   await writeFile(join(root, '202604010001_assessment_version_language_tables.sql'), 'SELECT 3;');
   await writeFile(join(root, '202603290001_option_version_key_scope.sql'), 'SELECT 2;');
   await writeFile(join(root, '202603260001_mvp_canonical_schema.sql'), 'SELECT 1;');
@@ -157,6 +160,7 @@ test('loadMigrationsFromDirectory loads sorted sql files only', async () => {
       '202604080002_application_language_priority.sql',
       '202604120001_assessment_version_single_domain_language.sql',
       '202604120002_assessment_mode.sql',
+      '202604260001_pair_scoped_single_domain_driver_claims.sql',
     ],
   );
   assert.equal(migrations[0]?.sql, 'SELECT 1;');
@@ -170,6 +174,7 @@ test('loadMigrationsFromDirectory loads sorted sql files only', async () => {
   assert.equal(migrations[8]?.sql, 'SELECT 8;');
   assert.equal(migrations[9]?.sql, 'SELECT 9;');
   assert.equal(migrations[10]?.sql, 'SELECT 10;');
+  assert.equal(migrations[11]?.sql, 'SELECT 11;');
 });
 
 test('applyPendingMigrations runs pending migrations once and records them', async () => {
@@ -222,6 +227,10 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
         filename: '202604120002_assessment_mode.sql',
         sql: 'ALTER TABLE assessments ADD COLUMN mode TEXT;',
       },
+      {
+        filename: '202604260001_pair_scoped_single_domain_driver_claims.sql',
+        sql: 'CREATE TABLE assessment_version_single_domain_driver_claims (id UUID);',
+      },
     ],
   });
 
@@ -236,6 +245,7 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
     '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
+    '202604260001_pair_scoped_single_domain_driver_claims.sql',
   ]);
   assert.deepEqual(fake.state.executedSql, [
     'ALTER TABLE options ADD COLUMN assessment_version_id UUID;',
@@ -248,6 +258,7 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
     'ALTER TABLE assessment_version_application_contribution ADD COLUMN priority INTEGER;',
     'CREATE TABLE assessment_version_single_domain_framing (id UUID);',
     'ALTER TABLE assessments ADD COLUMN mode TEXT;',
+    'CREATE TABLE assessment_version_single_domain_driver_claims (id UUID);',
   ]);
   assert.deepEqual(fake.state.inserted, [
     '202603290001_option_version_key_scope.sql',
@@ -260,6 +271,7 @@ test('applyPendingMigrations runs pending migrations once and records them', asy
     '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
+    '202604260001_pair_scoped_single_domain_driver_claims.sql',
   ]);
   assert.equal(fake.state.began, 1);
   assert.equal(fake.state.committed, 1);
@@ -279,6 +291,7 @@ test('applyPendingMigrations is idempotent when all migrations are already recor
     '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
+    '202604260001_pair_scoped_single_domain_driver_claims.sql',
   ]);
 
   const applied = await applyPendingMigrations({
@@ -328,6 +341,10 @@ test('applyPendingMigrations is idempotent when all migrations are already recor
         filename: '202604120002_assessment_mode.sql',
         sql: 'SELECT 11;',
       },
+      {
+        filename: '202604260001_pair_scoped_single_domain_driver_claims.sql',
+        sql: 'SELECT 12;',
+      },
     ],
   });
 
@@ -367,6 +384,7 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     'assessment_version_single_domain_balancing_sections',
     'assessment_version_single_domain_pair_summaries',
     'assessment_version_single_domain_application_statements',
+    'assessment_version_single_domain_driver_claims',
   ]);
   fake.state.columns = new Set([
     'options.assessment_version_id',
@@ -400,6 +418,7 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     'avsd_application_statements_version_idx',
     'avsd_application_statements_version_signal_idx',
     'assessment_versions_assessment_mode_idx',
+    'avsd_driver_claims_version_pair_signal_role_idx',
   ]);
 
   const reconciled = await reconcileKnownMigrations({
@@ -449,6 +468,10 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
         filename: '202604120002_assessment_mode.sql',
         sql: 'SELECT 11;',
       },
+      {
+        filename: '202604260001_pair_scoped_single_domain_driver_claims.sql',
+        sql: 'SELECT 12;',
+      },
     ],
   });
 
@@ -464,6 +487,7 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
+    '202604260001_pair_scoped_single_domain_driver_claims.sql',
   ]);
   assert.deepEqual(fake.state.inserted, [
     '202603260001_mvp_canonical_schema.sql',
@@ -477,6 +501,7 @@ test('reconcileKnownMigrations records schema-compatible migrations that were ap
     '202604080002_application_language_priority.sql',
     '202604120001_assessment_version_single_domain_language.sql',
     '202604120002_assessment_mode.sql',
+    '202604260001_pair_scoped_single_domain_driver_claims.sql',
   ]);
 });
 
@@ -503,4 +528,34 @@ test('single-domain language migration declares all six tables, unique constrain
   assert.match(sql, /avsd_balancing_sections_version_pair_idx/i);
   assert.match(sql, /avsd_pair_summaries_version_pair_idx/i);
   assert.match(sql, /avsd_application_statements_version_signal_idx/i);
+});
+
+test('pair-scoped single-domain driver claims migration declares table constraints and lookup index', async () => {
+  const sql = await readFile(
+    join(process.cwd(), 'db', 'migrations', '202604260001_pair_scoped_single_domain_driver_claims.sql'),
+    'utf8',
+  );
+
+  assert.match(sql, /CREATE TABLE assessment_version_single_domain_driver_claims/i);
+  assert.match(sql, /assessment_version_id UUID NOT NULL REFERENCES assessment_versions\(id\) ON DELETE CASCADE/i);
+  assert.match(sql, /domain_key TEXT NOT NULL/i);
+  assert.match(sql, /pair_key TEXT NOT NULL/i);
+  assert.match(sql, /signal_key TEXT NOT NULL/i);
+  assert.match(sql, /driver_role TEXT NOT NULL/i);
+  assert.match(sql, /claim_type TEXT NOT NULL/i);
+  assert.match(sql, /claim_text TEXT NOT NULL/i);
+  assert.match(sql, /materiality TEXT NOT NULL/i);
+  assert.match(sql, /priority INTEGER NOT NULL/i);
+  assert.match(
+    sql,
+    /UNIQUE \(assessment_version_id, domain_key, pair_key, signal_key, driver_role, priority\)/i,
+  );
+  assert.match(sql, /driver_role IN \('primary_driver', 'secondary_driver', 'supporting_context', 'range_limitation'\)/i);
+  assert.match(
+    sql,
+    /claim_type IN \('driver_primary', 'driver_secondary', 'driver_supporting_context', 'driver_range_limitation'\)/i,
+  );
+  assert.match(sql, /materiality IN \('core', 'supporting', 'material_underplay'\)/i);
+  assert.match(sql, /CHECK \(priority > 0\)/i);
+  assert.match(sql, /avsd_driver_claims_version_pair_signal_role_idx/i);
 });

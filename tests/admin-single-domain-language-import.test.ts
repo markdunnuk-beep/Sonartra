@@ -77,6 +77,7 @@ function createFakeDb(seed?: Partial<SingleDomainTableState>) {
 
       if (
         sql.includes('FROM assessment_version_single_domain_hero_pairs') ||
+        sql.includes('FROM assessment_version_single_domain_driver_claims') ||
         sql.includes('FROM assessment_version_single_domain_signal_chapters') ||
         sql.includes('FROM assessment_version_single_domain_balancing_sections') ||
         sql.includes('FROM assessment_version_single_domain_pair_summaries') ||
@@ -140,4 +141,47 @@ test('invalid SIGNAL_CHAPTERS headers are rejected visibly', async () => {
   assert.equal(result.success, false);
   assert.equal(result.parseErrors.length, 1);
   assert.match(result.parseErrors[0]?.message ?? '', /Invalid headers for SIGNAL_CHAPTERS/i);
+});
+
+test('DRIVER_CLAIMS validates role claim type and materiality mapping', async () => {
+  const fake = createFakeDb();
+
+  const result = await importSingleDomainLanguageDatasetForAssessmentVersionWithDependencies({
+    assessmentVersionId: 'version-draft',
+    datasetKey: 'DRIVER_CLAIMS',
+    rawInput: [
+      'domain_key|pair_key|signal_key|driver_role|claim_type|claim_text|materiality|priority',
+      'leadership|process_results|process|secondary_driver|driver_primary|Process supports results|core|1',
+    ].join('\n'),
+  }, {
+    db: fake.db,
+    revalidatePath() {},
+  });
+
+  assert.equal(result.success, false);
+  assert.equal(result.validationErrors.length, 1);
+  assert.match(
+    result.validationErrors[0]?.message ?? '',
+    /claim_type" must be "driver_secondary" when driver_role is "secondary_driver/i,
+  );
+});
+
+test('DRIVER_CLAIMS requires positive integer priority', async () => {
+  const fake = createFakeDb();
+
+  const result = await importSingleDomainLanguageDatasetForAssessmentVersionWithDependencies({
+    assessmentVersionId: 'version-draft',
+    datasetKey: 'DRIVER_CLAIMS',
+    rawInput: [
+      'domain_key|pair_key|signal_key|driver_role|claim_type|claim_text|materiality|priority',
+      'leadership|process_results|process|primary_driver|driver_primary|Process leads the pair|core|0',
+    ].join('\n'),
+  }, {
+    db: fake.db,
+    revalidatePath() {},
+  });
+
+  assert.equal(result.success, false);
+  assert.equal(result.validationErrors.length, 1);
+  assert.match(result.validationErrors[0]?.message ?? '', /priority" must be a positive integer/i);
 });

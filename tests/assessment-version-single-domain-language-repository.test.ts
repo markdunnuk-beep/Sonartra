@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   getSingleDomainApplicationStatementRows,
   getSingleDomainBalancingSectionRows,
+  getSingleDomainDriverClaimRows,
   getSingleDomainFramingRows,
   getSingleDomainHeroPairRows,
   getSingleDomainLanguageBundle,
@@ -11,6 +12,7 @@ import {
   getSingleDomainSignalChapterRows,
   replaceSingleDomainApplicationStatementRows,
   replaceSingleDomainBalancingSectionRows,
+  replaceSingleDomainDriverClaimRows,
   replaceSingleDomainFramingRows,
   replaceSingleDomainHeroPairRows,
   replaceSingleDomainPairSummaryRows,
@@ -21,6 +23,7 @@ import {
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
+  DriverClaimsRow,
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
@@ -30,6 +33,7 @@ import type {
 type SingleDomainTableState = {
   framing: DomainFramingRow[];
   heroPairs: HeroPairsRow[];
+  driverClaims: DriverClaimsRow[];
   signalChapters: SignalChaptersRow[];
   balancingSections: BalancingSectionsRow[];
   pairSummaries: PairSummariesRow[];
@@ -45,6 +49,7 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
   const state: SingleDomainTableState = {
     framing: [...(seed?.framing ?? [])],
     heroPairs: [...(seed?.heroPairs ?? [])],
+    driverClaims: [...(seed?.driverClaims ?? [])],
     signalChapters: [...(seed?.signalChapters ?? [])],
     balancingSections: [...(seed?.balancingSections ?? [])],
     pairSummaries: [...(seed?.pairSummaries ?? [])],
@@ -56,6 +61,7 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
   const cloneState = (): SingleDomainTableState => ({
     framing: state.framing.map((row) => ({ ...row })),
     heroPairs: state.heroPairs.map((row) => ({ ...row })),
+    driverClaims: state.driverClaims.map((row) => ({ ...row })),
     signalChapters: state.signalChapters.map((row) => ({ ...row })),
     balancingSections: state.balancingSections.map((row) => ({ ...row })),
     pairSummaries: state.pairSummaries.map((row) => ({ ...row })),
@@ -113,6 +119,7 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
         if (snapshot) {
           state.framing = snapshot.framing;
           state.heroPairs = snapshot.heroPairs;
+          state.driverClaims = snapshot.driverClaims;
           state.signalChapters = snapshot.signalChapters;
           state.balancingSections = snapshot.balancingSections;
           state.pairSummaries = snapshot.pairSummaries;
@@ -140,6 +147,11 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
 
       if (sql.startsWith('DELETE FROM assessment_version_single_domain_hero_pairs')) {
         state.heroPairs = [];
+        return { rows: [] as T[] };
+      }
+
+      if (sql.startsWith('DELETE FROM assessment_version_single_domain_driver_claims')) {
+        state.driverClaims = [];
         return { rows: [] as T[] };
       }
 
@@ -171,6 +183,19 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
       if (sql.includes('FROM assessment_version_single_domain_hero_pairs')) {
         maybeThrowMissingTable('assessment_version_single_domain_hero_pairs', 'heroPairs');
         return { rows: sortByKey(state.heroPairs, (row) => row.pair_key) as T[] };
+      }
+
+      if (sql.includes('FROM assessment_version_single_domain_driver_claims')) {
+        maybeThrowMissingTable('assessment_version_single_domain_driver_claims', 'driverClaims');
+        return {
+          rows: [...state.driverClaims].sort((left, right) => (
+            left.domain_key.localeCompare(right.domain_key)
+            || left.pair_key.localeCompare(right.pair_key)
+            || left.driver_role.localeCompare(right.driver_role)
+            || left.priority - right.priority
+            || left.signal_key.localeCompare(right.signal_key)
+          )) as T[],
+        };
       }
 
       if (sql.includes('FROM assessment_version_single_domain_signal_chapters')) {
@@ -226,6 +251,46 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
           hero_strength_paragraph,
           hero_tension_paragraph,
           hero_close_paragraph,
+        });
+        return { rows: [] as T[] };
+      }
+
+      if (sql.startsWith('INSERT INTO assessment_version_single_domain_driver_claims')) {
+        if (config?.failInsertTable === 'driverClaims') {
+          throw new Error('DRIVER_CLAIMS_INSERT_FAILED');
+        }
+
+        const [
+          ,
+          domain_key,
+          pair_key,
+          signal_key,
+          driver_role,
+          claim_type,
+          claim_text,
+          materiality,
+          priority,
+        ] = params as [string, string, string, string, DriverClaimsRow['driver_role'], DriverClaimsRow['claim_type'], string, DriverClaimsRow['materiality'], number];
+
+        if (state.driverClaims.some((existingRow) => (
+          existingRow.domain_key === domain_key
+          && existingRow.pair_key === pair_key
+          && existingRow.signal_key === signal_key
+          && existingRow.driver_role === driver_role
+          && existingRow.priority === priority
+        ))) {
+          throw new Error(`duplicate key value violates unique constraint for ${domain_key}:${pair_key}:${signal_key}:${driver_role}:${priority}`);
+        }
+
+        state.driverClaims.push({
+          domain_key,
+          pair_key,
+          signal_key,
+          driver_role,
+          claim_type,
+          claim_text,
+          materiality,
+          priority,
         });
         return { rows: [] as T[] };
       }
@@ -380,6 +445,7 @@ test('reading empty single-domain datasets returns empty collections cleanly', a
   assert.deepEqual(bundle, {
     DOMAIN_FRAMING: [],
     HERO_PAIRS: [],
+    DRIVER_CLAIMS: [],
     SIGNAL_CHAPTERS: [],
     BALANCING_SECTIONS: [],
     PAIR_SUMMARIES: [],
@@ -423,7 +489,7 @@ test('replace functions fully replace prior rows', async () => {
   }]);
 });
 
-test('getSingleDomainLanguageBundle returns all six datasets', async () => {
+test('getSingleDomainLanguageBundle returns all seven datasets', async () => {
   const fake = createFakeSingleDomainLanguageDb({
     framing: [{
       domain_key: 'execution',
@@ -441,6 +507,16 @@ test('getSingleDomainLanguageBundle returns all six datasets', async () => {
       hero_strength_paragraph: 'Strength',
       hero_tension_paragraph: 'Tension',
       hero_close_paragraph: 'Close',
+    }],
+    driverClaims: [{
+      domain_key: 'leadership',
+      pair_key: 'driver_analyst',
+      signal_key: 'driver',
+      driver_role: 'primary_driver',
+      claim_type: 'driver_primary',
+      claim_text: 'Driver primary claim',
+      materiality: 'core',
+      priority: 1,
     }],
     signalChapters: [{
       signal_key: 'lead_people',
@@ -494,6 +570,7 @@ test('getSingleDomainLanguageBundle returns all six datasets', async () => {
 
   assert.equal(bundle.DOMAIN_FRAMING.length, 1);
   assert.equal(bundle.HERO_PAIRS.length, 1);
+  assert.equal(bundle.DRIVER_CLAIMS.length, 1);
   assert.equal(bundle.SIGNAL_CHAPTERS.length, 1);
   assert.equal(bundle.BALANCING_SECTIONS.length, 1);
   assert.equal(bundle.PAIR_SUMMARIES.length, 1);
@@ -556,6 +633,69 @@ test('deterministic ordering is preserved for pair and signal keyed datasets', a
 
   assert.deepEqual(heroRows.map((row) => row.pair_key), ['driver_analyst', 'operator_guardian']);
   assert.deepEqual(applicationRows.map((row) => row.signal_key), ['decision_evidence', 'stress_stability']);
+});
+
+test('driver claim rows are replaced and ordered by domain, pair, role, priority, and signal', async () => {
+  const fake = createFakeSingleDomainLanguageDb({
+    driverClaims: [{
+      domain_key: 'old',
+      pair_key: 'old_pair',
+      signal_key: 'old_signal',
+      driver_role: 'primary_driver',
+      claim_type: 'driver_primary',
+      claim_text: 'Old claim',
+      materiality: 'core',
+      priority: 1,
+    }],
+  });
+
+  await replaceSingleDomainDriverClaimRows(fake.db, {
+    assessmentVersionId: 'version-1',
+    rows: [
+      {
+        domain_key: 'leadership',
+        pair_key: 'results_process',
+        signal_key: 'process',
+        driver_role: 'secondary_driver',
+        claim_type: 'driver_secondary',
+        claim_text: 'Secondary process claim',
+        materiality: 'core',
+        priority: 2,
+      },
+      {
+        domain_key: 'leadership',
+        pair_key: 'process_people',
+        signal_key: 'process',
+        driver_role: 'primary_driver',
+        claim_type: 'driver_primary',
+        claim_text: 'Primary process claim',
+        materiality: 'core',
+        priority: 1,
+      },
+      {
+        domain_key: 'leadership',
+        pair_key: 'results_process',
+        signal_key: 'results',
+        driver_role: 'secondary_driver',
+        claim_type: 'driver_secondary',
+        claim_text: 'Secondary results claim',
+        materiality: 'core',
+        priority: 1,
+      },
+    ],
+  });
+
+  const rows = await getSingleDomainDriverClaimRows(fake.db, 'version-1');
+
+  assert.deepEqual(
+    rows.map((row) => `${row.domain_key}|${row.pair_key}|${row.driver_role}|${row.priority}|${row.signal_key}`),
+    [
+      'leadership|process_people|primary_driver|1|process',
+      'leadership|results_process|secondary_driver|1|results',
+      'leadership|results_process|secondary_driver|2|process',
+    ],
+  );
+  assert.equal(fake.state.driverClaims.some((row) => row.domain_key === 'old'), false);
 });
 
 test('write paths reject multi_domain versions while read paths short-circuit cleanly', async () => {
@@ -690,21 +830,20 @@ test('dispatcher save function routes to the correct dataset repository', async 
 
   await saveSingleDomainLanguageDataset(fake.db, {
     assessmentVersionId: 'version-1',
-    datasetKey: 'BALANCING_SECTIONS',
+    datasetKey: 'DRIVER_CLAIMS',
     rows: [{
+      domain_key: 'leadership',
       pair_key: 'driver_analyst',
-      balancing_section_title: 'Balance',
-      current_pattern_paragraph: 'Pattern',
-      practical_meaning_paragraph: 'Meaning',
-      system_risk_paragraph: 'Risk',
-      rebalance_intro: 'Intro',
-      rebalance_action_1: 'A1',
-      rebalance_action_2: 'A2',
-      rebalance_action_3: 'A3',
+      signal_key: 'driver',
+      driver_role: 'primary_driver',
+      claim_type: 'driver_primary',
+      claim_text: 'Driver primary claim',
+      materiality: 'core',
+      priority: 1,
     }],
   });
 
-  const rows = await getSingleDomainBalancingSectionRows(fake.db, 'version-1');
+  const rows = await getSingleDomainDriverClaimRows(fake.db, 'version-1');
   assert.equal(rows.length, 1);
   assert.equal(rows[0]?.pair_key, 'driver_analyst');
 });

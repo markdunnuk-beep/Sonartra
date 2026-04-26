@@ -403,6 +403,25 @@ export async function reconcileKnownMigrations(params: {
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);
       }
+
+      continue;
+    }
+
+    if (migration.filename === '202604260001_pair_scoped_single_domain_driver_claims.sql') {
+      const hasDriverClaimsTable = await tableExists(
+        params.db,
+        'assessment_version_single_domain_driver_claims',
+      );
+      const hasDriverClaimsIndex = await indexExists(
+        params.db,
+        'avsd_driver_claims_version_pair_signal_role_idx',
+      );
+
+      if (hasDriverClaimsTable && hasDriverClaimsIndex) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
     }
   }
 

@@ -1,6 +1,7 @@
 export const SINGLE_DOMAIN_LANGUAGE_DATASET_KEYS = [
   'DOMAIN_FRAMING',
   'HERO_PAIRS',
+  'DRIVER_CLAIMS',
   'SIGNAL_CHAPTERS',
   'BALANCING_SECTIONS',
   'PAIR_SUMMARIES',
@@ -27,6 +28,21 @@ export interface HeroPairsRow {
   hero_strength_paragraph: string;
   hero_tension_paragraph: string;
   hero_close_paragraph: string;
+}
+
+export interface DriverClaimsRow {
+  domain_key: string;
+  pair_key: string;
+  signal_key: string;
+  driver_role: 'primary_driver' | 'secondary_driver' | 'supporting_context' | 'range_limitation';
+  claim_type:
+    | 'driver_primary'
+    | 'driver_secondary'
+    | 'driver_supporting_context'
+    | 'driver_range_limitation';
+  claim_text: string;
+  materiality: 'core' | 'supporting' | 'material_underplay';
+  priority: number;
 }
 
 export interface SignalChaptersRow {
@@ -98,6 +114,17 @@ export const HERO_PAIRS_COLUMNS = [
   'hero_close_paragraph',
 ] as const;
 
+export const DRIVER_CLAIMS_COLUMNS = [
+  'domain_key',
+  'pair_key',
+  'signal_key',
+  'driver_role',
+  'claim_type',
+  'claim_text',
+  'materiality',
+  'priority',
+] as const;
+
 export const SIGNAL_CHAPTERS_COLUMNS = [
   'signal_key',
   'position_primary_label',
@@ -151,6 +178,7 @@ export const APPLICATION_STATEMENTS_COLUMNS = [
 export type SingleDomainLanguageDatasetRowMap = {
   DOMAIN_FRAMING: DomainFramingRow;
   HERO_PAIRS: HeroPairsRow;
+  DRIVER_CLAIMS: DriverClaimsRow;
   SIGNAL_CHAPTERS: SignalChaptersRow;
   BALANCING_SECTIONS: BalancingSectionsRow;
   PAIR_SUMMARIES: PairSummariesRow;
@@ -160,6 +188,7 @@ export type SingleDomainLanguageDatasetRowMap = {
 export type SingleDomainLanguageDatasetColumnsMap = {
   DOMAIN_FRAMING: typeof DOMAIN_FRAMING_COLUMNS;
   HERO_PAIRS: typeof HERO_PAIRS_COLUMNS;
+  DRIVER_CLAIMS: typeof DRIVER_CLAIMS_COLUMNS;
   SIGNAL_CHAPTERS: typeof SIGNAL_CHAPTERS_COLUMNS;
   BALANCING_SECTIONS: typeof BALANCING_SECTIONS_COLUMNS;
   PAIR_SUMMARIES: typeof PAIR_SUMMARIES_COLUMNS;
@@ -169,6 +198,7 @@ export type SingleDomainLanguageDatasetColumnsMap = {
 export const SINGLE_DOMAIN_LANGUAGE_DATASET_COLUMNS = {
   DOMAIN_FRAMING: DOMAIN_FRAMING_COLUMNS,
   HERO_PAIRS: HERO_PAIRS_COLUMNS,
+  DRIVER_CLAIMS: DRIVER_CLAIMS_COLUMNS,
   SIGNAL_CHAPTERS: SIGNAL_CHAPTERS_COLUMNS,
   BALANCING_SECTIONS: BALANCING_SECTIONS_COLUMNS,
   PAIR_SUMMARIES: PAIR_SUMMARIES_COLUMNS,

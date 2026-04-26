@@ -4,6 +4,7 @@ import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
+  DriverClaimsRow,
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
@@ -109,6 +110,7 @@ function emptySingleDomainLanguageBundle(): SingleDomainLanguageBundle {
   return Object.freeze({
     DOMAIN_FRAMING: Object.freeze([]),
     HERO_PAIRS: Object.freeze([]),
+    DRIVER_CLAIMS: Object.freeze([]),
     SIGNAL_CHAPTERS: Object.freeze([]),
     BALANCING_SECTIONS: Object.freeze([]),
     PAIR_SUMMARIES: Object.freeze([]),
@@ -248,6 +250,28 @@ export async function getSingleDomainHeroPairRows(
   });
 }
 
+export async function getSingleDomainDriverClaimRows(
+  db: Queryable,
+  assessmentVersionId: AssessmentVersionId,
+): Promise<readonly DriverClaimsRow[]> {
+  return getDatasetRows<DriverClaimsRow>({
+    db,
+    assessmentVersionId,
+    tableName: 'assessment_version_single_domain_driver_claims',
+    selectColumns: `
+      domain_key,
+      pair_key,
+      signal_key,
+      driver_role,
+      claim_type,
+      claim_text,
+      materiality,
+      priority
+    `,
+    orderBy: 'domain_key ASC, pair_key ASC, driver_role ASC, priority ASC, signal_key ASC',
+  });
+}
+
 export async function getSingleDomainSignalChapterRows(
   db: Queryable,
   assessmentVersionId: AssessmentVersionId,
@@ -359,6 +383,7 @@ export async function getSingleDomainLanguageBundle(
   const [
     DOMAIN_FRAMING,
     HERO_PAIRS,
+    DRIVER_CLAIMS,
     SIGNAL_CHAPTERS,
     BALANCING_SECTIONS,
     PAIR_SUMMARIES,
@@ -366,6 +391,7 @@ export async function getSingleDomainLanguageBundle(
   ] = await Promise.all([
     getSingleDomainFramingRows(db, assessmentVersionId),
     getSingleDomainHeroPairRows(db, assessmentVersionId),
+    getSingleDomainDriverClaimRows(db, assessmentVersionId),
     getSingleDomainSignalChapterRows(db, assessmentVersionId),
     getSingleDomainBalancingSectionRows(db, assessmentVersionId),
     getSingleDomainPairSummaryRows(db, assessmentVersionId),
@@ -375,6 +401,7 @@ export async function getSingleDomainLanguageBundle(
   return Object.freeze({
     DOMAIN_FRAMING,
     HERO_PAIRS,
+    DRIVER_CLAIMS,
     SIGNAL_CHAPTERS,
     BALANCING_SECTIONS,
     PAIR_SUMMARIES,
@@ -424,6 +451,31 @@ export async function replaceSingleDomainHeroPairRows(
       'hero_strength_paragraph',
       'hero_tension_paragraph',
       'hero_close_paragraph',
+    ],
+    rows: params.rows,
+  });
+}
+
+export async function replaceSingleDomainDriverClaimRows(
+  db: Queryable | TransactionCapable,
+  params: {
+    assessmentVersionId: AssessmentVersionId;
+    rows: readonly DriverClaimsRow[];
+  },
+): Promise<void> {
+  await replaceDatasetRows({
+    db,
+    assessmentVersionId: params.assessmentVersionId,
+    tableName: 'assessment_version_single_domain_driver_claims',
+    columns: [
+      'domain_key',
+      'pair_key',
+      'signal_key',
+      'driver_role',
+      'claim_type',
+      'claim_text',
+      'materiality',
+      'priority',
     ],
     rows: params.rows,
   });
@@ -553,6 +605,11 @@ export async function saveSingleDomainLanguageDataset<TKey extends SingleDomainL
       return replaceSingleDomainHeroPairRows(db, params as {
         assessmentVersionId: AssessmentVersionId;
         rows: readonly HeroPairsRow[];
+      });
+    case 'DRIVER_CLAIMS':
+      return replaceSingleDomainDriverClaimRows(db, params as {
+        assessmentVersionId: AssessmentVersionId;
+        rows: readonly DriverClaimsRow[];
       });
     case 'SIGNAL_CHAPTERS':
       return replaceSingleDomainSignalChapterRows(db, params as {

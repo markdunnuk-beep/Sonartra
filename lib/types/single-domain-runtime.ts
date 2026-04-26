@@ -71,6 +71,7 @@ export type SingleDomainRuntimeQuestion = {
 export type SingleDomainRuntimeLanguageRowCounts = {
   DOMAIN_FRAMING: number;
   HERO_PAIRS: number;
+  DRIVER_CLAIMS: number;
   SIGNAL_CHAPTERS: number;
   BALANCING_SECTIONS: number;
   PAIR_SUMMARIES: number;

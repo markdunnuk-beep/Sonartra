@@ -111,6 +111,16 @@ function normalizeCell(value: string): string {
 }
 
 function buildDuplicateRowKey(row: Record<string, string>, primaryKey: string): string {
+  if (primaryKey === 'driver_claim_key') {
+    return [
+      row.domain_key ?? '',
+      row.pair_key ?? '',
+      row.signal_key ?? '',
+      row.driver_role ?? '',
+      row.priority ?? '',
+    ].join('|');
+  }
+
   return row[primaryKey] ?? '';
 }
 
@@ -291,7 +301,7 @@ function getExistingRowCount<TKey extends SingleDomainLanguageDatasetKey>(
   datasetKey: TKey,
   bundle: Awaited<ReturnType<typeof getSingleDomainLanguageBundle>>,
 ): number {
-  return bundle[datasetKey].length;
+  return bundle[datasetKey]?.length ?? 0;
 }
 
 function buildPreviewGroups<TKey extends SingleDomainLanguageDatasetKey>(
@@ -301,8 +311,8 @@ function buildPreviewGroups<TKey extends SingleDomainLanguageDatasetKey>(
   const definition = getSingleDomainLanguageDatasetDefinition(datasetKey);
 
   return rows.map((row, index) => ({
-    targetKey: String((row as unknown as Record<string, string>)[definition.primaryKey] ?? ''),
-    targetLabel: String((row as unknown as Record<string, string>)[definition.primaryKey] ?? ''),
+    targetKey: buildDuplicateRowKey(row as unknown as Record<string, string>, definition.primaryKey),
+    targetLabel: buildDuplicateRowKey(row as unknown as Record<string, string>, definition.primaryKey),
     entries: definition.expectedHeaders
       .filter((header) => header !== definition.primaryKey)
       .map((header) => ({

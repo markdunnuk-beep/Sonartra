@@ -209,7 +209,7 @@ export async function importSingleDomainNarrativeSectionForAssessmentVersionWith
     assessmentVersion.assessmentVersionId,
   );
   const mappedLegacyDataset = getLegacyDatasetKeyForNarrativeDataset(command.datasetKey);
-  const existingRowCount = existingBundle[mappedLegacyDataset].length;
+  const existingRowCount = existingBundle[mappedLegacyDataset]?.length ?? 0;
 
   if (planErrors.length > 0) {
     return buildResult({

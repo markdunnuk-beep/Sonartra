@@ -1,6 +1,7 @@
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
+  DriverClaimsRow,
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
@@ -10,6 +11,7 @@ import type {
 export type SingleDomainLanguageBundle = {
   DOMAIN_FRAMING: readonly DomainFramingRow[];
   HERO_PAIRS: readonly HeroPairsRow[];
+  DRIVER_CLAIMS?: readonly DriverClaimsRow[];
   SIGNAL_CHAPTERS: readonly SignalChaptersRow[];
   BALANCING_SECTIONS: readonly BalancingSectionsRow[];
   PAIR_SUMMARIES: readonly PairSummariesRow[];
