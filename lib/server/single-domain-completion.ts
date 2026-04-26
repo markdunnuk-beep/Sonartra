@@ -10,6 +10,7 @@ import { loadSingleDomainRuntimeDefinition } from '@/lib/server/single-domain-ru
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
+  DriverClaimsRow,
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
@@ -139,6 +140,20 @@ type SignalLanguageFallbackWarning = {
   generated: boolean;
 };
 
+type DriverClaimResolutionWarning = {
+  pairKey: string;
+  signalKey: string;
+  driverRole: DriverClaimsRow['driver_role'];
+  fallbackSource: string;
+};
+
+type DriverClaimSourceDiagnostic = {
+  pairKey: string;
+  signalKey: string;
+  driverRole: DriverClaimsRow['driver_role'];
+  source: 'driver_claims' | 'driver_claims_reversed_pair';
+};
+
 type SelectedSignalText = {
   text: string;
   source: string;
@@ -151,6 +166,20 @@ const POSITION_WARNING_LABELS: Record<SingleDomainSignalPosition, string> = {
   supporting: 'supporting_context',
   underplayed: 'range_limitation',
 };
+
+function getDriverRoleForPosition(position: SingleDomainSignalPosition): DriverClaimsRow['driver_role'] {
+  switch (position) {
+    case 'primary':
+      return 'primary_driver';
+    case 'secondary':
+      return 'secondary_driver';
+    case 'underplayed':
+      return 'range_limitation';
+    case 'supporting':
+    default:
+      return 'supporting_context';
+  }
+}
 
 function includesMainDriverLanguage(value: string): boolean {
   return /\bmain\s+driver\b/i.test(value);
@@ -311,6 +340,58 @@ function formatSignalFallbackWarnings(warnings: readonly SignalLanguageFallbackW
   return Object.freeze(formatted);
 }
 
+function formatDriverClaimResolutionWarnings(
+  warnings: readonly DriverClaimResolutionWarning[],
+): readonly string[] {
+  const seen = new Set<string>();
+  const formatted: string[] = [];
+
+  warnings.forEach((warning) => {
+    const key = [
+      warning.pairKey,
+      warning.signalKey,
+      warning.driverRole,
+      warning.fallbackSource,
+    ].join('|');
+    if (seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    formatted.push(
+      `single_domain_pair_driver_claim_missing: pair_key=${warning.pairKey}; signal_key=${warning.signalKey}; driver_role=${warning.driverRole}; fallback=${warning.fallbackSource}`,
+    );
+  });
+
+  return Object.freeze(formatted);
+}
+
+function formatDriverClaimSourceDiagnostics(
+  diagnostics: readonly DriverClaimSourceDiagnostic[],
+): readonly string[] {
+  const seen = new Set<string>();
+  const formatted: string[] = [];
+
+  diagnostics.forEach((diagnostic) => {
+    const key = [
+      diagnostic.pairKey,
+      diagnostic.signalKey,
+      diagnostic.driverRole,
+      diagnostic.source,
+    ].join('|');
+    if (seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    formatted.push(
+      `single_domain_driver_claim_source: pair_key=${diagnostic.pairKey}; signal_key=${diagnostic.signalKey}; role=${diagnostic.driverRole}; source=${diagnostic.source}`,
+    );
+  });
+
+  return Object.freeze(formatted);
+}
+
 function getPositionLabel(params: {
   row: SignalChaptersRow;
   signalKey: string;
@@ -319,86 +400,207 @@ function getPositionLabel(params: {
   warnings: SignalLanguageFallbackWarning[];
 }): {
   label: string;
-  intro: string;
+  text: string;
+  source: string;
 } {
   switch (params.position) {
-    case 'primary':
+    case 'primary': {
+      const selected = selectSafeSignalText({
+        signalKey: params.signalKey,
+        signalLabel: params.signalLabel,
+        position: params.position,
+        purpose: 'intro',
+        preferredSource: 'chapter_intro_primary',
+        warnings: params.warnings,
+        candidates: [
+          { source: 'chapter_intro_primary', text: params.row.chapter_intro_primary },
+          { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
+          { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
+          { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
+        ],
+      });
       return {
         label: firstText(params.row.position_primary_label, 'Primary'),
-        intro: selectSafeSignalText({
-          signalKey: params.signalKey,
-          signalLabel: params.signalLabel,
-          position: params.position,
-          purpose: 'intro',
-          preferredSource: 'chapter_intro_primary',
-          warnings: params.warnings,
-          candidates: [
-            { source: 'chapter_intro_primary', text: params.row.chapter_intro_primary },
-            { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-            { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-            { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-          ],
-        }).text,
+        text: selected.text,
+        source: selected.source,
       };
-    case 'secondary':
+    }
+    case 'secondary': {
+      const selected = selectSafeSignalText({
+        signalKey: params.signalKey,
+        signalLabel: params.signalLabel,
+        position: params.position,
+        purpose: 'intro',
+        preferredSource: 'chapter_intro_secondary',
+        warnings: params.warnings,
+        candidates: [
+          { source: 'chapter_intro_secondary', text: params.row.chapter_intro_secondary },
+          { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
+          { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
+          { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
+        ],
+      });
       return {
         label: firstText(params.row.position_secondary_label, 'Secondary'),
-        intro: selectSafeSignalText({
-          signalKey: params.signalKey,
-          signalLabel: params.signalLabel,
-          position: params.position,
-          purpose: 'intro',
-          preferredSource: 'chapter_intro_secondary',
-          warnings: params.warnings,
-          candidates: [
-            { source: 'chapter_intro_secondary', text: params.row.chapter_intro_secondary },
-            { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-            { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-            { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-          ],
-        }).text,
+        text: selected.text,
+        source: selected.source,
       };
-    case 'underplayed':
+    }
+    case 'underplayed': {
+      const selected = selectSafeSignalText({
+        signalKey: params.signalKey,
+        signalLabel: params.signalLabel,
+        position: params.position,
+        purpose: 'intro',
+        preferredSource: 'chapter_intro_underplayed',
+        warnings: params.warnings,
+        candidates: [
+          { source: 'chapter_intro_underplayed', text: params.row.chapter_intro_underplayed },
+          { source: 'chapter_risk_impact', text: params.row.chapter_risk_impact },
+          { source: 'chapter_risk_behaviour', text: params.row.chapter_risk_behaviour },
+          { source: 'chapter_development', text: params.row.chapter_development },
+          { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
+          { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
+          { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
+        ],
+      });
       return {
         label: firstText(params.row.position_underplayed_label, 'Underplayed'),
-        intro: selectSafeSignalText({
-          signalKey: params.signalKey,
-          signalLabel: params.signalLabel,
-          position: params.position,
-          purpose: 'intro',
-          preferredSource: 'chapter_intro_underplayed',
-          warnings: params.warnings,
-          candidates: [
-            { source: 'chapter_intro_underplayed', text: params.row.chapter_intro_underplayed },
-            { source: 'chapter_risk_impact', text: params.row.chapter_risk_impact },
-            { source: 'chapter_risk_behaviour', text: params.row.chapter_risk_behaviour },
-            { source: 'chapter_development', text: params.row.chapter_development },
-            { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-            { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-            { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-          ],
-        }).text,
+        text: selected.text,
+        source: selected.source,
       };
+    }
     case 'supporting':
-    default:
+    default: {
+      const selected = selectSafeSignalText({
+        signalKey: params.signalKey,
+        signalLabel: params.signalLabel,
+        position: params.position,
+        purpose: 'intro',
+        preferredSource: 'chapter_intro_supporting',
+        warnings: params.warnings,
+        candidates: [
+          { source: 'chapter_intro_supporting', text: params.row.chapter_intro_supporting },
+          { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
+          { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
+          { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
+        ],
+      });
       return {
         label: firstText(params.row.position_supporting_label, 'Supporting'),
-        intro: selectSafeSignalText({
-          signalKey: params.signalKey,
-          signalLabel: params.signalLabel,
-          position: params.position,
-          purpose: 'intro',
-          preferredSource: 'chapter_intro_supporting',
-          warnings: params.warnings,
-          candidates: [
-            { source: 'chapter_intro_supporting', text: params.row.chapter_intro_supporting },
-            { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-            { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-            { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-          ],
-        }).text,
+        text: selected.text,
+        source: selected.source,
       };
+    }
   }
+}
+
+function createDriverClaimKey(params: {
+  domainKey: string;
+  pairKey: string;
+  signalKey: string;
+  driverRole: DriverClaimsRow['driver_role'];
+}): string {
+  return [
+    params.domainKey,
+    params.pairKey,
+    params.signalKey,
+    params.driverRole,
+  ].join('|');
+}
+
+function createDriverClaimMaps(
+  runtimeDefinition: Awaited<ReturnType<typeof loadSingleDomainRuntimeDefinition>>,
+): {
+  exactByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
+  reversedByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
+} {
+  const runtimePairKeys = runtimeDefinition.derivedPairs.map((pair) => pair.pairKey);
+  const exactByKey = new Map<string, DriverClaimsRow[]>();
+  const reversedByKey = new Map<string, DriverClaimsRow[]>();
+
+  (runtimeDefinition.languageBundle.DRIVER_CLAIMS ?? []).forEach((row) => {
+    const exactKey = createDriverClaimKey({
+      domainKey: row.domain_key,
+      pairKey: row.pair_key,
+      signalKey: row.signal_key,
+      driverRole: row.driver_role,
+    });
+    exactByKey.set(exactKey, [...(exactByKey.get(exactKey) ?? []), row]);
+
+    const resolution = resolveSingleDomainPairKey(runtimePairKeys, row.pair_key);
+    if (resolution.success && resolution.wasReversed) {
+      const reversedKey = createDriverClaimKey({
+        domainKey: row.domain_key,
+        pairKey: resolution.canonicalPairKey,
+        signalKey: row.signal_key,
+        driverRole: row.driver_role,
+      });
+      reversedByKey.set(reversedKey, [...(reversedByKey.get(reversedKey) ?? []), row]);
+    }
+  });
+
+  const sortRows = (rows: readonly DriverClaimsRow[]) => Object.freeze(
+    [...rows].sort((left, right) => left.priority - right.priority || left.claim_text.localeCompare(right.claim_text)),
+  );
+
+  return {
+    exactByKey: new Map([...exactByKey.entries()].map(([key, rows]) => [key, sortRows(rows)])),
+    reversedByKey: new Map([...reversedByKey.entries()].map(([key, rows]) => [key, sortRows(rows)])),
+  };
+}
+
+function resolvePairScopedDriverClaim(params: {
+  domainKey: string;
+  pairKey: string;
+  signalKey: string;
+  driverRole: DriverClaimsRow['driver_role'];
+  maps: {
+    exactByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
+    reversedByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
+  };
+  sourceDiagnostics: DriverClaimSourceDiagnostic[];
+}): SelectedSignalText | null {
+  const key = createDriverClaimKey(params);
+  const exactText = (params.maps.exactByKey.get(key) ?? [])
+    .map((row) => row.claim_text.trim())
+    .filter(Boolean)
+    .join('\n');
+  if (hasText(exactText)) {
+    params.sourceDiagnostics.push({
+      pairKey: params.pairKey,
+      signalKey: params.signalKey,
+      driverRole: params.driverRole,
+      source: 'driver_claims',
+    });
+
+    return {
+      text: exactText,
+      source: 'driver_claims',
+      generated: false,
+    };
+  }
+
+  const reversedText = (params.maps.reversedByKey.get(key) ?? [])
+    .map((row) => row.claim_text.trim())
+    .filter(Boolean)
+    .join('\n');
+  if (hasText(reversedText)) {
+    params.sourceDiagnostics.push({
+      pairKey: params.pairKey,
+      signalKey: params.signalKey,
+      driverRole: params.driverRole,
+      source: 'driver_claims_reversed_pair',
+    });
+
+    return {
+      text: reversedText,
+      source: 'driver_claims_reversed_pair',
+      generated: false,
+    };
+  }
+
+  return null;
 }
 
 function createPairLanguageMap<TRow extends { pair_key: string }>(
@@ -422,6 +624,7 @@ function createLanguageMaps(runtimeDefinition: Awaited<ReturnType<typeof loadSin
       runtimeDefinition.languageBundle.DOMAIN_FRAMING.map((row) => [row.domain_key, row]),
     ),
     heroByPairKey: createPairLanguageMap(runtimeDefinition, runtimeDefinition.languageBundle.HERO_PAIRS),
+    driverClaimMaps: createDriverClaimMaps(runtimeDefinition),
     signalChapterBySignalKey: new Map(
       runtimeDefinition.languageBundle.SIGNAL_CHAPTERS.map((row) => [row.signal_key, row]),
     ),
@@ -494,14 +697,23 @@ function requireText(value: string, message: string): string {
 
 function buildSignalChapterPayload(params: {
   row: SignalChaptersRow;
+  domainKey: string;
+  pairKey: string;
   signalKey: string;
   signalLabel: string;
   rank: number;
   normalizedScore: number;
   rawScore: number;
   position: SingleDomainSignalPosition;
+  driverClaimMaps: {
+    exactByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
+    reversedByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
+  };
   warnings: SignalLanguageFallbackWarning[];
+  driverClaimWarnings: DriverClaimResolutionWarning[];
+  driverClaimSourceDiagnostics: DriverClaimSourceDiagnostic[];
 }): SingleDomainResultSignal {
+  const driverRole = getDriverRoleForPosition(params.position);
   const positionLanguage = getPositionLabel({
     row: params.row,
     signalKey: params.signalKey,
@@ -509,8 +721,24 @@ function buildSignalChapterPayload(params: {
     position: params.position,
     warnings: params.warnings,
   });
+  const driverClaimText = resolvePairScopedDriverClaim({
+    domainKey: params.domainKey,
+    pairKey: params.pairKey,
+    signalKey: params.signalKey,
+    driverRole,
+    maps: params.driverClaimMaps,
+    sourceDiagnostics: params.driverClaimSourceDiagnostics,
+  });
+  if (!driverClaimText) {
+    params.driverClaimWarnings.push({
+      pairKey: params.pairKey,
+      signalKey: params.signalKey,
+      driverRole,
+      fallbackSource: positionLanguage.source,
+    });
+  }
   const chapterIntro = requireText(
-    positionLanguage.intro,
+    driverClaimText?.text ?? positionLanguage.text,
     `Missing usable signal chapter intro language for signal "${params.signalKey}" in position "${params.position}".`,
   );
   const chapterHowItShowsUp = requireText(
@@ -1084,6 +1312,8 @@ export async function buildSingleDomainResultPayload(params: {
 
   const maps = createLanguageMaps(runtimeDefinition);
   const signalFallbackWarnings: SignalLanguageFallbackWarning[] = [];
+  const driverClaimWarnings: DriverClaimResolutionWarning[] = [];
+  const driverClaimSourceDiagnostics: DriverClaimSourceDiagnostic[] = [];
   const introRow = requireRow(
     maps.framingByDomainKey.get(runtimeDefinition.domain.key),
     `Missing DOMAIN_FRAMING row for domain "${runtimeDefinition.domain.key}".`,
@@ -1099,13 +1329,18 @@ export async function buildSingleDomainResultPayload(params: {
 
       return buildSignalChapterPayload({
         row: chapterRow,
+        domainKey: runtimeDefinition.domain.key,
+        pairKey: topPairKey,
         signalKey: signal.signalKey,
         signalLabel: signal.signalTitle,
         rank: signal.rank,
         normalizedScore: signal.percentage,
         rawScore: signal.rawTotal,
         position,
+        driverClaimMaps: maps.driverClaimMaps,
         warnings: signalFallbackWarnings,
+        driverClaimWarnings,
+        driverClaimSourceDiagnostics,
       });
     }),
   );
@@ -1194,6 +1429,8 @@ export async function buildSingleDomainResultPayload(params: {
       warnings: Object.freeze([
         ...scoreResult.diagnostics.warnings,
         ...normalizedResult.diagnostics.warnings,
+        ...formatDriverClaimSourceDiagnostics(driverClaimSourceDiagnostics),
+        ...formatDriverClaimResolutionWarnings(driverClaimWarnings),
         ...formatSignalFallbackWarnings(signalFallbackWarnings),
       ]),
     }),

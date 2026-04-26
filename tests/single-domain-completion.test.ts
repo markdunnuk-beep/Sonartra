@@ -15,6 +15,7 @@ import { isSingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
+  DriverClaimsRow,
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
@@ -113,6 +114,7 @@ type RuntimeFixture = {
   language: {
     DOMAIN_FRAMING: DomainFramingRow[];
     HERO_PAIRS: HeroPairsRow[];
+    DRIVER_CLAIMS: DriverClaimsRow[];
     SIGNAL_CHAPTERS: SignalChaptersRow[];
     BALANCING_SECTIONS: BalancingSectionsRow[];
     PAIR_SUMMARIES: PairSummariesRow[];
@@ -221,6 +223,7 @@ function buildRuntimeFixture(): RuntimeFixture {
         hero_tension_paragraph: `Tension ${pair_key}`,
         hero_close_paragraph: `Close ${pair_key}`,
       })),
+      DRIVER_CLAIMS: [],
       SIGNAL_CHAPTERS: ['vision', 'delivery', 'people', 'rigor'].map((signal_key) => ({
         signal_key,
         position_primary_label: 'Primary',
@@ -605,6 +608,61 @@ function createDb(config?: {
         development_statement_2: `${label} development 2`,
       }));
     },
+    useBlueprintPairScopedDriverClaims() {
+      const pairKeys = [
+        'process_results',
+        'process_people',
+        'process_vision',
+        'results_people',
+        'results_vision',
+        'people_vision',
+      ];
+      const rowsByRole = [
+        {
+          signal_key: 'results',
+          driver_role: 'primary_driver',
+          claim_type: 'driver_primary',
+          materiality: 'core',
+          claim_text: 'DRIVER_CLAIMS process_results results primary text.',
+        },
+        {
+          signal_key: 'process',
+          driver_role: 'secondary_driver',
+          claim_type: 'driver_secondary',
+          materiality: 'core',
+          claim_text: 'DRIVER_CLAIMS process_results process secondary text.',
+        },
+        {
+          signal_key: 'people',
+          driver_role: 'supporting_context',
+          claim_type: 'driver_supporting_context',
+          materiality: 'supporting',
+          claim_text: 'DRIVER_CLAIMS process_results people supporting text.',
+        },
+        {
+          signal_key: 'vision',
+          driver_role: 'range_limitation',
+          claim_type: 'driver_range_limitation',
+          materiality: 'material_underplay',
+          claim_text: 'DRIVER_CLAIMS process_results vision range text.',
+        },
+      ] as const;
+
+      runtime.language.DRIVER_CLAIMS = pairKeys.flatMap((pairKey) =>
+        rowsByRole.map((row, index) => ({
+          domain_key: 'leadership-approach',
+          pair_key: pairKey,
+          signal_key: row.signal_key,
+          driver_role: row.driver_role,
+          claim_type: row.claim_type,
+          claim_text: pairKey === 'process_results'
+            ? row.claim_text
+            : `DRIVER_CLAIMS ${pairKey} ${row.signal_key} ${row.driver_role}.`,
+          materiality: row.materiality,
+          priority: index + 1,
+        })),
+      );
+    },
     db: {
       async query<T>(text: string, params?: unknown[]) {
         const sql = text.replace(/\s+/g, ' ').trim();
@@ -983,6 +1041,10 @@ function createDb(config?: {
           return { rows: runtime.language.HERO_PAIRS as T[] };
         }
 
+        if (sql.includes('FROM assessment_version_single_domain_driver_claims')) {
+          return { rows: runtime.language.DRIVER_CLAIMS as T[] };
+        }
+
         if (sql.includes('FROM assessment_version_single_domain_signal_chapters')) {
           return { rows: runtime.language.SIGNAL_CHAPTERS as T[] };
         }
@@ -1189,6 +1251,93 @@ test('single-domain completion replaces semantically incompatible driver fallbac
       && warning.includes('missing_role=secondary_driver')
     )),
   );
+});
+
+test('single-domain completion resolves drivers from exact pair-scoped driver claims', async () => {
+  const harness = createDb();
+  harness.useBlueprintSemanticFallbackFixture();
+  harness.useBlueprintPairScopedDriverClaims();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'blueprint-version',
+    responses: buildResponseSet(),
+  });
+
+  const signalText = (signalKey: string) => {
+    const signal = payload.signals.find((entry) => entry.signal_key === signalKey);
+    assert.ok(signal, `Expected signal ${signalKey}`);
+    return signal.chapter_intro;
+  };
+
+  assert.equal(isSingleDomainResultPayload(payload), true);
+  assert.equal(payload.diagnostics.topPair, 'process_results');
+  assert.deepEqual(payload.signals.map((signal) => signal.signal_key), ['results', 'process', 'people', 'vision']);
+  assert.deepEqual(payload.signals.map((signal) => signal.position), ['primary', 'secondary', 'supporting', 'underplayed']);
+  assert.equal(signalText('results'), 'DRIVER_CLAIMS process_results results primary text.');
+  assert.equal(signalText('process'), 'DRIVER_CLAIMS process_results process secondary text.');
+  assert.equal(signalText('people'), 'DRIVER_CLAIMS process_results people supporting text.');
+  assert.equal(signalText('vision'), 'DRIVER_CLAIMS process_results vision range text.');
+  assert.equal(
+    payload.diagnostics.warnings.some((warning) => warning.includes('single_domain_pair_driver_claim_missing')),
+    false,
+  );
+  assert.equal(
+    payload.diagnostics.warnings.filter((warning) => warning.includes('source=driver_claims')).length,
+    4,
+  );
+  assert.equal(
+    payload.signals.every((signal) => [
+      signal.chapter_intro,
+      signal.chapter_how_it_shows_up,
+      signal.chapter_value_outcome,
+      signal.chapter_value_team_effect,
+      signal.chapter_risk_behaviour,
+      signal.chapter_risk_impact,
+      signal.chapter_development,
+    ].every((value) => value.trim().length > 0)),
+    true,
+  );
+});
+
+test('single-domain completion keeps legacy signal-chapter compatibility without driver claims', async () => {
+  const harness = createDb();
+  harness.useBlueprintSemanticFallbackFixture();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'blueprint-version',
+    responses: buildResponseSet(),
+  });
+
+  const textFor = (signalKey: string) => {
+    const signal = payload.signals.find((entry) => entry.signal_key === signalKey);
+    assert.ok(signal, `Expected signal ${signalKey}`);
+    return [
+      signal.chapter_intro,
+      signal.chapter_how_it_shows_up,
+      signal.chapter_value_outcome,
+      signal.chapter_value_team_effect,
+      signal.chapter_risk_behaviour,
+      signal.chapter_risk_impact,
+      signal.chapter_development,
+    ].join('\n');
+  };
+
+  assert.equal(isSingleDomainResultPayload(payload), true);
+  assert.equal(payload.diagnostics.topPair, 'process_results');
+  assert.ok(
+    payload.diagnostics.warnings.some((warning) => (
+      warning.includes('single_domain_pair_driver_claim_missing')
+      && warning.includes('pair_key=process_results')
+      && warning.includes('signal_key=results')
+      && warning.includes('driver_role=primary_driver')
+    )),
+  );
+  assert.doesNotMatch(textFor('process'), /\bmain\s+driver\b/i);
+  assert.doesNotMatch(textFor('people'), /\bmain\s+driver\b/i);
+  assert.doesNotMatch(textFor('vision'), /\bmain\s+driver\b/i);
+  assert.doesNotMatch(textFor('results'), /\bweaker\s+range\b/i);
 });
 
 test('single-domain payload ignores cloned non-target pair rows and uses signal fallback', async () => {
