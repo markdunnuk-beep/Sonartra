@@ -162,9 +162,11 @@ function createOpeningSummary(
   const underplayed = rankedSignals.find((signal) => signal.position === 'underplayed')
     ?? rankedSignals[rankedSignals.length - 1];
 
-  const primaryLabel = primary?.signal_label ?? 'Primary signal';
-  const secondaryLabel = secondary?.signal_label ?? 'secondary signal';
-  const underplayedLabel = underplayed?.signal_label ?? 'least available range';
+  const primaryLabel = primary?.signal_label ? formatDisplayLabel(primary.signal_label) : 'Primary signal';
+  const secondaryLabel = secondary?.signal_label ? formatDisplayLabel(secondary.signal_label) : 'secondary signal';
+  const underplayedLabel = underplayed?.signal_label
+    ? formatDisplayLabel(underplayed.signal_label)
+    : 'least available range';
 
   const signalPattern = secondary
     ? `${primaryLabel} appears strongest, ${secondaryLabel} reinforces it, and ${underplayedLabel} is the least available range.`
@@ -181,7 +183,7 @@ function createOpeningSummary(
       {
         label: 'Leading pair',
         value: pairLabel,
-        detail: payload.hero.hero_opening,
+        detail: formatNarrativeText(payload.hero.hero_opening),
       },
       {
         label: 'Signal pattern',
@@ -190,7 +192,7 @@ function createOpeningSummary(
       },
       {
         label: 'Missing range',
-        value: `${underplayedLabel}: ${payload.balancing.balancing_section_title}`,
+        value: `${underplayedLabel}: ${formatDisplayLabel(payload.balancing.balancing_section_title)}`,
         detail: 'The least available range named by this result.',
       },
     ],
