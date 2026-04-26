@@ -87,11 +87,40 @@ Post-deployment Chrome MCP production validation:
 
 | Check | Result |
 | --- | --- |
-| Desktop target route | Pending deployment check |
-| Mobile target route | Pending deployment check |
-| Evidence proof stack visible | Pending deployment check |
-| Evidence order aligns with H1 | Pending deployment check |
-| Horizontal overflow | Pending deployment check |
+| Desktop target route | Passed |
+| Mobile target route | Passed |
+| Evidence proof stack visible | Passed |
+| Evidence order aligns with H1 | Passed |
+| Horizontal overflow | None observed |
+
+Production evidence panel observed:
+
+```text
+Built from 24/24 completed responses, ordered to match the result headline.
+
+Primary signal
+Results
+29%
+Rank 1 in this completed result.
+
+Reinforcing signal
+Process
+25%
+Rank 2 in this completed result.
+
+Least available range
+Vision
+21%
+Rank 4 in this completed result.
+
+Response base
+24/24 completed responses
+Normal assessment completion, not a preview or imported result.
+
+Leading pair
+Results and Process
+Shown primary-first to match the headline. This result is led by results, with process providing the strongest secondary signal.
+```
 
 ## 5. Console / Runtime Findings
 
@@ -103,11 +132,17 @@ Pre-deployment:
 
 Post-deployment:
 
-- Pending production verification after deployment.
+- Chrome MCP production route check passed.
+- Browser title remained `Sonartra`.
+- No console messages were reported.
+- Result document request returned `200`.
+- Clerk resources loaded successfully from `https://clerk.sonartra.com`.
+- No failed result/RSC/auth requests were observed.
 
 ## 6. Screenshots Captured
 
-Pending production deployment check.
+- `docs/qa/screenshots/single-domain-evidence-layer-desktop.png`
+- `docs/qa/screenshots/single-domain-evidence-layer-mobile.png`
 
 ## 7. Remaining Weaknesses
 
