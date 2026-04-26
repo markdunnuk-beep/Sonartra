@@ -9,7 +9,8 @@ export async function getSingleDomainDraftReadiness(
   const evaluation = await evaluateSingleDomainRuntimeDefinition(db, assessmentVersionId);
 
   return {
-    isReady: evaluation.runtimeDefinition !== null && evaluation.issues.length === 0,
+    isReady: evaluation.runtimeDefinition !== null
+      && !evaluation.issues.some((issue) => issue.severity === 'blocking'),
     issues: evaluation.issues,
     counts: evaluation.counts,
     expectations: evaluation.expectations,

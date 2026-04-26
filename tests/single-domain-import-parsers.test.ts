@@ -125,3 +125,71 @@ test('single-domain narrative rows map into the legacy storage bundle shape', ()
     },
   ]);
 });
+
+test('single-domain drivers rows map to pair-scoped driver claims without signal collapse', () => {
+  const pairKeys = [
+    'process_results',
+    'process_vision',
+    'process_people',
+    'results_vision',
+    'results_people',
+    'vision_people',
+  ];
+  const roles = [
+    {
+      driver_role: 'primary_driver',
+      claim_type: 'driver_primary',
+      materiality: 'core',
+      signal_key: 'process',
+    },
+    {
+      driver_role: 'secondary_driver',
+      claim_type: 'driver_secondary',
+      materiality: 'core',
+      signal_key: 'results',
+    },
+    {
+      driver_role: 'supporting_context',
+      claim_type: 'driver_supporting_context',
+      materiality: 'supporting',
+      signal_key: 'people',
+    },
+    {
+      driver_role: 'range_limitation',
+      claim_type: 'driver_range_limitation',
+      materiality: 'material_underplay',
+      signal_key: 'vision',
+    },
+  ] as const;
+
+  const rows = pairKeys.flatMap((pairKey) =>
+    roles.map((role, index) => ({
+      domain_key: 'leadership',
+      section_key: 'drivers' as const,
+      pair_key: pairKey,
+      signal_key: role.signal_key,
+      driver_role: role.driver_role,
+      claim_type: role.claim_type,
+      claim_text: `${pairKey} ${role.driver_role}`,
+      materiality: role.materiality,
+      priority: String(index + 1),
+    })),
+  );
+
+  const result = mapSingleDomainNarrativeRowsToLegacyDataset('SINGLE_DOMAIN_DRIVERS', rows);
+
+  assert.equal(result.datasetKey, 'DRIVER_CLAIMS');
+  assert.equal(result.rows.length, 24);
+  assert.equal(new Set(result.rows.map((row) => row.pair_key)).size, 6);
+  assert.equal(new Set(result.rows.map((row) => row.signal_key)).size, 4);
+  assert.deepEqual(result.rows[0], {
+    domain_key: 'leadership',
+    pair_key: 'process_results',
+    signal_key: 'process',
+    driver_role: 'primary_driver',
+    claim_type: 'driver_primary',
+    claim_text: 'process_results primary_driver',
+    materiality: 'core',
+    priority: 1,
+  });
+});

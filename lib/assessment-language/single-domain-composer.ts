@@ -582,6 +582,7 @@ function chooseActivePairKey(
   requestedPairKey?: string,
 ): string | null {
   const storedPairKeys = [
+    ...(bundle.DRIVER_CLAIMS ?? []).map((row) => row.pair_key),
     ...bundle.HERO_PAIRS.map((row) => row.pair_key),
     ...bundle.PAIR_SUMMARIES.map((row) => row.pair_key),
     ...bundle.BALANCING_SECTIONS.map((row) => row.pair_key),
@@ -657,6 +658,37 @@ function buildDriverRowsFromLegacy(
   });
 
   return rows;
+}
+
+function buildDriverRowsFromClaims(
+  bundle: SingleDomainLanguageBundle,
+  activePairKey: string,
+): readonly SingleDomainDriversImportRow[] {
+  const roleOrder: Record<SingleDomainDriversImportRow['driver_role'], number> = {
+    primary_driver: 0,
+    secondary_driver: 1,
+    supporting_context: 2,
+    range_limitation: 3,
+  };
+
+  return [...(bundle.DRIVER_CLAIMS ?? [])]
+    .filter((row) => row.pair_key === activePairKey)
+    .sort((left, right) => (
+      roleOrder[left.driver_role] - roleOrder[right.driver_role]
+      || left.priority - right.priority
+      || left.signal_key.localeCompare(right.signal_key)
+    ))
+    .map((row) => ({
+      domain_key: row.domain_key,
+      section_key: 'drivers',
+      pair_key: row.pair_key,
+      signal_key: row.signal_key,
+      driver_role: row.driver_role,
+      claim_type: row.claim_type,
+      claim_text: row.claim_text,
+      materiality: row.materiality,
+      priority: String(row.priority),
+    }));
 }
 
 function buildRankedSignals(
@@ -860,12 +892,20 @@ export function buildSingleDomainDraftPreviewInput(
     ],
   });
 
-  const driverRows = buildDriverRowsFromLegacy(
+  const pairScopedDriverRows = buildDriverRowsFromClaims(
     assessment.singleDomainLanguageBundle,
     activePairKey,
+  );
+  const driverRows = (
+    pairScopedDriverRows.length > 0
+      ? pairScopedDriverRows
+      : buildDriverRowsFromLegacy(
+        assessment.singleDomainLanguageBundle,
+        activePairKey,
+      )
   ).map((row) => ({
     ...row,
-    domain_key: domain.domainKey,
+    domain_key: row.domain_key || domain.domainKey,
   }));
 
   const underplayedSignals = new Set(

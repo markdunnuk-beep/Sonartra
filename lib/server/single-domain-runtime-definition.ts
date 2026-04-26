@@ -76,6 +76,27 @@ type RuntimeWeightRow = {
   source_weight_key: string | null;
 };
 
+const DRIVER_CLAIM_ROLES = [
+  'primary_driver',
+  'secondary_driver',
+  'supporting_context',
+  'range_limitation',
+] as const;
+
+const DRIVER_ROLE_TO_CLAIM_TYPE = {
+  primary_driver: 'driver_primary',
+  secondary_driver: 'driver_secondary',
+  supporting_context: 'driver_supporting_context',
+  range_limitation: 'driver_range_limitation',
+} as const;
+
+const DRIVER_ROLE_TO_MATERIALITY = {
+  primary_driver: 'core',
+  secondary_driver: 'core',
+  supporting_context: 'supporting',
+  range_limitation: 'material_underplay',
+} as const;
+
 export class SingleDomainRuntimeDefinitionError extends Error {
   readonly code: SingleDomainDraftReadinessIssueCode;
   readonly issues: readonly SingleDomainDraftReadinessIssue[];
@@ -112,12 +133,13 @@ function createIssue(
   section: SingleDomainDraftReadinessIssue['section'],
   message: string,
   relatedKeys?: readonly string[],
+  severity: SingleDomainDraftReadinessIssue['severity'] = 'blocking',
 ): SingleDomainDraftReadinessIssue {
   return {
     code,
     section,
     message,
-    severity: 'blocking',
+    severity,
     relatedKeys: relatedKeys ? Object.freeze([...relatedKeys]) : undefined,
   };
 }
@@ -267,7 +289,7 @@ function buildLanguageExpectations(signalCount: number, derivedPairCount: number
   return {
     DOMAIN_FRAMING: 1,
     HERO_PAIRS: derivedPairCount,
-    DRIVER_CLAIMS: 0,
+    DRIVER_CLAIMS: derivedPairCount * DRIVER_CLAIM_ROLES.length,
     SIGNAL_CHAPTERS: signalCount,
     BALANCING_SECTIONS: derivedPairCount,
     PAIR_SUMMARIES: derivedPairCount,
@@ -367,6 +389,105 @@ function validateLanguageKeys(params: {
       ),
     );
   }
+
+  const driverClaimRows = params.languageBundle.DRIVER_CLAIMS ?? [];
+  const driverDomainKeys = [...new Set(driverClaimRows.map((row) => row.domain_key))];
+  const invalidDriverDomainKeys = domainKey
+    ? driverDomainKeys.filter((key) => key !== domainKey)
+    : driverDomainKeys;
+  if (invalidDriverDomainKeys.length > 0) {
+    params.issues.push(
+      createIssue(
+        'driver_claims_key_mismatch',
+        'language',
+        'DRIVER_CLAIMS rows must reference the current single-domain key only.',
+        invalidDriverDomainKeys,
+        'warning',
+      ),
+    );
+  }
+
+  const driverSignalKeys = [...new Set(driverClaimRows.map((row) => row.signal_key))];
+  const invalidDriverSignalKeys = driverSignalKeys.filter((key) => !signalKeySet.has(key));
+  if (invalidDriverSignalKeys.length > 0) {
+    params.issues.push(
+      createIssue(
+        'driver_claims_key_mismatch',
+        'language',
+        'DRIVER_CLAIMS signal_key values must resolve against the current authored signal keys.',
+        invalidDriverSignalKeys,
+        'warning',
+      ),
+    );
+  }
+
+  const driverPairKeys = [...new Set(driverClaimRows.map((row) => row.pair_key))];
+  const invalidDriverPairKeys = driverPairKeys.filter(
+    (key) => !resolveSingleDomainPairKey(params.pairKeys, key).success,
+  );
+  if (invalidDriverPairKeys.length > 0) {
+    params.issues.push(
+      createIssue(
+        'driver_claims_key_mismatch',
+        'language',
+        'DRIVER_CLAIMS pair_key values must resolve against the current signal-derived pair set.',
+        invalidDriverPairKeys,
+        'warning',
+      ),
+    );
+  }
+
+  const roleMappingMismatches = driverClaimRows
+    .filter((row) => {
+      const driverRole = row.driver_role as keyof typeof DRIVER_ROLE_TO_CLAIM_TYPE;
+      return !DRIVER_CLAIM_ROLES.includes(driverRole)
+        || row.claim_type !== DRIVER_ROLE_TO_CLAIM_TYPE[driverRole]
+        || row.materiality !== DRIVER_ROLE_TO_MATERIALITY[driverRole];
+    })
+    .map((row) => `${row.pair_key}:${row.signal_key}:${row.driver_role}`);
+  if (roleMappingMismatches.length > 0) {
+    params.issues.push(
+      createIssue(
+        'driver_claims_role_mapping_mismatch',
+        'language',
+        'DRIVER_CLAIMS rows must preserve the required driver_role, claim_type, and materiality mapping.',
+        roleMappingMismatches,
+        'warning',
+      ),
+    );
+  }
+
+  const coverageKeys = new Map<string, number>();
+  driverClaimRows.forEach((row) => {
+    const resolvedPairKey = resolveSingleDomainPairKey(params.pairKeys, row.pair_key);
+    if (!resolvedPairKey.success) {
+      return;
+    }
+
+    const key = `${resolvedPairKey.canonicalPairKey}:${row.driver_role}`;
+    coverageKeys.set(key, (coverageKeys.get(key) ?? 0) + 1);
+  });
+
+  const coverageFindings = params.pairKeys.flatMap((pairKey) =>
+    DRIVER_CLAIM_ROLES
+      .map((driverRole) => {
+        const key = `${pairKey}:${driverRole}`;
+        const count = coverageKeys.get(key) ?? 0;
+        return count === 1 ? null : `${key}:${count}`;
+      })
+      .filter((key): key is string => Boolean(key)),
+  );
+  if (coverageFindings.length > 0) {
+    params.issues.push(
+      createIssue(
+        'driver_claims_coverage_incomplete',
+        'language',
+        'DRIVER_CLAIMS should contain exactly one row for each expected pair and driver role.',
+        coverageFindings,
+        'warning',
+      ),
+    );
+  }
 }
 
 function createRuntimeDefinition(params: {
@@ -381,7 +502,7 @@ function createRuntimeDefinition(params: {
   expectations: SingleDomainDraftReadinessExpectations;
   issues: readonly SingleDomainDraftReadinessIssue[];
 }): SingleDomainRuntimeDefinition | null {
-  if (params.issues.length > 0) {
+  if (params.issues.some((issue) => issue.severity === 'blocking')) {
     return null;
   }
 
@@ -749,6 +870,17 @@ export async function evaluateSingleDomainRuntimeDefinition(
         'hero_pairs_count_mismatch',
         'language',
         `HERO_PAIRS must contain no more than ${expectedLanguageRowCounts.HERO_PAIRS} signal-derived pair row${expectedLanguageRowCounts.HERO_PAIRS === 1 ? '' : 's'}. Missing pairs use runtime fallback language.`,
+      ),
+    );
+  }
+  if (languageRowCounts.DRIVER_CLAIMS !== expectedLanguageRowCounts.DRIVER_CLAIMS) {
+    issues.push(
+      createIssue(
+        'driver_claims_count_mismatch',
+        'language',
+        `DRIVER_CLAIMS should contain exactly ${expectedLanguageRowCounts.DRIVER_CLAIMS} pair-scoped driver claim row${expectedLanguageRowCounts.DRIVER_CLAIMS === 1 ? '' : 's'}. Legacy SIGNAL_CHAPTERS compatibility remains available until pair-aware completion is enabled.`,
+        undefined,
+        'warning',
       ),
     );
   }

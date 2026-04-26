@@ -145,6 +145,10 @@ export type SingleDomainDraftReadinessIssueCode =
   | 'domain_framing_key_mismatch'
   | 'hero_pairs_count_mismatch'
   | 'hero_pairs_key_mismatch'
+  | 'driver_claims_count_mismatch'
+  | 'driver_claims_key_mismatch'
+  | 'driver_claims_role_mapping_mismatch'
+  | 'driver_claims_coverage_incomplete'
   | 'signal_chapters_count_mismatch'
   | 'signal_chapters_key_mismatch'
   | 'balancing_sections_count_mismatch'
@@ -159,7 +163,7 @@ export type SingleDomainDraftReadinessIssue = {
   code: SingleDomainDraftReadinessIssueCode;
   section: SingleDomainDraftReadinessSection;
   message: string;
-  severity: 'blocking';
+  severity: 'blocking' | 'warning';
   relatedKeys?: readonly string[];
 };
 

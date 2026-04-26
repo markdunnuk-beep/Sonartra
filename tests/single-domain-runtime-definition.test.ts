@@ -10,6 +10,7 @@ import {
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
+  DriverClaimsRow,
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
@@ -68,6 +69,7 @@ type RuntimeFixture = {
   language?: {
     DOMAIN_FRAMING?: DomainFramingRow[];
     HERO_PAIRS?: HeroPairsRow[];
+    DRIVER_CLAIMS?: DriverClaimsRow[];
     SIGNAL_CHAPTERS?: SignalChaptersRow[];
     BALANCING_SECTIONS?: BalancingSectionsRow[];
     PAIR_SUMMARIES?: PairSummariesRow[];
@@ -79,6 +81,7 @@ function createSingleDomainDb(fixture: RuntimeFixture) {
   const language = {
     DOMAIN_FRAMING: fixture.language?.DOMAIN_FRAMING ?? [],
     HERO_PAIRS: fixture.language?.HERO_PAIRS ?? [],
+    DRIVER_CLAIMS: fixture.language?.DRIVER_CLAIMS ?? [],
     SIGNAL_CHAPTERS: fixture.language?.SIGNAL_CHAPTERS ?? [],
     BALANCING_SECTIONS: fixture.language?.BALANCING_SECTIONS ?? [],
     PAIR_SUMMARIES: fixture.language?.PAIR_SUMMARIES ?? [],
@@ -121,6 +124,10 @@ function createSingleDomainDb(fixture: RuntimeFixture) {
         return { rows: language.HERO_PAIRS as T[] };
       }
 
+      if (sql.includes('FROM assessment_version_single_domain_driver_claims')) {
+        return { rows: language.DRIVER_CLAIMS as T[] };
+      }
+
       if (sql.includes('FROM assessment_version_single_domain_signal_chapters')) {
         return { rows: language.SIGNAL_CHAPTERS as T[] };
       }
@@ -140,6 +147,53 @@ function createSingleDomainDb(fixture: RuntimeFixture) {
       throw new Error(`Unhandled SQL in single-domain runtime test: ${sql}`);
     },
   };
+}
+
+function buildCompleteDriverClaims(): DriverClaimsRow[] {
+  const pairKeys = [
+    'directive_supportive',
+    'directive_analytical',
+    'supportive_analytical',
+  ];
+  const rowsByRole = [
+    {
+      driver_role: 'primary_driver',
+      claim_type: 'driver_primary',
+      materiality: 'core',
+      signal_key: 'directive',
+    },
+    {
+      driver_role: 'secondary_driver',
+      claim_type: 'driver_secondary',
+      materiality: 'core',
+      signal_key: 'supportive',
+    },
+    {
+      driver_role: 'supporting_context',
+      claim_type: 'driver_supporting_context',
+      materiality: 'supporting',
+      signal_key: 'analytical',
+    },
+    {
+      driver_role: 'range_limitation',
+      claim_type: 'driver_range_limitation',
+      materiality: 'material_underplay',
+      signal_key: 'analytical',
+    },
+  ] as const;
+
+  return pairKeys.flatMap((pairKey) =>
+    rowsByRole.map((row, index) => ({
+      domain_key: 'leadership-style',
+      pair_key: pairKey,
+      signal_key: row.signal_key,
+      driver_role: row.driver_role,
+      claim_type: row.claim_type,
+      claim_text: `${pairKey} ${row.driver_role}`,
+      materiality: row.materiality,
+      priority: index + 1,
+    })),
+  );
 }
 
 function buildFixture(overrides?: Partial<RuntimeFixture>): RuntimeFixture {
@@ -268,6 +322,7 @@ function buildFixture(overrides?: Partial<RuntimeFixture>): RuntimeFixture {
           hero_close_paragraph: 'Close',
         },
       ],
+      DRIVER_CLAIMS: buildCompleteDriverClaims(),
       SIGNAL_CHAPTERS: [
         {
           signal_key: 'directive',
@@ -434,6 +489,7 @@ test('single-domain runtime loader assembles a deterministic runtime object from
   assert.equal(runtime.questions.length, 1);
   assert.equal(runtime.questions[0]?.options.length, 2);
   assert.equal(runtime.optionSignalWeights.length, 2);
+  assert.equal(runtime.languageBundle.DRIVER_CLAIMS.length, 12);
   assert.equal(runtime.languageBundle.SIGNAL_CHAPTERS.length, 3);
 });
 
@@ -568,8 +624,77 @@ test('readiness bridge exposes explicit issues, counts, and expectations', async
 
   assert.equal(readiness.counts.optionCount, 2);
   assert.equal(readiness.expectations.expectedLanguageRowCounts.HERO_PAIRS, 3);
+  assert.equal(readiness.expectations.expectedLanguageRowCounts.DRIVER_CLAIMS, 12);
   assert.ok(readiness.issues.some((issue) => issue.code === 'weight_signal_unresolved'));
   assert.equal(readiness.runtimeDefinition, null);
+});
+
+test('driver claims readiness accepts complete pair-role coverage', async () => {
+  const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(buildFixture()), 'version-1');
+
+  assert.equal(readiness.isReady, true);
+  assert.equal(readiness.counts.languageRowCounts.DRIVER_CLAIMS, 12);
+  assert.equal(readiness.expectations.expectedLanguageRowCounts.DRIVER_CLAIMS, 12);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'driver_claims_coverage_incomplete'), false);
+});
+
+test('driver claims readiness warns when one pair-role row is missing', async () => {
+  const fixture = buildFixture();
+  fixture.language.DRIVER_CLAIMS = fixture.language.DRIVER_CLAIMS.filter(
+    (row) => !(row.pair_key === 'directive_supportive' && row.driver_role === 'range_limitation'),
+  );
+
+  const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
+  const issue = readiness.issues.find((entry) => entry.code === 'driver_claims_coverage_incomplete');
+
+  assert.equal(readiness.isReady, true);
+  assert.equal(issue?.severity, 'warning');
+  assert.ok(issue?.relatedKeys?.includes('directive_supportive:range_limitation:0'));
+});
+
+test('driver claims readiness warns for invalid pair and signal keys', async () => {
+  const fixture = buildFixture();
+  fixture.language.DRIVER_CLAIMS = [
+    ...fixture.language.DRIVER_CLAIMS,
+    {
+      domain_key: 'leadership-style',
+      pair_key: 'missing_pair',
+      signal_key: 'missing_signal',
+      driver_role: 'primary_driver',
+      claim_type: 'driver_primary',
+      claim_text: 'Invalid key claim',
+      materiality: 'core',
+      priority: 1,
+    },
+  ];
+
+  const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
+  const keyIssues = readiness.issues.filter((entry) => entry.code === 'driver_claims_key_mismatch');
+
+  assert.equal(readiness.isReady, true);
+  assert.equal(keyIssues.length >= 2, true);
+  assert.ok(keyIssues.some((issue) => issue.relatedKeys?.includes('missing_pair')));
+  assert.ok(keyIssues.some((issue) => issue.relatedKeys?.includes('missing_signal')));
+});
+
+test('driver claims readiness warns for invalid role claim and materiality mapping', async () => {
+  const fixture = buildFixture();
+  fixture.language.DRIVER_CLAIMS = fixture.language.DRIVER_CLAIMS.map((row, index) => (
+    index === 0
+      ? ({
+          ...row,
+          claim_type: 'driver_secondary',
+          materiality: 'supporting',
+        } as DriverClaimsRow)
+      : row
+  ));
+
+  const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
+  const issue = readiness.issues.find((entry) => entry.code === 'driver_claims_role_mapping_mismatch');
+
+  assert.equal(readiness.isReady, true);
+  assert.equal(issue?.severity, 'warning');
+  assert.ok(issue?.relatedKeys?.some((key) => key.includes('directive_supportive:directive:primary_driver')));
 });
 
 test('existing multi-domain runtime loading remains available through the engine repository path', async () => {

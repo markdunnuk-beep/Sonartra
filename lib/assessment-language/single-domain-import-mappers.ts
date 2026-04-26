@@ -11,10 +11,10 @@ import type {
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
+  DriverClaimsRow,
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
-  SignalChaptersRow,
   SingleDomainLanguageDatasetKey,
   SingleDomainLanguageDatasetRowMap,
 } from '@/lib/types/single-domain-language';
@@ -22,7 +22,7 @@ import type {
 type LegacyDatasetMap = {
   SINGLE_DOMAIN_INTRO: 'DOMAIN_FRAMING';
   SINGLE_DOMAIN_HERO: 'HERO_PAIRS';
-  SINGLE_DOMAIN_DRIVERS: 'SIGNAL_CHAPTERS';
+  SINGLE_DOMAIN_DRIVERS: 'DRIVER_CLAIMS';
   SINGLE_DOMAIN_PAIR: 'PAIR_SUMMARIES';
   SINGLE_DOMAIN_LIMITATION: 'BALANCING_SECTIONS';
   SINGLE_DOMAIN_APPLICATION: 'APPLICATION_STATEMENTS';
@@ -31,7 +31,7 @@ type LegacyDatasetMap = {
 export const SINGLE_DOMAIN_NARRATIVE_TO_LEGACY_DATASET_MAP: LegacyDatasetMap = {
   SINGLE_DOMAIN_INTRO: 'DOMAIN_FRAMING',
   SINGLE_DOMAIN_HERO: 'HERO_PAIRS',
-  SINGLE_DOMAIN_DRIVERS: 'SIGNAL_CHAPTERS',
+  SINGLE_DOMAIN_DRIVERS: 'DRIVER_CLAIMS',
   SINGLE_DOMAIN_PAIR: 'PAIR_SUMMARIES',
   SINGLE_DOMAIN_LIMITATION: 'BALANCING_SECTIONS',
   SINGLE_DOMAIN_APPLICATION: 'APPLICATION_STATEMENTS',
@@ -60,52 +60,17 @@ function mapHeroRows(rows: readonly SingleDomainHeroImportRow[]): readonly HeroP
   }));
 }
 
-function joinClaimTexts(
-  rows: readonly SingleDomainDriversImportRow[],
-  driverRole: SingleDomainDriversImportRow['driver_role'],
-): string {
-  return rows
-    .filter((row) => row.driver_role === driverRole)
-    .sort((left, right) => Number(left.priority) - Number(right.priority))
-    .map((row) => row.claim_text)
-    .join('\n');
-}
-
-function mapDriversRows(rows: readonly SingleDomainDriversImportRow[]): readonly SignalChaptersRow[] {
-  const bySignal = new Map<string, SingleDomainDriversImportRow[]>();
-
-  rows.forEach((row) => {
-    const existing = bySignal.get(row.signal_key) ?? [];
-    existing.push(row);
-    bySignal.set(row.signal_key, existing);
-  });
-
-  return [...bySignal.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([signal_key, signalRows]) => {
-      const primaryClaim = joinClaimTexts(signalRows, 'primary_driver');
-      const secondaryClaim = joinClaimTexts(signalRows, 'secondary_driver');
-      const supportingClaim = joinClaimTexts(signalRows, 'supporting_context');
-      const limitationClaim = joinClaimTexts(signalRows, 'range_limitation');
-
-      return {
-        signal_key,
-        position_primary_label: 'Primary driver',
-        position_secondary_label: 'Secondary driver',
-        position_supporting_label: 'Supporting context',
-        position_underplayed_label: 'Range limitation',
-        chapter_intro_primary: primaryClaim,
-        chapter_intro_secondary: secondaryClaim,
-        chapter_intro_supporting: supportingClaim,
-        chapter_intro_underplayed: limitationClaim,
-        chapter_how_it_shows_up: primaryClaim || secondaryClaim || supportingClaim,
-        chapter_value_outcome: supportingClaim || secondaryClaim || primaryClaim,
-        chapter_value_team_effect: supportingClaim || secondaryClaim || primaryClaim,
-        chapter_risk_behaviour: limitationClaim,
-        chapter_risk_impact: limitationClaim,
-        chapter_development: limitationClaim,
-      };
-    });
+function mapDriversRows(rows: readonly SingleDomainDriversImportRow[]): readonly DriverClaimsRow[] {
+  return rows.map((row) => ({
+    domain_key: row.domain_key,
+    pair_key: row.pair_key,
+    signal_key: row.signal_key,
+    driver_role: row.driver_role,
+    claim_type: row.claim_type,
+    claim_text: row.claim_text,
+    materiality: row.materiality,
+    priority: Number(row.priority),
+  }));
 }
 
 function mapPairRows(rows: readonly SingleDomainPairImportRow[]): readonly PairSummariesRow[] {
@@ -219,7 +184,7 @@ export function mapSingleDomainNarrativeRowsToLegacyDataset<TKey extends SingleD
       };
     case 'SINGLE_DOMAIN_DRIVERS':
       return {
-        datasetKey: 'SIGNAL_CHAPTERS',
+        datasetKey: 'DRIVER_CLAIMS',
         rows: mapDriversRows(rows as readonly SingleDomainDriversImportRow[]),
       } as {
         datasetKey: LegacyDatasetMap[TKey];

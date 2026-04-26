@@ -196,6 +196,48 @@ test('draft preview input adapts imported draft bundle rows into the locked prev
         hero_close_paragraph: 'The result is disciplined execution.',
       },
     ],
+    DRIVER_CLAIMS: [
+      {
+        domain_key: 'leadership-style',
+        pair_key: 'directive_structured',
+        signal_key: 'directive',
+        driver_role: 'primary_driver',
+        claim_type: 'driver_primary',
+        claim_text: 'Pair-scoped Directive claim.',
+        materiality: 'core',
+        priority: 1,
+      },
+      {
+        domain_key: 'leadership-style',
+        pair_key: 'directive_structured',
+        signal_key: 'structured',
+        driver_role: 'secondary_driver',
+        claim_type: 'driver_secondary',
+        claim_text: 'Pair-scoped Structured claim.',
+        materiality: 'core',
+        priority: 2,
+      },
+      {
+        domain_key: 'leadership-style',
+        pair_key: 'directive_structured',
+        signal_key: 'reflective',
+        driver_role: 'supporting_context',
+        claim_type: 'driver_supporting_context',
+        claim_text: 'Pair-scoped Reflective support claim.',
+        materiality: 'supporting',
+        priority: 3,
+      },
+      {
+        domain_key: 'leadership-style',
+        pair_key: 'directive_structured',
+        signal_key: 'reflective',
+        driver_role: 'range_limitation',
+        claim_type: 'driver_range_limitation',
+        claim_text: 'Pair-scoped Reflective range claim.',
+        materiality: 'material_underplay',
+        priority: 4,
+      },
+    ],
     SIGNAL_CHAPTERS: [
       {
         signal_key: 'directive',
@@ -303,6 +345,12 @@ test('draft preview input adapts imported draft bundle rows into the locked prev
   }
 
   assert.equal(preview.input.sections.hero.pattern_label, 'Firm structured delivery');
+  assert.equal(preview.input.sections.drivers.length, 4);
+  assert.equal(preview.input.sections.drivers[0]?.claim_text, 'Pair-scoped Directive claim.');
+  assert.equal(
+    preview.input.sections.drivers.some((row) => row.claim_text === 'Directive pace sets the pattern.'),
+    false,
+  );
   assert.equal(preview.input.sections.pair.pair_label, 'Directive + Structured');
   assert.equal(preview.input.sections.limitation.weaker_signal_key, 'reflective');
   assert.equal(preview.input.sections.application.length, 3);
