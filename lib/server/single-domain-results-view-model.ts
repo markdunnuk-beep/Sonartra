@@ -19,10 +19,25 @@ export type SingleDomainResultsMetadataItem = {
   emphasis?: boolean;
 };
 
+export type SingleDomainResultsEvidenceItem = {
+  label: string;
+  value: string;
+  detail?: string;
+};
+
+export type SingleDomainResultsOpeningSummary = {
+  eyebrow: string;
+  title: string;
+  diagnosis: string;
+  implication: string;
+  evidenceItems: readonly SingleDomainResultsEvidenceItem[];
+};
+
 export type SingleDomainResultsViewModel = {
   assessmentTitle: string;
   version: string;
   pairLabel: string;
+  openingSummary: SingleDomainResultsOpeningSummary;
   metadataItems: readonly SingleDomainResultsMetadataItem[];
   readingSections: ResultReadingSectionsConfig;
   report: ComposedSingleDomainReport;
@@ -137,6 +152,51 @@ function cleanComposedReport(report: ComposedSingleDomainReport): ComposedSingle
   };
 }
 
+function createOpeningSummary(
+  payload: SingleDomainResultPayload,
+  pairLabel: string,
+): SingleDomainResultsOpeningSummary {
+  const rankedSignals = [...payload.signals].sort((left, right) => left.rank - right.rank);
+  const primary = rankedSignals[0];
+  const secondary = rankedSignals[1];
+  const underplayed = rankedSignals.find((signal) => signal.position === 'underplayed')
+    ?? rankedSignals[rankedSignals.length - 1];
+
+  const primaryLabel = primary?.signal_label ?? 'Primary signal';
+  const secondaryLabel = secondary?.signal_label ?? 'secondary signal';
+  const underplayedLabel = underplayed?.signal_label ?? 'least available range';
+
+  const signalPattern = secondary
+    ? `${primaryLabel} appears strongest, ${secondaryLabel} reinforces it, and ${underplayedLabel} is the least available range.`
+    : `${primaryLabel} appears as the strongest signal in this result.`;
+
+  return {
+    eyebrow: 'Your leadership pattern',
+    title: secondary
+      ? `${primaryLabel}-led pattern, reinforced by ${secondaryLabel}`
+      : `${primaryLabel}-led pattern`,
+    diagnosis: formatNarrativeText(payload.pairSummary.pair_opening_paragraph),
+    implication: formatNarrativeText(payload.balancing.current_pattern_paragraph),
+    evidenceItems: [
+      {
+        label: 'Leading pair',
+        value: pairLabel,
+        detail: payload.hero.hero_opening,
+      },
+      {
+        label: 'Signal pattern',
+        value: signalPattern,
+        detail: `Ranked from ${payload.diagnostics.answeredQuestionCount} completed responses.`,
+      },
+      {
+        label: 'Missing range',
+        value: `${underplayedLabel}: ${payload.balancing.balancing_section_title}`,
+        detail: 'The least available range named by this result.',
+      },
+    ],
+  };
+}
+
 export function createSingleDomainResultsViewModel(
   payload: SingleDomainResultPayload,
 ): SingleDomainResultsViewModel {
@@ -149,11 +209,13 @@ export function createSingleDomainResultsViewModel(
   const report = cleanComposedReport(
     composeSingleDomainReport(buildSingleDomainResultComposerInput(payload)),
   );
+  const openingSummary = createOpeningSummary(payload, pairLabel);
 
   return {
     assessmentTitle: payload.metadata.assessmentTitle,
     version: payload.metadata.version,
     pairLabel,
+    openingSummary,
     metadataItems: [
       { label: 'Completed', value: completionTimestamp.date },
       ...(completionTimestamp.time ? [{ label: 'Time', value: completionTimestamp.time }] : []),

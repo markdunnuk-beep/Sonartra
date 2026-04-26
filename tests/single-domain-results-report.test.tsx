@@ -194,6 +194,15 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   );
 
   assert.match(markup, /sonartra-report-hero/);
+  assert.match(markup, /Your leadership pattern/);
+  assert.match(markup, /Vision-led pattern, reinforced by Delivery/);
+  assert.match(markup, /Pair opening paragraph/);
+  assert.match(markup, /Why this result was generated/);
+  assert.match(markup, /Signal pattern/);
+  assert.match(markup, /Vision appears strongest, Delivery reinforces it, and Rigor is the least available range/);
+  assert.match(markup, /Ranked from 24 completed responses/);
+  assert.match(markup, /Missing range/);
+  assert.match(markup, /Rigor: Balancing your approach/);
   assert.match(markup, /sonartra-single-domain-meta-strip/);
   assert.match(markup, />Completed</);
   assert.match(markup, />Time</);

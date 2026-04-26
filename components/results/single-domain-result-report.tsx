@@ -31,6 +31,35 @@ function MetadataCard({
   );
 }
 
+function OpeningEvidencePanel({
+  items,
+}: {
+  items: SingleDomainResultsViewModel['openingSummary']['evidenceItems'];
+}) {
+  return (
+    <aside className="sonartra-single-domain-evidence-panel" aria-label="Why this result was generated">
+      <div className="sonartra-single-domain-evidence-panel-header">
+        <p className="sonartra-report-kicker">Why this result was generated</p>
+        <p className="sonartra-single-domain-evidence-panel-note">
+          Based on the pattern in your completed responses.
+        </p>
+      </div>
+
+      <dl className="sonartra-single-domain-evidence-list">
+        {items.map((item) => (
+          <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-evidence-item">
+            <dt>{item.label}</dt>
+            <dd>
+              <strong>{item.value}</strong>
+              {item.detail ? <span>{item.detail}</span> : null}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </aside>
+  );
+}
+
 export function SingleDomainResultReport({ result }: { result: SingleDomainResultsViewModel }) {
   const introSection = result.report.sections.find((section) => section.key === 'intro');
   const heroSection = result.report.sections.find((section) => section.key === 'hero');
@@ -45,34 +74,38 @@ export function SingleDomainResultReport({ result }: { result: SingleDomainResul
           <ReportHeader
             id={introSection.key}
             titleId={`${introSection.key}-heading`}
-            eyebrow={result.assessmentTitle}
-            meta={<MetadataCard items={result.metadataItems} pairLabel={result.pairLabel} />}
-            title={result.report.domainTitle}
+            eyebrow={result.openingSummary.eyebrow}
+            title={result.openingSummary.title}
             lead={
-              <p className="sonartra-single-domain-intro-subtitle">
-                {result.readingSections.sectionsById.intro?.intentPrompt}
+              <p className="sonartra-single-domain-intro-subtitle sonartra-single-domain-opening-lead">
+                {result.openingSummary.diagnosis}
               </p>
             }
             className="sonartra-single-domain-intro"
+            contentClassName="sonartra-single-domain-opening-content"
           >
-            <div className="sonartra-report-reading-measure space-y-4 md:space-y-5">
-              {introSection.paragraphs[0] ? (
+            <div className="sonartra-single-domain-opening-grid">
+              <div className="sonartra-single-domain-opening-narrative">
                 <p className="sonartra-report-summary text-white/78">
-                  {introSection.paragraphs[0]}
+                  {result.openingSummary.implication}
                 </p>
-              ) : null}
 
-              <div className="sonartra-single-domain-intro-copy-grid">
-                {introSection.paragraphs.slice(1, 3).map((paragraph) => (
-                  <p
-                    key={`intro-${paragraph}`}
-                    className="sonartra-report-body text-white/64"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                <div className="sonartra-single-domain-intro-copy-grid">
+                  {introSection.paragraphs.slice(1, 3).map((paragraph) => (
+                    <p
+                      key={`intro-${paragraph}`}
+                      className="sonartra-report-body text-white/58"
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </div>
+
+              <OpeningEvidencePanel items={result.openingSummary.evidenceItems} />
             </div>
+
+            <MetadataCard items={result.metadataItems} pairLabel={result.pairLabel} />
           </ReportHeader>
         ) : null}
 

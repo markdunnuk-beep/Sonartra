@@ -880,6 +880,92 @@ main {
     color: rgba(224, 233, 255, 0.64);
   }
 
+  .sonartra-single-domain-opening-lead {
+    max-width: 64ch;
+    color: rgba(235, 241, 255, 0.8);
+  }
+
+  .sonartra-single-domain-opening-content {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .sonartra-single-domain-opening-grid {
+    display: grid;
+    gap: 1.25rem;
+    align-items: stretch;
+  }
+
+  .sonartra-single-domain-opening-narrative {
+    display: grid;
+    gap: 1.15rem;
+    min-width: 0;
+  }
+
+  .sonartra-single-domain-evidence-panel {
+    display: grid;
+    gap: 1.05rem;
+    align-self: start;
+    border: 1px solid rgba(223, 232, 255, 0.08);
+    border-left-color: rgba(209, 180, 111, 0.38);
+    border-radius: 1.1rem;
+    background:
+      linear-gradient(135deg, rgba(209, 180, 111, 0.075), rgba(255, 255, 255, 0.018) 42%, rgba(255, 255, 255, 0.008)),
+      rgba(9, 13, 23, 0.28);
+    padding: 1rem;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.025),
+      0 16px 34px rgba(0, 0, 0, 0.12);
+  }
+
+  .sonartra-single-domain-evidence-panel-header {
+    display: grid;
+    gap: 0.32rem;
+  }
+
+  .sonartra-single-domain-evidence-panel-note {
+    @apply text-[0.82rem] leading-5 tracking-[0];
+    color: rgba(207, 218, 243, 0.58);
+  }
+
+  .sonartra-single-domain-evidence-list {
+    display: grid;
+    gap: 0.95rem;
+  }
+
+  .sonartra-single-domain-evidence-item {
+    display: grid;
+    gap: 0.26rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+    padding-top: 0.82rem;
+  }
+
+  .sonartra-single-domain-evidence-item:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .sonartra-single-domain-evidence-item dt {
+    @apply sonartra-type-nav-meta;
+    color: rgba(207, 218, 243, 0.46);
+  }
+
+  .sonartra-single-domain-evidence-item dd {
+    display: grid;
+    gap: 0.22rem;
+    margin: 0;
+  }
+
+  .sonartra-single-domain-evidence-item strong {
+    @apply text-[0.95rem] font-semibold leading-6 tracking-[0];
+    color: rgba(239, 244, 255, 0.86);
+  }
+
+  .sonartra-single-domain-evidence-item span {
+    @apply text-[0.82rem] leading-5 tracking-[0];
+    color: rgba(207, 218, 243, 0.58);
+  }
+
   .sonartra-single-domain-intro-copy-grid {
     display: grid;
     gap: 1.1rem;
@@ -887,6 +973,11 @@ main {
   }
 
   @media (min-width: 1280px) {
+    .sonartra-single-domain-opening-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.42fr);
+      gap: 2rem;
+    }
+
     .sonartra-single-domain-intro-copy-grid {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -915,9 +1006,8 @@ main {
     gap: 0.78rem 1rem;
     align-items: start;
     max-width: 100%;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.045);
-    padding: 0.8rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.035);
+    padding-top: 0.82rem;
   }
 
   .sonartra-single-domain-meta-strip-item {
@@ -931,11 +1021,11 @@ main {
   }
 
   .sonartra-single-domain-meta-strip-value {
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     font-weight: 500;
-    line-height: 1.45rem;
-    letter-spacing: -0.01em;
-    color: rgba(236, 241, 255, 0.76);
+    line-height: 1.28rem;
+    letter-spacing: 0;
+    color: rgba(236, 241, 255, 0.58);
   }
 
   @media (min-width: 640px) {
