@@ -1297,7 +1297,7 @@ main {
 
   .sonartra-single-domain-application-entry-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.9rem;
     min-width: 0;
   }
@@ -1323,6 +1323,22 @@ main {
   .sonartra-single-domain-application-entry-title {
     @apply text-[1.25rem] font-semibold leading-7 tracking-[-0.014em] md:text-[1.42rem] md:leading-8;
     color: rgba(236, 241, 255, 0.84);
+  }
+
+  .sonartra-single-domain-application-entry-heading {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .sonartra-single-domain-application-entry-subtitle {
+    margin: 0.22rem 0 0;
+    max-width: 32rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: 0;
+    color: rgba(208, 217, 237, 0.58);
   }
 
   .sonartra-single-domain-application-entry-body {
@@ -1563,6 +1579,12 @@ main {
 
     .sonartra-single-domain-application-entry-header {
       gap: 0.8rem;
+    }
+
+    .sonartra-single-domain-application-entry-subtitle {
+      margin-top: 0.18rem;
+      font-size: 0.87rem;
+      line-height: 1.42;
     }
 
     .sonartra-single-domain-application-entry-index {

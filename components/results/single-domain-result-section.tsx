@@ -13,6 +13,21 @@ const SINGLE_DOMAIN_SECTION_DISPLAY_LABELS = {
   application: 'Putting This Into Practice',
 } as const;
 
+const SINGLE_DOMAIN_APPLICATION_META = {
+  rely: {
+    title: 'Where to Lean In',
+    subtitle: 'The strengths you can rely on most when it matters.',
+  },
+  notice: {
+    title: 'Where to Stay Alert',
+    subtitle: 'Early signs to watch so performance doesn’t drift.',
+  },
+  develop: {
+    title: 'Where to Grow',
+    subtitle: 'The next areas to focus on to strengthen your effectiveness.',
+  },
+} as const;
+
 const SINGLE_DOMAIN_SECTION_BODY_LABELS: Partial<
   Record<ComposedNarrativeSection['key'], string>
 > = {
@@ -139,11 +154,13 @@ function SignalDriverEntry({
 
 function ApplicationActionEntry({
   index,
+  panelKey,
   title,
   items,
   className,
 }: {
   index: number;
+  panelKey: keyof typeof SINGLE_DOMAIN_APPLICATION_META;
   title: string;
   items: readonly string[];
   className?: string;
@@ -152,18 +169,23 @@ function ApplicationActionEntry({
     return null;
   }
 
+  const meta = SINGLE_DOMAIN_APPLICATION_META[panelKey];
+
   return (
     <section
       className={['sonartra-single-domain-application-entry', className]
         .filter(Boolean)
         .join(' ')}
-      data-application-area={title.toLowerCase().replace(/\s+/g, '-')}
+      data-application-area={panelKey}
     >
       <div className="sonartra-single-domain-application-entry-header">
         <span className="sonartra-single-domain-application-entry-index">
           {String(index + 1).padStart(2, '0')}
         </span>
-        <h3 className="sonartra-single-domain-application-entry-title">{title}</h3>
+        <div className="sonartra-single-domain-application-entry-heading">
+          <h3 className="sonartra-single-domain-application-entry-title">{meta.title}</h3>
+          <p className="sonartra-single-domain-application-entry-subtitle">{meta.subtitle}</p>
+        </div>
       </div>
       <div className="sonartra-single-domain-application-entry-body">
         {items.map((item, index) => (
@@ -334,6 +356,13 @@ export function SingleDomainResultSection({
             <ApplicationActionEntry
               key={item.label}
               index={index}
+              panelKey={
+                item.label === 'Notice'
+                  ? 'notice'
+                  : item.label === 'Develop'
+                    ? 'develop'
+                    : 'rely'
+              }
               title={item.label}
               items={item.content}
               className={

@@ -248,6 +248,7 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /sonartra-single-domain-application-entry-notice/);
   assert.match(markup, /sonartra-single-domain-application-entry-develop/);
   assert.match(markup, /sonartra-single-domain-application-entry-header/);
+  assert.match(markup, /sonartra-single-domain-application-entry-heading/);
   assert.match(markup, /sonartra-single-domain-application-entry-index/);
   assert.match(markup, /sonartra-single-domain-application-point-primary/);
   assert.doesNotMatch(markup, /sonartra-single-domain-application-grid/);
@@ -258,18 +259,24 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, />Range limitation</);
   assert.match(markup, /<h3 class="sonartra-single-domain-driver-entry-title">Primary driver<\/h3>/);
   assert.match(markup, /<h3 class="sonartra-single-domain-driver-entry-title">Secondary driver<\/h3>/);
-  assert.match(markup, />Rely on</);
-  assert.match(markup, />Notice</);
-  assert.match(markup, />Develop</);
-  assert.match(markup, /data-application-area="rely-on"/);
+  assert.match(markup, />Where to Lean In</);
+  assert.match(markup, />Where to Stay Alert</);
+  assert.match(markup, />Where to Grow</);
+  assert.match(markup, /The strengths you can rely on most when it matters\./);
+  assert.match(markup, /Early signs to watch so performance doesn’t drift\./);
+  assert.match(markup, /The next areas to focus on to strengthen your effectiveness\./);
+  assert.match(markup, /data-application-area="rely"/);
   assert.match(markup, /data-application-area="notice"/);
   assert.match(markup, /data-application-area="develop"/);
   assert.match(markup, />01<\/span>/);
   assert.match(markup, />02<\/span>/);
   assert.match(markup, />03<\/span>/);
-  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Rely on<\/h3>/);
-  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Notice<\/h3>/);
-  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Develop<\/h3>/);
+  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Where to Lean In<\/h3>/);
+  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Where to Stay Alert<\/h3>/);
+  assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Where to Grow<\/h3>/);
+  assert.match(markup, /Vision strength/);
+  assert.match(markup, /Delivery watchout/);
+  assert.match(markup, /Rigor development/);
   assert.match(markup, /sonartra-single-domain-section-limitation/);
 });
 
@@ -396,11 +403,21 @@ test('single-domain report spacing and labels support lighter mobile scanability
   assert.match(cssSource, /\.sonartra-single-domain-application-flow\s*\{[\s\S]*?gap:\s*1\.9rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-entry\s*\{[\s\S]*?border-radius:\s*1\.4rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-entry-index\s*\{[\s\S]*?min-width:\s*2\.45rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-application-entry-heading\s*\{[\s\S]*?flex-direction:\s*column;/);
+  assert.match(cssSource, /\.sonartra-single-domain-application-entry-subtitle\s*\{[\s\S]*?font-size:\s*0\.92rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-point\s*\{[\s\S]*?padding-top:\s*0\.95rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-section-label\s*\{[\s\S]*?text-transform:\s*none;/);
   assert.match(
     cssSource,
-    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-report-body-soft\s*\{[\s\S]*?line-height:\s*1\.82rem;[\s\S]*?\.sonartra-single-domain-application-entry\s*\{[\s\S]*?padding:\s*1\.15rem 1rem 1\.05rem;/,
+    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-report-body-soft\s*\{[\s\S]*?line-height:\s*1\.82rem;/,
+  );
+  assert.match(
+    cssSource,
+    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-single-domain-application-entry\s*\{[\s\S]*?padding:\s*1\.15rem 1rem 1\.05rem;/,
+  );
+  assert.match(
+    cssSource,
+    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-single-domain-application-entry-subtitle\s*\{[\s\S]*?font-size:\s*0\.87rem;/,
   );
 });
 
