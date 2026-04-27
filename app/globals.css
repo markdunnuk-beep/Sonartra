@@ -1265,19 +1265,59 @@ main {
 
   .sonartra-single-domain-application-flow {
     display: grid;
-    gap: 1.55rem;
-    max-width: 72ch;
+    gap: 1.9rem;
+    max-width: 76ch;
   }
 
   .sonartra-single-domain-application-entry {
+    position: relative;
     display: grid;
-    gap: 1.05rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.055);
-    padding-top: 1.45rem;
+    gap: 1.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1.4rem;
+    padding: 1.35rem 1.2rem 1.25rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0.005) 58%),
+      rgba(15, 18, 26, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.018),
+      0 12px 28px rgba(0, 0, 0, 0.045);
   }
 
-  .sonartra-single-domain-application-entry:first-child {
-    border-top-color: rgba(255, 255, 255, 0.095);
+  .sonartra-single-domain-application-entry::before {
+    content: '';
+    position: absolute;
+    top: 1.2rem;
+    bottom: 1.2rem;
+    left: 0;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(226, 234, 255, 0.26), transparent 78%);
+  }
+
+  .sonartra-single-domain-application-entry-header {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
+  }
+
+  .sonartra-single-domain-application-entry-index {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.45rem;
+    min-height: 2.45rem;
+    padding: 0.35rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid rgba(236, 241, 255, 0.11);
+    background: rgba(255, 255, 255, 0.02);
+    color: rgba(222, 231, 249, 0.56);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
   }
 
   .sonartra-single-domain-application-entry-title {
@@ -1287,20 +1327,74 @@ main {
 
   .sonartra-single-domain-application-entry-body {
     display: grid;
-    gap: 1rem;
+    gap: 0.95rem;
+  }
+
+  .sonartra-single-domain-application-point {
+    position: relative;
+    display: grid;
+    gap: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+    padding-top: 0.95rem;
+  }
+
+  .sonartra-single-domain-application-point:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .sonartra-single-domain-application-point-primary {
+    padding-bottom: 0.15rem;
   }
 
   .sonartra-single-domain-application-entry-notice {
-    border-top-color: rgba(251, 191, 36, 0.13);
+    border-color: rgba(251, 191, 36, 0.11);
+    background:
+      linear-gradient(180deg, rgba(251, 191, 36, 0.024), rgba(255, 255, 255, 0.004) 62%),
+      rgba(15, 18, 26, 0.18);
   }
 
   .sonartra-single-domain-application-entry-develop {
-    border-top-color: rgba(125, 211, 252, 0.12);
+    border-color: rgba(125, 211, 252, 0.11);
+    background:
+      linear-gradient(180deg, rgba(125, 211, 252, 0.024), rgba(255, 255, 255, 0.004) 62%),
+      rgba(15, 18, 26, 0.18);
+  }
+
+  .sonartra-single-domain-application-entry-rely {
+    border-color: rgba(217, 224, 243, 0.085);
+  }
+
+  .sonartra-single-domain-application-entry-notice::before {
+    background: linear-gradient(180deg, rgba(251, 226, 166, 0.45), transparent 78%);
+  }
+
+  .sonartra-single-domain-application-entry-develop::before {
+    background: linear-gradient(180deg, rgba(151, 219, 252, 0.42), transparent 78%);
+  }
+
+  .sonartra-single-domain-application-entry-rely .sonartra-single-domain-application-entry-index {
+    border-color: rgba(236, 241, 255, 0.11);
+  }
+
+  .sonartra-single-domain-application-entry-notice .sonartra-single-domain-application-entry-index {
+    border-color: rgba(251, 226, 166, 0.22);
+    color: rgba(251, 226, 166, 0.66);
+  }
+
+  .sonartra-single-domain-application-entry-develop .sonartra-single-domain-application-entry-index {
+    border-color: rgba(151, 219, 252, 0.22);
+    color: rgba(188, 234, 253, 0.66);
   }
 
   @media (min-width: 768px) {
     .sonartra-single-domain-application-flow {
-      gap: 1.85rem;
+      gap: 2.1rem;
+    }
+
+    .sonartra-single-domain-application-entry {
+      gap: 1.45rem;
+      padding: 1.55rem 1.55rem 1.45rem;
     }
   }
 
@@ -1450,6 +1544,40 @@ main {
 
     .sonartra-prose-details-body {
       gap: 1rem;
+    }
+
+    .sonartra-single-domain-application-flow {
+      gap: 1.4rem;
+    }
+
+    .sonartra-single-domain-application-entry {
+      gap: 1.15rem;
+      padding: 1.15rem 1rem 1.05rem;
+      border-radius: 1.2rem;
+    }
+
+    .sonartra-single-domain-application-entry::before {
+      top: 1rem;
+      bottom: 1rem;
+    }
+
+    .sonartra-single-domain-application-entry-header {
+      gap: 0.8rem;
+    }
+
+    .sonartra-single-domain-application-entry-index {
+      min-width: 2.2rem;
+      min-height: 2.2rem;
+      font-size: 0.68rem;
+    }
+
+    .sonartra-single-domain-application-entry-body {
+      gap: 0.82rem;
+    }
+
+    .sonartra-single-domain-application-point {
+      gap: 0.6rem;
+      padding-top: 0.82rem;
     }
   }
 

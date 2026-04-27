@@ -138,10 +138,12 @@ function SignalDriverEntry({
 }
 
 function ApplicationActionEntry({
+  index,
   title,
   items,
   className,
 }: {
+  index: number;
   title: string;
   items: readonly string[];
   className?: string;
@@ -155,23 +157,38 @@ function ApplicationActionEntry({
       className={['sonartra-single-domain-application-entry', className]
         .filter(Boolean)
         .join(' ')}
+      data-application-area={title.toLowerCase().replace(/\s+/g, '-')}
     >
-      <h3 className="sonartra-single-domain-application-entry-title">{title}</h3>
+      <div className="sonartra-single-domain-application-entry-header">
+        <span className="sonartra-single-domain-application-entry-index">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <h3 className="sonartra-single-domain-application-entry-title">{title}</h3>
+      </div>
       <div className="sonartra-single-domain-application-entry-body">
         {items.map((item, index) => (
-          <ProseWithDisclosure
+          <div
             key={`${title}-${item}`}
-            text={item}
             className={[
-              'sonartra-report-body-soft',
-              index === 0 ? 'text-white/78' : 'text-white/64',
+              'sonartra-single-domain-application-point',
+              index === 0 ? 'sonartra-single-domain-application-point-primary' : null,
             ]
               .filter(Boolean)
               .join(' ')}
-            minSentencesForDisclosure={5}
-            visibleSentenceCount={2}
-            disclosureLabel={`Read more about ${title.toLowerCase()}`}
-          />
+          >
+            <ProseWithDisclosure
+              text={item}
+              className={[
+                'sonartra-report-body-soft',
+                index === 0 ? 'text-white/78' : 'text-white/64',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              minSentencesForDisclosure={5}
+              visibleSentenceCount={2}
+              disclosureLabel={`Read more about ${title.toLowerCase()}`}
+            />
+          </div>
         ))}
       </div>
     </section>
@@ -313,9 +330,10 @@ export function SingleDomainResultSection({
         style={getRevealStyle(step)}
       >
         <div className="sonartra-single-domain-application-flow">
-          {section.focusItems.map((item) => (
+          {section.focusItems.map((item, index) => (
             <ApplicationActionEntry
               key={item.label}
+              index={index}
               title={item.label}
               items={item.content}
               className={
