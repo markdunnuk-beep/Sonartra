@@ -204,10 +204,12 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /sonartra-single-domain-proof-item/);
   assert.match(markup, /Primary signal/);
   assert.match(markup, /Reinforcing signal/);
+  assert.match(markup, /Supporting signal/);
   assert.match(markup, /Least available range/);
   assert.match(markup, /Response base/);
   assert.match(markup, /38%/);
   assert.match(markup, /31%/);
+  assert.match(markup, /19%/);
   assert.match(markup, /12%/);
   assert.match(markup, /24\/24 completed responses/);
   assert.match(markup, /Signal pattern/);
@@ -255,6 +257,24 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Notice<\/h3>/);
   assert.match(markup, /<h3 class="sonartra-single-domain-application-entry-title">Develop<\/h3>/);
   assert.match(markup, /sonartra-single-domain-section-limitation/);
+});
+
+test('single-domain results report uses score badges when persisted normalized scores do not sum to 100', () => {
+  const payload = buildPayload();
+  payload.signals[0]!.normalized_score = 34;
+  payload.signals[1]!.normalized_score = 27;
+  payload.signals[2]!.normalized_score = 16;
+  payload.signals[3]!.normalized_score = 11;
+
+  const markup = renderToStaticMarkup(
+    <SingleDomainResultsReport result={createSingleDomainResultsViewModel(payload)} />,
+  );
+
+  assert.match(markup, /Score 34/);
+  assert.match(markup, /Score 27/);
+  assert.match(markup, /Score 16/);
+  assert.match(markup, /Score 11/);
+  assert.doesNotMatch(markup, />34%<\/span>/);
 });
 
 test('single-domain results report reduces dense repeated prose with accessible disclosure', () => {
@@ -350,6 +370,19 @@ test('single-domain results report aligns limitation prefix with accepted pair b
   assert.match(markup, /Shown primary-first to match the headline\./);
   assert.doesNotMatch(markup, /Vision:\s+The People signal/i);
   assert.match(markup, /People:\s+The People signal is therefore the missing range/i);
+});
+
+test('single-domain intro spacing keeps tighter opening rhythm without widening the desktop gutter', () => {
+  const cssSource = readFileSync(globalsPath, 'utf8');
+
+  assert.match(cssSource, /\.sonartra-single-domain-opening-content\s*\{[\s\S]*?gap:\s*1rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-opening-grid\s*\{[\s\S]*?gap:\s*1rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-opening-narrative\s*\{[\s\S]*?gap:\s*0\.85rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-intro-copy-grid\s*\{[\s\S]*?gap:\s*0\.72rem;/);
+  assert.match(
+    cssSource,
+    /@media \(min-width: 1280px\) \{[\s\S]*?\.sonartra-single-domain-opening-grid\s*\{[\s\S]*?gap:\s*1\.7rem;/,
+  );
 });
 
 test('single-domain results view model preserves authored body casing and formats labels only', () => {

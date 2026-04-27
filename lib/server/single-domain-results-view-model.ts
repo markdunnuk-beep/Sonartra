@@ -168,11 +168,20 @@ function createOpeningSummary(
   const rankedSignals = [...payload.signals].sort((left, right) => left.rank - right.rank);
   const primary = rankedSignals[0];
   const secondary = rankedSignals[1];
+  const supporting = rankedSignals[2];
   const underplayed = rankedSignals.find((signal) => signal.position === 'underplayed')
     ?? rankedSignals[rankedSignals.length - 1];
+  const normalizedScoreSum = rankedSignals.reduce(
+    (total, signal) => total + signal.normalized_score,
+    0,
+  );
+  const showPercentageBadges = normalizedScoreSum === 100;
 
   const primaryLabel = primary?.signal_label ? formatDisplayLabel(primary.signal_label) : 'Primary signal';
   const secondaryLabel = secondary?.signal_label ? formatDisplayLabel(secondary.signal_label) : 'secondary signal';
+  const supportingLabel = supporting?.signal_label
+    ? formatDisplayLabel(supporting.signal_label)
+    : 'supporting signal';
   const underplayedLabel = underplayed?.signal_label
     ? formatDisplayLabel(underplayed.signal_label)
     : 'least available range';
@@ -188,6 +197,8 @@ function createOpeningSummary(
   const signalPattern = secondary
     ? `${primaryLabel} appears strongest, ${secondaryLabel} reinforces it, and ${underplayedLabel} is the least available range.`
     : `${primaryLabel} appears as the strongest signal in this result.`;
+  const formatScoreLabel = (normalizedScore: number) =>
+    showPercentageBadges ? `${normalizedScore}%` : `Score ${normalizedScore}`;
 
   return {
     eyebrow: 'Your leadership pattern',
@@ -203,7 +214,7 @@ function createOpeningSummary(
             label: 'Primary signal',
             value: primaryLabel,
             detail: `Rank ${primary.rank} in this completed result.`,
-            scoreLabel: `${primary.normalized_score}%`,
+            scoreLabel: formatScoreLabel(primary.normalized_score),
           }]
         : []),
       ...(secondary
@@ -211,7 +222,15 @@ function createOpeningSummary(
             label: 'Reinforcing signal',
             value: secondaryLabel,
             detail: `Rank ${secondary.rank} in this completed result.`,
-            scoreLabel: `${secondary.normalized_score}%`,
+            scoreLabel: formatScoreLabel(secondary.normalized_score),
+          }]
+        : []),
+      ...(supporting
+        ? [{
+            label: 'Supporting signal',
+            value: supportingLabel,
+            detail: `Rank ${supporting.rank} in this completed result.`,
+            scoreLabel: formatScoreLabel(supporting.normalized_score),
           }]
         : []),
       ...(underplayed
@@ -219,7 +238,7 @@ function createOpeningSummary(
             label: 'Least available range',
             value: underplayedLabel,
             detail: `Rank ${underplayed.rank} in this completed result.`,
-            scoreLabel: `${underplayed.normalized_score}%`,
+            scoreLabel: formatScoreLabel(underplayed.normalized_score),
           }]
         : []),
       {
