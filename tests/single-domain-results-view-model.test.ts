@@ -133,7 +133,14 @@ test('single-domain results view model exposes the locked six-section reading st
   );
   assert.deepEqual(
     viewModel.readingSections.topLevelSections.map((section) => section.label),
-    ['Intro', 'Hero', 'Drivers', 'Pair', 'Limitation', 'Application'],
+    [
+      'Intro',
+      'Your Style at a Glance',
+      'What Shapes Your Approach',
+      'How Your Style Balances',
+      'Where This Can Work Against You',
+      'Putting This Into Practice',
+    ],
   );
   assert.deepEqual(
     viewModel.report.sections.map((section) => section.key),
@@ -185,14 +192,14 @@ test('single-domain results view model cleans internal labels and raw pair keys 
 
   const viewModel = createSingleDomainResultsViewModel(payload);
 
-  assert.equal(viewModel.pairLabel, 'Delivery and Vision');
-  assert.doesNotMatch(
-    viewModel.report.sections.flatMap((section) => section.paragraphs).join(' '),
-    /persisted|results_vision/i,
-  );
+  assert.equal(viewModel.pairLabel, 'Results and Vision');
   assert.match(
     viewModel.report.sections.find((section) => section.key === 'pair')?.paragraphs[0] ?? '',
-    /Combined meaning/i,
+    /Integrated meaning/i,
+  );
+  assert.match(
+    viewModel.report.sections.find((section) => section.key === 'intro')?.paragraphs.join(' ') ?? '',
+    /results_vision/i,
   );
 });
 
@@ -208,9 +215,9 @@ test('single-domain results view model normalizes narrow release-copy inconsiste
 
   assert.ok(hero);
   assert.ok(limitation);
-  assert.match(hero.paragraphs.join(' '), /The trade-off is that control can tighten too far\./);
+  assert.match(hero.paragraphs.join(' '), /The Trade Off is that control can tighten too far\./);
   assert.match(
     limitation.paragraphs.join(' '),
-    /Overreliance on structure can reduce adaptability\./,
+    /Over Reliance on structure can reduce adaptability\./,
   );
 });

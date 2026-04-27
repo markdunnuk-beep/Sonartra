@@ -195,6 +195,11 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
 
   assert.match(markup, /sonartra-report-hero/);
   assert.match(markup, /Your leadership pattern/);
+  assert.match(markup, /Your Style at a Glance/);
+  assert.match(markup, /What Shapes Your Approach/);
+  assert.match(markup, /How Your Style Balances/);
+  assert.match(markup, /Where This Can Work Against You/);
+  assert.match(markup, /Putting This Into Practice/);
   assert.match(markup, /Vision-led pattern, reinforced by Delivery/);
   assert.match(markup, /Pair opening paragraph/);
   assert.match(markup, /Why this result was generated/);
@@ -372,16 +377,18 @@ test('single-domain results report aligns limitation prefix with accepted pair b
   assert.match(markup, /People:\s+The People signal is therefore the missing range/i);
 });
 
-test('single-domain intro spacing keeps tighter opening rhythm without widening the desktop gutter', () => {
+test('single-domain report spacing and labels support lighter mobile scanability without changing anchors', () => {
   const cssSource = readFileSync(globalsPath, 'utf8');
 
-  assert.match(cssSource, /\.sonartra-single-domain-opening-content\s*\{[\s\S]*?gap:\s*1rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-opening-grid\s*\{[\s\S]*?gap:\s*1rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-opening-narrative\s*\{[\s\S]*?gap:\s*0\.85rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-intro-copy-grid\s*\{[\s\S]*?gap:\s*0\.72rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-section::before\s*\{[\s\S]*?top:\s*-1\.35rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-report-flow\s*\{[\s\S]*?gap:\s*3\.2rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-proof-grid\s*\{[\s\S]*?gap:\s*0\.68rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-driver-entry\s*\{[\s\S]*?padding-top:\s*1\.5rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-application-entry\s*\{[\s\S]*?padding-top:\s*1\.45rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-section-label\s*\{[\s\S]*?text-transform:\s*none;/);
   assert.match(
     cssSource,
-    /@media \(min-width: 1280px\) \{[\s\S]*?\.sonartra-single-domain-opening-grid\s*\{[\s\S]*?gap:\s*1\.7rem;/,
+    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-report-body-soft\s*\{[\s\S]*?line-height:\s*1\.82rem;/,
   );
 });
 

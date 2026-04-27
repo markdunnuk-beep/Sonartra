@@ -25,11 +25,25 @@ test('single-domain reading sections stay aligned with the locked narrative cont
 test('single-domain reading sections keep the exact six rail labels and no nested subsections', () => {
   assert.deepEqual(
     SINGLE_DOMAIN_RESULT_READING_SECTIONS.topLevelSections.map((section) => section.label),
-    ['Intro', 'Hero', 'Drivers', 'Pair', 'Limitation', 'Application'],
+    [
+      'Intro',
+      'Your Style at a Glance',
+      'What Shapes Your Approach',
+      'How Your Style Balances',
+      'Where This Can Work Against You',
+      'Putting This Into Practice',
+    ],
   );
   assert.deepEqual(
     SINGLE_DOMAIN_RESULT_READING_SECTIONS.topLevelSections.map((section) => section.shortLabel),
-    ['Intro', 'Hero', 'Drivers', 'Pair', 'Limit', 'Apply'],
+    [
+      'Intro',
+      'Style at a Glance',
+      'Shapes Your Approach',
+      'Style Balance',
+      'Work Against You',
+      'Into Practice',
+    ],
   );
   assert.equal(SINGLE_DOMAIN_RESULT_READING_SECTIONS.subsections.length, 0);
   assert.equal(SINGLE_DOMAIN_RESULT_READING_SECTIONS.sections.length, 6);

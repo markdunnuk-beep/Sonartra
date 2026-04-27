@@ -21,28 +21,28 @@ const SINGLE_DOMAIN_RESULT_SECTION_METADATA: Record<
     intentPrompt: 'What this domain measures and how to read the report that follows.',
   },
   hero: {
-    label: 'Hero',
-    shortLabel: 'Hero',
+    label: 'Your Style at a Glance',
+    shortLabel: 'Style at a Glance',
     intentPrompt: 'The defining pattern that stands out most clearly in this domain.',
   },
   drivers: {
-    label: 'Drivers',
-    shortLabel: 'Drivers',
+    label: 'What Shapes Your Approach',
+    shortLabel: 'Shapes Your Approach',
     intentPrompt: 'What is creating that pattern, including any missing range that matters.',
   },
   pair: {
-    label: 'Pair',
-    shortLabel: 'Pair',
+    label: 'How Your Style Balances',
+    shortLabel: 'Style Balance',
     intentPrompt: 'How the two strongest tendencies combine when this pattern shows up.',
   },
   limitation: {
-    label: 'Limitation',
-    shortLabel: 'Limit',
+    label: 'Where This Can Work Against You',
+    shortLabel: 'Work Against You',
     intentPrompt: 'Where the current pattern narrows, costs more, or needs broader range.',
   },
   application: {
-    label: 'Application',
-    shortLabel: 'Apply',
+    label: 'Putting This Into Practice',
+    shortLabel: 'Into Practice',
     intentPrompt: 'What to rely on, what to notice, and what to develop from here.',
   },
 };

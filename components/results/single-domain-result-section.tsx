@@ -5,6 +5,21 @@ import { ResultSectionIntent } from '@/components/results/result-section-intent'
 import type { ComposedNarrativeSection } from '@/lib/assessment-language/single-domain-composer';
 import type { ResultReadingSectionsConfig } from '@/lib/results/result-reading-sections';
 
+const SINGLE_DOMAIN_SECTION_DISPLAY_LABELS = {
+  hero: 'Your Style at a Glance',
+  drivers: 'What Shapes Your Approach',
+  pair: 'How Your Style Balances',
+  limitation: 'Where This Can Work Against You',
+  application: 'Putting This Into Practice',
+} as const;
+
+const SINGLE_DOMAIN_SECTION_BODY_LABELS: Partial<
+  Record<ComposedNarrativeSection['key'], string>
+> = {
+  pair: SINGLE_DOMAIN_SECTION_DISPLAY_LABELS.pair,
+  limitation: SINGLE_DOMAIN_SECTION_DISPLAY_LABELS.limitation,
+};
+
 type SingleDomainResultSectionProps = {
   section: ComposedNarrativeSection;
   sectionsConfig: ResultReadingSectionsConfig;
@@ -174,13 +189,17 @@ export function SingleDomainResultSection({
     const [headline, summary, ...supporting] = section.paragraphs;
 
     return (
-      <ReportChapter
-        id={section.key}
-        titleId={headingId}
-        eyebrow={section.title}
-        title={headline}
-        lead={
-          <ResultSectionIntent
+        <ReportChapter
+          id={section.key}
+          titleId={headingId}
+          eyebrow={
+            <span className="sonartra-single-domain-section-label">
+              {SINGLE_DOMAIN_SECTION_DISPLAY_LABELS.hero}
+            </span>
+          }
+          title={headline}
+          lead={
+            <ResultSectionIntent
             sectionId={section.key}
             sectionsConfig={sectionsConfig}
             className="max-w-[46ch]"
@@ -236,11 +255,15 @@ export function SingleDomainResultSection({
     ];
 
     return (
-      <ReportChapter
-        id={section.key}
-        titleId={headingId}
-        eyebrow="Drivers"
-        title="What is creating this pattern"
+        <ReportChapter
+          id={section.key}
+          titleId={headingId}
+          eyebrow={
+            <span className="sonartra-single-domain-section-label">
+              {SINGLE_DOMAIN_SECTION_DISPLAY_LABELS.drivers}
+            </span>
+          }
+          title="What is creating this pattern"
         lead={
           <ResultSectionIntent
             sectionId={section.key}
@@ -270,11 +293,15 @@ export function SingleDomainResultSection({
 
   if (section.key === 'application') {
     return (
-      <ReportChapter
-        id={section.key}
-        titleId={headingId}
-        eyebrow="Application"
-        title="What to rely on, notice, and develop"
+        <ReportChapter
+          id={section.key}
+          titleId={headingId}
+          eyebrow={
+            <span className="sonartra-single-domain-section-label">
+              {SINGLE_DOMAIN_SECTION_DISPLAY_LABELS.application}
+            </span>
+          }
+          title="What to rely on, notice, and develop"
         lead={
           <ResultSectionIntent
             sectionId={section.key}
@@ -306,18 +333,21 @@ export function SingleDomainResultSection({
   }
 
   const [headline, ...body] = section.paragraphs;
+  const displayEyebrow = SINGLE_DOMAIN_SECTION_BODY_LABELS[section.key] ?? section.title;
   const sectionClasses = {
     intro: 'space-y-7 md:space-y-8',
-    pair: 'sonartra-single-domain-section-pair max-w-[58rem] space-y-5 px-0 py-0',
+    pair: 'sonartra-single-domain-section-pair max-w-[58rem] space-y-6 px-0 py-0 md:space-y-7',
     limitation:
-      'sonartra-single-domain-section-limitation space-y-6 px-5 py-6 md:px-7 md:py-7',
+      'sonartra-single-domain-section-limitation space-y-7 px-5 py-6 md:space-y-8 md:px-7 md:py-7',
   }[section.key];
 
   return (
     <ReportChapter
       id={section.key}
       titleId={headingId}
-      eyebrow={section.title}
+      eyebrow={
+        <span className="sonartra-single-domain-section-label">{displayEyebrow}</span>
+      }
       title={headline}
       lead={
         <ResultSectionIntent
@@ -334,10 +364,10 @@ export function SingleDomainResultSection({
       <div
         className={
           section.key === 'pair'
-            ? 'sonartra-single-domain-pair-body space-y-3 pt-1'
+            ? 'sonartra-single-domain-pair-body space-y-4 pt-2 md:space-y-5'
             : section.key === 'limitation'
-              ? 'sonartra-single-domain-limitation-body space-y-4 border-t border-white/[0.07] pt-6'
-              : 'border-white/7 space-y-4 border-t pt-6'
+              ? 'sonartra-single-domain-limitation-body space-y-5 border-t border-white/[0.07] pt-7 md:space-y-6'
+              : 'border-white/7 space-y-5 border-t pt-7 md:space-y-6'
         }
       >
         {body.map((paragraph, index) => (
