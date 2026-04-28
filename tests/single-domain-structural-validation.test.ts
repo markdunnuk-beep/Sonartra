@@ -275,6 +275,7 @@ test('hero pair completeness derives from the current signal-derived pair count'
         hero_tension_paragraph: 'One',
         hero_close_paragraph: 'One',
       }],
+      DRIVER_CLAIMS: [],
       SIGNAL_CHAPTERS: [],
       BALANCING_SECTIONS: [],
       PAIR_SUMMARIES: [],
@@ -308,6 +309,7 @@ test('signal chapters and application statements completeness derive from the cu
     languageBundle: {
       DOMAIN_FRAMING: [],
       HERO_PAIRS: [],
+      DRIVER_CLAIMS: [],
       SIGNAL_CHAPTERS: [{
         signal_key: 'directive',
         position_primary_label: 'Primary',
@@ -351,12 +353,50 @@ test('signal chapters and application statements completeness derive from the cu
   assert.equal(applicationStatements?.status, 'attention');
 });
 
+
+test('driver claims completeness requires four roles for every canonical pair', () => {
+  const validation = buildSingleDomainLanguageValidation({
+    authoredDomains: [{
+      domainId: 'domain-1',
+      domainKey: 'focus',
+      label: 'Focus',
+      description: null,
+      orderIndex: 0,
+      createdAt: '',
+      updatedAt: '',
+      signals: [
+        { signalId: 'signal-1', signalKey: 'results', label: 'Results', description: null, orderIndex: 0, createdAt: '', updatedAt: '' },
+        { signalId: 'signal-2', signalKey: 'process', label: 'Process', description: null, orderIndex: 1, createdAt: '', updatedAt: '' },
+        { signalId: 'signal-3', signalKey: 'vision', label: 'Vision', description: null, orderIndex: 2, createdAt: '', updatedAt: '' },
+        { signalId: 'signal-4', signalKey: 'people', label: 'People', description: null, orderIndex: 3, createdAt: '', updatedAt: '' },
+      ],
+    }],
+    languageBundle: {
+      DOMAIN_FRAMING: [],
+      HERO_PAIRS: [],
+      DRIVER_CLAIMS: [],
+      SIGNAL_CHAPTERS: [],
+      BALANCING_SECTIONS: [],
+      PAIR_SUMMARIES: [],
+      APPLICATION_STATEMENTS: [],
+    },
+  });
+
+  const driverClaims = validation.datasets.find((dataset) => dataset.datasetKey === 'DRIVER_CLAIMS');
+
+  assert.equal(validation.expectedPairCount, 6);
+  assert.equal(driverClaims?.expectedRowCount, 24);
+  assert.equal(driverClaims?.actualRowCount, 0);
+  assert.equal(driverClaims?.status, 'not_started');
+});
+
 test('language validation never treats zero expected rows as ready when prerequisites are missing', () => {
   const validation = buildSingleDomainLanguageValidation({
     authoredDomains: [],
     languageBundle: {
       DOMAIN_FRAMING: [],
       HERO_PAIRS: [],
+      DRIVER_CLAIMS: [],
       SIGNAL_CHAPTERS: [],
       BALANCING_SECTIONS: [],
       PAIR_SUMMARIES: [],

@@ -82,7 +82,7 @@ const SECTION_DATASET_LABELS: Record<SingleDomainNarrativeSectionKey, string> = 
 const LEGACY_VALIDATION_DATASET_KEYS = {
   intro: 'DOMAIN_FRAMING',
   hero: 'HERO_PAIRS',
-  drivers: 'SIGNAL_CHAPTERS',
+  drivers: 'DRIVER_CLAIMS',
   pair: 'PAIR_SUMMARIES',
   limitation: 'BALANCING_SECTIONS',
   application: 'APPLICATION_STATEMENTS',
@@ -135,9 +135,9 @@ function getSectionRowCounts(
     } else if (status === 'waiting') {
       detail = `${SECTION_TITLES[section]} is waiting on earlier authored structure before readiness can be checked.`;
     } else if (dataset.countRule === 'exact') {
-      detail = `${SECTION_TITLES[section]} currently has ${dataset.actualRowCount} of ${dataset.expectedRowCount} required adapted rows.`;
+      detail = `${SECTION_TITLES[section]} currently has ${dataset.actualRowCount} of ${dataset.expectedRowCount} required rows.`;
     } else {
-      detail = `${SECTION_TITLES[section]} needs at least ${dataset.expectedRowCount} adapted row${dataset.expectedRowCount === 1 ? '' : 's'} before it can be treated as complete.`;
+      detail = `${SECTION_TITLES[section]} needs at least ${dataset.expectedRowCount} row${dataset.expectedRowCount === 1 ? '' : 's'} before it can be treated as complete.`;
     }
   }
 
