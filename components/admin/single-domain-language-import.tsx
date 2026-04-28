@@ -322,6 +322,13 @@ export function SingleDomainLanguageImport({
                 ) : null}
               </div>
             ) : null}
+            {selectedValidation && selectedValidation.datasetKey !== 'DRIVER_CLAIMS' && selectedValidation.issues.length > 0 ? (
+              <div className="mt-4 space-y-1 text-sm leading-6 text-[rgba(255,214,214,0.92)]">
+                {selectedValidation.issues.map((issue) => (
+                  <p key={`${selectedValidation.datasetKey}-${issue.code}-${issue.message}`}>{issue.message}</p>
+                ))}
+              </div>
+            ) : null}
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               <ReferenceDisclosure title="Show locked headers">
                 <pre className="overflow-x-auto whitespace-pre-wrap break-words text-sm leading-7 text-white/78">

@@ -8,6 +8,43 @@ import {
 } from '@/lib/admin/single-domain-structural-validation';
 import { getExpectedDriverClaimTuples } from '@/lib/assessment-language/single-domain-canonical';
 
+const HERO_PAIR_TEST_DOMAIN = [{
+  domainId: 'domain-1',
+  domainKey: 'focus',
+  label: 'Focus',
+  description: null,
+  orderIndex: 0,
+  createdAt: '',
+  updatedAt: '',
+  signals: [
+    { signalId: 'signal-1', signalKey: 'results', label: 'Results', description: null, orderIndex: 0, createdAt: '', updatedAt: '' },
+    { signalId: 'signal-2', signalKey: 'people', label: 'People', description: null, orderIndex: 1, createdAt: '', updatedAt: '' },
+  ],
+}] as const;
+
+function buildHeroPairLanguageValidation(heroHeadline: string) {
+  return buildSingleDomainLanguageValidation({
+    authoredDomains: HERO_PAIR_TEST_DOMAIN,
+    languageBundle: {
+      DOMAIN_FRAMING: [],
+      HERO_PAIRS: [{
+        pair_key: 'results_people',
+        hero_headline: heroHeadline,
+        hero_subheadline: 'Subheadline',
+        hero_opening: 'Opening',
+        hero_strength_paragraph: 'Strength',
+        hero_tension_paragraph: 'Tension',
+        hero_close_paragraph: 'Close',
+      }],
+      DRIVER_CLAIMS: [],
+      SIGNAL_CHAPTERS: [],
+      BALANCING_SECTIONS: [],
+      PAIR_SUMMARIES: [],
+      APPLICATION_STATEMENTS: [],
+    },
+  });
+}
+
 test('pair count derives from the current authored signal count', () => {
   assert.equal(getExpectedSignalPairCount(0), 0);
   assert.equal(getExpectedSignalPairCount(1), 0);
@@ -290,6 +327,46 @@ test('hero pair completeness derives from the current signal-derived pair count'
   assert.equal(heroPairs?.actualRowCount, 1);
   assert.equal(heroPairs?.expectedRowCount, 3);
   assert.equal(heroPairs?.isReady, false);
+});
+
+test('hero pair language completeness fails when visible text does not reference the active pair', () => {
+  const validation = buildHeroPairLanguageValidation('Shared direction');
+  const heroPairs = validation.datasets.find((dataset) => dataset.datasetKey === 'HERO_PAIRS');
+
+  assert.equal(heroPairs?.isReady, false);
+  assert.equal(validation.overallReady, false);
+  assert.match(heroPairs?.detail ?? '', /Invalid HERO_PAIRS: results_people must reference results and people, or the active pair key\./i);
+  assert.ok(heroPairs?.issues.some((issue) => issue.code === 'language_hero_pairs_content_mismatch'));
+});
+
+test('hero pair language completeness passes when visible text references both active signals', () => {
+  const validation = buildHeroPairLanguageValidation('Results and People');
+  const heroPairs = validation.datasets.find((dataset) => dataset.datasetKey === 'HERO_PAIRS');
+
+  assert.equal(heroPairs?.isReady, true);
+  assert.match(heroPairs?.detail ?? '', /HERO_PAIRS matches the current derived pair count/i);
+});
+
+test('hero pair language completeness passes pair-reference validation when visible text references the active pair key', () => {
+  const validation = buildHeroPairLanguageValidation('results_people');
+  const heroPairs = validation.datasets.find((dataset) => dataset.datasetKey === 'HERO_PAIRS');
+
+  assert.equal(heroPairs?.isReady, true);
+  assert.equal(heroPairs?.issues.some((issue) => issue.code === 'language_hero_pairs_content_mismatch'), false);
+});
+
+test('language completeness and review language section agree when hero pair text is invalid', () => {
+  const languageValidation = buildHeroPairLanguageValidation('Shared direction');
+  const structuralValidation = buildSingleDomainStructuralValidation({
+    authoredDomains: HERO_PAIR_TEST_DOMAIN,
+    authoredQuestions: [],
+    languageValidation,
+  });
+  const languageSection = structuralValidation.sections.find((section) => section.key === 'language');
+
+  assert.equal(languageValidation.overallReady, false);
+  assert.equal(languageSection?.status, 'attention');
+  assert.ok(structuralValidation.issues.some((issue) => issue.code === 'language_hero_pairs_content_mismatch'));
 });
 
 test('application statements completeness derives from the current signal count while signal chapters stay out of builder readiness', () => {

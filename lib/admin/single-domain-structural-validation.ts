@@ -4,6 +4,10 @@ import type {
   AdminAssessmentDetailSignalWeight,
 } from '@/lib/server/admin-assessment-detail';
 import { getExpectedDriverClaimTuples } from '@/lib/assessment-language/single-domain-canonical';
+import {
+  getPairLanguageReferenceRequirement,
+  pairLanguageReferencesPair,
+} from '@/lib/assessment-language/single-domain-pair-language';
 import { SINGLE_DOMAIN_RESPONSE_OPTION_LABELS } from '@/lib/admin/single-domain-response-import';
 import { getSingleDomainLanguageDatasetDefinition } from '@/lib/admin/single-domain-language-datasets';
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
@@ -297,6 +301,30 @@ function createLanguageDatasetValidation(params: {
   };
 }
 
+function createPairContentMismatchIssues(params: {
+  datasetKey: 'HERO_PAIRS' | 'PAIR_SUMMARIES';
+  pairKeys: readonly string[];
+  rows: readonly {
+    pair_key: string;
+    rowText: string;
+  }[];
+}): readonly SingleDomainStructuralIssue[] {
+  const datasetLabel = params.datasetKey === 'HERO_PAIRS' ? 'HERO_PAIRS' : 'PAIR_SUMMARIES';
+
+  return Object.freeze(
+    params.rows
+      .filter((row) => params.pairKeys.includes(row.pair_key))
+      .filter((row) => !pairLanguageReferencesPair({
+        pairKey: row.pair_key,
+        rowText: row.rowText,
+      }))
+      .map((row) => createIssue(
+        `language_${params.datasetKey.toLowerCase()}_content_mismatch`,
+        `Invalid ${datasetLabel}: ${getPairLanguageReferenceRequirement(row.pair_key).message}`,
+      )),
+  );
+}
+
 export function buildSingleDomainLanguageValidation(params: {
   authoredDomains: readonly AdminAssessmentDetailDomain[];
   languageBundle: SingleDomainLanguageBundle;
@@ -306,9 +334,49 @@ export function buildSingleDomainLanguageValidation(params: {
   const signalKeys = params.authoredDomains.flatMap((domain) => domain.signals.map((signal) => signal.signalKey));
   const signalCount = params.authoredDomains.reduce((sum, domain) => sum + domain.signals.length, 0);
   const expectedPairCount = getExpectedSignalPairCount(signalCount);
+  const expectedPairKeys = params.authoredDomains.length > 0
+    ? Object.freeze(
+        getExpectedDriverClaimTuples({
+          domainKey: primaryDomainKey ?? '',
+          signalKeys,
+        })
+          .map((tuple) => tuple.pairKey)
+          .filter((pairKey, index, array) => array.indexOf(pairKey) === index),
+      )
+    : Object.freeze([] as string[]);
   const expectedDriverClaimTupleKeys = buildExpectedDriverClaimTupleKeys({
     domainKey: primaryDomainKey,
     signalKeys,
+  });
+  const heroPairContentIssues = createPairContentMismatchIssues({
+    datasetKey: 'HERO_PAIRS',
+    pairKeys: expectedPairKeys,
+    rows: params.languageBundle.HERO_PAIRS.map((row) => ({
+      pair_key: row.pair_key,
+      rowText: [
+        row.hero_headline,
+        row.hero_subheadline,
+        row.hero_opening,
+        row.hero_strength_paragraph,
+        row.hero_tension_paragraph,
+        row.hero_close_paragraph,
+      ].join(' '),
+    })),
+  });
+  const pairSummaryContentIssues = createPairContentMismatchIssues({
+    datasetKey: 'PAIR_SUMMARIES',
+    pairKeys: expectedPairKeys,
+    rows: params.languageBundle.PAIR_SUMMARIES.map((row) => ({
+      pair_key: row.pair_key,
+      rowText: [
+        row.pair_section_title,
+        row.pair_headline,
+        row.pair_opening_paragraph,
+        row.pair_strength_paragraph,
+        row.pair_tension_paragraph,
+        row.pair_close_paragraph,
+      ].join(' '),
+    })),
   });
   const actualDriverClaimTupleCounts = new Map<string, number>();
   (params.languageBundle.DRIVER_CLAIMS ?? []).forEach((row) => {
@@ -458,6 +526,18 @@ export function buildSingleDomainLanguageValidation(params: {
     }),
   ];
   const driverClaimsDatasetIndex = datasets.findIndex((dataset) => dataset.datasetKey === 'DRIVER_CLAIMS');
+  const heroPairsDatasetIndex = datasets.findIndex((dataset) => dataset.datasetKey === 'HERO_PAIRS');
+  if (heroPairsDatasetIndex >= 0 && heroPairContentIssues.length > 0) {
+    const dataset = datasets[heroPairsDatasetIndex]!;
+    datasets[heroPairsDatasetIndex] = {
+      ...dataset,
+      isReady: false,
+      status: dataset.actualRowCount > 0 ? 'attention' : dataset.status,
+      detail: heroPairContentIssues[0]!.message,
+      issues: Object.freeze([...dataset.issues, ...heroPairContentIssues]),
+      completeRowCount: Math.max(0, dataset.expectedRowCount - heroPairContentIssues.length),
+    };
+  }
   if (driverClaimsDatasetIndex >= 0 && driverClaimsIssues.length > 0) {
     const dataset = datasets[driverClaimsDatasetIndex]!;
     datasets[driverClaimsDatasetIndex] = {
@@ -476,6 +556,18 @@ export function buildSingleDomainLanguageValidation(params: {
       completeRowCount: driverClaimMatrix.completeRowCount,
       driverClaimMatrix,
       detail: `DRIVER_CLAIMS coverage is ${driverClaimMatrix.completeRowCount} / ${driverClaimMatrix.expectedRowCount} exact runtime tuples.`,
+    };
+  }
+  const pairSummariesDatasetIndex = datasets.findIndex((dataset) => dataset.datasetKey === 'PAIR_SUMMARIES');
+  if (pairSummariesDatasetIndex >= 0 && pairSummaryContentIssues.length > 0) {
+    const dataset = datasets[pairSummariesDatasetIndex]!;
+    datasets[pairSummariesDatasetIndex] = {
+      ...dataset,
+      isReady: false,
+      status: dataset.actualRowCount > 0 ? 'attention' : dataset.status,
+      detail: pairSummaryContentIssues[0]!.message,
+      issues: Object.freeze([...dataset.issues, ...pairSummaryContentIssues]),
+      completeRowCount: Math.max(0, dataset.expectedRowCount - pairSummaryContentIssues.length),
     };
   }
   const issues = Object.freeze(datasets.flatMap((dataset) => dataset.issues));

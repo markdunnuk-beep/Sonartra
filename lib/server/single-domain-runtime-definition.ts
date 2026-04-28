@@ -4,6 +4,7 @@ import {
   getExpectedDriverClaimTuples,
   getSingleDomainCanonicalPairKeys,
 } from '@/lib/assessment-language/single-domain-canonical';
+import { pairLanguageReferencesPair } from '@/lib/assessment-language/single-domain-pair-language';
 import { resolveSingleDomainPairKey } from '@/lib/assessment-language/single-domain-pair-keys';
 import { getSingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language';
 import type {
@@ -136,31 +137,6 @@ function createIssue(
     severity,
     relatedKeys: relatedKeys ? Object.freeze([...relatedKeys]) : undefined,
   };
-}
-
-function compactText(value: string): string {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
-}
-
-function pairLanguageReferencesPair(params: {
-  pairKey: string;
-  rowText: string;
-}): boolean {
-  const [leftSignalKey, rightSignalKey] = params.pairKey.split('_');
-  if (!leftSignalKey || !rightSignalKey) {
-    return false;
-  }
-
-  const normalized = compactText(params.rowText);
-  const pairKeyToken = compactText(params.pairKey);
-  const reversedPairKeyToken = compactText(`${rightSignalKey}_${leftSignalKey}`);
-
-  if (normalized.includes(pairKeyToken) || normalized.includes(reversedPairKeyToken)) {
-    return true;
-  }
-
-  return normalized.includes(compactText(leftSignalKey))
-    && normalized.includes(compactText(rightSignalKey));
 }
 
 async function loadRuntimeContext(

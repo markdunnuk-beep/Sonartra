@@ -535,6 +535,42 @@ test('missing language datasets fail readiness explicitly where required', async
   assert.equal(readiness.issues.some((issue) => issue.code === 'pair_summaries_count_mismatch'), false);
 });
 
+test('hero pair runtime readiness fails when visible text does not reference the active pair', async () => {
+  const fixture = buildFixture();
+  fixture.language.HERO_PAIRS = fixture.language.HERO_PAIRS.map((row) => (
+    row.pair_key === 'directive_supportive'
+      ? {
+          ...row,
+          hero_headline: 'Shared direction',
+          hero_subheadline: 'Shared direction',
+          hero_opening: 'Shared direction',
+          hero_strength_paragraph: 'Shared direction',
+          hero_tension_paragraph: 'Shared direction',
+          hero_close_paragraph: 'Shared direction',
+        }
+      : row
+  ));
+
+  const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
+
+  assert.equal(readiness.isReady, false);
+  assert.ok(readiness.issues.some((issue) => issue.code === 'hero_pairs_content_mismatch'));
+});
+
+test('hero pair runtime readiness accepts visible text that references the active pair key', async () => {
+  const fixture = buildFixture();
+  fixture.language.HERO_PAIRS = fixture.language.HERO_PAIRS.map((row) => (
+    row.pair_key === 'directive_supportive'
+      ? { ...row, hero_headline: 'directive_supportive' }
+      : row
+  ));
+
+  const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
+
+  assert.equal(readiness.isReady, true);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'hero_pairs_content_mismatch'), false);
+});
+
 test('readiness bridge exposes explicit issues, counts, and expectations', async () => {
   const readiness = await getSingleDomainDraftReadiness(
     createSingleDomainDb(buildFixture({
