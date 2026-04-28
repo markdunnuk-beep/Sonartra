@@ -143,6 +143,31 @@ test('invalid SIGNAL_CHAPTERS headers are rejected visibly', async () => {
   assert.match(result.parseErrors[0]?.message ?? '', /Invalid headers for SIGNAL_CHAPTERS/i);
 });
 
+test('valid SIGNAL_CHAPTERS import accepts four leadership signal rows with header included', async () => {
+  const fake = createFakeDb();
+
+  const result = await importSingleDomainLanguageDatasetForAssessmentVersionWithDependencies({
+    assessmentVersionId: 'version-draft',
+    datasetKey: 'SIGNAL_CHAPTERS',
+    rawInput: [
+      'signal_key|position_primary_label|position_secondary_label|position_supporting_label|position_underplayed_label|chapter_intro_primary|chapter_intro_secondary|chapter_intro_supporting|chapter_intro_underplayed|chapter_how_it_shows_up|chapter_value_outcome|chapter_value_team_effect|chapter_risk_behaviour|chapter_risk_impact|chapter_development',
+      'results|Primary driver|Secondary driver|Supporting context|Underplayed signal|Results leads with visible outcome pressure and delivery urgency.|Results in second position reinforces momentum without owning the whole pattern.|Results in a supporting role keeps execution standards present in the background.|When underplayed, results pressure can become too soft or delayed.|It shows up as a clear push toward measurable progress and closure.|The value is faster movement from intent to tangible outcomes.|Teams feel stronger accountability and clearer completion signals.|Risk appears when pace outruns context and options narrow too quickly.|Impact can include missed perspectives and lower sustained commitment.|Development focus is to pair speed with explicit check points and reflection.',
+      'process|Primary driver|Secondary driver|Supporting context|Underplayed signal|Process leads by creating order, sequence, and repeatable rhythm.|Process as secondary gives structure to another leading signal.|Process in support keeps standards and handoffs reliable.|When underplayed, work can lose cadence and quality control.|It shows up through planning discipline and visible operating rhythm.|The value is dependable execution with fewer avoidable errors.|Teams experience clearer coordination and steadier follow-through.|Risk appears when process becomes rigid and adaptation slows.|Impact can include bureaucracy, delay, or reduced initiative.|Development focus is to keep structure while adjusting to context quickly.',
+      'vision|Primary driver|Secondary driver|Supporting context|Underplayed signal|Vision leads by setting direction and framing future opportunity.|Vision as secondary expands options around the primary signal.|Vision in support keeps longer-range meaning connected to current work.|When underplayed, direction can shrink to short-term tasks only.|It shows up as strategic framing and pattern-seeing across decisions.|The value is stronger alignment around purpose and future outcomes.|Teams feel more motivated when direction is meaningful and coherent.|Risk appears when ideas outpace execution capacity.|Impact can include ambiguity, drift, or overextension.|Development focus is to translate strategy into concrete next steps.',
+      'people|Primary driver|Secondary driver|Supporting context|Underplayed signal|People leads by centering trust, commitment, and relational awareness.|People as secondary improves adoption and follow-through of decisions.|People in support keeps culture and morale visible while work advances.|When underplayed, engagement can drop and resistance may stay hidden.|It shows up through listening, inclusion, and active relationship management.|The value is stronger commitment and healthier collaboration under pressure.|Teams feel seen, increasing trust and shared ownership.|Risk appears when harmony overrides necessary challenge or pace.|Impact can include slower decisions and unclear accountability.|Development focus is to pair empathy with firm standards and timely decisions.',
+    ].join('\n'),
+  }, {
+    db: fake.db,
+    revalidatePath() {},
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(result.parseErrors.length, 0);
+  assert.equal(result.validationErrors.length, 0);
+  assert.equal(result.summary.importedRowCount, 4);
+  assert.equal(result.summary.targetCount, 4);
+});
+
 test('DRIVER_CLAIMS validates role claim type and materiality mapping', async () => {
   const fake = createFakeDb();
 
