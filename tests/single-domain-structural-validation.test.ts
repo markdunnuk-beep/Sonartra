@@ -354,7 +354,7 @@ test('signal chapters and application statements completeness derive from the cu
 });
 
 
-test('driver claims completeness requires four roles for every canonical pair', () => {
+test('driver claims completeness requires the full exact runtime tuple matrix', () => {
   const validation = buildSingleDomainLanguageValidation({
     authoredDomains: [{
       domainId: 'domain-1',
@@ -385,7 +385,7 @@ test('driver claims completeness requires four roles for every canonical pair', 
   const driverClaims = validation.datasets.find((dataset) => dataset.datasetKey === 'DRIVER_CLAIMS');
 
   assert.equal(validation.expectedPairCount, 6);
-  assert.equal(driverClaims?.expectedRowCount, 24);
+  assert.equal(driverClaims?.expectedRowCount, 48);
   assert.equal(driverClaims?.actualRowCount, 0);
   assert.equal(driverClaims?.status, 'not_started');
 });

@@ -166,7 +166,7 @@ test('single-domain validation accepts runtime-ordered results_process pair keys
   assert.equal(result.success, true);
 });
 
-test('single-domain validation accepts reversed pair keys and normalizes them to runtime order', () => {
+test('single-domain validation rejects reversed pair keys for pair-owned sections', () => {
   const context = buildSingleDomainImportValidationContext({
     datasetKey: 'SINGLE_DOMAIN_HERO',
     currentDomainKey: 'leadership-approach',
@@ -187,8 +187,12 @@ test('single-domain validation accepts reversed pair keys and normalizes them to
   const result = validateSingleDomainImportRows(context, rows);
   const normalized = normalizeSingleDomainImportRowsForRuntimePairKeys(context, rows);
 
-  assert.equal(result.success, true);
-  assert.equal(normalized[0]?.pair_key, 'results_process');
+  assert.equal(result.success, false);
+  assert.match(
+    result.validationErrors.map((issue) => issue.message).join('\n'),
+    /pair_key "process_results" must be canonical for the current signal order/i,
+  );
+  assert.equal(normalized[0]?.pair_key, 'process_results');
 });
 
 test('pair-owned section imports no longer fail solely because pair order is runtime-first', () => {
@@ -242,7 +246,7 @@ test('pair-owned section imports no longer fail solely because pair order is run
   assert.equal(application.success, true);
 });
 
-test('drivers validation requires canonical pair keys and full pair-role coverage', () => {
+test('drivers validation requires canonical pair keys and exact runtime tuple coverage', () => {
   const context = buildSingleDomainImportValidationContext({
     datasetKey: 'SINGLE_DOMAIN_DRIVERS',
     currentDomainKey: 'leadership-approach',
@@ -270,6 +274,6 @@ test('drivers validation requires canonical pair keys and full pair-role coverag
   );
   assert.match(
     result.validationErrors.map((issue) => issue.message).join('\n'),
-    /Missing drivers row for pair_key "results_process" and driver_role "secondary_driver"/i,
+    /Missing drivers row for exact tuple "leadership-approach\|results_process\|results\|primary_driver"/i,
   );
 });

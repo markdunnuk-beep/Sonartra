@@ -3,19 +3,13 @@ import type {
   AdminAssessmentDetailQuestion,
   AdminAssessmentDetailSignalWeight,
 } from '@/lib/server/admin-assessment-detail';
+import { getExpectedDriverClaimTuples } from '@/lib/assessment-language/single-domain-canonical';
 import { SINGLE_DOMAIN_RESPONSE_OPTION_LABELS } from '@/lib/admin/single-domain-response-import';
 import { getSingleDomainLanguageDatasetDefinition } from '@/lib/admin/single-domain-language-datasets';
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
 import { getSingleDomainExpectedPairCount } from '@/lib/types/single-domain-runtime';
 import type { SingleDomainLanguageDatasetKey } from '@/lib/types/single-domain-language';
 import type { SingleDomainDraftReadinessIssue } from '@/lib/types/single-domain-runtime';
-
-const DRIVER_CLAIM_REQUIRED_ROLES = [
-  'primary_driver',
-  'secondary_driver',
-  'supporting_context',
-  'range_limitation',
-] as const;
 
 export type SingleDomainStructuralIssueSeverity = 'blocking' | 'warning';
 
@@ -83,6 +77,22 @@ export type SingleDomainLanguageValidation = {
   datasets: readonly SingleDomainLanguageDatasetValidation[];
   issues: readonly SingleDomainStructuralIssue[];
 };
+
+function buildExpectedDriverClaimTupleKeys(params: {
+  domainKey: string | null;
+  signalKeys: readonly string[];
+}): readonly string[] {
+  if (!params.domainKey) {
+    return Object.freeze([]);
+  }
+
+  return Object.freeze(
+    getExpectedDriverClaimTuples({
+      domainKey: params.domainKey,
+      signalKeys: params.signalKeys,
+    }).map((tuple) => `${tuple.domainKey}|${tuple.pairKey}|${tuple.signalKey}|${tuple.driverRole}`),
+  );
+}
 
 export type SingleDomainResponseCoverage = {
   complete: boolean;
@@ -271,8 +281,42 @@ export function buildSingleDomainLanguageValidation(params: {
   languageBundle: SingleDomainLanguageBundle;
 }): SingleDomainLanguageValidation {
   const domainCount = params.authoredDomains.length;
+  const primaryDomainKey = params.authoredDomains[0]?.domainKey ?? null;
+  const signalKeys = params.authoredDomains.flatMap((domain) => domain.signals.map((signal) => signal.signalKey));
   const signalCount = params.authoredDomains.reduce((sum, domain) => sum + domain.signals.length, 0);
   const expectedPairCount = getExpectedSignalPairCount(signalCount);
+  const expectedDriverClaimTupleKeys = buildExpectedDriverClaimTupleKeys({
+    domainKey: primaryDomainKey,
+    signalKeys,
+  });
+  const actualDriverClaimTupleCounts = new Map<string, number>();
+  (params.languageBundle.DRIVER_CLAIMS ?? []).forEach((row) => {
+    const key = `${row.domain_key}|${row.pair_key}|${row.signal_key}|${row.driver_role}`;
+    actualDriverClaimTupleCounts.set(key, (actualDriverClaimTupleCounts.get(key) ?? 0) + 1);
+  });
+  const missingDriverClaimTuples = expectedDriverClaimTupleKeys.filter(
+    (key) => actualDriverClaimTupleCounts.get(key) !== 1,
+  );
+  const invalidDriverClaimTuples = [...actualDriverClaimTupleCounts.keys()].filter(
+    (key) => !expectedDriverClaimTupleKeys.includes(key),
+  );
+  const duplicateDriverClaimTuples = [...actualDriverClaimTupleCounts.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([key]) => key);
+  const driverClaimsIssues = [
+    ...missingDriverClaimTuples.map((key) => createIssue(
+      'language_driver_claims_tuple_missing',
+      `DRIVER_CLAIMS is missing the exact runtime tuple "${key}".`,
+    )),
+    ...invalidDriverClaimTuples.map((key) => createIssue(
+      'language_driver_claims_tuple_invalid',
+      `DRIVER_CLAIMS contains an unexpected exact runtime tuple "${key}".`,
+    )),
+    ...duplicateDriverClaimTuples.map((key) => createIssue(
+      'language_driver_claims_tuple_duplicate',
+      `DRIVER_CLAIMS must contain exactly one row for "${key}".`,
+    )),
+  ];
   const datasets: SingleDomainLanguageDatasetValidation[] = [
     createLanguageDatasetValidation({
       datasetKey: 'DOMAIN_FRAMING',
@@ -299,10 +343,10 @@ export function buildSingleDomainLanguageValidation(params: {
     createLanguageDatasetValidation({
       datasetKey: 'DRIVER_CLAIMS',
       actualRowCount: (params.languageBundle.DRIVER_CLAIMS ?? []).length,
-      expectedRowCount: expectedPairCount * DRIVER_CLAIM_REQUIRED_ROLES.length,
+      expectedRowCount: expectedDriverClaimTupleKeys.length,
       countRule: 'exact',
-      successDetail: `DRIVER_CLAIMS matches the current derived pair count (${expectedPairCount}) with all required driver roles.`,
-      failureMessage: `DRIVER_CLAIMS must contain exactly ${expectedPairCount * DRIVER_CLAIM_REQUIRED_ROLES.length} row${expectedPairCount * DRIVER_CLAIM_REQUIRED_ROLES.length === 1 ? '' : 's'} (${expectedPairCount} pair${expectedPairCount === 1 ? '' : 's'} × ${DRIVER_CLAIM_REQUIRED_ROLES.length} required driver roles).`,
+      successDetail: 'DRIVER_CLAIMS matches the exact runtime tuple contract for the current domain, signals, and pairs.',
+      failureMessage: `DRIVER_CLAIMS must contain exactly ${expectedDriverClaimTupleKeys.length} row${expectedDriverClaimTupleKeys.length === 1 ? '' : 's'} matching the exact runtime tuple contract.`,
       waitingDetail: signalCount === 0
         ? 'Waiting on authored signals before driver claims can be derived.'
         : expectedPairCount === 0
@@ -354,6 +398,17 @@ export function buildSingleDomainLanguageValidation(params: {
       waitingDetail: signalCount === 0 ? 'Waiting on authored signals before application statements can be assessed.' : undefined,
     }),
   ];
+  const driverClaimsDatasetIndex = datasets.findIndex((dataset) => dataset.datasetKey === 'DRIVER_CLAIMS');
+  if (driverClaimsDatasetIndex >= 0 && driverClaimsIssues.length > 0) {
+    const dataset = datasets[driverClaimsDatasetIndex]!;
+    datasets[driverClaimsDatasetIndex] = {
+      ...dataset,
+      isReady: false,
+      status: dataset.actualRowCount > 0 ? 'attention' : dataset.status,
+      detail: driverClaimsIssues[0]!.message,
+      issues: Object.freeze([...dataset.issues, ...driverClaimsIssues]),
+    };
+  }
   const issues = Object.freeze(datasets.flatMap((dataset) => dataset.issues));
 
   return {

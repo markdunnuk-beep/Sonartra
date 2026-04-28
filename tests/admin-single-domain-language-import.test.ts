@@ -366,11 +366,11 @@ test('DRIVER_CLAIMS rejects rows that do not match the exact runtime lookup tupl
   assert.equal(result.success, false);
   assert.match(
     result.validationErrors.map((error) => error.message).join('\n'),
-    /results_vision\|vision\|primary_driver/i,
+    /results_vision\|results\|primary_driver/i,
   );
   assert.match(
     result.validationErrors.map((error) => error.message).join('\n'),
-    /results_vision\|results\|primary_driver/i,
+    /results_vision\|vision\|secondary_driver/i,
   );
 });
 

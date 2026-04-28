@@ -135,13 +135,6 @@ const PAIR_KEYS = [
   'people_rigor',
 ] as const;
 
-const DRIVER_ROLES: DriverClaimsRow['driver_role'][] = [
-  'primary_driver',
-  'secondary_driver',
-  'supporting_context',
-  'range_limitation',
-];
-
 function buildRuntimeFixture(): RuntimeFixture {
   return {
     context: {
@@ -234,30 +227,36 @@ function buildRuntimeFixture(): RuntimeFixture {
         hero_tension_paragraph: `Tension ${pair_key}`,
         hero_close_paragraph: `Close ${pair_key}`,
       })),
-      DRIVER_CLAIMS: PAIR_KEYS.flatMap((pair_key) => (
-        ['vision', 'delivery', 'people', 'rigor'].flatMap((signal_key) => (
-          DRIVER_ROLES.map((driver_role, index) => ({
-            domain_key: 'leadership-style',
-            pair_key,
-            signal_key,
-            driver_role,
-            claim_type: driver_role === 'primary_driver'
-              ? 'driver_primary'
-              : driver_role === 'secondary_driver'
-                ? 'driver_secondary'
-                : driver_role === 'supporting_context'
-                  ? 'driver_supporting_context'
-                  : 'driver_range_limitation',
-            claim_text: `DRIVER_CLAIMS ${pair_key} ${signal_key} ${driver_role} ${index + 1}.`,
-            materiality: driver_role === 'range_limitation'
-              ? 'material_underplay'
-              : driver_role === 'supporting_context'
-                ? 'supporting'
-                : 'core',
-            priority: index + 1,
-          }))
-        ))
-      )),
+      DRIVER_CLAIMS: getExpectedDriverClaimTuples({
+        domainKey: 'leadership-style',
+        signalKeys: ['vision', 'delivery', 'people', 'rigor'],
+        pairKeys: PAIR_KEYS,
+      }).map((tuple) => ({
+        domain_key: tuple.domainKey,
+        pair_key: tuple.pairKey,
+        signal_key: tuple.signalKey,
+        driver_role: tuple.driverRole,
+        claim_type: tuple.driverRole === 'primary_driver'
+          ? 'driver_primary'
+          : tuple.driverRole === 'secondary_driver'
+            ? 'driver_secondary'
+            : tuple.driverRole === 'supporting_context'
+              ? 'driver_supporting_context'
+              : 'driver_range_limitation',
+        claim_text: `DRIVER_CLAIMS ${tuple.pairKey} ${tuple.signalKey} ${tuple.driverRole}.`,
+        materiality: tuple.driverRole === 'range_limitation'
+          ? 'material_underplay'
+          : tuple.driverRole === 'supporting_context'
+            ? 'supporting'
+            : 'core',
+        priority: tuple.driverRole === 'primary_driver'
+          ? 1
+          : tuple.driverRole === 'secondary_driver'
+            ? 2
+            : tuple.driverRole === 'supporting_context'
+              ? 3
+              : 4,
+      })),
       SIGNAL_CHAPTERS: ['vision', 'delivery', 'people', 'rigor'].map((signal_key) => ({
         signal_key,
         position_primary_label: 'Primary',
@@ -1163,7 +1162,7 @@ test('single-domain payload rejects reversed pair language rows for the active c
       assessmentVersionId: 'version-1',
       responses: buildResponseSet(),
     }),
-    /Missing canonical HERO_PAIRS row for pair "vision_delivery"/i,
+    /HERO_PAIRS pair_key values must match the canonical pair keys exactly/i,
   );
 });
 
@@ -1193,14 +1192,14 @@ test('single-domain payload maps sparse section-first language into required pay
 
   assert.equal(isSingleDomainResultPayload(payload), true);
   assert.equal(payload.signals[0]?.signal_key, 'vision');
-  assert.equal(payload.signals[0]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery vision primary_driver 1.');
+  assert.equal(payload.signals[0]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery vision primary_driver.');
   assert.equal(payload.signals[1]?.signal_key, 'delivery');
-  assert.equal(payload.signals[1]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery delivery secondary_driver 2.');
+  assert.equal(payload.signals[1]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery delivery secondary_driver.');
   assert.equal(payload.signals[2]?.signal_key, 'people');
-  assert.equal(payload.signals[2]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery people supporting_context 3.');
+  assert.equal(payload.signals[2]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery people supporting_context.');
   assert.equal(payload.signals[3]?.signal_key, 'rigor');
-  assert.equal(payload.signals[3]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery rigor range_limitation 4.');
-  assert.equal(payload.signals[3]?.chapter_risk_impact, 'DRIVER_CLAIMS vision_delivery rigor range_limitation 4.');
+  assert.equal(payload.signals[3]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery rigor range_limitation.');
+  assert.equal(payload.signals[3]?.chapter_risk_impact, 'DRIVER_CLAIMS vision_delivery rigor range_limitation.');
   assert.equal(payload.balancing.system_risk_paragraph, 'Rebalance vision_delivery');
   assert.deepEqual(payload.balancing.rebalance_actions, [
     'vision_delivery action 1',
@@ -1306,7 +1305,7 @@ test('single-domain payload fails when canonical pair rows are cloned from a dif
         },
       },
     }),
-    /Missing canonical HERO_PAIRS row for pair "delivery_people"/i,
+    /HERO_PAIRS rows must reference the active pair signals or pair key in their visible text/i,
   );
 });
 

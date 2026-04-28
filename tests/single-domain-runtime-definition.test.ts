@@ -401,30 +401,30 @@ function buildFixture(overrides?: Partial<RuntimeFixture>): RuntimeFixture {
       PAIR_SUMMARIES: [
         {
           pair_key: 'directive_supportive',
-          pair_section_title: 'Section',
-          pair_headline: 'Headline',
-          pair_opening_paragraph: 'Opening',
-          pair_strength_paragraph: 'Strength',
-          pair_tension_paragraph: 'Tension',
-          pair_close_paragraph: 'Close',
+          pair_section_title: 'directive_supportive section',
+          pair_headline: 'directive_supportive headline',
+          pair_opening_paragraph: 'directive_supportive opening',
+          pair_strength_paragraph: 'directive_supportive strength',
+          pair_tension_paragraph: 'directive_supportive tension',
+          pair_close_paragraph: 'directive_supportive close',
         },
         {
           pair_key: 'directive_analytical',
-          pair_section_title: 'Section',
-          pair_headline: 'Headline',
-          pair_opening_paragraph: 'Opening',
-          pair_strength_paragraph: 'Strength',
-          pair_tension_paragraph: 'Tension',
-          pair_close_paragraph: 'Close',
+          pair_section_title: 'directive_analytical section',
+          pair_headline: 'directive_analytical headline',
+          pair_opening_paragraph: 'directive_analytical opening',
+          pair_strength_paragraph: 'directive_analytical strength',
+          pair_tension_paragraph: 'directive_analytical tension',
+          pair_close_paragraph: 'directive_analytical close',
         },
         {
           pair_key: 'supportive_analytical',
-          pair_section_title: 'Section',
-          pair_headline: 'Headline',
-          pair_opening_paragraph: 'Opening',
-          pair_strength_paragraph: 'Strength',
-          pair_tension_paragraph: 'Tension',
-          pair_close_paragraph: 'Close',
+          pair_section_title: 'supportive_analytical section',
+          pair_headline: 'supportive_analytical headline',
+          pair_opening_paragraph: 'supportive_analytical opening',
+          pair_strength_paragraph: 'supportive_analytical strength',
+          pair_tension_paragraph: 'supportive_analytical tension',
+          pair_close_paragraph: 'supportive_analytical close',
         },
       ],
       APPLICATION_STATEMENTS: [
@@ -476,11 +476,11 @@ test('single-domain runtime loader assembles a deterministic runtime object from
   assert.equal(runtime.questions.length, 1);
   assert.equal(runtime.questions[0]?.options.length, 2);
   assert.equal(runtime.optionSignalWeights.length, 2);
-  assert.equal(runtime.languageBundle.DRIVER_CLAIMS.length, 12);
+  assert.equal(runtime.languageBundle.DRIVER_CLAIMS.length, 15);
   assert.equal(runtime.languageBundle.SIGNAL_CHAPTERS.length, 3);
 });
 
-test('single-domain runtime readiness accepts reversed pair language keys as aliases', async () => {
+test('single-domain runtime readiness rejects reversed pair language keys', async () => {
   const fixture = buildFixture();
   fixture.language.HERO_PAIRS = fixture.language.HERO_PAIRS.map((row) => (
     row.pair_key === 'directive_supportive'
@@ -500,7 +500,10 @@ test('single-domain runtime readiness accepts reversed pair language keys as ali
 
   const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
 
-  assert.equal(readiness.isReady, true);
+  assert.equal(readiness.isReady, false);
+  assert.ok(readiness.issues.some((issue) => issue.code === 'hero_pairs_key_mismatch'));
+  assert.ok(readiness.issues.some((issue) => issue.code === 'balancing_sections_key_mismatch'));
+  assert.ok(readiness.issues.some((issue) => issue.code === 'pair_summaries_key_mismatch'));
 });
 
 test('unknown or undefined mode values never resolve through the single-domain runtime path', async () => {
@@ -611,7 +614,7 @@ test('readiness bridge exposes explicit issues, counts, and expectations', async
 
   assert.equal(readiness.counts.optionCount, 2);
   assert.equal(readiness.expectations.expectedLanguageRowCounts.HERO_PAIRS, 3);
-  assert.equal(readiness.expectations.expectedLanguageRowCounts.DRIVER_CLAIMS, 12);
+  assert.equal(readiness.expectations.expectedLanguageRowCounts.DRIVER_CLAIMS, 15);
   assert.ok(readiness.issues.some((issue) => issue.code === 'weight_signal_unresolved'));
   assert.equal(readiness.runtimeDefinition, null);
 });
@@ -620,23 +623,25 @@ test('driver claims readiness accepts complete pair-role coverage', async () => 
   const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(buildFixture()), 'version-1');
 
   assert.equal(readiness.isReady, true);
-  assert.equal(readiness.counts.languageRowCounts.DRIVER_CLAIMS, 12);
-  assert.equal(readiness.expectations.expectedLanguageRowCounts.DRIVER_CLAIMS, 12);
+  assert.equal(readiness.counts.languageRowCounts.DRIVER_CLAIMS, 15);
+  assert.equal(readiness.expectations.expectedLanguageRowCounts.DRIVER_CLAIMS, 15);
   assert.equal(readiness.issues.some((issue) => issue.code === 'driver_claims_coverage_incomplete'), false);
 });
 
-test('driver claims readiness warns when one pair-role row is missing', async () => {
+test('driver claims readiness blocks when one exact runtime tuple is missing', async () => {
   const fixture = buildFixture();
   fixture.language.DRIVER_CLAIMS = fixture.language.DRIVER_CLAIMS.filter(
-    (row) => !(row.pair_key === 'directive_supportive' && row.driver_role === 'range_limitation'),
+    (row) => !(row.pair_key === 'directive_supportive'
+      && row.signal_key === 'analytical'
+      && row.driver_role === 'supporting_context'),
   );
 
   const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
   const issue = readiness.issues.find((entry) => entry.code === 'driver_claims_coverage_incomplete');
 
-  assert.equal(readiness.isReady, true);
-  assert.equal(issue?.severity, 'warning');
-  assert.ok(issue?.relatedKeys?.includes('directive_supportive:range_limitation:0'));
+  assert.equal(readiness.isReady, false);
+  assert.equal(issue?.severity, 'blocking');
+  assert.ok(issue?.relatedKeys?.includes('leadership-style:directive_supportive:analytical:supporting_context:0'));
 });
 
 test('driver claims readiness warns for invalid pair and signal keys', async () => {
@@ -679,8 +684,8 @@ test('driver claims readiness warns for invalid role claim and materiality mappi
   const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
   const issue = readiness.issues.find((entry) => entry.code === 'driver_claims_role_mapping_mismatch');
 
-  assert.equal(readiness.isReady, true);
-  assert.equal(issue?.severity, 'warning');
+  assert.equal(readiness.isReady, false);
+  assert.equal(issue?.severity, 'blocking');
   assert.ok(issue?.relatedKeys?.some((key) => key.includes('directive_supportive:directive:primary_driver')));
 });
 
@@ -838,12 +843,12 @@ test('driver claims readiness blocks when rows do not match the exact runtime lo
         'vision_people',
       ].map((pair_key) => ({
         pair_key,
-        pair_section_title: 'Section',
-        pair_headline: 'Headline',
-        pair_opening_paragraph: 'Opening',
-        pair_strength_paragraph: 'Strength',
-        pair_tension_paragraph: 'Tension',
-        pair_close_paragraph: 'Close',
+        pair_section_title: `${pair_key} section`,
+        pair_headline: `${pair_key} headline`,
+        pair_opening_paragraph: `${pair_key} opening`,
+        pair_strength_paragraph: `${pair_key} strength`,
+        pair_tension_paragraph: `${pair_key} tension`,
+        pair_close_paragraph: `${pair_key} close`,
       })),
       APPLICATION_STATEMENTS: ['results', 'process', 'vision', 'people'].map((signal_key) => ({
         signal_key,

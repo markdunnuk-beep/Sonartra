@@ -7,7 +7,6 @@ import {
 } from '@/lib/admin/single-domain-language-datasets';
 import {
   getExpectedDriverClaimTuples,
-  hasLeadershipCanonicalSignalSet,
   getSingleDomainCanonicalPairKeys,
 } from '@/lib/assessment-language/single-domain-canonical';
 import type {
@@ -349,7 +348,7 @@ function buildDatasetValidationErrors<TKey extends SingleDomainLanguageDatasetKe
     return issues;
   }
 
-  if (datasetKey !== 'DRIVER_CLAIMS' || !currentDomainKey || !hasLeadershipCanonicalSignalSet(expectedSignalKeys)) {
+  if (datasetKey !== 'DRIVER_CLAIMS' || !currentDomainKey) {
     return issues;
   }
 

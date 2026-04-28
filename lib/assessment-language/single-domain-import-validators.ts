@@ -1,7 +1,10 @@
 import {
   resolveSingleDomainPairKey,
 } from '@/lib/assessment-language/single-domain-pair-keys';
-import { getSingleDomainCanonicalPairKeys } from '@/lib/assessment-language/single-domain-canonical';
+import {
+  getExpectedDriverClaimTuples,
+  getSingleDomainCanonicalPairKeys,
+} from '@/lib/assessment-language/single-domain-canonical';
 import { SINGLE_DOMAIN_DRIVER_ROLE_TO_CLAIM_TYPE } from '@/lib/assessment-language/single-domain-narrative-schema';
 import type {
   SingleDomainApplicationImportRow,
@@ -57,10 +60,6 @@ function hasKnownSignalKey(signalKeys: readonly string[], signalKey: string): bo
   return signalKeys.includes(signalKey);
 }
 
-function hasKnownPairKey(pairKeys: readonly string[], pairKey: string): boolean {
-  return resolveSingleDomainPairKey(pairKeys, pairKey).success;
-}
-
 function hasCanonicalPairKey(pairKeys: readonly string[], pairKey: string): boolean {
   return pairKeys.includes(pairKey);
 }
@@ -80,21 +79,20 @@ function validatePairKey(
     return;
   }
 
-  if (!hasKnownPairKey(pairKeys, pairKey)) {
+  if (!resolution.success) {
     issues.push({
       lineNumber,
       message: `Line ${lineNumber}: pair_key "${pairKey}" is not resolvable for the current signal set.`,
     });
-  }
-}
-
-function normalizePairKey(pairKeys: readonly string[], pairKey: string): string {
-  const resolution = resolveSingleDomainPairKey(pairKeys, pairKey);
-  if (!resolution.success) {
-    return pairKey;
+    return;
   }
 
-  return resolution.canonicalPairKey;
+  if (resolution.wasReversed) {
+    issues.push({
+      lineNumber,
+      message: `Line ${lineNumber}: pair_key "${pairKey}" must be canonical for the current signal order.`,
+    });
+  }
 }
 
 function validateSharedRowFields<TKey extends SingleDomainNarrativeDatasetKey>(
@@ -250,7 +248,7 @@ function validateDriversRows(
 ): readonly SingleDomainImportValidationIssue[] {
   const issues: SingleDomainImportValidationIssue[] = [];
   const seenKeys = new Set<string>();
-  const coverageByPairAndRole = new Map<string, Set<string>>();
+  const actualTupleCounts = new Map<string, number>();
 
   rows.forEach((row, index) => {
     const lineNumber = index + 2;
@@ -304,10 +302,13 @@ function validateDriversRows(
 
     validateDriverMateriality(row, lineNumber, issues);
 
-    const coverageKey = `${row.pair_key}|${row.driver_role}`;
-    const signalSet = coverageByPairAndRole.get(coverageKey) ?? new Set<string>();
-    signalSet.add(row.signal_key);
-    coverageByPairAndRole.set(coverageKey, signalSet);
+    const tupleKey = [
+      row.domain_key,
+      row.pair_key,
+      row.signal_key,
+      row.driver_role,
+    ].join('|');
+    actualTupleCounts.set(tupleKey, (actualTupleCounts.get(tupleKey) ?? 0) + 1);
 
     const duplicateKey = [
       row.domain_key,
@@ -326,27 +327,43 @@ function validateDriversRows(
     seenKeys.add(duplicateKey);
   });
 
-  context.pairKeys.forEach((pairKey) => {
-    SINGLE_DOMAIN_DRIVER_ROLES.forEach((driverRole) => {
-      const coverageKey = `${pairKey}|${driverRole}`;
-      const signalSet = coverageByPairAndRole.get(coverageKey);
-      const signalList = signalSet ? [...signalSet].join(', ') : '';
+  if (!context.currentDomainKey) {
+    return issues;
+  }
 
-      if (!signalSet || signalSet.size === 0) {
-        issues.push({
-          lineNumber: null,
-          message: `Missing drivers row for pair_key "${pairKey}" and driver_role "${driverRole}".`,
-        });
-        return;
-      }
+  const expectedTuples = getExpectedDriverClaimTuples({
+    domainKey: context.currentDomainKey,
+    signalKeys: context.signalKeys,
+    pairKeys: context.pairKeys,
+  });
+  const expectedTupleKeys = new Set(
+    expectedTuples.map((tuple) => `${tuple.domainKey}|${tuple.pairKey}|${tuple.signalKey}|${tuple.driverRole}`),
+  );
 
-      if (signalSet.size > 1) {
-        issues.push({
-          lineNumber: null,
-          message: `pair_key "${pairKey}" and driver_role "${driverRole}" must map to exactly one signal_key (found: ${signalList}).`,
-        });
-      }
-    });
+  rows.forEach((row, index) => {
+    const tupleKey = [
+      row.domain_key,
+      row.pair_key,
+      row.signal_key,
+      row.driver_role,
+    ].join('|');
+    if (!expectedTupleKeys.has(tupleKey)) {
+      issues.push({
+        lineNumber: index + 2,
+        message: `Line ${index + 2}: drivers row must match an exact runtime tuple. Received ${tupleKey}.`,
+      });
+    }
+  });
+
+  expectedTuples.forEach((tuple) => {
+    const tupleKey = `${tuple.domainKey}|${tuple.pairKey}|${tuple.signalKey}|${tuple.driverRole}`;
+    const count = actualTupleCounts.get(tupleKey) ?? 0;
+    if (count !== 1) {
+      issues.push({
+        lineNumber: null,
+        message: `Missing drivers row for exact tuple "${tupleKey}" (found ${count}).`,
+      });
+    }
   });
 
   return issues;
@@ -536,20 +553,7 @@ export function normalizeSingleDomainImportRowsForRuntimePairKeys<
   context: SingleDomainImportValidationContext,
   rows: readonly SingleDomainNarrativeImportRowMap[TKey][],
 ): readonly SingleDomainNarrativeImportRowMap[TKey][] {
-  if (context.datasetKey === 'SINGLE_DOMAIN_INTRO') {
-    return rows;
-  }
-
-  return rows.map((row) => {
-    if (!('pair_key' in row)) {
-      return row;
-    }
-
-    return {
-      ...row,
-      pair_key: normalizePairKey(context.pairKeys, row.pair_key),
-    };
-  }) as readonly SingleDomainNarrativeImportRowMap[TKey][];
+  return rows;
 }
 
 export function validateSingleDomainImportRows<TKey extends SingleDomainNarrativeDatasetKey>(

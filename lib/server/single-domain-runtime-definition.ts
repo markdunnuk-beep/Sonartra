@@ -1,7 +1,6 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
 import {
   DRIVER_CLAIM_ROLES,
-  hasLeadershipCanonicalSignalSet,
   getExpectedDriverClaimTuples,
   getSingleDomainCanonicalPairKeys,
 } from '@/lib/assessment-language/single-domain-canonical';
@@ -138,6 +137,31 @@ function createIssue(
     severity,
     relatedKeys: relatedKeys ? Object.freeze([...relatedKeys]) : undefined,
   };
+}
+
+function compactText(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+}
+
+function pairLanguageReferencesPair(params: {
+  pairKey: string;
+  rowText: string;
+}): boolean {
+  const [leftSignalKey, rightSignalKey] = params.pairKey.split('_');
+  if (!leftSignalKey || !rightSignalKey) {
+    return false;
+  }
+
+  const normalized = compactText(params.rowText);
+  const pairKeyToken = compactText(params.pairKey);
+  const reversedPairKeyToken = compactText(`${rightSignalKey}_${leftSignalKey}`);
+
+  if (normalized.includes(pairKeyToken) || normalized.includes(reversedPairKeyToken)) {
+    return true;
+  }
+
+  return normalized.includes(compactText(leftSignalKey))
+    && normalized.includes(compactText(rightSignalKey));
 }
 
 async function loadRuntimeContext(
@@ -281,15 +305,27 @@ async function loadWeights(
   return Object.freeze(result.rows);
 }
 
-function buildLanguageExpectations(signalCount: number, derivedPairCount: number): SingleDomainRuntimeLanguageRowCounts {
+function buildLanguageExpectations(params: {
+  signalCount: number;
+  derivedPairCount: number;
+  domainKey: string | null;
+  signalKeys: readonly string[];
+  pairKeys: readonly string[];
+}): SingleDomainRuntimeLanguageRowCounts {
   return {
     DOMAIN_FRAMING: 1,
-    HERO_PAIRS: derivedPairCount,
-    DRIVER_CLAIMS: derivedPairCount * DRIVER_CLAIM_ROLES.length,
-    SIGNAL_CHAPTERS: signalCount,
-    BALANCING_SECTIONS: derivedPairCount,
-    PAIR_SUMMARIES: derivedPairCount,
-    APPLICATION_STATEMENTS: signalCount,
+    HERO_PAIRS: params.derivedPairCount,
+    DRIVER_CLAIMS: params.domainKey
+      ? getExpectedDriverClaimTuples({
+          domainKey: params.domainKey,
+          signalKeys: params.signalKeys,
+          pairKeys: params.pairKeys,
+        }).length
+      : 0,
+    SIGNAL_CHAPTERS: params.signalCount,
+    BALANCING_SECTIONS: params.derivedPairCount,
+    PAIR_SUMMARIES: params.derivedPairCount,
+    APPLICATION_STATEMENTS: params.signalCount,
   };
 }
 
@@ -302,6 +338,7 @@ function validateLanguageKeys(params: {
 }): void {
   const signalKeySet = new Set(params.signalKeys);
   const domainKey = params.domainKey;
+  const strictDriverTupleCoverage = Boolean(domainKey) && params.pairKeys.length > 0;
 
   const framingKeys = [...new Set(params.languageBundle.DOMAIN_FRAMING.map((row) => row.domain_key))];
   if (domainKey && framingKeys.some((key) => key !== domainKey)) {
@@ -342,46 +379,88 @@ function validateLanguageKeys(params: {
   }
 
   const heroPairKeys = [...new Set(params.languageBundle.HERO_PAIRS.map((row) => row.pair_key))];
-  const invalidHeroPairKeys = heroPairKeys.filter(
-    (key) => !resolveSingleDomainPairKey(params.pairKeys, key).success,
-  );
+  const invalidHeroPairKeys = heroPairKeys.filter((key) => !params.pairKeys.includes(key));
   if (invalidHeroPairKeys.length > 0) {
     params.issues.push(
       createIssue(
         'hero_pairs_key_mismatch',
         'language',
-        'HERO_PAIRS rows must resolve against the current signal-derived pair set.',
+        'HERO_PAIRS pair_key values must match the canonical pair keys exactly.',
         invalidHeroPairKeys,
+      ),
+    );
+  }
+  const heroContentMismatches = params.languageBundle.HERO_PAIRS
+    .filter((row) => params.pairKeys.includes(row.pair_key))
+    .filter((row) => !pairLanguageReferencesPair({
+      pairKey: row.pair_key,
+      rowText: [
+        row.hero_headline,
+        row.hero_subheadline,
+        row.hero_opening,
+        row.hero_strength_paragraph,
+        row.hero_tension_paragraph,
+        row.hero_close_paragraph,
+      ].join(' '),
+    }))
+    .map((row) => row.pair_key);
+  if (heroContentMismatches.length > 0) {
+    params.issues.push(
+      createIssue(
+        'hero_pairs_content_mismatch',
+        'language',
+        'HERO_PAIRS rows must reference the active pair signals or pair key in their visible text.',
+        heroContentMismatches,
       ),
     );
   }
 
   const balancingPairKeys = [...new Set(params.languageBundle.BALANCING_SECTIONS.map((row) => row.pair_key))];
-  const invalidBalancingPairKeys = balancingPairKeys.filter(
-    (key) => !resolveSingleDomainPairKey(params.pairKeys, key).success,
-  );
+  const invalidBalancingPairKeys = balancingPairKeys.filter((key) => !params.pairKeys.includes(key));
   if (invalidBalancingPairKeys.length > 0) {
     params.issues.push(
       createIssue(
         'balancing_sections_key_mismatch',
         'language',
-        'BALANCING_SECTIONS rows must resolve against the current signal-derived pair set.',
+        'BALANCING_SECTIONS pair_key values must match the canonical pair keys exactly.',
         invalidBalancingPairKeys,
       ),
     );
   }
 
   const pairSummaryKeys = [...new Set(params.languageBundle.PAIR_SUMMARIES.map((row) => row.pair_key))];
-  const invalidPairSummaryKeys = pairSummaryKeys.filter(
-    (key) => !resolveSingleDomainPairKey(params.pairKeys, key).success,
-  );
+  const invalidPairSummaryKeys = pairSummaryKeys.filter((key) => !params.pairKeys.includes(key));
   if (invalidPairSummaryKeys.length > 0) {
     params.issues.push(
       createIssue(
         'pair_summaries_key_mismatch',
         'language',
-        'PAIR_SUMMARIES rows must resolve against the current signal-derived pair set.',
+        'PAIR_SUMMARIES pair_key values must match the canonical pair keys exactly.',
         invalidPairSummaryKeys,
+      ),
+    );
+  }
+  const pairSummaryContentMismatches = params.languageBundle.PAIR_SUMMARIES
+    .filter((row) => params.pairKeys.includes(row.pair_key))
+    .filter((row) => !pairLanguageReferencesPair({
+      pairKey: row.pair_key,
+      rowText: [
+        row.pair_section_title,
+        row.pair_headline,
+        row.pair_opening_paragraph,
+        row.pair_strength_paragraph,
+        row.pair_tension_paragraph,
+        row.pair_close_paragraph,
+      ].join(' '),
+    }))
+    .map((row) => row.pair_key);
+  if (pairSummaryContentMismatches.length > 0) {
+    params.issues.push(
+      createIssue(
+        'pair_summaries_content_mismatch',
+        'language',
+        'PAIR_SUMMARIES rows must reference the active pair signals or pair key in their visible text.',
+        pairSummaryContentMismatches,
       ),
     );
   }
@@ -416,7 +495,6 @@ function validateLanguageKeys(params: {
   }
 
   const driverPairKeys = [...new Set(driverClaimRows.map((row) => row.pair_key))];
-  const strictDriverTupleCoverage = Boolean(domainKey) && hasLeadershipCanonicalSignalSet(params.signalKeys);
   const invalidDriverPairKeys = strictDriverTupleCoverage
     ? driverPairKeys.filter((key) => !params.pairKeys.includes(key))
     : driverPairKeys.filter((key) => !resolveSingleDomainPairKey(params.pairKeys, key).success);
@@ -449,7 +527,7 @@ function validateLanguageKeys(params: {
         'language',
         'DRIVER_CLAIMS rows must preserve the required driver_role, claim_type, and materiality mapping.',
         roleMappingMismatches,
-        strictDriverTupleCoverage ? 'blocking' : 'warning',
+        'blocking',
       ),
     );
   }
@@ -601,7 +679,13 @@ export async function evaluateSingleDomainRuntimeDefinition(
   assessmentVersionId: string,
 ): Promise<SingleDomainRuntimeEvaluation> {
   const context = await loadRuntimeContext(db, assessmentVersionId);
-  const emptyLanguageCounts = buildLanguageExpectations(0, 0);
+  const emptyLanguageCounts = buildLanguageExpectations({
+    signalCount: 0,
+    derivedPairCount: 0,
+    domainKey: null,
+    signalKeys: [],
+    pairKeys: [],
+  });
 
   if (!context) {
     return {
@@ -675,7 +759,15 @@ export async function evaluateSingleDomainRuntimeDefinition(
   const runtimeDomainRow = domainRows[0] ?? null;
   const signalCount = signalRows.length;
   const derivedPairCount = getSingleDomainExpectedPairCount(signalCount);
-  const expectedLanguageRowCounts = buildLanguageExpectations(signalCount, derivedPairCount);
+  const expectedSignalKeys = signalRows.map((row) => row.signal_key);
+  const expectedPairKeys = [...getSingleDomainCanonicalPairKeys(expectedSignalKeys)];
+  const expectedLanguageRowCounts = buildLanguageExpectations({
+    signalCount,
+    derivedPairCount,
+    domainKey: runtimeDomainRow?.domain_key ?? null,
+    signalKeys: expectedSignalKeys,
+    pairKeys: expectedPairKeys,
+  });
   const languageRowCounts = createLanguageRowCounts(languageBundle);
 
   if (signalCount === 0) {
@@ -887,8 +979,6 @@ export async function evaluateSingleDomainRuntimeDefinition(
     );
   }
 
-  const expectedPairKeys = new Set(derivedPairKeys);
-  const expectedSignalKeys = signals.map((signal) => signal.key);
   validateLanguageKeys({
     domainKey: runtimeDomainRow?.domain_key ?? null,
     signalKeys: expectedSignalKeys,
@@ -920,9 +1010,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       createIssue(
         'driver_claims_count_mismatch',
         'language',
-        `DRIVER_CLAIMS should contain exactly ${expectedLanguageRowCounts.DRIVER_CLAIMS} pair-scoped driver claim row${expectedLanguageRowCounts.DRIVER_CLAIMS === 1 ? '' : 's'}. Legacy SIGNAL_CHAPTERS compatibility remains available until pair-aware completion is enabled.`,
-        undefined,
-        'warning',
+        `DRIVER_CLAIMS should contain exactly ${expectedLanguageRowCounts.DRIVER_CLAIMS} exact runtime tuple row${expectedLanguageRowCounts.DRIVER_CLAIMS === 1 ? '' : 's'}.`,
       ),
     );
   }

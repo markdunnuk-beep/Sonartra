@@ -32,6 +32,10 @@ export type ExpectedDriverClaimTuple = {
   driverRole: DriverClaimRole;
 };
 
+function supportsRangeLimitationTuples(signalCount: number): boolean {
+  return signalCount >= 4;
+}
+
 export function hasLeadershipCanonicalSignalSet(signalKeys: readonly string[]): boolean {
   return signalKeys.length === LEADERSHIP_CANONICAL_SIGNAL_KEYS.length
     && LEADERSHIP_CANONICAL_SIGNAL_KEYS.every((signalKey) => signalKeys.includes(signalKey));
@@ -65,6 +69,7 @@ export function getExpectedDriverClaimTuples(params: {
   pairKeys?: readonly string[];
 }): readonly ExpectedDriverClaimTuple[] {
   const pairKeys = params.pairKeys ?? getSingleDomainCanonicalPairKeys(params.signalKeys);
+  const includeRangeLimitation = supportsRangeLimitationTuples(params.signalKeys.length);
 
   return Object.freeze(pairKeys.flatMap((pairKey) => {
     const [leftSignalKey, rightSignalKey] = pairKey.split('_');
@@ -76,42 +81,40 @@ export function getExpectedDriverClaimTuples(params: {
       (signalKey) => signalKey !== leftSignalKey && signalKey !== rightSignalKey,
     );
 
-    const supportingSignal = remainingSignals[0] ?? null;
-    const rangeSignal = remainingSignals.at(-1) ?? null;
+    const pairSignals = [leftSignalKey, rightSignalKey];
+    const primarySecondaryTuples = pairSignals.flatMap((signalKey) => ([
+      {
+        domainKey: params.domainKey,
+        pairKey,
+        signalKey,
+        driverRole: 'primary_driver' as const,
+      },
+      {
+        domainKey: params.domainKey,
+        pairKey,
+        signalKey,
+        driverRole: 'secondary_driver' as const,
+      },
+    ]));
+    const supportingTuples = remainingSignals.map((signalKey) => ({
+      domainKey: params.domainKey,
+      pairKey,
+      signalKey,
+      driverRole: 'supporting_context' as const,
+    }));
+    const rangeLimitationTuples = includeRangeLimitation
+      ? remainingSignals.map((signalKey) => ({
+          domainKey: params.domainKey,
+          pairKey,
+          signalKey,
+          driverRole: 'range_limitation' as const,
+        }))
+      : [];
 
     return [
-      leftSignalKey
-        ? {
-            domainKey: params.domainKey,
-            pairKey,
-            signalKey: leftSignalKey,
-            driverRole: 'primary_driver' as const,
-          }
-        : null,
-      rightSignalKey
-        ? {
-            domainKey: params.domainKey,
-            pairKey,
-            signalKey: rightSignalKey,
-            driverRole: 'secondary_driver' as const,
-          }
-        : null,
-      supportingSignal
-        ? {
-            domainKey: params.domainKey,
-            pairKey,
-            signalKey: supportingSignal,
-            driverRole: 'supporting_context' as const,
-          }
-        : null,
-      rangeSignal
-        ? {
-            domainKey: params.domainKey,
-            pairKey,
-            signalKey: rangeSignal,
-            driverRole: 'range_limitation' as const,
-          }
-        : null,
-    ].filter((entry): entry is ExpectedDriverClaimTuple => Boolean(entry));
+      ...primarySecondaryTuples,
+      ...supportingTuples,
+      ...rangeLimitationTuples,
+    ];
   }));
 }

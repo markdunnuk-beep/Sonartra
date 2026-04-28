@@ -145,6 +145,7 @@ export type SingleDomainDraftReadinessIssueCode =
   | 'domain_framing_key_mismatch'
   | 'hero_pairs_count_mismatch'
   | 'hero_pairs_key_mismatch'
+  | 'hero_pairs_content_mismatch'
   | 'driver_claims_count_mismatch'
   | 'driver_claims_key_mismatch'
   | 'driver_claims_role_mapping_mismatch'
@@ -155,6 +156,7 @@ export type SingleDomainDraftReadinessIssueCode =
   | 'balancing_sections_key_mismatch'
   | 'pair_summaries_count_mismatch'
   | 'pair_summaries_key_mismatch'
+  | 'pair_summaries_content_mismatch'
   | 'application_statements_count_mismatch'
   | 'application_statements_key_mismatch'
   | 'runtime_definition_incomplete';
