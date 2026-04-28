@@ -43,7 +43,7 @@ export function SingleDomainNarrativeBuilder() {
           <SecondaryText>{model.adapterNote}</SecondaryText>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-[0.95rem] border border-white/8 bg-black/10 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">Sections complete</p>
             <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">{model.readiness.completeCount}</p>
@@ -57,8 +57,12 @@ export function SingleDomainNarrativeBuilder() {
             <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">{model.readiness.waitingCount}</p>
           </div>
           <div className="rounded-[0.95rem] border border-white/8 bg-black/10 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">Validation warnings</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">Section warnings</p>
             <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">{model.readiness.validationWarningCount}</p>
+          </div>
+          <div className="rounded-[0.95rem] border border-white/8 bg-black/10 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">Blocking diagnostics</p>
+            <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">{model.readiness.blockingDiagnosticCount}</p>
           </div>
         </div>
       </SurfaceCard>
