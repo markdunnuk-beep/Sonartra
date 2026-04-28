@@ -1,4 +1,10 @@
 import {
+  buildSingleDomainComposerDiagnostics,
+} from '@/lib/assessment-language/single-domain-composer-diagnostics';
+import {
+  buildSingleDomainDraftPreviewInput,
+} from '@/lib/assessment-language/single-domain-composer';
+import {
   SINGLE_DOMAIN_ALLOWED_CLAIMS_BY_SECTION,
   SINGLE_DOMAIN_NARRATIVE_DATASET_COLUMNS,
   SINGLE_DOMAIN_NARRATIVE_SECTION_CONTRACTS,
@@ -35,6 +41,8 @@ export type SingleDomainNarrativeReadinessSummary = {
   incompleteCount: number;
   waitingCount: number;
   validationWarningCount: number;
+  blockingDiagnosticCount: number;
+  diagnosticWarningCount: number;
 };
 
 export type SingleDomainNarrativeBuilderModel = {
@@ -210,6 +218,12 @@ export function buildSingleDomainNarrativeBuilderModel(
       expectedRowCount: counts.expectedRowCount,
     } satisfies SingleDomainNarrativeBuilderSection;
   });
+  const draftPreview = buildSingleDomainDraftPreviewInput(assessment);
+  const diagnostics = draftPreview.success
+    ? buildSingleDomainComposerDiagnostics(draftPreview.input)
+    : { issues: [] as const };
+  const blockingDiagnosticCount = diagnostics.issues.filter((issue) => issue.severity === 'blocking').length;
+  const diagnosticWarningCount = diagnostics.issues.filter((issue) => issue.severity === 'warning').length;
 
   return {
     sections,
@@ -221,6 +235,8 @@ export function buildSingleDomainNarrativeBuilderModel(
         (sum, section) => sum + (section.validationState === 'warning' ? 1 : 0),
         0,
       ),
+      blockingDiagnosticCount,
+      diagnosticWarningCount,
     },
     adapterNote:
       'The builder now renders the locked six-section narrative contract. Existing stored single-domain language rows are adapted internally until section-native imports and composer preview land.',

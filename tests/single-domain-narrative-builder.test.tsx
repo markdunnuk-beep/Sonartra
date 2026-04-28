@@ -360,7 +360,8 @@ test('narrative builder renders the six locked sections, readiness summary, and 
   assert.match(markup, /Narrative readiness/);
   assert.match(markup, /Sections complete/);
   assert.match(markup, /Sections incomplete/);
-  assert.match(markup, /Validation warnings/);
+  assert.match(markup, /Section warnings/);
+  assert.match(markup, /Blocking diagnostics/);
   assert.match(markup, /Locked six-section order/);
   assert.match(markup, /Intro/);
   assert.match(markup, /Hero/);
