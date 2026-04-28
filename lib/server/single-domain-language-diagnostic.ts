@@ -22,6 +22,7 @@ type SignalRow = {
 export type SingleDomainLanguageDatasetReport = {
   expectedCount: number;
   actualCount: number;
+  completeCount: number;
   isReady: boolean;
   presentKeys: string[];
   missingKeys: string[];
@@ -36,6 +37,21 @@ type KeyAnalysis = {
   duplicateKeys: Array<{ key: string; count: number }>;
 };
 
+export type SingleDomainLanguageDiagnosticIssue = {
+  code: 'single_domain_driver_claim_matrix_invalid' | 'single_domain_driver_claim_missing_tuple';
+  message: string;
+  tupleKey?: string;
+  pairKey?: string;
+};
+
+export type SingleDomainDriverClaimPairDiagnostic = {
+  pairKey: string;
+  expectedCount: number;
+  actualCount: number;
+  completeCount: number;
+  missingTuples: string[];
+};
+
 export type SingleDomainLanguageDiagnosticPayload = {
   assessmentKey: string;
   assessmentVersionId: string;
@@ -48,6 +64,13 @@ export type SingleDomainLanguageDiagnosticPayload = {
     expectedPairCount: number;
   };
   datasets: Record<string, SingleDomainLanguageDatasetReport>;
+  driverClaimMatrix: {
+    expectedCount: number;
+    actualCount: number;
+    completeCount: number;
+    pairs: SingleDomainDriverClaimPairDiagnostic[];
+    issues: SingleDomainLanguageDiagnosticIssue[];
+  };
   driverClaimsAdditionalCoverage: {
     signalKeyCoverage: KeyAnalysis;
     domainKeyCoverage: KeyAnalysis;
@@ -269,6 +292,11 @@ export async function runSingleDomainLanguageDiagnostic(
       );
     },
   });
+  const actualDriverClaimTupleCounts = new Map<string, number>();
+  driverClaimsResult.rows.forEach((row) => {
+    const tupleKey = `${row.domain_key}|${row.pair_key}|${row.signal_key}|${row.driver_role}`;
+    actualDriverClaimTupleCounts.set(tupleKey, (actualDriverClaimTupleCounts.get(tupleKey) ?? 0) + 1);
+  });
 
   const signalChaptersAnalysis = analyzeKeys({
     actualKeys: signalChaptersResult.rows.map((row) => row.signal_key),
@@ -298,6 +326,7 @@ export async function runSingleDomainLanguageDiagnostic(
     DOMAIN_FRAMING: {
       expectedCount: 1,
       actualCount: domainFramingCount,
+      completeCount: domainFramingAnalysis.presentKeys.filter((key) => !domainFramingAnalysis.missingKeys.includes(key)).length,
       isReady: evaluateReadiness({
         expectedCount: 1,
         actualCount: domainFramingCount,
@@ -309,40 +338,92 @@ export async function runSingleDomainLanguageDiagnostic(
     HERO_PAIRS: {
       expectedCount: pairKeys.length,
       actualCount: heroPairsCount,
+      completeCount: pairKeys.length - heroPairsAnalysis.missingKeys.length,
       isReady: evaluateReadiness({ expectedCount: pairKeys.length, actualCount: heroPairsCount, keyAnalysis: heroPairsAnalysis }),
       ...heroPairsAnalysis,
     },
     DRIVER_CLAIMS: {
       expectedCount: expectedDriverKeys.length,
       actualCount: driverClaimsCount,
+      completeCount: expectedDriverKeys.filter((key) => actualDriverClaimTupleCounts.get(key) === 1).length,
       isReady: evaluateReadiness({ expectedCount: expectedDriverKeys.length, actualCount: driverClaimsCount, keyAnalysis: driverClaimsAnalysis }),
       ...driverClaimsAnalysis,
     },
     SIGNAL_CHAPTERS: {
       expectedCount: signalKeys.length,
       actualCount: signalChaptersCount,
+      completeCount: signalKeys.length - signalChaptersAnalysis.missingKeys.length,
       isReady: evaluateReadiness({ expectedCount: signalKeys.length, actualCount: signalChaptersCount, keyAnalysis: signalChaptersAnalysis }),
       ...signalChaptersAnalysis,
     },
     BALANCING_SECTIONS: {
       expectedCount: pairKeys.length,
       actualCount: balancingSectionsCount,
+      completeCount: pairKeys.length - balancingSectionsAnalysis.missingKeys.length,
       isReady: evaluateReadiness({ expectedCount: pairKeys.length, actualCount: balancingSectionsCount, keyAnalysis: balancingSectionsAnalysis }),
       ...balancingSectionsAnalysis,
     },
     PAIR_SUMMARIES: {
       expectedCount: pairKeys.length,
       actualCount: pairSummariesCount,
+      completeCount: pairKeys.length - pairSummariesAnalysis.missingKeys.length,
       isReady: evaluateReadiness({ expectedCount: pairKeys.length, actualCount: pairSummariesCount, keyAnalysis: pairSummariesAnalysis }),
       ...pairSummariesAnalysis,
     },
     APPLICATION_STATEMENTS: {
       expectedCount: signalKeys.length,
       actualCount: applicationStatementsCount,
+      completeCount: signalKeys.length - applicationStatementsAnalysis.missingKeys.length,
       isReady: evaluateReadiness({ expectedCount: signalKeys.length, actualCount: applicationStatementsCount, keyAnalysis: applicationStatementsAnalysis }),
       ...applicationStatementsAnalysis,
     },
   };
+
+  const driverClaimExpectedByPair = new Map<string, string[]>();
+  expectedDriverKeys.forEach((key) => {
+    const [, pairKey] = key.split('|');
+    if (!pairKey) {
+      return;
+    }
+    const keys = driverClaimExpectedByPair.get(pairKey) ?? [];
+    keys.push(key);
+    driverClaimExpectedByPair.set(pairKey, keys);
+  });
+  const driverClaimActualByPair = new Map<string, number>();
+  driverClaimsResult.rows.forEach((row) => {
+    driverClaimActualByPair.set(row.pair_key, (driverClaimActualByPair.get(row.pair_key) ?? 0) + 1);
+  });
+  const driverClaimPairDiagnostics = [...driverClaimExpectedByPair.entries()]
+    .map(([pairKey, tupleKeys]) => {
+      const missingTuples = tupleKeys.filter((key) => !driverClaimsAnalysis.presentKeys.includes(key));
+      return {
+        pairKey,
+        expectedCount: tupleKeys.length,
+        actualCount: driverClaimActualByPair.get(pairKey) ?? 0,
+        completeCount: tupleKeys.filter((key) => actualDriverClaimTupleCounts.get(key) === 1).length,
+        missingTuples,
+      };
+    })
+    .sort((left, right) => left.pairKey.localeCompare(right.pairKey));
+  const driverClaimIssues: SingleDomainLanguageDiagnosticIssue[] = [];
+  if (
+    driverClaimsCount !== expectedDriverKeys.length
+    || driverClaimsAnalysis.invalidKeys.length > 0
+    || driverClaimsAnalysis.duplicateKeys.length > 0
+  ) {
+    driverClaimIssues.push({
+      code: 'single_domain_driver_claim_matrix_invalid',
+      message: `DRIVER_CLAIMS must contain exactly ${expectedDriverKeys.length} valid rows for the current runtime tuple matrix, but found ${driverClaimsCount}.`,
+    });
+  }
+  driverClaimsAnalysis.missingKeys.forEach((tupleKey) => {
+    driverClaimIssues.push({
+      code: 'single_domain_driver_claim_missing_tuple',
+      message: `Missing exact DRIVER_CLAIMS tuple ${tupleKey}.`,
+      tupleKey,
+      pairKey: tupleKey.split('|')[1],
+    });
+  });
 
   const driverSignalCoverage = analyzeKeys({
     actualKeys: driverClaimsResult.rows.map((row) => row.signal_key),
@@ -368,6 +449,13 @@ export async function runSingleDomainLanguageDiagnostic(
       expectedPairCount: pairKeys.length,
     },
     datasets: datasetReports,
+    driverClaimMatrix: {
+      expectedCount: expectedDriverKeys.length,
+      actualCount: driverClaimsCount,
+      completeCount: expectedDriverKeys.filter((key) => actualDriverClaimTupleCounts.get(key) === 1).length,
+      pairs: driverClaimPairDiagnostics,
+      issues: driverClaimIssues,
+    },
     driverClaimsAdditionalCoverage: {
       signalKeyCoverage: driverSignalCoverage,
       domainKeyCoverage: driverDomainCoverage,

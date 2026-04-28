@@ -6,6 +6,7 @@ import {
   buildSingleDomainStructuralValidation,
   getExpectedSignalPairCount,
 } from '@/lib/admin/single-domain-structural-validation';
+import { getExpectedDriverClaimTuples } from '@/lib/assessment-language/single-domain-canonical';
 
 test('pair count derives from the current authored signal count', () => {
   assert.equal(getExpectedSignalPairCount(0), 0);
@@ -386,8 +387,87 @@ test('driver claims completeness requires the full exact runtime tuple matrix', 
 
   assert.equal(validation.expectedPairCount, 6);
   assert.equal(driverClaims?.expectedRowCount, 48);
+  assert.equal(driverClaims?.completeRowCount, 0);
   assert.equal(driverClaims?.actualRowCount, 0);
   assert.equal(driverClaims?.status, 'not_started');
+});
+
+test('driver claims validation exposes per-pair 8 of 8 coverage only when exact tuples exist', () => {
+  const signalKeys = ['results', 'process', 'vision', 'people'] as const;
+  const validation = buildSingleDomainLanguageValidation({
+    authoredDomains: [{
+      domainId: 'domain-1',
+      domainKey: 'focus',
+      label: 'Focus',
+      description: null,
+      orderIndex: 0,
+      createdAt: '',
+      updatedAt: '',
+      signals: signalKeys.map((signalKey, index) => ({
+        signalId: `signal-${index + 1}`,
+        signalKey,
+        label: signalKey,
+        description: null,
+        orderIndex: index,
+        createdAt: '',
+        updatedAt: '',
+      })),
+    }],
+    languageBundle: {
+      DOMAIN_FRAMING: [],
+      HERO_PAIRS: [],
+      DRIVER_CLAIMS: getExpectedDriverClaimTuples({
+        domainKey: 'focus',
+        signalKeys,
+      })
+        .filter((tuple) => !(tuple.pairKey === 'results_process'
+          && tuple.signalKey === 'process'
+          && tuple.driverRole === 'primary_driver'))
+        .map((tuple) => ({
+          domain_key: tuple.domainKey,
+          pair_key: tuple.pairKey,
+          signal_key: tuple.signalKey,
+          driver_role: tuple.driverRole,
+          claim_type: tuple.driverRole === 'primary_driver'
+            ? 'driver_primary'
+            : tuple.driverRole === 'secondary_driver'
+              ? 'driver_secondary'
+              : tuple.driverRole === 'supporting_context'
+                ? 'driver_supporting_context'
+                : 'driver_range_limitation',
+          claim_text: `${tuple.pairKey} ${tuple.signalKey} ${tuple.driverRole}`,
+          materiality: tuple.driverRole === 'range_limitation'
+            ? 'material_underplay'
+            : tuple.driverRole === 'supporting_context'
+              ? 'supporting'
+              : 'core',
+          priority: tuple.driverRole === 'primary_driver'
+            ? 1
+            : tuple.driverRole === 'secondary_driver'
+              ? 2
+              : tuple.driverRole === 'supporting_context'
+                ? 3
+                : 4,
+        })),
+      SIGNAL_CHAPTERS: [],
+      BALANCING_SECTIONS: [],
+      PAIR_SUMMARIES: [],
+      APPLICATION_STATEMENTS: [],
+    },
+  });
+
+  const driverClaims = validation.datasets.find((dataset) => dataset.datasetKey === 'DRIVER_CLAIMS');
+  const resultsProcess = driverClaims?.driverClaimMatrix?.pairs.find((pair) => pair.pairKey === 'results_process');
+  const resultsVision = driverClaims?.driverClaimMatrix?.pairs.find((pair) => pair.pairKey === 'results_vision');
+
+  assert.equal(driverClaims?.expectedRowCount, 48);
+  assert.equal(driverClaims?.actualRowCount, 47);
+  assert.equal(driverClaims?.completeRowCount, 47);
+  assert.ok(driverClaims?.issues.some((issue) => issue.code === 'language_driver_claims_matrix_invalid'));
+  assert.equal(resultsProcess?.completeRowCount, 7);
+  assert.equal(resultsProcess?.expectedRowCount, 8);
+  assert.ok(resultsProcess?.missingTuples.includes('focus|results_process|process|primary_driver'));
+  assert.equal(resultsVision?.completeRowCount, 8);
 });
 
 test('language validation never treats zero expected rows as ready when prerequisites are missing', () => {

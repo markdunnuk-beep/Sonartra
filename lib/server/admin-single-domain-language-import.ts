@@ -362,6 +362,13 @@ function buildDatasetValidationErrors<TKey extends SingleDomainLanguageDatasetKe
   );
   const actualTupleCounts = new Map<string, number>();
 
+  if (rows.length !== expectedTuples.length) {
+    issues.push({
+      lineNumber: null,
+      message: `DRIVER_CLAIMS must contain exactly ${expectedTuples.length} rows for the current exact runtime tuple matrix. Found ${rows.length}.`,
+    });
+  }
+
   rows.forEach((row, index) => {
     const driverRow = row as SingleDomainLanguageDatasetRowMap['DRIVER_CLAIMS'];
     const tupleKey = [

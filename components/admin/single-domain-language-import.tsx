@@ -66,6 +66,11 @@ function ReferenceDisclosure({
   );
 }
 
+function formatDriverClaimTuple(tupleKey: string): string {
+  const [domainKey, pairKey, signalKey, driverRole] = tupleKey.split('|');
+  return [pairKey, signalKey, driverRole, domainKey].filter(Boolean).join(' + ');
+}
+
 function buildDatasetPlaceholder(datasetKey: SingleDomainLanguageDatasetKey, headers: readonly string[]): string {
   const headerLine = headers.join('|');
 
@@ -224,13 +229,13 @@ export function SingleDomainLanguageImport({
                 </LabelPill>
               </div>
               <p className="mt-3 text-sm leading-6 text-white/54">
-                {dataset.actualRowCount} row{dataset.actualRowCount === 1 ? '' : 's'}
-                {' '}loaded
-                {dataset.status === 'waiting'
-                  ? ` / ${dataset.detail}`
-                  : dataset.countRule === 'exact'
-                    ? ` / ${dataset.expectedRowCount} expected`
-                    : ' / 1+ required'}
+                {dataset.datasetKey === 'DRIVER_CLAIMS' && dataset.driverClaimMatrix
+                  ? `${dataset.driverClaimMatrix.completeRowCount} / ${dataset.driverClaimMatrix.expectedRowCount} rows complete`
+                  : `${dataset.actualRowCount} row${dataset.actualRowCount === 1 ? '' : 's'} loaded${dataset.status === 'waiting'
+                    ? ` / ${dataset.detail}`
+                    : dataset.countRule === 'exact'
+                      ? ` / ${dataset.expectedRowCount} expected`
+                      : ' / 1+ required'}`}
               </p>
             </button>
           );
@@ -268,16 +273,55 @@ export function SingleDomainLanguageImport({
                 Expected header: {selectedDefinition.expectedHeaders.join('|')}
               </LabelPill>
               <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
-                {selectedValidation?.status === 'waiting'
-                  ? 'Waiting on earlier structure'
-                  : selectedValidation?.countRule === 'exact'
-                  ? `${selectedValidation.expectedRowCount} expected`
-                  : '1+ required'}
+                {selectedValidation?.datasetKey === 'DRIVER_CLAIMS' && selectedValidation.driverClaimMatrix
+                  ? `${selectedValidation.driverClaimMatrix.completeRowCount} / ${selectedValidation.driverClaimMatrix.expectedRowCount} rows complete`
+                  : selectedValidation?.status === 'waiting'
+                    ? 'Waiting on earlier structure'
+                    : selectedValidation?.countRule === 'exact'
+                      ? `${selectedValidation.expectedRowCount} expected`
+                      : '1+ required'}
               </LabelPill>
             </div>
             <p className="mt-3 text-sm leading-6 text-white/62 sm:leading-7">
               {selectedValidation?.detail ?? 'Counts will update after the next successful import.'}
             </p>
+            {selectedValidation?.datasetKey === 'DRIVER_CLAIMS' && selectedValidation.driverClaimMatrix ? (
+              <div className="mt-4 space-y-4">
+                <div className="grid gap-3 lg:grid-cols-2">
+                  {selectedValidation.driverClaimMatrix.pairs.map((pair) => (
+                    <div
+                      className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3"
+                      key={pair.pairKey}
+                    >
+                      <p className="text-sm font-medium text-white">{pair.pairKey}: {pair.completeRowCount} / {pair.expectedRowCount}</p>
+                      {pair.missingTuples.length > 0 ? (
+                        <div className="mt-2 space-y-1 text-sm leading-6 text-[rgba(255,214,214,0.92)]">
+                          {pair.missingTuples.map((tupleKey) => (
+                            <p key={tupleKey}>Missing: {formatDriverClaimTuple(tupleKey)}</p>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-sm leading-6 text-[rgba(217,255,229,0.84)]">All exact tuples present.</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {selectedValidation.driverClaimMatrix.invalidTuples.length > 0 ? (
+                  <div className="space-y-1 text-sm leading-6 text-[rgba(255,214,214,0.92)]">
+                    {selectedValidation.driverClaimMatrix.invalidTuples.map((tupleKey) => (
+                      <p key={tupleKey}>Invalid: {formatDriverClaimTuple(tupleKey)}</p>
+                    ))}
+                  </div>
+                ) : null}
+                {selectedValidation.driverClaimMatrix.duplicateTuples.length > 0 ? (
+                  <div className="space-y-1 text-sm leading-6 text-[rgba(255,214,214,0.92)]">
+                    {selectedValidation.driverClaimMatrix.duplicateTuples.map((tupleKey) => (
+                      <p key={tupleKey}>Duplicate: {formatDriverClaimTuple(tupleKey)}</p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               <ReferenceDisclosure title="Show locked headers">
                 <pre className="overflow-x-auto whitespace-pre-wrap break-words text-sm leading-7 text-white/78">

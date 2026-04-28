@@ -63,11 +63,31 @@ export type SingleDomainLanguageDatasetValidation = {
   label: string;
   actualRowCount: number;
   expectedRowCount: number;
+  completeRowCount: number;
   countRule: 'at_least' | 'exact';
   status: 'ready' | 'attention' | 'waiting' | 'not_started';
   isReady: boolean;
   detail: string;
   issues: readonly SingleDomainStructuralIssue[];
+  driverClaimMatrix?: SingleDomainDriverClaimMatrixValidation;
+};
+
+export type SingleDomainDriverClaimMatrixPairValidation = {
+  pairKey: string;
+  actualRowCount: number;
+  expectedRowCount: number;
+  completeRowCount: number;
+  missingTuples: readonly string[];
+};
+
+export type SingleDomainDriverClaimMatrixValidation = {
+  actualRowCount: number;
+  expectedRowCount: number;
+  completeRowCount: number;
+  missingTuples: readonly string[];
+  invalidTuples: readonly string[];
+  duplicateTuples: readonly string[];
+  pairs: readonly SingleDomainDriverClaimMatrixPairValidation[];
 };
 
 export type SingleDomainLanguageValidation = {
@@ -268,6 +288,7 @@ function createLanguageDatasetValidation(params: {
     label: definition.label,
     actualRowCount: params.actualRowCount,
     expectedRowCount: params.expectedRowCount,
+    completeRowCount: isReady ? params.expectedRowCount : 0,
     countRule: params.countRule,
     status,
     isReady,
@@ -303,7 +324,54 @@ export function buildSingleDomainLanguageValidation(params: {
   const duplicateDriverClaimTuples = [...actualDriverClaimTupleCounts.entries()]
     .filter(([, count]) => count > 1)
     .map(([key]) => key);
+  const expectedDriverClaimTuplesByPair = new Map<string, string[]>();
+  expectedDriverClaimTupleKeys.forEach((key) => {
+    const [, pairKey] = key.split('|');
+    if (!pairKey) {
+      return;
+    }
+    const entries = expectedDriverClaimTuplesByPair.get(pairKey) ?? [];
+    entries.push(key);
+    expectedDriverClaimTuplesByPair.set(pairKey, entries);
+  });
+  const actualDriverClaimTupleCountsByPair = new Map<string, number>();
+  [...actualDriverClaimTupleCounts.entries()].forEach(([key, count]) => {
+    const [, pairKey] = key.split('|');
+    if (!pairKey) {
+      return;
+    }
+    actualDriverClaimTupleCountsByPair.set(pairKey, (actualDriverClaimTupleCountsByPair.get(pairKey) ?? 0) + count);
+  });
+  const driverClaimMatrixPairs = [...expectedDriverClaimTuplesByPair.entries()]
+    .map(([pairKey, tupleKeys]) => {
+      const missingTuples = tupleKeys.filter((key) => actualDriverClaimTupleCounts.get(key) !== 1);
+      const completeRowCount = tupleKeys.filter((key) => actualDriverClaimTupleCounts.get(key) === 1).length;
+
+      return {
+        pairKey,
+        actualRowCount: actualDriverClaimTupleCountsByPair.get(pairKey) ?? 0,
+        expectedRowCount: tupleKeys.length,
+        completeRowCount,
+        missingTuples: Object.freeze(missingTuples),
+      } satisfies SingleDomainDriverClaimMatrixPairValidation;
+    })
+    .sort((left, right) => left.pairKey.localeCompare(right.pairKey));
+  const driverClaimMatrix = Object.freeze({
+    actualRowCount: (params.languageBundle.DRIVER_CLAIMS ?? []).length,
+    expectedRowCount: expectedDriverClaimTupleKeys.length,
+    completeRowCount: expectedDriverClaimTupleKeys.filter((key) => actualDriverClaimTupleCounts.get(key) === 1).length,
+    missingTuples: Object.freeze(missingDriverClaimTuples),
+    invalidTuples: Object.freeze(invalidDriverClaimTuples),
+    duplicateTuples: Object.freeze(duplicateDriverClaimTuples),
+    pairs: Object.freeze(driverClaimMatrixPairs),
+  } satisfies SingleDomainDriverClaimMatrixValidation);
   const driverClaimsIssues = [
+    ...(driverClaimMatrix.actualRowCount !== driverClaimMatrix.expectedRowCount
+      ? [createIssue(
+          'language_driver_claims_matrix_invalid',
+          `DRIVER_CLAIMS must contain exactly ${driverClaimMatrix.expectedRowCount} rows for the current exact runtime tuple contract, but found ${driverClaimMatrix.actualRowCount}.`,
+        )]
+      : []),
     ...missingDriverClaimTuples.map((key) => createIssue(
       'language_driver_claims_tuple_missing',
       `DRIVER_CLAIMS is missing the exact runtime tuple "${key}".`,
@@ -407,6 +475,16 @@ export function buildSingleDomainLanguageValidation(params: {
       status: dataset.actualRowCount > 0 ? 'attention' : dataset.status,
       detail: driverClaimsIssues[0]!.message,
       issues: Object.freeze([...dataset.issues, ...driverClaimsIssues]),
+      completeRowCount: driverClaimMatrix.completeRowCount,
+      driverClaimMatrix,
+    };
+  } else if (driverClaimsDatasetIndex >= 0) {
+    const dataset = datasets[driverClaimsDatasetIndex]!;
+    datasets[driverClaimsDatasetIndex] = {
+      ...dataset,
+      completeRowCount: driverClaimMatrix.completeRowCount,
+      driverClaimMatrix,
+      detail: `DRIVER_CLAIMS coverage is ${driverClaimMatrix.completeRowCount} / ${driverClaimMatrix.expectedRowCount} exact runtime tuples.`,
     };
   }
   const issues = Object.freeze(datasets.flatMap((dataset) => dataset.issues));

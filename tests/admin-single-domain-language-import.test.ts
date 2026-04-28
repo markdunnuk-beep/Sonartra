@@ -7,6 +7,7 @@ import {
 import {
   importSingleDomainLanguageDatasetActionWithExecutor,
 } from '@/lib/server/admin-single-domain-language-import-actions';
+import { getExpectedDriverClaimTuples } from '@/lib/assessment-language/single-domain-canonical';
 
 type SingleDomainTableState = {
   signals: string[];
@@ -371,6 +372,120 @@ test('DRIVER_CLAIMS rejects rows that do not match the exact runtime lookup tupl
   assert.match(
     result.validationErrors.map((error) => error.message).join('\n'),
     /results_vision\|vision\|secondary_driver/i,
+  );
+});
+
+test('DRIVER_CLAIMS rejects 24-row datasets that omit the reverse-ranking tuples', async () => {
+  const fake = createFakeDb({
+    signals: ['results', 'process', 'vision', 'people'],
+  });
+
+  const rawRows = [
+    'domain_key|pair_key|signal_key|driver_role|claim_type|claim_text|materiality|priority',
+    'leadership-style|results_process|results|primary_driver|driver_primary|Results leads this pair.|core|1',
+    'leadership-style|results_process|process|secondary_driver|driver_secondary|Process supports this pair.|core|2',
+    'leadership-style|results_process|vision|supporting_context|driver_supporting_context|Vision supports this pair.|supporting|3',
+    'leadership-style|results_process|people|range_limitation|driver_range_limitation|People is underplayed.|material_underplay|4',
+    'leadership-style|results_vision|results|primary_driver|driver_primary|Results leads this pair.|core|1',
+    'leadership-style|results_vision|vision|secondary_driver|driver_secondary|Vision supports this pair.|core|2',
+    'leadership-style|results_vision|process|supporting_context|driver_supporting_context|Process supports this pair.|supporting|3',
+    'leadership-style|results_vision|people|range_limitation|driver_range_limitation|People is underplayed.|material_underplay|4',
+    'leadership-style|results_people|results|primary_driver|driver_primary|Results leads this pair.|core|1',
+    'leadership-style|results_people|people|secondary_driver|driver_secondary|People supports this pair.|core|2',
+    'leadership-style|results_people|process|supporting_context|driver_supporting_context|Process supports this pair.|supporting|3',
+    'leadership-style|results_people|vision|range_limitation|driver_range_limitation|Vision is underplayed.|material_underplay|4',
+    'leadership-style|process_vision|process|primary_driver|driver_primary|Process leads this pair.|core|1',
+    'leadership-style|process_vision|vision|secondary_driver|driver_secondary|Vision supports this pair.|core|2',
+    'leadership-style|process_vision|results|supporting_context|driver_supporting_context|Results supports this pair.|supporting|3',
+    'leadership-style|process_vision|people|range_limitation|driver_range_limitation|People is underplayed.|material_underplay|4',
+    'leadership-style|process_people|process|primary_driver|driver_primary|Process leads this pair.|core|1',
+    'leadership-style|process_people|people|secondary_driver|driver_secondary|People supports this pair.|core|2',
+    'leadership-style|process_people|results|supporting_context|driver_supporting_context|Results supports this pair.|supporting|3',
+    'leadership-style|process_people|vision|range_limitation|driver_range_limitation|Vision is underplayed.|material_underplay|4',
+    'leadership-style|vision_people|vision|primary_driver|driver_primary|Vision leads this pair.|core|1',
+    'leadership-style|vision_people|people|secondary_driver|driver_secondary|People supports this pair.|core|2',
+    'leadership-style|vision_people|results|supporting_context|driver_supporting_context|Results supports this pair.|supporting|3',
+    'leadership-style|vision_people|process|range_limitation|driver_range_limitation|Process is underplayed.|material_underplay|4',
+  ];
+
+  const result = await importSingleDomainLanguageDatasetForAssessmentVersionWithDependencies({
+    assessmentVersionId: 'version-draft',
+    datasetKey: 'DRIVER_CLAIMS',
+    rawInput: rawRows.join('\n'),
+  }, {
+    db: fake.db,
+    revalidatePath() {},
+  });
+
+  assert.equal(result.success, false);
+  assert.match(
+    result.validationErrors.map((error) => error.message).join('\n'),
+    /must contain exactly 48 rows/i,
+  );
+  assert.match(
+    result.validationErrors.map((error) => error.message).join('\n'),
+    /results_process\|process\|primary_driver/i,
+  );
+});
+
+test('DRIVER_CLAIMS rejects reversed pair keys even when the row count is otherwise complete', async () => {
+  const fake = createFakeDb({
+    signals: ['results', 'process', 'vision', 'people'],
+  });
+
+  const rawRows = [
+    'domain_key|pair_key|signal_key|driver_role|claim_type|claim_text|materiality|priority',
+    ...getExpectedDriverClaimTuples({
+      domainKey: 'leadership-style',
+      signalKeys: ['results', 'process', 'vision', 'people'],
+    }).map((tuple) => {
+      const pairKey = tuple.pairKey === 'results_process' ? 'process_results' : tuple.pairKey;
+      const claimType = tuple.driverRole === 'primary_driver'
+        ? 'driver_primary'
+        : tuple.driverRole === 'secondary_driver'
+          ? 'driver_secondary'
+          : tuple.driverRole === 'supporting_context'
+            ? 'driver_supporting_context'
+            : 'driver_range_limitation';
+      const materiality = tuple.driverRole === 'range_limitation'
+        ? 'material_underplay'
+        : tuple.driverRole === 'supporting_context'
+          ? 'supporting'
+          : 'core';
+      const priority = tuple.driverRole === 'primary_driver'
+        ? 1
+        : tuple.driverRole === 'secondary_driver'
+          ? 2
+          : tuple.driverRole === 'supporting_context'
+            ? 3
+            : 4;
+
+      return [
+        tuple.domainKey,
+        pairKey,
+        tuple.signalKey,
+        tuple.driverRole,
+        claimType,
+        `${pairKey} ${tuple.signalKey} ${tuple.driverRole}`,
+        materiality,
+        String(priority),
+      ].join('|');
+    }),
+  ];
+
+  const result = await importSingleDomainLanguageDatasetForAssessmentVersionWithDependencies({
+    assessmentVersionId: 'version-draft',
+    datasetKey: 'DRIVER_CLAIMS',
+    rawInput: rawRows.join('\n'),
+  }, {
+    db: fake.db,
+    revalidatePath() {},
+  });
+
+  assert.equal(result.success, false);
+  assert.match(
+    result.validationErrors.map((error) => error.message).join('\n'),
+    /process_results\|results\|primary_driver/i,
   );
 });
 
