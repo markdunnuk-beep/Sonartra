@@ -131,6 +131,13 @@ const PAIR_KEYS = [
   'people_rigor',
 ] as const;
 
+const DRIVER_ROLES: DriverClaimsRow['driver_role'][] = [
+  'primary_driver',
+  'secondary_driver',
+  'supporting_context',
+  'range_limitation',
+];
+
 function buildRuntimeFixture(): RuntimeFixture {
   return {
     context: {
@@ -223,7 +230,26 @@ function buildRuntimeFixture(): RuntimeFixture {
         hero_tension_paragraph: `Tension ${pair_key}`,
         hero_close_paragraph: `Close ${pair_key}`,
       })),
-      DRIVER_CLAIMS: [],
+      DRIVER_CLAIMS: PAIR_KEYS.flatMap((pair_key) => (
+        ['vision', 'delivery', 'people', 'rigor'].flatMap((signal_key) => (
+          DRIVER_ROLES.map((driver_role, index) => ({
+            domain_key: 'leadership-style',
+            pair_key,
+            signal_key,
+            driver_role,
+            claim_type: driver_role === 'primary_driver'
+              ? 'driver_primary'
+              : driver_role === 'secondary_driver'
+                ? 'driver_secondary'
+                : driver_role === 'supporting_context'
+                  ? 'driver_supporting_context'
+                  : 'driver_range_limitation',
+            claim_text: `DRIVER_CLAIMS ${pair_key} ${signal_key} ${driver_role} ${index + 1}.`,
+            materiality: driver_role === 'range_limitation' ? 'material_underplay' : 'core',
+            priority: index + 1,
+          }))
+        ))
+      )),
       SIGNAL_CHAPTERS: ['vision', 'delivery', 'people', 'rigor'].map((signal_key) => ({
         signal_key,
         position_primary_label: 'Primary',
@@ -1130,47 +1156,31 @@ test('single-domain payload assembles deterministically from authored runtime da
   assert.deepEqual(payload.application.developmentFocus.map((item) => item.statement), ['Rigor development 1', 'People development 2', 'Delivery development 2']);
 });
 
-test('single-domain payload resolves reversed pair language rows to runtime pair key', async () => {
+test('single-domain payload rejects reversed pair language rows for the active canonical pair key', async () => {
   const harness = createDb();
   harness.reverseTopPairLanguageKeys();
 
-  const payload = await buildSingleDomainResultPayload({
-    db: harness.db,
-    assessmentVersionId: 'version-1',
-    responses: buildResponseSet(),
-  });
-
-  assert.equal(payload.diagnostics.topPair, 'vision_delivery');
-  assert.equal(payload.hero.pair_key, 'vision_delivery');
-  assert.equal(payload.balancing.pair_key, 'vision_delivery');
-  assert.equal(payload.pairSummary.pair_key, 'vision_delivery');
-  assert.equal(payload.hero.hero_headline, 'Hero vision_delivery');
+  await assert.rejects(
+    () => buildSingleDomainResultPayload({
+      db: harness.db,
+      assessmentVersionId: 'version-1',
+      responses: buildResponseSet(),
+    }),
+    /Missing canonical HERO_PAIRS row for pair "vision_delivery"/i,
+  );
 });
 
-test('single-domain payload falls back when active pair language is missing', async () => {
+test('single-domain payload fails when active pair language is missing', async () => {
   const harness = createDb();
   harness.removePairLanguage('vision_delivery');
 
-  const payload = await buildSingleDomainResultPayload({
-    db: harness.db,
-    assessmentVersionId: 'version-1',
-    responses: buildResponseSet(),
-  });
-
-  assert.equal(payload.diagnostics.topPair, 'vision_delivery');
-  assert.equal(payload.hero.hero_headline, 'Vision and Delivery');
-  assert.equal(payload.pairSummary.pair_headline, 'Vision and Delivery');
-  assert.match(
-    payload.pairSummary.pair_opening_paragraph,
-    /The combination of Vision and Delivery creates a pattern where/,
-  );
-  assert.match(
-    payload.balancing.current_pattern_paragraph,
-    /When Vision dominates without enough Rigor/,
-  );
-  assert.deepEqual(
-    payload.application.strengths.map((item) => item.statement),
-    ['Vision strength 1', 'Delivery strength 2', 'People strength 2'],
+  await assert.rejects(
+    () => buildSingleDomainResultPayload({
+      db: harness.db,
+      assessmentVersionId: 'version-1',
+      responses: buildResponseSet(),
+    }),
+    /Missing canonical HERO_PAIRS row for pair "vision_delivery"/i,
   );
 });
 
@@ -1186,14 +1196,14 @@ test('single-domain payload maps sparse section-first language into required pay
 
   assert.equal(isSingleDomainResultPayload(payload), true);
   assert.equal(payload.signals[0]?.signal_key, 'vision');
-  assert.equal(payload.signals[0]?.chapter_intro, 'vision shows up');
+  assert.equal(payload.signals[0]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery vision primary_driver 1.');
   assert.equal(payload.signals[1]?.signal_key, 'delivery');
-  assert.equal(payload.signals[1]?.chapter_intro, 'delivery shows up');
+  assert.equal(payload.signals[1]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery delivery secondary_driver 2.');
   assert.equal(payload.signals[2]?.signal_key, 'people');
-  assert.equal(payload.signals[2]?.chapter_intro, 'people shows up');
+  assert.equal(payload.signals[2]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery people supporting_context 3.');
   assert.equal(payload.signals[3]?.signal_key, 'rigor');
-  assert.equal(payload.signals[3]?.chapter_intro, 'rigor shows up');
-  assert.equal(payload.signals[3]?.chapter_risk_impact, 'rigor shows up');
+  assert.equal(payload.signals[3]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery rigor range_limitation 4.');
+  assert.equal(payload.signals[3]?.chapter_risk_impact, 'DRIVER_CLAIMS vision_delivery rigor range_limitation 4.');
   assert.equal(payload.balancing.system_risk_paragraph, 'Rebalance vision_delivery');
   assert.deepEqual(payload.balancing.rebalance_actions, [
     'vision_delivery action 1',
@@ -1202,54 +1212,17 @@ test('single-domain payload maps sparse section-first language into required pay
   ]);
 });
 
-test('single-domain completion replaces semantically incompatible driver fallbacks with neutral text', async () => {
+test('single-domain completion fails when pair-scoped driver claims are missing', async () => {
   const harness = createDb();
   harness.useBlueprintSemanticFallbackFixture();
 
-  const payload = await buildSingleDomainResultPayload({
-    db: harness.db,
-    assessmentVersionId: 'blueprint-version',
-    responses: buildResponseSet(),
-  });
-
-  const textFor = (signalKey: string) => {
-    const signal = payload.signals.find((entry) => entry.signal_key === signalKey);
-    assert.ok(signal, `Expected signal ${signalKey}`);
-    return [
-      signal.chapter_intro,
-      signal.chapter_how_it_shows_up,
-      signal.chapter_value_outcome,
-      signal.chapter_value_team_effect,
-      signal.chapter_risk_behaviour,
-      signal.chapter_risk_impact,
-      signal.chapter_development,
-    ].join('\n');
-  };
-
-  assert.equal(isSingleDomainResultPayload(payload), true);
-  assert.equal(payload.diagnostics.topPair, 'process_results');
-  assert.deepEqual(payload.signals.map((signal) => signal.signal_key), ['results', 'process', 'people', 'vision']);
-  assert.deepEqual(payload.signals.map((signal) => signal.position), ['primary', 'secondary', 'supporting', 'underplayed']);
-
-  assert.doesNotMatch(textFor('process'), /\bmain\s+driver\b/i);
-  assert.doesNotMatch(textFor('people'), /\bmain\s+driver\b/i);
-  assert.doesNotMatch(textFor('vision'), /\bmain\s+driver\b/i);
-  assert.doesNotMatch(textFor('results'), /\bweaker\s+range\b/i);
-  assert.doesNotMatch(payload.balancing.practical_meaning_paragraph, /Results is the weaker range/i);
-  assert.equal(payload.balancing.balancing_section_title, 'When structure outruns commitment');
-  assert.match(payload.balancing.system_risk_paragraph, /People signal is therefore the missing range/i);
-  assert.ok(
-    payload.diagnostics.warnings.some((warning) => (
-      warning.includes('signal_key=vision')
-      && warning.includes('missing_role=range_limitation')
-      && warning.includes('generated=true')
-    )),
-  );
-  assert.ok(
-    payload.diagnostics.warnings.some((warning) => (
-      warning.includes('signal_key=process')
-      && warning.includes('missing_role=secondary_driver')
-    )),
+  await assert.rejects(
+    () => buildSingleDomainResultPayload({
+      db: harness.db,
+      assessmentVersionId: 'blueprint-version',
+      responses: buildResponseSet(),
+    }),
+    /Missing DRIVER_CLAIMS row for pair "process_results", signal "results", and role "primary_driver"/i,
   );
 });
 
@@ -1300,100 +1273,43 @@ test('single-domain completion resolves drivers from exact pair-scoped driver cl
   );
 });
 
-test('single-domain completion keeps legacy signal-chapter compatibility without driver claims', async () => {
+test('single-domain completion fails without exact pair-scoped driver claims', async () => {
   const harness = createDb();
   harness.useBlueprintSemanticFallbackFixture();
 
-  const payload = await buildSingleDomainResultPayload({
-    db: harness.db,
-    assessmentVersionId: 'blueprint-version',
-    responses: buildResponseSet(),
-  });
-
-  const textFor = (signalKey: string) => {
-    const signal = payload.signals.find((entry) => entry.signal_key === signalKey);
-    assert.ok(signal, `Expected signal ${signalKey}`);
-    return [
-      signal.chapter_intro,
-      signal.chapter_how_it_shows_up,
-      signal.chapter_value_outcome,
-      signal.chapter_value_team_effect,
-      signal.chapter_risk_behaviour,
-      signal.chapter_risk_impact,
-      signal.chapter_development,
-    ].join('\n');
-  };
-
-  assert.equal(isSingleDomainResultPayload(payload), true);
-  assert.equal(payload.diagnostics.topPair, 'process_results');
-  assert.ok(
-    payload.diagnostics.warnings.some((warning) => (
-      warning.includes('single_domain_pair_driver_claim_missing')
-      && warning.includes('pair_key=process_results')
-      && warning.includes('signal_key=results')
-      && warning.includes('driver_role=primary_driver')
-    )),
+  await assert.rejects(
+    () => buildSingleDomainResultPayload({
+      db: harness.db,
+      assessmentVersionId: 'blueprint-version',
+      responses: buildResponseSet(),
+    }),
+    /Missing DRIVER_CLAIMS row for pair "process_results", signal "results", and role "primary_driver"/i,
   );
-  assert.doesNotMatch(textFor('process'), /\bmain\s+driver\b/i);
-  assert.doesNotMatch(textFor('people'), /\bmain\s+driver\b/i);
-  assert.doesNotMatch(textFor('vision'), /\bmain\s+driver\b/i);
-  assert.doesNotMatch(textFor('results'), /\bweaker\s+range\b/i);
 });
 
-test('single-domain payload ignores cloned non-target pair rows and uses signal fallback', async () => {
+test('single-domain payload fails when canonical pair rows are cloned from a different pair', async () => {
   const harness = createDb();
   harness.cloneTopPairLanguageAcrossPairs();
 
-  const payload = await buildSingleDomainResultPayload({
-    db: harness.db,
-    assessmentVersionId: 'version-1',
-    responses: {
-      attemptId: 'attempt-1',
-      assessmentKey: 'role-focus',
-      versionTag: '1.0.0',
-      status: 'submitted',
-      submittedAt: '2026-04-12T10:00:00.000Z',
-      responsesByQuestionId: {
-        'question-1': {
-          responseId: 'response-1',
-          attemptId: 'attempt-1',
-          questionId: 'question-1',
-          value: { selectedOptionId: 'option-1b' },
-          updatedAt: '2026-04-12T09:57:00.000Z',
-        },
-        'question-2': {
-          responseId: 'response-2',
-          attemptId: 'attempt-1',
-          questionId: 'question-2',
-          value: { selectedOptionId: 'option-2b' },
-          updatedAt: '2026-04-12T09:58:00.000Z',
-        },
-        'question-3': {
-          responseId: 'response-3',
-          attemptId: 'attempt-1',
-          questionId: 'question-3',
-          value: { selectedOptionId: 'option-3a' },
-          updatedAt: '2026-04-12T09:59:00.000Z',
-        },
-        'question-4': {
-          responseId: 'response-4',
-          attemptId: 'attempt-1',
-          questionId: 'question-4',
-          value: { selectedOptionId: 'option-4a' },
-          updatedAt: '2026-04-12T10:00:00.000Z',
+  await assert.rejects(
+    () => buildSingleDomainResultPayload({
+      db: harness.db,
+      assessmentVersionId: 'version-1',
+      responses: {
+        attemptId: 'attempt-1',
+        assessmentKey: 'role-focus',
+        versionTag: '1.0.0',
+        status: 'submitted',
+        submittedAt: '2026-04-12T10:00:00.000Z',
+        responsesByQuestionId: {
+          'question-1': { responseId: 'response-1', attemptId: 'attempt-1', questionId: 'question-1', value: { selectedOptionId: 'option-1b' }, updatedAt: '2026-04-12T09:57:00.000Z' },
+          'question-2': { responseId: 'response-2', attemptId: 'attempt-1', questionId: 'question-2', value: { selectedOptionId: 'option-2b' }, updatedAt: '2026-04-12T09:58:00.000Z' },
+          'question-3': { responseId: 'response-3', attemptId: 'attempt-1', questionId: 'question-3', value: { selectedOptionId: 'option-3a' }, updatedAt: '2026-04-12T09:59:00.000Z' },
+          'question-4': { responseId: 'response-4', attemptId: 'attempt-1', questionId: 'question-4', value: { selectedOptionId: 'option-4a' }, updatedAt: '2026-04-12T10:00:00.000Z' },
         },
       },
-    },
-  });
-
-  assert.equal(payload.diagnostics.topPair, 'delivery_people');
-  assert.equal(payload.hero.hero_headline, 'People and Delivery');
-  assert.equal(payload.pairSummary.pair_headline, 'People and Delivery');
-  assert.doesNotMatch(payload.hero.hero_headline, /vision_delivery/);
-  assert.doesNotMatch(payload.pairSummary.pair_opening_paragraph, /vision_delivery/);
-  assert.match(
-    payload.pairSummary.pair_opening_paragraph,
-    /The combination of People and Delivery creates a pattern where/,
+    }),
+    /Missing canonical HERO_PAIRS row for pair "delivery_people"/i,
   );
 });
 

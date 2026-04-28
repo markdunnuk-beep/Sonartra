@@ -151,7 +151,7 @@ type DriverClaimSourceDiagnostic = {
   pairKey: string;
   signalKey: string;
   driverRole: DriverClaimsRow['driver_role'];
-  source: 'driver_claims' | 'driver_claims_reversed_pair';
+  source: 'driver_claims';
 };
 
 type SelectedSignalText = {
@@ -513,11 +513,8 @@ function createDriverClaimMaps(
   runtimeDefinition: Awaited<ReturnType<typeof loadSingleDomainRuntimeDefinition>>,
 ): {
   exactByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
-  reversedByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
 } {
-  const runtimePairKeys = runtimeDefinition.derivedPairs.map((pair) => pair.pairKey);
   const exactByKey = new Map<string, DriverClaimsRow[]>();
-  const reversedByKey = new Map<string, DriverClaimsRow[]>();
 
   (runtimeDefinition.languageBundle.DRIVER_CLAIMS ?? []).forEach((row) => {
     const exactKey = createDriverClaimKey({
@@ -527,17 +524,6 @@ function createDriverClaimMaps(
       driverRole: row.driver_role,
     });
     exactByKey.set(exactKey, [...(exactByKey.get(exactKey) ?? []), row]);
-
-    const resolution = resolveSingleDomainPairKey(runtimePairKeys, row.pair_key);
-    if (resolution.success && resolution.wasReversed) {
-      const reversedKey = createDriverClaimKey({
-        domainKey: row.domain_key,
-        pairKey: resolution.canonicalPairKey,
-        signalKey: row.signal_key,
-        driverRole: row.driver_role,
-      });
-      reversedByKey.set(reversedKey, [...(reversedByKey.get(reversedKey) ?? []), row]);
-    }
   });
 
   const sortRows = (rows: readonly DriverClaimsRow[]) => Object.freeze(
@@ -546,7 +532,6 @@ function createDriverClaimMaps(
 
   return {
     exactByKey: new Map([...exactByKey.entries()].map(([key, rows]) => [key, sortRows(rows)])),
-    reversedByKey: new Map([...reversedByKey.entries()].map(([key, rows]) => [key, sortRows(rows)])),
   };
 }
 
@@ -557,7 +542,6 @@ function resolvePairScopedDriverClaim(params: {
   driverRole: DriverClaimsRow['driver_role'];
   maps: {
     exactByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
-    reversedByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
   };
   sourceDiagnostics: DriverClaimSourceDiagnostic[];
 }): SelectedSignalText | null {
@@ -581,25 +565,6 @@ function resolvePairScopedDriverClaim(params: {
     };
   }
 
-  const reversedText = (params.maps.reversedByKey.get(key) ?? [])
-    .map((row) => row.claim_text.trim())
-    .filter(Boolean)
-    .join('\n');
-  if (hasText(reversedText)) {
-    params.sourceDiagnostics.push({
-      pairKey: params.pairKey,
-      signalKey: params.signalKey,
-      driverRole: params.driverRole,
-      source: 'driver_claims_reversed_pair',
-    });
-
-    return {
-      text: reversedText,
-      source: 'driver_claims_reversed_pair',
-      generated: false,
-    };
-  }
-
   return null;
 }
 
@@ -612,7 +577,9 @@ function createPairLanguageMap<TRow extends { pair_key: string }>(
 
   rows.forEach((row) => {
     const resolution = resolveSingleDomainPairKey(runtimePairKeys, row.pair_key);
-    map.set(resolution.success ? resolution.canonicalPairKey : row.pair_key, row);
+    if (resolution.success && !resolution.wasReversed) {
+      map.set(resolution.canonicalPairKey, row);
+    }
   });
 
   return map;
@@ -707,7 +674,6 @@ function buildSignalChapterPayload(params: {
   position: SingleDomainSignalPosition;
   driverClaimMaps: {
     exactByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
-    reversedByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
   };
   warnings: SignalLanguageFallbackWarning[];
   driverClaimWarnings: DriverClaimResolutionWarning[];
@@ -730,15 +696,12 @@ function buildSignalChapterPayload(params: {
     sourceDiagnostics: params.driverClaimSourceDiagnostics,
   });
   if (!driverClaimText) {
-    params.driverClaimWarnings.push({
-      pairKey: params.pairKey,
-      signalKey: params.signalKey,
-      driverRole,
-      fallbackSource: positionLanguage.source,
-    });
+    throw new SingleDomainCompletionError(
+      `Missing DRIVER_CLAIMS row for pair "${params.pairKey}", signal "${params.signalKey}", and role "${driverRole}".`,
+    );
   }
   const chapterIntro = requireText(
-    driverClaimText?.text ?? positionLanguage.text,
+    driverClaimText.text,
     `Missing usable signal chapter intro language for signal "${params.signalKey}" in position "${params.position}".`,
   );
   const chapterHowItShowsUp = requireText(
@@ -937,14 +900,6 @@ function pairLanguageReferencesSignals(params: {
     && secondaryTokens.some((token) => normalized.includes(token));
 }
 
-function warnPairFallback(section: 'hero' | 'pair' | 'limitation', pairKey: string): void {
-  if (process.env.SONARTRA_DEBUG_SINGLE_DOMAIN_FALLBACK !== 'true') {
-    return;
-  }
-
-  console.warn(`[single-domain] ${section} fallback language used for pair_key="${pairKey}".`);
-}
-
 function toHero(row: HeroPairsRow, pairKey: string): SingleDomainResultHero {
   return {
     pair_key: pairKey,
@@ -957,32 +912,6 @@ function toHero(row: HeroPairsRow, pairKey: string): SingleDomainResultHero {
   };
 }
 
-function toHeroFallback(params: {
-  pairKey: string;
-  primary: SingleDomainResultSignal;
-  secondary: SingleDomainResultSignal;
-}): SingleDomainResultHero {
-  warnPairFallback('hero', params.pairKey);
-
-  return {
-    pair_key: params.pairKey,
-    hero_headline: `${params.primary.signal_label} and ${params.secondary.signal_label}`,
-    hero_subheadline: `A result led by ${params.primary.signal_label} with ${params.secondary.signal_label} close behind.`,
-    hero_opening: `This result is led by ${params.primary.signal_label}, with ${params.secondary.signal_label} providing the strongest secondary signal.`,
-    hero_strength_paragraph: firstText(
-      params.primary.chapter_intro,
-      params.primary.chapter_how_it_shows_up,
-      params.primary.chapter_value_outcome,
-    ),
-    hero_tension_paragraph: firstText(
-      params.secondary.chapter_risk_impact,
-      params.secondary.chapter_risk_behaviour,
-      params.secondary.chapter_development,
-      params.secondary.chapter_intro,
-    ),
-    hero_close_paragraph: `Read this as a controlled signal-level synthesis, not as pair-specific authored language.`,
-  };
-}
 
 function toBalancing(row: BalancingSectionsRow, pairKey: string): SingleDomainResultBalancing {
   const currentPattern = requireText(
@@ -1028,56 +957,6 @@ function toBalancing(row: BalancingSectionsRow, pairKey: string): SingleDomainRe
   };
 }
 
-function toBalancingFallback(params: {
-  pairKey: string;
-  primary: SingleDomainResultSignal;
-  weaker: SingleDomainResultSignal;
-  warnings: SignalLanguageFallbackWarning[];
-}): SingleDomainResultBalancing {
-  warnPairFallback('limitation', params.pairKey);
-
-  const primaryLimitation = selectSafeSignalText({
-    signalKey: params.primary.signal_key,
-    signalLabel: params.primary.signal_label,
-    position: 'primary',
-    purpose: 'risk',
-    preferredSource: 'primary.chapter_risk_impact',
-    warnings: params.warnings,
-    candidates: [
-      { source: 'primary.chapter_risk_impact', text: params.primary.chapter_risk_impact },
-      { source: 'primary.chapter_risk_behaviour', text: params.primary.chapter_risk_behaviour },
-      { source: 'primary.chapter_development', text: params.primary.chapter_development },
-      { source: 'primary.chapter_intro', text: params.primary.chapter_intro },
-    ],
-  }).text;
-  const weakerTension = selectSafeSignalText({
-    signalKey: params.weaker.signal_key,
-    signalLabel: params.weaker.signal_label,
-    position: 'underplayed',
-    purpose: 'risk',
-    preferredSource: 'weaker.chapter_risk_impact',
-    warnings: params.warnings,
-    candidates: [
-      { source: 'weaker.chapter_risk_impact', text: params.weaker.chapter_risk_impact },
-      { source: 'weaker.chapter_development', text: params.weaker.chapter_development },
-      { source: 'weaker.chapter_intro', text: params.weaker.chapter_intro },
-    ],
-  }).text;
-
-  return {
-    pair_key: params.pairKey,
-    balancing_section_title: `When ${params.primary.signal_label} needs more ${params.weaker.signal_label}`,
-    current_pattern_paragraph: `When ${params.primary.signal_label} dominates without enough ${params.weaker.signal_label}, the pattern may become narrower than the situation requires.`,
-    practical_meaning_paragraph: primaryLimitation,
-    system_risk_paragraph: weakerTension,
-    rebalance_intro: `${params.weaker.signal_key}: ${weakerTension}`,
-    rebalance_actions: Object.freeze([
-      `Use ${params.weaker.signal_label} as an explicit check before the pattern hardens.`,
-      primaryLimitation,
-      weakerTension,
-    ]),
-  };
-}
 
 function toPairSummary(row: PairSummariesRow, pairKey: string): SingleDomainResultPairSummary {
   return {
@@ -1091,34 +970,6 @@ function toPairSummary(row: PairSummariesRow, pairKey: string): SingleDomainResu
   };
 }
 
-function toPairSummaryFallback(params: {
-  pairKey: string;
-  primary: SingleDomainResultSignal;
-  secondary: SingleDomainResultSignal;
-}): SingleDomainResultPairSummary {
-  warnPairFallback('pair', params.pairKey);
-
-  const primarySummary = firstText(
-    params.primary.chapter_intro,
-    params.primary.chapter_how_it_shows_up,
-    params.primary.chapter_value_outcome,
-  );
-  const secondarySummary = firstText(
-    params.secondary.chapter_intro,
-    params.secondary.chapter_how_it_shows_up,
-    params.secondary.chapter_value_outcome,
-  );
-
-  return {
-    pair_key: params.pairKey,
-    pair_section_title: `${params.primary.signal_label} and ${params.secondary.signal_label}`,
-    pair_headline: `${params.primary.signal_label} and ${params.secondary.signal_label}`,
-    pair_opening_paragraph: `The combination of ${params.primary.signal_label} and ${params.secondary.signal_label} creates a pattern where the strongest signal sets the main emphasis and the second signal shapes how that emphasis is expressed.`,
-    pair_strength_paragraph: primarySummary,
-    pair_tension_paragraph: secondarySummary,
-    pair_close_paragraph: `This is a signal-level synthesis because no pair-specific authored language exists for ${params.pairKey}.`,
-  };
-}
 
 function getSpecificHeroRow(params: {
   row: HeroPairsRow | undefined;
@@ -1165,6 +1016,21 @@ function getSpecificBalancingRow(params: {
   return null;
 }
 
+function requireSpecificPairRow<TRow>(params: {
+  row: TRow | null;
+  pairKey: string;
+  section: 'HERO_PAIRS' | 'BALANCING_SECTIONS' | 'PAIR_SUMMARIES';
+  diagnosticReason: string;
+}): TRow {
+  if (params.row) {
+    return params.row;
+  }
+
+  throw new SingleDomainCompletionError(
+    `Missing canonical ${params.section} row for pair "${params.pairKey}" (${params.diagnosticReason}).`,
+  );
+}
+
 function getSpecificPairSummaryRow(params: {
   row: PairSummariesRow | undefined;
   pairKey: string;
@@ -1206,7 +1072,10 @@ function buildApplicationStatements(params: {
         signal_key: signal.signal_key,
         signal_label: signal.signal_label,
         rank: signal.rank,
-        statement: index === 0 ? row.strength_statement_1 : row.strength_statement_2,
+        statement: requireText(
+          index === 0 ? row.strength_statement_1 : row.strength_statement_2,
+          `Missing APPLICATION_STATEMENTS strength text for signal "${signal.signal_key}" at slot ${index + 1}.`,
+        ),
       } satisfies SingleDomainApplicationStatement);
     });
 
@@ -1230,7 +1099,10 @@ function buildApplicationStatements(params: {
       signal_key: candidate.signal_key,
       signal_label: candidate.signal_label,
       rank: candidate.rank,
-      statement: watchouts.length === 0 ? row.watchout_statement_1 : row.watchout_statement_2,
+      statement: requireText(
+        watchouts.length === 0 ? row.watchout_statement_1 : row.watchout_statement_2,
+        `Missing APPLICATION_STATEMENTS watchout text for signal "${candidate.signal_key}" at slot ${watchouts.length + 1}.`,
+      ),
     }));
     seenWatchoutKeys.add(candidate.signal_key);
   }
@@ -1255,9 +1127,12 @@ function buildApplicationStatements(params: {
       signal_key: candidate.signal_key,
       signal_label: candidate.signal_label,
       rank: candidate.rank,
-      statement: developmentFocus.length === 0
-        ? row.development_statement_1
-        : row.development_statement_2,
+      statement: requireText(
+        developmentFocus.length === 0
+          ? row.development_statement_1
+          : row.development_statement_2,
+        `Missing APPLICATION_STATEMENTS development text for signal "${candidate.signal_key}" at slot ${developmentFocus.length + 1}.`,
+      ),
     }));
     seenDevelopmentKeys.add(candidate.signal_key);
   }
@@ -1348,20 +1223,35 @@ export async function buildSingleDomainResultPayload(params: {
     pairKey: topPairKey,
     signals,
   });
-  const heroRow = getSpecificHeroRow({
+  const heroRow = requireSpecificPairRow({
+    row: getSpecificHeroRow({
     row: maps.heroByPairKey.get(topPairKey),
     pairKey: topPairKey,
     primary: pairSignals.primary,
     secondary: pairSignals.secondary,
+  }),
+    pairKey: topPairKey,
+    section: 'HERO_PAIRS',
+    diagnosticReason: 'row missing or references non-active pair language',
   });
-  const balancingRow = getSpecificBalancingRow({
+  const balancingRow = requireSpecificPairRow({
+    row: getSpecificBalancingRow({
     row: maps.balancingByPairKey.get(topPairKey),
+  }),
+    pairKey: topPairKey,
+    section: 'BALANCING_SECTIONS',
+    diagnosticReason: 'row missing or incomplete',
   });
-  const pairSummaryRow = getSpecificPairSummaryRow({
+  const pairSummaryRow = requireSpecificPairRow({
+    row: getSpecificPairSummaryRow({
     row: maps.pairSummaryByPairKey.get(topPairKey),
     pairKey: topPairKey,
     primary: pairSignals.primary,
     secondary: pairSignals.secondary,
+  }),
+    pairKey: topPairKey,
+    section: 'PAIR_SUMMARIES',
+    diagnosticReason: 'row missing or references non-active pair language',
   });
 
   const application = buildApplicationStatements({
@@ -1382,33 +1272,14 @@ export async function buildSingleDomainResultPayload(params: {
     }),
     intro: Object.freeze(toIntro(introRow)),
     hero: Object.freeze(
-      heroRow
-        ? toHero(heroRow, topPairKey)
-        : toHeroFallback({
-            pairKey: topPairKey,
-            primary: pairSignals.primary,
-            secondary: pairSignals.secondary,
-          }),
+      toHero(heroRow, topPairKey),
     ),
     signals,
     balancing: Object.freeze(
-      balancingRow
-        ? toBalancing(balancingRow, topPairKey)
-        : toBalancingFallback({
-            pairKey: topPairKey,
-            primary: pairSignals.primary,
-            weaker: pairSignals.weaker,
-            warnings: signalFallbackWarnings,
-          }),
+      toBalancing(balancingRow, topPairKey),
     ),
     pairSummary: Object.freeze(
-      pairSummaryRow
-        ? toPairSummary(pairSummaryRow, topPairKey)
-        : toPairSummaryFallback({
-            pairKey: topPairKey,
-            primary: pairSignals.primary,
-            secondary: pairSignals.secondary,
-          }),
+      toPairSummary(pairSummaryRow, topPairKey),
     ),
     application: Object.freeze(application),
     diagnostics: Object.freeze({
