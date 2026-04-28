@@ -241,3 +241,35 @@ test('pair-owned section imports no longer fail solely because pair order is run
   assert.equal(limitation.success, true);
   assert.equal(application.success, true);
 });
+
+test('drivers validation requires canonical pair keys and full pair-role coverage', () => {
+  const context = buildSingleDomainImportValidationContext({
+    datasetKey: 'SINGLE_DOMAIN_DRIVERS',
+    currentDomainKey: 'leadership-approach',
+    signalKeys: ['results', 'process', 'vision', 'people'],
+  });
+
+  const result = validateSingleDomainImportRows(context, [
+    {
+      domain_key: 'leadership-approach',
+      section_key: 'drivers',
+      pair_key: 'process_results',
+      signal_key: 'results',
+      driver_role: 'primary_driver',
+      claim_type: 'driver_primary',
+      claim_text: 'Primary claim.',
+      materiality: 'core',
+      priority: '1',
+    },
+  ]);
+
+  assert.equal(result.success, false);
+  assert.match(
+    result.validationErrors.map((issue) => issue.message).join('\n'),
+    /pair_key "process_results" must be canonical/i,
+  );
+  assert.match(
+    result.validationErrors.map((issue) => issue.message).join('\n'),
+    /Missing drivers row for pair_key "results_process" and driver_role "secondary_driver"/i,
+  );
+});

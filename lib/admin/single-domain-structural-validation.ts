@@ -10,6 +10,13 @@ import { getSingleDomainExpectedPairCount } from '@/lib/types/single-domain-runt
 import type { SingleDomainLanguageDatasetKey } from '@/lib/types/single-domain-language';
 import type { SingleDomainDraftReadinessIssue } from '@/lib/types/single-domain-runtime';
 
+const DRIVER_CLAIM_REQUIRED_ROLES = [
+  'primary_driver',
+  'secondary_driver',
+  'supporting_context',
+  'range_limitation',
+] as const;
+
 export type SingleDomainStructuralIssueSeverity = 'blocking' | 'warning';
 
 export type SingleDomainStructuralIssue = {
@@ -287,6 +294,19 @@ export function buildSingleDomainLanguageValidation(params: {
         ? 'Waiting on authored signals before hero pairs can be derived.'
         : expectedPairCount === 0
           ? 'Waiting on at least two authored signals before hero pairs can be derived.'
+          : undefined,
+    }),
+    createLanguageDatasetValidation({
+      datasetKey: 'DRIVER_CLAIMS',
+      actualRowCount: (params.languageBundle.DRIVER_CLAIMS ?? []).length,
+      expectedRowCount: expectedPairCount * DRIVER_CLAIM_REQUIRED_ROLES.length,
+      countRule: 'exact',
+      successDetail: `DRIVER_CLAIMS matches the current derived pair count (${expectedPairCount}) with all required driver roles.`,
+      failureMessage: `DRIVER_CLAIMS must contain exactly ${expectedPairCount * DRIVER_CLAIM_REQUIRED_ROLES.length} row${expectedPairCount * DRIVER_CLAIM_REQUIRED_ROLES.length === 1 ? '' : 's'} (${expectedPairCount} pair${expectedPairCount === 1 ? '' : 's'} × ${DRIVER_CLAIM_REQUIRED_ROLES.length} required driver roles).`,
+      waitingDetail: signalCount === 0
+        ? 'Waiting on authored signals before driver claims can be derived.'
+        : expectedPairCount === 0
+          ? 'Waiting on at least two authored signals before driver claims can be derived.'
           : undefined,
     }),
     createLanguageDatasetValidation({

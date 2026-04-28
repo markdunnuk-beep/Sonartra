@@ -61,6 +61,10 @@ function hasKnownPairKey(pairKeys: readonly string[], pairKey: string): boolean 
   return resolveSingleDomainPairKey(pairKeys, pairKey).success;
 }
 
+function hasCanonicalPairKey(pairKeys: readonly string[], pairKey: string): boolean {
+  return pairKeys.includes(pairKey);
+}
+
 function validatePairKey(
   pairKeys: readonly string[],
   pairKey: string,
@@ -246,11 +250,17 @@ function validateDriversRows(
 ): readonly SingleDomainImportValidationIssue[] {
   const issues: SingleDomainImportValidationIssue[] = [];
   const seenKeys = new Set<string>();
+  const coverageByPairAndRole = new Map<string, Set<string>>();
 
   rows.forEach((row, index) => {
     const lineNumber = index + 2;
     validateSharedRowFields(row, lineNumber, context, issues);
-    validatePairKey(context.pairKeys, row.pair_key, lineNumber, issues);
+    if (!hasCanonicalPairKey(context.pairKeys, row.pair_key)) {
+      issues.push({
+        lineNumber,
+        message: `Line ${lineNumber}: pair_key "${row.pair_key}" must be canonical for this draft.`,
+      });
+    }
 
     if (!hasKnownSignalKey(context.signalKeys, row.signal_key)) {
       issues.push({
@@ -294,6 +304,11 @@ function validateDriversRows(
 
     validateDriverMateriality(row, lineNumber, issues);
 
+    const coverageKey = `${row.pair_key}|${row.driver_role}`;
+    const signalSet = coverageByPairAndRole.get(coverageKey) ?? new Set<string>();
+    signalSet.add(row.signal_key);
+    coverageByPairAndRole.set(coverageKey, signalSet);
+
     const duplicateKey = [
       row.domain_key,
       row.pair_key,
@@ -309,6 +324,29 @@ function validateDriversRows(
       });
     }
     seenKeys.add(duplicateKey);
+  });
+
+  context.pairKeys.forEach((pairKey) => {
+    SINGLE_DOMAIN_DRIVER_ROLES.forEach((driverRole) => {
+      const coverageKey = `${pairKey}|${driverRole}`;
+      const signalSet = coverageByPairAndRole.get(coverageKey);
+      const signalList = signalSet ? [...signalSet].join(', ') : '';
+
+      if (!signalSet || signalSet.size === 0) {
+        issues.push({
+          lineNumber: null,
+          message: `Missing drivers row for pair_key "${pairKey}" and driver_role "${driverRole}".`,
+        });
+        return;
+      }
+
+      if (signalSet.size > 1) {
+        issues.push({
+          lineNumber: null,
+          message: `pair_key "${pairKey}" and driver_role "${driverRole}" must map to exactly one signal_key (found: ${signalList}).`,
+        });
+      }
+    });
   });
 
   return issues;
@@ -483,6 +521,27 @@ export function buildSingleDomainImportValidationContext(params: {
   currentDomainKey: string | null;
   signalKeys: readonly string[];
 }): SingleDomainImportValidationContext {
+  const canonicalSignals = ['results', 'process', 'vision', 'people'] as const;
+  const canonicalSignalSet = new Set(canonicalSignals);
+  const hasCanonicalSignalSet = params.signalKeys.length === canonicalSignals.length
+    && params.signalKeys.every((signalKey) => canonicalSignalSet.has(signalKey as (typeof canonicalSignals)[number]));
+  if (hasCanonicalSignalSet) {
+    return {
+      datasetKey: params.datasetKey,
+      targetSection: SINGLE_DOMAIN_IMPORT_DATASET_SECTION_MAP[params.datasetKey],
+      currentDomainKey: params.currentDomainKey,
+      signalKeys: [...params.signalKeys],
+      pairKeys: [
+        'results_process',
+        'results_vision',
+        'results_people',
+        'process_vision',
+        'process_people',
+        'vision_people',
+      ],
+    };
+  }
+
   const pairKeys: string[] = [];
 
   for (let leftIndex = 0; leftIndex < params.signalKeys.length; leftIndex += 1) {

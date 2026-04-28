@@ -186,7 +186,7 @@ export function SingleDomainSectionPanel({
             <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">
               {section.currentRowCount}/{section.expectedRowCount > 0 ? section.expectedRowCount : 0}
             </p>
-            <p className="mt-2 text-sm leading-6 text-white/56">Current adapted section row coverage.</p>
+            <p className="mt-2 text-sm leading-6 text-white/56">Current section row coverage.</p>
           </div>
           <div className="rounded-[0.95rem] border border-white/8 bg-black/10 p-4 md:col-span-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/42">

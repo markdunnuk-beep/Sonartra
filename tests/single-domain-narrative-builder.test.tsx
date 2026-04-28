@@ -13,6 +13,7 @@ function createLanguageBundle(overrides?: Partial<SingleDomainLanguageBundle>): 
   return {
     DOMAIN_FRAMING: [],
     HERO_PAIRS: [],
+    DRIVER_CLAIMS: [],
     SIGNAL_CHAPTERS: [],
     BALANCING_SECTIONS: [],
     PAIR_SUMMARIES: [],
@@ -173,6 +174,48 @@ test('narrative builder mapper preserves the locked six-section order from Task 
           hero_close_paragraph: 'Close',
         },
       ],
+      DRIVER_CLAIMS: [
+        {
+          domain_key: 'leadership-style',
+          pair_key: 'directive_supportive',
+          signal_key: 'directive',
+          driver_role: 'primary_driver',
+          claim_type: 'driver_primary',
+          claim_text: 'Primary',
+          materiality: 'core',
+          priority: 1,
+        },
+        {
+          domain_key: 'leadership-style',
+          pair_key: 'directive_supportive',
+          signal_key: 'supportive',
+          driver_role: 'secondary_driver',
+          claim_type: 'driver_secondary',
+          claim_text: 'Secondary',
+          materiality: 'core',
+          priority: 2,
+        },
+        {
+          domain_key: 'leadership-style',
+          pair_key: 'directive_supportive',
+          signal_key: 'directive',
+          driver_role: 'supporting_context',
+          claim_type: 'driver_supporting_context',
+          claim_text: 'Supporting',
+          materiality: 'supporting',
+          priority: 3,
+        },
+        {
+          domain_key: 'leadership-style',
+          pair_key: 'directive_supportive',
+          signal_key: 'supportive',
+          driver_role: 'range_limitation',
+          claim_type: 'driver_range_limitation',
+          claim_text: 'Range',
+          materiality: 'material_underplay',
+          priority: 4,
+        },
+      ],
       SIGNAL_CHAPTERS: [
         {
           signal_key: 'directive',
@@ -281,6 +324,7 @@ test('narrative builder renders the six locked sections, readiness summary, and 
         },
       ],
       HERO_PAIRS: [],
+      DRIVER_CLAIMS: [],
       SIGNAL_CHAPTERS: [
         {
           signal_key: 'directive',
