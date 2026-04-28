@@ -1,12 +1,9 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
+import {
+  getExpectedDriverClaimTuples,
+  getSingleDomainCanonicalPairKeys,
+} from '@/lib/assessment-language/single-domain-canonical';
 import { getDbPool } from '@/lib/server/db';
-
-const DRIVER_ROLES = [
-  'primary_driver',
-  'secondary_driver',
-  'supporting_context',
-  'range_limitation',
-] as const;
 
 type VersionRow = {
   assessment_version_id: string;
@@ -58,16 +55,6 @@ export type SingleDomainLanguageDiagnosticPayload = {
   overallReady: boolean;
   blockingDatasets: string[];
 };
-
-function buildPairKeys(signalKeys: readonly string[]): string[] {
-  const pairs: string[] = [];
-  for (let i = 0; i < signalKeys.length; i += 1) {
-    for (let j = i + 1; j < signalKeys.length; j += 1) {
-      pairs.push(`${signalKeys[i]}_${signalKeys[j]}`);
-    }
-  }
-  return pairs;
-}
 
 function uniqueSorted(values: readonly string[]): string[] {
   return [...new Set(values)].sort((a, b) => a.localeCompare(b));
@@ -162,7 +149,7 @@ export async function runSingleDomainLanguageDiagnostic(
 
   const primaryDomainKey = domainResult.rows[0]?.domain_key ?? null;
   const signalKeys = signalResult.rows.map((row) => row.signal_key);
-  const pairKeys = buildPairKeys(signalKeys);
+  const pairKeys = [...getSingleDomainCanonicalPairKeys(signalKeys)];
 
   const domainFramingResult = await db.query<{ domain_key: string }>(
     `
@@ -236,7 +223,13 @@ export async function runSingleDomainLanguageDiagnostic(
 
   const pairKeySet = new Set(pairKeys);
   const signalKeySet = new Set(signalKeys);
-  const expectedDriverKeys = pairKeys.flatMap((pairKey) => DRIVER_ROLES.map((role) => `${pairKey}|${role}`));
+  const expectedDriverKeys = primaryDomainKey
+    ? getExpectedDriverClaimTuples({
+        domainKey: primaryDomainKey,
+        signalKeys,
+        pairKeys,
+      }).map((tuple) => `${tuple.domainKey}|${tuple.pairKey}|${tuple.signalKey}|${tuple.driverRole}`)
+    : [];
   const domainFramingCount = domainFramingResult.rows.length;
   const heroPairsCount = heroPairsResult.rows.length;
   const driverClaimsCount = driverClaimsResult.rows.length;
@@ -258,11 +251,22 @@ export async function runSingleDomainLanguageDiagnostic(
   });
 
   const driverClaimsAnalysis = analyzeKeys({
-    actualKeys: driverClaimsResult.rows.map((row) => `${row.pair_key}|${row.driver_role}`),
+    actualKeys: driverClaimsResult.rows.map(
+      (row) => `${row.domain_key}|${row.pair_key}|${row.signal_key}|${row.driver_role}`,
+    ),
     expectedKeys: expectedDriverKeys,
     validateKey: (key) => {
-      const [pairKey, role] = key.split('|');
-      return Boolean(pairKey && role && pairKeySet.has(pairKey) && DRIVER_ROLES.includes(role as (typeof DRIVER_ROLES)[number]));
+      const [domainKey, pairKey, signalKey, role] = key.split('|');
+      return Boolean(
+        domainKey
+        && pairKey
+        && signalKey
+        && role
+        && primaryDomainKey
+        && domainKey === primaryDomainKey
+        && pairKeySet.has(pairKey)
+        && signalKeySet.has(signalKey),
+      );
     },
   });
 

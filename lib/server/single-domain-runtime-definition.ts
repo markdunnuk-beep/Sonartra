@@ -1,4 +1,10 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
+import {
+  DRIVER_CLAIM_ROLES,
+  hasLeadershipCanonicalSignalSet,
+  getExpectedDriverClaimTuples,
+  getSingleDomainCanonicalPairKeys,
+} from '@/lib/assessment-language/single-domain-canonical';
 import { resolveSingleDomainPairKey } from '@/lib/assessment-language/single-domain-pair-keys';
 import { getSingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language';
 import type {
@@ -17,10 +23,7 @@ import type {
   SingleDomainRuntimeQuestion,
   SingleDomainRuntimeSignal,
 } from '@/lib/types/single-domain-runtime';
-import {
-  buildSingleDomainPairKey,
-  getSingleDomainExpectedPairCount,
-} from '@/lib/types/single-domain-runtime';
+import { getSingleDomainExpectedPairCount } from '@/lib/types/single-domain-runtime';
 
 type RuntimeContextRow = {
   assessment_id: string;
@@ -75,13 +78,6 @@ type RuntimeWeightRow = {
   weight: string;
   source_weight_key: string | null;
 };
-
-const DRIVER_CLAIM_ROLES = [
-  'primary_driver',
-  'secondary_driver',
-  'supporting_context',
-  'range_limitation',
-] as const;
 
 const DRIVER_ROLE_TO_CLAIM_TYPE = {
   primary_driver: 'driver_primary',
@@ -402,7 +398,6 @@ function validateLanguageKeys(params: {
         'language',
         'DRIVER_CLAIMS rows must reference the current single-domain key only.',
         invalidDriverDomainKeys,
-        'warning',
       ),
     );
   }
@@ -416,23 +411,25 @@ function validateLanguageKeys(params: {
         'language',
         'DRIVER_CLAIMS signal_key values must resolve against the current authored signal keys.',
         invalidDriverSignalKeys,
-        'warning',
       ),
     );
   }
 
   const driverPairKeys = [...new Set(driverClaimRows.map((row) => row.pair_key))];
-  const invalidDriverPairKeys = driverPairKeys.filter(
-    (key) => !resolveSingleDomainPairKey(params.pairKeys, key).success,
-  );
+  const strictDriverTupleCoverage = Boolean(domainKey) && hasLeadershipCanonicalSignalSet(params.signalKeys);
+  const invalidDriverPairKeys = strictDriverTupleCoverage
+    ? driverPairKeys.filter((key) => !params.pairKeys.includes(key))
+    : driverPairKeys.filter((key) => !resolveSingleDomainPairKey(params.pairKeys, key).success);
   if (invalidDriverPairKeys.length > 0) {
     params.issues.push(
       createIssue(
         'driver_claims_key_mismatch',
         'language',
-        'DRIVER_CLAIMS pair_key values must resolve against the current signal-derived pair set.',
+        strictDriverTupleCoverage
+          ? 'DRIVER_CLAIMS pair_key values must match the canonical pair keys exactly.'
+          : 'DRIVER_CLAIMS pair_key values must resolve against the current signal-derived pair set.',
         invalidDriverPairKeys,
-        'warning',
+        strictDriverTupleCoverage ? 'blocking' : 'warning',
       ),
     );
   }
@@ -452,39 +449,79 @@ function validateLanguageKeys(params: {
         'language',
         'DRIVER_CLAIMS rows must preserve the required driver_role, claim_type, and materiality mapping.',
         roleMappingMismatches,
-        'warning',
+        strictDriverTupleCoverage ? 'blocking' : 'warning',
       ),
     );
   }
 
   const coverageKeys = new Map<string, number>();
   driverClaimRows.forEach((row) => {
-    const resolvedPairKey = resolveSingleDomainPairKey(params.pairKeys, row.pair_key);
-    if (!resolvedPairKey.success) {
+    if (!strictDriverTupleCoverage) {
+      const resolvedPairKey = resolveSingleDomainPairKey(params.pairKeys, row.pair_key);
+      if (!resolvedPairKey.success) {
+        return;
+      }
+
+      const key = `${resolvedPairKey.canonicalPairKey}:${row.driver_role}`;
+      coverageKeys.set(key, (coverageKeys.get(key) ?? 0) + 1);
       return;
     }
 
-    const key = `${resolvedPairKey.canonicalPairKey}:${row.driver_role}`;
+    const key = `${row.domain_key}:${row.pair_key}:${row.signal_key}:${row.driver_role}`;
     coverageKeys.set(key, (coverageKeys.get(key) ?? 0) + 1);
   });
 
-  const coverageFindings = params.pairKeys.flatMap((pairKey) =>
-    DRIVER_CLAIM_ROLES
-      .map((driverRole) => {
-        const key = `${pairKey}:${driverRole}`;
+  const expectedDriverClaimTuples = strictDriverTupleCoverage && domainKey
+    ? getExpectedDriverClaimTuples({
+        domainKey,
+        signalKeys: params.signalKeys,
+        pairKeys: params.pairKeys,
+      })
+    : [];
+  if (strictDriverTupleCoverage) {
+    const expectedTupleKeys = new Set(
+      expectedDriverClaimTuples.map((tuple) => `${tuple.domainKey}:${tuple.pairKey}:${tuple.signalKey}:${tuple.driverRole}`),
+    );
+    const unexpectedCoverageKeys = [...coverageKeys.keys()].filter((key) => !expectedTupleKeys.has(key));
+    if (unexpectedCoverageKeys.length > 0) {
+      params.issues.push(
+        createIssue(
+          'driver_claims_key_mismatch',
+          'language',
+          'DRIVER_CLAIMS rows must match the exact runtime lookup tuple domain_key + pair_key + signal_key + driver_role.',
+          unexpectedCoverageKeys,
+        ),
+      );
+    }
+  }
+
+  const coverageFindings = strictDriverTupleCoverage
+    ? expectedDriverClaimTuples
+      .map((tuple) => {
+        const key = `${tuple.domainKey}:${tuple.pairKey}:${tuple.signalKey}:${tuple.driverRole}`;
         const count = coverageKeys.get(key) ?? 0;
         return count === 1 ? null : `${key}:${count}`;
       })
-      .filter((key): key is string => Boolean(key)),
-  );
+      .filter((key): key is string => Boolean(key))
+    : params.pairKeys.flatMap((pairKey) =>
+      DRIVER_CLAIM_ROLES
+        .map((driverRole) => {
+          const key = `${pairKey}:${driverRole}`;
+          const count = coverageKeys.get(key) ?? 0;
+          return count === 1 ? null : `${key}:${count}`;
+        })
+        .filter((key): key is string => Boolean(key)),
+    );
   if (coverageFindings.length > 0) {
     params.issues.push(
       createIssue(
         'driver_claims_coverage_incomplete',
         'language',
-        'DRIVER_CLAIMS should contain exactly one row for each expected pair and driver role.',
+        strictDriverTupleCoverage
+          ? 'DRIVER_CLAIMS should contain exactly one row for each exact runtime lookup tuple.'
+          : 'DRIVER_CLAIMS should contain exactly one row for each expected pair and driver role.',
         coverageFindings,
-        'warning',
+        strictDriverTupleCoverage ? 'blocking' : 'warning',
       ),
     );
   }
@@ -689,24 +726,29 @@ export async function evaluateSingleDomainRuntimeDefinition(
   );
   const signalById = new Map(signals.map((signal) => [signal.id, signal]));
 
+  const signalByKey = new Map(signals.map((signal) => [signal.key, signal]));
+  const derivedPairKeys = [...getSingleDomainCanonicalPairKeys(signals.map((signal) => signal.key))];
   const derivedPairs: readonly SingleDomainRuntimeDerivedPair[] = Object.freeze(
-    signals.flatMap((leftSignal, leftIndex) =>
-      signals.slice(leftIndex + 1).map((rightSignal, offset) =>
-        Object.freeze({
-          pairKey: buildSingleDomainPairKey(leftSignal.key, rightSignal.key),
-          leftSignalId: leftSignal.id,
-          leftSignalKey: leftSignal.key,
-          leftSignalTitle: leftSignal.title,
-          rightSignalId: rightSignal.id,
-          rightSignalKey: rightSignal.key,
-          rightSignalTitle: rightSignal.title,
-          orderIndex: leftIndex + offset,
-        }),
-      ),
-    ),
-  );
+    derivedPairKeys.flatMap((pairKey, index) => {
+      const [leftSignalKey, rightSignalKey] = pairKey.split('_');
+      const leftSignal = leftSignalKey ? signalByKey.get(leftSignalKey) : null;
+      const rightSignal = rightSignalKey ? signalByKey.get(rightSignalKey) : null;
+      if (!leftSignal || !rightSignal) {
+        return [];
+      }
 
-  const derivedPairKeys = derivedPairs.map((pair) => pair.pairKey);
+      return [Object.freeze({
+        pairKey,
+        leftSignalId: leftSignal.id,
+        leftSignalKey: leftSignal.key,
+        leftSignalTitle: leftSignal.title,
+        rightSignalId: rightSignal.id,
+        rightSignalKey: rightSignal.key,
+        rightSignalTitle: rightSignal.title,
+        orderIndex: index,
+      })];
+    }),
+  );
 
   const optionWeightsByOptionId = new Map<string, SingleDomainRuntimeOptionSignalWeight[]>();
   for (const row of weightRows) {

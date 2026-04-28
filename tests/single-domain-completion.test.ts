@@ -8,6 +8,10 @@ import {
   buildAssessmentWorkspaceViewModel,
   buildDashboardViewModel,
 } from '@/lib/server/dashboard-workspace-view-model';
+import {
+  getExpectedDriverClaimTuples,
+  getSingleDomainCanonicalPairKeys,
+} from '@/lib/assessment-language/single-domain-canonical';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import { buildSingleDomainResultPayload } from '@/lib/server/single-domain-completion';
 import type { AssessmentCompletionPayload } from '@/lib/server/assessment-completion-types';
@@ -245,7 +249,11 @@ function buildRuntimeFixture(): RuntimeFixture {
                   ? 'driver_supporting_context'
                   : 'driver_range_limitation',
             claim_text: `DRIVER_CLAIMS ${pair_key} ${signal_key} ${driver_role} ${index + 1}.`,
-            materiality: driver_role === 'range_limitation' ? 'material_underplay' : 'core',
+            materiality: driver_role === 'range_limitation'
+              ? 'material_underplay'
+              : driver_role === 'supporting_context'
+                ? 'supporting'
+                : 'core',
             priority: index + 1,
           }))
         ))
@@ -492,12 +500,12 @@ function createDb(config?: {
       }));
 
       const pairKeys = [
-        'process_results',
+        'results_process',
+        'results_vision',
+        'results_people',
         'process_people',
         'process_vision',
-        'results_people',
-        'results_vision',
-        'people_vision',
+        'vision_people',
       ];
 
       runtime.language.DOMAIN_FRAMING = [{
@@ -528,22 +536,22 @@ function createDb(config?: {
       }));
       runtime.language.BALANCING_SECTIONS = pairKeys.map((pair_key) => ({
         pair_key,
-        balancing_section_title: pair_key === 'process_results'
+        balancing_section_title: pair_key === 'results_process'
           ? 'When structure outruns commitment'
           : `Balance ${pair_key}`,
-        current_pattern_paragraph: pair_key === 'process_results'
+        current_pattern_paragraph: pair_key === 'results_process'
           ? 'The cost of this pattern is that structure and outcomes can receive more attention than how people are responding.'
           : `Current ${pair_key}`,
-        practical_meaning_paragraph: pair_key === 'process_results'
+        practical_meaning_paragraph: pair_key === 'results_process'
           ? 'The limitation appears when the situation needs more patience, listening, or a better read of how people feel about the work.'
           : `Meaning ${pair_key}`,
-        system_risk_paragraph: pair_key === 'process_results'
+        system_risk_paragraph: pair_key === 'results_process'
           ? 'The People signal is therefore the missing range to develop around this result.'
           : `Risk ${pair_key}`,
-        rebalance_intro: pair_key === 'process_results'
+        rebalance_intro: pair_key === 'results_process'
           ? 'people: The People signal is therefore the missing range to develop around this result.'
           : `Rebalance ${pair_key}`,
-        rebalance_action_1: pair_key === 'process_results'
+        rebalance_action_1: pair_key === 'results_process'
           ? 'Bring people into the thinking before the plan is fixed.'
           : `${pair_key} action 1`,
         rebalance_action_2: '',
@@ -633,61 +641,50 @@ function createDb(config?: {
         development_statement_1: `${label} development 1`,
         development_statement_2: `${label} development 2`,
       }));
+      runtime.language.DRIVER_CLAIMS = [];
     },
     useBlueprintPairScopedDriverClaims() {
-      const pairKeys = [
-        'process_results',
-        'process_people',
-        'process_vision',
-        'results_people',
-        'results_vision',
-        'people_vision',
-      ];
-      const rowsByRole = [
-        {
-          signal_key: 'results',
-          driver_role: 'primary_driver',
-          claim_type: 'driver_primary',
-          materiality: 'core',
-          claim_text: 'DRIVER_CLAIMS process_results results primary text.',
-        },
-        {
-          signal_key: 'process',
-          driver_role: 'secondary_driver',
-          claim_type: 'driver_secondary',
-          materiality: 'core',
-          claim_text: 'DRIVER_CLAIMS process_results process secondary text.',
-        },
-        {
-          signal_key: 'people',
-          driver_role: 'supporting_context',
-          claim_type: 'driver_supporting_context',
-          materiality: 'supporting',
-          claim_text: 'DRIVER_CLAIMS process_results people supporting text.',
-        },
-        {
-          signal_key: 'vision',
-          driver_role: 'range_limitation',
-          claim_type: 'driver_range_limitation',
-          materiality: 'material_underplay',
-          claim_text: 'DRIVER_CLAIMS process_results vision range text.',
-        },
-      ] as const;
+      const signalKeys = ['process', 'results', 'people', 'vision'];
+      const pairKeys = [...getSingleDomainCanonicalPairKeys(signalKeys)];
 
-      runtime.language.DRIVER_CLAIMS = pairKeys.flatMap((pairKey) =>
-        rowsByRole.map((row, index) => ({
-          domain_key: 'leadership-approach',
-          pair_key: pairKey,
-          signal_key: row.signal_key,
-          driver_role: row.driver_role,
-          claim_type: row.claim_type,
-          claim_text: pairKey === 'process_results'
-            ? row.claim_text
-            : `DRIVER_CLAIMS ${pairKey} ${row.signal_key} ${row.driver_role}.`,
-          materiality: row.materiality,
-          priority: index + 1,
-        })),
-      );
+      runtime.language.DRIVER_CLAIMS = getExpectedDriverClaimTuples({
+        domainKey: 'leadership-approach',
+        signalKeys,
+        pairKeys,
+      }).map((tuple) => ({
+        domain_key: tuple.domainKey,
+        pair_key: tuple.pairKey,
+        signal_key: tuple.signalKey,
+        driver_role: tuple.driverRole,
+        claim_type: tuple.driverRole === 'primary_driver'
+          ? 'driver_primary'
+          : tuple.driverRole === 'secondary_driver'
+            ? 'driver_secondary'
+            : tuple.driverRole === 'supporting_context'
+              ? 'driver_supporting_context'
+              : 'driver_range_limitation',
+        claim_text: tuple.pairKey === 'results_process'
+          ? tuple.driverRole === 'primary_driver'
+            ? 'DRIVER_CLAIMS results_process results primary text.'
+            : tuple.driverRole === 'secondary_driver'
+              ? 'DRIVER_CLAIMS results_process process secondary text.'
+              : tuple.driverRole === 'supporting_context'
+                ? 'DRIVER_CLAIMS results_process people supporting text.'
+                : 'DRIVER_CLAIMS results_process vision range text.'
+          : `DRIVER_CLAIMS ${tuple.pairKey} ${tuple.signalKey} ${tuple.driverRole}.`,
+        materiality: tuple.driverRole === 'range_limitation'
+          ? 'material_underplay'
+          : tuple.driverRole === 'supporting_context'
+            ? 'supporting'
+            : 'core',
+        priority: tuple.driverRole === 'primary_driver'
+          ? 1
+          : tuple.driverRole === 'secondary_driver'
+            ? 2
+            : tuple.driverRole === 'supporting_context'
+              ? 3
+              : 4,
+      }));
     },
     db: {
       async query<T>(text: string, params?: unknown[]) {
@@ -1222,7 +1219,7 @@ test('single-domain completion fails when pair-scoped driver claims are missing'
       assessmentVersionId: 'blueprint-version',
       responses: buildResponseSet(),
     }),
-    /Missing DRIVER_CLAIMS row for pair "process_results", signal "results", and role "primary_driver"/i,
+    /DRIVER_CLAIMS should contain exactly one row for each exact runtime lookup tuple/i,
   );
 });
 
@@ -1244,13 +1241,13 @@ test('single-domain completion resolves drivers from exact pair-scoped driver cl
   };
 
   assert.equal(isSingleDomainResultPayload(payload), true);
-  assert.equal(payload.diagnostics.topPair, 'process_results');
+  assert.equal(payload.diagnostics.topPair, 'results_process');
   assert.deepEqual(payload.signals.map((signal) => signal.signal_key), ['results', 'process', 'people', 'vision']);
   assert.deepEqual(payload.signals.map((signal) => signal.position), ['primary', 'secondary', 'supporting', 'underplayed']);
-  assert.equal(signalText('results'), 'DRIVER_CLAIMS process_results results primary text.');
-  assert.equal(signalText('process'), 'DRIVER_CLAIMS process_results process secondary text.');
-  assert.equal(signalText('people'), 'DRIVER_CLAIMS process_results people supporting text.');
-  assert.equal(signalText('vision'), 'DRIVER_CLAIMS process_results vision range text.');
+  assert.equal(signalText('results'), 'DRIVER_CLAIMS results_process results primary text.');
+  assert.equal(signalText('process'), 'DRIVER_CLAIMS results_process process secondary text.');
+  assert.equal(signalText('people'), 'DRIVER_CLAIMS results_process people supporting text.');
+  assert.equal(signalText('vision'), 'DRIVER_CLAIMS results_process vision range text.');
   assert.equal(
     payload.diagnostics.warnings.some((warning) => warning.includes('single_domain_pair_driver_claim_missing')),
     false,
@@ -1283,7 +1280,7 @@ test('single-domain completion fails without exact pair-scoped driver claims', a
       assessmentVersionId: 'blueprint-version',
       responses: buildResponseSet(),
     }),
-    /Missing DRIVER_CLAIMS row for pair "process_results", signal "results", and role "primary_driver"/i,
+    /DRIVER_CLAIMS should contain exactly one row for each exact runtime lookup tuple/i,
   );
 });
 

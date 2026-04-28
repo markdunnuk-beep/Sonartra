@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { getExpectedDriverClaimTuples } from '@/lib/assessment-language/single-domain-canonical';
 import { createAssessmentDefinitionRepository } from '@/lib/engine/repository';
 import { getSingleDomainDraftReadiness } from '@/lib/server/single-domain-draft-readiness';
 import {
@@ -150,50 +151,36 @@ function createSingleDomainDb(fixture: RuntimeFixture) {
 }
 
 function buildCompleteDriverClaims(): DriverClaimsRow[] {
-  const pairKeys = [
-    'directive_supportive',
-    'directive_analytical',
-    'supportive_analytical',
-  ];
-  const rowsByRole = [
-    {
-      driver_role: 'primary_driver',
-      claim_type: 'driver_primary',
-      materiality: 'core',
-      signal_key: 'directive',
-    },
-    {
-      driver_role: 'secondary_driver',
-      claim_type: 'driver_secondary',
-      materiality: 'core',
-      signal_key: 'supportive',
-    },
-    {
-      driver_role: 'supporting_context',
-      claim_type: 'driver_supporting_context',
-      materiality: 'supporting',
-      signal_key: 'analytical',
-    },
-    {
-      driver_role: 'range_limitation',
-      claim_type: 'driver_range_limitation',
-      materiality: 'material_underplay',
-      signal_key: 'analytical',
-    },
-  ] as const;
-
-  return pairKeys.flatMap((pairKey) =>
-    rowsByRole.map((row, index) => ({
-      domain_key: 'leadership-style',
-      pair_key: pairKey,
-      signal_key: row.signal_key,
-      driver_role: row.driver_role,
-      claim_type: row.claim_type,
-      claim_text: `${pairKey} ${row.driver_role}`,
-      materiality: row.materiality,
-      priority: index + 1,
-    })),
-  );
+  return getExpectedDriverClaimTuples({
+    domainKey: 'leadership-style',
+    signalKeys: ['directive', 'supportive', 'analytical'],
+    pairKeys: ['directive_supportive', 'directive_analytical', 'supportive_analytical'],
+  }).map((tuple) => ({
+    domain_key: tuple.domainKey,
+    pair_key: tuple.pairKey,
+    signal_key: tuple.signalKey,
+    driver_role: tuple.driverRole,
+    claim_type: tuple.driverRole === 'primary_driver'
+      ? 'driver_primary'
+      : tuple.driverRole === 'secondary_driver'
+        ? 'driver_secondary'
+        : tuple.driverRole === 'supporting_context'
+          ? 'driver_supporting_context'
+          : 'driver_range_limitation',
+    claim_text: `${tuple.pairKey} ${tuple.driverRole}`,
+    materiality: tuple.driverRole === 'range_limitation'
+      ? 'material_underplay'
+      : tuple.driverRole === 'supporting_context'
+        ? 'supporting'
+        : 'core',
+    priority: tuple.driverRole === 'primary_driver'
+      ? 1
+      : tuple.driverRole === 'secondary_driver'
+        ? 2
+        : tuple.driverRole === 'supporting_context'
+          ? 3
+          : 4,
+  }));
 }
 
 function buildFixture(overrides?: Partial<RuntimeFixture>): RuntimeFixture {
@@ -671,7 +658,7 @@ test('driver claims readiness warns for invalid pair and signal keys', async () 
   const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
   const keyIssues = readiness.issues.filter((entry) => entry.code === 'driver_claims_key_mismatch');
 
-  assert.equal(readiness.isReady, true);
+  assert.equal(readiness.isReady, false);
   assert.equal(keyIssues.length >= 2, true);
   assert.ok(keyIssues.some((issue) => issue.relatedKeys?.includes('missing_pair')));
   assert.ok(keyIssues.some((issue) => issue.relatedKeys?.includes('missing_signal')));
@@ -695,6 +682,187 @@ test('driver claims readiness warns for invalid role claim and materiality mappi
   assert.equal(readiness.isReady, true);
   assert.equal(issue?.severity, 'warning');
   assert.ok(issue?.relatedKeys?.some((key) => key.includes('directive_supportive:directive:primary_driver')));
+});
+
+test('driver claims readiness blocks when rows do not match the exact runtime lookup tuple', async () => {
+  const fixture = buildFixture({
+    domains: [{
+      domain_id: 'domain-1',
+      domain_key: 'leadership-approach',
+      domain_label: 'Leadership approach',
+      domain_description: null,
+      domain_order_index: 0,
+    }],
+    signals: [
+      {
+        signal_id: 'signal-1',
+        signal_key: 'results',
+        signal_label: 'Results',
+        signal_description: null,
+        signal_order_index: 0,
+        domain_id: 'domain-1',
+      },
+      {
+        signal_id: 'signal-2',
+        signal_key: 'process',
+        signal_label: 'Process',
+        signal_description: null,
+        signal_order_index: 1,
+        domain_id: 'domain-1',
+      },
+      {
+        signal_id: 'signal-3',
+        signal_key: 'vision',
+        signal_label: 'Vision',
+        signal_description: null,
+        signal_order_index: 2,
+        domain_id: 'domain-1',
+      },
+      {
+        signal_id: 'signal-4',
+        signal_key: 'people',
+        signal_label: 'People',
+        signal_description: null,
+        signal_order_index: 3,
+        domain_id: 'domain-1',
+      },
+    ],
+    language: {
+      DOMAIN_FRAMING: [{
+        domain_key: 'leadership-approach',
+        section_title: 'Leadership approach',
+        intro_paragraph: 'Intro',
+        meaning_paragraph: 'Meaning',
+        bridge_to_signals: 'Bridge',
+        blueprint_context_line: 'Blueprint',
+      }],
+      HERO_PAIRS: [
+        'results_process',
+        'results_vision',
+        'results_people',
+        'process_vision',
+        'process_people',
+        'vision_people',
+      ].map((pair_key) => ({
+        pair_key,
+        hero_headline: `Hero ${pair_key}`,
+        hero_subheadline: 'Subtitle',
+        hero_opening: 'Opening',
+        hero_strength_paragraph: 'Strength',
+        hero_tension_paragraph: 'Tension',
+        hero_close_paragraph: 'Close',
+      })),
+      DRIVER_CLAIMS: [
+        {
+          domain_key: 'leadership-approach',
+          pair_key: 'results_vision',
+          signal_key: 'vision',
+          driver_role: 'primary_driver',
+          claim_type: 'driver_primary',
+          claim_text: 'Vision primary',
+          materiality: 'core',
+          priority: 1,
+        },
+        {
+          domain_key: 'leadership-approach',
+          pair_key: 'results_vision',
+          signal_key: 'results',
+          driver_role: 'secondary_driver',
+          claim_type: 'driver_secondary',
+          claim_text: 'Results secondary',
+          materiality: 'core',
+          priority: 2,
+        },
+        {
+          domain_key: 'leadership-approach',
+          pair_key: 'results_vision',
+          signal_key: 'people',
+          driver_role: 'supporting_context',
+          claim_type: 'driver_supporting_context',
+          claim_text: 'People supporting',
+          materiality: 'supporting',
+          priority: 3,
+        },
+        {
+          domain_key: 'leadership-approach',
+          pair_key: 'results_vision',
+          signal_key: 'process',
+          driver_role: 'range_limitation',
+          claim_type: 'driver_range_limitation',
+          claim_text: 'Process range',
+          materiality: 'material_underplay',
+          priority: 4,
+        },
+      ],
+      SIGNAL_CHAPTERS: ['results', 'process', 'vision', 'people'].map((signal_key) => ({
+        signal_key,
+        position_primary_label: 'Primary',
+        position_secondary_label: 'Secondary',
+        position_supporting_label: 'Supporting',
+        position_underplayed_label: 'Underplayed',
+        chapter_intro_primary: 'A',
+        chapter_intro_secondary: 'B',
+        chapter_intro_supporting: 'C',
+        chapter_intro_underplayed: 'D',
+        chapter_how_it_shows_up: 'E',
+        chapter_value_outcome: 'F',
+        chapter_value_team_effect: 'G',
+        chapter_risk_behaviour: 'H',
+        chapter_risk_impact: 'I',
+        chapter_development: 'J',
+      })),
+      BALANCING_SECTIONS: [
+        'results_process',
+        'results_vision',
+        'results_people',
+        'process_vision',
+        'process_people',
+        'vision_people',
+      ].map((pair_key) => ({
+        pair_key,
+        balancing_section_title: 'Balance',
+        current_pattern_paragraph: 'Pattern',
+        practical_meaning_paragraph: 'Meaning',
+        system_risk_paragraph: 'Risk',
+        rebalance_intro: 'Intro',
+        rebalance_action_1: 'A1',
+        rebalance_action_2: 'A2',
+        rebalance_action_3: 'A3',
+      })),
+      PAIR_SUMMARIES: [
+        'results_process',
+        'results_vision',
+        'results_people',
+        'process_vision',
+        'process_people',
+        'vision_people',
+      ].map((pair_key) => ({
+        pair_key,
+        pair_section_title: 'Section',
+        pair_headline: 'Headline',
+        pair_opening_paragraph: 'Opening',
+        pair_strength_paragraph: 'Strength',
+        pair_tension_paragraph: 'Tension',
+        pair_close_paragraph: 'Close',
+      })),
+      APPLICATION_STATEMENTS: ['results', 'process', 'vision', 'people'].map((signal_key) => ({
+        signal_key,
+        strength_statement_1: 'S1',
+        strength_statement_2: 'S2',
+        watchout_statement_1: 'W1',
+        watchout_statement_2: 'W2',
+        development_statement_1: 'D1',
+        development_statement_2: 'D2',
+      })),
+    },
+  });
+
+  const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
+  const issue = readiness.issues.find((entry) => entry.code === 'driver_claims_coverage_incomplete');
+
+  assert.equal(readiness.isReady, false);
+  assert.equal(issue?.severity, 'blocking');
+  assert.ok(issue?.relatedKeys?.some((key) => key.includes('leadership-approach:results_vision:results:primary_driver:0')));
 });
 
 test('existing multi-domain runtime loading remains available through the engine repository path', async () => {

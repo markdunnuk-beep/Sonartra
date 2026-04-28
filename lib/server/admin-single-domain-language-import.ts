@@ -5,6 +5,11 @@ import { revalidatePath } from 'next/cache';
 import {
   getSingleDomainLanguageDatasetDefinition,
 } from '@/lib/admin/single-domain-language-datasets';
+import {
+  getExpectedDriverClaimTuples,
+  hasLeadershipCanonicalSignalSet,
+  getSingleDomainCanonicalPairKeys,
+} from '@/lib/assessment-language/single-domain-canonical';
 import type {
   SingleDomainLanguageImportPreviewGroup,
 } from '@/lib/admin/single-domain-language-import';
@@ -50,6 +55,10 @@ type AssessmentVersionImportTarget = {
 
 type AssessmentSignalRow = {
   signal_key: string;
+};
+
+type AssessmentDomainRow = {
+  domain_key: string;
 };
 
 type ImportParseError = {
@@ -284,42 +293,104 @@ async function loadAssessmentSignalKeys(
   return result.rows.map((row) => row.signal_key);
 }
 
+async function loadAssessmentDomainKey(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<string | null> {
+  const result = await db.query<AssessmentDomainRow>(
+    `
+    SELECT domain_key
+    FROM domains
+    WHERE assessment_version_id = $1
+    ORDER BY order_index ASC, id ASC
+    LIMIT 1
+    `,
+    [assessmentVersionId],
+  );
+
+  return result.rows[0]?.domain_key ?? null;
+}
+
 function buildDatasetValidationErrors<TKey extends SingleDomainLanguageDatasetKey>(
   datasetKey: TKey,
   rows: readonly SingleDomainLanguageDatasetRowMap[TKey][],
+  currentDomainKey: string | null,
   expectedSignalKeys: readonly string[],
 ): readonly ImportValidationError[] {
-  if (datasetKey !== 'SIGNAL_CHAPTERS') {
-    return [];
-  }
-
   const issues: ImportValidationError[] = [];
-  const expectedSet = new Set(expectedSignalKeys);
-  const rowSignalKeys = rows.map((row) => String((row as SignalChaptersRow).signal_key));
+  if (datasetKey === 'SIGNAL_CHAPTERS') {
+    const expectedSet = new Set(expectedSignalKeys);
+    const rowSignalKeys = rows.map((row) => String((row as SignalChaptersRow).signal_key));
 
-  if (rows.length !== expectedSignalKeys.length) {
-    issues.push({
-      lineNumber: null,
-      message: `SIGNAL_CHAPTERS row count mismatch: expected ${expectedSignalKeys.length} row(s) to match authored signals, found ${rows.length}.`,
+    if (rows.length !== expectedSignalKeys.length) {
+      issues.push({
+        lineNumber: null,
+        message: `SIGNAL_CHAPTERS row count mismatch: expected ${expectedSignalKeys.length} row(s) to match authored signals, found ${rows.length}.`,
+      });
+    }
+
+    rowSignalKeys.forEach((signalKey, index) => {
+      if (!expectedSet.has(signalKey)) {
+        issues.push({
+          lineNumber: index + 2,
+          message: `Line ${index + 2}: invalid signal_key "${signalKey}". Expected one of: ${expectedSignalKeys.join(', ')}.`,
+        });
+      }
     });
+
+    const missingSignalKeys = expectedSignalKeys.filter((signalKey) => !rowSignalKeys.includes(signalKey));
+    if (missingSignalKeys.length > 0) {
+      issues.push({
+        lineNumber: null,
+        message: `SIGNAL_CHAPTERS is missing authored signal_key value(s): ${missingSignalKeys.join(', ')}.`,
+      });
+    }
+
+    return issues;
   }
 
-  rowSignalKeys.forEach((signalKey, index) => {
-    if (!expectedSet.has(signalKey)) {
+  if (datasetKey !== 'DRIVER_CLAIMS' || !currentDomainKey || !hasLeadershipCanonicalSignalSet(expectedSignalKeys)) {
+    return issues;
+  }
+
+  const expectedTuples = getExpectedDriverClaimTuples({
+    domainKey: currentDomainKey,
+    signalKeys: expectedSignalKeys,
+    pairKeys: getSingleDomainCanonicalPairKeys(expectedSignalKeys),
+  });
+  const expectedTupleKeys = new Set(
+    expectedTuples.map((tuple) => `${tuple.domainKey}|${tuple.pairKey}|${tuple.signalKey}|${tuple.driverRole}`),
+  );
+  const actualTupleCounts = new Map<string, number>();
+
+  rows.forEach((row, index) => {
+    const driverRow = row as SingleDomainLanguageDatasetRowMap['DRIVER_CLAIMS'];
+    const tupleKey = [
+      driverRow.domain_key,
+      driverRow.pair_key,
+      driverRow.signal_key,
+      driverRow.driver_role,
+    ].join('|');
+    actualTupleCounts.set(tupleKey, (actualTupleCounts.get(tupleKey) ?? 0) + 1);
+
+    if (!expectedTupleKeys.has(tupleKey)) {
       issues.push({
         lineNumber: index + 2,
-        message: `Line ${index + 2}: invalid signal_key "${signalKey}". Expected one of: ${expectedSignalKeys.join(', ')}.`,
+        message: `Line ${index + 2}: DRIVER_CLAIMS row must match an exact runtime lookup tuple. Received ${tupleKey}.`,
       });
     }
   });
 
-  const missingSignalKeys = expectedSignalKeys.filter((signalKey) => !rowSignalKeys.includes(signalKey));
-  if (missingSignalKeys.length > 0) {
-    issues.push({
-      lineNumber: null,
-      message: `SIGNAL_CHAPTERS is missing authored signal_key value(s): ${missingSignalKeys.join(', ')}.`,
-    });
-  }
+  expectedTuples.forEach((tuple) => {
+    const tupleKey = `${tuple.domainKey}|${tuple.pairKey}|${tuple.signalKey}|${tuple.driverRole}`;
+    const count = actualTupleCounts.get(tupleKey) ?? 0;
+    if (count !== 1) {
+      issues.push({
+        lineNumber: null,
+        message: `DRIVER_CLAIMS must contain exactly one row for ${tupleKey}. Found ${count}.`,
+      });
+    }
+  });
 
   return issues;
 }
@@ -472,12 +543,16 @@ export async function previewSingleDomainLanguageDatasetForAssessmentVersionWith
     command.assessmentVersionId,
   );
   const planErrors = buildPlanErrors(command.datasetKey, assessmentVersion);
+  const currentDomainKey = assessmentVersion
+    ? await loadAssessmentDomainKey(dependencies.db, assessmentVersion.assessmentVersionId)
+    : null;
   const expectedSignalKeys = assessmentVersion
     ? await loadAssessmentSignalKeys(dependencies.db, assessmentVersion.assessmentVersionId)
     : [];
   const datasetValidationErrors = buildDatasetValidationErrors(
     command.datasetKey,
     parsed.rows,
+    currentDomainKey,
     expectedSignalKeys,
   );
   const bundle = assessmentVersion

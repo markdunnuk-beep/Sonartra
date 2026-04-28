@@ -1,6 +1,7 @@
 import {
   resolveSingleDomainPairKey,
 } from '@/lib/assessment-language/single-domain-pair-keys';
+import { getSingleDomainCanonicalPairKeys } from '@/lib/assessment-language/single-domain-canonical';
 import { SINGLE_DOMAIN_DRIVER_ROLE_TO_CLAIM_TYPE } from '@/lib/assessment-language/single-domain-narrative-schema';
 import type {
   SingleDomainApplicationImportRow,
@@ -20,7 +21,6 @@ import {
   SINGLE_DOMAIN_CLAIM_OWNERSHIP_KEYS,
   SINGLE_DOMAIN_DRIVER_ROLES,
 } from '@/lib/assessment-language/single-domain-narrative-types';
-import { buildSingleDomainPairKey } from '@/lib/types/single-domain-runtime';
 
 export type SingleDomainImportValidationIssue = {
   lineNumber: number | null;
@@ -521,47 +521,12 @@ export function buildSingleDomainImportValidationContext(params: {
   currentDomainKey: string | null;
   signalKeys: readonly string[];
 }): SingleDomainImportValidationContext {
-  const canonicalSignals = ['results', 'process', 'vision', 'people'] as const;
-  const canonicalSignalSet = new Set(canonicalSignals);
-  const hasCanonicalSignalSet = params.signalKeys.length === canonicalSignals.length
-    && params.signalKeys.every((signalKey) => canonicalSignalSet.has(signalKey as (typeof canonicalSignals)[number]));
-  if (hasCanonicalSignalSet) {
-    return {
-      datasetKey: params.datasetKey,
-      targetSection: SINGLE_DOMAIN_IMPORT_DATASET_SECTION_MAP[params.datasetKey],
-      currentDomainKey: params.currentDomainKey,
-      signalKeys: [...params.signalKeys],
-      pairKeys: [
-        'results_process',
-        'results_vision',
-        'results_people',
-        'process_vision',
-        'process_people',
-        'vision_people',
-      ],
-    };
-  }
-
-  const pairKeys: string[] = [];
-
-  for (let leftIndex = 0; leftIndex < params.signalKeys.length; leftIndex += 1) {
-    for (let rightIndex = leftIndex + 1; rightIndex < params.signalKeys.length; rightIndex += 1) {
-      const left = params.signalKeys[leftIndex];
-      const right = params.signalKeys[rightIndex];
-      if (!left || !right) {
-        continue;
-      }
-
-      pairKeys.push(buildSingleDomainPairKey(left, right));
-    }
-  }
-
   return {
     datasetKey: params.datasetKey,
     targetSection: SINGLE_DOMAIN_IMPORT_DATASET_SECTION_MAP[params.datasetKey],
     currentDomainKey: params.currentDomainKey,
     signalKeys: [...params.signalKeys],
-    pairKeys,
+    pairKeys: [...getSingleDomainCanonicalPairKeys(params.signalKeys)],
   };
 }
 

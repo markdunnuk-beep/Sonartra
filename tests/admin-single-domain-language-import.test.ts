@@ -148,6 +148,12 @@ function createFakeDb(seed?: Partial<SingleDomainTableState>) {
         };
       }
 
+      if (sql.includes('FROM domains') && sql.includes('WHERE assessment_version_id = $1')) {
+        return {
+          rows: [{ domain_key: 'leadership-style' }] as T[],
+        };
+      }
+
       if (sql.includes('FROM assessment_version_single_domain_signal_chapters')) {
         return { rows: [...state.signalChapters] as T[] };
       }
@@ -311,10 +317,60 @@ test('DRIVER_CLAIMS validates role claim type and materiality mapping', async ()
   });
 
   assert.equal(result.success, false);
-  assert.equal(result.validationErrors.length, 1);
   assert.match(
-    result.validationErrors[0]?.message ?? '',
+    result.validationErrors.map((error) => error.message).join('\n'),
     /claim_type" must be "driver_secondary" when driver_role is "secondary_driver/i,
+  );
+});
+
+test('DRIVER_CLAIMS rejects rows that do not match the exact runtime lookup tuple', async () => {
+  const fake = createFakeDb({
+    signals: ['results', 'process', 'vision', 'people'],
+  });
+
+  const result = await importSingleDomainLanguageDatasetForAssessmentVersionWithDependencies({
+    assessmentVersionId: 'version-draft',
+    datasetKey: 'DRIVER_CLAIMS',
+    rawInput: [
+      'domain_key|pair_key|signal_key|driver_role|claim_type|claim_text|materiality|priority',
+      'leadership-style|results_vision|vision|primary_driver|driver_primary|Vision leads this pair.|core|1',
+      'leadership-style|results_vision|results|secondary_driver|driver_secondary|Results supports this pair.|core|2',
+      'leadership-style|results_vision|people|supporting_context|driver_supporting_context|People supports this pair.|supporting|3',
+      'leadership-style|results_vision|process|range_limitation|driver_range_limitation|Process is underplayed.|material_underplay|4',
+      'leadership-style|results_process|process|primary_driver|driver_primary|Process leads this pair.|core|1',
+      'leadership-style|results_process|results|secondary_driver|driver_secondary|Results supports this pair.|core|2',
+      'leadership-style|results_process|vision|supporting_context|driver_supporting_context|Vision supports this pair.|supporting|3',
+      'leadership-style|results_process|people|range_limitation|driver_range_limitation|People is underplayed.|material_underplay|4',
+      'leadership-style|results_people|results|primary_driver|driver_primary|Results leads this pair.|core|1',
+      'leadership-style|results_people|people|secondary_driver|driver_secondary|People supports this pair.|core|2',
+      'leadership-style|results_people|process|supporting_context|driver_supporting_context|Process supports this pair.|supporting|3',
+      'leadership-style|results_people|vision|range_limitation|driver_range_limitation|Vision is underplayed.|material_underplay|4',
+      'leadership-style|process_vision|process|primary_driver|driver_primary|Process leads this pair.|core|1',
+      'leadership-style|process_vision|vision|secondary_driver|driver_secondary|Vision supports this pair.|core|2',
+      'leadership-style|process_vision|results|supporting_context|driver_supporting_context|Results supports this pair.|supporting|3',
+      'leadership-style|process_vision|people|range_limitation|driver_range_limitation|People is underplayed.|material_underplay|4',
+      'leadership-style|process_people|process|primary_driver|driver_primary|Process leads this pair.|core|1',
+      'leadership-style|process_people|people|secondary_driver|driver_secondary|People supports this pair.|core|2',
+      'leadership-style|process_people|results|supporting_context|driver_supporting_context|Results supports this pair.|supporting|3',
+      'leadership-style|process_people|vision|range_limitation|driver_range_limitation|Vision is underplayed.|material_underplay|4',
+      'leadership-style|vision_people|vision|primary_driver|driver_primary|Vision leads this pair.|core|1',
+      'leadership-style|vision_people|people|secondary_driver|driver_secondary|People supports this pair.|core|2',
+      'leadership-style|vision_people|process|supporting_context|driver_supporting_context|Process supports this pair.|supporting|3',
+      'leadership-style|vision_people|results|range_limitation|driver_range_limitation|Results is underplayed.|material_underplay|4',
+    ].join('\n'),
+  }, {
+    db: fake.db,
+    revalidatePath() {},
+  });
+
+  assert.equal(result.success, false);
+  assert.match(
+    result.validationErrors.map((error) => error.message).join('\n'),
+    /results_vision\|vision\|primary_driver/i,
+  );
+  assert.match(
+    result.validationErrors.map((error) => error.message).join('\n'),
+    /results_vision\|results\|primary_driver/i,
   );
 });
 
@@ -334,6 +390,8 @@ test('DRIVER_CLAIMS requires positive integer priority', async () => {
   });
 
   assert.equal(result.success, false);
-  assert.equal(result.validationErrors.length, 1);
-  assert.match(result.validationErrors[0]?.message ?? '', /priority" must be a positive integer/i);
+  assert.match(
+    result.validationErrors.map((error) => error.message).join('\n'),
+    /priority" must be a positive integer/i,
+  );
 });
