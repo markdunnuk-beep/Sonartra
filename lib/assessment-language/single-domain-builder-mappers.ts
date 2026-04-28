@@ -174,9 +174,6 @@ function buildValidationMessages(
     messages.push(
       'Driver-role validation will enforce primary, secondary, supporting context, and range limitation ownership once section-native imports are wired.',
     );
-    messages.push(
-      'Signal chapters compatibility rows are still required at runtime: import exactly one SIGNAL_CHAPTERS row per authored signal key.',
-    );
   }
 
   if (section === 'limitation') {

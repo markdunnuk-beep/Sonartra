@@ -17,7 +17,7 @@ import {
   type SingleDomainLanguageImportState,
 } from '@/lib/admin/single-domain-language-import';
 import {
-  SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS,
+  ADMIN_SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS,
 } from '@/lib/admin/single-domain-language-datasets';
 import { importSingleDomainLanguageDatasetAction } from '@/lib/server/admin-single-domain-language-import-actions';
 import type {
@@ -134,9 +134,9 @@ export function SingleDomainLanguageImport({
     [assessmentVersionId],
   );
 
-  const selectedDefinition = SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS.find(
+  const selectedDefinition = ADMIN_SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS.find(
     (definition) => definition.key === selectedDatasetKey,
-  ) ?? SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS[0];
+  ) ?? ADMIN_SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS[0];
   const selectedValidation = datasetValidation.find((dataset) => dataset.datasetKey === selectedDatasetKey)
     ?? datasetValidation[0];
   const inlineError =

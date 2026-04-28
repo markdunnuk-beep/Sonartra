@@ -4,6 +4,18 @@ import {
   type SingleDomainLanguageDatasetKey,
 } from '@/lib/types/single-domain-language';
 
+export const ADMIN_SINGLE_DOMAIN_LANGUAGE_DATASET_KEYS = [
+  'DOMAIN_FRAMING',
+  'HERO_PAIRS',
+  'DRIVER_CLAIMS',
+  'BALANCING_SECTIONS',
+  'PAIR_SUMMARIES',
+  'APPLICATION_STATEMENTS',
+] as const satisfies readonly SingleDomainLanguageDatasetKey[];
+
+export type AdminSingleDomainLanguageDatasetKey =
+  typeof ADMIN_SINGLE_DOMAIN_LANGUAGE_DATASET_KEYS[number];
+
 export type SingleDomainLanguageDatasetDefinition = {
   key: SingleDomainLanguageDatasetKey;
   label: string;
@@ -59,6 +71,16 @@ export const SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS = Object.freeze(
     } satisfies SingleDomainLanguageDatasetDefinition),
   ),
 );
+
+export const ADMIN_SINGLE_DOMAIN_LANGUAGE_DATASET_DEFINITIONS = Object.freeze(
+  ADMIN_SINGLE_DOMAIN_LANGUAGE_DATASET_KEYS.map((key) =>
+    getSingleDomainLanguageDatasetDefinition(key),
+  ),
+);
+
+export function isAdminSingleDomainLanguageDatasetKey(value: string): value is AdminSingleDomainLanguageDatasetKey {
+  return ADMIN_SINGLE_DOMAIN_LANGUAGE_DATASET_KEYS.includes(value as AdminSingleDomainLanguageDatasetKey);
+}
 
 export function getSingleDomainLanguageDatasetDefinition(
   datasetKey: SingleDomainLanguageDatasetKey,

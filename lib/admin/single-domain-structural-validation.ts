@@ -422,15 +422,6 @@ export function buildSingleDomainLanguageValidation(params: {
           : undefined,
     }),
     createLanguageDatasetValidation({
-      datasetKey: 'SIGNAL_CHAPTERS',
-      actualRowCount: params.languageBundle.SIGNAL_CHAPTERS.length,
-      expectedRowCount: signalCount,
-      countRule: 'exact',
-      successDetail: `SIGNAL_CHAPTERS matches the current authored signal count (${signalCount}).`,
-      failureMessage: `SIGNAL_CHAPTERS must contain exactly ${signalCount} row${signalCount === 1 ? '' : 's'} to match the current authored signal count.`,
-      waitingDetail: signalCount === 0 ? 'Waiting on authored signals before signal chapters can be assessed.' : undefined,
-    }),
-    createLanguageDatasetValidation({
       datasetKey: 'BALANCING_SECTIONS',
       actualRowCount: params.languageBundle.BALANCING_SECTIONS.length,
       expectedRowCount: expectedPairCount,

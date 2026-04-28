@@ -292,7 +292,7 @@ test('hero pair completeness derives from the current signal-derived pair count'
   assert.equal(heroPairs?.isReady, false);
 });
 
-test('signal chapters and application statements completeness derive from the current signal count', () => {
+test('application statements completeness derives from the current signal count while signal chapters stay out of builder readiness', () => {
   const validation = buildSingleDomainLanguageValidation({
     authoredDomains: [{
       domainId: 'domain-1',
@@ -346,9 +346,7 @@ test('signal chapters and application statements completeness derive from the cu
   const applicationStatements = validation.datasets.find((dataset) => dataset.datasetKey === 'APPLICATION_STATEMENTS');
 
   assert.equal(validation.signalCount, 2);
-  assert.equal(signalChapters?.expectedRowCount, 2);
-  assert.equal(signalChapters?.isReady, false);
-  assert.equal(signalChapters?.status, 'attention');
+  assert.equal(signalChapters, undefined);
   assert.equal(applicationStatements?.expectedRowCount, 2);
   assert.equal(applicationStatements?.isReady, false);
   assert.equal(applicationStatements?.status, 'attention');
@@ -485,13 +483,11 @@ test('language validation never treats zero expected rows as ready when prerequi
   });
 
   const heroPairs = validation.datasets.find((dataset) => dataset.datasetKey === 'HERO_PAIRS');
-  const signalChapters = validation.datasets.find((dataset) => dataset.datasetKey === 'SIGNAL_CHAPTERS');
 
   assert.equal(validation.overallReady, false);
   assert.equal(heroPairs?.expectedRowCount, 0);
   assert.equal(heroPairs?.isReady, false);
   assert.equal(heroPairs?.status, 'waiting');
   assert.match(heroPairs?.detail ?? '', /Waiting on authored signals/i);
-  assert.equal(signalChapters?.expectedRowCount, 0);
-  assert.equal(signalChapters?.status, 'waiting');
+  assert.equal(validation.datasets.some((dataset) => dataset.datasetKey === 'SIGNAL_CHAPTERS'), false);
 });

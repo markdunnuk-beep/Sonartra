@@ -5,11 +5,8 @@ import { useFormStatus } from 'react-dom';
 
 import { useAdminAssessmentAuthoring } from '@/components/admin/admin-assessment-authoring-context';
 import { LabelPill, SurfaceCard, cn } from '@/components/shared/user-app-ui';
-import { initialSingleDomainLanguageImportState } from '@/lib/admin/single-domain-language-import';
 import { initialSingleDomainNarrativeImportState } from '@/lib/admin/single-domain-narrative-import';
-import { SIGNAL_CHAPTERS_COLUMNS } from '@/lib/types/single-domain-language';
 import type { SingleDomainNarrativeBuilderSection } from '@/lib/assessment-language/single-domain-builder-mappers';
-import { importSingleDomainLanguageDatasetAction } from '@/lib/server/admin-single-domain-language-import-actions';
 import { importSingleDomainNarrativeSectionAction } from '@/lib/server/admin-single-domain-narrative-import-actions';
 
 const DRIVER_ROLE_LABELS = [
@@ -149,34 +146,9 @@ export function SingleDomainSectionPanel({
     importAction ?? disabledImportAction,
     initialImportState,
   );
-  const signalChaptersDataset = assessment.singleDomainLanguageValidation.datasets.find(
-    (dataset) => dataset.datasetKey === 'SIGNAL_CHAPTERS',
-  ) ?? null;
-  const signalChapterRowsBySignal = new Set(assessment.singleDomainLanguageBundle.SIGNAL_CHAPTERS.map((row) => row.signal_key));
-  const authoredSignalKeys = assessment.authoredDomains.flatMap((domain) => domain.signals.map((signal) => signal.signalKey));
-  const missingSignalChapterKeys = authoredSignalKeys.filter((signalKey) => !signalChapterRowsBySignal.has(signalKey));
-  const signalChaptersInitialImportState = {
-    ...initialSingleDomainLanguageImportState,
-    datasetKey: 'SIGNAL_CHAPTERS' as const,
-  };
-  const signalChaptersImportAction = draftVersionId
-    ? importSingleDomainLanguageDatasetAction.bind(null, { assessmentVersionId: draftVersionId })
-    : null;
-  const disabledSignalChaptersImportAction = async () => signalChaptersInitialImportState;
-  const [signalChaptersImportState, signalChaptersFormAction] = useActionState(
-    signalChaptersImportAction ?? disabledSignalChaptersImportAction,
-    signalChaptersInitialImportState,
-  );
   const parseErrors = importState.parseErrors.map((issue) => issue.message);
   const validationErrors = importState.validationErrors.map((issue) => issue.message);
   const planErrors = importState.planErrors.map((issue) => issue.message);
-  const signalChaptersErrors = [
-    ...(signalChaptersImportState.parseErrors.map((issue) => issue.message)),
-    ...(signalChaptersImportState.validationErrors.map((issue) => issue.message)),
-    ...(signalChaptersImportState.planErrors.map((issue) => issue.message)),
-    ...(signalChaptersImportState.executionError ? [signalChaptersImportState.executionError] : []),
-    ...(signalChaptersImportState.formError ? [signalChaptersImportState.formError] : []),
-  ];
   const canImport = Boolean(draftVersionId);
 
   return (
@@ -262,51 +234,6 @@ export function SingleDomainSectionPanel({
           </div>
         </div>
       ) : null}
-      {section.key === 'drivers' ? (
-        <div className="space-y-3 rounded-[0.95rem] border border-[rgba(126,179,255,0.18)] bg-[rgba(126,179,255,0.05)] p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-white">Signal chapters compatibility import</p>
-              <p className="mt-2 text-sm leading-6 text-white/62">
-                Runtime readiness still requires one <code>SIGNAL_CHAPTERS</code> row per authored signal key.
-              </p>
-            </div>
-            <LabelPill className={signalChaptersDataset?.status === 'ready'
-              ? 'border-[rgba(116,209,177,0.18)] bg-[rgba(116,209,177,0.08)] text-[rgba(214,246,233,0.86)]'
-              : 'border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.88)]'}
-            >
-              {signalChaptersDataset?.actualRowCount ?? 0}/{signalChaptersDataset?.expectedRowCount ?? 0}
-            </LabelPill>
-          </div>
-          <p className="text-xs uppercase tracking-[0.18em] text-white/46">Required header</p>
-          <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-[0.85rem] border border-white/8 bg-black/20 p-3 text-xs leading-6 text-white/72">
-            {SIGNAL_CHAPTERS_COLUMNS.join('|')}
-          </pre>
-          <form action={signalChaptersFormAction} className="space-y-3">
-            <input name="datasetKey" type="hidden" value="SIGNAL_CHAPTERS" />
-            <textarea
-              className="sonartra-focus-ring min-h-[140px] w-full rounded-[1rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28 hover:border-white/14 focus:border-[rgba(142,162,255,0.36)]"
-              defaultValue={signalChaptersImportState.rawInput}
-              name="rawInput"
-              placeholder="Paste SIGNAL_CHAPTERS rows in pipe-delimited format."
-            />
-            <ImportSubmitButton disabled={!canImport} />
-          </form>
-          {missingSignalChapterKeys.length > 0 ? (
-            <p className="text-sm leading-6 text-[rgba(255,227,187,0.9)]">
-              Missing signal_keys: {missingSignalChapterKeys.join(', ')}
-            </p>
-          ) : null}
-          {signalChaptersErrors.length > 0 ? (
-            <ImportIssueList
-              label="Signal chapters import issues"
-              messages={signalChaptersErrors}
-              tone="danger"
-            />
-          ) : null}
-        </div>
-      ) : null}
-
       {section.key === 'application' ? (
         <div className="space-y-3">
           <p className="text-sm font-medium text-white">Application focus</p>

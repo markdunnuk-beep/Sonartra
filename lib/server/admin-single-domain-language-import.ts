@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import {
   getSingleDomainLanguageDatasetDefinition,
+  isAdminSingleDomainLanguageDatasetKey,
 } from '@/lib/admin/single-domain-language-datasets';
 import {
   getExpectedDriverClaimTuples,
@@ -20,7 +21,6 @@ import {
   validateSingleDomainDatasetHeaders,
 } from '@/lib/validation/single-domain-language';
 import type {
-  SignalChaptersRow,
   SingleDomainLanguageDatasetKey,
   SingleDomainLanguageDatasetRowMap,
 } from '@/lib/types/single-domain-language';
@@ -79,7 +79,11 @@ type ParseDatasetResult<TKey extends SingleDomainLanguageDatasetKey> = {
 };
 
 export type SingleDomainLanguageImportPlanError = {
-  code: 'ASSESSMENT_VERSION_NOT_FOUND' | 'ASSESSMENT_VERSION_NOT_EDITABLE' | 'INVALID_DATASET_KEY';
+  code:
+    | 'ASSESSMENT_VERSION_NOT_FOUND'
+    | 'ASSESSMENT_VERSION_NOT_EDITABLE'
+    | 'INVALID_DATASET_KEY'
+    | 'DATASET_NOT_AUTHORABLE';
   message: string;
 };
 
@@ -317,37 +321,6 @@ function buildDatasetValidationErrors<TKey extends SingleDomainLanguageDatasetKe
   expectedSignalKeys: readonly string[],
 ): readonly ImportValidationError[] {
   const issues: ImportValidationError[] = [];
-  if (datasetKey === 'SIGNAL_CHAPTERS') {
-    const expectedSet = new Set(expectedSignalKeys);
-    const rowSignalKeys = rows.map((row) => String((row as SignalChaptersRow).signal_key));
-
-    if (rows.length !== expectedSignalKeys.length) {
-      issues.push({
-        lineNumber: null,
-        message: `SIGNAL_CHAPTERS row count mismatch: expected ${expectedSignalKeys.length} row(s) to match authored signals, found ${rows.length}.`,
-      });
-    }
-
-    rowSignalKeys.forEach((signalKey, index) => {
-      if (!expectedSet.has(signalKey)) {
-        issues.push({
-          lineNumber: index + 2,
-          message: `Line ${index + 2}: invalid signal_key "${signalKey}". Expected one of: ${expectedSignalKeys.join(', ')}.`,
-        });
-      }
-    });
-
-    const missingSignalKeys = expectedSignalKeys.filter((signalKey) => !rowSignalKeys.includes(signalKey));
-    if (missingSignalKeys.length > 0) {
-      issues.push({
-        lineNumber: null,
-        message: `SIGNAL_CHAPTERS is missing authored signal_key value(s): ${missingSignalKeys.join(', ')}.`,
-      });
-    }
-
-    return issues;
-  }
-
   if (datasetKey !== 'DRIVER_CLAIMS' || !currentDomainKey) {
     return issues;
   }
@@ -438,6 +411,13 @@ function buildPlanErrors(
     return [{
       code: 'INVALID_DATASET_KEY',
       message: `Invalid single-domain dataset key "${datasetKey}".`,
+    }];
+  }
+
+  if (!isAdminSingleDomainLanguageDatasetKey(datasetKey)) {
+    return [{
+      code: 'DATASET_NOT_AUTHORABLE',
+      message: `${datasetKey} is no longer available in the admin single-domain language importer.`,
     }];
   }
 
