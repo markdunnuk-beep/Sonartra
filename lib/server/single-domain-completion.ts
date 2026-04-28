@@ -14,7 +14,6 @@ import type {
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
-  SignalChaptersRow,
 } from '@/lib/types/single-domain-language';
 import type {
   SingleDomainApplicationStatement,
@@ -133,20 +132,6 @@ function getSignalPosition(rank: number, signalCount: number): SingleDomainSigna
   return 'supporting';
 }
 
-type SignalLanguageFallbackWarning = {
-  signalKey: string;
-  missingRole: SingleDomainSignalPosition;
-  fallbackSource: string;
-  generated: boolean;
-};
-
-type DriverClaimResolutionWarning = {
-  pairKey: string;
-  signalKey: string;
-  driverRole: DriverClaimsRow['driver_role'];
-  fallbackSource: string;
-};
-
 type DriverClaimSourceDiagnostic = {
   pairKey: string;
   signalKey: string;
@@ -160,11 +145,11 @@ type SelectedSignalText = {
   generated: boolean;
 };
 
-const POSITION_WARNING_LABELS: Record<SingleDomainSignalPosition, string> = {
-  primary: 'primary_driver',
-  secondary: 'secondary_driver',
-  supporting: 'supporting_context',
-  underplayed: 'range_limitation',
+const POSITION_LABELS: Record<SingleDomainSignalPosition, string> = {
+  primary: 'Primary',
+  secondary: 'Secondary',
+  supporting: 'Supporting',
+  underplayed: 'Underplayed',
 };
 
 function getDriverRoleForPosition(position: SingleDomainSignalPosition): DriverClaimsRow['driver_role'] {
@@ -179,191 +164,6 @@ function getDriverRoleForPosition(position: SingleDomainSignalPosition): DriverC
     default:
       return 'supporting_context';
   }
-}
-
-function includesMainDriverLanguage(value: string): boolean {
-  return /\bmain\s+driver\b/i.test(value);
-}
-
-function includesWeakerRangeLanguage(value: string): boolean {
-  return /\bweaker\s+range\b/i.test(value) || /\bunderplayed\b/i.test(value);
-}
-
-function isRoleCompatibleText(value: string, position: SingleDomainSignalPosition): boolean {
-  if (!hasText(value)) {
-    return false;
-  }
-
-  if (position !== 'primary' && includesMainDriverLanguage(value)) {
-    return false;
-  }
-
-  if (position !== 'underplayed' && includesWeakerRangeLanguage(value)) {
-    return false;
-  }
-
-  return true;
-}
-
-function neutralSignalText(params: {
-  signalLabel: string;
-  position: SingleDomainSignalPosition;
-  purpose: 'intro' | 'behaviour' | 'outcome' | 'team' | 'risk' | 'development';
-}): string {
-  const label = params.signalLabel;
-
-  if (params.position === 'underplayed') {
-    if (params.purpose === 'development') {
-      return `${label} is the range to bring in more deliberately. Developing this signal will help the pattern stay broader when pressure narrows attention.`;
-    }
-
-    if (params.purpose === 'risk') {
-      return `${label} is the range most likely to need deliberate attention. If it is not brought in, the pattern can become narrower than the situation requires.`;
-    }
-
-    return `${label} is the range to bring in more deliberately in this result. It can broaden the pattern when the current emphasis becomes too narrow.`;
-  }
-
-  if (params.position === 'supporting') {
-    if (params.purpose === 'development') {
-      return `${label} can be developed as a supporting influence. Used deliberately, it adds range without taking over the result pattern.`;
-    }
-
-    if (params.purpose === 'risk') {
-      return `${label} may be less visible than the leading signals. If it is not used deliberately, the result can lose some useful range.`;
-    }
-
-    return `${label} sits behind the leading pattern as supporting context. It adds useful range to how this result is expressed.`;
-  }
-
-  if (params.position === 'secondary') {
-    if (params.purpose === 'development') {
-      return `${label} can be developed as the strongest secondary signal. Used well, it strengthens the result without replacing the leading emphasis.`;
-    }
-
-    if (params.purpose === 'risk') {
-      return `${label} may narrow the result if it is used without enough balance. It is most useful when it supports the leading signal rather than overtaking it.`;
-    }
-
-    return `${label} provides the strongest secondary signal in this result. It reinforces the leading pattern and shapes how that pattern is expressed.`;
-  }
-
-  if (params.purpose === 'development') {
-    return `${label} can be developed as the leading signal by using it with enough range and balance. This keeps the result effective without becoming too narrow.`;
-  }
-
-  if (params.purpose === 'risk') {
-    return `${label} sets the leading emphasis in this result. If it is used too narrowly, the pattern can lose balance and reduce its effectiveness.`;
-  }
-
-  return `${label} is the leading signal in this result. It sets the main emphasis for how this pattern is expressed.`;
-}
-
-function selectSafeSignalText(params: {
-  signalKey: string;
-  signalLabel: string;
-  position: SingleDomainSignalPosition;
-  purpose: 'intro' | 'behaviour' | 'outcome' | 'team' | 'risk' | 'development';
-  preferredSource: string;
-  candidates: readonly {
-    source: string;
-    text: string | null | undefined;
-  }[];
-  warnings: SignalLanguageFallbackWarning[];
-}): SelectedSignalText {
-  for (const candidate of params.candidates) {
-    if (candidate.source === params.preferredSource && isRoleCompatibleText(candidate.text ?? '', params.position)) {
-      return {
-        text: candidate.text!.trim(),
-        source: candidate.source,
-        generated: false,
-      };
-    }
-  }
-
-  for (const candidate of params.candidates) {
-    if (isRoleCompatibleText(candidate.text ?? '', params.position)) {
-      params.warnings.push({
-        signalKey: params.signalKey,
-        missingRole: params.position,
-        fallbackSource: candidate.source,
-        generated: false,
-      });
-
-      return {
-        text: candidate.text!.trim(),
-        source: candidate.source,
-        generated: false,
-      };
-    }
-  }
-
-  params.warnings.push({
-    signalKey: params.signalKey,
-    missingRole: params.position,
-    fallbackSource: 'generated_neutral',
-    generated: true,
-  });
-
-  return {
-    text: neutralSignalText({
-      signalLabel: params.signalLabel,
-      position: params.position,
-      purpose: params.purpose,
-    }),
-    source: 'generated_neutral',
-    generated: true,
-  };
-}
-
-function formatSignalFallbackWarnings(warnings: readonly SignalLanguageFallbackWarning[]): readonly string[] {
-  const seen = new Set<string>();
-  const formatted: string[] = [];
-
-  warnings.forEach((warning) => {
-    const key = [
-      warning.signalKey,
-      warning.missingRole,
-      warning.fallbackSource,
-      warning.generated ? 'generated' : 'sourced',
-    ].join('|');
-    if (seen.has(key)) {
-      return;
-    }
-
-    seen.add(key);
-    formatted.push(
-      `single_domain_driver_language_fallback: signal_key=${warning.signalKey}; missing_role=${POSITION_WARNING_LABELS[warning.missingRole]}; fallback_source=${warning.fallbackSource}; generated=${warning.generated ? 'true' : 'false'}`,
-    );
-  });
-
-  return Object.freeze(formatted);
-}
-
-function formatDriverClaimResolutionWarnings(
-  warnings: readonly DriverClaimResolutionWarning[],
-): readonly string[] {
-  const seen = new Set<string>();
-  const formatted: string[] = [];
-
-  warnings.forEach((warning) => {
-    const key = [
-      warning.pairKey,
-      warning.signalKey,
-      warning.driverRole,
-      warning.fallbackSource,
-    ].join('|');
-    if (seen.has(key)) {
-      return;
-    }
-
-    seen.add(key);
-    formatted.push(
-      `single_domain_pair_driver_claim_missing: pair_key=${warning.pairKey}; signal_key=${warning.signalKey}; driver_role=${warning.driverRole}; fallback=${warning.fallbackSource}`,
-    );
-  });
-
-  return Object.freeze(formatted);
 }
 
 function formatDriverClaimSourceDiagnostics(
@@ -390,109 +190,6 @@ function formatDriverClaimSourceDiagnostics(
   });
 
   return Object.freeze(formatted);
-}
-
-function getPositionLabel(params: {
-  row: SignalChaptersRow;
-  signalKey: string;
-  signalLabel: string;
-  position: SingleDomainSignalPosition;
-  warnings: SignalLanguageFallbackWarning[];
-}): {
-  label: string;
-  text: string;
-  source: string;
-} {
-  switch (params.position) {
-    case 'primary': {
-      const selected = selectSafeSignalText({
-        signalKey: params.signalKey,
-        signalLabel: params.signalLabel,
-        position: params.position,
-        purpose: 'intro',
-        preferredSource: 'chapter_intro_primary',
-        warnings: params.warnings,
-        candidates: [
-          { source: 'chapter_intro_primary', text: params.row.chapter_intro_primary },
-          { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-          { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-          { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-        ],
-      });
-      return {
-        label: firstText(params.row.position_primary_label, 'Primary'),
-        text: selected.text,
-        source: selected.source,
-      };
-    }
-    case 'secondary': {
-      const selected = selectSafeSignalText({
-        signalKey: params.signalKey,
-        signalLabel: params.signalLabel,
-        position: params.position,
-        purpose: 'intro',
-        preferredSource: 'chapter_intro_secondary',
-        warnings: params.warnings,
-        candidates: [
-          { source: 'chapter_intro_secondary', text: params.row.chapter_intro_secondary },
-          { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-          { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-          { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-        ],
-      });
-      return {
-        label: firstText(params.row.position_secondary_label, 'Secondary'),
-        text: selected.text,
-        source: selected.source,
-      };
-    }
-    case 'underplayed': {
-      const selected = selectSafeSignalText({
-        signalKey: params.signalKey,
-        signalLabel: params.signalLabel,
-        position: params.position,
-        purpose: 'intro',
-        preferredSource: 'chapter_intro_underplayed',
-        warnings: params.warnings,
-        candidates: [
-          { source: 'chapter_intro_underplayed', text: params.row.chapter_intro_underplayed },
-          { source: 'chapter_risk_impact', text: params.row.chapter_risk_impact },
-          { source: 'chapter_risk_behaviour', text: params.row.chapter_risk_behaviour },
-          { source: 'chapter_development', text: params.row.chapter_development },
-          { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-          { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-          { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-        ],
-      });
-      return {
-        label: firstText(params.row.position_underplayed_label, 'Underplayed'),
-        text: selected.text,
-        source: selected.source,
-      };
-    }
-    case 'supporting':
-    default: {
-      const selected = selectSafeSignalText({
-        signalKey: params.signalKey,
-        signalLabel: params.signalLabel,
-        position: params.position,
-        purpose: 'intro',
-        preferredSource: 'chapter_intro_supporting',
-        warnings: params.warnings,
-        candidates: [
-          { source: 'chapter_intro_supporting', text: params.row.chapter_intro_supporting },
-          { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-          { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-          { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-        ],
-      });
-      return {
-        label: firstText(params.row.position_supporting_label, 'Supporting'),
-        text: selected.text,
-        source: selected.source,
-      };
-    }
-  }
 }
 
 function createDriverClaimKey(params: {
@@ -592,9 +289,6 @@ function createLanguageMaps(runtimeDefinition: Awaited<ReturnType<typeof loadSin
     ),
     heroByPairKey: createPairLanguageMap(runtimeDefinition, runtimeDefinition.languageBundle.HERO_PAIRS),
     driverClaimMaps: createDriverClaimMaps(runtimeDefinition),
-    signalChapterBySignalKey: new Map(
-      runtimeDefinition.languageBundle.SIGNAL_CHAPTERS.map((row) => [row.signal_key, row]),
-    ),
     balancingByPairKey: createPairLanguageMap(
       runtimeDefinition,
       runtimeDefinition.languageBundle.BALANCING_SECTIONS,
@@ -662,8 +356,17 @@ function requireText(value: string, message: string): string {
   throw new SingleDomainCompletionError(message);
 }
 
-function buildSignalChapterPayload(params: {
-  row: SignalChaptersRow;
+function getApplicationSignalRow(params: {
+  applicationBySignalKey: ReadonlyMap<string, ApplicationStatementsRow>;
+  signalKey: string;
+}): ApplicationStatementsRow {
+  return requireRow(
+    params.applicationBySignalKey.get(params.signalKey),
+    `Missing APPLICATION_STATEMENTS language for signal "${params.signalKey}".`,
+  );
+}
+
+function buildResultSignalFromSectionFirstLanguage(params: {
   domainKey: string;
   pairKey: string;
   signalKey: string;
@@ -675,18 +378,10 @@ function buildSignalChapterPayload(params: {
   driverClaimMaps: {
     exactByKey: ReadonlyMap<string, readonly DriverClaimsRow[]>;
   };
-  warnings: SignalLanguageFallbackWarning[];
-  driverClaimWarnings: DriverClaimResolutionWarning[];
+  applicationRow: ApplicationStatementsRow;
   driverClaimSourceDiagnostics: DriverClaimSourceDiagnostic[];
 }): SingleDomainResultSignal {
   const driverRole = getDriverRoleForPosition(params.position);
-  const positionLanguage = getPositionLabel({
-    row: params.row,
-    signalKey: params.signalKey,
-    signalLabel: params.signalLabel,
-    position: params.position,
-    warnings: params.warnings,
-  });
   const driverClaimText = resolvePairScopedDriverClaim({
     domainKey: params.domainKey,
     pairKey: params.pairKey,
@@ -700,114 +395,31 @@ function buildSignalChapterPayload(params: {
       `Missing DRIVER_CLAIMS row for pair "${params.pairKey}", signal "${params.signalKey}", and role "${driverRole}".`,
     );
   }
-  const chapterIntro = requireText(
-    driverClaimText.text,
-    `Missing usable signal chapter intro language for signal "${params.signalKey}" in position "${params.position}".`,
-  );
-  const chapterHowItShowsUp = requireText(
-    selectSafeSignalText({
-      signalKey: params.signalKey,
-      signalLabel: params.signalLabel,
-      position: params.position,
-      purpose: 'behaviour',
-      preferredSource: 'chapter_how_it_shows_up',
-      warnings: params.warnings,
-      candidates: [
-        { source: 'chapter_how_it_shows_up', text: params.row.chapter_how_it_shows_up },
-        { source: 'chapter_intro', text: chapterIntro },
-        { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-        { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-      ],
-    }).text,
-    `Missing usable signal chapter behaviour language for signal "${params.signalKey}".`,
-  );
-  const chapterValueOutcome = requireText(
-    selectSafeSignalText({
-      signalKey: params.signalKey,
-      signalLabel: params.signalLabel,
-      position: params.position,
-      purpose: 'outcome',
-      preferredSource: 'chapter_value_outcome',
-      warnings: params.warnings,
-      candidates: [
-        { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-        { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-        { source: 'chapter_intro', text: chapterIntro },
-        { source: 'chapter_how_it_shows_up', text: chapterHowItShowsUp },
-      ],
-    }).text,
-    `Missing usable signal chapter outcome language for signal "${params.signalKey}".`,
-  );
-  const chapterValueTeamEffect = requireText(
-    selectSafeSignalText({
-      signalKey: params.signalKey,
-      signalLabel: params.signalLabel,
-      position: params.position,
-      purpose: 'team',
-      preferredSource: 'chapter_value_team_effect',
-      warnings: params.warnings,
-      candidates: [
-        { source: 'chapter_value_team_effect', text: params.row.chapter_value_team_effect },
-        { source: 'chapter_value_outcome', text: params.row.chapter_value_outcome },
-        { source: 'chapter_intro', text: chapterIntro },
-        { source: 'chapter_how_it_shows_up', text: chapterHowItShowsUp },
-      ],
-    }).text,
-    `Missing usable signal chapter team-effect language for signal "${params.signalKey}".`,
-  );
+  const chapterIntro = requireText(driverClaimText.text, `Missing usable signal intro language for signal "${params.signalKey}".`);
   const chapterRiskBehaviour = requireText(
-    selectSafeSignalText({
-      signalKey: params.signalKey,
-      signalLabel: params.signalLabel,
-      position: params.position,
-      purpose: 'risk',
-      preferredSource: 'chapter_risk_behaviour',
-      warnings: params.warnings,
-      candidates: [
-        { source: 'chapter_risk_behaviour', text: params.row.chapter_risk_behaviour },
-        { source: 'chapter_risk_impact', text: params.row.chapter_risk_impact },
-        { source: 'chapter_development', text: params.row.chapter_development },
-        { source: 'chapter_intro', text: chapterIntro },
-        { source: 'chapter_how_it_shows_up', text: chapterHowItShowsUp },
-      ],
-    }).text,
-    `Missing usable signal chapter risk behaviour language for signal "${params.signalKey}".`,
+    firstText(
+      params.applicationRow.watchout_statement_1,
+      params.applicationRow.watchout_statement_2,
+      chapterIntro,
+    ),
+    `Missing usable signal risk behaviour language for signal "${params.signalKey}".`,
   );
   const chapterRiskImpact = requireText(
-    selectSafeSignalText({
-      signalKey: params.signalKey,
-      signalLabel: params.signalLabel,
-      position: params.position,
-      purpose: 'risk',
-      preferredSource: 'chapter_risk_impact',
-      warnings: params.warnings,
-      candidates: [
-        { source: 'chapter_risk_impact', text: params.row.chapter_risk_impact },
-        { source: 'chapter_risk_behaviour', text: params.row.chapter_risk_behaviour },
-        { source: 'chapter_development', text: params.row.chapter_development },
-        { source: 'chapter_risk_behaviour_selected', text: chapterRiskBehaviour },
-        { source: 'chapter_intro', text: chapterIntro },
-      ],
-    }).text,
-    `Missing usable signal chapter risk impact language for signal "${params.signalKey}".`,
+    firstText(
+      params.applicationRow.watchout_statement_2,
+      params.applicationRow.watchout_statement_1,
+      chapterIntro,
+    ),
+    `Missing usable signal risk impact language for signal "${params.signalKey}".`,
   );
   const chapterDevelopment = requireText(
-    selectSafeSignalText({
-      signalKey: params.signalKey,
-      signalLabel: params.signalLabel,
-      position: params.position,
-      purpose: 'development',
-      preferredSource: 'chapter_development',
-      warnings: params.warnings,
-      candidates: [
-        { source: 'chapter_development', text: params.row.chapter_development },
-        { source: 'chapter_risk_impact', text: params.row.chapter_risk_impact },
-        { source: 'chapter_risk_behaviour', text: params.row.chapter_risk_behaviour },
-        { source: 'chapter_risk_impact_selected', text: chapterRiskImpact },
-        { source: 'chapter_intro', text: chapterIntro },
-      ],
-    }).text,
-    `Missing usable signal chapter development language for signal "${params.signalKey}".`,
+    firstText(
+      params.applicationRow.development_statement_1,
+      params.applicationRow.development_statement_2,
+      chapterRiskImpact,
+      chapterIntro,
+    ),
+    `Missing usable signal development language for signal "${params.signalKey}".`,
   );
 
   return Object.freeze({
@@ -817,14 +429,11 @@ function buildSignalChapterPayload(params: {
     normalized_score: params.normalizedScore,
     raw_score: params.rawScore,
     position: params.position,
-    position_label: requireText(
-      positionLanguage.label,
-      `Missing position label for signal "${params.signalKey}" in position "${params.position}".`,
-    ),
+    position_label: POSITION_LABELS[params.position],
     chapter_intro: chapterIntro,
-    chapter_how_it_shows_up: chapterHowItShowsUp,
-    chapter_value_outcome: chapterValueOutcome,
-    chapter_value_team_effect: chapterValueTeamEffect,
+    chapter_how_it_shows_up: chapterIntro,
+    chapter_value_outcome: chapterIntro,
+    chapter_value_team_effect: chapterIntro,
     chapter_risk_behaviour: chapterRiskBehaviour,
     chapter_risk_impact: chapterRiskImpact,
     chapter_development: chapterDevelopment,
@@ -1186,8 +795,6 @@ export async function buildSingleDomainResultPayload(params: {
   }
 
   const maps = createLanguageMaps(runtimeDefinition);
-  const signalFallbackWarnings: SignalLanguageFallbackWarning[] = [];
-  const driverClaimWarnings: DriverClaimResolutionWarning[] = [];
   const driverClaimSourceDiagnostics: DriverClaimSourceDiagnostic[] = [];
   const introRow = requireRow(
     maps.framingByDomainKey.get(runtimeDefinition.domain.key),
@@ -1196,14 +803,9 @@ export async function buildSingleDomainResultPayload(params: {
 
   const signals: readonly SingleDomainResultSignal[] = Object.freeze(
     rankedSignals.map((signal) => {
-      const chapterRow = requireRow(
-        maps.signalChapterBySignalKey.get(signal.signalKey),
-        `Missing SIGNAL_CHAPTERS row for signal "${signal.signalKey}".`,
-      );
       const position = getSignalPosition(signal.rank, rankedSignals.length);
 
-      return buildSignalChapterPayload({
-        row: chapterRow,
+      return buildResultSignalFromSectionFirstLanguage({
         domainKey: runtimeDefinition.domain.key,
         pairKey: topPairKey,
         signalKey: signal.signalKey,
@@ -1213,8 +815,10 @@ export async function buildSingleDomainResultPayload(params: {
         rawScore: signal.rawTotal,
         position,
         driverClaimMaps: maps.driverClaimMaps,
-        warnings: signalFallbackWarnings,
-        driverClaimWarnings,
+        applicationRow: getApplicationSignalRow({
+          applicationBySignalKey: maps.applicationBySignalKey,
+          signalKey: signal.signalKey,
+        }),
         driverClaimSourceDiagnostics,
       });
     }),
@@ -1301,8 +905,6 @@ export async function buildSingleDomainResultPayload(params: {
         ...scoreResult.diagnostics.warnings,
         ...normalizedResult.diagnostics.warnings,
         ...formatDriverClaimSourceDiagnostics(driverClaimSourceDiagnostics),
-        ...formatDriverClaimResolutionWarnings(driverClaimWarnings),
-        ...formatSignalFallbackWarnings(signalFallbackWarnings),
       ]),
     }),
   });

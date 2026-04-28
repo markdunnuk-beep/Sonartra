@@ -429,24 +429,8 @@ function createDb(config?: {
       runtime.language.BALANCING_SECTIONS = PAIR_KEYS.map((pair_key) => ({ ...balancing, pair_key }));
       runtime.language.PAIR_SUMMARIES = PAIR_KEYS.map((pair_key) => ({ ...pairSummary, pair_key }));
     },
-    blankPositionSpecificLanguageLikeSectionFirstImports() {
-      runtime.language.SIGNAL_CHAPTERS.forEach((row) => {
-        if (row.signal_key === 'vision') {
-          row.chapter_intro_primary = '';
-        }
-        if (row.signal_key === 'delivery') {
-          row.chapter_intro_secondary = '';
-        }
-        if (row.signal_key === 'people') {
-          row.chapter_intro_supporting = '';
-        }
-        if (row.signal_key === 'rigor') {
-          row.chapter_intro_underplayed = '';
-          row.chapter_risk_behaviour = '';
-          row.chapter_risk_impact = '';
-          row.chapter_development = '';
-        }
-      });
+    removeSignalChapters() {
+      runtime.language.SIGNAL_CHAPTERS = [];
       runtime.language.BALANCING_SECTIONS.forEach((row) => {
         row.system_risk_paragraph = '';
         row.rebalance_action_2 = '';
@@ -1067,10 +1051,6 @@ function createDb(config?: {
           return { rows: runtime.language.DRIVER_CLAIMS as T[] };
         }
 
-        if (sql.includes('FROM assessment_version_single_domain_signal_chapters')) {
-          return { rows: runtime.language.SIGNAL_CHAPTERS as T[] };
-        }
-
         if (sql.includes('FROM assessment_version_single_domain_balancing_sections')) {
           return { rows: runtime.language.BALANCING_SECTIONS as T[] };
         }
@@ -1180,9 +1160,9 @@ test('single-domain payload fails when active pair language is missing', async (
   );
 });
 
-test('single-domain payload maps sparse section-first language into required payload fields', async () => {
+test('single-domain payload reaches READY with zero SIGNAL_CHAPTERS rows present', async () => {
   const harness = createDb();
-  harness.blankPositionSpecificLanguageLikeSectionFirstImports();
+  harness.removeSignalChapters();
 
   const payload = await buildSingleDomainResultPayload({
     db: harness.db,
@@ -1199,7 +1179,8 @@ test('single-domain payload maps sparse section-first language into required pay
   assert.equal(payload.signals[2]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery people supporting_context.');
   assert.equal(payload.signals[3]?.signal_key, 'rigor');
   assert.equal(payload.signals[3]?.chapter_intro, 'DRIVER_CLAIMS vision_delivery rigor range_limitation.');
-  assert.equal(payload.signals[3]?.chapter_risk_impact, 'DRIVER_CLAIMS vision_delivery rigor range_limitation.');
+  assert.equal(payload.signals[3]?.chapter_risk_impact, 'Rigor watchout 2');
+  assert.equal(payload.signals[3]?.chapter_development, 'Rigor development 1');
   assert.equal(payload.balancing.system_risk_paragraph, 'Rebalance vision_delivery');
   assert.deepEqual(payload.balancing.rebalance_actions, [
     'vision_delivery action 1',
@@ -1247,10 +1228,6 @@ test('single-domain completion resolves drivers from exact pair-scoped driver cl
   assert.equal(signalText('process'), 'DRIVER_CLAIMS results_process process secondary text.');
   assert.equal(signalText('people'), 'DRIVER_CLAIMS results_process people supporting text.');
   assert.equal(signalText('vision'), 'DRIVER_CLAIMS results_process vision range text.');
-  assert.equal(
-    payload.diagnostics.warnings.some((warning) => warning.includes('single_domain_pair_driver_claim_missing')),
-    false,
-  );
   assert.equal(
     payload.diagnostics.warnings.filter((warning) => warning.includes('source=driver_claims')).length,
     4,

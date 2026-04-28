@@ -116,7 +116,6 @@ function createLanguageRowCounts(bundle: Awaited<ReturnType<typeof getSingleDoma
     DOMAIN_FRAMING: bundle.DOMAIN_FRAMING.length,
     HERO_PAIRS: bundle.HERO_PAIRS.length,
     DRIVER_CLAIMS: bundle.DRIVER_CLAIMS?.length ?? 0,
-    SIGNAL_CHAPTERS: bundle.SIGNAL_CHAPTERS.length,
     BALANCING_SECTIONS: bundle.BALANCING_SECTIONS.length,
     PAIR_SUMMARIES: bundle.PAIR_SUMMARIES.length,
     APPLICATION_STATEMENTS: bundle.APPLICATION_STATEMENTS.length,
@@ -322,7 +321,6 @@ function buildLanguageExpectations(params: {
           pairKeys: params.pairKeys,
         }).length
       : 0,
-    SIGNAL_CHAPTERS: params.signalCount,
     BALANCING_SECTIONS: params.derivedPairCount,
     PAIR_SUMMARIES: params.derivedPairCount,
     APPLICATION_STATEMENTS: params.signalCount,
@@ -348,19 +346,6 @@ function validateLanguageKeys(params: {
         'language',
         'DOMAIN_FRAMING rows must reference the current authored domain key only.',
         framingKeys,
-      ),
-    );
-  }
-
-  const signalChapterKeys = [...new Set(params.languageBundle.SIGNAL_CHAPTERS.map((row) => row.signal_key))];
-  const invalidSignalChapterKeys = signalChapterKeys.filter((key) => !signalKeySet.has(key));
-  if (invalidSignalChapterKeys.length > 0) {
-    params.issues.push(
-      createIssue(
-        'signal_chapters_key_mismatch',
-        'language',
-        'SIGNAL_CHAPTERS rows must resolve against the current authored signal keys.',
-        invalidSignalChapterKeys,
       ),
     );
   }
@@ -665,7 +650,7 @@ function createRuntimeDefinition(params: {
       DOMAIN_FRAMING: Object.freeze([...params.languageBundle.DOMAIN_FRAMING]),
       HERO_PAIRS: Object.freeze([...params.languageBundle.HERO_PAIRS]),
       DRIVER_CLAIMS: Object.freeze([...(params.languageBundle.DRIVER_CLAIMS ?? [])]),
-      SIGNAL_CHAPTERS: Object.freeze([...params.languageBundle.SIGNAL_CHAPTERS]),
+      SIGNAL_CHAPTERS: Object.freeze([]),
       BALANCING_SECTIONS: Object.freeze([...params.languageBundle.BALANCING_SECTIONS]),
       PAIR_SUMMARIES: Object.freeze([...params.languageBundle.PAIR_SUMMARIES]),
       APPLICATION_STATEMENTS: Object.freeze([...params.languageBundle.APPLICATION_STATEMENTS]),
@@ -726,7 +711,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
     loadQuestions(db, assessmentVersionId),
     loadOptions(db, assessmentVersionId),
     loadWeights(db, assessmentVersionId),
-    getSingleDomainLanguageBundle(db, assessmentVersionId),
+    getSingleDomainLanguageBundle(db, assessmentVersionId, { includeSignalChapters: false }),
   ]);
 
   const issues: SingleDomainDraftReadinessIssue[] = [];
@@ -1011,15 +996,6 @@ export async function evaluateSingleDomainRuntimeDefinition(
         'driver_claims_count_mismatch',
         'language',
         `DRIVER_CLAIMS should contain exactly ${expectedLanguageRowCounts.DRIVER_CLAIMS} exact runtime tuple row${expectedLanguageRowCounts.DRIVER_CLAIMS === 1 ? '' : 's'}.`,
-      ),
-    );
-  }
-  if (languageRowCounts.SIGNAL_CHAPTERS !== expectedLanguageRowCounts.SIGNAL_CHAPTERS) {
-    issues.push(
-      createIssue(
-        'signal_chapters_count_mismatch',
-        'language',
-        `SIGNAL_CHAPTERS must contain exactly ${expectedLanguageRowCounts.SIGNAL_CHAPTERS} row${expectedLanguageRowCounts.SIGNAL_CHAPTERS === 1 ? '' : 's'}.`,
       ),
     );
   }

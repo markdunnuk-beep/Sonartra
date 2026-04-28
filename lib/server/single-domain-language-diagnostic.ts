@@ -204,16 +204,6 @@ export async function runSingleDomainLanguageDiagnostic(
     [version.assessment_version_id],
   );
 
-  const signalChaptersResult = await db.query<{ signal_key: string }>(
-    `
-    SELECT signal_key
-    FROM assessment_version_single_domain_signal_chapters
-    WHERE assessment_version_id = $1
-    ORDER BY signal_key ASC
-    `,
-    [version.assessment_version_id],
-  );
-
   const balancingSectionsResult = await db.query<{ pair_key: string }>(
     `
     SELECT pair_key
@@ -256,7 +246,6 @@ export async function runSingleDomainLanguageDiagnostic(
   const domainFramingCount = domainFramingResult.rows.length;
   const heroPairsCount = heroPairsResult.rows.length;
   const driverClaimsCount = driverClaimsResult.rows.length;
-  const signalChaptersCount = signalChaptersResult.rows.length;
   const balancingSectionsCount = balancingSectionsResult.rows.length;
   const pairSummariesCount = pairSummariesResult.rows.length;
   const applicationStatementsCount = applicationStatementsResult.rows.length;
@@ -296,12 +285,6 @@ export async function runSingleDomainLanguageDiagnostic(
   driverClaimsResult.rows.forEach((row) => {
     const tupleKey = `${row.domain_key}|${row.pair_key}|${row.signal_key}|${row.driver_role}`;
     actualDriverClaimTupleCounts.set(tupleKey, (actualDriverClaimTupleCounts.get(tupleKey) ?? 0) + 1);
-  });
-
-  const signalChaptersAnalysis = analyzeKeys({
-    actualKeys: signalChaptersResult.rows.map((row) => row.signal_key),
-    expectedKeys: signalKeys,
-    validateKey: (key) => signalKeySet.has(key),
   });
 
   const balancingSectionsAnalysis = analyzeKeys({
@@ -348,13 +331,6 @@ export async function runSingleDomainLanguageDiagnostic(
       completeCount: expectedDriverKeys.filter((key) => actualDriverClaimTupleCounts.get(key) === 1).length,
       isReady: evaluateReadiness({ expectedCount: expectedDriverKeys.length, actualCount: driverClaimsCount, keyAnalysis: driverClaimsAnalysis }),
       ...driverClaimsAnalysis,
-    },
-    SIGNAL_CHAPTERS: {
-      expectedCount: signalKeys.length,
-      actualCount: signalChaptersCount,
-      completeCount: signalKeys.length - signalChaptersAnalysis.missingKeys.length,
-      isReady: evaluateReadiness({ expectedCount: signalKeys.length, actualCount: signalChaptersCount, keyAnalysis: signalChaptersAnalysis }),
-      ...signalChaptersAnalysis,
     },
     BALANCING_SECTIONS: {
       expectedCount: pairKeys.length,

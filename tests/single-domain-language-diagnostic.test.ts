@@ -69,17 +69,6 @@ function createDiagnosticDb() {
         };
       }
 
-      if (sql.includes('FROM assessment_version_single_domain_signal_chapters')) {
-        return {
-          rows: [
-            { signal_key: 'results' },
-            { signal_key: 'process' },
-            { signal_key: 'vision' },
-            { signal_key: 'people' },
-          ] as T[],
-        };
-      }
-
       if (sql.includes('FROM assessment_version_single_domain_balancing_sections')) {
         return {
           rows: [

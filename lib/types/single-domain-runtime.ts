@@ -72,7 +72,6 @@ export type SingleDomainRuntimeLanguageRowCounts = {
   DOMAIN_FRAMING: number;
   HERO_PAIRS: number;
   DRIVER_CLAIMS: number;
-  SIGNAL_CHAPTERS: number;
   BALANCING_SECTIONS: number;
   PAIR_SUMMARIES: number;
   APPLICATION_STATEMENTS: number;
@@ -150,8 +149,6 @@ export type SingleDomainDraftReadinessIssueCode =
   | 'driver_claims_key_mismatch'
   | 'driver_claims_role_mapping_mismatch'
   | 'driver_claims_coverage_incomplete'
-  | 'signal_chapters_count_mismatch'
-  | 'signal_chapters_key_mismatch'
   | 'balancing_sections_count_mismatch'
   | 'balancing_sections_key_mismatch'
   | 'pair_summaries_count_mismatch'

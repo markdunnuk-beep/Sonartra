@@ -15,7 +15,6 @@ import type {
   DomainFramingRow,
   HeroPairsRow,
   PairSummariesRow,
-  SignalChaptersRow,
 } from '@/lib/types/single-domain-language';
 
 type RuntimeFixture = {
@@ -71,7 +70,6 @@ type RuntimeFixture = {
     DOMAIN_FRAMING?: DomainFramingRow[];
     HERO_PAIRS?: HeroPairsRow[];
     DRIVER_CLAIMS?: DriverClaimsRow[];
-    SIGNAL_CHAPTERS?: SignalChaptersRow[];
     BALANCING_SECTIONS?: BalancingSectionsRow[];
     PAIR_SUMMARIES?: PairSummariesRow[];
     APPLICATION_STATEMENTS?: ApplicationStatementsRow[];
@@ -83,7 +81,6 @@ function createSingleDomainDb(fixture: RuntimeFixture) {
     DOMAIN_FRAMING: fixture.language?.DOMAIN_FRAMING ?? [],
     HERO_PAIRS: fixture.language?.HERO_PAIRS ?? [],
     DRIVER_CLAIMS: fixture.language?.DRIVER_CLAIMS ?? [],
-    SIGNAL_CHAPTERS: fixture.language?.SIGNAL_CHAPTERS ?? [],
     BALANCING_SECTIONS: fixture.language?.BALANCING_SECTIONS ?? [],
     PAIR_SUMMARIES: fixture.language?.PAIR_SUMMARIES ?? [],
     APPLICATION_STATEMENTS: fixture.language?.APPLICATION_STATEMENTS ?? [],
@@ -127,10 +124,6 @@ function createSingleDomainDb(fixture: RuntimeFixture) {
 
       if (sql.includes('FROM assessment_version_single_domain_driver_claims')) {
         return { rows: language.DRIVER_CLAIMS as T[] };
-      }
-
-      if (sql.includes('FROM assessment_version_single_domain_signal_chapters')) {
-        return { rows: language.SIGNAL_CHAPTERS as T[] };
       }
 
       if (sql.includes('FROM assessment_version_single_domain_balancing_sections')) {
@@ -310,59 +303,6 @@ function buildFixture(overrides?: Partial<RuntimeFixture>): RuntimeFixture {
         },
       ],
       DRIVER_CLAIMS: buildCompleteDriverClaims(),
-      SIGNAL_CHAPTERS: [
-        {
-          signal_key: 'directive',
-          position_primary_label: 'Primary',
-          position_secondary_label: 'Secondary',
-          position_supporting_label: 'Supporting',
-          position_underplayed_label: 'Underplayed',
-          chapter_intro_primary: 'A',
-          chapter_intro_secondary: 'B',
-          chapter_intro_supporting: 'C',
-          chapter_intro_underplayed: 'D',
-          chapter_how_it_shows_up: 'E',
-          chapter_value_outcome: 'F',
-          chapter_value_team_effect: 'G',
-          chapter_risk_behaviour: 'H',
-          chapter_risk_impact: 'I',
-          chapter_development: 'J',
-        },
-        {
-          signal_key: 'supportive',
-          position_primary_label: 'Primary',
-          position_secondary_label: 'Secondary',
-          position_supporting_label: 'Supporting',
-          position_underplayed_label: 'Underplayed',
-          chapter_intro_primary: 'A',
-          chapter_intro_secondary: 'B',
-          chapter_intro_supporting: 'C',
-          chapter_intro_underplayed: 'D',
-          chapter_how_it_shows_up: 'E',
-          chapter_value_outcome: 'F',
-          chapter_value_team_effect: 'G',
-          chapter_risk_behaviour: 'H',
-          chapter_risk_impact: 'I',
-          chapter_development: 'J',
-        },
-        {
-          signal_key: 'analytical',
-          position_primary_label: 'Primary',
-          position_secondary_label: 'Secondary',
-          position_supporting_label: 'Supporting',
-          position_underplayed_label: 'Underplayed',
-          chapter_intro_primary: 'A',
-          chapter_intro_secondary: 'B',
-          chapter_intro_supporting: 'C',
-          chapter_intro_underplayed: 'D',
-          chapter_how_it_shows_up: 'E',
-          chapter_value_outcome: 'F',
-          chapter_value_team_effect: 'G',
-          chapter_risk_behaviour: 'H',
-          chapter_risk_impact: 'I',
-          chapter_development: 'J',
-        },
-      ],
       BALANCING_SECTIONS: [
         {
           pair_key: 'directive_supportive',
@@ -477,7 +417,7 @@ test('single-domain runtime loader assembles a deterministic runtime object from
   assert.equal(runtime.questions[0]?.options.length, 2);
   assert.equal(runtime.optionSignalWeights.length, 2);
   assert.equal(runtime.languageBundle.DRIVER_CLAIMS.length, 15);
-  assert.equal(runtime.languageBundle.SIGNAL_CHAPTERS.length, 3);
+  assert.equal(runtime.languageBundle.SIGNAL_CHAPTERS.length, 0);
 });
 
 test('single-domain runtime readiness rejects reversed pair language keys', async () => {
@@ -579,7 +519,6 @@ test('missing language datasets fail readiness explicitly where required', async
       language: {
         DOMAIN_FRAMING: [],
         HERO_PAIRS: [],
-        SIGNAL_CHAPTERS: [],
         BALANCING_SECTIONS: [],
         PAIR_SUMMARIES: [],
         APPLICATION_STATEMENTS: [],
@@ -590,7 +529,6 @@ test('missing language datasets fail readiness explicitly where required', async
 
   assert.equal(readiness.isReady, false);
   assert.ok(readiness.issues.some((issue) => issue.code === 'domain_framing_count_mismatch'));
-  assert.ok(readiness.issues.some((issue) => issue.code === 'signal_chapters_count_mismatch'));
   assert.ok(readiness.issues.some((issue) => issue.code === 'application_statements_count_mismatch'));
   assert.equal(readiness.issues.some((issue) => issue.code === 'hero_pairs_count_mismatch'), false);
   assert.equal(readiness.issues.some((issue) => issue.code === 'balancing_sections_count_mismatch'), false);
@@ -799,23 +737,6 @@ test('driver claims readiness blocks when rows do not match the exact runtime lo
           priority: 4,
         },
       ],
-      SIGNAL_CHAPTERS: ['results', 'process', 'vision', 'people'].map((signal_key) => ({
-        signal_key,
-        position_primary_label: 'Primary',
-        position_secondary_label: 'Secondary',
-        position_supporting_label: 'Supporting',
-        position_underplayed_label: 'Underplayed',
-        chapter_intro_primary: 'A',
-        chapter_intro_secondary: 'B',
-        chapter_intro_supporting: 'C',
-        chapter_intro_underplayed: 'D',
-        chapter_how_it_shows_up: 'E',
-        chapter_value_outcome: 'F',
-        chapter_value_team_effect: 'G',
-        chapter_risk_behaviour: 'H',
-        chapter_risk_impact: 'I',
-        chapter_development: 'J',
-      })),
       BALANCING_SECTIONS: [
         'results_process',
         'results_vision',

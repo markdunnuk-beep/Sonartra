@@ -369,6 +369,9 @@ export async function getSingleDomainApplicationStatementRows(
 export async function getSingleDomainLanguageBundle(
   db: Queryable,
   assessmentVersionId: AssessmentVersionId,
+  options?: {
+    includeSignalChapters?: boolean;
+  },
 ): Promise<SingleDomainLanguageBundle> {
   const allowed = await allowSingleDomainAccess({
     db,
@@ -392,7 +395,9 @@ export async function getSingleDomainLanguageBundle(
     getSingleDomainFramingRows(db, assessmentVersionId),
     getSingleDomainHeroPairRows(db, assessmentVersionId),
     getSingleDomainDriverClaimRows(db, assessmentVersionId),
-    getSingleDomainSignalChapterRows(db, assessmentVersionId),
+    options?.includeSignalChapters === false
+      ? Promise.resolve(Object.freeze([]) as readonly SignalChaptersRow[])
+      : getSingleDomainSignalChapterRows(db, assessmentVersionId),
     getSingleDomainBalancingSectionRows(db, assessmentVersionId),
     getSingleDomainPairSummaryRows(db, assessmentVersionId),
     getSingleDomainApplicationStatementRows(db, assessmentVersionId),
