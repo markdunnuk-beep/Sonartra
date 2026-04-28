@@ -55,6 +55,7 @@ export async function listPublishedAssessmentInventory(
     INNER JOIN assessment_versions av ON av.assessment_id = a.id
     LEFT JOIN questions q ON q.assessment_version_id = av.id
     WHERE av.lifecycle_status = 'PUBLISHED'
+      AND a.is_active = TRUE
     GROUP BY
       a.id,
       a.assessment_key,

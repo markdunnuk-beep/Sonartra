@@ -31,7 +31,7 @@ type StoredAssignment = {
 
 type FakeState = {
   users: { id: string }[];
-  publishedVersions: { assessmentId: string; assessmentVersionId: string }[];
+  publishedVersions: { assessmentId: string; assessmentVersionId: string; isActive?: boolean }[];
   assignments: StoredAssignment[];
 };
 
@@ -85,7 +85,10 @@ function createFakeDb(initialState: FakeState) {
         text.includes("av.lifecycle_status = 'PUBLISHED'")
       ) {
         const record = state.publishedVersions.find(
-          (item) => item.assessmentId === params[0] && item.assessmentVersionId === params[1],
+          (item) =>
+            item.assessmentId === params[0]
+            && item.assessmentVersionId === params[1]
+            && item.isActive !== false,
         );
 
         return {
@@ -504,6 +507,74 @@ test('non-admin cannot perform assignment mutations', async () => {
   assert.equal(
     result.formError,
     'The assignment could not be created. Review the selection and try again.',
+  );
+});
+
+test('archived published assessments do not appear as assignable versions', async () => {
+  const viewModel = projectAdminUserDetailViewModel(
+    [
+      {
+        user_id: 'user-1',
+        user_name: 'Grace Hopper',
+        user_email: 'grace@example.com',
+        user_status: 'active',
+        user_role: 'admin',
+        user_created_at: '2026-04-01T09:00:00.000Z',
+        organisation_id: null,
+        assignment_id: null,
+        assignment_status: null,
+        assignment_order_index: null,
+        assessment_version_id: null,
+        attempt_id: null,
+        assigned_at: null,
+        started_at: null,
+        completed_at: null,
+        assignment_updated_at: null,
+        attempt_last_activity_at: null,
+        attempt_updated_at: null,
+        attempt_created_at: null,
+        result_id: null,
+        result_generated_at: null,
+        result_created_at: null,
+        assessment_title: null,
+        assessment_mode: null,
+      },
+    ],
+    [
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'active-one',
+        title: 'Active One',
+        description: null,
+        assessmentVersionId: 'version-1',
+        versionTag: '1.0.0',
+        publishedAt: '2026-04-04T09:00:00.000Z',
+        questionCount: 20,
+      },
+    ],
+  );
+
+  assert.equal(viewModel?.controls.assignmentOptions.length, 1);
+  assert.equal(viewModel?.controls.assignmentOptions[0]?.assessmentVersionId, 'version-1');
+});
+
+test('assignment creation rejects archived published versions even when ids are posted directly', async () => {
+  const fake = createFakeDb({
+    users: [{ id: 'user-1' }],
+    publishedVersions: [{ assessmentId: 'assessment-3', assessmentVersionId: 'version-3', isActive: false }],
+    assignments: [],
+  });
+
+  await assert.rejects(
+    () =>
+      createAdminUserAssignmentRecord({
+        db: fake.client,
+        userId: 'user-1',
+        assessmentId: 'assessment-3',
+        assessmentVersionId: 'version-3',
+        targetOrderIndex: 0,
+      }),
+    /ASSESSMENT_VERSION_NOT_PUBLISHED/,
   );
 });
 

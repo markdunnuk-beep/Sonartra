@@ -182,6 +182,7 @@ async function loadPublishedVersion(
     FROM assessments a
     INNER JOIN assessment_versions av ON av.assessment_id = a.id
     WHERE a.id = $1::uuid
+      AND a.is_active = TRUE
       AND av.id = $2::uuid
       AND av.lifecycle_status = 'PUBLISHED'
     `,

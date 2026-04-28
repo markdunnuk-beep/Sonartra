@@ -50,6 +50,7 @@ export type AdminAssessmentDashboardItem = {
 
 export type AdminAssessmentDashboardSummary = {
   totalAssessments: number;
+  archivedCount: number;
   publishedCount: number;
   publishedAndDraftCount: number;
   draftOnlyCount: number;
@@ -58,6 +59,7 @@ export type AdminAssessmentDashboardSummary = {
 };
 
 export type AdminAssessmentDashboardViewModel = {
+  showArchived: boolean;
   summary: AdminAssessmentDashboardSummary;
   assessments: readonly AdminAssessmentDashboardItem[];
 };
@@ -356,6 +358,9 @@ async function listAdminAssessmentCatalogRows(
 
 export async function buildAdminAssessmentDashboardViewModel(
   db: Queryable,
+  options?: {
+    showArchived?: boolean;
+  },
 ): Promise<AdminAssessmentDashboardViewModel> {
   const rows = await listAdminAssessmentCatalogRows(db);
   const rowsByAssessmentId = new Map<string, AdminAssessmentCatalogRow[]>();
@@ -371,10 +376,12 @@ export async function buildAdminAssessmentDashboardViewModel(
   }
 
   const groupedRows = Array.from(rowsByAssessmentId.values());
+  const showArchived = options?.showArchived === true;
+  const filteredGroups = groupedRows.filter((group) => showArchived || group[0]?.assessment_is_active !== false);
   const readinessByAssessmentKey = new Map<string, AdminAssessmentDraftReadiness>();
 
   await Promise.all(
-    groupedRows.map(async (group) => {
+    filteredGroups.map(async (group) => {
       const assessmentKey = group[0]?.assessment_key;
       if (!assessmentKey) {
         return;
@@ -393,7 +400,7 @@ export async function buildAdminAssessmentDashboardViewModel(
   );
 
   const assessments = Object.freeze(
-    groupedRows.map((group) =>
+    filteredGroups.map((group) =>
       mapAssessmentDashboardItem(
         group,
         readinessByAssessmentKey.get(group[0]?.assessment_key ?? '') ?? 'no_draft',
@@ -402,8 +409,10 @@ export async function buildAdminAssessmentDashboardViewModel(
   );
 
   return {
+    showArchived,
     summary: {
       totalAssessments: assessments.length,
+      archivedCount: groupedRows.filter((group) => group[0]?.assessment_is_active === false).length,
       publishedCount: assessments.filter((assessment) => assessment.publishedVersion !== null).length,
       publishedAndDraftCount: assessments.filter(
         (assessment) => assessment.overallStatus === 'published_and_draft',

@@ -9,6 +9,7 @@ type AssessmentFixture = {
   assessmentKey: string;
   assessmentVersionId: string;
   versionTag: string;
+  isActive?: boolean;
 };
 
 type AttemptFixture = {
@@ -71,6 +72,9 @@ function createFakeDb(params?: {
       if (text.includes('FROM assessments a') && text.includes("av.lifecycle_status = 'PUBLISHED'")) {
         const assessmentKey = queryParams?.[0];
         if (assessment.assessmentKey !== assessmentKey) {
+          return { rows: [] as T[] };
+        }
+        if (text.includes('a.is_active = TRUE') && assessment.isActive === false) {
           return { rows: [] as T[] };
         }
 
@@ -449,6 +453,28 @@ test('startAssessmentAttempt links the new attempt to the current published vers
   assert.equal(lifecycle.assessmentVersionId, 'version-2');
   assert.equal(lifecycle.versionTag, '2.0.0');
   assert.equal(lifecycle.totalQuestions, 24);
+});
+
+test('archived assessments do not start because they are excluded from published lookup', async () => {
+  const service = createAssessmentAttemptLifecycleService({
+    db: createFakeDb({
+      assessment: {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'archived-live',
+        assessmentVersionId: 'version-2',
+        versionTag: '2.0.0',
+        isActive: false,
+      },
+    }),
+  });
+
+  await assert.rejects(
+    () => service.startAssessmentAttempt({
+      userId: 'user-1',
+      assessmentKey: 'archived-live',
+    }),
+    /Published assessment not found/,
+  );
 });
 
 test('starting after a completed ready attempt creates a new attempt', async () => {

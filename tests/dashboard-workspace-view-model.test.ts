@@ -22,6 +22,7 @@ type InventoryFixture = {
   assessmentVersionId: string;
   versionTag: string;
   publishedAt: string | null;
+  isActive?: boolean;
 };
 
 type AttemptFixture = {
@@ -308,7 +309,9 @@ function createFakeDb(params: {
     async query<T>(text: string, queryParams?: unknown[]) {
       if (text.includes('a.title AS assessment_title') && text.includes("WHERE av.lifecycle_status = 'PUBLISHED'")) {
         return {
-          rows: inventory.map((item) => ({
+          rows: inventory
+            .filter((item) => !text.includes('a.is_active = TRUE') || item.isActive !== false)
+            .map((item) => ({
             assessment_id: item.assessmentId,
             assessment_key: item.assessmentKey,
             assessment_title: item.title,
@@ -324,6 +327,9 @@ function createFakeDb(params: {
         const assessmentKey = queryParams?.[0] as string;
         const item = inventoryByKey.get(assessmentKey);
         if (!item) {
+          return { rows: [] as T[] };
+        }
+        if (text.includes('a.is_active = TRUE') && item.isActive === false) {
           return { rows: [] as T[] };
         }
 
@@ -953,4 +959,41 @@ test('workspace and dashboard still load when assessment mode columns are absent
   assert.equal(workspace.assessments[0]?.status, 'ready');
   assert.equal(workspace.assessments[0]?.cta.href, '/app/results/result-1');
   assert.equal(dashboard.latestReadyResult?.href, '/app/results/result-1');
+});
+
+test('archived published assessments do not appear in workspace inventory', async () => {
+  const db = createFakeDb({
+    inventory: [
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'active-one',
+        title: 'Active One',
+        description: null,
+        assessmentVersionId: 'version-1',
+        versionTag: '1.0.0',
+        publishedAt: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        assessmentId: 'assessment-2',
+        assessmentKey: 'archived-one',
+        title: 'Archived One',
+        description: null,
+        assessmentVersionId: 'version-2',
+        versionTag: '1.0.0',
+        publishedAt: '2026-01-02T00:00:00.000Z',
+        isActive: false,
+      },
+    ],
+    questionCountByVersionId: {
+      'version-1': 10,
+      'version-2': 10,
+    },
+  });
+
+  const workspace = await buildAssessmentWorkspaceViewModel({
+    db,
+    userId: 'user-1',
+  });
+
+  assert.deepEqual(workspace.assessments.map((assessment) => assessment.assessmentKey), ['active-one']);
 });

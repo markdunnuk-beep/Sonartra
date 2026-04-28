@@ -341,6 +341,7 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
         assessmentKey: 'archive-only',
         title: 'Archive Only',
         description: null,
+        isActive: false,
         versions: [
           {
             assessmentVersionId: 'version-4',
@@ -354,12 +355,13 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
     ]),
   );
 
-  assert.equal(viewModel.summary.totalAssessments, 4);
+  assert.equal(viewModel.summary.totalAssessments, 3);
+  assert.equal(viewModel.summary.archivedCount, 1);
   assert.equal(viewModel.summary.publishedCount, 1);
   assert.equal(viewModel.summary.publishedAndDraftCount, 1);
   assert.equal(viewModel.summary.draftOnlyCount, 1);
   assert.equal(viewModel.summary.noVersionsCount, 1);
-  assert.equal(viewModel.summary.setupIncompleteCount, 1);
+  assert.equal(viewModel.summary.setupIncompleteCount, 0);
 
   const flagship = viewModel.assessments.find((assessment) => assessment.assessmentKey === 'wplp80');
   assert.equal(flagship?.overallStatus, 'published_and_draft');
@@ -383,10 +385,51 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
   assert.equal(noVersions?.overallStatus, 'no_versions');
   assert.equal(noVersions?.latestDraftReadiness, 'no_draft');
 
-  const setupIncomplete = viewModel.assessments.find(
-    (assessment) => assessment.assessmentKey === 'archive-only',
+  assert.equal(
+    viewModel.assessments.some((assessment) => assessment.assessmentKey === 'archive-only'),
+    false,
   );
-  assert.equal(setupIncomplete?.overallStatus, 'setup_incomplete');
+});
+
+test('dashboard can include archived assessments when explicitly requested', async () => {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(
+    createFakeDb([
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'active-one',
+        title: 'Active One',
+        description: null,
+        versions: [],
+      },
+      {
+        assessmentId: 'assessment-2',
+        assessmentKey: 'archive-only',
+        title: 'Archive Only',
+        description: null,
+        isActive: false,
+        versions: [
+          {
+            assessmentVersionId: 'version-4',
+            versionTag: '0.8.0',
+            status: 'ARCHIVED',
+            questionCount: 12,
+            updatedAt: '2026-01-02T00:00:00.000Z',
+          },
+        ],
+      },
+    ]),
+    {
+      showArchived: true,
+    },
+  );
+
+  assert.equal(viewModel.showArchived, true);
+  assert.equal(viewModel.summary.totalAssessments, 2);
+  assert.equal(viewModel.summary.archivedCount, 1);
+  assert.equal(
+    viewModel.assessments.find((assessment) => assessment.assessmentKey === 'archive-only')?.isActive,
+    false,
+  );
 });
 
 test('undefined and unknown modes resolve safely for dashboard labels', async () => {

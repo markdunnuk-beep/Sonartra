@@ -91,6 +91,7 @@ export async function getPublishedAssessmentSummaryByKey(
     FROM assessments a
     INNER JOIN assessment_versions av ON av.assessment_id = a.id
     WHERE a.assessment_key = $1
+      AND a.is_active = TRUE
       AND av.lifecycle_status = 'PUBLISHED'
     `,
     [assessmentKey],

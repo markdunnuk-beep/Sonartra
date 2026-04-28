@@ -1,5 +1,6 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 
+import { AdminAssessmentArchiveCardAction } from '@/components/admin/admin-assessment-archive-card-action';
 import {
   ButtonLink,
   EmptyState,
@@ -113,8 +114,8 @@ function AssessmentCard({
                 {formatDraftReadiness(assessment.latestDraftReadiness)}
               </LabelPill>
               {!assessment.isActive ? (
-                <LabelPill className="border-white/10 bg-white/[0.04] text-white/58">
-                  Inactive
+                <LabelPill className="border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]">
+                  Archived
                 </LabelPill>
               ) : null}
             </div>
@@ -141,6 +142,9 @@ function AssessmentCard({
                 {reviewLabel}
               </Link>
             ) : null}
+            {assessment.isActive ? (
+              <AdminAssessmentArchiveCardAction assessmentKey={assessment.assessmentKey} />
+            ) : null}
           </div>
         </div>
 
@@ -162,9 +166,11 @@ function AssessmentCard({
 export function AdminAssessmentsDashboard({
   summary,
   assessments,
+  showArchived,
 }: {
   summary: AdminAssessmentDashboardSummary;
   assessments: readonly AdminAssessmentDashboardItem[];
+  showArchived: boolean;
 }) {
   return (
     <PageFrame>
@@ -183,6 +189,17 @@ export function AdminAssessmentsDashboard({
             <ButtonLink href="/admin/assessments/new" variant="primary">
               Create assessment
             </ButtonLink>
+            <Link
+              className={cn(
+                'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border px-4 py-2.5 text-sm font-medium transition duration-200',
+                showArchived
+                  ? 'border-[rgba(142,162,255,0.25)] bg-[rgba(142,162,255,0.12)] text-[rgba(228,234,255,0.9)] hover:border-[rgba(156,174,255,0.3)]'
+                  : 'border-white/10 bg-white/[0.03] text-white/72 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
+              )}
+              href={showArchived ? '/admin/assessments' : '/admin/assessments?showArchived=1'}
+            >
+              {showArchived ? 'Hide archived' : `Show archived${summary.archivedCount > 0 ? ` (${summary.archivedCount})` : ''}`}
+            </Link>
             <p className="text-sm text-white/52">Starts a new assessment with draft version `1.0.0`.</p>
           </div>
         </div>
@@ -195,11 +212,16 @@ export function AdminAssessmentsDashboard({
           description="Quick view of your assessments."
         />
 
-        <div className="grid gap-4 xl:grid-cols-5">
+        <div className="grid gap-4 xl:grid-cols-6">
           <SummaryCard
             label="Assessments"
             value={String(summary.totalAssessments)}
-            detail="All assessments."
+            detail={showArchived ? 'Visible active and archived assessments.' : 'Visible active assessments only.'}
+          />
+          <SummaryCard
+            label="Archived"
+            value={String(summary.archivedCount)}
+            detail="Hidden from default admin lists and user-start flows."
           />
           <SummaryCard
             label="With published"
@@ -233,8 +255,8 @@ export function AdminAssessmentsDashboard({
 
         {assessments.length === 0 ? (
           <EmptyState
-            title="No assessments yet"
-            description="Create your first assessment."
+            title={showArchived ? 'No assessments match this filter' : 'No assessments yet'}
+            description={showArchived ? 'No active or archived assessments are available.' : 'Create your first assessment.'}
             action={
               <ButtonLink href="/admin/assessments/new" variant="primary">
                 Create assessment
@@ -252,6 +274,3 @@ export function AdminAssessmentsDashboard({
     </PageFrame>
   );
 }
-
-
-
