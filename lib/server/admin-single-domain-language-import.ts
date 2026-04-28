@@ -16,6 +16,7 @@ import {
   validateSingleDomainDatasetHeaders,
 } from '@/lib/validation/single-domain-language';
 import type {
+  SignalChaptersRow,
   SingleDomainLanguageDatasetKey,
   SingleDomainLanguageDatasetRowMap,
 } from '@/lib/types/single-domain-language';
@@ -45,6 +46,10 @@ type AssessmentVersionImportTarget = {
   assessmentVersionId: string;
   assessmentKey: string;
   lifecycleStatus: AssessmentVersionRow['lifecycle_status'];
+};
+
+type AssessmentSignalRow = {
+  signal_key: string;
 };
 
 type ImportParseError = {
@@ -148,10 +153,32 @@ function parseSingleDomainDatasetInput<TKey extends SingleDomainLanguageDatasetK
   );
 
   if (!headerValidation.success) {
+    const missingHeaders = headerValidation.expectedColumns.filter(
+      (column) => !headerValidation.receivedColumns.includes(column),
+    );
+    const invalidHeaders = headerValidation.receivedColumns.filter(
+      (column) => !headerValidation.expectedColumns.includes(column),
+    );
+    const headerCountDetail = `Expected ${headerValidation.expectedColumns.length} header columns but found ${headerValidation.receivedColumns.length}.`;
+    const missingHeaderDetail = missingHeaders.length > 0
+      ? `Missing header field(s): ${missingHeaders.join(', ')}.`
+      : null;
+    const invalidHeaderDetail = invalidHeaders.length > 0
+      ? `Invalid header field(s): ${invalidHeaders.join(', ')}.`
+      : null;
+
     return {
       success: false,
       rows: [],
-      parseErrors: [{ lineNumber: 1, message: headerValidation.message }],
+      parseErrors: [{
+        lineNumber: 1,
+        message: [
+          headerValidation.message,
+          headerCountDetail,
+          missingHeaderDetail,
+          invalidHeaderDetail,
+        ].filter(Boolean).join(' '),
+      }],
       validationErrors: [],
       targetCount: 0,
     };
@@ -176,7 +203,7 @@ function parseSingleDomainDatasetInput<TKey extends SingleDomainLanguageDatasetK
     if (columns.length !== expectedHeaders.length) {
       parseErrors.push({
         lineNumber,
-        message: `Line ${lineNumber}: expected exactly ${expectedHeaders.length} pipe-delimited columns.`,
+        message: `Line ${lineNumber}: expected exactly ${expectedHeaders.length} pipe-delimited columns but found ${columns.length}.`,
       });
       continue;
     }
@@ -238,6 +265,63 @@ function parseSingleDomainDatasetInput<TKey extends SingleDomainLanguageDatasetK
     validationErrors,
     targetCount: seenKeys.size,
   };
+}
+
+async function loadAssessmentSignalKeys(
+  db: Queryable,
+  assessmentVersionId: string,
+): Promise<readonly string[]> {
+  const result = await db.query<AssessmentSignalRow>(
+    `
+    SELECT signal_key
+    FROM signals
+    WHERE assessment_version_id = $1
+    ORDER BY order_index ASC, signal_key ASC
+    `,
+    [assessmentVersionId],
+  );
+
+  return result.rows.map((row) => row.signal_key);
+}
+
+function buildDatasetValidationErrors<TKey extends SingleDomainLanguageDatasetKey>(
+  datasetKey: TKey,
+  rows: readonly SingleDomainLanguageDatasetRowMap[TKey][],
+  expectedSignalKeys: readonly string[],
+): readonly ImportValidationError[] {
+  if (datasetKey !== 'SIGNAL_CHAPTERS') {
+    return [];
+  }
+
+  const issues: ImportValidationError[] = [];
+  const expectedSet = new Set(expectedSignalKeys);
+  const rowSignalKeys = rows.map((row) => String((row as SignalChaptersRow).signal_key));
+
+  if (rows.length !== expectedSignalKeys.length) {
+    issues.push({
+      lineNumber: null,
+      message: `SIGNAL_CHAPTERS row count mismatch: expected ${expectedSignalKeys.length} row(s) to match authored signals, found ${rows.length}.`,
+    });
+  }
+
+  rowSignalKeys.forEach((signalKey, index) => {
+    if (!expectedSet.has(signalKey)) {
+      issues.push({
+        lineNumber: index + 2,
+        message: `Line ${index + 2}: invalid signal_key "${signalKey}". Expected one of: ${expectedSignalKeys.join(', ')}.`,
+      });
+    }
+  });
+
+  const missingSignalKeys = expectedSignalKeys.filter((signalKey) => !rowSignalKeys.includes(signalKey));
+  if (missingSignalKeys.length > 0) {
+    issues.push({
+      lineNumber: null,
+      message: `SIGNAL_CHAPTERS is missing authored signal_key value(s): ${missingSignalKeys.join(', ')}.`,
+    });
+  }
+
+  return issues;
 }
 
 async function loadAssessmentVersionForImport(
@@ -388,16 +472,26 @@ export async function previewSingleDomainLanguageDatasetForAssessmentVersionWith
     command.assessmentVersionId,
   );
   const planErrors = buildPlanErrors(command.datasetKey, assessmentVersion);
+  const expectedSignalKeys = assessmentVersion
+    ? await loadAssessmentSignalKeys(dependencies.db, assessmentVersion.assessmentVersionId)
+    : [];
+  const datasetValidationErrors = buildDatasetValidationErrors(
+    command.datasetKey,
+    parsed.rows,
+    expectedSignalKeys,
+  );
   const bundle = assessmentVersion
     ? await getSingleDomainLanguageBundle(dependencies.db, assessmentVersion.assessmentVersionId)
     : null;
   const existingRowCount = bundle ? getExistingRowCount(command.datasetKey, bundle) : 0;
 
-  if (parsed.validationErrors.length > 0 || planErrors.length > 0) {
+  const allValidationErrors = [...parsed.validationErrors, ...datasetValidationErrors];
+
+  if (allValidationErrors.length > 0 || planErrors.length > 0) {
     return buildResult({
       assessmentVersionId: assessmentVersion?.assessmentVersionId ?? command.assessmentVersionId,
       parseErrors: [],
-      validationErrors: parsed.validationErrors,
+      validationErrors: allValidationErrors,
       planErrors,
       previewGroups: [],
       existingRowCount,
@@ -474,13 +568,16 @@ export async function importSingleDomainLanguageDatasetForAssessmentVersionWithD
     };
   } catch (error) {
     const definition = getSingleDomainLanguageDatasetDefinition(command.datasetKey);
+    const existingRowConflictMessage = error instanceof Error && /duplicate key value/i.test(error.message)
+      ? ' Existing row conflict detected: replace the existing dataset rows before retrying.'
+      : '';
 
     return {
       ...preview,
       success: false,
       canImport: false,
       executionError: error instanceof Error
-        ? `${definition.label} import could not be saved: ${error.message}`
+        ? `${definition.label} import could not be saved: ${error.message}${existingRowConflictMessage}`
         : `${definition.label} import could not be saved.`,
     };
   }
