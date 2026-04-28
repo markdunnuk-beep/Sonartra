@@ -11,6 +11,7 @@ import {
 } from '@/lib/admin/single-domain-language-datasets';
 import {
   importSingleDomainLanguageDatasetForAssessmentVersion,
+  type SingleDomainLanguageImportResult,
 } from '@/lib/server/admin-single-domain-language-import';
 import type { SingleDomainLanguageDatasetKey } from '@/lib/types/single-domain-language';
 
@@ -22,6 +23,12 @@ type ActionValues = {
   datasetKey: SingleDomainLanguageDatasetKey;
   rawInput: string;
 };
+
+type ImportExecutor = (command: {
+  assessmentVersionId: string;
+  datasetKey: SingleDomainLanguageDatasetKey;
+  rawInput: string;
+}) => Promise<SingleDomainLanguageImportResult>;
 
 function normalizeIssues(
   issues: readonly { message: string }[],
@@ -63,13 +70,61 @@ function buildEmptyInputState(
 
 export async function importSingleDomainLanguageDatasetAction(
   context: ActionContext,
-  values: ActionValues,
+  previousStateOrValues: SingleDomainLanguageImportState | ActionValues,
+  maybeFormData?: FormData,
 ): Promise<SingleDomainLanguageImportState> {
+  return importSingleDomainLanguageDatasetActionWithExecutor(
+    context,
+    previousStateOrValues,
+    maybeFormData,
+    importSingleDomainLanguageDatasetForAssessmentVersion,
+  );
+}
+
+function isActionValues(value: unknown): value is ActionValues {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  return 'datasetKey' in value && 'rawInput' in value;
+}
+
+function normalizeActionValues(
+  previousStateOrValues: SingleDomainLanguageImportState | ActionValues,
+  maybeFormData?: FormData,
+): ActionValues {
+  if (maybeFormData instanceof FormData) {
+    return {
+      datasetKey: String(maybeFormData.get('datasetKey') ?? '') as SingleDomainLanguageDatasetKey,
+      rawInput: String(maybeFormData.get('rawInput') ?? ''),
+    };
+  }
+
+  if (isActionValues(previousStateOrValues)) {
+    return previousStateOrValues;
+  }
+
+  const previousState = previousStateOrValues as SingleDomainLanguageImportState;
+
+  return {
+    datasetKey: previousState.datasetKey,
+    rawInput: previousState.rawInput,
+  };
+}
+
+export async function importSingleDomainLanguageDatasetActionWithExecutor(
+  context: ActionContext,
+  previousStateOrValues: SingleDomainLanguageImportState | ActionValues,
+  maybeFormData: FormData | undefined,
+  executor: ImportExecutor,
+): Promise<SingleDomainLanguageImportState> {
+  const values = normalizeActionValues(previousStateOrValues, maybeFormData);
+
   if (!values.rawInput.trim()) {
     return buildEmptyInputState(values.datasetKey, values.rawInput);
   }
 
-  const result = await importSingleDomainLanguageDatasetForAssessmentVersion({
+  const result = await executor({
     assessmentVersionId: context.assessmentVersionId,
     datasetKey: values.datasetKey,
     rawInput: values.rawInput,
