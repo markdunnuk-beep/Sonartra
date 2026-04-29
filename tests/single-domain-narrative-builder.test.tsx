@@ -305,8 +305,8 @@ test('narrative builder mapper preserves the locked six-section order from Task 
     model.sections.map((section) => section.key),
     ['intro', 'hero', 'drivers', 'pair', 'limitation', 'application'],
   );
-  assert.equal(model.readiness.completeCount, 2);
-  assert.equal(model.readiness.incompleteCount, 3);
+  assert.equal(model.readiness.completeCount, 4);
+  assert.equal(model.readiness.incompleteCount, 1);
   assert.equal(model.readiness.waitingCount, 1);
 });
 

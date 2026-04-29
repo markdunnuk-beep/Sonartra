@@ -4,10 +4,6 @@ import type {
   AdminAssessmentDetailSignalWeight,
 } from '@/lib/server/admin-assessment-detail';
 import { getExpectedDriverClaimTuples } from '@/lib/assessment-language/single-domain-canonical';
-import {
-  getPairLanguageReferenceRequirement,
-  pairLanguageReferencesPair,
-} from '@/lib/assessment-language/single-domain-pair-language';
 import { SINGLE_DOMAIN_RESPONSE_OPTION_LABELS } from '@/lib/admin/single-domain-response-import';
 import { getSingleDomainLanguageDatasetDefinition } from '@/lib/admin/single-domain-language-datasets';
 import type { SingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language-types';
@@ -308,28 +304,45 @@ function createLanguageDatasetValidation(params: {
   };
 }
 
-function createPairContentMismatchIssues(params: {
+function createPairKeyCoverage(params: {
   datasetKey: 'HERO_PAIRS' | 'PAIR_SUMMARIES';
-  pairKeys: readonly string[];
-  rows: readonly {
-    pair_key: string;
-    rowText: string;
-  }[];
-}): readonly SingleDomainStructuralIssue[] {
+  expectedPairKeys: readonly string[];
+  actualPairKeys: readonly string[];
+}): {
+  completeRowCount: number;
+  issues: readonly SingleDomainStructuralIssue[];
+} {
   const datasetLabel = params.datasetKey === 'HERO_PAIRS' ? 'HERO_PAIRS' : 'PAIR_SUMMARIES';
+  const actualPairKeyCounts = new Map<string, number>();
+  params.actualPairKeys.forEach((pairKey) => {
+    actualPairKeyCounts.set(pairKey, (actualPairKeyCounts.get(pairKey) ?? 0) + 1);
+  });
+  const expectedPairKeySet = new Set(params.expectedPairKeys);
+  const missingPairKeys = params.expectedPairKeys.filter((pairKey) => (actualPairKeyCounts.get(pairKey) ?? 0) === 0);
+  const unexpectedPairKeys = [...actualPairKeyCounts.keys()].filter((pairKey) => !expectedPairKeySet.has(pairKey));
+  const duplicatePairKeys = [...actualPairKeyCounts.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([pairKey]) => pairKey);
 
-  return Object.freeze(
-    params.rows
-      .filter((row) => params.pairKeys.includes(row.pair_key))
-      .filter((row) => !pairLanguageReferencesPair({
-        pairKey: row.pair_key,
-        rowText: row.rowText,
-      }))
-      .map((row) => createIssue(
-        `language_${params.datasetKey.toLowerCase()}_content_mismatch`,
-        `Invalid ${datasetLabel}: ${getPairLanguageReferenceRequirement(row.pair_key).message}`,
-      )),
-  );
+  const issues = [
+    ...missingPairKeys.map((pairKey) => createIssue(
+      `language_${params.datasetKey.toLowerCase()}_pair_key_missing`,
+      `${datasetLabel} is missing the canonical pair_key "${pairKey}".`,
+    )),
+    ...unexpectedPairKeys.map((pairKey) => createIssue(
+      `language_${params.datasetKey.toLowerCase()}_pair_key_unexpected`,
+      `${datasetLabel} contains unexpected pair_key "${pairKey}". Pair keys must match the canonical signal-derived pair set exactly.`,
+    )),
+    ...duplicatePairKeys.map((pairKey) => createIssue(
+      `language_${params.datasetKey.toLowerCase()}_pair_key_duplicate`,
+      `${datasetLabel} must contain exactly one row for pair_key "${pairKey}".`,
+    )),
+  ];
+
+  return {
+    completeRowCount: params.expectedPairKeys.filter((pairKey) => actualPairKeyCounts.get(pairKey) === 1).length,
+    issues: Object.freeze(issues),
+  };
 }
 
 export function buildSingleDomainLanguageValidation(params: {
@@ -356,35 +369,15 @@ export function buildSingleDomainLanguageValidation(params: {
     domainKey: primaryDomainKey,
     signalKeys,
   });
-  const heroPairContentIssues = createPairContentMismatchIssues({
+  const heroPairKeyCoverage = createPairKeyCoverage({
     datasetKey: 'HERO_PAIRS',
-    pairKeys: expectedPairKeys,
-    rows: params.languageBundle.HERO_PAIRS.map((row) => ({
-      pair_key: row.pair_key,
-      rowText: [
-        row.hero_headline,
-        row.hero_subheadline,
-        row.hero_opening,
-        row.hero_strength_paragraph,
-        row.hero_tension_paragraph,
-        row.hero_close_paragraph,
-      ].join(' '),
-    })),
+    expectedPairKeys,
+    actualPairKeys: params.languageBundle.HERO_PAIRS.map((row) => row.pair_key),
   });
-  const pairSummaryContentIssues = createPairContentMismatchIssues({
+  const pairSummaryKeyCoverage = createPairKeyCoverage({
     datasetKey: 'PAIR_SUMMARIES',
-    pairKeys: expectedPairKeys,
-    rows: params.languageBundle.PAIR_SUMMARIES.map((row) => ({
-      pair_key: row.pair_key,
-      rowText: [
-        row.pair_section_title,
-        row.pair_headline,
-        row.pair_opening_paragraph,
-        row.pair_strength_paragraph,
-        row.pair_tension_paragraph,
-        row.pair_close_paragraph,
-      ].join(' '),
-    })),
+    expectedPairKeys,
+    actualPairKeys: params.languageBundle.PAIR_SUMMARIES.map((row) => row.pair_key),
   });
   const actualDriverClaimTupleCounts = new Map<string, number>();
   (params.languageBundle.DRIVER_CLAIMS ?? []).forEach((row) => {
@@ -539,15 +532,15 @@ export function buildSingleDomainLanguageValidation(params: {
   ];
   const driverClaimsDatasetIndex = datasets.findIndex((dataset) => dataset.datasetKey === 'DRIVER_CLAIMS');
   const heroPairsDatasetIndex = datasets.findIndex((dataset) => dataset.datasetKey === 'HERO_PAIRS');
-  if (heroPairsDatasetIndex >= 0 && heroPairContentIssues.length > 0) {
+  if (heroPairsDatasetIndex >= 0 && heroPairKeyCoverage.issues.length > 0) {
     const dataset = datasets[heroPairsDatasetIndex]!;
     datasets[heroPairsDatasetIndex] = {
       ...dataset,
       isReady: false,
       status: dataset.actualRowCount > 0 ? 'attention' : dataset.status,
-      detail: heroPairContentIssues[0]!.message,
-      issues: Object.freeze([...dataset.issues, ...heroPairContentIssues]),
-      completeRowCount: Math.max(0, dataset.expectedRowCount - heroPairContentIssues.length),
+      detail: heroPairKeyCoverage.issues[0]!.message,
+      issues: Object.freeze([...dataset.issues, ...heroPairKeyCoverage.issues]),
+      completeRowCount: heroPairKeyCoverage.completeRowCount,
     };
   }
   if (driverClaimsDatasetIndex >= 0 && driverClaimsIssues.length > 0) {
@@ -571,15 +564,15 @@ export function buildSingleDomainLanguageValidation(params: {
     };
   }
   const pairSummariesDatasetIndex = datasets.findIndex((dataset) => dataset.datasetKey === 'PAIR_SUMMARIES');
-  if (pairSummariesDatasetIndex >= 0 && pairSummaryContentIssues.length > 0) {
+  if (pairSummariesDatasetIndex >= 0 && pairSummaryKeyCoverage.issues.length > 0) {
     const dataset = datasets[pairSummariesDatasetIndex]!;
     datasets[pairSummariesDatasetIndex] = {
       ...dataset,
       isReady: false,
       status: dataset.actualRowCount > 0 ? 'attention' : dataset.status,
-      detail: pairSummaryContentIssues[0]!.message,
-      issues: Object.freeze([...dataset.issues, ...pairSummaryContentIssues]),
-      completeRowCount: Math.max(0, dataset.expectedRowCount - pairSummaryContentIssues.length),
+      detail: pairSummaryKeyCoverage.issues[0]!.message,
+      issues: Object.freeze([...dataset.issues, ...pairSummaryKeyCoverage.issues]),
+      completeRowCount: pairSummaryKeyCoverage.completeRowCount,
     };
   }
   const issues = Object.freeze(datasets.flatMap((dataset) => dataset.issues));

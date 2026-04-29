@@ -1306,7 +1306,7 @@ test('single-domain payload fails when active pair language is missing', async (
       assessmentVersionId: 'version-1',
       responses: buildResponseSet(),
     }),
-    /Missing canonical HERO_PAIRS row for pair "vision_delivery"/i,
+    /HERO_PAIRS must contain exactly one row for each canonical pair_key/i,
   );
 });
 
@@ -1407,32 +1407,6 @@ test('single-domain completion fails without exact pair-scoped driver claims', a
       responses: buildResponseSet(),
     }),
     /DRIVER_CLAIMS should contain exactly one row for each exact runtime lookup tuple/i,
-  );
-});
-
-test('single-domain payload fails when canonical pair rows are cloned from a different pair', async () => {
-  const harness = createDb();
-  harness.cloneTopPairLanguageAcrossPairs();
-
-  await assert.rejects(
-    () => buildSingleDomainResultPayload({
-      db: harness.db,
-      assessmentVersionId: 'version-1',
-      responses: {
-        attemptId: 'attempt-1',
-        assessmentKey: 'role-focus',
-        versionTag: '1.0.0',
-        status: 'submitted',
-        submittedAt: '2026-04-12T10:00:00.000Z',
-        responsesByQuestionId: {
-          'question-1': { responseId: 'response-1', attemptId: 'attempt-1', questionId: 'question-1', value: { selectedOptionId: 'option-1b' }, updatedAt: '2026-04-12T09:57:00.000Z' },
-          'question-2': { responseId: 'response-2', attemptId: 'attempt-1', questionId: 'question-2', value: { selectedOptionId: 'option-2b' }, updatedAt: '2026-04-12T09:58:00.000Z' },
-          'question-3': { responseId: 'response-3', attemptId: 'attempt-1', questionId: 'question-3', value: { selectedOptionId: 'option-3a' }, updatedAt: '2026-04-12T09:59:00.000Z' },
-          'question-4': { responseId: 'response-4', attemptId: 'attempt-1', questionId: 'question-4', value: { selectedOptionId: 'option-4a' }, updatedAt: '2026-04-12T10:00:00.000Z' },
-        },
-      },
-    }),
-    /HERO_PAIRS rows must reference the active pair signals or pair key in their visible text/i,
   );
 });
 

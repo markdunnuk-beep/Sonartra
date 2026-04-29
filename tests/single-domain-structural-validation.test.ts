@@ -24,13 +24,13 @@ const HERO_PAIR_TEST_DOMAIN = [{
   ],
 }] as const;
 
-function buildHeroPairLanguageValidation(heroHeadline: string) {
+function buildHeroPairLanguageValidation(heroHeadline: string, pairKey = 'results_people') {
   return buildSingleDomainLanguageValidation({
     authoredDomains: HERO_PAIR_TEST_DOMAIN,
     languageBundle: {
       DOMAIN_FRAMING: [],
       HERO_PAIRS: [{
-        pair_key: 'results_people',
+        pair_key: pairKey,
         hero_headline: heroHeadline,
         hero_subheadline: 'Subheadline',
         hero_opening: 'Opening',
@@ -42,6 +42,43 @@ function buildHeroPairLanguageValidation(heroHeadline: string) {
       SIGNAL_CHAPTERS: [],
       BALANCING_SECTIONS: [],
       PAIR_SUMMARIES: [],
+      APPLICATION_STATEMENTS: [],
+    },
+  });
+}
+
+function buildHeroAndPairLanguageValidation(params?: {
+  heroPairKeys?: readonly string[];
+  pairSummaryPairKeys?: readonly string[];
+}) {
+  const heroPairKeys = params?.heroPairKeys ?? ['results_people'];
+  const pairSummaryPairKeys = params?.pairSummaryPairKeys ?? ['results_people'];
+
+  return buildSingleDomainLanguageValidation({
+    authoredDomains: HERO_PAIR_TEST_DOMAIN,
+    languageBundle: {
+      DOMAIN_FRAMING: [],
+      HERO_PAIRS: heroPairKeys.map((pair_key) => ({
+        pair_key,
+        hero_headline: 'The stabilising organiser',
+        hero_subheadline: 'Direction held through trusted operating rhythm',
+        hero_opening: 'This copy is editorial and does not need literal signal names.',
+        hero_strength_paragraph: 'Strength',
+        hero_tension_paragraph: 'Tension',
+        hero_close_paragraph: 'Close',
+      })),
+      DRIVER_CLAIMS: [],
+      SIGNAL_CHAPTERS: [],
+      BALANCING_SECTIONS: [],
+      PAIR_SUMMARIES: pairSummaryPairKeys.map((pair_key) => ({
+        pair_key,
+        pair_section_title: 'Structure that people can trust',
+        pair_headline: 'Operational trust in motion',
+        pair_opening_paragraph: 'This copy is owned by the pair_key, not by literal keyword repetition.',
+        pair_strength_paragraph: 'Strength',
+        pair_tension_paragraph: 'Tension',
+        pair_close_paragraph: 'Close',
+      })),
       APPLICATION_STATEMENTS: [],
     },
   });
@@ -392,14 +429,13 @@ function buildApplicationStatementRows(signalKeys: readonly string[]): Applicati
   return rows;
 }
 
-test('hero pair language completeness fails when visible text does not reference the active pair', () => {
+test('hero pair language completeness accepts editorial copy when canonical pair_key coverage is valid', () => {
   const validation = buildHeroPairLanguageValidation('Shared direction');
   const heroPairs = validation.datasets.find((dataset) => dataset.datasetKey === 'HERO_PAIRS');
 
-  assert.equal(heroPairs?.isReady, false);
-  assert.equal(validation.overallReady, false);
-  assert.match(heroPairs?.detail ?? '', /Invalid HERO_PAIRS: results_people must reference results and people, or the active pair key\./i);
-  assert.ok(heroPairs?.issues.some((issue) => issue.code === 'language_hero_pairs_content_mismatch'));
+  assert.equal(heroPairs?.isReady, true);
+  assert.match(heroPairs?.detail ?? '', /HERO_PAIRS matches the current derived pair count/i);
+  assert.equal(heroPairs?.issues.some((issue) => issue.code.includes('content_mismatch')), false);
 });
 
 test('hero pair language completeness passes when visible text references both active signals', () => {
@@ -418,8 +454,8 @@ test('hero pair language completeness passes pair-reference validation when visi
   assert.equal(heroPairs?.issues.some((issue) => issue.code === 'language_hero_pairs_content_mismatch'), false);
 });
 
-test('language completeness and review language section agree when hero pair text is invalid', () => {
-  const languageValidation = buildHeroPairLanguageValidation('Shared direction');
+test('language completeness and review language section agree when hero pair_key coverage is invalid', () => {
+  const languageValidation = buildHeroPairLanguageValidation('Shared direction', 'people_results');
   const structuralValidation = buildSingleDomainStructuralValidation({
     authoredDomains: HERO_PAIR_TEST_DOMAIN,
     authoredQuestions: [],
@@ -429,7 +465,27 @@ test('language completeness and review language section agree when hero pair tex
 
   assert.equal(languageValidation.overallReady, false);
   assert.equal(languageSection?.status, 'waiting');
-  assert.ok(structuralValidation.issues.some((issue) => issue.code === 'language_hero_pairs_content_mismatch'));
+  assert.ok(structuralValidation.issues.some((issue) => issue.code === 'language_hero_pairs_pair_key_missing'));
+  assert.ok(structuralValidation.issues.some((issue) => issue.code === 'language_hero_pairs_pair_key_unexpected'));
+});
+
+test('pair summaries completeness accepts editorial copy when canonical pair_key coverage is valid', () => {
+  const validation = buildHeroAndPairLanguageValidation();
+  const pairSummaries = validation.datasets.find((dataset) => dataset.datasetKey === 'PAIR_SUMMARIES');
+
+  assert.equal(pairSummaries?.isReady, true);
+  assert.equal(pairSummaries?.completeRowCount, 1);
+  assert.equal(pairSummaries?.issues.some((issue) => issue.code.includes('content_mismatch')), false);
+});
+
+test('pair summaries completeness fails when canonical pair_key order is reversed', () => {
+  const validation = buildHeroAndPairLanguageValidation({ pairSummaryPairKeys: ['people_results'] });
+  const pairSummaries = validation.datasets.find((dataset) => dataset.datasetKey === 'PAIR_SUMMARIES');
+
+  assert.equal(pairSummaries?.isReady, false);
+  assert.equal(pairSummaries?.completeRowCount, 0);
+  assert.ok(pairSummaries?.issues.some((issue) => issue.code === 'language_pair_summaries_pair_key_missing'));
+  assert.ok(pairSummaries?.issues.some((issue) => issue.code === 'language_pair_summaries_pair_key_unexpected'));
 });
 
 test('application statements completeness derives from the full-pattern row count while signal chapters stay out of builder readiness', () => {

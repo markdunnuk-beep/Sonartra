@@ -530,12 +530,12 @@ test('missing language datasets fail readiness explicitly where required', async
   assert.equal(readiness.isReady, false);
   assert.ok(readiness.issues.some((issue) => issue.code === 'domain_framing_count_mismatch'));
   assert.ok(readiness.issues.some((issue) => issue.code === 'application_statements_count_mismatch'));
-  assert.equal(readiness.issues.some((issue) => issue.code === 'hero_pairs_count_mismatch'), false);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'hero_pairs_count_mismatch'), true);
   assert.equal(readiness.issues.some((issue) => issue.code === 'balancing_sections_count_mismatch'), false);
-  assert.equal(readiness.issues.some((issue) => issue.code === 'pair_summaries_count_mismatch'), false);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'pair_summaries_count_mismatch'), true);
 });
 
-test('hero pair runtime readiness fails when visible text does not reference the active pair', async () => {
+test('hero pair runtime readiness accepts editorial copy when canonical pair_key coverage is valid', async () => {
   const fixture = buildFixture();
   fixture.language.HERO_PAIRS = fixture.language.HERO_PAIRS.map((row) => (
     row.pair_key === 'directive_supportive'
@@ -553,8 +553,8 @@ test('hero pair runtime readiness fails when visible text does not reference the
 
   const readiness = await getSingleDomainDraftReadiness(createSingleDomainDb(fixture), 'version-1');
 
-  assert.equal(readiness.isReady, false);
-  assert.ok(readiness.issues.some((issue) => issue.code === 'hero_pairs_content_mismatch'));
+  assert.equal(readiness.isReady, true);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'hero_pairs_content_mismatch'), false);
 });
 
 test('hero pair runtime readiness accepts visible text that references the active pair key', async () => {

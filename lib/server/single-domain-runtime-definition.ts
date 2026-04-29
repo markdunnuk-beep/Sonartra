@@ -4,7 +4,6 @@ import {
   getExpectedDriverClaimTuples,
   getSingleDomainCanonicalPairKeys,
 } from '@/lib/assessment-language/single-domain-canonical';
-import { pairLanguageReferencesPair } from '@/lib/assessment-language/single-domain-pair-language';
 import { resolveSingleDomainPairKey } from '@/lib/assessment-language/single-domain-pair-keys';
 import {
   isFullPatternApplicationRow,
@@ -391,6 +390,10 @@ function validateLanguageKeys(params: {
 
   const heroPairKeys = [...new Set(params.languageBundle.HERO_PAIRS.map((row) => row.pair_key))];
   const invalidHeroPairKeys = heroPairKeys.filter((key) => !params.pairKeys.includes(key));
+  const duplicateHeroPairKeys = params.pairKeys.filter(
+    (key) => params.languageBundle.HERO_PAIRS.filter((row) => row.pair_key === key).length > 1,
+  );
+  const missingHeroPairKeys = params.pairKeys.filter((key) => !heroPairKeys.includes(key));
   if (invalidHeroPairKeys.length > 0) {
     params.issues.push(
       createIssue(
@@ -401,27 +404,23 @@ function validateLanguageKeys(params: {
       ),
     );
   }
-  const heroContentMismatches = params.languageBundle.HERO_PAIRS
-    .filter((row) => params.pairKeys.includes(row.pair_key))
-    .filter((row) => !pairLanguageReferencesPair({
-      pairKey: row.pair_key,
-      rowText: [
-        row.hero_headline,
-        row.hero_subheadline,
-        row.hero_opening,
-        row.hero_strength_paragraph,
-        row.hero_tension_paragraph,
-        row.hero_close_paragraph,
-      ].join(' '),
-    }))
-    .map((row) => row.pair_key);
-  if (heroContentMismatches.length > 0) {
+  if (missingHeroPairKeys.length > 0) {
     params.issues.push(
       createIssue(
-        'hero_pairs_content_mismatch',
+        'hero_pairs_key_mismatch',
         'language',
-        'HERO_PAIRS rows must reference the active pair signals or pair key in their visible text.',
-        heroContentMismatches,
+        'HERO_PAIRS must contain exactly one row for each canonical pair_key.',
+        missingHeroPairKeys,
+      ),
+    );
+  }
+  if (duplicateHeroPairKeys.length > 0) {
+    params.issues.push(
+      createIssue(
+        'hero_pairs_key_mismatch',
+        'language',
+        'HERO_PAIRS must not contain duplicate canonical pair_key rows.',
+        duplicateHeroPairKeys,
       ),
     );
   }
@@ -441,6 +440,10 @@ function validateLanguageKeys(params: {
 
   const pairSummaryKeys = [...new Set(params.languageBundle.PAIR_SUMMARIES.map((row) => row.pair_key))];
   const invalidPairSummaryKeys = pairSummaryKeys.filter((key) => !params.pairKeys.includes(key));
+  const duplicatePairSummaryKeys = params.pairKeys.filter(
+    (key) => params.languageBundle.PAIR_SUMMARIES.filter((row) => row.pair_key === key).length > 1,
+  );
+  const missingPairSummaryKeys = params.pairKeys.filter((key) => !pairSummaryKeys.includes(key));
   if (invalidPairSummaryKeys.length > 0) {
     params.issues.push(
       createIssue(
@@ -451,27 +454,23 @@ function validateLanguageKeys(params: {
       ),
     );
   }
-  const pairSummaryContentMismatches = params.languageBundle.PAIR_SUMMARIES
-    .filter((row) => params.pairKeys.includes(row.pair_key))
-    .filter((row) => !pairLanguageReferencesPair({
-      pairKey: row.pair_key,
-      rowText: [
-        row.pair_section_title,
-        row.pair_headline,
-        row.pair_opening_paragraph,
-        row.pair_strength_paragraph,
-        row.pair_tension_paragraph,
-        row.pair_close_paragraph,
-      ].join(' '),
-    }))
-    .map((row) => row.pair_key);
-  if (pairSummaryContentMismatches.length > 0) {
+  if (missingPairSummaryKeys.length > 0) {
     params.issues.push(
       createIssue(
-        'pair_summaries_content_mismatch',
+        'pair_summaries_key_mismatch',
         'language',
-        'PAIR_SUMMARIES rows must reference the active pair signals or pair key in their visible text.',
-        pairSummaryContentMismatches,
+        'PAIR_SUMMARIES must contain exactly one row for each canonical pair_key.',
+        missingPairSummaryKeys,
+      ),
+    );
+  }
+  if (duplicatePairSummaryKeys.length > 0) {
+    params.issues.push(
+      createIssue(
+        'pair_summaries_key_mismatch',
+        'language',
+        'PAIR_SUMMARIES must not contain duplicate canonical pair_key rows.',
+        duplicatePairSummaryKeys,
       ),
     );
   }
@@ -1009,12 +1008,12 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.HERO_PAIRS > expectedLanguageRowCounts.HERO_PAIRS) {
+  if (languageRowCounts.HERO_PAIRS !== expectedLanguageRowCounts.HERO_PAIRS) {
     issues.push(
       createIssue(
         'hero_pairs_count_mismatch',
         'language',
-        `HERO_PAIRS must contain no more than ${expectedLanguageRowCounts.HERO_PAIRS} signal-derived pair row${expectedLanguageRowCounts.HERO_PAIRS === 1 ? '' : 's'}. Missing pairs use runtime fallback language.`,
+        `HERO_PAIRS must contain exactly ${expectedLanguageRowCounts.HERO_PAIRS} signal-derived pair row${expectedLanguageRowCounts.HERO_PAIRS === 1 ? '' : 's'}.`,
       ),
     );
   }
@@ -1036,12 +1035,12 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.PAIR_SUMMARIES > expectedLanguageRowCounts.PAIR_SUMMARIES) {
+  if (languageRowCounts.PAIR_SUMMARIES !== expectedLanguageRowCounts.PAIR_SUMMARIES) {
     issues.push(
       createIssue(
         'pair_summaries_count_mismatch',
         'language',
-        `PAIR_SUMMARIES must contain no more than ${expectedLanguageRowCounts.PAIR_SUMMARIES} signal-derived pair row${expectedLanguageRowCounts.PAIR_SUMMARIES === 1 ? '' : 's'}. Missing pairs use runtime fallback language.`,
+        `PAIR_SUMMARIES must contain exactly ${expectedLanguageRowCounts.PAIR_SUMMARIES} signal-derived pair row${expectedLanguageRowCounts.PAIR_SUMMARIES === 1 ? '' : 's'}.`,
       ),
     );
   }
