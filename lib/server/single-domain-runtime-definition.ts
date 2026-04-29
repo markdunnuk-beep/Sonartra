@@ -6,6 +6,10 @@ import {
 } from '@/lib/assessment-language/single-domain-canonical';
 import { pairLanguageReferencesPair } from '@/lib/assessment-language/single-domain-pair-language';
 import { resolveSingleDomainPairKey } from '@/lib/assessment-language/single-domain-pair-keys';
+import {
+  isFullPatternApplicationRow,
+  SINGLE_DOMAIN_APPLICATION_DRIVER_ROLES,
+} from '@/lib/assessment-language/single-domain-application-pattern';
 import { getSingleDomainLanguageBundle } from '@/lib/server/assessment-version-single-domain-language';
 import type {
   SingleDomainDraftReadinessCounts,
@@ -286,7 +290,11 @@ function buildLanguageExpectations(params: {
   domainKey: string | null;
   signalKeys: readonly string[];
   pairKeys: readonly string[];
+  applicationRows?: readonly Awaited<ReturnType<typeof getSingleDomainLanguageBundle>>['APPLICATION_STATEMENTS'][number][];
 }): SingleDomainRuntimeLanguageRowCounts {
+  const hasFullPatternApplicationRows = (params.applicationRows ?? []).some(isFullPatternApplicationRow);
+  const lowerSignalPermutationCount = Math.max(0, (params.signalCount - 2) * (params.signalCount - 3));
+
   return {
     DOMAIN_FRAMING: 1,
     HERO_PAIRS: params.derivedPairCount,
@@ -299,11 +307,14 @@ function buildLanguageExpectations(params: {
       : 0,
     BALANCING_SECTIONS: params.derivedPairCount,
     PAIR_SUMMARIES: params.derivedPairCount,
-    APPLICATION_STATEMENTS: params.signalCount,
+    APPLICATION_STATEMENTS: hasFullPatternApplicationRows
+      ? params.derivedPairCount * lowerSignalPermutationCount * 3 * 4
+      : params.signalCount,
   };
 }
 
 function validateLanguageKeys(params: {
+  assessmentVersionId: string;
   domainKey: string | null;
   signalKeys: readonly string[];
   pairKeys: readonly string[];
@@ -337,6 +348,45 @@ function validateLanguageKeys(params: {
         invalidApplicationSignalKeys,
       ),
     );
+  }
+  const fullPatternApplicationRows = params.languageBundle.APPLICATION_STATEMENTS.filter(isFullPatternApplicationRow);
+  if (fullPatternApplicationRows.length > 0) {
+    const rowsByPatternKey = new Map<string, typeof fullPatternApplicationRows>();
+    fullPatternApplicationRows.forEach((row) => {
+      const rows = rowsByPatternKey.get(row.pattern_key ?? '') ?? [];
+      rows.push(row);
+      rowsByPatternKey.set(row.pattern_key ?? '', rows);
+    });
+
+    rowsByPatternKey.forEach((rows, patternKey) => {
+      const missing: string[] = [];
+      (['rely_on', 'notice', 'develop'] as const).forEach((focusArea) => {
+        SINGLE_DOMAIN_APPLICATION_DRIVER_ROLES.forEach((driverRole) => {
+          if (!rows.some((row) => row.focus_area === focusArea && row.driver_role === driverRole)) {
+            missing.push(`${focusArea}:${driverRole}`);
+          }
+        });
+      });
+
+      if (rows.length !== 12 || missing.length > 0) {
+        params.issues.push(
+          createIssue(
+            'single_domain_application_full_pattern_missing',
+            'language',
+            [
+              'single_domain_application_full_pattern_missing',
+              `assessment_version_id=${params.assessmentVersionId}`,
+              `domain_key=${domainKey ?? ''}`,
+              `pattern_key=${patternKey}`,
+              'expected_count=12',
+              `actual_count=${rows.length}`,
+              `missing=${missing.join(',') || 'none'}`,
+            ].join('; '),
+            [patternKey, ...missing],
+          ),
+        );
+      }
+    });
   }
 
   const heroPairKeys = [...new Set(params.languageBundle.HERO_PAIRS.map((row) => row.pair_key))];
@@ -728,6 +778,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
     domainKey: runtimeDomainRow?.domain_key ?? null,
     signalKeys: expectedSignalKeys,
     pairKeys: expectedPairKeys,
+    applicationRows: languageBundle.APPLICATION_STATEMENTS,
   });
   const languageRowCounts = createLanguageRowCounts(languageBundle);
 
@@ -941,6 +992,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
   }
 
   validateLanguageKeys({
+    assessmentVersionId,
     domainKey: runtimeDomainRow?.domain_key ?? null,
     signalKeys: expectedSignalKeys,
     pairKeys: derivedPairKeys,

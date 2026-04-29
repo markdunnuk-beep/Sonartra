@@ -2,6 +2,12 @@ import { loadRuntimeExecutionModel } from '@/lib/engine/runtime-loader';
 import { normalizeScoreResult } from '@/lib/engine/normalization';
 import { scoreAssessmentResponses } from '@/lib/engine/scoring';
 import { resolveSingleDomainPairKey } from '@/lib/assessment-language/single-domain-pair-keys';
+import {
+  buildSingleDomainApplicationPattern,
+  isFullPatternApplicationRow,
+  SINGLE_DOMAIN_APPLICATION_DRIVER_ROLES,
+  type SingleDomainApplicationDriverRole,
+} from '@/lib/assessment-language/single-domain-application-pattern';
 import type {
   RuntimeAssessmentDefinition,
   RuntimeResponseSet,
@@ -17,6 +23,8 @@ import type {
 } from '@/lib/types/single-domain-language';
 import type {
   SingleDomainApplicationStatement,
+  SingleDomainResultApplicationRoleItem,
+  SingleDomainResultApplicationSection,
   SingleDomainResultApplication,
   SingleDomainResultBalancing,
   SingleDomainResultHero,
@@ -139,6 +147,12 @@ type DriverClaimSourceDiagnostic = {
   source: 'driver_claims';
 };
 
+type ApplicationSourceDiagnostic = {
+  source: 'full_pattern' | 'legacy_signal_bucket_fallback';
+  patternKey?: string;
+  pairKey?: string;
+};
+
 type SelectedSignalText = {
   text: string;
   source: string;
@@ -190,6 +204,18 @@ function formatDriverClaimSourceDiagnostics(
   });
 
   return Object.freeze(formatted);
+}
+
+function formatApplicationSourceDiagnostic(diagnostic: ApplicationSourceDiagnostic): string {
+  if (diagnostic.source === 'full_pattern') {
+    return [
+      'single_domain_application_full_pattern_source',
+      `pattern_key=${diagnostic.patternKey ?? ''}`,
+      `pair_key=${diagnostic.pairKey ?? ''}`,
+    ].join(': ');
+  }
+
+  return 'single_domain_application_legacy_signal_bucket_fallback: no full-pattern application rows were available.';
 }
 
 function createDriverClaimKey(params: {
@@ -300,6 +326,7 @@ function createLanguageMaps(runtimeDefinition: Awaited<ReturnType<typeof loadSin
     applicationBySignalKey: new Map(
       runtimeDefinition.languageBundle.APPLICATION_STATEMENTS.map((row) => [row.signal_key, row]),
     ),
+    applicationRows: runtimeDefinition.languageBundle.APPLICATION_STATEMENTS,
   };
 }
 
@@ -665,8 +692,28 @@ function getSpecificPairSummaryRow(params: {
 function buildApplicationStatements(params: {
   rankedSignals: readonly SingleDomainResultSignal[];
   applicationBySignalKey: ReadonlyMap<string, ApplicationStatementsRow>;
+  applicationRows: readonly ApplicationStatementsRow[];
+  domainKey: string;
+  assessmentVersionId: string;
+  sourceDiagnostics: ApplicationSourceDiagnostic[];
 }): SingleDomainResultApplication {
   const ranked = [...params.rankedSignals].sort((left, right) => left.rank - right.rank);
+  const fullPatternRows = params.applicationRows.filter(isFullPatternApplicationRow);
+
+  if (fullPatternRows.length > 0) {
+    return buildFullPatternApplicationStatements({
+      rankedSignals: ranked,
+      applicationRows: fullPatternRows,
+      domainKey: params.domainKey,
+      assessmentVersionId: params.assessmentVersionId,
+      sourceDiagnostics: params.sourceDiagnostics,
+    });
+  }
+
+  params.sourceDiagnostics.push({
+    source: 'legacy_signal_bucket_fallback',
+  });
+
   const lowestFirst = [...ranked].sort((left, right) => right.rank - left.rank);
 
   const strengths = ranked
@@ -753,6 +800,151 @@ function buildApplicationStatements(params: {
   };
 }
 
+const APPLICATION_FOCUS_CONFIG = {
+  rely_on: {
+    payloadKey: 'relyOn',
+    guidanceType: 'applied_strength',
+    legacyKey: 'strengths',
+  },
+  notice: {
+    payloadKey: 'notice',
+    guidanceType: 'watchout',
+    legacyKey: 'watchouts',
+  },
+  develop: {
+    payloadKey: 'develop',
+    guidanceType: 'development_focus',
+    legacyKey: 'developmentFocus',
+  },
+} as const;
+
+type ApplicationFocusArea = keyof typeof APPLICATION_FOCUS_CONFIG;
+
+function buildFullPatternApplicationStatements(params: {
+  rankedSignals: readonly SingleDomainResultSignal[];
+  applicationRows: readonly ApplicationStatementsRow[];
+  domainKey: string;
+  assessmentVersionId: string;
+  sourceDiagnostics: ApplicationSourceDiagnostic[];
+}): SingleDomainResultApplication {
+  const pattern = buildSingleDomainApplicationPattern(
+    params.rankedSignals.map((signal) => signal.signal_key),
+  );
+  const signalByKey = new Map(params.rankedSignals.map((signal) => [signal.signal_key, signal]));
+  const selectedRows = params.applicationRows.filter((row) => (
+    row.domain_key === params.domainKey
+    && row.pattern_key === pattern.patternKey
+  ));
+
+  const selectedByFocusAndRole = new Map<string, ApplicationStatementsRow>();
+  selectedRows.forEach((row) => {
+    selectedByFocusAndRole.set(`${row.focus_area}|${row.driver_role}`, row);
+  });
+
+  const missing: string[] = [];
+  const sections: Record<string, SingleDomainResultApplicationSection> = {};
+  const legacyBuckets: Record<string, SingleDomainApplicationStatement[]> = {
+    strengths: [],
+    watchouts: [],
+    developmentFocus: [],
+  };
+
+  (Object.keys(APPLICATION_FOCUS_CONFIG) as ApplicationFocusArea[]).forEach((focusArea) => {
+    const config = APPLICATION_FOCUS_CONFIG[focusArea];
+    const items: SingleDomainResultApplicationRoleItem[] = [];
+
+    SINGLE_DOMAIN_APPLICATION_DRIVER_ROLES.forEach((driverRole) => {
+      const row = selectedByFocusAndRole.get(`${focusArea}|${driverRole}`);
+      const expectedSignalKey = pattern.signalByRole[driverRole];
+
+      if (!row) {
+        missing.push(`${focusArea}:${driverRole}`);
+        return;
+      }
+
+      if (
+        row.guidance_type !== config.guidanceType
+        || row.signal_key !== expectedSignalKey
+        || row.priority !== SINGLE_DOMAIN_APPLICATION_DRIVER_ROLES.indexOf(driverRole) + 1
+      ) {
+        missing.push(`${focusArea}:${driverRole}:invalid_mapping`);
+        return;
+      }
+
+      const signal = requireRow(
+        signalByKey.get(row.signal_key),
+        `Missing ranked signal "${row.signal_key}" for application pattern "${pattern.patternKey}".`,
+      );
+      const text = requireText(
+        row.guidance_text ?? '',
+        `Missing APPLICATION_STATEMENTS guidance_text for pattern "${pattern.patternKey}", focus_area "${focusArea}", role "${driverRole}".`,
+      );
+      const linkedClaimType = requireText(
+        row.linked_claim_type ?? '',
+        `Missing APPLICATION_STATEMENTS linked_claim_type for pattern "${pattern.patternKey}", focus_area "${focusArea}", role "${driverRole}".`,
+      );
+      const priority = row.priority ?? 0;
+
+      items.push(Object.freeze({
+        driverRole,
+        signalKey: row.signal_key,
+        signalLabel: signal.signal_label,
+        rank: signal.rank,
+        priority,
+        text,
+        linkedClaimType,
+      } satisfies SingleDomainResultApplicationRoleItem));
+      legacyBuckets[config.legacyKey].push(Object.freeze({
+        signal_key: row.signal_key,
+        signal_label: signal.signal_label,
+        rank: signal.rank,
+        statement: text,
+        driver_role: driverRole,
+        priority,
+        linked_claim_type: linkedClaimType,
+      } satisfies SingleDomainApplicationStatement));
+    });
+
+    sections[config.payloadKey] = Object.freeze({
+      guidanceType: config.guidanceType,
+      items: Object.freeze([...items].sort((left, right) => left.priority - right.priority)),
+    });
+  });
+
+  if (selectedRows.length !== 12 || missing.length > 0) {
+    throw new SingleDomainCompletionError(
+      [
+        'single_domain_application_full_pattern_missing',
+        `assessment_version_id=${params.assessmentVersionId}`,
+        `domain_key=${params.domainKey}`,
+        `pattern_key=${pattern.patternKey}`,
+        'expected_count=12',
+        `actual_count=${selectedRows.length}`,
+        `missing=${missing.join(',') || 'none'}`,
+      ].join('; '),
+    );
+  }
+
+  params.sourceDiagnostics.push({
+    source: 'full_pattern',
+    patternKey: pattern.patternKey,
+    pairKey: pattern.pairKey,
+  });
+
+  return Object.freeze({
+    patternKey: pattern.patternKey,
+    pairKey: pattern.pairKey,
+    sections: Object.freeze({
+      relyOn: sections.relyOn as SingleDomainResultApplicationSection,
+      notice: sections.notice as SingleDomainResultApplicationSection,
+      develop: sections.develop as SingleDomainResultApplicationSection,
+    }),
+    strengths: Object.freeze(legacyBuckets.strengths),
+    watchouts: Object.freeze(legacyBuckets.watchouts),
+    developmentFocus: Object.freeze(legacyBuckets.developmentFocus),
+  });
+}
+
 export async function buildSingleDomainResultPayload(params: {
   db: Queryable;
   assessmentVersionId: string;
@@ -796,6 +988,7 @@ export async function buildSingleDomainResultPayload(params: {
 
   const maps = createLanguageMaps(runtimeDefinition);
   const driverClaimSourceDiagnostics: DriverClaimSourceDiagnostic[] = [];
+  const applicationSourceDiagnostics: ApplicationSourceDiagnostic[] = [];
   const introRow = requireRow(
     maps.framingByDomainKey.get(runtimeDefinition.domain.key),
     `Missing DOMAIN_FRAMING row for domain "${runtimeDefinition.domain.key}".`,
@@ -861,6 +1054,10 @@ export async function buildSingleDomainResultPayload(params: {
   const application = buildApplicationStatements({
     rankedSignals: signals,
     applicationBySignalKey: maps.applicationBySignalKey,
+    applicationRows: maps.applicationRows,
+    domainKey: runtimeDefinition.domain.key,
+    assessmentVersionId: params.assessmentVersionId,
+    sourceDiagnostics: applicationSourceDiagnostics,
   });
 
   const payload = Object.freeze({
@@ -905,6 +1102,7 @@ export async function buildSingleDomainResultPayload(params: {
         ...scoreResult.diagnostics.warnings,
         ...normalizedResult.diagnostics.warnings,
         ...formatDriverClaimSourceDiagnostics(driverClaimSourceDiagnostics),
+        ...applicationSourceDiagnostics.map(formatApplicationSourceDiagnostic),
       ]),
     }),
   });

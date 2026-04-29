@@ -156,6 +156,7 @@ export type SingleDomainDraftReadinessIssueCode =
   | 'pair_summaries_content_mismatch'
   | 'application_statements_count_mismatch'
   | 'application_statements_key_mismatch'
+  | 'single_domain_application_full_pattern_missing'
   | 'runtime_definition_incomplete';
 
 export type SingleDomainDraftReadinessIssue = {

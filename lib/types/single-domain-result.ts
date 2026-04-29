@@ -77,9 +77,34 @@ export type SingleDomainApplicationStatement = {
   signal_label: string;
   rank: number;
   statement: string;
+  driver_role?: string;
+  priority?: number;
+  linked_claim_type?: string;
+};
+
+export type SingleDomainResultApplicationRoleItem = {
+  driverRole: string;
+  signalKey: string;
+  signalLabel: string;
+  rank: number;
+  priority: number;
+  text: string;
+  linkedClaimType: string;
+};
+
+export type SingleDomainResultApplicationSection = {
+  guidanceType: 'applied_strength' | 'watchout' | 'development_focus';
+  items: readonly SingleDomainResultApplicationRoleItem[];
 };
 
 export type SingleDomainResultApplication = {
+  patternKey?: string;
+  pairKey?: string;
+  sections?: {
+    relyOn: SingleDomainResultApplicationSection;
+    notice: SingleDomainResultApplicationSection;
+    develop: SingleDomainResultApplicationSection;
+  };
   strengths: readonly SingleDomainApplicationStatement[];
   watchouts: readonly SingleDomainApplicationStatement[];
   developmentFocus: readonly SingleDomainApplicationStatement[];
@@ -138,6 +163,35 @@ function isApplicationStatement(value: unknown): value is SingleDomainApplicatio
     && isNonEmptyString(value.signal_label)
     && isFiniteNumber(value.rank)
     && isNonEmptyString(value.statement);
+}
+
+function isApplicationRoleItem(value: unknown): value is SingleDomainResultApplicationRoleItem {
+  return isRecord(value)
+    && isNonEmptyString(value.driverRole)
+    && isNonEmptyString(value.signalKey)
+    && isNonEmptyString(value.signalLabel)
+    && isFiniteNumber(value.rank)
+    && isFiniteNumber(value.priority)
+    && isNonEmptyString(value.text)
+    && isNonEmptyString(value.linkedClaimType);
+}
+
+function isApplicationSection(value: unknown): value is SingleDomainResultApplicationSection {
+  return isRecord(value)
+    && isNonEmptyString(value.guidanceType)
+    && Array.isArray(value.items)
+    && value.items.every(isApplicationRoleItem);
+}
+
+function hasValidApplicationSections(value: Record<string, unknown>): boolean {
+  if (value.sections === undefined) {
+    return true;
+  }
+
+  return isRecord(value.sections)
+    && isApplicationSection(value.sections.relyOn)
+    && isApplicationSection(value.sections.notice)
+    && isApplicationSection(value.sections.develop);
 }
 
 function isSignal(value: unknown): value is SingleDomainResultSignal {
@@ -212,6 +266,9 @@ export function isSingleDomainResultPayload(value: unknown): value is SingleDoma
     || !isNonEmptyString(value.pairSummary.pair_tension_paragraph)
     || !isNonEmptyString(value.pairSummary.pair_close_paragraph)
     || !isRecord(value.application)
+    || !(value.application.patternKey === undefined || isNonEmptyString(value.application.patternKey))
+    || !(value.application.pairKey === undefined || isNonEmptyString(value.application.pairKey))
+    || !hasValidApplicationSections(value.application)
     || !Array.isArray(value.application.strengths)
     || !value.application.strengths.every(isApplicationStatement)
     || !Array.isArray(value.application.watchouts)

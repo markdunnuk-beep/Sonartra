@@ -135,6 +135,62 @@ const PAIR_KEYS = [
   'people_rigor',
 ] as const;
 
+const APPLICATION_FOCUS_ROWS = [
+  ['rely_on', 'applied_strength'],
+  ['notice', 'watchout'],
+  ['develop', 'development_focus'],
+] as const;
+
+const APPLICATION_DRIVER_ROLES = [
+  ['primary_driver', 1],
+  ['secondary_driver', 2],
+  ['supporting_context', 3],
+  ['range_limitation', 4],
+] as const;
+
+function buildFullPatternApplicationRows(params: {
+  domainKey: string;
+  signalKeys: readonly string[];
+  pairKeys: readonly string[];
+}): ApplicationStatementsRow[] {
+  return params.pairKeys.flatMap((pairKey) => {
+    const [first = '', second = ''] = pairKey.split('_');
+    const remaining = params.signalKeys.filter((signalKey) => signalKey !== first && signalKey !== second);
+    const patternSignals = [
+      [first, second, remaining[0] ?? '', remaining[1] ?? ''],
+      [first, second, remaining[1] ?? '', remaining[0] ?? ''],
+    ];
+
+    return patternSignals.flatMap((pattern) =>
+      APPLICATION_FOCUS_ROWS.flatMap(([focus_area, guidance_type]) =>
+        APPLICATION_DRIVER_ROLES.map(([driver_role, priority], index) => {
+          const pattern_key = pattern.join('_');
+          const signal_key = pattern[index] ?? '';
+
+          return {
+            domain_key: params.domainKey,
+            pattern_key,
+            pair_key: pairKey,
+            focus_area,
+            guidance_type,
+            driver_role,
+            signal_key,
+            priority,
+            guidance_text: `${pattern_key} ${focus_area} ${driver_role}`,
+            linked_claim_type: guidance_type,
+            strength_statement_1: '',
+            strength_statement_2: '',
+            watchout_statement_1: '',
+            watchout_statement_2: '',
+            development_statement_1: '',
+            development_statement_2: '',
+          };
+        }),
+      ),
+    );
+  });
+}
+
 function buildRuntimeFixture(): RuntimeFixture {
   return {
     context: {
@@ -625,6 +681,24 @@ function createDb(config?: {
         development_statement_2: `${label} development 2`,
       }));
       runtime.language.DRIVER_CLAIMS = [];
+    },
+    useFullPatternApplicationRows(signalKeys = ['vision', 'delivery', 'people', 'rigor']) {
+      runtime.language.APPLICATION_STATEMENTS = buildFullPatternApplicationRows({
+        domainKey: runtime.domains[0]?.domain_key ?? 'leadership-style',
+        signalKeys,
+        pairKeys: [...getSingleDomainCanonicalPairKeys(signalKeys)],
+      });
+    },
+    removeFullPatternApplicationRole(params: {
+      patternKey: string;
+      focusArea: NonNullable<ApplicationStatementsRow['focus_area']>;
+      driverRole: NonNullable<ApplicationStatementsRow['driver_role']>;
+    }) {
+      runtime.language.APPLICATION_STATEMENTS = runtime.language.APPLICATION_STATEMENTS.filter((row) => !(
+        row.pattern_key === params.patternKey
+        && row.focus_area === params.focusArea
+        && row.driver_role === params.driverRole
+      ));
     },
     useBlueprintPairScopedDriverClaims() {
       const signalKeys = ['process', 'results', 'people', 'vision'];
@@ -1130,6 +1204,82 @@ test('single-domain payload assembles deterministically from authored runtime da
   assert.deepEqual(payload.application.strengths.map((item) => item.statement), ['Vision strength 1', 'Delivery strength 2', 'People strength 2']);
   assert.deepEqual(payload.application.watchouts.map((item) => item.statement), ['Vision watchout 1', 'Delivery watchout 2', 'Rigor watchout 2']);
   assert.deepEqual(payload.application.developmentFocus.map((item) => item.statement), ['Rigor development 1', 'People development 2', 'Delivery development 2']);
+});
+
+test('single-domain payload selects application rows from the computed full ranked pattern', async () => {
+  const harness = createDb();
+  harness.useFullPatternApplicationRows();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  assert.equal(payload.application.patternKey, 'vision_delivery_people_rigor');
+  assert.equal(payload.application.pairKey, 'vision_delivery');
+  assert.deepEqual(
+    payload.application.sections?.relyOn.items.map((item) => `${item.driverRole}:${item.signalKey}:${item.priority}`),
+    [
+      'primary_driver:vision:1',
+      'secondary_driver:delivery:2',
+      'supporting_context:people:3',
+      'range_limitation:rigor:4',
+    ],
+  );
+  assert.deepEqual(
+    payload.application.sections?.develop.items.map((item) => item.text),
+    [
+      'vision_delivery_people_rigor develop primary_driver',
+      'vision_delivery_people_rigor develop secondary_driver',
+      'vision_delivery_people_rigor develop supporting_context',
+      'vision_delivery_people_rigor develop range_limitation',
+    ],
+  );
+  assert.equal(
+    payload.application.strengths.some((item) => item.statement.includes('vision_delivery_rigor_people')),
+    false,
+  );
+  assert.equal(
+    payload.diagnostics.warnings.some((warning) =>
+      warning.includes('single_domain_application_full_pattern_source')
+      && warning.includes('pattern_key=vision_delivery_people_rigor')),
+    true,
+  );
+});
+
+test('single-domain payload preserves lower-signal role order in full-pattern application rows', async () => {
+  const harness = createDb();
+  harness.useFullPatternApplicationRows();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  const noticeItems = payload.application.sections?.notice.items ?? [];
+  assert.equal(noticeItems.find((item) => item.driverRole === 'supporting_context')?.signalKey, 'people');
+  assert.equal(noticeItems.find((item) => item.driverRole === 'range_limitation')?.signalKey, 'rigor');
+});
+
+test('single-domain payload fails explicitly when the computed full pattern is incomplete', async () => {
+  const harness = createDb();
+  harness.useFullPatternApplicationRows();
+  harness.removeFullPatternApplicationRole({
+    patternKey: 'vision_delivery_people_rigor',
+    focusArea: 'notice',
+    driverRole: 'supporting_context',
+  });
+
+  await assert.rejects(
+    () => buildSingleDomainResultPayload({
+      db: harness.db,
+      assessmentVersionId: 'version-1',
+      responses: buildResponseSet(),
+    }),
+    /single_domain_application_full_pattern_missing; assessment_version_id=version-1; domain_key=leadership-style; pattern_key=vision_delivery_people_rigor; expected_count=12; actual_count=11; missing=notice:supporting_context/i,
+  );
 });
 
 test('single-domain payload rejects reversed pair language rows for the active canonical pair key', async () => {
