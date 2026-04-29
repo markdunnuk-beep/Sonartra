@@ -359,14 +359,6 @@ function toIntro(row: DomainFramingRow): SingleDomainResultIntro {
   };
 }
 
-function normalizeText(value: string): string {
-  return value.trim().toLowerCase();
-}
-
-function compactText(value: string): string {
-  return normalizeText(value).replace(/[^a-z0-9]+/g, ' ');
-}
-
 function hasText(value: string | null | undefined): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -467,75 +459,6 @@ function buildResultSignalFromSectionFirstLanguage(params: {
   } satisfies SingleDomainResultSignal);
 }
 
-function getSignalByKey(
-  signals: readonly SingleDomainResultSignal[],
-  signalKey: string,
-): SingleDomainResultSignal | null {
-  return signals.find((signal) => signal.signal_key === signalKey) ?? null;
-}
-
-function getPairSignals(params: {
-  pairKey: string;
-  signals: readonly SingleDomainResultSignal[];
-}): {
-  primary: SingleDomainResultSignal;
-  secondary: SingleDomainResultSignal;
-  weaker: SingleDomainResultSignal;
-} {
-  const [leftSignalKey, rightSignalKey] = params.pairKey.split('_');
-  const sortedSignals = [...params.signals].sort((left, right) => left.rank - right.rank);
-  const pairSignals = [leftSignalKey, rightSignalKey]
-    .map((signalKey) => signalKey ? getSignalByKey(params.signals, signalKey) : null)
-    .filter((signal): signal is SingleDomainResultSignal => Boolean(signal))
-    .sort((left, right) => left.rank - right.rank);
-  const primary =
-    pairSignals[0]
-    ?? sortedSignals[0]
-    ?? (leftSignalKey ? getSignalByKey(params.signals, leftSignalKey) : null);
-  const secondary =
-    pairSignals.find((signal) => signal.signal_key !== primary?.signal_key)
-    ?? sortedSignals.find((signal) => signal.signal_key !== primary?.signal_key)
-    ?? (rightSignalKey ? getSignalByKey(params.signals, rightSignalKey) : null)
-    ?? sortedSignals.find((signal) => signal.signal_key !== primary?.signal_key);
-  const weaker =
-    sortedSignals.find((signal) => signal.position === 'underplayed')
-    ?? sortedSignals[sortedSignals.length - 1];
-
-  if (!primary || !secondary || !weaker) {
-    throw new SingleDomainCompletionError(
-      `Unable to build fallback language for pair "${params.pairKey}".`,
-    );
-  }
-
-  return { primary, secondary, weaker };
-}
-
-function pairLanguageReferencesSignals(params: {
-  pairKey: string;
-  rowText: string;
-  primary: SingleDomainResultSignal;
-  secondary: SingleDomainResultSignal;
-}): boolean {
-  const normalized = compactText(params.rowText);
-  const pairKeyToken = compactText(params.pairKey);
-  const reversedPairKeyToken = compactText(params.pairKey.split('_').reverse().join('_'));
-  const primaryTokens = [
-    params.primary.signal_key,
-    params.primary.signal_label,
-  ].map(compactText).filter(Boolean);
-  const secondaryTokens = [
-    params.secondary.signal_key,
-    params.secondary.signal_label,
-  ].map(compactText).filter(Boolean);
-
-  if (normalized.includes(pairKeyToken) || normalized.includes(reversedPairKeyToken)) {
-    return true;
-  }
-
-  return primaryTokens.some((token) => normalized.includes(token))
-    && secondaryTokens.some((token) => normalized.includes(token));
-}
-
 function toHero(row: HeroPairsRow, pairKey: string): SingleDomainResultHero {
   return {
     pair_key: pairKey,
@@ -609,24 +532,12 @@ function toPairSummary(row: PairSummariesRow, pairKey: string): SingleDomainResu
 
 function getSpecificHeroRow(params: {
   row: HeroPairsRow | undefined;
-  pairKey: string;
-  primary: SingleDomainResultSignal;
-  secondary: SingleDomainResultSignal;
 }): HeroPairsRow | null {
   if (!params.row) {
     return null;
   }
 
-  const rowText = [
-    params.row.hero_headline,
-    params.row.hero_subheadline,
-    params.row.hero_opening,
-    params.row.hero_strength_paragraph,
-    params.row.hero_tension_paragraph,
-    params.row.hero_close_paragraph,
-  ].join(' ');
-
-  return pairLanguageReferencesSignals({ ...params, rowText }) ? params.row : null;
+  return params.row;
 }
 
 function getSpecificBalancingRow(params: {
@@ -669,24 +580,12 @@ function requireSpecificPairRow<TRow>(params: {
 
 function getSpecificPairSummaryRow(params: {
   row: PairSummariesRow | undefined;
-  pairKey: string;
-  primary: SingleDomainResultSignal;
-  secondary: SingleDomainResultSignal;
 }): PairSummariesRow | null {
   if (!params.row) {
     return null;
   }
 
-  const rowText = [
-    params.row.pair_section_title,
-    params.row.pair_headline,
-    params.row.pair_opening_paragraph,
-    params.row.pair_strength_paragraph,
-    params.row.pair_tension_paragraph,
-    params.row.pair_close_paragraph,
-  ].join(' ');
-
-  return pairLanguageReferencesSignals({ ...params, rowText }) ? params.row : null;
+  return params.row;
 }
 
 function buildApplicationStatements(params: {
@@ -1016,20 +915,13 @@ export async function buildSingleDomainResultPayload(params: {
       });
     }),
   );
-  const pairSignals = getPairSignals({
-    pairKey: topPairKey,
-    signals,
-  });
   const heroRow = requireSpecificPairRow({
     row: getSpecificHeroRow({
-    row: maps.heroByPairKey.get(topPairKey),
-    pairKey: topPairKey,
-    primary: pairSignals.primary,
-    secondary: pairSignals.secondary,
-  }),
+      row: maps.heroByPairKey.get(topPairKey),
+    }),
     pairKey: topPairKey,
     section: 'HERO_PAIRS',
-    diagnosticReason: 'row missing or references non-active pair language',
+    diagnosticReason: 'row missing for canonical pair_key',
   });
   const balancingRow = requireSpecificPairRow({
     row: getSpecificBalancingRow({
@@ -1041,14 +933,11 @@ export async function buildSingleDomainResultPayload(params: {
   });
   const pairSummaryRow = requireSpecificPairRow({
     row: getSpecificPairSummaryRow({
-    row: maps.pairSummaryByPairKey.get(topPairKey),
-    pairKey: topPairKey,
-    primary: pairSignals.primary,
-    secondary: pairSignals.secondary,
-  }),
+      row: maps.pairSummaryByPairKey.get(topPairKey),
+    }),
     pairKey: topPairKey,
     section: 'PAIR_SUMMARIES',
-    diagnosticReason: 'row missing or references non-active pair language',
+    diagnosticReason: 'row missing for canonical pair_key',
   });
 
   const application = buildApplicationStatements({

@@ -471,6 +471,30 @@ function createDb(config?: {
           row.pair_key = 'delivery_vision';
         });
     },
+    useEditorialTopHeroCopy() {
+      const row = runtime.language.HERO_PAIRS.find((entry) => entry.pair_key === 'vision_delivery')!;
+      row.hero_headline = 'A composed leadership centre';
+      row.hero_subheadline = 'How your strongest habits shape the way work moves';
+      row.hero_opening = 'You tend to create forward motion by making choices concrete and keeping momentum visible.';
+      row.hero_strength_paragraph = 'People usually know what matters next and can feel the practical pace of your leadership.';
+      row.hero_tension_paragraph = 'The risk is that the pace can narrow attention before the wider intent has fully landed.';
+      row.hero_close_paragraph = 'Your best work comes when movement and meaning stay connected.';
+    },
+    useEditorialTopPairSummaryCopy() {
+      const row = runtime.language.PAIR_SUMMARIES.find((entry) => entry.pair_key === 'vision_delivery')!;
+      row.pair_section_title = 'How this pattern works';
+      row.pair_headline = 'A practical form of direction';
+      row.pair_opening_paragraph = 'This combination turns intent into movement without needing every detail to be settled first.';
+      row.pair_strength_paragraph = 'It can help teams move quickly because the next useful step usually becomes visible.';
+      row.pair_tension_paragraph = 'It can create strain when immediate movement starts to crowd out shared understanding.';
+      row.pair_close_paragraph = 'The strongest version keeps pace and purpose in active conversation.';
+    },
+    removeHeroLanguage(pairKey: string) {
+      runtime.language.HERO_PAIRS = runtime.language.HERO_PAIRS.filter((row) => row.pair_key !== pairKey);
+    },
+    removePairSummaryLanguage(pairKey: string) {
+      runtime.language.PAIR_SUMMARIES = runtime.language.PAIR_SUMMARIES.filter((row) => row.pair_key !== pairKey);
+    },
     removePairLanguage(pairKey: string) {
       runtime.language.HERO_PAIRS = runtime.language.HERO_PAIRS.filter((row) => row.pair_key !== pairKey);
       runtime.language.BALANCING_SECTIONS = runtime.language.BALANCING_SECTIONS.filter((row) => row.pair_key !== pairKey);
@@ -1282,6 +1306,34 @@ test('single-domain payload fails explicitly when the computed full pattern is i
   );
 });
 
+test('single-domain completion selects editorial Hero copy by canonical pair_key without literal signal names', async () => {
+  const harness = createDb();
+  harness.useEditorialTopHeroCopy();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  assert.equal(payload.hero.pair_key, 'vision_delivery');
+  assert.equal(payload.hero.hero_headline, 'A composed leadership centre');
+});
+
+test('single-domain completion selects editorial Pair copy by canonical pair_key without literal signal names', async () => {
+  const harness = createDb();
+  harness.useEditorialTopPairSummaryCopy();
+
+  const payload = await buildSingleDomainResultPayload({
+    db: harness.db,
+    assessmentVersionId: 'version-1',
+    responses: buildResponseSet(),
+  });
+
+  assert.equal(payload.pairSummary.pair_key, 'vision_delivery');
+  assert.equal(payload.pairSummary.pair_headline, 'A practical form of direction');
+});
+
 test('single-domain payload rejects reversed pair language rows for the active canonical pair key', async () => {
   const harness = createDb();
   harness.reverseTopPairLanguageKeys();
@@ -1293,6 +1345,34 @@ test('single-domain payload rejects reversed pair language rows for the active c
       responses: buildResponseSet(),
     }),
     /HERO_PAIRS pair_key values must match the canonical pair keys exactly/i,
+  );
+});
+
+test('single-domain payload fails when active Hero language is missing', async () => {
+  const harness = createDb();
+  harness.removeHeroLanguage('vision_delivery');
+
+  await assert.rejects(
+    () => buildSingleDomainResultPayload({
+      db: harness.db,
+      assessmentVersionId: 'version-1',
+      responses: buildResponseSet(),
+    }),
+    /HERO_PAIRS must contain exactly one row for each canonical pair_key/i,
+  );
+});
+
+test('single-domain payload fails when active Pair summary language is missing', async () => {
+  const harness = createDb();
+  harness.removePairSummaryLanguage('vision_delivery');
+
+  await assert.rejects(
+    () => buildSingleDomainResultPayload({
+      db: harness.db,
+      assessmentVersionId: 'version-1',
+      responses: buildResponseSet(),
+    }),
+    /PAIR_SUMMARIES must contain exactly one row for each canonical pair_key/i,
   );
 });
 

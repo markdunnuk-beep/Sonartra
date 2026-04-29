@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { ASSESSMENT_COMPLETION_SAFE_ERROR_MESSAGE } from '@/lib/assessment/completion-error-copy';
 import { getDbPool } from '@/lib/server/db';
 import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
 import {
@@ -39,8 +40,8 @@ export async function GET(
       return NextResponse.json({ lastError: 'forbidden' }, { status: 403 });
     }
 
-    const message = error instanceof Error ? error.message : 'internal_error';
-    return NextResponse.json({ lastError: message }, { status: 500 });
+    console.error('[assessment-status] user resolution failed', error);
+    return NextResponse.json({ lastError: ASSESSMENT_COMPLETION_SAFE_ERROR_MESSAGE }, { status: 500 });
   }
 
   if (!requestUser) {
@@ -78,7 +79,7 @@ export async function GET(
       return NextResponse.json(
         {
           status: 'error',
-          lastError: runner.lastError ?? 'assessment_completion_failed',
+          lastError: ASSESSMENT_COMPLETION_SAFE_ERROR_MESSAGE,
         },
         { status: 200 },
       );
@@ -97,14 +98,16 @@ export async function GET(
     );
   } catch (error) {
     if (error instanceof AssessmentRunnerNotFoundError) {
-      return NextResponse.json({ lastError: error.message }, { status: 404 });
+      console.error('[assessment-status] attempt not found', error);
+      return NextResponse.json({ lastError: ASSESSMENT_COMPLETION_SAFE_ERROR_MESSAGE }, { status: 404 });
     }
 
     if (error instanceof AssessmentRunnerForbiddenError) {
-      return NextResponse.json({ lastError: error.message }, { status: 403 });
+      console.error('[assessment-status] forbidden attempt access', error);
+      return NextResponse.json({ lastError: ASSESSMENT_COMPLETION_SAFE_ERROR_MESSAGE }, { status: 403 });
     }
 
-    const message = error instanceof Error ? error.message : 'internal_error';
-    return NextResponse.json({ lastError: message }, { status: 500 });
+    console.error('[assessment-status] status lookup failed', error);
+    return NextResponse.json({ lastError: ASSESSMENT_COMPLETION_SAFE_ERROR_MESSAGE }, { status: 500 });
   }
 }

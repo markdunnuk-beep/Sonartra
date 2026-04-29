@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { AssessmentRunnerClient } from '@/app/(user)/app/assessments/[assessmentKey]/attempts/[attemptId]/assessment-runner-client';
 import { AssessmentProcessingState } from '@/components/assessment/assessment-processing-state';
+import { ASSESSMENT_COMPLETION_SAFE_ERROR_MESSAGE } from '@/lib/assessment/completion-error-copy';
 import { getDbPool } from '@/lib/server/db';
 import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
 import {
@@ -74,9 +75,7 @@ export default async function AssessmentAttemptRunnerPage({
                 We couldn&apos;t complete your result
               </h2>
               <p className="max-w-[32rem] text-[0.98rem] leading-7 text-white/60">
-                {runner.lastError
-                  ? `Please return to your workspace. ${runner.lastError.replace(/_/g, ' ')}.`
-                  : 'Please return to your workspace and try again.'}
+                {ASSESSMENT_COMPLETION_SAFE_ERROR_MESSAGE}
               </p>
             </div>
 

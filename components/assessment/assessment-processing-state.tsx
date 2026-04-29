@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { AssessmentLoader } from '@/components/assessment/assessment-loader';
+import { getAssessmentCompletionSafeErrorMessage } from '@/lib/assessment/completion-error-copy';
 import { getAssessmentLoaderMinimumVisibleMs } from '@/lib/assessment/loader-progress';
 import {
   ASSESSMENT_PROCESSING_LONG_WAIT_MS,
@@ -32,11 +33,7 @@ type AssessmentProcessingStateProps = {
 const PROCESSING_REDIRECT_SETTLE_MS = 260;
 
 function formatFailureMessage(lastError: string | null): string {
-  if (!lastError) {
-    return 'Please return to your workspace and try again.';
-  }
-
-  return `Please return to your workspace. ${lastError.replace(/_/g, ' ')}.`;
+  return getAssessmentCompletionSafeErrorMessage(lastError);
 }
 
 function formatLongProcessingMessage(stage: AssessmentProcessingStateProps['stage']): string {
