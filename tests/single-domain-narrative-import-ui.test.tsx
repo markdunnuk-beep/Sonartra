@@ -164,6 +164,9 @@ test('single-domain narrative builder renders section-first import controls for 
   assert.match(markup, /Application import contract/);
   assert.match(markup, /domain_key\|section_key\|domain_title\|domain_definition/);
   assert.match(markup, /domain_key\|section_key\|pair_key\|signal_key\|driver_role\|claim_type/);
+  assert.match(markup, /domain_key\|section_key\|pattern_key\|pair_key\|focus_area\|guidance_type\|driver_role\|signal_key\|priority\|guidance_text\|linked_claim_type/);
+  assert.match(markup, /Expected total: 144 rows/);
+  assert.match(markup, /pattern_key plus driver_role/);
   assert.doesNotMatch(markup, /SINGLE_DOMAIN_INTRO/);
   assert.doesNotMatch(markup, /SINGLE_DOMAIN_HERO/);
   assert.doesNotMatch(markup, /SINGLE_DOMAIN_DRIVERS/);

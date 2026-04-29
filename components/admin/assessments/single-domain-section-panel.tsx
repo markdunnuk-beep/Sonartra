@@ -30,17 +30,24 @@ const DRIVER_ROLE_LABELS = [
 
 const APPLICATION_FOCUS_LABELS = [
   {
-    key: 'rely on',
-    description: 'What the person should trust in the established pattern.',
+    key: 'rely_on',
+    description: 'Must map to applied_strength for each driver_role in the full pattern.',
   },
   {
     key: 'notice',
-    description: 'What should be monitored when the pattern starts to narrow.',
+    description: 'Must map to watchout for each driver_role in the full pattern.',
   },
   {
     key: 'develop',
-    description: 'What needs deliberate range-building and follow-through.',
+    description: 'Must map to development_focus for each driver_role in the full pattern.',
   },
+] as const;
+
+const APPLICATION_PATTERN_RULES = [
+  'Header: domain_key|section_key|pattern_key|pair_key|focus_area|guidance_type|driver_role|signal_key|priority|guidance_text|linked_claim_type',
+  'Expected total: 144 rows for the four-signal model.',
+  'Each pattern_key has 12 rows: 3 focus areas x 4 driver roles.',
+  'priority is deterministic role order only: primary_driver=1, secondary_driver=2, supporting_context=3, range_limitation=4.',
 ] as const;
 
 function getValidationTone(state: SingleDomainNarrativeBuilderSection['validationState']): string {
@@ -246,6 +253,14 @@ export function SingleDomainSectionPanel({
                 <p className="mt-3 text-sm leading-6 text-white/58">{item.description}</p>
               </div>
             ))}
+          </div>
+          <div className="rounded-[0.95rem] border border-[rgba(126,179,255,0.14)] bg-[rgba(126,179,255,0.05)] p-4">
+            <p className="text-sm font-medium text-white">Full-pattern import rules</p>
+            <div className="mt-3 space-y-2 text-sm leading-6 text-white/60">
+              {APPLICATION_PATTERN_RULES.map((rule) => (
+                <p key={rule}>{rule}</p>
+              ))}
+            </div>
           </div>
         </div>
       ) : null}

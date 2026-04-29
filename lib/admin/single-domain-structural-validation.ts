@@ -257,6 +257,13 @@ export function getExpectedSignalPairCount(signalCount: number): number {
   return getSingleDomainExpectedPairCount(signalCount);
 }
 
+export function getExpectedSingleDomainApplicationStatementRowCount(signalCount: number): number {
+  const expectedPairCount = getExpectedSignalPairCount(signalCount);
+  const lowerSignalPermutationCount = Math.max(0, (signalCount - 2) * (signalCount - 3));
+
+  return expectedPairCount * lowerSignalPermutationCount * 3 * 4;
+}
+
 function createLanguageDatasetValidation(params: {
   datasetKey: SingleDomainLanguageDatasetKey;
   actualRowCount: number;
@@ -334,6 +341,7 @@ export function buildSingleDomainLanguageValidation(params: {
   const signalKeys = params.authoredDomains.flatMap((domain) => domain.signals.map((signal) => signal.signalKey));
   const signalCount = params.authoredDomains.reduce((sum, domain) => sum + domain.signals.length, 0);
   const expectedPairCount = getExpectedSignalPairCount(signalCount);
+  const expectedApplicationStatementRowCount = getExpectedSingleDomainApplicationStatementRowCount(signalCount);
   const expectedPairKeys = params.authoredDomains.length > 0
     ? Object.freeze(
         getExpectedDriverClaimTuples({
@@ -518,11 +526,15 @@ export function buildSingleDomainLanguageValidation(params: {
     createLanguageDatasetValidation({
       datasetKey: 'APPLICATION_STATEMENTS',
       actualRowCount: params.languageBundle.APPLICATION_STATEMENTS.length,
-      expectedRowCount: signalCount,
+      expectedRowCount: expectedApplicationStatementRowCount,
       countRule: 'exact',
-      successDetail: `APPLICATION_STATEMENTS matches the current authored signal count (${signalCount}).`,
-      failureMessage: `APPLICATION_STATEMENTS must contain exactly ${signalCount} row${signalCount === 1 ? '' : 's'} to match the current authored signal count.`,
-      waitingDetail: signalCount === 0 ? 'Waiting on authored signals before application statements can be assessed.' : undefined,
+      successDetail: `APPLICATION_STATEMENTS matches the full-pattern application contract (${expectedApplicationStatementRowCount} rows).`,
+      failureMessage: `APPLICATION_STATEMENTS must contain exactly ${expectedApplicationStatementRowCount} full-pattern rows keyed by domain_key + pattern_key + focus_area + guidance_type + driver_role.`,
+      waitingDetail: signalCount === 0
+        ? 'Waiting on authored signals before application statements can be assessed.'
+        : signalCount < 4
+          ? 'Waiting on at least four authored signals before full-pattern application rows can be assessed.'
+          : undefined,
     }),
   ];
   const driverClaimsDatasetIndex = datasets.findIndex((dataset) => dataset.datasetKey === 'DRIVER_CLAIMS');

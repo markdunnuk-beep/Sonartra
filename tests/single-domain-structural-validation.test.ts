@@ -4,9 +4,11 @@ import assert from 'node:assert/strict';
 import {
   buildSingleDomainLanguageValidation,
   buildSingleDomainStructuralValidation,
+  getExpectedSingleDomainApplicationStatementRowCount,
   getExpectedSignalPairCount,
 } from '@/lib/admin/single-domain-structural-validation';
 import { getExpectedDriverClaimTuples } from '@/lib/assessment-language/single-domain-canonical';
+import type { ApplicationStatementsRow } from '@/lib/types/single-domain-language';
 
 const HERO_PAIR_TEST_DOMAIN = [{
   domainId: 'domain-1',
@@ -329,6 +331,67 @@ test('hero pair completeness derives from the current signal-derived pair count'
   assert.equal(heroPairs?.isReady, false);
 });
 
+test('application statement count derives from the full ranked-pattern contract', () => {
+  assert.equal(getExpectedSingleDomainApplicationStatementRowCount(0), 0);
+  assert.equal(getExpectedSingleDomainApplicationStatementRowCount(2), 0);
+  assert.equal(getExpectedSingleDomainApplicationStatementRowCount(3), 0);
+  assert.equal(getExpectedSingleDomainApplicationStatementRowCount(4), 144);
+});
+
+function buildApplicationStatementRows(signalKeys: readonly string[]): ApplicationStatementsRow[] {
+  const focusMappings = [
+    ['rely_on', 'applied_strength'],
+    ['notice', 'watchout'],
+    ['develop', 'development_focus'],
+  ] as const;
+  const roleMappings = [
+    ['primary_driver', 0, 1],
+    ['secondary_driver', 1, 2],
+    ['supporting_context', 2, 3],
+    ['range_limitation', 3, 4],
+  ] as const;
+  const rows: ApplicationStatementsRow[] = [];
+
+  for (let firstIndex = 0; firstIndex < signalKeys.length; firstIndex += 1) {
+    for (let secondIndex = firstIndex + 1; secondIndex < signalKeys.length; secondIndex += 1) {
+      const remaining = signalKeys.filter((_, index) => index !== firstIndex && index !== secondIndex);
+      for (const [third, fourth] of [[remaining[0], remaining[1]], [remaining[1], remaining[0]]] as const) {
+        if (!third || !fourth) {
+          continue;
+        }
+        const patternSignals = [signalKeys[firstIndex]!, signalKeys[secondIndex]!, third, fourth];
+        const patternKey = patternSignals.join('_');
+        const pairKey = patternSignals.slice(0, 2).join('_');
+
+        for (const [focusArea, guidanceType] of focusMappings) {
+          for (const [driverRole, signalIndex, priority] of roleMappings) {
+            rows.push({
+              domain_key: 'focus',
+              pattern_key: patternKey,
+              pair_key: pairKey,
+              focus_area: focusArea,
+              guidance_type: guidanceType,
+              driver_role: driverRole,
+              signal_key: patternSignals[signalIndex]!,
+              priority,
+              guidance_text: 'Placeholder application guidance.',
+              linked_claim_type: guidanceType,
+              strength_statement_1: '',
+              strength_statement_2: '',
+              watchout_statement_1: '',
+              watchout_statement_2: '',
+              development_statement_1: '',
+              development_statement_2: '',
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return rows;
+}
+
 test('hero pair language completeness fails when visible text does not reference the active pair', () => {
   const validation = buildHeroPairLanguageValidation('Shared direction');
   const heroPairs = validation.datasets.find((dataset) => dataset.datasetKey === 'HERO_PAIRS');
@@ -365,11 +428,12 @@ test('language completeness and review language section agree when hero pair tex
   const languageSection = structuralValidation.sections.find((section) => section.key === 'language');
 
   assert.equal(languageValidation.overallReady, false);
-  assert.equal(languageSection?.status, 'attention');
+  assert.equal(languageSection?.status, 'waiting');
   assert.ok(structuralValidation.issues.some((issue) => issue.code === 'language_hero_pairs_content_mismatch'));
 });
 
-test('application statements completeness derives from the current signal count while signal chapters stay out of builder readiness', () => {
+test('application statements completeness derives from the full-pattern row count while signal chapters stay out of builder readiness', () => {
+  const signalKeys = ['results', 'vision', 'people', 'process'] as const;
   const validation = buildSingleDomainLanguageValidation({
     authoredDomains: [{
       domainId: 'domain-1',
@@ -379,10 +443,15 @@ test('application statements completeness derives from the current signal count 
       orderIndex: 0,
       createdAt: '',
       updatedAt: '',
-      signals: [
-        { signalId: 'signal-1', signalKey: 'directive', label: 'Directive', description: null, orderIndex: 0, createdAt: '', updatedAt: '' },
-        { signalId: 'signal-2', signalKey: 'supportive', label: 'Supportive', description: null, orderIndex: 1, createdAt: '', updatedAt: '' },
-      ],
+      signals: signalKeys.map((signalKey, index) => ({
+        signalId: `signal-${index + 1}`,
+        signalKey,
+        label: signalKey,
+        description: null,
+        orderIndex: index,
+        createdAt: '',
+        updatedAt: '',
+      })),
     }],
     languageBundle: {
       DOMAIN_FRAMING: [],
@@ -407,26 +476,20 @@ test('application statements completeness derives from the current signal count 
       }],
       BALANCING_SECTIONS: [],
       PAIR_SUMMARIES: [],
-      APPLICATION_STATEMENTS: [{
-        signal_key: 'directive',
-        strength_statement_1: 'S1',
-        strength_statement_2: 'S2',
-        watchout_statement_1: 'W1',
-        watchout_statement_2: 'W2',
-        development_statement_1: 'D1',
-        development_statement_2: 'D2',
-      }],
+      APPLICATION_STATEMENTS: buildApplicationStatementRows(signalKeys).slice(0, 143),
     },
   });
 
   const signalChapters = validation.datasets.find((dataset) => dataset.datasetKey === 'SIGNAL_CHAPTERS');
   const applicationStatements = validation.datasets.find((dataset) => dataset.datasetKey === 'APPLICATION_STATEMENTS');
 
-  assert.equal(validation.signalCount, 2);
+  assert.equal(validation.signalCount, 4);
   assert.equal(signalChapters, undefined);
-  assert.equal(applicationStatements?.expectedRowCount, 2);
+  assert.equal(applicationStatements?.expectedRowCount, 144);
+  assert.equal(applicationStatements?.actualRowCount, 143);
   assert.equal(applicationStatements?.isReady, false);
   assert.equal(applicationStatements?.status, 'attention');
+  assert.match(applicationStatements?.detail ?? '', /pattern_key \+ focus_area \+ guidance_type \+ driver_role/i);
 });
 
 

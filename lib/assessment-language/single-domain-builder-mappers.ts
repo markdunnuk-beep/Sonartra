@@ -66,7 +66,7 @@ const SECTION_PURPOSES: Record<SingleDomainNarrativeSectionKey, string> = {
   drivers: 'What is creating that pattern',
   pair: 'How the top two tendencies combine',
   limitation: 'Where the pattern becomes costly or narrow',
-  application: 'What to rely on, notice, and develop',
+  application: 'Full ranked-pattern guidance across rely_on, notice, and develop',
 };
 
 const SECTION_DATASET_KEYS: Record<SingleDomainNarrativeSectionKey, SingleDomainNarrativeDatasetKey> = {
@@ -184,7 +184,9 @@ function buildValidationMessages(
 
   if (section === 'application') {
     messages.push(
-      'Application guidance will block publish when materially underplayed signals lack a watchout or development action.',
+      'Application imports must use pattern_key plus driver_role: 6 top pairs x 2 lower-signal permutations x 3 focus areas x 4 roles = 144 rows.',
+      'The duplicate key is domain_key + pattern_key + focus_area + guidance_type + driver_role; pair_key + signal_key + priority is no longer valid for application rows.',
+      'Each pattern_key needs 12 rows: rely_on/applied_strength, notice/watchout, and develop/development_focus across primary_driver, secondary_driver, supporting_context, and range_limitation.',
     );
   }
 

@@ -305,9 +305,9 @@ test('narrative builder mapper preserves the locked six-section order from Task 
     model.sections.map((section) => section.key),
     ['intro', 'hero', 'drivers', 'pair', 'limitation', 'application'],
   );
-  assert.equal(model.readiness.completeCount, 6);
-  assert.equal(model.readiness.incompleteCount, 0);
-  assert.equal(model.readiness.waitingCount, 0);
+  assert.equal(model.readiness.completeCount, 2);
+  assert.equal(model.readiness.incompleteCount, 3);
+  assert.equal(model.readiness.waitingCount, 1);
 });
 
 test('narrative builder renders the six locked sections, readiness summary, and section-specific role guidance', () => {
@@ -379,9 +379,12 @@ test('narrative builder renders the six locked sections, readiness summary, and 
   assert.match(markup, /secondary_driver/);
   assert.match(markup, /supporting_context/);
   assert.match(markup, /range_limitation/);
-  assert.match(markup, /rely on/);
+  assert.match(markup, /rely_on/);
   assert.match(markup, /notice/);
   assert.match(markup, /develop/);
+  assert.match(markup, /pattern_key\|pair_key\|focus_area\|guidance_type\|driver_role/);
+  assert.match(markup, /Expected total: 144 rows/);
+  assert.match(markup, /domain_key \+ pattern_key \+ focus_area \+ guidance_type \+ driver_role/);
   assert.match(markup, /Pipe-delimited section import/);
   assert.match(markup, /Composer preview/);
   assert.match(markup, /Publish blockers/);

@@ -51,7 +51,7 @@ const SINGLE_DOMAIN_LANGUAGE_DATASET_META = {
   },
   APPLICATION_STATEMENTS: {
     label: 'Application Statements',
-    description: 'Per-signal strengths, watchouts, and development statements for the authored signal set.',
+    description: 'Full ranked-pattern application guidance: 144 rows for 6 top pairs, 2 lower-signal permutations, 3 focus areas, and 4 driver roles.',
   },
 } as const satisfies Record<SingleDomainLanguageDatasetKey, {
   label: string;
