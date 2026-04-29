@@ -2,322 +2,271 @@
 
 Date: 2026-04-29
 
-Audit target: `https://www.sonartra.com/app/assessments/sonartra-leadership-approach/attempts/f9292bdd-2f5c-430f-814d-854e272c83e5`
+Audit target: `http://localhost:3000/app/results/single-domain/288cc68e-eba7-4933-82f0-0bcafb146fbb#application`
+
+Context: this is a re-audit after the completion blocker was fixed locally. The result now has `resultStatus: ready`, appears in `/app/results`, and the completed local attempt redirects to the result detail page.
 
 Auditor stance: paid behavioural assessment standard, not hobby-app standard.
 
 ## 1. Executive Verdict
 
-Overall score: **4.2 / 10**
+Overall score: **7.4 / 10**
 
-Monetisation readiness: **NOT READY**
+Monetisation readiness: **NEARLY READY**
 
-No-BS summary: the runner is substantially better than a prototype and has a calm, credible operating model, but the live paid journey fails at the most important point: completion. The production attempt accepted all 24 answers, entered the processing state, then failed with an internal language-composer error: `Missing canonical HERO PAIRS row for pair "process vision" (row missing or references non-active pair language).` That is a hard P0. A user cannot get the paid output, and the error exposes implementation language. Until a completed live single-domain attempt reliably produces a READY persisted result and a readable report, this module cannot be charged for.
+No-BS summary: the P0 completion failure is fixed and the module now reaches the point that matters: a READY persisted result with a complete, structured Application section. The result page is credible, calm, and materially above prototype quality. It is not yet strong enough for an unassisted public paid launch. The runner language still makes the signal model too obvious, the runner presentation still feels more operational than premium, and the result report sometimes asks the reader to work too hard before the value lands. This is credible for a controlled beta or sales-led pilot. It is not yet a polished self-serve paid product.
 
 ## 2. Scorecard
 
 | Area | Score | Verdict |
 | --- | ---: | --- |
-| Runner UI | 7.2 | Calm, legible, professional enough, but still too app-dashboard-like for a premium assessment. |
-| Runner UX | 7.0 | Autosave, review mode, and progress are good; completion failure destroys trust. |
-| Runner language | 6.2 | Clear and accessible, but many options make the signal mapping too obvious. |
-| Results UI | 3.0 | Not reachable from the audited live attempt; repository tests suggest a structured report exists, but live proof failed. |
-| Results UX | 2.0 | The user journey ends in failure, then the Results list says `No results yet`. |
-| Results language | 3.5 | Cannot be validated live; component tests pass, but monetisation requires live output proof. |
-| Application usefulness | 2.0 | Full-pattern Application rows are validated by tests, but no live result was generated to verify usefulness. |
-| Trust / credibility | 3.0 | Strong runner trust cues are outweighed by internal error leakage at completion. |
-| Technical reliability | 3.5 | Tests/build pass, but live completion returns 500. |
-| Overall monetisation readiness | 4.2 | Not chargeable. Closed internal QA only. |
+| Runner UI | 7.2 | Clear and calm, but still closer to an app workflow than a premium assessment experience. |
+| Runner UX | 7.3 | Autosave, progress, review, and post-completion redirect are now credible; route handling for completed attempts is good locally. |
+| Runner language | 6.2 | Accessible, but too many answer options expose the underlying Results / Vision / People / Process signal mapping. |
+| Results UI | 8.0 | Editorial report shell is strong, with good hierarchy, no horizontal overflow, and a useful desktop reading rail. |
+| Results UX | 7.6 | Sections are complete and navigable; the report is dense and mobile loses quick section navigation. |
+| Results language | 7.3 | Specific and commercially credible overall, but some phrasing is heavy, repetitive, or slightly too absolute. |
+| Application usefulness | 8.0 | Full-pattern Application output renders all 12 rows and is the most practical part of the result. |
+| Trust / credibility | 7.4 | READY result, persisted payload, and no internal diagnostic leakage restore trust; runner option transparency still weakens perceived validity. |
+| Technical reliability | 8.4 | Local routes, tests, reference validation, build, and changed-file lint passed; full lint remains blocked by known unrelated issues. |
+| Overall monetisation readiness | 7.4 | Suitable for controlled beta or guided pilot; not ready for public self-serve paid launch. |
 
 ## 3. Assessment Runner Audit
 
 ### Strengths
 
-- Route: live attempt URL, desktop 1440px. Authentication was valid as `mark.dunn.uk@gmail.com`, and the initial page loaded directly into the runner without auth confusion.
-- The first screen is understandable: heading `Sonartra Leadership Approach`, instruction `Work through each question in order. Responses save automatically as you go.`, and a visible `Question 1 of 24` state.
-- Autosave gives clear feedback. Selecting an option changed status from `Saving response` to `Responses saved`, and progress moved from `0%` to `4%`.
-- The 24-question navigator is useful on desktop. It clearly distinguishes current, complete, and incomplete states.
-- Review mode is conceptually good. At 24/24, the runner showed `Ready to complete`, `All questions answered`, `Response set complete`, and `Assessment ready to complete`.
+- The previous P0 completion failure is fixed locally. The completed local attempt `e7ef1ecc-a1e7-42a1-8c0b-dc78c8f044a5` redirects to `http://localhost:3000/app/results/single-domain/288cc68e-eba7-4933-82f0-0bcafb146fbb`.
+- The runner model remains commercially sensible: 24 questions, autosave, clear progress, review before completion, and a processing state.
+- User-safe completion error copy is now covered by tests, so internal composer diagnostics should not leak to end users.
 
 ### Weaknesses
 
 | Severity | Evidence | Why it matters commercially | Recommended fix |
 | --- | --- | --- | --- |
-| P0 | Completion ended with `We couldn't complete your result` after `/api/assessments/complete` returned 500. | A paid assessment that cannot produce a result is not monetisable. | Fix composer/runtime Hero/Pair row lookup before any paid launch. |
-| P1 | Error text shown to the user: `Missing canonical HERO PAIRS row for pair "process vision" (row missing or references non-active pair language).` | This exposes database/import/composer concepts and makes the product look unfinished. | Replace user-facing failure with calm support-safe wording, and log internal diagnostics server-side only. |
-| P1 | The question prompt is duplicated in the runner body. Example on Q1: `When leading a team, what do you focus on most?` appears as both heading and repeated body text. | Repetition makes the runner feel generated rather than editorially designed. | Remove the duplicate prompt line below the heading unless it carries different explanatory value. |
-| P1 | Many options expose the scored signal directly: `Clarify what needs to be delivered`, `Clarify where the work is heading`, `Set out how the work should run`, `Check what people need to contribute`. | Users can infer Results / Vision / Process / People too easily, which weakens perceived validity. | Rewrite options as equally attractive behavioural trade-offs rather than transparent signal labels. |
-| P2 | Desktop runner still feels like an app workflow rather than a premium assessment experience: sidebar, question navigator grid, and administrative precision dominate. | Business buyers can accept operational clarity, but paid consumer-grade assessment UX needs more focus and less machinery. | Keep the navigator, but reduce chrome and give the question card more editorial presence. |
+| P1 | Prior runner audit observed duplicated prompt presentation, for example `When leading a team, what do you focus on most?` appearing as both heading and body copy. No runner UI code was changed in this audit cycle. | Duplicate prompt treatment makes the experience feel generated or unfinished. | Remove repeated prompt text unless the second line adds distinct guidance. |
+| P1 | Option examples such as `Clarify what needs to be delivered`, `Clarify where the work is heading`, `Set out how the work should run`, and `Check what people need to contribute` map too visibly to Results / Vision / Process / People. | A paying user can infer the scoring model, reducing perceived assessment validity. | Rewrite options as equally attractive behavioural trade-offs rather than signal labels. |
+| P1 | The runner still appears to emphasise operational completion mechanics over premium assessment framing. | A business buyer may accept it, but self-serve paid users need stronger trust and perceived expertise before answering. | Add a stronger opening rationale and reduce mechanical chrome around the question card. |
+| P2 | The production attempt id from the earlier audit returned 404 locally, while the local completed attempt redirected correctly. | Not a product blocker, but QA handoff is less clear when production and local attempt ids diverge. | Keep QA notes tied to local result id and local attempt id separately. |
 
-## 4. Assessment Language Audit
+## 4. Completion Flow Audit
 
-### Question quality
+Completion now works locally for the repaired flow.
 
-The questions are clear, simple, and accessible. Examples observed:
+- Local completed attempt route checked: `http://localhost:3000/app/assessments/sonartra-leadership-approach/attempts/e7ef1ecc-a1e7-42a1-8c0b-dc78c8f044a5`.
+- Observed behaviour: redirected to `http://localhost:3000/app/results/single-domain/288cc68e-eba7-4933-82f0-0bcafb146fbb`.
+- Result readiness from persisted payload inspection: `READY`.
+- Results list route `http://localhost:3000/app/results` shows `Sonartra Leadership Approach`, `Completed 29 Apr 2026`, and `View Result`.
+- Workspace route `http://localhost:3000/app/workspace` shows `Your results are ready` and `RESULTS READY`.
+- Dashboard route `http://localhost:3000/app/dashboard` resolves to the workspace shell locally.
 
-- `When leading a team, what do you focus on most?`
-- `How do you define success for your team?`
-- `When priorities compete, what matters most to you?`
-- `When your plan is challenged, what is your instinct?`
-- `When work is going well, what do you reinforce?`
+Remaining issue: this audit did not create a fresh new attempt end to end because the user supplied a completed READY result. The prior completion path is covered by focused tests and by the completed local attempt redirect.
 
-This is understandable from teacher to CEO. The language avoids gimmicks and mostly avoids jargon.
-
-### Answer option balance
-
-The options are too semantically transparent. Examples:
-
-- `Effort leads to clear outcomes`
-- `Work moves in the right direction`
-- `Work runs in a consistent way`
-- `People grow and stay engaged`
-
-These are balanced in length and tone, but they map almost one-to-one to Results, Vision, Process, and People. That makes the assessment feel easier to game and more like a preference quiz than a serious behavioural instrument.
-
-### Signal obviousness
-
-Signal obviousness is the biggest language weakness in the runner. The model may be deterministic and valid internally, but the surfaced choices need to feel situational. Paid users should feel they are making real behavioural judgements, not choosing the label they want.
-
-### Weak / leading / repetitive copy
-
-- `Answer the current question to keep moving through the assessment.` appears throughout the runner. It is functional, but it feels like system guidance, not premium assessment guidance.
-- `Work through each question in order. Responses save automatically as you go.` is clear, but it undersells the purpose. It explains the mechanics, not why the assessment matters.
-
-## 5. Completion Flow Audit
-
-### Submit
-
-The submit checkpoint is well designed in isolation. It gives the user confidence that all answers are complete and that they can still review before submission.
-
-### Processing state
-
-The processing state is strong for a short wait:
-
-- `Analysing your response patterns`
-- `Building your behavioural profile`
-
-This is credible and restrained. It avoids fake AI drama.
-
-### Redirect / readiness
-
-This is the hard failure. The live attempt stayed on the attempt route and displayed:
-
-`We couldn't complete your result`
-
-Network evidence:
-
-- `POST https://www.sonartra.com/api/assessments/complete [500]`
-- Response route remained `https://www.sonartra.com/app/assessments/sonartra-leadership-approach/attempts/f9292bdd-2f5c-430f-814d-854e272c83e5`
-
-The Results page after failure showed:
-
-- `No results yet`
-- `Complete an assessment to see your results here.`
-
-This is commercially fatal because the user has completed the assessment and is then told they have no result.
-
-## 6. Results Page Audit
+## 5. Results Page Audit
 
 ### First impression
 
-Not fully auditable on the live target because completion failed. The only reachable production results surface for the authenticated user was the empty list state:
+The result page now clears the most important commercial threshold: it produces a complete report, not a blank state or technical failure. The top result is immediately understandable:
 
-- Route: `https://www.sonartra.com/app/results`
-- Visible state: `No results yet`
+- H1: `Results-led pattern, reinforced by Vision`
+- Leading pair: `Results and Vision`
+- Scores shown: Results 42%, Vision 25%, People 21%, Process 12%
+- Opening claim: `You move from defining the end point to acting on it with little space for challenge, treating early clarity as sufficient proof to proceed.`
 
-That empty state is acceptable for a new user, but unacceptable immediately after a failed completion. It creates a contradiction: the user just completed an assessment, but the product says there are no results.
+That is specific enough to feel like an assessment result rather than a generic productivity article. The weakness is density: the first screen contains the pattern title, score evidence, pair claim, response count, and multiple explanatory layers. The value is there, but the reader has to process a lot before the insight settles.
 
-### Information architecture
+### Report structure
 
-Repository inspection confirms the intended single-domain route is payload-driven:
+All required sections are present in the locked single-domain order:
 
-- `app/(user)/app/results/single-domain/[resultId]/page.tsx` loads result detail through `getAssessmentResultDetail`.
-- It renders `SingleDomainResultReport` with `createSingleDomainResultsViewModel(detail.singleDomainResult)`.
-- `components/results/single-domain-result-report.tsx` renders intro, hero, remaining sections, reading rail, and reading progress.
+1. Intro
+2. Hero
+3. Drivers
+4. Pair
+5. Limitation
+6. Application
 
-This matches the one-result-contract principle, but it was not reachable from the audited live attempt.
+Headings observed on the result detail route include:
 
-### Visual design
+- `Driving towards a clear end state`
+- `What is creating this pattern`
+- `Direction that converts quickly into action`
+- `When agreement is assumed too early`
+- `What to rely on, notice, and develop`
 
-Live result design could not be judged from a generated production result. Component tests indicate the report shell covers the locked six-section flow and reading rail, but paid readiness requires a live READY result inspection.
+This structure is commercially coherent. It moves from identity, to evidence, to interaction, to risk, to practical application. The Application section lands as a useful payoff rather than a detached appendix.
 
 ### Reading rail
 
-Not verified live because no result route was produced. Existing tests cover reading rail anchors, but that is not a substitute for production UX proof.
+Desktop viewport `1440x1000`: the reading rail is visible and section anchors work. Loading the target URL with `#application` lands on the Application section, with the section near the top of the viewport.
+
+Tablet viewport `768x1024` and mobile viewport `390x844`: the reading rail is hidden, which is reasonable for layout space. The trade-off is that mobile users lose fast in-report navigation, so dense sections become more scroll-heavy.
 
 ### Mobile layout
 
-Mobile runner at 390px was usable. It switches to a compact `ASSESSMENT FOCUS 12/24` state with an `Open question navigator` control. This is a good mobile pattern.
-
-Mobile results page was not tested because no live result existed.
+Mobile did not show horizontal overflow. The Application anchor worked and the content remained readable. The shell text extraction showed repeated app navigation labels in the DOM, which should be checked for screen-reader noise, but there was no visible mobile layout break in the inspected state.
 
 ### Accessibility basics
 
-Runner positives:
+- One `main` landmark was present.
+- No duplicate IDs were detected in the inspected result page.
+- Application anchor landed correctly.
+- No runtime or hydration errors were observed in the browser console.
 
-- Uses radio controls for options.
-- Autosave status uses live-region semantics.
-- Processing state exposes status semantics.
-- Buttons have descriptive accessible labels such as `Complete the assessment and submit your responses`.
+## 6. Results Language Audit
 
-Runner issues:
+### Strongest sections
 
-- First click on the radio control itself timed out via Chrome MCP; clicking the visible label worked. This may be a tooling artefact, but it is worth checking hit target layering manually.
-- The duplicate prompt creates unnecessary screen-reader repetition.
+The strongest result language is specific, behavioural, and commercially credible:
 
-## 7. Results Language Audit
+- `The cost appears when quick agreement is treated as evidence that the direction is right.`
+- `Direction that converts quickly into action`
+- `When agreement is assumed too early`
+- `Do not assume direction will organise itself.`
 
-Live generated result language could not be audited because the live attempt failed before result creation.
+These lines sound like a real leadership report. They identify a behavioural pattern and a cost, rather than flattering the user with generic strengths.
 
-Based on repository tests only, the intended result structure is:
+### Weak or risky language
 
-- intro
-- hero
-- drivers
-- pair
-- limitation
-- application
+| Severity | Evidence | Issue | Recommended fix |
+| --- | --- | --- | --- |
+| P1 | `You move from defining the end point to acting on it with little space for challenge...` | Insightful, but slightly too absolute. Some users may read it as a judgement rather than a pattern. | Keep the edge, but calibrate with conditional phrasing: `You can move...` or `Under pressure, you may move...`. |
+| P1 | The result repeats a similar direction/action/agreement theme across opening, pair, limitation, and Application. | The consistency is good, but repetition reduces perceived depth. | Give each section a sharper job: hero for identity, pair for mechanism, limitation for failure mode, Application for behaviours. |
+| P2 | Some sections are long enough that the premium editorial feel competes with cognitive load. | Paid reports need depth, but users also need scan-friendly payoff. | Add tighter summary lines or clearer "what this means" statements without changing the canonical payload model. |
 
-The results report test suite says it renders persisted full-pattern Application output without lower-order fallback. That is encouraging, but it is not enough for monetisation readiness. A paid product needs proof that the real production data and composer can generate a coherent report for real attempts.
+### Premium quality assessment
 
-## 8. Application Full-Pattern Audit
+The report is now credible. It does not feel like a toy quiz. It still does not fully feel like a paid benchmark product because some language is too close to a deterministic template and the runner option wording makes the model easy to reverse-engineer. The result language is strong enough for a closed beta, not yet strong enough to carry public paid acquisition without a human framing layer.
 
-Live full-pattern Application output: **not verified**.
+## 7. Application Full-Pattern Audit
 
-Reason: completion failed before a result was created.
+Persisted payload inspection confirmed:
 
-Expected checks that could not be completed live:
+- `application.patternKey`: `results_vision_people_process`
+- `application.pairKey`: `results_vision`
+- Application legacy arrays populated: strengths 4, watchouts 4, developmentFocus 4.
+- Application structured sections populated: `relyOn`, `notice`, `develop`.
+- Driver roles preserved: `primary_driver`, `secondary_driver`, `supporting_context`, `range_limitation`.
+- Signal order preserved: results, vision, people, process.
 
-- generated `patternKey`
-- generated `pairKey`
-- 12 selected Application rows
-- `rely_on`, `notice`, `develop`
-- primary, secondary, supporting, and range-limitation roles
-- absence of fallback copy
+Visible Application sections:
 
-Repository/test evidence:
+- `Where to Lean In`
+- `Where to Stay Alert`
+- `Where to Grow`
 
-- `tests/single-domain-completion.test.ts` passed full-pattern Application selection tests.
-- `tests/single-domain-results-report.test.tsx` passed persisted full-pattern Application rendering tests.
-- `scripts/validate-single-domain-reference-row-counts.ts` passed `application: 144`.
+The page renders 12 Application items: 4 roles per focus area across rely_on / notice / develop. This is the clearest evidence that the full-pattern model is visible to the user and not merely stored.
 
-Technical risk: the Application model may be correct, but the user never reaches it while the Hero/Pair composer guard blocks completion.
+Useful examples:
 
-## 9. Technical Reliability Audit
+- Results / primary driver: `Rely on your ability to turn ambition into visible movement...`
+- Vision / secondary driver: `Rely on your instinct for giving work a larger direction...`
+- People / supporting context: `Use people awareness deliberately when the vision needs ownership...`
+- Process / range limitation: `Do not assume direction will organise itself...`
 
-### Browser / network
+Usefulness score: **8.0 / 10**.
 
-Live attempt initial load:
+The Application section is practical and probably the most monetisable part of the report. It shows how the ranked pattern changes guidance across roles. The remaining gap is presentation: the UI exposes the four-role nuance, but the section could do more to explain why those roles matter to the reader.
 
-- Route: production attempt URL.
-- HTTP document: 200.
-- Console errors: none.
-- Authentication: `mark.dunn.uk@gmail.com`.
+Fallback check: no fallback copy, missing rows, blank subsections, or internal diagnostics were visible. Persisted diagnostics include `single_domain_application_full_pattern_source: pattern_key=results_vision_people_process: pair_key=results_vision`, which supports full-pattern selection.
 
-Runner response saves:
+## 8. Technical Reliability Audit
 
-- 24 response POSTs to `/api/assessments/attempts/.../responses`.
-- All observed response saves returned 200.
+### Browser and route checks
 
-Completion:
+| Route | Result |
+| --- | --- |
+| `http://localhost:3000/app/results/single-domain/288cc68e-eba7-4933-82f0-0bcafb146fbb#application` | Loaded READY result; Application anchor worked. |
+| `http://localhost:3000/app/results` | Loaded; completed result appears. |
+| `http://localhost:3000/app/workspace` | Loaded; latest result shown as ready. |
+| `http://localhost:3000/app/dashboard` | Resolved to workspace shell locally. |
+| `http://localhost:3000/app/assessments/sonartra-leadership-approach/attempts/f9292bdd-2f5c-430f-814d-854e272c83e5` | 404 locally because this is the production attempt id. |
+| `http://localhost:3000/app/assessments/sonartra-leadership-approach/attempts/e7ef1ecc-a1e7-42a1-8c0b-dc78c8f044a5` | Redirected to the completed result detail page. |
 
-- `POST https://www.sonartra.com/api/assessments/complete [500]`.
-- User-facing error: `Missing canonical HERO PAIRS row for pair "process vision" (row missing or references non-active pair language).`
+### Console and network
 
-Local comparison:
+No app runtime errors, hydration errors, or failed app network requests were observed on the result page. Console output was limited to development messages, HMR logs, React DevTools guidance, and the Clerk development-key warning.
 
-- Local attempt also failed at completion with the same class of message: `Missing canonical HERO_PAIRS row for pair "results_vision" (row missing or references non-active pair language).`
+### Source-of-truth check
 
-### Code evidence
+Repository inspection supports the required architecture:
 
-Relevant source:
+- `app/(user)/app/results/single-domain/[resultId]/page.tsx` loads result detail through the result read model.
+- `components/results/single-domain-result-report.tsx` renders from the result view model.
+- `lib/server/single-domain-results-view-model.ts` maps the persisted single-domain result payload into presentation sections.
+- `lib/types/single-domain-result.ts` includes `application.patternKey`, `application.pairKey`, structured `application.sections`, and existing arrays.
 
-- `lib/server/single-domain-completion.ts:513` defines `pairLanguageReferencesSignals`.
-- `lib/server/single-domain-completion.ts:610` uses that check in `getSpecificHeroRow`.
-- `lib/server/single-domain-completion.ts:670` uses that check in `getSpecificPairSummaryRow`.
-- `lib/server/single-domain-completion.ts:1032` and `1051` pass diagnostic reason `row missing or references non-active pair language`.
+No evidence was found of UI-side scoring, UI-side pattern recomputation, or browser-side language lookup.
 
-Problem: completion still treats editorial Hero/Pair copy as invalid unless visible text contains the active signal labels or pair key. That is not a reliable language ownership rule. It creates false negatives for valid authored copy and blocks paid completion.
+### Validation commands
 
-### Tests and build
+| Command | Result |
+| --- | --- |
+| `cmd /c node --import tsx --test tests/single-domain-completion.test.ts tests/assessment-completion-error-copy.test.ts` | PASS, 20/20 tests. |
+| `cmd /c node --import tsx --test tests/single-domain-runtime-definition.test.ts tests/single-domain-results-report.test.tsx` | PASS, 26/26 tests. |
+| `cmd /c node --import tsx --test tests/single-domain-results-smoke.test.tsx tests/result-read-model.test.ts` | PASS, 11/11 tests. |
+| `cmd /c node --import tsx --test tests/single-domain-application-pattern.test.ts tests/single-domain-import-parsers.test.ts tests/single-domain-import-validators.test.ts` | PASS, 31/31 tests. |
+| `cmd /c node --import tsx scripts/validate-single-domain-reference-row-counts.ts` | PASS: intro 1, hero 6, drivers 48, pair 6, limitations 6, application 144. |
+| `cmd /c npm run build` | PASS. |
+| `cmd /c npx eslint "app/(user)/app/results/single-domain/[resultId]/page.tsx" components/results/single-domain-result-report.tsx lib/server/single-domain-results-view-model.ts lib/types/single-domain-result.ts --max-warnings=0` | PASS. |
+| `cmd /c npm run lint` | FAIL on known unrelated blockers only. |
 
-Commands run:
+Known unrelated full-lint blockers:
 
-- `cmd /c node --import tsx --test tests/single-domain-runtime-definition.test.ts tests/single-domain-completion.test.ts tests/single-domain-results-report.test.tsx` - PASS, 41/41.
-- `cmd /c node --import tsx --test tests/single-domain-results-smoke.test.tsx tests/result-read-model.test.ts` - initial sandbox `spawn EPERM`, rerun outside sandbox PASS, 11/11.
-- `cmd /c node --import tsx --test tests/single-domain-application-pattern.test.ts tests/single-domain-import-parsers.test.ts tests/single-domain-import-validators.test.ts` - initial sandbox `spawn EPERM`, rerun outside sandbox PASS, 31/31.
-- `cmd /c node --import tsx scripts/validate-single-domain-reference-row-counts.ts` - PASS.
-- `cmd /c npm run build` - PASS.
-- `cmd /c npm run lint` - FAIL on known unrelated blockers:
-  - `app/(admin)/admin/diagnostics/single-domain-language/[assessmentKey]/page.tsx`: `react-hooks/error-boundaries`, JSX inside try/catch.
-  - `scripts/audit-single-domain-pair-coverage.ts:204`: unused eslint-disable warning.
+- `app/(admin)/admin/diagnostics/single-domain-language/[assessmentKey]/page.tsx`: `react-hooks/error-boundaries` for JSX inside `try/catch`.
+- `scripts/audit-single-domain-pair-coverage.ts:204`: unused eslint-disable warning.
 
-## 10. Monetisation Blockers
+## 9. Monetisation Blockers
 
-### P0 blockers
+### P0
 
-1. Completion fails on production after all 24 answers.
-   - Route: audited live attempt.
-   - Evidence: `/api/assessments/complete [500]`.
-   - Fix: remove the Hero/Pair visible-text ownership heuristic from completion and rely on canonical pair-key row ownership plus import validation.
+No current P0 blockers were found in the completed local result path. Completion, result retrieval, result list visibility, workspace visibility, and Application rendering all work locally.
 
-2. User-facing failure exposes internal implementation language.
-   - Evidence: `Missing canonical HERO PAIRS row for pair "process vision"`.
-   - Fix: replace with user-safe language and log internal details server-side.
+### P1
 
-3. Results page cannot be reached from the paid journey.
-   - Evidence: after failure, `/app/results` shows `No results yet`.
-   - Fix: completion must persist a READY result or fail before final submission with a recoverable state.
+| Blocker | Evidence | Required fix before public paid launch |
+| --- | --- | --- |
+| Runner answer options are too signal-obvious. | Options such as `Clarify what needs to be delivered` and `Clarify where the work is heading` reveal the model. | Rewrite answer options into less transparent behavioural trade-offs. |
+| Runner presentation feels operational rather than premium. | The flow is clear, but progress mechanics and repeated prompt treatment dominate the experience. | Give the question card stronger editorial hierarchy and remove prompt duplication. |
+| Result opening is dense. | First screen includes title, pair, scores, response count, evidence, and explanatory copy. | Add a sharper one-sentence payoff before evidence density. |
+| Result language sometimes overstates the pattern. | `...with little space for challenge...` is useful but harsh. | Calibrate high-impact statements without making them bland. |
+| Mobile navigation lacks quick section movement. | Reading rail is hidden on tablet/mobile. | Add a compact mobile section nav or sticky jump control if user testing shows scroll fatigue. |
 
-### P1 serious issues
+### P2
 
-1. Runner option language is too signal-obvious.
-   - Evidence: `Effort leads to clear outcomes`, `Work moves in the right direction`, `Work runs in a consistent way`, `People grow and stay engaged`.
-   - Fix: rewrite as situational trade-offs.
+- Check screen-reader noise from duplicated shell navigation labels in responsive markup.
+- Add more explicit explanation of the four Application roles so the full-pattern sophistication is obvious to users.
+- Consider lighter summary cards for dense report sections.
 
-2. Runner copy repeats the question prompt.
-   - Evidence: Q1 displays `When leading a team, what do you focus on most?` twice.
-   - Fix: remove duplicate prompt body.
+## 10. Priority Fix Plan
 
-3. Results language cannot be production-verified.
-   - Evidence: no READY result from live target.
-   - Fix: create a live seeded QA result and verify the complete persisted report.
+### Must-fix before paid beta
 
-### P2 polish issues
+1. Remove duplicated runner prompt presentation.
+2. Rewrite the most transparent answer options so signal mapping is not obvious.
+3. Run a fresh attempt end-to-end in the same environment used for beta users, not just an already completed result.
+4. Confirm production deployment has the completion fix and no internal diagnostic leakage.
 
-1. Runner feels operationally clear but not yet premium enough for a paid behavioural product.
-2. `Answer the current question to keep moving through the assessment.` is useful but mechanical.
-3. Sidebar and navigator chrome compete with assessment focus on desktop.
+### Should-fix before public launch
 
-## 11. Priority Fix Plan
-
-### 1-day fixes
-
-- Fix `single-domain-completion.ts` so Hero/Pair selection does not require literal signal labels in visible copy.
-- Replace internal completion error copy with user-safe messaging.
-- Re-run the exact live attempt or a fresh production QA attempt and confirm READY result creation.
-- Remove duplicate question prompt rendering in the runner.
-
-### 1-week fixes
-
-- Rewrite runner answer options into less obvious behavioural trade-offs.
-- Run a fresh live result-page audit at desktop, tablet, and mobile once completion is fixed.
-- Add a regression test for editorial Hero/Pair copy that has valid `pair_key` ownership but does not contain literal signal names.
-- Add production QA seed/checklist for one known single-domain attempt and result.
+1. Tighten the first result screen so the main insight lands faster.
+2. Calibrate harsh or absolute result claims while preserving behavioural specificity.
+3. Add a mobile-friendly report navigation affordance.
+4. Improve Application role explanation so the 12-row full-pattern model feels intentionally valuable.
+5. Clean the known unrelated lint blockers so full lint is green before public launch.
 
 ### Later enhancements
 
-- Reduce desktop runner chrome so the question experience feels more premium and less admin-like.
-- Add a concise “why this matters” line at the start of the runner.
-- Add post-completion recovery affordance if result generation fails: retry, support code, and preserved response set.
+1. Add richer benchmark framing once enough data exists.
+2. Add optional manager/team interpretation guidance.
+3. Add export/share affordances only after the core report is commercially strong.
 
-## 12. Final Recommendation
+## 11. Final Recommendation
 
-Do **not** charge users for this module now.
+Charge now: **No for public self-serve.**
 
-Do **not** run a public paid launch.
+Closed beta: **Yes, if positioned as a controlled pilot and supported by direct feedback collection.**
 
-Use closed internal QA only until the P0 completion blocker is fixed and a live production attempt produces a READY persisted result with the full report visible. After that, run a second monetisation audit focused on the Results page, because the most valuable paid surface was not reachable in this audit.
+Public launch: **Hold.**
 
-The runner is promising. The product journey is not monetisable until the completion and result delivery path is reliable.
+Next audit condition: rerun after runner option language is rewritten, prompt duplication is removed, production completion is verified after deployment, and a fresh attempt completes end-to-end into a READY result without manual intervention.
 
