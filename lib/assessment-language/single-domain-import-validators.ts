@@ -9,6 +9,7 @@ import { SINGLE_DOMAIN_DRIVER_ROLE_TO_CLAIM_TYPE } from '@/lib/assessment-langua
 import type {
   SingleDomainApplicationImportRow,
   SingleDomainDriverMateriality,
+  SingleDomainDriverRole,
   SingleDomainDriversImportRow,
   SingleDomainIntroImportRow,
   SingleDomainLimitationImportRow,
@@ -18,7 +19,6 @@ import type {
   SingleDomainPairImportRow,
   SingleDomainHeroImportRow,
 } from '@/lib/assessment-language/single-domain-narrative-types';
-import { SINGLE_DOMAIN_APPLICATION_GUIDANCE_TYPES } from '@/lib/assessment-language/single-domain-narrative-schema';
 import { SINGLE_DOMAIN_IMPORT_DATASET_SECTION_MAP } from '@/lib/assessment-language/single-domain-import-headers';
 import {
   SINGLE_DOMAIN_CLAIM_OWNERSHIP_KEYS,
@@ -62,6 +62,46 @@ function hasKnownSignalKey(signalKeys: readonly string[], signalKey: string): bo
 
 function hasCanonicalPairKey(pairKeys: readonly string[], pairKey: string): boolean {
   return pairKeys.includes(pairKey);
+}
+
+const SINGLE_DOMAIN_APPLICATION_IMPORT_GUIDANCE_TYPES = [
+  'applied_strength',
+  'watchout',
+  'development_focus',
+] as const;
+
+const APPLICATION_FOCUS_TO_GUIDANCE_TYPE = {
+  rely_on: 'applied_strength',
+  notice: 'watchout',
+  develop: 'development_focus',
+} as const;
+
+const APPLICATION_DRIVER_ROLE_TO_PRIORITY = {
+  primary_driver: '1',
+  secondary_driver: '2',
+  supporting_context: '3',
+  range_limitation: '4',
+} as const satisfies Record<SingleDomainDriverRole, string>;
+
+const APPLICATION_DRIVER_ROLE_ORDER = [
+  'primary_driver',
+  'secondary_driver',
+  'supporting_context',
+  'range_limitation',
+] as const;
+
+const APPLICATION_FOCUS_AREAS = [
+  'rely_on',
+  'notice',
+  'develop',
+] as const;
+
+function splitPatternKey(patternKey: string): readonly string[] {
+  return patternKey.split('_');
+}
+
+function splitApplicationPairKey(pairKey: string): readonly string[] {
+  return pairKey.split('_');
 }
 
 function validatePairKey(
@@ -468,11 +508,48 @@ function validateApplicationRows(
 ): readonly SingleDomainImportValidationIssue[] {
   const issues: SingleDomainImportValidationIssue[] = [];
   const seenKeys = new Set<string>();
+  const rowsByPatternKey = new Map<string, SingleDomainApplicationImportRow[]>();
+  const patternKeysByPairKey = new Map<string, Set<string>>();
 
   rows.forEach((row, index) => {
     const lineNumber = index + 2;
     validateSharedRowFields(row, lineNumber, context, issues);
-    validatePairKey(context.pairKeys, row.pair_key, lineNumber, issues);
+
+    const patternKey = row.pattern_key ?? '';
+    const driverRole = row.driver_role ?? '';
+    const patternSignals = splitPatternKey(patternKey);
+    const pairSignals = splitApplicationPairKey(row.pair_key);
+
+    if (!hasText(patternKey)) {
+      issues.push({ lineNumber, message: `Line ${lineNumber}: pattern_key is required.` });
+    } else if (patternSignals.length !== 4 || patternSignals.some((signalKey) => !hasText(signalKey))) {
+      issues.push({
+        lineNumber,
+        message: `Line ${lineNumber}: pattern_key must contain exactly 4 signals.`,
+      });
+    }
+
+    if (pairSignals.length !== 2 || pairSignals.some((signalKey) => !hasText(signalKey))) {
+      issues.push({
+        lineNumber,
+        message: `Line ${lineNumber}: pair_key must contain exactly 2 signals.`,
+      });
+    } else if (patternSignals.length === 4) {
+      const expectedPairKey = `${patternSignals[0]}_${patternSignals[1]}`;
+      if (row.pair_key !== expectedPairKey) {
+        issues.push({
+          lineNumber,
+          message: `Line ${lineNumber}: pair_key must match the first two signals in pattern_key.`,
+        });
+      }
+    }
+
+    if (!hasCanonicalPairKey(context.pairKeys, row.pair_key)) {
+      issues.push({
+        lineNumber,
+        message: `Line ${lineNumber}: pair_key "${row.pair_key}" must be canonical for this draft.`,
+      });
+    }
 
     if (row.focus_area !== 'rely_on' && row.focus_area !== 'notice' && row.focus_area !== 'develop') {
       issues.push({
@@ -481,11 +558,44 @@ function validateApplicationRows(
       });
     }
 
-    if (!SINGLE_DOMAIN_APPLICATION_GUIDANCE_TYPES.includes(row.guidance_type)) {
+    if (!SINGLE_DOMAIN_APPLICATION_IMPORT_GUIDANCE_TYPES.includes(
+      row.guidance_type as typeof SINGLE_DOMAIN_APPLICATION_IMPORT_GUIDANCE_TYPES[number],
+    )) {
       issues.push({
         lineNumber,
         message: `Line ${lineNumber}: guidance_type "${row.guidance_type}" is invalid.`,
       });
+    }
+
+    if (
+      row.focus_area === 'rely_on'
+      || row.focus_area === 'notice'
+      || row.focus_area === 'develop'
+    ) {
+      const expectedGuidanceType = APPLICATION_FOCUS_TO_GUIDANCE_TYPE[row.focus_area];
+      if (row.guidance_type !== expectedGuidanceType) {
+        issues.push({
+          lineNumber,
+          message: `Line ${lineNumber}: focus_area "${row.focus_area}" must use guidance_type "${expectedGuidanceType}".`,
+        });
+      }
+    }
+
+    if (!SINGLE_DOMAIN_DRIVER_ROLES.includes(driverRole as SingleDomainDriverRole)) {
+      issues.push({
+        lineNumber,
+        message: hasText(driverRole)
+          ? `Line ${lineNumber}: driver_role "${driverRole}" is invalid.`
+          : `Line ${lineNumber}: driver_role is required.`,
+      });
+    } else if (patternSignals.length === 4) {
+      const expectedSignalKey = patternSignals[APPLICATION_DRIVER_ROLE_ORDER.indexOf(driverRole as SingleDomainDriverRole)];
+      if (row.signal_key !== expectedSignalKey) {
+        issues.push({
+          lineNumber,
+          message: `Line ${lineNumber}: driver_role does not match signal position in pattern_key.`,
+        });
+      }
     }
 
     if (!hasKnownSignalKey(context.signalKeys, row.signal_key)) {
@@ -493,6 +603,15 @@ function validateApplicationRows(
         lineNumber,
         message: `Line ${lineNumber}: signal_key "${row.signal_key}" is not resolvable for the current domain.`,
       });
+    }
+
+    for (const signalKey of patternSignals) {
+      if (hasText(signalKey) && !hasKnownSignalKey(context.signalKeys, signalKey)) {
+        issues.push({
+          lineNumber,
+          message: `Line ${lineNumber}: pattern_key signal "${signalKey}" is not resolvable for the current domain.`,
+        });
+      }
     }
 
     if (!hasText(row.guidance_text)) {
@@ -511,15 +630,24 @@ function validateApplicationRows(
         lineNumber,
         message: `Line ${lineNumber}: priority must be a positive integer string.`,
       });
+    } else if (SINGLE_DOMAIN_DRIVER_ROLES.includes(driverRole as SingleDomainDriverRole)) {
+      const expectedPriority = APPLICATION_DRIVER_ROLE_TO_PRIORITY[
+        driverRole as keyof typeof APPLICATION_DRIVER_ROLE_TO_PRIORITY
+      ];
+      if (row.priority !== expectedPriority) {
+        issues.push({
+          lineNumber,
+          message: `Line ${lineNumber}: priority does not match driver_role.`,
+        });
+      }
     }
 
     const duplicateKey = [
       row.domain_key,
-      row.pair_key,
+      patternKey,
       row.focus_area,
       row.guidance_type,
-      row.signal_key,
-      row.priority,
+      driverRole,
     ].join('|');
     if (seenKeys.has(duplicateKey)) {
       issues.push({
@@ -528,6 +656,88 @@ function validateApplicationRows(
       });
     }
     seenKeys.add(duplicateKey);
+
+    if (hasText(patternKey)) {
+      const patternRows = rowsByPatternKey.get(patternKey) ?? [];
+      patternRows.push(row);
+      rowsByPatternKey.set(patternKey, patternRows);
+    }
+
+    if (hasText(row.pair_key) && hasText(patternKey)) {
+      const patternKeys = patternKeysByPairKey.get(row.pair_key) ?? new Set<string>();
+      patternKeys.add(patternKey);
+      patternKeysByPairKey.set(row.pair_key, patternKeys);
+    }
+  });
+
+  rowsByPatternKey.forEach((patternRows, patternKey) => {
+    const patternSignals = splitPatternKey(patternKey);
+    if (patternRows.length !== 12) {
+      issues.push({
+        lineNumber: null,
+        message: `Pattern "${patternKey}" must contain exactly 12 application rows (found ${patternRows.length}).`,
+      });
+    }
+
+    for (const focusArea of APPLICATION_FOCUS_AREAS) {
+      const focusRows = patternRows.filter((row) => row.focus_area === focusArea);
+      for (const driverRole of APPLICATION_DRIVER_ROLE_ORDER) {
+        const count = focusRows.filter((row) => row.driver_role === driverRole).length;
+        if (count !== 1) {
+          issues.push({
+            lineNumber: null,
+            message:
+              `Pattern "${patternKey}" focus_area "${focusArea}" must contain exactly one ${driverRole} row (found ${count}).`,
+          });
+        }
+      }
+
+      const extraRoleRows = focusRows.filter(
+        (row) => !SINGLE_DOMAIN_DRIVER_ROLES.includes((row.driver_role ?? '') as SingleDomainDriverRole),
+      );
+      if (extraRoleRows.length > 0) {
+        issues.push({
+          lineNumber: null,
+          message:
+            `Pattern "${patternKey}" focus_area "${focusArea}" contains extra role rows.`,
+        });
+      }
+    }
+
+    if (patternSignals.length === 4 && new Set(patternSignals).size !== 4) {
+      issues.push({
+        lineNumber: null,
+        message: `Pattern "${patternKey}" must contain 4 distinct signals.`,
+      });
+    }
+  });
+
+  context.pairKeys.forEach((pairKey) => {
+    const patternKeys = patternKeysByPairKey.get(pairKey) ?? new Set<string>();
+    if (patternKeys.size !== 2) {
+      issues.push({
+        lineNumber: null,
+        message: `pair_key "${pairKey}" must contain exactly 2 pattern_keys (found ${patternKeys.size}).`,
+      });
+      return;
+    }
+
+    const pairSignals = splitApplicationPairKey(pairKey);
+    const remainingSignals = context.signalKeys.filter((signalKey) => !pairSignals.includes(signalKey));
+    const expectedPatternKeys = new Set([
+      [...pairSignals, ...remainingSignals].join('_'),
+      [...pairSignals, ...[...remainingSignals].reverse()].join('_'),
+    ]);
+
+    patternKeys.forEach((patternKey) => {
+      if (!expectedPatternKeys.has(patternKey)) {
+        issues.push({
+          lineNumber: null,
+          message:
+            `pair_key "${pairKey}" pattern_key "${patternKey}" must use the remaining signals in opposite orders.`,
+        });
+      }
+    });
   });
 
   return issues;

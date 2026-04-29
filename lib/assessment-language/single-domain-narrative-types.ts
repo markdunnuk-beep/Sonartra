@@ -151,9 +151,11 @@ export interface SingleDomainLimitationImportRow {
 export interface SingleDomainApplicationImportRow {
   domain_key: string;
   section_key: 'application';
+  pattern_key?: string;
   pair_key: string;
   focus_area: SingleDomainApplicationFocusArea;
   guidance_type: SingleDomainApplicationGuidanceType;
+  driver_role?: SingleDomainDriverRole;
   signal_key: string;
   guidance_text: string;
   linked_claim_type: SingleDomainClaimOwnership;

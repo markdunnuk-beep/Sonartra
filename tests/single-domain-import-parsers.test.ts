@@ -33,7 +33,7 @@ test('parseSingleDomainImportInput enforces the exact header contract for all si
     SINGLE_DOMAIN_LIMITATION:
       'leadership-style|limitation|directive_structured|Compressed reconsideration|The pattern narrows.|Range gets tighter.|reflective|Reflective range arrives late.',
     SINGLE_DOMAIN_APPLICATION:
-      'leadership-style|application|directive_structured|rely_on|applied_strength|directive|Use fast decision clarity.|driver_primary|1',
+      'leadership-style|application|directive_supportive_reflective_structured|directive_supportive|rely_on|applied_strength|primary_driver|directive|1|Use fast decision clarity.|applied_strength',
   } as const;
 
   for (const datasetKey of Object.keys(samples) as Array<keyof typeof samples>) {
@@ -67,6 +67,18 @@ test('parseSingleDomainImportInput fails clearly when a six-section dataset uses
   const rawInput = [
     getSingleDomainImportHeaderColumns('SINGLE_DOMAIN_PAIR').join('|'),
     'leadership-style|application|directive_structured|rely_on|applied_strength|directive|Use fast decision clarity.|driver_primary|1',
+  ].join('\n');
+
+  const result = parseSingleDomainImportInput('SINGLE_DOMAIN_APPLICATION', rawInput);
+
+  assert.equal(result.success, false);
+  assert.match(result.parseErrors[0]?.message ?? '', /Invalid headers/);
+});
+
+test('parseSingleDomainImportInput rejects the old application header', () => {
+  const rawInput = [
+    'domain_key|section_key|pair_key|focus_area|guidance_type|signal_key|guidance_text|linked_claim_type|priority',
+    'leadership-style|application|directive_structured|rely_on|applied_strength|directive|Use fast decision clarity.|applied_strength|1',
   ].join('\n');
 
   const result = parseSingleDomainImportInput('SINGLE_DOMAIN_APPLICATION', rawInput);

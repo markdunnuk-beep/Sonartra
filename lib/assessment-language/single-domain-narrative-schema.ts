@@ -67,13 +67,15 @@ export const SINGLE_DOMAIN_NARRATIVE_DATASET_COLUMNS = {
   SINGLE_DOMAIN_APPLICATION: [
     'domain_key',
     'section_key',
+    'pattern_key',
     'pair_key',
     'focus_area',
     'guidance_type',
+    'driver_role',
     'signal_key',
+    'priority',
     'guidance_text',
     'linked_claim_type',
-    'priority',
   ],
 } as const;
 

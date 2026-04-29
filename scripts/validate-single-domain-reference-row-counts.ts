@@ -13,7 +13,7 @@ const expectations: Expectation[] = [
   { key: 'drivers', file: 'single_domain_drivers_reference.txt', expected: 48 },
   { key: 'pair', file: 'single_domain_pair_summaries_reference.txt', expected: 6 },
   { key: 'limitations', file: 'single_domain_limitations_reference.txt', expected: 6 },
-  { key: 'application', file: 'single_domain_application_reference.txt', expected: 24 },
+  { key: 'application', file: 'single_domain_application_reference.txt', expected: 144 },
 ];
 
 function countRows(filePath: string): number {
