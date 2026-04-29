@@ -6,7 +6,12 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import { SingleDomainResultsReport } from '@/components/results/single-domain-results-report';
 import { createSingleDomainResultsViewModel } from '@/lib/server/single-domain-results-view-model';
-import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
+import type {
+  SingleDomainApplicationStatement,
+  SingleDomainResultApplicationRoleItem,
+  SingleDomainResultApplicationSection,
+  SingleDomainResultPayload,
+} from '@/lib/types/single-domain-result';
 
 const globalsPath = join(process.cwd(), 'app', 'globals.css');
 
@@ -153,6 +158,131 @@ function buildPayload(): SingleDomainResultPayload {
   };
 }
 
+function buildFullPatternApplicationSection(
+  guidanceType: SingleDomainResultApplicationSection['guidanceType'],
+  rows: readonly [
+    readonly [SingleDomainResultApplicationRoleItem['driverRole'], string, string, number, string],
+    readonly [SingleDomainResultApplicationRoleItem['driverRole'], string, string, number, string],
+    readonly [SingleDomainResultApplicationRoleItem['driverRole'], string, string, number, string],
+    readonly [SingleDomainResultApplicationRoleItem['driverRole'], string, string, number, string],
+  ],
+): SingleDomainResultApplicationSection {
+  return {
+    guidanceType,
+    items: rows.map(([driverRole, signalKey, signalLabel, priority, text], index) => ({
+      driverRole,
+      signalKey,
+      signalLabel,
+      rank: index + 1,
+      priority,
+      text,
+      linkedClaimType: guidanceType,
+    })),
+  };
+}
+
+function toApplicationStatement(
+  item: SingleDomainResultApplicationRoleItem,
+): SingleDomainApplicationStatement {
+  return {
+    signal_key: item.signalKey,
+    signal_label: item.signalLabel,
+    rank: item.rank,
+    statement: item.text,
+    driver_role: item.driverRole,
+    priority: item.priority,
+    linked_claim_type: item.linkedClaimType,
+  };
+}
+
+function buildFullPatternPayload(): SingleDomainResultPayload {
+  const payload = buildPayload();
+  const relyOn = buildFullPatternApplicationSection('applied_strength', [
+    ['primary_driver', 'results', 'Results', 1, 'RPVP rely primary results'],
+    ['secondary_driver', 'vision', 'Vision', 2, 'RPVP rely secondary vision'],
+    ['supporting_context', 'people', 'People', 3, 'RPVP rely supporting people'],
+    ['range_limitation', 'process', 'Process', 4, 'RPVP rely limitation process'],
+  ]);
+  const notice = buildFullPatternApplicationSection('watchout', [
+    ['primary_driver', 'results', 'Results', 1, 'RPVP notice primary results'],
+    ['secondary_driver', 'vision', 'Vision', 2, 'RPVP notice secondary vision'],
+    ['supporting_context', 'people', 'People', 3, 'RPVP notice supporting people'],
+    ['range_limitation', 'process', 'Process', 4, 'RPVP notice limitation process'],
+  ]);
+  const develop = buildFullPatternApplicationSection('development_focus', [
+    ['primary_driver', 'results', 'Results', 1, 'RPVP develop primary results'],
+    ['secondary_driver', 'vision', 'Vision', 2, 'RPVP develop secondary vision'],
+    ['supporting_context', 'people', 'People', 3, 'RPVP develop supporting people'],
+    ['range_limitation', 'process', 'Process', 4, 'RPVP develop limitation process'],
+  ]);
+
+  payload.metadata.domainKey = 'leadership-approach';
+  payload.hero.pair_key = 'results_vision';
+  payload.balancing.pair_key = 'results_vision';
+  payload.pairSummary.pair_key = 'results_vision';
+  payload.diagnostics.topPair = 'results_vision';
+  payload.signals = [
+    {
+      ...payload.signals[0]!,
+      signal_key: 'results',
+      signal_label: 'Results',
+      rank: 1,
+      normalized_score: 38,
+      raw_score: 38,
+      position: 'primary',
+      position_label: 'Primary',
+    },
+    {
+      ...payload.signals[1]!,
+      signal_key: 'vision',
+      signal_label: 'Vision',
+      rank: 2,
+      normalized_score: 31,
+      raw_score: 31,
+      position: 'secondary',
+      position_label: 'Secondary',
+    },
+    {
+      ...payload.signals[2]!,
+      signal_key: 'people',
+      signal_label: 'People',
+      rank: 3,
+      normalized_score: 19,
+      raw_score: 19,
+      position: 'supporting',
+      position_label: 'Supporting',
+    },
+    {
+      ...payload.signals[3]!,
+      signal_key: 'process',
+      signal_label: 'Process',
+      rank: 4,
+      normalized_score: 12,
+      raw_score: 12,
+      position: 'underplayed',
+      position_label: 'Underplayed',
+    },
+  ];
+  payload.application = {
+    patternKey: 'results_vision_people_process',
+    pairKey: 'results_vision',
+    sections: {
+      relyOn,
+      notice,
+      develop,
+    },
+    strengths: relyOn.items.map(toApplicationStatement),
+    watchouts: notice.items.map(toApplicationStatement),
+    developmentFocus: develop.items.map(toApplicationStatement),
+  };
+
+  return payload;
+}
+
+function countMatches(value: string, pattern: RegExp) {
+  return value.match(pattern)?.length ?? 0;
+}
+
 test('single-domain results report renders the locked six-section flow and six rail anchors only', () => {
   const markup = renderToStaticMarkup(
     <SingleDomainResultsReport result={createSingleDomainResultsViewModel(buildPayload())} />,
@@ -175,6 +305,59 @@ test('single-domain results report renders the locked six-section flow and six r
 
   assert.match(markup, /data-result-reading-rail="true"/);
   assert.doesNotMatch(markup, /sonartra-report-shell-rail/);
+});
+
+test('single-domain results report renders persisted full-pattern application output without lower-order fallback', () => {
+  const payload = buildFullPatternPayload();
+  const viewModel = createSingleDomainResultsViewModel(payload);
+  const markup = renderToStaticMarkup(<SingleDomainResultsReport result={viewModel} />);
+
+  assert.equal(payload.application.patternKey, 'results_vision_people_process');
+  assert.equal(payload.application.pairKey, 'results_vision');
+  assert.equal(payload.application.sections?.relyOn.items.length, 4);
+  assert.equal(payload.application.sections?.notice.items.length, 4);
+  assert.equal(payload.application.sections?.develop.items.length, 4);
+  assert.equal(payload.application.strengths.length, 4);
+  assert.equal(payload.application.watchouts.length, 4);
+  assert.equal(payload.application.developmentFocus.length, 4);
+
+  assert.match(markup, /What to rely on, notice, and develop/);
+  assert.match(markup, />Where to Lean In</);
+  assert.match(markup, />Where to Stay Alert</);
+  assert.match(markup, />Where to Grow</);
+  assert.match(markup, /data-application-area="rely"/);
+  assert.match(markup, /data-application-area="notice"/);
+  assert.match(markup, /data-application-area="develop"/);
+
+  for (const text of [
+    'RPVP rely primary results',
+    'RPVP rely secondary vision',
+    'RPVP rely supporting people',
+    'RPVP rely limitation process',
+    'RPVP notice primary results',
+    'RPVP notice secondary vision',
+    'RPVP notice supporting people',
+    'RPVP notice limitation process',
+    'RPVP develop primary results',
+    'RPVP develop secondary vision',
+    'RPVP develop supporting people',
+    'RPVP develop limitation process',
+  ]) {
+    assert.match(markup, new RegExp(text));
+  }
+
+  assert.equal(countMatches(markup, /RPVP rely /g), 4);
+  assert.equal(countMatches(markup, /RPVP notice /g), 4);
+  assert.equal(countMatches(markup, /RPVP develop /g), 4);
+  assert.doesNotMatch(markup, /RVPP rely supporting process/);
+  assert.doesNotMatch(markup, /RVPP rely limitation people/);
+  assert.doesNotMatch(markup, /Vision strength/);
+  assert.doesNotMatch(markup, /Delivery watchout/);
+  assert.doesNotMatch(markup, /Rigor development/);
+  assert.equal(countMatches(markup, /<main\b/g), 1);
+
+  const ids = [...markup.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
+  assert.equal(new Set(ids).size, ids.length);
 });
 
 test('single-domain report shell lets desktop reading rail use the full sticky containing height', () => {
