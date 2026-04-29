@@ -422,6 +422,48 @@ export async function reconcileKnownMigrations(params: {
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);
       }
+
+      continue;
+    }
+
+    if (migration.filename === '202604290001_full_pattern_single_domain_application.sql') {
+      const applicationColumnsExist: boolean[] = [];
+      for (const columnName of [
+        'domain_key',
+        'pattern_key',
+        'pair_key',
+        'focus_area',
+        'guidance_type',
+        'driver_role',
+        'priority',
+        'guidance_text',
+        'linked_claim_type',
+      ]) {
+        applicationColumnsExist.push(await columnExists(
+          params.db,
+          'assessment_version_single_domain_application_statements',
+          columnName,
+        ));
+      }
+
+      const hasPatternLookupIndex = await indexExists(
+        params.db,
+        'assessment_version_single_domain_application_pattern_lookup_idx',
+      );
+      const hasFullPatternUniqueIndex = await indexExists(
+        params.db,
+        'assessment_version_single_domain_application_full_pattern_key',
+      );
+
+      if (
+        applicationColumnsExist.every(Boolean)
+        && hasPatternLookupIndex
+        && hasFullPatternUniqueIndex
+      ) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
     }
   }
 

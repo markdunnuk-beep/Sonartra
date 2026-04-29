@@ -79,6 +79,16 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
   }
 
   function getRowKey(row: DomainFramingRow | HeroPairsRow | SignalChaptersRow | BalancingSectionsRow | PairSummariesRow | ApplicationStatementsRow): string {
+    if ('pattern_key' in row && row.pattern_key) {
+      return [
+        row.domain_key,
+        row.pattern_key,
+        row.focus_area,
+        row.guidance_type,
+        row.driver_role,
+      ].join('|');
+    }
+
     if ('domain_key' in row) {
       return row.domain_key;
     }
@@ -215,7 +225,16 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
 
       if (sql.includes('FROM assessment_version_single_domain_application_statements')) {
         maybeThrowMissingTable('assessment_version_single_domain_application_statements', 'applicationStatements');
-        return { rows: sortByKey(state.applicationStatements, (row) => row.signal_key) as T[] };
+        return {
+          rows: [...state.applicationStatements].sort((left, right) => (
+            String(left.domain_key ?? '').localeCompare(String(right.domain_key ?? ''))
+            || String(left.pattern_key ?? '').localeCompare(String(right.pattern_key ?? ''))
+            || String(left.focus_area ?? '').localeCompare(String(right.focus_area ?? ''))
+            || (Number(left.priority ?? 0) - Number(right.priority ?? 0))
+            || String(left.driver_role ?? '').localeCompare(String(right.driver_role ?? ''))
+            || left.signal_key.localeCompare(right.signal_key)
+          )) as T[],
+        };
       }
 
       if (sql.startsWith('INSERT INTO assessment_version_single_domain_framing')) {
@@ -403,22 +422,46 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
 
         const [
           ,
+          domain_key,
+          pattern_key,
+          pair_key,
+          focus_area,
+          guidance_type,
+          driver_role,
           signal_key,
-          strength_statement_1,
-          strength_statement_2,
-          watchout_statement_1,
-          watchout_statement_2,
-          development_statement_1,
-          development_statement_2,
-        ] = params as [string, ...string[]];
+          priority,
+          guidance_text,
+          linked_claim_type,
+        ] = params as [
+          string,
+          string,
+          string,
+          string,
+          NonNullable<ApplicationStatementsRow['focus_area']>,
+          NonNullable<ApplicationStatementsRow['guidance_type']>,
+          NonNullable<ApplicationStatementsRow['driver_role']>,
+          string,
+          number,
+          string,
+          string,
+        ];
         pushUnique('applicationStatements', {
+          domain_key,
+          pattern_key,
+          pair_key,
+          focus_area,
+          guidance_type,
+          driver_role,
           signal_key,
-          strength_statement_1,
-          strength_statement_2,
-          watchout_statement_1,
-          watchout_statement_2,
-          development_statement_1,
-          development_statement_2,
+          priority,
+          guidance_text,
+          linked_claim_type,
+          strength_statement_1: '',
+          strength_statement_2: '',
+          watchout_statement_1: '',
+          watchout_statement_2: '',
+          development_statement_1: '',
+          development_statement_2: '',
         });
         return { rows: [] as T[] };
       }
@@ -434,6 +477,38 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
   return {
     db: client,
     state,
+  };
+}
+
+function buildApplicationStatementRow(params: {
+  domain_key?: string;
+  pattern_key: string;
+  pair_key: string;
+  focus_area: NonNullable<ApplicationStatementsRow['focus_area']>;
+  guidance_type: NonNullable<ApplicationStatementsRow['guidance_type']>;
+  driver_role: NonNullable<ApplicationStatementsRow['driver_role']>;
+  signal_key: string;
+  priority: number;
+  guidance_text?: string;
+  linked_claim_type?: string;
+}): ApplicationStatementsRow {
+  return {
+    domain_key: params.domain_key ?? 'leadership-approach',
+    pattern_key: params.pattern_key,
+    pair_key: params.pair_key,
+    focus_area: params.focus_area,
+    guidance_type: params.guidance_type,
+    driver_role: params.driver_role,
+    signal_key: params.signal_key,
+    priority: params.priority,
+    guidance_text: params.guidance_text ?? 'Placeholder application guidance.',
+    linked_claim_type: params.linked_claim_type ?? params.guidance_type,
+    strength_statement_1: '',
+    strength_statement_2: '',
+    watchout_statement_1: '',
+    watchout_statement_2: '',
+    development_statement_1: '',
+    development_statement_2: '',
   };
 }
 
@@ -607,24 +682,28 @@ test('deterministic ordering is preserved for pair and signal keyed datasets', a
   await replaceSingleDomainApplicationStatementRows(fake.db, {
     assessmentVersionId: 'version-1',
     rows: [
-      {
+      buildApplicationStatementRow({
+        domain_key: 'leadership',
+        pattern_key: 'stress_stability_decision_evidence',
+        pair_key: 'stress_stability',
+        focus_area: 'rely_on',
+        guidance_type: 'applied_strength',
+        driver_role: 'primary_driver',
         signal_key: 'stress_stability',
-        strength_statement_1: 'B1',
-        strength_statement_2: 'B2',
-        watchout_statement_1: 'B3',
-        watchout_statement_2: 'B4',
-        development_statement_1: 'B5',
-        development_statement_2: 'B6',
-      },
-      {
+        priority: 1,
+        guidance_text: 'B1',
+      }),
+      buildApplicationStatementRow({
+        domain_key: 'leadership',
+        pattern_key: 'decision_evidence_stress_stability',
+        pair_key: 'decision_evidence',
+        focus_area: 'rely_on',
+        guidance_type: 'applied_strength',
+        driver_role: 'primary_driver',
         signal_key: 'decision_evidence',
-        strength_statement_1: 'A1',
-        strength_statement_2: 'A2',
-        watchout_statement_1: 'A3',
-        watchout_statement_2: 'A4',
-        development_statement_1: 'A5',
-        development_statement_2: 'A6',
-      },
+        priority: 1,
+        guidance_text: 'A1',
+      }),
     ],
   });
 
@@ -632,7 +711,10 @@ test('deterministic ordering is preserved for pair and signal keyed datasets', a
   const applicationRows = await getSingleDomainApplicationStatementRows(fake.db, 'version-1');
 
   assert.deepEqual(heroRows.map((row) => row.pair_key), ['driver_analyst', 'operator_guardian']);
-  assert.deepEqual(applicationRows.map((row) => row.signal_key), ['decision_evidence', 'stress_stability']);
+  assert.deepEqual(applicationRows.map((row) => row.pattern_key), [
+    'decision_evidence_stress_stability',
+    'stress_stability_decision_evidence',
+  ]);
 });
 
 test('driver claim rows are replaced and ordered by domain, pair, role, priority, and signal', async () => {
@@ -696,6 +778,107 @@ test('driver claim rows are replaced and ordered by domain, pair, role, priority
     ],
   );
   assert.equal(fake.state.driverClaims.some((row) => row.domain_key === 'old'), false);
+});
+
+test('full-pattern application rows persist without pair-level collisions', async () => {
+  const fake = createFakeSingleDomainLanguageDb();
+  const signals = ['results', 'vision', 'people', 'process'];
+  const pairs = [
+    ['results', 'vision'],
+    ['results', 'people'],
+    ['results', 'process'],
+    ['vision', 'people'],
+    ['process', 'vision'],
+    ['process', 'people'],
+  ];
+  const focusAreas = [
+    ['rely_on', 'applied_strength'],
+    ['notice', 'watchout'],
+    ['develop', 'development_focus'],
+  ] as const;
+  const roles = [
+    ['primary_driver', 1],
+    ['secondary_driver', 2],
+    ['supporting_context', 3],
+    ['range_limitation', 4],
+  ] as const;
+
+  const rows = pairs.flatMap(([first, second]) => {
+    const [third, fourth] = signals.filter((signal) => signal !== first && signal !== second);
+    const patternSignals = [
+      [first, second, third, fourth],
+      [first, second, fourth, third],
+    ];
+
+    return patternSignals.flatMap((pattern) =>
+      focusAreas.flatMap(([focus_area, guidance_type]) =>
+        roles.map(([driver_role, priority], index) => buildApplicationStatementRow({
+          pattern_key: pattern.join('_'),
+          pair_key: `${first}_${second}`,
+          focus_area,
+          guidance_type,
+          driver_role,
+          signal_key: pattern[index] ?? '',
+          priority,
+        })),
+      ),
+    );
+  });
+
+  await replaceSingleDomainApplicationStatementRows(fake.db, {
+    assessmentVersionId: 'version-1',
+    rows,
+  });
+
+  const storedRows = await getSingleDomainApplicationStatementRows(fake.db, 'version-1');
+
+  assert.equal(storedRows.length, 144);
+  assert.equal(fake.state.applicationStatements.length, 144);
+  assert.equal(
+    storedRows.some((row) =>
+      row.pair_key === 'results_vision'
+      && row.pattern_key === 'results_vision_people_process'
+      && row.driver_role === 'primary_driver'),
+    true,
+  );
+  assert.equal(
+    storedRows.some((row) =>
+      row.pair_key === 'results_vision'
+      && row.pattern_key === 'results_vision_process_people'
+      && row.driver_role === 'primary_driver'),
+    true,
+  );
+});
+
+test('duplicate full-pattern application uniqueness key is rejected and rolled back', async () => {
+  const original = buildApplicationStatementRow({
+    pattern_key: 'results_vision_people_process',
+    pair_key: 'results_vision',
+    focus_area: 'rely_on',
+    guidance_type: 'applied_strength',
+    driver_role: 'primary_driver',
+    signal_key: 'results',
+    priority: 1,
+  });
+  const fake = createFakeSingleDomainLanguageDb({
+    applicationStatements: [original],
+  });
+
+  await assert.rejects(
+    () => replaceSingleDomainApplicationStatementRows(fake.db, {
+      assessmentVersionId: 'version-1',
+      rows: [
+        original,
+        {
+          ...original,
+          guidance_text: 'Different text with the same deterministic key.',
+        },
+      ],
+    }),
+    /duplicate key value violates unique constraint/i,
+  );
+
+  assert.deepEqual(fake.state.applicationStatements, [original]);
 });
 
 test('write paths reject multi_domain versions while read paths short-circuit cleanly', async () => {

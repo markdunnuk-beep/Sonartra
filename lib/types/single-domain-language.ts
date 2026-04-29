@@ -86,7 +86,16 @@ export interface PairSummariesRow {
 }
 
 export interface ApplicationStatementsRow {
+  domain_key?: string;
+  pattern_key?: string;
+  pair_key?: string;
+  focus_area?: 'rely_on' | 'notice' | 'develop';
+  guidance_type?: 'applied_strength' | 'watchout' | 'development_focus';
+  driver_role?: 'primary_driver' | 'secondary_driver' | 'supporting_context' | 'range_limitation';
   signal_key: string;
+  priority?: number;
+  guidance_text?: string;
+  linked_claim_type?: string;
   strength_statement_1: string;
   strength_statement_2: string;
   watchout_statement_1: string;
@@ -166,13 +175,16 @@ export const PAIR_SUMMARIES_COLUMNS = [
 ] as const;
 
 export const APPLICATION_STATEMENTS_COLUMNS = [
+  'domain_key',
+  'pattern_key',
+  'pair_key',
+  'focus_area',
+  'guidance_type',
+  'driver_role',
   'signal_key',
-  'strength_statement_1',
-  'strength_statement_2',
-  'watchout_statement_1',
-  'watchout_statement_2',
-  'development_statement_1',
-  'development_statement_2',
+  'priority',
+  'guidance_text',
+  'linked_claim_type',
 ] as const;
 
 export type SingleDomainLanguageDatasetRowMap = {

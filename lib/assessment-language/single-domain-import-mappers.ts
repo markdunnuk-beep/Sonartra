@@ -103,59 +103,41 @@ function mapLimitationRows(
   }));
 }
 
-function takeFirstTwoTexts(
-  rows: readonly SingleDomainApplicationImportRow[],
-  matcher: (row: SingleDomainApplicationImportRow) => boolean,
-): readonly [string, string] {
-  const matches = rows
-    .filter(matcher)
-    .sort((left, right) => Number(left.priority) - Number(right.priority))
-    .map((row) => row.guidance_text);
-
-  return [matches[0] ?? '', matches[1] ?? ''];
-}
-
 function mapApplicationRows(
   rows: readonly SingleDomainApplicationImportRow[],
 ): readonly ApplicationStatementsRow[] {
-  const bySignal = new Map<string, SingleDomainApplicationImportRow[]>();
+  return rows.map((row) => {
+    if (!row.pattern_key) {
+      throw new Error('SINGLE_DOMAIN_APPLICATION persistence requires pattern_key.');
+    }
 
-  rows.forEach((row) => {
-    const existing = bySignal.get(row.signal_key) ?? [];
-    existing.push(row);
-    bySignal.set(row.signal_key, existing);
+    if (!row.driver_role) {
+      throw new Error('SINGLE_DOMAIN_APPLICATION persistence requires driver_role.');
+    }
+
+    if (row.guidance_type === 'range_recovery_action') {
+      throw new Error('SINGLE_DOMAIN_APPLICATION persistence no longer supports range_recovery_action.');
+    }
+
+    return {
+      domain_key: row.domain_key,
+      pattern_key: row.pattern_key,
+      pair_key: row.pair_key,
+      focus_area: row.focus_area,
+      guidance_type: row.guidance_type,
+      driver_role: row.driver_role,
+      signal_key: row.signal_key,
+      priority: Number(row.priority),
+      guidance_text: row.guidance_text,
+      linked_claim_type: row.linked_claim_type,
+      strength_statement_1: '',
+      strength_statement_2: '',
+      watchout_statement_1: '',
+      watchout_statement_2: '',
+      development_statement_1: '',
+      development_statement_2: '',
+    };
   });
-
-  return [...bySignal.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([signal_key, signalRows]) => {
-      const [strength1, strength2] = takeFirstTwoTexts(
-        signalRows,
-        (row) => row.focus_area === 'rely_on' || row.guidance_type === 'applied_strength',
-      );
-      const [watchout1, watchout2] = takeFirstTwoTexts(
-        signalRows,
-        (row) => row.focus_area === 'notice'
-          || row.guidance_type === 'watchout'
-          || row.guidance_type === 'range_recovery_action',
-      );
-      const [development1, development2] = takeFirstTwoTexts(
-        signalRows,
-        (row) => row.focus_area === 'develop'
-          || row.guidance_type === 'development_focus'
-          || row.guidance_type === 'range_recovery_action',
-      );
-
-      return {
-        signal_key,
-        strength_statement_1: strength1,
-        strength_statement_2: strength2,
-        watchout_statement_1: watchout1,
-        watchout_statement_2: watchout2,
-        development_statement_1: development1,
-        development_statement_2: development2,
-      };
-    });
 }
 
 export function mapSingleDomainNarrativeRowsToLegacyDataset<TKey extends SingleDomainNarrativeDatasetKey>(

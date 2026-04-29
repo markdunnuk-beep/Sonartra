@@ -144,6 +144,34 @@ const DRIVER_ROLE_TO_MATERIALITY = {
   range_limitation: 'material_underplay',
 } as const satisfies Record<DriverClaimsRow['driver_role'], DriverClaimsRow['materiality']>;
 
+const APPLICATION_FOCUS_AREAS = [
+  'rely_on',
+  'notice',
+  'develop',
+] as const satisfies readonly NonNullable<ApplicationStatementsRow['focus_area']>[];
+
+const APPLICATION_GUIDANCE_TYPES = [
+  'applied_strength',
+  'watchout',
+  'development_focus',
+] as const satisfies readonly NonNullable<ApplicationStatementsRow['guidance_type']>[];
+
+function requireApplicationFocusArea(value: string): NonNullable<ApplicationStatementsRow['focus_area']> {
+  if (!APPLICATION_FOCUS_AREAS.includes(value as NonNullable<ApplicationStatementsRow['focus_area']>)) {
+    throw new Error(`Field "focus_area" must be one of: ${APPLICATION_FOCUS_AREAS.join(', ')}.`);
+  }
+
+  return value as NonNullable<ApplicationStatementsRow['focus_area']>;
+}
+
+function requireApplicationGuidanceType(value: string): NonNullable<ApplicationStatementsRow['guidance_type']> {
+  if (!APPLICATION_GUIDANCE_TYPES.includes(value as NonNullable<ApplicationStatementsRow['guidance_type']>)) {
+    throw new Error(`Field "guidance_type" must be one of: ${APPLICATION_GUIDANCE_TYPES.join(', ')}.`);
+  }
+
+  return value as NonNullable<ApplicationStatementsRow['guidance_type']>;
+}
+
 function requireNonEmptyString(value: unknown, fieldName: string): string {
   if (typeof value !== 'string') {
     throw new Error(`Field "${fieldName}" must be a string.`);
@@ -236,9 +264,48 @@ export const driverClaimsRowSchema: StrictRowSchema<DriverClaimsRow> = {
 export const signalChaptersRowSchema = createStrictRowSchema<SignalChaptersRow>(SIGNAL_CHAPTERS_COLUMNS);
 export const balancingSectionsRowSchema = createStrictRowSchema<BalancingSectionsRow>(BALANCING_SECTIONS_COLUMNS);
 export const pairSummariesRowSchema = createStrictRowSchema<PairSummariesRow>(PAIR_SUMMARIES_COLUMNS);
-export const applicationStatementsRowSchema = createStrictRowSchema<ApplicationStatementsRow>(
-  APPLICATION_STATEMENTS_COLUMNS,
-);
+export const applicationStatementsRowSchema: StrictRowSchema<ApplicationStatementsRow> = {
+  parse(row: RawSingleDomainRow): ApplicationStatementsRow {
+    const receivedColumns = getOrderedRowKeys(row);
+    if (!hasExactSequence(APPLICATION_STATEMENTS_COLUMNS, receivedColumns)) {
+      throw new Error([
+        'Row columns must match the dataset contract exactly.',
+        `Expected columns: ${APPLICATION_STATEMENTS_COLUMNS.join('|')}`,
+        `Received columns: ${receivedColumns.join('|')}`,
+      ].join(' '));
+    }
+
+    const domainKey = requireNonEmptyString(row.domain_key, 'domain_key');
+    const patternKey = requireNonEmptyString(row.pattern_key, 'pattern_key');
+    const pairKey = requireNonEmptyString(row.pair_key, 'pair_key');
+    const focusArea = requireApplicationFocusArea(requireNonEmptyString(row.focus_area, 'focus_area'));
+    const guidanceType = requireApplicationGuidanceType(requireNonEmptyString(row.guidance_type, 'guidance_type'));
+    const driverRole = requireDriverRole(requireNonEmptyString(row.driver_role, 'driver_role'));
+    const signalKey = requireNonEmptyString(row.signal_key, 'signal_key');
+    const priority = parsePositiveInteger(requireNonEmptyString(row.priority, 'priority'));
+    const guidanceText = requireNonEmptyString(row.guidance_text, 'guidance_text');
+    const linkedClaimType = requireNonEmptyString(row.linked_claim_type, 'linked_claim_type');
+
+    return {
+      domain_key: domainKey,
+      pattern_key: patternKey,
+      pair_key: pairKey,
+      focus_area: focusArea,
+      guidance_type: guidanceType,
+      driver_role: driverRole,
+      signal_key: signalKey,
+      priority,
+      guidance_text: guidanceText,
+      linked_claim_type: linkedClaimType,
+      strength_statement_1: '',
+      strength_statement_2: '',
+      watchout_statement_1: '',
+      watchout_statement_2: '',
+      development_statement_1: '',
+      development_statement_2: '',
+    };
+  },
+};
 
 export const singleDomainLanguageSchemaRegistry = {
   DOMAIN_FRAMING: {

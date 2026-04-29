@@ -91,13 +91,16 @@ test('rejects wrong dataset key', () => {
 
 test('rejects out-of-order headers', () => {
   const validation = validateSingleDomainDatasetHeaders('APPLICATION_STATEMENTS', [
+    'domain_key',
+    'pattern_key',
+    'pair_key',
+    'focus_area',
+    'guidance_type',
+    'driver_role',
     'signal_key',
-    'strength_statement_2',
-    'strength_statement_1',
-    'watchout_statement_1',
-    'watchout_statement_2',
-    'development_statement_1',
-    'development_statement_2',
+    'guidance_text',
+    'priority',
+    'linked_claim_type',
   ]);
 
   assert.equal(validation.success, false);
@@ -107,24 +110,36 @@ test('rejects out-of-order headers', () => {
 test('accepts exact APPLICATION_STATEMENTS rows', () => {
   const rows = parseSingleDomainDatasetRows('APPLICATION_STATEMENTS', [
     buildRow(APPLICATION_STATEMENTS_COLUMNS, [
-      'lead_people',
-      'Strength one',
-      'Strength two',
-      'Watchout one',
-      'Watchout two',
-      'Development one',
-      'Development two',
+      'leadership-approach',
+      'results_vision_people_process',
+      'results_vision',
+      'rely_on',
+      'applied_strength',
+      'primary_driver',
+      'results',
+      '1',
+      'Placeholder application guidance.',
+      'applied_strength',
     ]),
   ]);
 
   assert.deepEqual(rows, [{
-    signal_key: 'lead_people',
-    strength_statement_1: 'Strength one',
-    strength_statement_2: 'Strength two',
-    watchout_statement_1: 'Watchout one',
-    watchout_statement_2: 'Watchout two',
-    development_statement_1: 'Development one',
-    development_statement_2: 'Development two',
+    domain_key: 'leadership-approach',
+    pattern_key: 'results_vision_people_process',
+    pair_key: 'results_vision',
+    focus_area: 'rely_on',
+    guidance_type: 'applied_strength',
+    driver_role: 'primary_driver',
+    signal_key: 'results',
+    priority: 1,
+    guidance_text: 'Placeholder application guidance.',
+    linked_claim_type: 'applied_strength',
+    strength_statement_1: '',
+    strength_statement_2: '',
+    watchout_statement_1: '',
+    watchout_statement_2: '',
+    development_statement_1: '',
+    development_statement_2: '',
   }]);
 });
 
