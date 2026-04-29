@@ -47,6 +47,32 @@ function isMissingRelationError(error: unknown, tableName: string): boolean {
     && error.message.includes('does not exist');
 }
 
+const FULL_PATTERN_APPLICATION_COLUMNS = [
+  'domain_key',
+  'pattern_key',
+  'pair_key',
+  'focus_area',
+  'guidance_type',
+  'driver_role',
+  'priority',
+  'guidance_text',
+  'linked_claim_type',
+] as const;
+
+function isMissingFullPatternApplicationColumnError(error: unknown, tableName: string): boolean {
+  if (
+    tableName !== 'assessment_version_single_domain_application_statements'
+    || !(error instanceof Error)
+    || !error.message.includes('does not exist')
+  ) {
+    return false;
+  }
+
+  return FULL_PATTERN_APPLICATION_COLUMNS.some((column) =>
+    error.message.includes(`column "${column}"`),
+  );
+}
+
 function isMissingModeColumnError(error: unknown): boolean {
   return error instanceof Error
     && (
@@ -150,6 +176,10 @@ async function getDatasetRows<TRow>(params: {
     return freezeRows(result.rows);
   } catch (error) {
     if (isMissingRelationError(error, params.tableName)) {
+      return Object.freeze([]);
+    }
+
+    if (isMissingFullPatternApplicationColumnError(error, params.tableName)) {
       return Object.freeze([]);
     }
 

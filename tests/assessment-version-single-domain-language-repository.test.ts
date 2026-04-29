@@ -45,6 +45,7 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
   failInsertTable?: keyof SingleDomainTableState;
   missingTables?: Partial<Record<keyof SingleDomainTableState, boolean>>;
   missingModeColumns?: boolean;
+  missingApplicationFullPatternColumns?: boolean;
 }) {
   const state: SingleDomainTableState = {
     framing: [...(seed?.framing ?? [])],
@@ -225,6 +226,11 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
 
       if (sql.includes('FROM assessment_version_single_domain_application_statements')) {
         maybeThrowMissingTable('assessment_version_single_domain_application_statements', 'applicationStatements');
+
+        if (config?.missingApplicationFullPatternColumns) {
+          throw new Error('column "domain_key" does not exist');
+        }
+
         return {
           rows: [...state.applicationStatements].sort((left, right) => (
             String(left.domain_key ?? '').localeCompare(String(right.domain_key ?? ''))
@@ -953,6 +959,35 @@ test('missing single-domain tables read back as empty datasets', async () => {
 
   assert.deepEqual(heroRows, []);
   assert.deepEqual(balancingRows, []);
+});
+
+test('legacy application table shape reads as empty full-pattern application rows instead of crashing', async () => {
+  const fake = createFakeSingleDomainLanguageDb({
+    framing: [{
+      domain_key: 'leadership',
+      section_title: 'Leadership',
+      intro_paragraph: 'Intro',
+      meaning_paragraph: 'Meaning',
+      bridge_to_signals: 'Bridge',
+      blueprint_context_line: 'Blueprint',
+    }],
+    applicationStatements: [{
+      signal_key: 'results',
+      strength_statement_1: 'Legacy strength one',
+      strength_statement_2: 'Legacy strength two',
+      watchout_statement_1: 'Legacy watchout one',
+      watchout_statement_2: 'Legacy watchout two',
+      development_statement_1: 'Legacy develop one',
+      development_statement_2: 'Legacy develop two',
+    }],
+  }, {
+    missingApplicationFullPatternColumns: true,
+  });
+
+  const bundle = await getSingleDomainLanguageBundle(fake.db, 'version-1');
+
+  assert.equal(bundle.DOMAIN_FRAMING.length, 1);
+  assert.deepEqual(bundle.APPLICATION_STATEMENTS, []);
 });
 
 test('duplicate key inserts are rejected and rolled back', async () => {
