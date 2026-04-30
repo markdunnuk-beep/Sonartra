@@ -893,7 +893,7 @@ main {
   .sonartra-single-domain-opening-grid {
     display: grid;
     gap: 1rem;
-    align-items: stretch;
+    align-items: start;
   }
 
   .sonartra-single-domain-opening-narrative {
@@ -1059,6 +1059,15 @@ main {
       gap: 1.7rem;
     }
 
+    .sonartra-single-domain-opening-grid:has(.sonartra-single-domain-evidence-details[open]) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sonartra-single-domain-opening-grid:has(.sonartra-single-domain-evidence-details[open])
+      .sonartra-single-domain-evidence-panel {
+      max-width: 44rem;
+    }
+
     .sonartra-single-domain-intro-copy-grid {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -1085,14 +1094,16 @@ main {
   .sonartra-single-domain-meta-block {
     display: grid;
     gap: 0.42rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
-    padding-top: 0.72rem;
+    max-width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding-bottom: 0.72rem;
   }
 
   .sonartra-single-domain-meta-strip {
     display: grid;
     gap: 0.66rem 1rem;
     align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     max-width: 100%;
   }
 

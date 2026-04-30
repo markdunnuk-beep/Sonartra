@@ -163,9 +163,6 @@ export function ResultReadingRail({
             height={28}
             className="h-auto w-[136px] opacity-[0.8]"
           />
-          <p className="text-white/22 text-[0.58rem] font-medium uppercase tracking-[0.18em]">
-            Reading rail
-          </p>
         </div>
         <ul className="sonartra-result-rail-track relative space-y-0.5 pl-1.5" role="list">
           {sectionsConfig.topLevelSections.map((section) => {

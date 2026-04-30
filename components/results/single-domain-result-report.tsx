@@ -128,7 +128,7 @@ export function SingleDomainResultReport({ result }: { result: SingleDomainResul
           <ReportHeader
             id={introSection.key}
             titleId={`${introSection.key}-heading`}
-            eyebrow={result.openingSummary.eyebrow}
+            meta={<MetadataCard items={result.metadataItems} pairLabel={result.pairLabel} />}
             title={result.openingSummary.title}
             lead={
               <p className="sonartra-single-domain-intro-subtitle sonartra-single-domain-opening-lead">
@@ -162,8 +162,6 @@ export function SingleDomainResultReport({ result }: { result: SingleDomainResul
                 items={result.openingSummary.evidenceItems}
               />
             </div>
-
-            <MetadataCard items={result.metadataItems} pairLabel={result.pairLabel} />
           </ReportHeader>
         ) : null}
 

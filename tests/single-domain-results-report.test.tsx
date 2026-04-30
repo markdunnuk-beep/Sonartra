@@ -377,7 +377,7 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   );
 
   assert.match(markup, /sonartra-report-hero/);
-  assert.match(markup, /Your leadership pattern/);
+  assert.doesNotMatch(markup, /Your leadership pattern/);
   assert.match(markup, /Your Style at a Glance/);
   assert.match(markup, /What Shapes Your Approach/);
   assert.match(markup, /How Your Style Balances/);
@@ -468,6 +468,12 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /Delivery watchout/);
   assert.match(markup, /Rigor development/);
   assert.match(markup, /sonartra-single-domain-section-limitation/);
+
+  const metadataIndex = markup.indexOf('sonartra-single-domain-meta-block');
+  const titleIndex = markup.indexOf('Vision-led pattern, reinforced by Delivery');
+  assert.ok(metadataIndex >= 0);
+  assert.ok(titleIndex >= 0);
+  assert.ok(metadataIndex < titleIndex);
 });
 
 test('single-domain results report uses score badges when persisted normalized scores do not sum to 100', () => {
@@ -588,8 +594,14 @@ test('single-domain report spacing and labels support lighter mobile scanability
 
   assert.match(cssSource, /\.sonartra-single-domain-section::before\s*\{[\s\S]*?top:\s*-1\.35rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-report-flow\s*\{[\s\S]*?gap:\s*3\.2rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-opening-grid\s*\{[\s\S]*?align-items:\s*start;/);
+  assert.match(
+    cssSource,
+    /\.sonartra-single-domain-opening-grid:has\(\.sonartra-single-domain-evidence-details\[open\]\)\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\);/,
+  );
   assert.match(cssSource, /\.sonartra-single-domain-proof-grid\s*\{[\s\S]*?gap:\s*0\.56rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-evidence-details\s*\{[\s\S]*?border-top:\s*1px solid rgba\(255, 255, 255, 0\.04\);/);
+  assert.match(cssSource, /\.sonartra-single-domain-meta-block\s*\{[\s\S]*?border-bottom:\s*1px solid rgba\(255, 255, 255, 0\.03\);/);
   assert.match(cssSource, /\.sonartra-single-domain-version-note\s*\{[\s\S]*?color:\s*rgba\(207, 218, 243, 0\.34\);/);
   assert.match(cssSource, /\.sonartra-single-domain-driver-entry\s*\{[\s\S]*?padding-top:\s*1\.5rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-flow\s*\{[\s\S]*?gap:\s*1\.9rem;/);

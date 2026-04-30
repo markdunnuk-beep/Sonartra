@@ -10,6 +10,7 @@ test('reading rail renders expected top-level section labels', () => {
 
   assert.match(markup, /src="\/images\/sonartra-logo\.svg"/);
   assert.match(markup, /alt="Sonartra"/);
+  assert.doesNotMatch(markup, />Reading rail</);
   assert.match(markup, />01<\/span>/);
   assert.match(markup, />02<\/span>/);
   assert.match(markup, />03<\/span>/);
@@ -169,11 +170,11 @@ test('reading rail can render the single-domain section model without affecting 
   );
 
   assert.match(markup, />Intro</);
-  assert.match(markup, />Hero</);
-  assert.match(markup, />Drivers</);
-  assert.match(markup, />Pair</);
-  assert.match(markup, />Limitation</);
-  assert.match(markup, />Application</);
+  assert.match(markup, />Your Style at a Glance</);
+  assert.match(markup, />What Shapes Your Approach</);
+  assert.match(markup, />How Your Style Balances</);
+  assert.match(markup, />Where This Can Work Against You</);
+  assert.match(markup, />Putting This Into Practice</);
   assert.doesNotMatch(markup, /aria-label="Domain chapters"/);
   assert.equal(markup.match(/<a /g)?.length ?? 0, 6);
 });
