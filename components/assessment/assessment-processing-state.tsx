@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { AssessmentLoader } from '@/components/assessment/assessment-loader';
 import { getAssessmentCompletionSafeErrorMessage } from '@/lib/assessment/completion-error-copy';
 import { getAssessmentLoaderMinimumVisibleMs } from '@/lib/assessment/loader-progress';
 import {
@@ -31,6 +30,11 @@ type AssessmentProcessingStateProps = {
 };
 
 const PROCESSING_REDIRECT_SETTLE_MS = 260;
+const RESULT_TRANSITION_STEPS = [
+  'Analysing response pattern',
+  'Building your leadership profile',
+  'Preparing your result',
+] as const;
 
 function formatFailureMessage(lastError: string | null): string {
   return getAssessmentCompletionSafeErrorMessage(lastError);
@@ -47,12 +51,47 @@ function formatLongProcessingMessage(stage: AssessmentProcessingStateProps['stag
 function ProcessingShell({ children }: { children: ReactNode }) {
   return (
     <section className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-5 py-10 sm:px-6 lg:px-8">
-      <div className="border-white/7 relative mx-auto w-full max-w-[44rem] overflow-hidden rounded-[2rem] border bg-[radial-gradient(circle_at_top_left,rgba(145,168,214,0.09),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.012))] px-7 py-8 shadow-[0_22px_62px_rgba(0,0,0,0.2)] sm:px-10 sm:py-10 md:px-12">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.018),transparent_22%,transparent_78%,rgba(255,255,255,0.012))]" />
+      <div className="border-white/8 relative mx-auto w-full max-w-[42rem] overflow-hidden rounded-[1.65rem] border bg-[radial-gradient(circle_at_50%_0%,rgba(210,220,245,0.105),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.026),rgba(255,255,255,0.01))] px-6 py-8 shadow-[0_24px_72px_rgba(0,0,0,0.22)] sm:px-10 sm:py-10 md:px-12">
+        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.26),transparent)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.014),transparent_30%,transparent_78%,rgba(255,255,255,0.01))]" />
         <div className="relative mx-auto max-w-[35rem] space-y-6">{children}</div>
       </div>
     </section>
   );
+}
+
+function ResultTransitionMark() {
+  return (
+    <div aria-hidden="true" className="relative mx-auto flex h-14 w-14 items-center justify-center">
+      <span className="absolute h-14 w-14 rounded-full border border-white/8 bg-white/[0.018]" />
+      <span className="motion-safe:animate-[pulse_4.6s_ease-in-out_infinite] absolute h-9 w-9 rounded-full border border-white/10 bg-white/[0.026]" />
+      <span className="h-2.5 w-2.5 rounded-full bg-white/90 shadow-[0_0_26px_rgba(236,241,255,0.34)]" />
+    </div>
+  );
+}
+
+function getTransitionCopy(params: {
+  stage: AssessmentProcessingStateProps['stage'];
+  resolvedReadyHref: string | null;
+}) {
+  if (params.resolvedReadyHref && params.stage !== 'submitting') {
+    return {
+      title: 'Opening your report',
+      subtitle: 'Your result is ready. Sonartra is taking you to the persisted report.',
+    };
+  }
+
+  if (params.stage === 'submitting') {
+    return {
+      title: 'Submitting your responses',
+      subtitle: 'Your answers are saved. Sonartra is moving them into result preparation.',
+    };
+  }
+
+  return {
+    title: 'Preparing your result',
+    subtitle: 'Sonartra is building your leadership profile from the saved response pattern.',
+  };
 }
 
 export function AssessmentProcessingState({
@@ -322,13 +361,47 @@ export function AssessmentProcessingState({
     );
   }
 
+  const transitionCopy = getTransitionCopy({ stage, resolvedReadyHref });
+
   return (
-    <AssessmentLoader
-      title="Analysing your response patterns"
-      subtitle="Building your behavioural profile"
-      variant="processing"
-      progressMode="simulated"
-      isComplete={Boolean(resolvedReadyHref) && stage !== 'submitting'}
-    />
+    <ProcessingShell>
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-busy={!resolvedReadyHref}
+        className="text-center"
+      >
+        <ResultTransitionMark />
+
+        <div className="mx-auto mt-7 max-w-[34rem] space-y-3">
+          <p className="sonartra-report-kicker text-white/42">Result preparation</p>
+          <h1 className="text-[2rem] font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-[2.35rem]">
+            {transitionCopy.title}
+          </h1>
+          <p className="mx-auto max-w-[31rem] text-[0.98rem] leading-7 text-white/62">
+            {transitionCopy.subtitle}
+          </p>
+        </div>
+
+        <div className="mx-auto mt-7 grid max-w-[31rem] gap-2.5 text-left sm:grid-cols-3">
+          {RESULT_TRANSITION_STEPS.map((step) => (
+            <div
+              key={step}
+              className="border-white/8 rounded-xl border bg-white/[0.022] px-3.5 py-3"
+            >
+              <span className="block h-1.5 w-1.5 rounded-full bg-white/55" aria-hidden="true" />
+              <span className="mt-2 block text-[0.78rem] font-medium leading-5 text-white/58">
+                {step}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <p className="mx-auto mt-6 max-w-[29rem] text-[0.84rem] leading-6 text-white/42">
+          This usually takes a few seconds.
+        </p>
+      </div>
+    </ProcessingShell>
   );
 }
