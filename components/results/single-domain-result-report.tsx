@@ -12,22 +12,30 @@ function MetadataCard({
   items: SingleDomainResultsViewModel['metadataItems'];
   pairLabel: string;
 }) {
+  const versionItem = items.find((item) => item.label.toLowerCase() === 'version');
   const detailItems = [
-    ...items,
+    ...items.filter((item) => item.label.toLowerCase() !== 'version'),
     { label: 'Leading pair', value: pairLabel },
   ] as const;
 
   return (
-    <dl aria-label="Report details" className="sonartra-single-domain-meta-strip">
-      {detailItems.map((item) => (
-        <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-meta-strip-item">
-          <dt className="sonartra-report-kicker">{item.label}</dt>
-          <dd className="sonartra-single-domain-meta-strip-value">
-            {item.value}
-          </dd>
-        </div>
-      ))}
-    </dl>
+    <div className="sonartra-single-domain-meta-block">
+      <dl aria-label="Report details" className="sonartra-single-domain-meta-strip">
+        {detailItems.map((item) => (
+          <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-meta-strip-item">
+            <dt className="sonartra-report-kicker">{item.label}</dt>
+            <dd className="sonartra-single-domain-meta-strip-value">
+              {item.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {versionItem ? (
+        <p className="sonartra-single-domain-version-note">
+          Report version {versionItem.value}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -40,17 +48,20 @@ function OpeningEvidencePanel({
   proofItems: SingleDomainResultsViewModel['openingSummary']['proofItems'];
   items: SingleDomainResultsViewModel['openingSummary']['evidenceItems'];
 }) {
+  const headlineProofItems = proofItems.slice(0, 2);
+  const supportingProofItems = proofItems.slice(2);
+
   return (
-    <aside className="sonartra-single-domain-evidence-panel" aria-label="Why this result was generated">
+    <aside className="sonartra-single-domain-evidence-panel" aria-label="Result basis">
       <div className="sonartra-single-domain-evidence-panel-header">
-        <p className="sonartra-report-kicker">Why this result was generated</p>
+        <p className="sonartra-report-kicker">Result basis</p>
         <p className="sonartra-single-domain-evidence-panel-note">
           {lead}
         </p>
       </div>
 
-      <div className="sonartra-single-domain-proof-grid" aria-label="Signal rank evidence">
-        {proofItems.map((item) => (
+      <div className="sonartra-single-domain-proof-grid" aria-label="Headline signal evidence">
+        {headlineProofItems.map((item) => (
           <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-proof-item">
             <div>
               <p className="sonartra-single-domain-proof-label">{item.label}</p>
@@ -64,17 +75,41 @@ function OpeningEvidencePanel({
         ))}
       </div>
 
-      <dl className="sonartra-single-domain-evidence-list">
-        {items.map((item) => (
-          <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-evidence-item">
-            <dt>{item.label}</dt>
-            <dd>
-              <strong>{item.value}</strong>
-              {item.detail ? <span>{item.detail}</span> : null}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <details className="sonartra-single-domain-evidence-details">
+        <summary>
+          <span>View full evidence</span>
+        </summary>
+        <div className="sonartra-single-domain-evidence-details-body">
+          {supportingProofItems.length > 0 ? (
+            <div className="sonartra-single-domain-proof-grid" aria-label="Full signal rank evidence">
+              {supportingProofItems.map((item) => (
+                <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-proof-item">
+                  <div>
+                    <p className="sonartra-single-domain-proof-label">{item.label}</p>
+                    <p className="sonartra-single-domain-proof-value">{item.value}</p>
+                  </div>
+                  {item.scoreLabel ? (
+                    <span className="sonartra-single-domain-proof-score">{item.scoreLabel}</span>
+                  ) : null}
+                  <p className="sonartra-single-domain-proof-detail">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          <dl className="sonartra-single-domain-evidence-list">
+            {items.map((item) => (
+              <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-evidence-item">
+                <dt>{item.label}</dt>
+                <dd>
+                  <strong>{item.value}</strong>
+                  {item.detail ? <span>{item.detail}</span> : null}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </details>
     </aside>
   );
 }
