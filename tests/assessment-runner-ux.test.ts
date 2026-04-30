@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import {
+  getDistinctSecondaryPromptText,
+  normalizePromptText,
+} from '@/lib/assessment-runner/runner-prompt-copy';
 import { getResumeQuestionIndex } from '@/lib/assessment-runner/runner-ux';
 
 const runnerClientPath = join(
@@ -114,6 +118,52 @@ test('runner client uses canonical autosave and completion status messaging', ()
   assert.doesNotMatch(source, /return 'Saved';/);
 });
 
+test('runner prompt helper suppresses duplicate and punctuation-only repeated question text', () => {
+  const heading = 'When leading a team, what do you focus on most?';
+
+  assert.equal(
+    normalizePromptText('  When leading a team,\nwhat do you focus on most???  '),
+    'when leading a team, what do you focus on most',
+  );
+  assert.equal(
+    getDistinctSecondaryPromptText({
+      heading,
+      secondary: 'when leading a team, what do you focus on most.',
+    }),
+    null,
+  );
+});
+
+test('runner prompt helper keeps distinct authored guidance and explanations', () => {
+  assert.equal(
+    getDistinctSecondaryPromptText({
+      heading: 'When leading a team, what do you focus on most?',
+      secondary: 'Choose the response that best reflects your usual approach.',
+    }),
+    'Choose the response that best reflects your usual approach.',
+  );
+  assert.equal(
+    getDistinctSecondaryPromptText({
+      heading: 'When leading a team, what do you focus on most?',
+      secondary: 'Think about the pattern you return to when pressure rises.',
+    }),
+    'Think about the pattern you return to when pressure rises.',
+  );
+});
+
+test('runner client gates helper copy through duplicate prompt suppression without hiding options or status', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /const questionHelperText = getDistinctSecondaryPromptText\(/);
+  assert.match(source, /heading: currentQuestion\?\.prompt/);
+  assert.match(source, /secondary: modeCopy\.modeDescription/);
+  assert.match(source, /questionHelperText \? \(/);
+  assert.match(source, /\{questionHelperText\}/);
+  assert.match(source, /currentQuestion\.options\.map/);
+  assert.match(source, /autosaveStateLabel/);
+  assert.match(source, /completionPercentage/);
+});
+
 test('runner client renders explicit in-progress and review mode messaging from canonical runner state', () => {
   const source = readFileSync(runnerClientPath, 'utf8');
 
@@ -178,7 +228,8 @@ test('runner client hardens semantic structure and navigator accessibility label
   assert.match(source, /aria-labelledby="runner-question-title"/);
   assert.match(source, /id="runner-question-title"/);
   assert.match(source, /<fieldset className="grid gap-3">/);
-  assert.match(source, /<legend className="sr-only">\{currentQuestion\.prompt\}<\/legend>/);
+  assert.match(source, /<legend className="sr-only">Response options<\/legend>/);
+  assert.doesNotMatch(source, /<legend className="sr-only">\{currentQuestion\.prompt\}<\/legend>/);
   assert.match(source, /type="radio"/);
   assert.match(source, /name=\{`question-\$\{currentQuestion\.questionId\}`\}/);
   assert.match(source, /checked=\{selected\}/);

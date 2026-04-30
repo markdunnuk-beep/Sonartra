@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { AssessmentProcessingState } from '@/components/assessment/assessment-processing-state';
 import { cn } from '@/components/shared/user-app-ui';
+import { getDistinctSecondaryPromptText } from '@/lib/assessment-runner/runner-prompt-copy';
 import { getRunnerState } from '@/lib/assessment-runner/runner-state';
 import { getResumeQuestionIndex } from '@/lib/assessment-runner/runner-ux';
 import type { AssessmentRunnerViewModel } from '@/lib/server/assessment-runner-types';
@@ -165,6 +166,10 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
     currentQuestionNumber,
     totalQuestions,
     isFinalQuestion,
+  });
+  const questionHelperText = getDistinctSecondaryPromptText({
+    heading: currentQuestion?.prompt,
+    secondary: modeCopy.modeDescription,
   });
 
   useEffect(() => {
@@ -616,9 +621,11 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   >
                     {modeCopy.modeTitle}
                   </p>
-                  <p className="sonartra-type-body-secondary text-white/62 max-w-[46rem]">
-                    {modeCopy.modeDescription}
-                  </p>
+                  {questionHelperText ? (
+                    <p className="sonartra-type-body-secondary text-white/62 max-w-[46rem]">
+                      {questionHelperText}
+                    </p>
+                  ) : null}
                 </div>
                 <h2
                   id="runner-question-title"
@@ -629,7 +636,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
               </div>
 
               <fieldset className="grid gap-3">
-                <legend className="sr-only">{currentQuestion.prompt}</legend>
+                <legend className="sr-only">Response options</legend>
                 {currentQuestion.options.map((option, index) => {
                   const selected =
                     selectedByQuestionId[currentQuestion.questionId] === option.optionId;
