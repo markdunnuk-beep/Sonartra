@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -60,12 +61,20 @@ function ProcessingShell({ children }: { children: ReactNode }) {
   );
 }
 
-function ResultTransitionMark() {
+function ResultTransitionLogo() {
   return (
-    <div aria-hidden="true" className="relative mx-auto flex h-14 w-14 items-center justify-center">
-      <span className="absolute h-14 w-14 rounded-full border border-white/8 bg-white/[0.018]" />
-      <span className="motion-safe:animate-[pulse_4.6s_ease-in-out_infinite] absolute h-9 w-9 rounded-full border border-white/10 bg-white/[0.026]" />
-      <span className="h-2.5 w-2.5 rounded-full bg-white/90 shadow-[0_0_26px_rgba(236,241,255,0.34)]" />
+    <div
+      aria-hidden="true"
+      className="border-white/9 mx-auto flex h-14 w-[10rem] items-center justify-center rounded-2xl border bg-white/[0.024] px-5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] sm:w-[10.75rem]"
+    >
+      <Image
+        src="/images/sonartra-logo.svg"
+        alt=""
+        width={1082}
+        height={335}
+        className="h-auto w-full opacity-90"
+        priority
+      />
     </div>
   );
 }
@@ -372,7 +381,7 @@ export function AssessmentProcessingState({
         aria-busy={!resolvedReadyHref}
         className="text-center"
       >
-        <ResultTransitionMark />
+        <ResultTransitionLogo />
 
         <div className="mx-auto mt-7 max-w-[34rem] space-y-3">
           <p className="sonartra-report-kicker text-white/42">Result preparation</p>
