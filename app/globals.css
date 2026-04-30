@@ -1130,6 +1130,93 @@ main {
     color: rgba(207, 218, 243, 0.34);
   }
 
+  .sonartra-result-section-nav {
+    max-width: 100%;
+  }
+
+  .sonartra-result-section-nav summary {
+    @apply sonartra-focus-ring flex cursor-pointer list-none items-center justify-between rounded-[0.95rem] border border-white/[0.055] bg-white/[0.018] px-3.5 py-3 outline-none;
+    color: rgba(224, 233, 255, 0.72);
+  }
+
+  .sonartra-result-section-nav summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .sonartra-result-section-nav summary::after {
+    content: '+';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.018);
+    color: rgba(224, 233, 255, 0.56);
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+
+  .sonartra-result-section-nav[open] summary::after {
+    content: '-';
+  }
+
+  .sonartra-result-section-nav-summary {
+    display: grid;
+    gap: 0.12rem;
+    min-width: 0;
+  }
+
+  .sonartra-result-section-nav-kicker {
+    @apply text-[0.58rem] font-medium uppercase leading-4 tracking-[0.18em];
+    color: rgba(207, 218, 243, 0.34);
+  }
+
+  .sonartra-result-section-nav-current {
+    @apply truncate text-[0.9rem] font-medium leading-5 tracking-[0.01em];
+    color: rgba(236, 241, 255, 0.78);
+  }
+
+  .sonartra-result-section-nav-panel {
+    display: grid;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.045);
+    border-radius: 1rem;
+    background: rgba(8, 12, 22, 0.62);
+    padding: 0.5rem;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .sonartra-result-section-nav-link {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.72rem;
+    align-items: center;
+    min-height: 2.65rem;
+    border-radius: 0.78rem;
+    padding: 0.62rem 0.7rem;
+    color: rgba(224, 233, 255, 0.62);
+    outline: none;
+  }
+
+  .sonartra-result-section-nav-link:hover,
+  .sonartra-result-section-nav-link[data-section-nav-state='current'] {
+    background: rgba(255, 255, 255, 0.026);
+    color: rgba(241, 246, 255, 0.84);
+  }
+
+  .sonartra-result-section-nav-number {
+    @apply text-[0.62rem] font-medium leading-4 tracking-[0.16em];
+    color: rgba(207, 218, 243, 0.34);
+  }
+
+  .sonartra-result-section-nav-label {
+    @apply text-[0.86rem] font-medium leading-5 tracking-[0.01em];
+    min-width: 0;
+  }
+
   @media (min-width: 640px) {
     .sonartra-single-domain-meta-strip {
       grid-template-columns: repeat(2, minmax(0, max-content));

@@ -418,6 +418,16 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.doesNotMatch(markup, />Version</);
   assert.match(markup, /Report version 1\.0\.0/);
   assert.match(markup, />Leading pair</);
+  assert.match(markup, /data-result-section-navigation="true"/);
+  assert.match(markup, /aria-label="Report section navigation"/);
+  assert.match(markup, /Jump to section/);
+  assert.match(markup, /href="#intro"/);
+  assert.match(markup, /href="#hero"/);
+  assert.match(markup, /href="#drivers"/);
+  assert.match(markup, /href="#pair"/);
+  assert.match(markup, /href="#limitation"/);
+  assert.match(markup, /href="#application"/);
+  assert.match(markup, />Putting This Into Practice</);
   assert.match(markup, /12 Apr 2026/);
   assert.match(markup, /\d{2}:\d{2}/);
   assert.match(markup, /Vision and Delivery/);
@@ -603,6 +613,8 @@ test('single-domain report spacing and labels support lighter mobile scanability
   assert.match(cssSource, /\.sonartra-single-domain-evidence-details\s*\{[\s\S]*?border-top:\s*1px solid rgba\(255, 255, 255, 0\.04\);/);
   assert.match(cssSource, /\.sonartra-single-domain-meta-block\s*\{[\s\S]*?border-bottom:\s*1px solid rgba\(255, 255, 255, 0\.03\);/);
   assert.match(cssSource, /\.sonartra-single-domain-version-note\s*\{[\s\S]*?color:\s*rgba\(207, 218, 243, 0\.34\);/);
+  assert.match(cssSource, /\.sonartra-result-section-nav summary\s*\{[\s\S]*?cursor-pointer/);
+  assert.match(cssSource, /\.sonartra-result-section-nav-link\s*\{[\s\S]*?min-height:\s*2\.65rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-driver-entry\s*\{[\s\S]*?padding-top:\s*1\.5rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-flow\s*\{[\s\S]*?gap:\s*1\.9rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-entry\s*\{[\s\S]*?border-radius:\s*1\.4rem;/);

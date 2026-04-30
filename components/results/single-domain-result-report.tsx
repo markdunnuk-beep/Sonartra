@@ -1,5 +1,6 @@
 import { ResultReadingProgress } from '@/components/results/result-reading-progress';
 import { ResultReadingRail } from '@/components/results/result-reading-rail';
+import { ResultSectionNavigation } from '@/components/results/result-section-navigation';
 import { ReportHeader } from '@/components/results/report-chapter';
 import { ReportBody, ReportShell } from '@/components/results/report-shell';
 import { SingleDomainResultSection } from '@/components/results/single-domain-result-section';
@@ -128,7 +129,12 @@ export function SingleDomainResultReport({ result }: { result: SingleDomainResul
           <ReportHeader
             id={introSection.key}
             titleId={`${introSection.key}-heading`}
-            meta={<MetadataCard items={result.metadataItems} pairLabel={result.pairLabel} />}
+            meta={
+              <>
+                <MetadataCard items={result.metadataItems} pairLabel={result.pairLabel} />
+                <ResultSectionNavigation sectionsConfig={result.readingSections} />
+              </>
+            }
             title={result.openingSummary.title}
             lead={
               <p className="sonartra-single-domain-intro-subtitle sonartra-single-domain-opening-lead">
