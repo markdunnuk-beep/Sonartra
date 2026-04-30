@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { AssessmentProcessingState } from '@/components/assessment/assessment-processing-state';
 import { cn } from '@/components/shared/user-app-ui';
-import { getDistinctSecondaryPromptText } from '@/lib/assessment-runner/runner-prompt-copy';
 import { getRunnerState } from '@/lib/assessment-runner/runner-state';
 import { getResumeQuestionIndex } from '@/lib/assessment-runner/runner-ux';
 import type { AssessmentRunnerViewModel } from '@/lib/server/assessment-runner-types';
@@ -97,12 +96,12 @@ function getRunnerModeCopy(params: {
   if (params.runnerState === 'ANSWERED_AWAITING_SUBMIT') {
     return {
       modeLabel: 'Review Mode',
-      modeTitle: 'All questions answered',
+      modeTitle: 'Review your answers',
       modeDescription:
-        'Everything is answered. Review any response before you complete the assessment.',
+        'Every response is saved. Review anything you want to change before completing.',
       navigationLabel: 'Review Question',
       nextLabel: 'Next Response',
-      finalActionHint: 'You can continue reviewing responses before you complete the assessment.',
+      finalActionHint: 'Review anything you want to change before completing.',
     };
   }
 
@@ -169,10 +168,6 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
     currentQuestionNumber,
     totalQuestions,
     isFinalQuestion,
-  });
-  const questionHelperText = getDistinctSecondaryPromptText({
-    heading: currentQuestion?.prompt,
-    secondary: modeCopy.modeDescription,
   });
 
   useEffect(() => {
@@ -552,37 +547,18 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 </span>
 
                 {showReviewHandoff ? (
-                  <div className="sonartra-motion-reveal-soft sonartra-runner-review-handoff border-white/12 rounded-[1.4rem] border bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-4 shadow-[0_22px_60px_rgba(0,0,0,0.24)] sm:p-5">
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                      <div className="max-w-[42rem] space-y-4">
-                        <div className="space-y-2">
-                          <p className="sonartra-type-eyebrow text-white/46">
-                            Completion checkpoint
-                          </p>
-                          <h2 className="sonartra-type-section-title text-[1.55rem] leading-[1.04] text-white sm:text-[1.8rem]">
-                            Ready to complete
-                          </h2>
-                          <p className="sonartra-type-body-secondary text-white/68 max-w-[34rem]">
-                            Your response set is complete. You can still move through the assessment
-                            and change any answer before final submission.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          <span className="border-emerald-400/18 inline-flex items-center rounded-full border bg-emerald-400/10 px-3 py-1.5 text-sm text-emerald-100">
-                            All questions answered
-                          </span>
-                          <span className="text-white/72 inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm">
-                            Response set complete
-                          </span>
-                          <span className="text-white/72 inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm">
-                            Assessment ready to complete
-                          </span>
-                        </div>
-
-                        <p className="sonartra-type-body-secondary text-white/56 max-w-[36rem]">
-                          Completing the assessment finalises your responses and moves Sonartra into
-                          results preparation.
+                  <div className="sonartra-motion-reveal-soft sonartra-runner-review-handoff border-white/10 rounded-[1.2rem] border bg-white/[0.035] p-4 shadow-[0_18px_44px_rgba(0,0,0,0.18)] sm:p-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="max-w-[36rem] space-y-2.5">
+                        <h2 className="sonartra-type-section-title text-[1.45rem] leading-[1.04] text-white sm:text-[1.65rem]">
+                          Ready to complete
+                        </h2>
+                        <p className="sonartra-type-body-secondary text-white/68 max-w-[34rem]">
+                          All {totalQuestions} responses are saved. You can still review any answer
+                          before submitting.
+                        </p>
+                        <p className="sonartra-type-caption text-white/44">
+                          Your result will be generated after submission.
                         </p>
                       </div>
 
@@ -601,24 +577,8 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                         >
                           Complete Assessment
                         </button>
-                        <p className="sonartra-type-caption text-white/44">
-                          Review remains available until you choose to complete.
-                        </p>
                       </div>
                     </div>
-                  </div>
-                ) : null}
-
-                {showReviewHandoff ? (
-                  <div className="space-y-2">
-                    <p className="sonartra-type-caption uppercase tracking-[0.22em] text-emerald-100/72">
-                      {modeCopy.modeTitle}
-                    </p>
-                    {questionHelperText ? (
-                      <p className="sonartra-type-body-secondary text-white/62 max-w-[46rem]">
-                        {questionHelperText}
-                      </p>
-                    ) : null}
                   </div>
                 ) : null}
                 <h2

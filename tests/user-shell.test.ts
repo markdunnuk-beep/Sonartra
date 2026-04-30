@@ -36,10 +36,14 @@ test('user shell reprioritises chrome for assessment runner routes on smaller sc
     /const shellDesktopBreakpoint = isAssessmentRunnerRoute \? 'xl' : 'lg';/,
   );
   assert.match(shellSource, /shellDesktopBreakpoint === 'xl' \? 'xl:sticky' : 'lg:sticky'/);
+  assert.match(shellSource, /min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip/);
   assert.match(shellSource, /sticky top-0 z-20/);
   assert.match(shellSource, /Runner focus/);
   assert.match(shellSource, /isAssessmentRunnerRoute \? 'Assessment' : 'SONARTRA'/);
-  assert.match(shellSource, /px-0 py-0 sm:px-1 sm:py-1 md:px-2 md:py-2 xl:px-5 xl:py-5/);
+  assert.match(
+    shellSource,
+    /overflow-x-clip px-0 py-0 sm:px-1 sm:py-1 md:px-2 md:py-2 xl:px-5 xl:py-5/,
+  );
   assert.match(
     shellSource,
     /border-0 bg-transparent shadow-none[\s\S]*sm:rounded-\[1\.6rem\][\s\S]*sm:border/,

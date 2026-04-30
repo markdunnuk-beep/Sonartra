@@ -403,7 +403,7 @@ export function UserAppShell({
           />
         ) : null}
 
-        <div className="flex min-h-screen flex-1 flex-col">
+        <div className="min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip">
           <div
             className={cn(
               'border-white/6 flex items-center justify-between border-b',
@@ -441,15 +441,15 @@ export function UserAppShell({
 
           <div
             className={cn(
-              'flex-1',
+              'min-w-0 flex-1',
               isAssessmentRunnerRoute
-                ? 'px-0 py-0 sm:px-1 sm:py-1 md:px-2 md:py-2 xl:px-5 xl:py-5'
+                ? 'overflow-x-clip px-0 py-0 sm:px-1 sm:py-1 md:px-2 md:py-2 xl:px-5 xl:py-5'
                 : 'px-2 py-2 lg:px-5 lg:py-5',
             )}
           >
             <div
               className={cn(
-                'min-h-full',
+                'min-h-full min-w-0',
                 isAssessmentRunnerRoute
                   ? 'sm:border-white/6 border-0 bg-transparent shadow-none sm:rounded-[1.6rem] sm:border sm:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] sm:shadow-[0_28px_90px_rgba(0,0,0,0.22)] sm:backdrop-blur-xl'
                   : 'border-white/6 rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl',

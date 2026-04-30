@@ -159,15 +159,12 @@ test('runner prompt helper keeps distinct authored guidance and explanations', (
   );
 });
 
-test('runner client gates helper copy through duplicate prompt suppression without hiding options or status', () => {
+test('runner client keeps the question area focused without hiding options or status', () => {
   const source = readFileSync(runnerClientPath, 'utf8');
 
-  assert.match(source, /const questionHelperText = getDistinctSecondaryPromptText\(/);
-  assert.match(source, /heading: currentQuestion\?\.prompt/);
-  assert.match(source, /secondary: modeCopy\.modeDescription/);
-  assert.match(source, /showReviewHandoff \? \(/);
-  assert.match(source, /questionHelperText \? \(/);
-  assert.match(source, /\{questionHelperText\}/);
+  assert.match(source, /<legend className="sr-only">Response options<\/legend>/);
+  assert.doesNotMatch(source, /<legend className="sr-only">\{currentQuestion\.prompt\}<\/legend>/);
+  assert.doesNotMatch(source, /const questionHelperText = getDistinctSecondaryPromptText\(/);
   assert.match(source, /currentQuestion\.options\.map/);
   assert.match(source, /autosaveStateLabel/);
   assert.match(source, /completionPercentage/);
@@ -178,12 +175,12 @@ test('runner client renders explicit in-progress and review mode messaging from 
 
   assert.match(source, /runnerState === 'ANSWERED_AWAITING_SUBMIT'/);
   assert.match(source, /modeLabel: 'Review Mode'/);
-  assert.match(source, /modeTitle: 'All questions answered'/);
+  assert.match(source, /modeTitle: 'Review your answers'/);
   assert.match(
     source,
-    /Everything is answered\. Review any response before you complete the assessment\./,
+    /Every response is saved\. Review anything you want to change before completing\./,
   );
-  assert.match(source, /You can continue reviewing responses before you complete the assessment\./);
+  assert.match(source, /Review anything you want to change before completing\./);
   assert.match(source, /modeLabel: 'In Progress'/);
   assert.match(source, /RUNNER_GUIDANCE_COPY/);
 });
@@ -201,19 +198,26 @@ test('runner client removes repeated chrome from the page header and progress ca
   assert.match(source, /completionPercentage/);
 });
 
-test('runner client renders a dedicated completion handoff only for answered-awaiting-submit mode', () => {
+test('runner client renders a simplified completion handoff only for answered-awaiting-submit mode', () => {
   const source = readFileSync(runnerClientPath, 'utf8');
 
   assert.match(source, /const showReviewHandoff = runnerState === 'ANSWERED_AWAITING_SUBMIT';/);
   assert.match(source, /showReviewHandoff \? \(/);
   assert.match(source, /sonartra-runner-review-handoff/);
-  assert.match(source, /Completion checkpoint/);
   assert.match(source, /Ready to complete/);
-  assert.match(source, /All questions answered/);
-  assert.match(source, /Response set complete/);
-  assert.match(source, /Assessment ready to complete/);
-  assert.match(source, /Completing the assessment finalises your responses and moves Sonartra/);
-  assert.match(source, /moves Sonartra into\s+results preparation\./);
+  assert.match(
+    source,
+    /All \{totalQuestions\} responses are saved\. You can still review any answer\s+before submitting\./,
+  );
+  assert.match(source, /Your result will be generated after submission\./);
+  assert.match(source, /Complete Assessment/);
+  assert.match(source, /disabled=\{!canSubmit\}/);
+  assert.doesNotMatch(source, /Completion checkpoint/);
+  assert.doesNotMatch(source, /All questions answered/);
+  assert.doesNotMatch(source, /Response set complete/);
+  assert.doesNotMatch(source, /Assessment ready to complete/);
+  assert.doesNotMatch(source, /Completing the assessment finalises/);
+  assert.doesNotMatch(source, /Review remains available until/);
   assert.doesNotMatch(
     source,
     /runnerState === 'IN_PROGRESS'[\s\S]{0,120}sonartra-runner-review-handoff/,
@@ -239,7 +243,7 @@ test('runner client adjusts navigation and CTA hierarchy for review mode without
   assert.match(source, /showFooterCompleteAction \? \(/);
   assert.match(source, /'Responses ready for review'/);
   assert.match(source, /'Ready to submit'/);
-  assert.match(source, /Review remains available until you choose to complete\./);
+  assert.match(source, /Previous Response/);
   assert.match(source, /Complete Assessment/);
   assert.match(source, /onClick=\{handleSubmit\}/);
 });
