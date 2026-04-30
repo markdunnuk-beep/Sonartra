@@ -63,8 +63,10 @@ test('runner client keeps the question and completion phases within the same she
 
   assert.match(source, /data-runner-phase=\{completionState !== 'idle' \? 'completion' : 'question'\}/);
   assert.match(source, /data-runner-state=\{runnerState\}/);
-  assert.match(source, /<h1 className="sonartra-type-page-title mt-2 max-w-\[16ch\]">/);
-  assert.match(source, /Assessment runner/);
+  assert.match(source, /sonartra-type-section-title max-w-\[34rem\]/);
+  assert.match(source, /xl:whitespace-nowrap/);
+  assert.match(source, /\{runner\.assessmentTitle\}/);
+  assert.doesNotMatch(source, /<p className="sonartra-type-eyebrow text-white\/42">Assessment runner<\/p>/);
   assert.match(source, /sonartra-runner-stage min-h-\[34rem\]/);
   assert.match(source, /sonartra-runner-support-card/);
   assert.match(
@@ -90,6 +92,12 @@ test('runner client gives question changes and completion feedback a calmer stag
   assert.match(source, /sonartra-runner-completion-card/);
   assert.match(source, /Completion status/);
   assert.match(source, /sonartra-runner-map-item/);
+  assert.match(
+    source,
+    /Choose the response that best reflects your usual approach\. Your answers save automatically\./,
+  );
+  assert.doesNotMatch(source, /Work through each question in order\. Responses save automatically as you go\./);
+  assert.doesNotMatch(source, /Answer the current question to keep moving through the assessment\./);
   assert.doesNotMatch(source, /Selection saved automatically\./);
   assert.doesNotMatch(source, /Every question now has a saved response\./);
   assert.doesNotMatch(source, /Selections save automatically\./);
@@ -157,6 +165,7 @@ test('runner client gates helper copy through duplicate prompt suppression witho
   assert.match(source, /const questionHelperText = getDistinctSecondaryPromptText\(/);
   assert.match(source, /heading: currentQuestion\?\.prompt/);
   assert.match(source, /secondary: modeCopy\.modeDescription/);
+  assert.match(source, /showReviewHandoff \? \(/);
   assert.match(source, /questionHelperText \? \(/);
   assert.match(source, /\{questionHelperText\}/);
   assert.match(source, /currentQuestion\.options\.map/);
@@ -176,7 +185,20 @@ test('runner client renders explicit in-progress and review mode messaging from 
   );
   assert.match(source, /You can continue reviewing responses before you complete the assessment\./);
   assert.match(source, /modeLabel: 'In Progress'/);
-  assert.match(source, /Answer the current question to keep moving through the assessment\./);
+  assert.match(source, /RUNNER_GUIDANCE_COPY/);
+});
+
+test('runner client removes repeated chrome from the page header and progress card', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.doesNotMatch(source, /<span>Assessment Runner<\/span>/);
+  assert.doesNotMatch(source, /<span className="text-white\/22">\/<\/span>/);
+  assert.doesNotMatch(source, /<span>\{runner\.assessmentTitle\}<\/span>/);
+  assert.match(source, /<h1[\s\S]*\{runner\.assessmentTitle\}[\s\S]*<\/h1>/);
+  assert.match(source, /modeCopy\.modeLabel/);
+  assert.match(source, /modeCopy\.navigationLabel/);
+  assert.match(source, /autosaveStateLabel/);
+  assert.match(source, /completionPercentage/);
 });
 
 test('runner client renders a dedicated completion handoff only for answered-awaiting-submit mode', () => {
@@ -277,6 +299,8 @@ test('runner client adds compact orientation controls for tablet and mobile layo
   assert.match(source, /Hide question navigator/);
   assert.match(source, /Jump to any question without leaving the runner\./);
   assert.match(source, /sm:grid-cols-6 md:grid-cols-8/);
+  assert.match(source, /rounded-\[1\.15rem\] border border-white\/8 bg-neutral-950\/72/);
+  assert.match(source, /rounded-lg border px-2 py-2 text-center/);
   assert.match(source, /setCompactNavigatorOpen\(false\);/);
   assert.match(source, /hidden xl:sticky xl:top-6 xl:block/);
 });

@@ -14,6 +14,9 @@ import type { AssessmentRunnerViewModel } from '@/lib/server/assessment-runner-t
 import type { AssessmentMode } from '@/lib/types/assessment';
 import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
+const RUNNER_GUIDANCE_COPY =
+  'Choose the response that best reflects your usual approach. Your answers save automatically.';
+
 type AssessmentRunnerClientProps = {
   userId: string;
   runner: AssessmentRunnerViewModel;
@@ -108,7 +111,7 @@ function getRunnerModeCopy(params: {
     modeTitle: `Question ${params.currentQuestionNumber} of ${params.totalQuestions}`,
     modeDescription: params.isFinalQuestion
       ? 'Finish this question to move into final review.'
-      : 'Answer the current question to keep moving through the assessment.',
+      : RUNNER_GUIDANCE_COPY,
     navigationLabel: 'Question',
     nextLabel: 'Next',
     finalActionHint: 'Complete the remaining questions to move into final review.',
@@ -379,12 +382,13 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
     >
       <div className="space-y-3">
         <header className="px-1">
-          <p className="sonartra-type-eyebrow text-white/42">Assessment runner</p>
-          <h1 className="sonartra-type-page-title mt-2 max-w-[16ch]">{runner.assessmentTitle}</h1>
-          <p className="sonartra-type-body-secondary text-white/58 mt-2 max-w-[42rem]">
+          <h1 className="sonartra-type-section-title max-w-[34rem] text-[1.8rem] leading-[1.04] text-white sm:text-[2.05rem] lg:max-w-none lg:text-[2.2rem] xl:whitespace-nowrap">
+            {runner.assessmentTitle}
+          </h1>
+          <p className="sonartra-type-body-secondary mt-2 max-w-[46rem] text-white/60">
             {showReviewHandoff
               ? 'All responses are in place. Review freely, then complete the assessment when ready.'
-              : 'Work through each question in order. Responses save automatically as you go.'}
+              : RUNNER_GUIDANCE_COPY}
           </p>
         </header>
 
@@ -393,10 +397,10 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
           data-runner-mobile-nav
           aria-label="Question navigator"
         >
-          <div className="sonartra-runner-mobile-orientation rounded-[1.25rem] border border-white/10 px-3.5 py-3 shadow-[0_18px_42px_rgba(0,0,0,0.24)] backdrop-blur-xl">
+          <div className="sonartra-runner-mobile-orientation rounded-[1.15rem] border border-white/8 bg-neutral-950/72 px-3.5 py-3 shadow-[0_14px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="sonartra-type-eyebrow text-white/42">Assessment focus</p>
+                <p className="sonartra-type-caption text-white/40">Progress</p>
                 <div className="mt-1 flex items-end gap-3">
                   <p className="sonartra-type-section-title text-[1.15rem]">
                     {currentQuestionNumber}/{totalQuestions}
@@ -427,7 +431,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
             {compactNavigatorOpen ? (
               <div
                 id="runner-compact-navigator"
-                className="sonartra-motion-reveal-soft border-white/8 mt-3 space-y-3 border-t pt-3"
+                className="sonartra-motion-reveal-soft border-white/6 mt-3 space-y-3 border-t pt-3"
                 role="region"
                 aria-label="Question navigator sheet"
               >
@@ -453,12 +457,12 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                         disabled={interactionLocked}
                         aria-label={`Jump to question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
                         className={cn(
-                          'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-xl border px-2 py-2.5 text-center',
+                          'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-lg border px-2 py-2 text-center',
                           active
-                            ? 'border-white bg-white text-neutral-950 shadow-[0_12px_24px_rgba(255,255,255,0.08)]'
+                            ? 'border-white/80 bg-white text-neutral-950 shadow-[0_10px_20px_rgba(255,255,255,0.06)]'
                             : answered
-                              ? 'border-emerald-400/18 hover:border-emerald-300/28 hover:bg-emerald-400/14 bg-emerald-400/10 text-white'
-                              : 'text-white/58 hover:border-white/18 border-white/10 bg-white/[0.03] hover:bg-white/[0.05]',
+                              ? 'border-emerald-400/16 bg-emerald-400/8 text-emerald-50 hover:border-emerald-300/24 hover:bg-emerald-400/12'
+                              : 'border-white/8 bg-white/[0.018] text-white/54 hover:border-white/16 hover:bg-white/[0.04]',
                           'disabled:cursor-not-allowed disabled:opacity-60',
                         )}
                       >
@@ -492,14 +496,9 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
             style={getRevealStyle(0)}
           >
             <div className="space-y-5">
-              <div className="sonartra-motion-status border-white/8 rounded-[1rem] border bg-white/[0.03] px-4 py-3">
+              <div className="sonartra-motion-status border-white/8 rounded-[1rem] border bg-white/[0.025] px-4 py-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0 space-y-1">
-                    <div className="sonartra-type-eyebrow flex flex-wrap items-center gap-2 text-white/40">
-                      <span>Assessment Runner</span>
-                      <span className="text-white/22">/</span>
-                      <span>{runner.assessmentTitle}</span>
-                    </div>
+                  <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={cn(
@@ -610,23 +609,18 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   </div>
                 ) : null}
 
-                <div className="space-y-2">
-                  <p
-                    className={cn(
-                      'sonartra-type-caption uppercase tracking-[0.22em]',
-                      runnerState === 'ANSWERED_AWAITING_SUBMIT'
-                        ? 'text-emerald-100/72'
-                        : 'text-white/42',
-                    )}
-                  >
-                    {modeCopy.modeTitle}
-                  </p>
-                  {questionHelperText ? (
-                    <p className="sonartra-type-body-secondary text-white/62 max-w-[46rem]">
-                      {questionHelperText}
+                {showReviewHandoff ? (
+                  <div className="space-y-2">
+                    <p className="sonartra-type-caption uppercase tracking-[0.22em] text-emerald-100/72">
+                      {modeCopy.modeTitle}
                     </p>
-                  ) : null}
-                </div>
+                    {questionHelperText ? (
+                      <p className="sonartra-type-body-secondary text-white/62 max-w-[46rem]">
+                        {questionHelperText}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
                 <h2
                   id="runner-question-title"
                   className="sonartra-type-section-title max-w-[30ch] text-[2rem] leading-[1.02] sm:text-[2.25rem] lg:text-[2.7rem]"
@@ -853,20 +847,20 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
       <aside className="hidden xl:sticky xl:top-6 xl:block">
         <section
-          className="sonartra-motion-reveal sonartra-motion-stage-3 sonartra-panel sonartra-runner-support-card space-y-4 p-4"
+          className="sonartra-motion-reveal sonartra-motion-stage-3 sonartra-runner-support-card space-y-3 rounded-[1.25rem] border border-white/8 bg-white/[0.018] p-3.5 shadow-[0_18px_44px_rgba(0,0,0,0.16)]"
           style={getRevealStyle(2)}
           aria-labelledby="runner-desktop-nav-title"
         >
-          <div className="space-y-2">
-            <p id="runner-desktop-nav-title" className="sonartra-type-eyebrow text-white/46">
+          <div className="space-y-1.5">
+            <p id="runner-desktop-nav-title" className="sonartra-type-caption text-white/42">
               Question navigator
             </p>
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="sonartra-type-section-title text-2xl">
+                <p className="sonartra-type-section-title text-xl">
                   {answeredQuestions}/{totalQuestions}
                 </p>
-                <p className="sonartra-type-body-secondary text-white/58">
+                <p className="sonartra-type-caption text-white/50">
                   {runnerState === 'ANSWERED_AWAITING_SUBMIT'
                     ? 'Responses ready for review'
                     : 'Questions completed'}
@@ -880,22 +874,22 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
             </div>
           </div>
 
-          <div className="sonartra-type-utility text-white/48 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1">
+          <div className="flex flex-wrap gap-1.5 text-[0.68rem] font-medium leading-5 text-white/42">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-2 py-0.5">
               <span className="h-2 w-2 rounded-full bg-white" />
               Current
             </span>
-            <span className="border-emerald-400/18 inline-flex items-center gap-2 rounded-full border bg-emerald-400/10 px-2.5 py-1 text-emerald-100">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/14 bg-emerald-400/8 px-2 py-0.5 text-emerald-100/86">
               <span className="h-2 w-2 rounded-full bg-emerald-200" />
               Complete
             </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-2 py-0.5">
               <span className="h-2 w-2 rounded-full bg-white/35" />
               Incomplete
             </span>
           </div>
 
-          <nav className="grid grid-cols-5 gap-2" aria-label="Question navigator">
+          <nav className="grid grid-cols-5 gap-1.5" aria-label="Question navigator">
             {runner.questions.map((question, index) => {
               const answered = selectedByQuestionId[question.questionId] !== null;
               const active = index === currentQuestionIndex;
@@ -908,12 +902,12 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   disabled={interactionLocked}
                   aria-label={`Jump to question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
                   className={cn(
-                    'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-xl border px-2 py-2.5 text-center',
+                    'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-lg border px-2 py-2 text-center',
                     active
-                      ? 'ring-white/12 border-white/85 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,247,255,0.94))] text-neutral-950 shadow-[0_14px_30px_rgba(255,255,255,0.1)] ring-1'
+                      ? 'border-white/80 bg-white text-neutral-950 shadow-[0_10px_22px_rgba(255,255,255,0.08)]'
                       : answered
-                        ? 'border-emerald-400/18 hover:border-emerald-300/28 hover:bg-emerald-400/14 bg-emerald-400/10 text-white'
-                        : 'text-white/58 hover:border-white/18 border-white/10 bg-white/[0.03] hover:bg-white/[0.05]',
+                        ? 'border-emerald-400/16 bg-emerald-400/8 text-emerald-50 hover:border-emerald-300/24 hover:bg-emerald-400/12'
+                        : 'border-white/8 bg-white/[0.018] text-white/54 hover:border-white/16 hover:bg-white/[0.04]',
                     'disabled:cursor-not-allowed disabled:opacity-60',
                   )}
                 >
