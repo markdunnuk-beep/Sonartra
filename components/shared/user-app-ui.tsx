@@ -114,15 +114,18 @@ export function ButtonLink({
   children,
   variant = 'secondary',
   className,
+  ariaLabel,
 }: Readonly<{
   href: string;
   children: ReactNode;
   variant?: 'primary' | 'secondary';
   className?: string;
+  ariaLabel?: string;
 }>) {
   return (
     <Link
       href={href}
+      aria-label={ariaLabel}
       className={cn(
         'sonartra-button sonartra-focus-ring',
         variant === 'primary' ? 'sonartra-button-primary' : 'sonartra-button-secondary',

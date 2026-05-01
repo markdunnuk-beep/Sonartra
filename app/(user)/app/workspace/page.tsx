@@ -32,6 +32,7 @@ type WorkspaceNextAction = {
   label: string;
   href: string | null;
   disabled: boolean;
+  accessibleLabel: string;
 };
 
 function formatPercentage(value: number): string {
@@ -62,6 +63,7 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
       label: 'Resume assessment',
       href: inProgress.actionHref,
       disabled: inProgress.actionDisabled,
+      accessibleLabel: `Resume ${inProgress.assessmentTitle}`,
     };
   }
 
@@ -73,6 +75,7 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
       label: 'View result',
       href: ready.resultHref ?? ready.actionHref,
       disabled: ready.actionDisabled,
+      accessibleLabel: `View result for ${ready.assessmentTitle}`,
     };
   }
 
@@ -84,6 +87,7 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
       label: 'Start assessment',
       href: notStarted.actionHref,
       disabled: notStarted.actionDisabled,
+      accessibleLabel: `Start ${notStarted.assessmentTitle}`,
     };
   }
 
@@ -95,6 +99,7 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
       label: 'Processing',
       href: null,
       disabled: true,
+      accessibleLabel: `${processing.assessmentTitle} result is being prepared`,
     };
   }
 
@@ -106,10 +111,18 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
       label: error.actionLabel,
       href: error.actionHref,
       disabled: error.actionDisabled,
+      accessibleLabel: `${error.actionLabel} for ${error.assessmentTitle}`,
     };
   }
 
-  return null;
+  return {
+    headline: 'No assessments are available yet',
+    description: 'Published assessments will appear here when they are available for your workspace.',
+    label: 'No assessment available',
+    href: null,
+    disabled: true,
+    accessibleLabel: 'No assessment available',
+  };
 }
 
 function getLatestSignalAssessment(
@@ -121,11 +134,18 @@ function getLatestSignalAssessment(
     && assessment.signalsForIndex.length > 0) ?? null;
 }
 
-function DisabledAction({ label }: Readonly<{ label: string }>) {
+function DisabledAction({
+  label,
+  accessibleLabel,
+}: Readonly<{
+  label: string;
+  accessibleLabel?: string;
+}>) {
   return (
     <button
       type="button"
       disabled
+      aria-label={accessibleLabel}
       className="sonartra-button sonartra-button-secondary cursor-not-allowed border-white/10 bg-white/[0.04] text-white/42 opacity-80"
     >
       {label}
@@ -138,18 +158,20 @@ function ActionControl({
   href,
   disabled,
   variant = 'secondary',
+  accessibleLabel,
 }: Readonly<{
   label: string;
   href: string | null;
   disabled: boolean;
   variant?: 'primary' | 'secondary';
+  accessibleLabel?: string;
 }>) {
   if (!href || disabled) {
-    return <DisabledAction label={label} />;
+    return <DisabledAction label={label} accessibleLabel={accessibleLabel} />;
   }
 
   return (
-    <ButtonLink href={href} variant={variant}>
+    <ButtonLink href={href} variant={variant} ariaLabel={accessibleLabel}>
       {label}
     </ButtonLink>
   );
@@ -163,6 +185,7 @@ function SignalMeter({
   compact?: boolean;
 }>) {
   const percentage = Math.max(0, Math.min(100, Math.round(signal.normalizedPercentage)));
+  const percentageLabel = formatPercentage(signal.normalizedPercentage);
 
   return (
     <div className="rounded-[1rem] border border-white/10 bg-white/[0.025] p-3">
@@ -171,11 +194,15 @@ function SignalMeter({
           <p className="sonartra-page-eyebrow">{signal.displayRole}</p>
           <p className="mt-1 truncate text-sm font-semibold text-white/90">{signal.signalLabel}</p>
         </div>
-        <p className="shrink-0 text-sm font-semibold text-white">{formatPercentage(signal.normalizedPercentage)}</p>
+        <p className="shrink-0 text-sm font-semibold text-white">{percentageLabel}</p>
       </div>
       <div
         className={compact ? 'mt-3 h-1.5 overflow-hidden rounded-full bg-white/8' : 'mt-4 h-2 overflow-hidden rounded-full bg-white/8'}
-        aria-hidden="true"
+        role="meter"
+        aria-label={`${signal.displayRole} signal, ${signal.signalLabel}, ${percentageLabel}`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percentage}
       >
         <div
           className="h-full rounded-full bg-[rgba(142,162,255,0.78)]"
@@ -188,11 +215,20 @@ function SignalMeter({
 
 function SignalCell({
   signal,
+  roleLabel,
 }: Readonly<{
   signal: WorkspaceSignalIndexItem | null;
+  roleLabel: string;
 }>) {
   if (!signal) {
-    return <span className="text-sm text-white/28">Not available yet</span>;
+    return (
+      <span
+        className="text-sm text-white/26"
+        aria-label={`${roleLabel} signal not available yet`}
+      >
+        Not available yet
+      </span>
+    );
   }
 
   return (
@@ -210,10 +246,14 @@ function AssessmentIndexRow({
   assessment: WorkspaceAssessmentItem;
 }>) {
   const signals = assessment.signalsForIndex ?? [];
+  const roleLabels = ['Primary', 'Secondary', 'Third', 'Fourth'] as const;
 
   return (
     <SurfaceCard className="p-0">
-      <div className="hidden items-stretch gap-0 xl:grid xl:grid-cols-[minmax(240px,2fr)_minmax(130px,0.8fr)_repeat(4,minmax(112px,1fr))_minmax(130px,0.8fr)]">
+      <div
+        aria-label={`${assessment.assessmentTitle}, ${assessment.statusLabel}`}
+        className="hidden items-stretch gap-0 xl:grid xl:grid-cols-[minmax(260px,2fr)_minmax(130px,0.75fr)_repeat(4,minmax(128px,1fr))_minmax(132px,0.8fr)]"
+      >
         <div className="border-white/8 border-r p-5">
           <h3 className="text-base font-semibold text-white">{assessment.assessmentTitle}</h3>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/58">
@@ -230,16 +270,23 @@ function AssessmentIndexRow({
         <div className="border-white/8 flex items-start border-r p-5">
           <StatusPill status={assessment.status} label={assessment.statusLabel} />
         </div>
-        {[1, 2, 3, 4].map((rank) => (
-          <div key={rank} className="border-white/8 border-r p-5">
-            <SignalCell signal={signals.find((signal) => signal.rank === rank) ?? null} />
-          </div>
-        ))}
+        {roleLabels.map((roleLabel, index) => {
+          const rank = index + 1;
+          return (
+            <div key={roleLabel} className="border-white/8 border-r p-5">
+              <SignalCell
+                roleLabel={roleLabel}
+                signal={signals.find((signal) => signal.rank === rank) ?? null}
+              />
+            </div>
+          );
+        })}
         <div className="flex items-start justify-end p-5">
           <ActionControl
             label={assessment.actionLabel}
             href={assessment.actionHref}
             disabled={assessment.actionDisabled}
+            accessibleLabel={`${assessment.actionLabel} for ${assessment.assessmentTitle}`}
           />
         </div>
       </div>
@@ -269,6 +316,7 @@ function AssessmentIndexRow({
             label={assessment.actionLabel}
             href={assessment.actionHref}
             disabled={assessment.actionDisabled}
+            accessibleLabel={`${assessment.actionLabel} for ${assessment.assessmentTitle}`}
           />
         </div>
 
@@ -317,6 +365,7 @@ export default async function UserWorkspacePage() {
               label={nextAction.label}
               href={nextAction.href}
               disabled={nextAction.disabled}
+              accessibleLabel={nextAction.accessibleLabel}
               variant="primary"
             />
           </div>
@@ -349,8 +398,8 @@ export default async function UserWorkspacePage() {
         />
 
         {viewModel.assessments.length > 0 ? (
-          <div className="space-y-3">
-            <div className="hidden rounded-[1.1rem] border border-white/8 bg-white/[0.025] px-5 py-3 text-xs font-semibold uppercase text-white/42 xl:grid xl:grid-cols-[minmax(240px,2fr)_minmax(130px,0.8fr)_repeat(4,minmax(112px,1fr))_minmax(130px,0.8fr)]">
+          <div aria-label="Assessment Index rows" className="space-y-3">
+            <div className="hidden rounded-[1.1rem] border border-white/8 bg-white/[0.025] px-5 py-3 text-xs font-semibold uppercase text-white/42 xl:grid xl:grid-cols-[minmax(260px,2fr)_minmax(130px,0.75fr)_repeat(4,minmax(128px,1fr))_minmax(132px,0.8fr)]">
               <span>Assessment</span>
               <span>Status</span>
               <span>Primary</span>
@@ -388,22 +437,31 @@ export default async function UserWorkspacePage() {
                   label={voiceFeatureEnabled ? 'Available in limited voice shell' : 'Unavailable in this environment'}
                 />
               </div>
-              <h2 className="max-w-3xl text-xl font-semibold tracking-[-0.02em] text-white lg:text-2xl">
+              <h3 className="max-w-3xl text-xl font-semibold tracking-[-0.02em] text-white lg:text-2xl">
                 Guided voice assessment
-              </h2>
+              </h3>
               <p className="max-w-3xl text-sm leading-7 text-white/66">
                 Open the controlled voice route for supported assessments. Live scoring still uses the canonical assessment path.
               </p>
             </div>
 
             {voiceFeatureEnabled ? (
-              <ButtonLink href="/app/voice-assessments" variant="primary">
+              <ButtonLink
+                href="/app/voice-assessments"
+                variant="primary"
+                ariaLabel="Open guided voice assessment"
+              >
                 Open Voice Assessment
               </ButtonLink>
             ) : (
-              <div className="sonartra-button sonartra-button-secondary cursor-not-allowed border-white/10 bg-white/[0.04] text-white/42 opacity-80">
+              <button
+                type="button"
+                disabled
+                aria-label="Voice assessment unavailable in this environment"
+                className="sonartra-button sonartra-button-secondary cursor-not-allowed border-white/10 bg-white/[0.04] text-white/42 opacity-80"
+              >
                 Voice unavailable
-              </div>
+              </button>
             )}
           </div>
         </SurfaceCard>
