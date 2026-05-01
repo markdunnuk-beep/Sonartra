@@ -172,3 +172,118 @@ Mobile `390 x 844`:
 - Browser data still covers the completed single-domain fixture only; processing, error, no-assessment, and multi-domain visual states are covered by UI/read-model control paths but were not all present in the live fixture.
 - No page-render test pattern was added in this pass; the existing focused read-model tests remain the strongest automated guard.
 - Task 5 can decide whether to add seeded UI fixtures or route-level render tests for the non-ready Workspace states.
+
+## Task 5 regression and final QA
+
+### Files changed
+
+- `tests/workspace-assessment-index-read-model.test.ts`
+- `tests/workspace-ui-import-guard.test.ts`
+- `docs/qa/workspace-redesign-verification.md`
+
+No Workspace UI, shared UI, server read-model, schema, scoring, normalization, or result-generation code was changed in Task 5.
+
+### Tests added/updated
+
+- Added regression coverage for defensively sorting persisted single-domain signals by rank and returning only the top four signals.
+- Added regression coverage for a valid completed single-domain result with fewer than four persisted signals, confirming the read model returns only available persisted values.
+- Added `tests/workspace-ui-import-guard.test.ts` to guard Workspace UI imports and accessibility-critical contracts.
+- Removed the smaller import guard from the read-model test file in favour of the focused guard test.
+
+### Regression scenarios covered
+
+- New user / not-started assessment row:
+  - `status = not_started`
+  - no attempt or result IDs
+  - `signalsForIndex = null`
+  - Start assessment action remains available
+
+- In-progress assessment:
+  - `status = in_progress`
+  - attempt ID present
+  - progress counts and percentage are safe
+  - `signalsForIndex = null`
+  - Resume assessment action remains available
+
+- Completed processing / unreadable result:
+  - submitted/completed attempt without a listable ready result maps to `completed_processing`
+  - action is disabled with no href
+  - `signalsForIndex = null`
+  - state does not regress to `in_progress`
+
+- Result-ready single-domain:
+  - `status = results_ready`
+  - result ID and canonical single-domain result href are present
+  - four persisted signals are exposed when four valid persisted signals exist
+  - signal key, label, normalized percentage, rank, and display role come from persisted payload fields and persisted rank
+
+- Result-ready single-domain with more than four signals:
+  - signals are sorted by persisted rank
+  - only the top four persisted signals are returned
+
+- Result-ready single-domain with fewer persisted signals:
+  - the read model does not crash
+  - missing signals are not synthesized
+  - only available persisted signals are returned
+
+- Malformed single-domain signal data:
+  - invalid payload does not crash the Workspace service
+  - row degrades without synthetic scores
+
+- Multi-domain ready result:
+  - result-ready status and canonical generic result action remain available
+  - `signalsForIndex` remains null
+  - no universal four-signal projection is forced
+
+### Import guard result
+
+`tests/workspace-ui-import-guard.test.ts` verifies:
+
+- Workspace UI files do not import scoring, normalization, engine runner, result builder, response-derived score sources, or option-signal-weight modules.
+- Workspace UI source does not reference obvious scoring or normalization calls such as `scoreAssessment`, `normalizeScores`, `normalizeSignal`, `rawScore`, or `optionSignalWeights`.
+- `lib/server/workspace-service.ts` does not query response rows directly or import scoring/normalization helpers.
+- Response rows remain limited to lifecycle progress counting through `assessment-attempt-lifecycle-queries.ts`.
+- Accessible action labels, disabled button rendering, and signal meter ARIA values remain present.
+
+### Chrome MCP final verification
+
+URL inspected: `http://localhost:3000/app/workspace`
+
+Desktop `1440 x 1000`:
+- Route rendered with HTTP 200.
+- Sidebar shell remained intact.
+- Section order was Recommended Next Action, Signal Snapshot, Assessment Index, then secondary Voice Assessment.
+- Four persisted single-domain signal scores remained visible.
+- Canonical result links used `/app/results/single-domain/f0df7bf7-4f14-4cb1-9f90-7cb6fa640001`.
+
+Tablet `768 x 1024`:
+- Route rendered successfully.
+- Assessment Index remained in the stacked card layout.
+- Signal ranking and percentages remained readable.
+- Mobile/tablet sidebar control was visible.
+
+Mobile `390 x 844`:
+- Route rendered successfully.
+- No obvious horizontal overflow was visible in the DevTools accessibility snapshot.
+- Mobile sidebar opened and closed visually.
+- Result links retained contextual accessible names.
+
+Console:
+- Final tab showed no app runtime errors.
+- The only final console warning observed was Next.js's `scroll-behavior: smooth` warning.
+
+### Validation commands and results
+
+- `node --import tsx --test tests/workspace-assessment-index-read-model.test.ts` - passed, 8 tests.
+- `node --import tsx --test tests/dashboard-workspace-view-model.test.ts` - passed, 8 tests.
+- `node --import tsx --test tests/result-read-model.test.ts` - passed, 10 tests.
+- `node --import tsx --test tests/workspace-ui-import-guard.test.ts` - passed, 3 tests.
+- `cmd /c node_modules\.bin\eslint.cmd "app/(user)/app/workspace/page.tsx" components/shared/user-app-ui.tsx tests/workspace-assessment-index-read-model.test.ts tests/workspace-ui-import-guard.test.ts --max-warnings=0` - passed.
+- `npm run build` - passed.
+- `npm run lint` - failed on the known unrelated existing lint in `app/(admin)/admin/diagnostics/single-domain-language/[assessmentKey]/page.tsx`, plus the existing unused eslint-disable warning in `scripts/audit-single-domain-pair-coverage.ts`.
+
+### Remaining limitations
+
+- No route-level render test pattern was added; UI accessibility and responsive behaviour remain verified through Chrome MCP plus source-level guard tests.
+- Live browser data still shows the completed single-domain fixture only; no-assessment, processing, error, and multi-domain visual states are covered by read-model/control-path tests rather than live seeded browser states.
+- A future cross-assessment Signal Matrix should only be added after multiple compatible assessments exist, and it must consume persisted result payloads only.

@@ -1,8 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
 import type { Queryable } from '@/lib/engine/repository-sql';
 import type { CanonicalResultPayload } from '@/lib/engine/types';
 import { createWorkspaceService } from '@/lib/server/workspace-service';
@@ -635,6 +632,120 @@ test('ready single-domain result exposes four persisted signal summaries', async
   ]);
 });
 
+test('ready single-domain signal index sorts by persisted rank and caps at four signals', async () => {
+  const payload = buildSingleDomainPayload({
+    signals: ([
+      ['sixth', 'Sixth', 6, 2],
+      ['third', 'Third Signal', 3, 21],
+      ['first', 'First Signal', 1, 39],
+      ['fifth', 'Fifth Signal', 5, 3],
+      ['second', 'Second Signal', 2, 27],
+      ['fourth', 'Fourth Signal', 4, 11],
+    ] as const).map(([signalKey, signalLabel, rank, normalizedScore]) => ({
+      signal_key: signalKey,
+      signal_label: signalLabel,
+      rank,
+      normalized_score: normalizedScore,
+      raw_score: normalizedScore,
+      position: rank === 1 ? 'primary' : rank === 2 ? 'secondary' : 'supporting',
+      position_label: rank === 1 ? 'Primary' : rank === 2 ? 'Secondary' : 'Supporting',
+      chapter_intro: `${signalLabel} intro`,
+      chapter_how_it_shows_up: `${signalLabel} shows up`,
+      chapter_value_outcome: `${signalLabel} value`,
+      chapter_value_team_effect: `${signalLabel} team effect`,
+      chapter_risk_behaviour: `${signalLabel} risk`,
+      chapter_risk_impact: `${signalLabel} impact`,
+      chapter_development: `${signalLabel} development`,
+    })),
+  });
+  const workspace = await createWorkspaceService({
+    db: createFakeDb({
+      inventory: [baseInventory],
+      attempts: [createAttempt({
+        attemptId: 'attempt-ranked',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        lifecycleStatus: 'RESULT_READY',
+        submittedAt: '2026-04-30T11:59:00.000Z',
+        completedAt: '2026-04-30T12:00:00.000Z',
+      })],
+      results: [createResult({
+        resultId: 'result-ranked',
+        attemptId: 'attempt-ranked',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        assessmentKey: 'leadership',
+        canonicalResultPayload: payload,
+      })],
+    }),
+  }).getWorkspaceViewModel({ userId: 'user-1' });
+
+  assert.deepEqual(
+    workspace.assessments[0]?.signalsForIndex?.map((signal) => ({
+      key: signal.signalKey,
+      rank: signal.rank,
+      role: signal.displayRole,
+      percentage: signal.normalizedPercentage,
+    })),
+    [
+      { key: 'first', rank: 1, role: 'Primary', percentage: 39 },
+      { key: 'second', rank: 2, role: 'Secondary', percentage: 27 },
+      { key: 'third', rank: 3, role: 'Third', percentage: 21 },
+      { key: 'fourth', rank: 4, role: 'Fourth', percentage: 11 },
+    ],
+  );
+});
+
+test('ready single-domain result with fewer persisted signals returns only available signals', async () => {
+  const payload = buildSingleDomainPayload({
+    signals: ([
+      ['vision', 'Vision', 1, 61],
+      ['delivery', 'Delivery', 2, 39],
+    ] as const).map(([signalKey, signalLabel, rank, normalizedScore]) => ({
+      signal_key: signalKey,
+      signal_label: signalLabel,
+      rank,
+      normalized_score: normalizedScore,
+      raw_score: normalizedScore,
+      position: rank === 1 ? 'primary' : 'secondary',
+      position_label: rank === 1 ? 'Primary' : 'Secondary',
+      chapter_intro: `${signalLabel} intro`,
+      chapter_how_it_shows_up: `${signalLabel} shows up`,
+      chapter_value_outcome: `${signalLabel} value`,
+      chapter_value_team_effect: `${signalLabel} team effect`,
+      chapter_risk_behaviour: `${signalLabel} risk`,
+      chapter_risk_impact: `${signalLabel} impact`,
+      chapter_development: `${signalLabel} development`,
+    })),
+  });
+  const workspace = await createWorkspaceService({
+    db: createFakeDb({
+      inventory: [baseInventory],
+      attempts: [createAttempt({
+        attemptId: 'attempt-two-signals',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        lifecycleStatus: 'RESULT_READY',
+        submittedAt: '2026-04-30T11:59:00.000Z',
+        completedAt: '2026-04-30T12:00:00.000Z',
+      })],
+      results: [createResult({
+        resultId: 'result-two-signals',
+        attemptId: 'attempt-two-signals',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        assessmentKey: 'leadership',
+        canonicalResultPayload: payload,
+      })],
+    }),
+  }).getWorkspaceViewModel({ userId: 'user-1' });
+
+  assert.deepEqual(workspace.assessments[0]?.signalsForIndex, [
+    { signalKey: 'vision', signalLabel: 'Vision', normalizedPercentage: 61, rank: 1, displayRole: 'Primary' },
+    { signalKey: 'delivery', signalLabel: 'Delivery', normalizedPercentage: 39, rank: 2, displayRole: 'Secondary' },
+  ]);
+});
+
 test('malformed single-domain signal data degrades without synthesized scores', async () => {
   const malformedPayload = {
     ...buildSingleDomainPayload(),
@@ -714,18 +825,4 @@ test('multi-domain results do not force a four-signal index', async () => {
   assert.equal(row?.assessmentMode, 'multi_domain');
   assert.equal(row?.resultHref, '/app/results/result-multi');
   assert.equal(row?.signalsForIndex, null);
-});
-
-test('workspace read model and UI do not import scoring or normalization engines', () => {
-  const workspaceService = readFileSync(
-    join(process.cwd(), 'lib/server/workspace-service.ts'),
-    'utf8',
-  );
-  const workspacePage = readFileSync(
-    join(process.cwd(), 'app/(user)/app/workspace/page.tsx'),
-    'utf8',
-  );
-
-  assert.doesNotMatch(workspaceService, /engine\/(scoring|normalization|engine-runner|result-builder)/);
-  assert.doesNotMatch(workspacePage, /engine\/(scoring|normalization|engine-runner|result-builder)/);
 });
