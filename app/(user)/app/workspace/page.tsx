@@ -3,8 +3,6 @@ import {
   EmptyState,
   LabelPill,
   PageFrame,
-  PageHeader,
-  SectionHeader,
   StatusPill,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
@@ -12,7 +10,6 @@ import type {
   WorkspaceAssessmentItem,
   WorkspaceSignalIndexItem,
 } from '@/lib/server/workspace-service';
-import { isVoiceAssessmentFeatureEnabled } from '@/lib/server/voice/voice-feature';
 import { formatAssessmentEstimatedDuration } from '@/lib/ui/assessment-duration';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
@@ -39,6 +36,10 @@ function formatPercentage(value: number): string {
   return `${Math.round(value)}%`;
 }
 
+function getShortAssessmentTitle(title: string): string {
+  return title.replace(/^Sonartra\s+/i, '');
+}
+
 function getProgressCopy(assessment: WorkspaceAssessmentItem): string | null {
   if (
     assessment.answeredCount === null
@@ -55,11 +56,12 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
   const inProgress = assessments.find((assessment) => assessment.status === 'in_progress');
   if (inProgress) {
     const progressCopy = getProgressCopy(inProgress);
+    const title = getShortAssessmentTitle(inProgress.assessmentTitle);
     return {
-      headline: 'Continue where you left off',
+      headline: `Continue ${title}`,
       description: progressCopy
-        ? `${inProgress.assessmentTitle}: ${progressCopy}`
-        : `Resume ${inProgress.assessmentTitle}.`,
+        ? progressCopy
+        : 'Pick up from your saved progress.',
       label: 'Resume assessment',
       href: inProgress.actionHref,
       disabled: inProgress.actionDisabled,
@@ -69,9 +71,10 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
 
   const ready = assessments.find((assessment) => assessment.status === 'results_ready');
   if (ready) {
+    const title = getShortAssessmentTitle(ready.assessmentTitle);
     return {
-      headline: 'Your latest result is ready',
-      description: `Review your completed result for ${ready.assessmentTitle}.`,
+      headline: `Your ${title} result is ready`,
+      description: 'Review your completed signal profile.',
       label: 'View result',
       href: ready.resultHref ?? ready.actionHref,
       disabled: ready.actionDisabled,
@@ -81,9 +84,10 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
 
   const notStarted = assessments.find((assessment) => assessment.status === 'not_started');
   if (notStarted) {
+    const title = getShortAssessmentTitle(notStarted.assessmentTitle);
     return {
-      headline: 'Begin your first assessment',
-      description: `Start ${notStarted.assessmentTitle} when you are ready.`,
+      headline: `Start ${title}`,
+      description: 'Complete your first assessment to generate your signal profile.',
       label: 'Start assessment',
       href: notStarted.actionHref,
       disabled: notStarted.actionDisabled,
@@ -123,6 +127,21 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
     disabled: true,
     accessibleLabel: 'No assessment available',
   };
+}
+
+function getDominantSignalDescription(signals: readonly WorkspaceSignalIndexItem[]): string {
+  const primary = signals.find((signal) => signal.rank === 1) ?? signals[0];
+  const secondary = signals.find((signal) => signal.rank === 2);
+
+  if (!primary) {
+    return '';
+  }
+
+  if (!secondary) {
+    return `Your latest result is led by ${primary.signalLabel}.`;
+  }
+
+  return `Your latest result is led by ${primary.signalLabel}, with ${secondary.signalLabel} as the secondary signal.`;
 }
 
 function getLatestSignalAssessment(
@@ -252,7 +271,7 @@ function AssessmentIndexRow({
     <SurfaceCard className="p-0">
       <div
         aria-label={`${assessment.assessmentTitle}, ${assessment.statusLabel}`}
-        className="hidden items-stretch gap-0 xl:grid xl:grid-cols-[minmax(260px,2fr)_minmax(130px,0.75fr)_repeat(4,minmax(128px,1fr))_minmax(132px,0.8fr)]"
+        className="hidden items-stretch gap-0 xl:grid xl:grid-cols-[minmax(250px,1.7fr)_minmax(168px,0.9fr)_repeat(4,minmax(120px,1fr))_minmax(128px,0.75fr)]"
       >
         <div className="border-white/8 border-r p-5">
           <h3 className="text-base font-semibold text-white">{assessment.assessmentTitle}</h3>
@@ -267,7 +286,7 @@ function AssessmentIndexRow({
             })}
           </p>
         </div>
-        <div className="border-white/8 flex items-start border-r p-5">
+        <div className="border-white/8 flex min-w-0 items-start border-r p-4">
           <StatusPill status={assessment.status} label={assessment.statusLabel} />
         </div>
         {roleLabels.map((roleLabel, index) => {
@@ -334,19 +353,21 @@ function AssessmentIndexRow({
 
 export default async function UserWorkspacePage() {
   const userId = await getRequestUserId();
-  const voiceFeatureEnabled = isVoiceAssessmentFeatureEnabled();
   const viewModel = await createWorkspaceService({
     db: getDbPool(),
   }).getWorkspaceViewModel({ userId });
   const nextAction = getNextAction(viewModel.assessments);
   const latestSignalAssessment = getLatestSignalAssessment(viewModel.assessments);
+  const latestSignals = latestSignalAssessment?.signalsForIndex ?? null;
 
   return (
     <PageFrame>
-      <PageHeader
-        title="Workspace"
-        description="Continue assessments, review results, and keep your signal pattern in view."
-      />
+      <header className="sonartra-page-header sonartra-motion-reveal">
+        <h1 className="sonartra-page-title">Workspace</h1>
+        <p className="sonartra-page-description">
+          Continue assessments, review results, and keep your signal pattern in view.
+        </p>
+      </header>
 
       {nextAction ? (
         <SurfaceCard accent className="overflow-hidden p-6 lg:p-8">
@@ -372,17 +393,18 @@ export default async function UserWorkspacePage() {
         </SurfaceCard>
       ) : null}
 
-      {latestSignalAssessment?.signalsForIndex ? (
+      {latestSignals ? (
         <section className="sonartra-section">
-          <SectionHeader
-            eyebrow="Signal Snapshot"
-            title="Signal Snapshot"
-            description="Your latest completed assessment shows this signal pattern."
-          />
+          <div className="sonartra-section-header sonartra-motion-reveal-soft">
+            <h2 className="sonartra-section-title">Your dominant signals</h2>
+            <p className="sonartra-section-description">
+              {getDominantSignalDescription(latestSignals)}
+            </p>
+          </div>
 
           <SurfaceCard className="p-5 lg:p-6">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {latestSignalAssessment.signalsForIndex.map((signal) => (
+              {latestSignals.map((signal) => (
                 <SignalMeter key={signal.signalKey} signal={signal} />
               ))}
             </div>
@@ -391,15 +413,16 @@ export default async function UserWorkspacePage() {
       ) : null}
 
       <section className="sonartra-section">
-        <SectionHeader
-          eyebrow="Assessment Index"
-          title="Assessment Index"
-          description="Your available assessments and their current state."
-        />
+        <div className="sonartra-section-header sonartra-motion-reveal-soft">
+          <h2 className="sonartra-section-title">Assessment index</h2>
+          <p className="sonartra-section-description">
+            Track each assessment, its current status, and the signals available from completed results.
+          </p>
+        </div>
 
         {viewModel.assessments.length > 0 ? (
           <div aria-label="Assessment Index rows" className="space-y-3">
-            <div className="hidden rounded-[1.1rem] border border-white/8 bg-white/[0.025] px-5 py-3 text-xs font-semibold uppercase text-white/42 xl:grid xl:grid-cols-[minmax(260px,2fr)_minmax(130px,0.75fr)_repeat(4,minmax(128px,1fr))_minmax(132px,0.8fr)]">
+            <div className="hidden rounded-[1.1rem] border border-white/8 bg-white/[0.025] px-5 py-3 text-xs font-semibold uppercase text-white/42 xl:grid xl:grid-cols-[minmax(250px,1.7fr)_minmax(168px,0.9fr)_repeat(4,minmax(120px,1fr))_minmax(128px,0.75fr)]">
               <span>Assessment</span>
               <span>Status</span>
               <span>Primary</span>
@@ -418,53 +441,6 @@ export default async function UserWorkspacePage() {
             description="Published assessments will appear here when they are available for this user."
           />
         )}
-      </section>
-
-      <section className="sonartra-section">
-        <SectionHeader
-          eyebrow="Voice Assessment"
-          title="Guided voice delivery"
-          description="A secondary route for supported assessments when voice delivery is enabled."
-        />
-
-        <SurfaceCard muted className="overflow-hidden p-5 lg:p-6">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <LabelPill>Preview surface</LabelPill>
-                <StatusPill
-                  status={voiceFeatureEnabled ? 'in_progress' : 'not_started'}
-                  label={voiceFeatureEnabled ? 'Available in limited voice shell' : 'Unavailable in this environment'}
-                />
-              </div>
-              <h3 className="max-w-3xl text-xl font-semibold tracking-[-0.02em] text-white lg:text-2xl">
-                Guided voice assessment
-              </h3>
-              <p className="max-w-3xl text-sm leading-7 text-white/66">
-                Open the controlled voice route for supported assessments. Live scoring still uses the canonical assessment path.
-              </p>
-            </div>
-
-            {voiceFeatureEnabled ? (
-              <ButtonLink
-                href="/app/voice-assessments"
-                variant="primary"
-                ariaLabel="Open guided voice assessment"
-              >
-                Open Voice Assessment
-              </ButtonLink>
-            ) : (
-              <button
-                type="button"
-                disabled
-                aria-label="Voice assessment unavailable in this environment"
-                className="sonartra-button sonartra-button-secondary cursor-not-allowed border-white/10 bg-white/[0.04] text-white/42 opacity-80"
-              >
-                Voice unavailable
-              </button>
-            )}
-          </div>
-        </SurfaceCard>
       </section>
 
       {viewModel.latestResult ? (

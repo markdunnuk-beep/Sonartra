@@ -287,3 +287,86 @@ Console:
 - No route-level render test pattern was added; UI accessibility and responsive behaviour remain verified through Chrome MCP plus source-level guard tests.
 - Live browser data still shows the completed single-domain fixture only; no-assessment, processing, error, and multi-domain visual states are covered by read-model/control-path tests rather than live seeded browser states.
 - A future cross-assessment Signal Matrix should only be added after multiple compatible assessments exist, and it must consume persisted result payloads only.
+
+## Final Workspace polish audit
+
+### Files changed
+
+- `app/(user)/app/workspace/page.tsx`
+- `tests/workspace-ui-import-guard.test.ts`
+- `docs/qa/workspace-redesign-verification.md`
+
+No scoring, normalization, result generation, schema, or read-model files were changed.
+
+### Copy changes made
+
+- Removed the default `USER APP` eyebrow from the Workspace header by using a Workspace-local header.
+- Updated the result-ready next action to read `Your Leadership Approach result is ready` with the support line `Review your completed signal profile.`
+- Updated in-progress and not-started next-action copy to name the assessment directly while keeping progress copy concise.
+- Replaced the duplicated Signal Snapshot section with `Your dominant signals`.
+- Added persisted-signal-led support copy, for example: `Your latest result is led by Results, with Vision as the secondary signal.`
+- Replaced the duplicated Assessment Index heading with `Assessment index`.
+- Updated Assessment Index support copy to: `Track each assessment, its current status, and the signals available from completed results.`
+
+### Layout and status pill fix
+
+- Widened the desktop Status column and slightly rebalanced the Assessment, signal, and Action columns.
+- Confirmed at `1440 x 1000` that the `RESULTS READY` pill stays inside the Status column and no longer crosses into Primary.
+- At `1200 x 900`, the page uses the stacked assessment card layout, avoiding a cramped desktop table.
+
+### Voice block removal
+
+- Removed the Workspace page's `Voice Assessment` / `Guided voice delivery` content block.
+- Removed the Workspace page import of `isVoiceAssessmentFeatureEnabled`.
+- Did not remove the Voice Assessment nav item, routes, feature flag service, or any non-Workspace voice code.
+- Added a guard assertion that the Workspace page does not import or render the secondary voice block.
+
+### Chrome MCP viewport results
+
+URL inspected: `http://localhost:3000/app/workspace`
+
+Desktop `1440 x 1000`:
+- Route rendered with HTTP 200.
+- `USER APP` was no longer present above `Workspace`.
+- Recommended Next Action named the result: `Your Leadership Approach result is ready`.
+- Dominant signal section showed persisted insight copy and all four persisted signal scores.
+- Assessment Index duplication was removed.
+- `RESULTS READY` remained inside the Status column.
+- Voice content block was absent from Workspace.
+- Canonical result link remained `/app/results/single-domain/f0df7bf7-4f14-4cb1-9f90-7cb6fa640001`.
+
+Desktop/narrow `1200 x 900`:
+- Route rendered successfully.
+- Assessment Index used stacked cards rather than a cramped table.
+- Signal scores and canonical result links remained visible.
+- Voice content block remained absent.
+
+Tablet `768 x 1024`:
+- Route rendered successfully.
+- Section order remained Recommended Next Action, dominant signals, Assessment Index, then quiet latest-result line.
+- Mobile/tablet shell control remained visible.
+
+Mobile `390 x 844`:
+- Route rendered successfully.
+- No obvious horizontal overflow was visible in the DevTools accessibility snapshot.
+- Four persisted signal scores remained visible.
+- Mobile sidebar opened and closed visually.
+
+Console:
+- No app runtime errors were observed.
+- The final tab showed only Next.js's `scroll-behavior: smooth` warning.
+
+### Validation commands and results
+
+- `cmd /c node_modules\.bin\eslint.cmd "app/(user)/app/workspace/page.tsx" tests/workspace-ui-import-guard.test.ts --max-warnings=0` - passed.
+- `node --import tsx --test tests/workspace-ui-import-guard.test.ts` - passed, 4 tests.
+- `node --import tsx --test tests/workspace-assessment-index-read-model.test.ts` - passed, 8 tests.
+- `node --import tsx --test tests/dashboard-workspace-view-model.test.ts` - passed, 8 tests.
+- `node --import tsx --test tests/result-read-model.test.ts` - passed, 10 tests.
+- `npm run build` - passed.
+- `npm run lint` - failed on the known unrelated existing lint in `app/(admin)/admin/diagnostics/single-domain-language/[assessmentKey]/page.tsx`, plus the existing unused eslint-disable warning in `scripts/audit-single-domain-pair-coverage.ts`.
+
+### Remaining limitations
+
+- Live browser data still represents the completed single-domain fixture; non-ready visual states remain covered by read-model tests and UI branch checks rather than seeded browser fixtures.
+- The latest-result quiet line still duplicates the completed assessment name, but remains low prominence and does not add another CTA.

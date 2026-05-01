@@ -52,3 +52,10 @@ test('workspace UI preserves accessible action and signal-meter contract', () =>
   assert.match(pageSource, /aria-valuenow=\{percentage\}/);
   assert.match(pageSource, /aria-label=\{`\$\{signal\.displayRole\} signal, \$\{signal\.signalLabel\}, \$\{percentageLabel\}`\}/);
 });
+
+test('workspace page does not render the secondary voice assessment block', () => {
+  const pageSource = readWorkspaceFile('app/(user)/app/workspace/page.tsx');
+
+  assert.doesNotMatch(pageSource, /voice-feature|isVoiceAssessmentFeatureEnabled/);
+  assert.doesNotMatch(pageSource, /Guided voice delivery|Open Voice Assessment|Voice unavailable/);
+});
