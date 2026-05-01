@@ -247,6 +247,7 @@ function createLifecycle(params?: Partial<AssessmentAttemptLifecycleViewModel>):
     versionTag: params?.versionTag ?? '1.0.0',
     status: params?.status ?? 'not_started',
     startedAt: params?.startedAt ?? null,
+    submittedAt: params?.submittedAt ?? null,
     updatedAt: params?.updatedAt ?? null,
     completedAt: params?.completedAt ?? null,
     totalQuestions: params?.totalQuestions ?? 20,

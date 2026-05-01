@@ -62,6 +62,7 @@ export type AssessmentAttemptLifecycleViewModel = {
   versionTag: string;
   status: AssessmentLifecycleStatus;
   startedAt: string | null;
+  submittedAt: string | null;
   updatedAt: string | null;
   completedAt: string | null;
   totalQuestions: number;

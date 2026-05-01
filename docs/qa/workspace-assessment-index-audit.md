@@ -380,3 +380,94 @@ Git status after validation:
 
 - Added: `docs/qa/workspace-assessment-index-audit.md`
 - No functional app files changed by this audit.
+
+## Task 2 Read-Model Implementation Note
+
+Date: 2026-05-01
+
+Files changed:
+
+- `lib/server/workspace-service.ts`
+- `lib/server/assessment-attempt-lifecycle.ts`
+- `lib/server/assessment-attempt-lifecycle-types.ts`
+- `tests/dashboard-workspace-view-model.test.ts`
+- `tests/workspace-assessment-index-read-model.test.ts`
+- `docs/qa/workspace-assessment-index-audit.md`
+
+New read-model shape:
+
+- `WorkspaceAssessmentItem` now keeps the existing UI compatibility fields (`title`, `description`, `ctaLabel`, `href`) and also exposes Assessment Index fields:
+  - identity/version fields: `assessmentTitle`, `assessmentDescription`, `assessmentMode`, `publishedVersionId`, `publishedVersionKey`, `publishedVersionNumber`
+  - lifecycle fields: `attemptId`, `resultId`, `resultHref`, `startedAt`, `submittedAt`, `completedAt`, `answeredCount`, `totalQuestionCount`, `progressPercentage`
+  - action fields: `actionLabel`, `actionHref`, `actionDisabled`
+  - result signal field: `signalsForIndex`
+- `AssessmentAttemptLifecycleViewModel` now exposes `submittedAt`, which was already loaded from `attempts.submitted_at`.
+
+Status handling decision:
+
+- Workspace status now uses the stable enum:
+  - `not_started`
+  - `in_progress`
+  - `completed_processing`
+  - `results_ready`
+  - `error`
+- A lifecycle `ready` state without a valid listable result is projected as `completed_processing` instead of `in_progress`.
+- `completed_processing` exposes a disabled action in the read model; the current UI still renders its existing compatibility link until the UI redesign consumes `actionDisabled`.
+
+Signal projection decision:
+
+- Completed single-domain rows load result detail through the existing result read model, then project only persisted `singleDomainResult.signals[]`.
+- `signalsForIndex` is sorted by persisted `rank`, filtered defensively to readable persisted fields, and capped to four items.
+- `normalizedPercentage` comes directly from persisted `normalized_score`.
+- `displayRole` is derived only from persisted rank:
+  - `1 -> Primary`
+  - `2 -> Secondary`
+  - `3 -> Third`
+  - `4 -> Fourth`
+- Incomplete rows expose `signalsForIndex: null`.
+- Malformed/unlistable ready payloads degrade to `completed_processing`; no missing scores are synthesized.
+
+Multi-domain handling decision:
+
+- Multi-domain ready results keep result identity and canonical result href.
+- `signalsForIndex` remains `null` for multi-domain rows because there is no universal persisted four-signal Workspace contract for cross-assessment comparison yet.
+
+Validation results:
+
+- `node --import tsx --test tests/workspace-assessment-index-read-model.test.ts`
+  - Initial sandboxed run failed with Node test-runner `spawn EPERM`.
+  - Escalated run passed: 7 tests passed, 0 failed.
+- `node --import tsx --test tests/dashboard-workspace-view-model.test.ts`
+  - Passed: 8 tests passed, 0 failed.
+- `node --import tsx --test tests/result-read-model.test.ts`
+  - Passed: 10 tests passed, 0 failed.
+- `npm run build`
+  - Passed. Next.js production build completed successfully.
+- `npm run lint`
+  - Failed on the known unrelated lint issue in `app/(admin)/admin/diagnostics/single-domain-language/[assessmentKey]/page.tsx` (`react-hooks/error-boundaries` for JSX inside `try/catch`) and one unrelated warning in `scripts/audit-single-domain-pair-coverage.ts`.
+- Changed-file lint:
+  - `node_modules\.bin\eslint.cmd lib/server/workspace-service.ts lib/server/assessment-attempt-lifecycle.ts lib/server/assessment-attempt-lifecycle-types.ts tests/dashboard-workspace-view-model.test.ts tests/workspace-assessment-index-read-model.test.ts --max-warnings=0`
+  - Passed.
+
+Chrome MCP result:
+
+- URL checked: `http://localhost:3000/app/workspace`
+- Result: `GET /app/workspace [200]`
+- Existing sections still rendered:
+  - Workspace header
+  - Recommended Next Action
+  - Assessment Overview
+  - Guided voice delivery
+  - Latest Result
+- Existing canonical result links remained visible:
+  - `/app/results/single-domain/f0df7bf7-4f14-4cb1-9f90-7cb6fa640001`
+- Console showed only the Clerk development-key warning.
+
+Product boundary:
+
+- No scoring logic was added.
+- No normalization logic was added.
+- No response parsing was used to derive scores.
+- No result generation code was changed.
+- No schema migration was added.
+- Existing Workspace UI layout was not redesigned.

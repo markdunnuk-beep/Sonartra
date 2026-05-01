@@ -190,6 +190,7 @@ async function buildLifecycleViewModel(
     versionTag: params.assessment.versionTag,
     status,
     startedAt: params.attempt?.startedAt ?? null,
+    submittedAt: params.attempt?.submittedAt ?? null,
     updatedAt: params.attempt?.updatedAt ?? null,
     completedAt: params.attempt?.completedAt ?? null,
     totalQuestions: progress.totalQuestions,
