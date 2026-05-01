@@ -59,3 +59,11 @@ test('workspace page does not render the secondary voice assessment block', () =
   assert.doesNotMatch(pageSource, /voice-feature|isVoiceAssessmentFeatureEnabled/);
   assert.doesNotMatch(pageSource, /Guided voice delivery|Open Voice Assessment|Voice unavailable/);
 });
+
+test('workspace page keeps final signal heading and omits duplicate latest-result line', () => {
+  const pageSource = readWorkspaceFile('app/(user)/app/workspace/page.tsx');
+
+  assert.match(pageSource, /Your current signal pattern/);
+  assert.doesNotMatch(pageSource, /Your dominant signals/);
+  assert.doesNotMatch(pageSource, /Latest result:/);
+});

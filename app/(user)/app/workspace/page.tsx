@@ -10,18 +10,10 @@ import type {
   WorkspaceAssessmentItem,
   WorkspaceSignalIndexItem,
 } from '@/lib/server/workspace-service';
-import { formatAssessmentEstimatedDuration } from '@/lib/ui/assessment-duration';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createWorkspaceService } from '@/lib/server/workspace-service';
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+import { formatAssessmentEstimatedDuration } from '@/lib/ui/assessment-duration';
 
 type WorkspaceNextAction = {
   headline: string;
@@ -396,7 +388,7 @@ export default async function UserWorkspacePage() {
       {latestSignals ? (
         <section className="sonartra-section">
           <div className="sonartra-section-header sonartra-motion-reveal-soft">
-            <h2 className="sonartra-section-title">Your dominant signals</h2>
+            <h2 className="sonartra-section-title">Your current signal pattern</h2>
             <p className="sonartra-section-description">
               {getDominantSignalDescription(latestSignals)}
             </p>
@@ -443,12 +435,6 @@ export default async function UserWorkspacePage() {
         )}
       </section>
 
-      {viewModel.latestResult ? (
-        <p className="text-sm text-white/42">
-          Latest result: {viewModel.latestResult.assessmentTitle}, completed{' '}
-          {formatDate(viewModel.latestResult.completedAt)}.
-        </p>
-      ) : null}
     </PageFrame>
   );
 }

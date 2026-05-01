@@ -370,3 +370,31 @@ Console:
 
 - Live browser data still represents the completed single-domain fixture; non-ready visual states remain covered by read-model tests and UI branch checks rather than seeded browser fixtures.
 - The latest-result quiet line still duplicates the completed assessment name, but remains low prominence and does not add another CTA.
+
+## Workspace micro polish
+
+### Files changed
+
+- `app/(user)/app/workspace/page.tsx`
+- `tests/workspace-ui-import-guard.test.ts`
+- `docs/qa/workspace-redesign-verification.md`
+
+### Changes made
+
+- Removed the quiet `Latest result:` line below the Assessment Index.
+- Kept the Recommended Next Action and Assessment Index result links intact.
+- Renamed the signal section from `Your dominant signals` to `Your current signal pattern`.
+- Kept the persisted-signal-led support copy and conditional `signalsForIndex` rendering.
+- Added a guard assertion for the new heading and the absence of the duplicate latest-result label.
+
+No engine, read-model, schema, scoring, normalization, result-generation, route, nav, sidebar, or voice-route changes were made.
+
+### Validation results
+
+- `node --import tsx --test tests/workspace-ui-import-guard.test.ts` - passed, 5 tests.
+- `node --import tsx --test tests/workspace-assessment-index-read-model.test.ts` - passed, 8 tests.
+- `node --import tsx --test tests/dashboard-workspace-view-model.test.ts` - passed, 8 tests.
+- `node --import tsx --test tests/result-read-model.test.ts` - passed, 10 tests.
+- `cmd /c node_modules\.bin\eslint.cmd "app/(user)/app/workspace/page.tsx" tests/workspace-ui-import-guard.test.ts --max-warnings=0` - passed.
+- `npm run build` - passed.
+- `npm run lint` - failed on the known unrelated existing lint in `app/(admin)/admin/diagnostics/single-domain-language/[assessmentKey]/page.tsx`, plus the existing unused eslint-disable warning in `scripts/audit-single-domain-pair-coverage.ts`.
