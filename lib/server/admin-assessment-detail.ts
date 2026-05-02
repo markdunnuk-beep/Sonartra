@@ -677,7 +677,25 @@ export async function getAdminAssessmentDetailByKey(
     SELECT
       a.id AS assessment_id,
       a.assessment_key,
-      COALESCE(av.mode, a.mode) AS assessment_mode,
+      CASE
+        WHEN EXISTS (
+          SELECT 1
+          FROM assessment_versions sdav
+          LEFT JOIN assessment_version_single_domain_framing sdf
+            ON sdf.assessment_version_id = sdav.id
+          LEFT JOIN assessment_version_single_domain_hero_pairs sdh
+            ON sdh.assessment_version_id = sdav.id
+          LEFT JOIN assessment_version_single_domain_driver_claims sdd
+            ON sdd.assessment_version_id = sdav.id
+          WHERE sdav.assessment_id = a.id
+            AND (
+              sdf.id IS NOT NULL
+              OR sdh.id IS NOT NULL
+              OR sdd.id IS NOT NULL
+            )
+        ) THEN 'single_domain'
+        ELSE COALESCE(av.mode, a.mode)
+      END AS assessment_mode,
       a.title AS assessment_title,
       a.description AS assessment_description,
       a.is_active AS assessment_is_active,

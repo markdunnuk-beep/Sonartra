@@ -497,6 +497,7 @@ test('creating v2.00 from v1.00 published succeeds and keeps the same assessment
   assert.equal(result.draftVersionTag, '2.00');
   assert.equal(fake.state.assessments.length, 1);
   assert.equal(fake.state.versions.at(-1)?.assessmentId, 'assessment-1');
+  assert.equal(fake.state.versions.at(-1)?.mode, 'single_domain');
 });
 
 test('creating v3.00 from v2.00 published succeeds', async () => {

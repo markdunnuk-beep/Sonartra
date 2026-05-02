@@ -869,7 +869,7 @@ async function copyVersionOwnedTable(params: {
   }
 }
 
-async function createDraftVersionFromLatestPublishedAssessmentRecords(params: {
+export async function createDraftVersionFromLatestPublishedAssessmentRecords(params: {
   db: Queryable;
   assessmentKeyOrId: string;
 }): Promise<DraftVersionCreationResult> {

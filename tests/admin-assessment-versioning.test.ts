@@ -18,11 +18,13 @@ type StoredAssessment = {
   assessmentKey: string;
   title?: string;
   description?: string | null;
+  mode?: 'multi_domain' | 'single_domain';
 };
 
 type StoredVersion = {
   id: string;
   assessmentId: string;
+  mode?: 'multi_domain' | 'single_domain';
   versionTag: string;
   lifecycleStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   titleOverride: string | null;
@@ -166,8 +168,34 @@ function createFakeDb(seed?: {
                   assessment_key: assessment.assessmentKey,
                   title: assessment.title ?? assessment.assessmentKey.toUpperCase(),
                   description: assessment.description ?? null,
+                  mode: assessment.mode ?? 'multi_domain',
                   created_at: '2026-03-01T00:00:00.000Z',
                   updated_at: '2026-03-01T00:00:00.000Z',
+                }]
+              : []) as T[],
+          };
+        }
+
+        if (text.includes('FROM assessment_versions') && text.includes('WHERE assessment_id = $1')) {
+          const assessmentId = params?.[0] as string;
+          const lifecycleStatus = params?.[1] as StoredVersion['lifecycleStatus'];
+          const version = state.versions
+            .filter((item) => item.assessmentId === assessmentId && item.lifecycleStatus === lifecycleStatus)
+            .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0] ?? null;
+
+          return {
+            rows: (version
+              ? [{
+                  id: version.id,
+                  assessment_id: version.assessmentId,
+                  mode: version.mode ?? 'multi_domain',
+                  version: version.versionTag,
+                  lifecycle_status: version.lifecycleStatus,
+                  title_override: version.titleOverride,
+                  description_override: version.descriptionOverride,
+                  published_at: version.publishedAt,
+                  created_at: version.createdAt,
+                  updated_at: version.updatedAt,
                 }]
               : []) as T[],
           };
@@ -427,13 +455,15 @@ function createFakeDb(seed?: {
 
         if (text.includes('INSERT INTO assessment_versions')) {
           const versionId = nextId('version', state.versions.length);
+          const includesMode = text.includes('mode,');
           state.versions.push({
             id: versionId,
             assessmentId: params?.[0] as string,
-            versionTag: params?.[1] as string,
+            mode: (includesMode ? params?.[1] : 'multi_domain') as 'multi_domain' | 'single_domain',
+            versionTag: (includesMode ? params?.[2] : params?.[1]) as string,
             lifecycleStatus: 'DRAFT',
-            titleOverride: (params?.[2] as string | null) ?? null,
-            descriptionOverride: (params?.[3] as string | null) ?? null,
+            titleOverride: (params?.[includesMode ? 3 : 2] as string | null) ?? null,
+            descriptionOverride: (params?.[includesMode ? 4 : 3] as string | null) ?? null,
             publishedAt: null,
             createdAt: '2026-03-29T10:00:00.000Z',
             updatedAt: '2026-03-29T10:00:00.000Z',
@@ -540,6 +570,21 @@ function createFakeDb(seed?: {
           return { rows: ([{ id }] as unknown) as T[] };
         }
 
+        if (text.includes('FROM options') && text.includes('WHERE assessment_version_id = $1')) {
+          const assessmentVersionId = params?.[0] as string;
+          const rows = state.options
+            .filter((option) => option.assessmentVersionId === assessmentVersionId)
+            .map((option) => ({
+              id: option.id,
+              question_id: option.questionId,
+              option_key: option.optionKey,
+              option_label: option.optionLabel,
+              option_text: option.optionText,
+              order_index: option.orderIndex,
+            }));
+          return { rows: rows as T[] };
+        }
+
         if (text.includes('FROM options o') && text.includes('INNER JOIN questions q ON q.id = o.question_id')) {
           const assessmentVersionId = params?.[0] as string;
           const questionIds = new Set(
@@ -628,11 +673,12 @@ test('increments assessment version tags deterministically', () => {
 
 test('publishes the selected draft and archives the previously published version', async () => {
   const fake = createFakeDb({
-    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80', mode: 'single_domain' }],
     versions: [
       {
         id: 'version-1',
         assessmentId: 'assessment-1',
+        mode: 'single_domain',
         versionTag: '1.0.0',
         lifecycleStatus: 'PUBLISHED',
         titleOverride: null,
@@ -730,11 +776,12 @@ test('publishes the selected draft and archives the previously published version
 
 test('creates a new draft version by duplicating canonical authoring structure from the published version', async () => {
   const fake = createFakeDb({
-    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80' }],
+    assessments: [{ id: 'assessment-1', assessmentKey: 'wplp80', mode: 'single_domain' }],
     versions: [
       {
         id: 'version-1',
         assessmentId: 'assessment-1',
+        mode: 'single_domain',
         versionTag: '1.0.0',
         lifecycleStatus: 'PUBLISHED',
         titleOverride: 'Published title',
@@ -813,11 +860,12 @@ test('creates a new draft version by duplicating canonical authoring structure f
     assessmentKey: 'wplp80',
   });
 
-  assert.equal(result.draftVersionTag, '1.0.1');
+  assert.equal(result.draftVersionTag, '2.00');
   assert.equal(result.sourceVersionTag, '1.0.0');
 
   const newVersion = fake.state.versions.find((version) => version.id === result.draftVersionId);
   assert.equal(newVersion?.lifecycleStatus, 'DRAFT');
+  assert.equal(newVersion?.mode, 'single_domain');
   assert.equal(newVersion?.titleOverride, 'Published title');
 
   const newDomains = fake.state.domains.filter((domain) => domain.assessmentVersionId === result.draftVersionId);

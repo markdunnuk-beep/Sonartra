@@ -90,7 +90,25 @@ async function loadAssessmentVersionModeIfAvailable(
     const result = await db.query<AssessmentModeRow>(
       `
       SELECT
-        COALESCE(av.mode, a.mode) AS assessment_mode
+        CASE
+          WHEN EXISTS (
+            SELECT 1
+            FROM assessment_version_single_domain_framing sdf
+            WHERE sdf.assessment_version_id = av.id
+          )
+            OR EXISTS (
+              SELECT 1
+              FROM assessment_version_single_domain_hero_pairs sdh
+              WHERE sdh.assessment_version_id = av.id
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM assessment_version_single_domain_driver_claims sdd
+              WHERE sdd.assessment_version_id = av.id
+            )
+          THEN 'single_domain'
+          ELSE COALESCE(av.mode, a.mode)
+        END AS assessment_mode
       FROM assessment_versions av
       INNER JOIN assessments a ON a.id = av.assessment_id
       WHERE av.id = $1

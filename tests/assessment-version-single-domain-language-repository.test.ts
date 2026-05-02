@@ -140,12 +140,25 @@ function createFakeSingleDomainLanguageDb(seed?: Partial<SingleDomainTableState>
         return { rows: [] as T[] };
       }
 
-      if (sql.includes('COALESCE(av.mode, a.mode) AS assessment_mode')) {
+      if (sql.includes('FROM assessment_versions av') && sql.includes('assessment_mode')) {
         if (config?.missingModeColumns) {
           throw new Error('column av.mode does not exist');
         }
 
         const assessmentVersionId = String(params?.[0] ?? '');
+        if (
+          sql.includes('assessment_version_single_domain_framing')
+          && (
+            state.framing.length > 0
+            || state.heroPairs.length > 0
+            || state.driverClaims.length > 0
+          )
+        ) {
+          return {
+            rows: [{ assessment_mode: 'single_domain' }] as T[],
+          };
+        }
+
         return {
           rows: [{ assessment_mode: config?.modeByVersion?.[assessmentVersionId] ?? null }] as T[],
         };
@@ -912,6 +925,28 @@ test('write paths reject multi_domain versions while read paths short-circuit cl
     }),
     SingleDomainLanguageModeError,
   );
+});
+
+test('single-domain datasets allow access when version mode metadata is stale', async () => {
+  const fake = createFakeSingleDomainLanguageDb({
+    framing: [{
+      domain_key: 'leadership',
+      section_title: 'Leadership',
+      intro_paragraph: 'Intro',
+      meaning_paragraph: 'Meaning',
+      bridge_to_signals: 'Bridge',
+      blueprint_context_line: 'Blueprint',
+    }],
+  }, {
+    modeByVersion: {
+      'version-1': 'multi_domain',
+    },
+  });
+
+  const rows = await getSingleDomainFramingRows(fake.db, 'version-1');
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0]?.domain_key, 'leadership');
 });
 
 test('exact field names are preserved round-trip', async () => {

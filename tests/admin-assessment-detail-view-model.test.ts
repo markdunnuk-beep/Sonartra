@@ -5,6 +5,7 @@ import type { Queryable } from '@/lib/engine/repository-sql';
 import { getAdminAssessmentDetailByKey } from '@/lib/server/admin-assessment-detail';
 
 type DetailFixture = {
+  hasSingleDomainDataset?: boolean;
   baseRows: Array<{
     assessment_id: string;
     assessment_key: string;
@@ -146,7 +147,14 @@ function createFakeDb(fixture: DetailFixture): Queryable {
   return {
     async query<T>(text: string) {
       if (text.includes('FROM assessments a') && text.includes('LEFT JOIN assessment_versions av')) {
-        return { rows: fixture.baseRows as T[] };
+        const rows = fixture.baseRows.map((row) => ({
+          ...row,
+          assessment_mode:
+            fixture.hasSingleDomainDataset && text.includes('assessment_version_single_domain_driver_claims')
+              ? 'single_domain'
+              : row.assessment_mode,
+        }));
+        return { rows: rows as T[] };
       }
 
       if (text.includes('LEFT JOIN LATERAL') && text.includes('draft_version_id')) {
@@ -460,6 +468,43 @@ test('loads latest draft weighting data and coverage for admin assessment detail
     assessmentIntro: 'incomplete',
     language: 'incomplete',
   });
+});
+
+test('single-domain datasets override a stale multi-domain detail mode', async () => {
+  const detail = await getAdminAssessmentDetailByKey(
+    createFakeDb({
+      hasSingleDomainDataset: true,
+      baseRows: [
+        {
+          assessment_id: 'assessment-1',
+          assessment_key: 'sonartra-leadership-approach',
+          assessment_mode: 'multi_domain',
+          assessment_title: 'Sonartra Leadership Approach',
+          assessment_description: null,
+          assessment_is_active: true,
+          assessment_created_at: '2026-01-01T00:00:00.000Z',
+          assessment_updated_at: '2026-04-30T00:00:00.000Z',
+          assessment_version_id: 'version-draft',
+          version_tag: '1.0.1',
+          version_status: 'DRAFT',
+          published_at: null,
+          version_created_at: '2026-04-30T00:00:00.000Z',
+          version_updated_at: '2026-04-30T00:00:00.000Z',
+          question_count: '80',
+        },
+      ],
+      signalGroupDomains: [],
+      signals: [],
+      questionDomains: [],
+      questions: [],
+      optionSignalWeights: [],
+      availableSignals: [],
+    }),
+    'sonartra-leadership-approach',
+  );
+
+  assert.equal(detail?.modeLabel, 'Single-Domain');
+  assert.equal(detail?.mode, 'single_domain');
 });
 
 test('derives trustworthy intro and language step completion from persisted draft content', async () => {

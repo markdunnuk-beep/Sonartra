@@ -8,6 +8,7 @@ type AssessmentDashboardFixture = {
   assessmentId: string;
   assessmentKey: string;
   mode?: string | null;
+  hasSingleDomainDataset?: boolean;
   title: string;
   description: string | null;
   isActive?: boolean;
@@ -52,7 +53,7 @@ function createFakeDb(
   return {
     async query<T>(text: string, params?: unknown[]) {
       if (text.includes('FROM assessments a') && text.includes('LEFT JOIN assessment_versions av')) {
-        if (text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') && options?.missingModeColumns) {
+        if (text.includes('COALESCE(av.mode, a.mode)') && options?.missingModeColumns) {
           throw new Error('column av.mode does not exist');
         }
 
@@ -64,7 +65,10 @@ function createFakeDb(
                 assessment_id: fixture.assessmentId,
                 assessment_key: fixture.assessmentKey,
                 assessment_title: fixture.title,
-                assessment_mode: fixture.mode ?? null,
+                assessment_mode:
+                  fixture.hasSingleDomainDataset && text.includes('assessment_version_single_domain_driver_claims')
+                    ? 'single_domain'
+                    : fixture.mode ?? null,
                 assessment_description: fixture.description,
                 assessment_is_active: fixture.isActive ?? true,
                 assessment_created_at: '2026-01-01T00:00:00.000Z',
@@ -88,7 +92,10 @@ function createFakeDb(
               assessment_id: fixture.assessmentId,
               assessment_key: fixture.assessmentKey,
               assessment_title: fixture.title,
-              assessment_mode: fixture.mode ?? null,
+              assessment_mode:
+                fixture.hasSingleDomainDataset && text.includes('assessment_version_single_domain_driver_claims')
+                  ? 'single_domain'
+                  : fixture.mode ?? null,
               assessment_description: fixture.description,
               assessment_is_active: fixture.isActive ?? true,
               assessment_created_at: '2026-01-01T00:00:00.000Z',
@@ -113,7 +120,7 @@ function createFakeDb(
       }
 
       if (text.includes('LEFT JOIN LATERAL') && text.includes('draft_version_id')) {
-        if (text.includes('COALESCE(dv.mode, a.mode) AS assessment_mode') && options?.missingModeColumns) {
+        if (text.includes('COALESCE(dv.mode, a.mode)') && options?.missingModeColumns) {
           throw new Error('column dv.mode does not exist');
         }
 
@@ -472,6 +479,37 @@ test('undefined and unknown modes resolve safely for dashboard labels', async ()
   assert.equal(
     viewModel.assessments.find((assessment) => assessment.assessmentKey === 'single-mode')?.modeLabel,
     'Single-Domain',
+  );
+});
+
+test('single-domain authoring datasets override a stale multi-domain dashboard mode', async () => {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(
+    createFakeDb([
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'sonartra-leadership-approach',
+        mode: 'multi_domain',
+        hasSingleDomainDataset: true,
+        title: 'Sonartra Leadership Approach',
+        description: null,
+        versions: [
+          {
+            assessmentVersionId: 'version-2',
+            versionTag: '1.0.1',
+            status: 'DRAFT',
+            questionCount: 80,
+            updatedAt: '2026-04-30T00:00:00.000Z',
+          },
+        ],
+      },
+    ]),
+  );
+
+  const assessment = viewModel.assessments[0];
+  assert.equal(assessment?.modeLabel, 'Single-Domain');
+  assert.equal(
+    assessment?.actionHref,
+    '/admin/assessments/single-domain/sonartra-leadership-approach',
   );
 });
 
