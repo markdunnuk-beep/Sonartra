@@ -233,12 +233,15 @@ function AccentPill({
 
 function BrandBackground() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-[44rem] bg-[radial-gradient(circle_at_24%_8%,rgba(50,214,176,0.14),transparent_34%),radial-gradient(circle_at_78%_4%,rgba(245,241,234,0.08),transparent_30%),linear-gradient(180deg,rgba(8,10,13,0)_0%,#080A0D_82%)]" />
-      <div className="absolute left-1/2 top-16 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.035]" />
-      <div className="absolute left-1/2 top-28 h-[22rem] w-[22rem] -translate-x-1/2 rounded-full border border-[#32D6B0]/[0.045]" />
-      <div className="absolute inset-x-0 top-0 h-[36rem] bg-[linear-gradient(rgba(245,241,234,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.014)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_84%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_54%,rgba(0,0,0,0.28)_100%)]" />
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-x-0 top-16 bottom-0 z-0 overflow-hidden bg-[linear-gradient(180deg,#090B0F_0%,#080A0D_46rem,#080A0D_100%)]"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_7%,rgba(50,214,176,0.13),transparent_31%),radial-gradient(circle_at_84%_12%,rgba(245,241,234,0.07),transparent_29%),linear-gradient(180deg,rgba(8,10,13,0)_0%,rgba(8,10,13,0.72)_68%,rgba(8,10,13,0)_100%)]" />
+      <div className="absolute left-1/2 top-12 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.035]" />
+      <div className="absolute left-1/2 top-24 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full border border-[#32D6B0]/[0.045]" />
+      <div className="absolute inset-x-[-8rem] top-0 h-[42rem] bg-[linear-gradient(rgba(245,241,234,0.016)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_58%,rgba(0,0,0,0.2)_100%)]" />
     </div>
   );
 }
@@ -251,7 +254,7 @@ export function BrandPageContent() {
   } satisfies CSSProperties;
 
   return (
-    <div className="relative isolate overflow-hidden bg-[#080A0D] text-[#F5F1EA]">
+    <div className="relative isolate min-h-screen overflow-hidden text-[#F5F1EA]">
       <BrandBackground />
       <div className="relative z-10 mx-auto w-full max-w-6xl px-5 py-10 sm:px-6 lg:px-8">
         <header className="py-16 md:py-24">
@@ -317,7 +320,7 @@ export function BrandPageContent() {
           </div>
         </Section>
 
-        <Section accent={accent} eyebrow="03 Logo and mark" title="Use the identity with restraint and clear space.">
+        <Section accent={accent} eyebrow="03 Logo and mark usage" title="Use the identity with restraint and clear space.">
           <div className="space-y-8">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-3xl border border-[#F5F1EA]/10 bg-[#101318] p-6">
@@ -606,7 +609,7 @@ export function BrandPageContent() {
           </div>
         </Section>
 
-        <Section accent={accent} eyebrow="08 Layout" title="Spacing should make the intelligence easier to scan.">
+        <Section accent={accent} eyebrow="08 Layout and spacing" title="Spacing should make the intelligence easier to scan.">
           <div className="grid gap-4 md:grid-cols-2">
             <GuidanceCard
               title="Generous spacing"
@@ -640,7 +643,7 @@ export function BrandPageContent() {
           </div>
         </Section>
 
-        <Section accent={accent} eyebrow="10 Applications" title="How the direction translates across Sonartra surfaces.">
+        <Section accent={accent} eyebrow="10 Example applications" title="How the direction translates across Sonartra surfaces.">
           <div className="grid gap-4">
             {applications.map((application) => (
               <article
