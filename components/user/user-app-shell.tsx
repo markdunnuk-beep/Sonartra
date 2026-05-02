@@ -122,9 +122,12 @@ function SessionFooter({
     <div className="border-white/8 rounded-[1.4rem] border bg-white/[0.03] p-3.5">
       <div className="flex items-center gap-3">
         <SessionAvatar />
-        <div className="min-w-0 flex-1">
-          <p className="sonartra-shell-session-label">Workspace session</p>
-          <p className="sonartra-shell-session-value mt-1 truncate">{userLabel}</p>
+        <div
+          className="min-w-0 flex-1"
+          aria-label={`Workspace session: ${userLabel}`}
+          title={userLabel}
+        >
+          <p className="sonartra-shell-session-value truncate">{userLabel}</p>
         </div>
         <Link
           aria-label="Log out"
