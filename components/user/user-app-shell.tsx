@@ -333,13 +333,8 @@ export function UserAppShell({
   userLabel: string;
 }>) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-
-    return window.localStorage.getItem(SHELL_COLLAPSE_STORAGE_KEY) === 'true';
-  });
+  const [collapsed, setCollapsed] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileDrawerId = useId();
   const mobileDrawerTitleId = useId();
@@ -350,8 +345,23 @@ export function UserAppShell({
   const mobileSidebarCollapsed = collapsed && !mobileOpen;
 
   useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      setCollapsed(window.localStorage.getItem(SHELL_COLLAPSE_STORAGE_KEY) === 'true');
+      setHasHydrated(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
     window.localStorage.setItem(SHELL_COLLAPSE_STORAGE_KEY, collapsed ? 'true' : 'false');
-  }, [collapsed]);
+  }, [collapsed, hasHydrated]);
 
   useEffect(() => {
     if (!mobileOpen) {

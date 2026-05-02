@@ -114,8 +114,16 @@ test('user mobile drawer opens as a full accessible drawer without overwriting d
   const source = readSource(userShellPath);
 
   assert.match(source, /import \{ useEffect, useId, useState \} from 'react';/);
+  assert.match(source, /const \[collapsed, setCollapsed\] = useState\(false\);/);
+  assert.match(source, /const \[hasHydrated, setHasHydrated\] = useState\(false\);/);
+  assert.match(source, /const frameId = window\.requestAnimationFrame\(\(\) => \{/);
+  assert.match(source, /setCollapsed\(window\.localStorage\.getItem\(SHELL_COLLAPSE_STORAGE_KEY\) === 'true'\);/);
+  assert.match(source, /setHasHydrated\(true\);/);
+  assert.match(source, /window\.cancelAnimationFrame\(frameId\);/);
+  assert.match(source, /if \(!hasHydrated\) \{\s*return;\s*\}/);
   assert.match(source, /const mobileSidebarCollapsed = collapsed && !mobileOpen;/);
   assert.match(source, /window\.localStorage\.setItem\(SHELL_COLLAPSE_STORAGE_KEY, collapsed \? 'true' : 'false'\);/);
+  assert.doesNotMatch(source, /useState\(\(\) => \{\s*if \(typeof window === 'undefined'\)/);
   assert.match(source, /document\.body\.dataset\.userMobileScrollLock = 'true';/);
   assert.match(source, /htmlStyle\.overflow = 'hidden';/);
   assert.match(source, /bodyStyle\.overflow = 'hidden';/);
