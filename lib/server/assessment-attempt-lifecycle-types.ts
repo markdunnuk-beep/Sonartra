@@ -27,6 +27,7 @@ export type AssessmentAttemptRecordSummary = {
   userId: string;
   assessmentId: string;
   assessmentVersionId: string;
+  versionTag: string;
   lifecycleStatus: PersistedAttemptLifecycleStatus;
   startedAt: string;
   submittedAt: string | null;

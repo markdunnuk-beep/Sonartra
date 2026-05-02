@@ -43,6 +43,21 @@ Starting an assessment follows one deterministic rule:
 
 If the latest attempt is already completed or ready, a new attempt is created.
 
+## Version lifecycle rules
+
+Assessment attempts are pinned to the concrete `assessment_versions.id` resolved when the attempt is created. Publishing a newer version changes future published-version resolution only; it does not rewrite existing attempts, responses, or results.
+
+The locked rules are:
+
+- completed results are historical records
+- result rows stay linked to the assessment version used at completion
+- publishing a newer version must not mutate older attempts, responses, or results
+- publishing a newer version must not automatically create attempts for users who completed an older version
+- in-progress attempts continue on the version they started on
+- new starts with no resumable in-progress attempt resolve the currently published version at creation time
+
+`user_assessment_assignments` is version-specific in the database because it stores `assessment_version_id` and can link to an exact attempt path. The general assessment start/resume flow currently resolves from published assessment inventory and existing attempts; it does not remap existing attempts through assignment state.
+
 ## Progress calculation
 
 Progress is computed from persisted data only:

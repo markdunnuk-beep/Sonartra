@@ -377,6 +377,35 @@ test('ready persisted result appears in list view and ordering is deterministic 
   assert.equal(results[0]?.resultAvailable, true);
 });
 
+test('historical ready result list item preserves the completed assessment version', async () => {
+  const service = createResultReadModelService({
+    db: createFakeDb([
+      {
+        resultId: 'result-v1',
+        attemptId: 'attempt-v1',
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.00',
+        userId: 'user-1',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:01:00.000Z',
+        createdAt: '2026-01-01T00:01:00.000Z',
+        canonicalResultPayload: buildPayload({
+          resultAttemptId: 'attempt-v1',
+        }),
+      },
+    ]),
+  });
+
+  const results = await service.listAssessmentResults({ userId: 'user-1' });
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0]?.resultId, 'result-v1');
+  assert.equal(results[0]?.attemptId, 'attempt-v1');
+  assert.equal(results[0]?.version, '1.00');
+});
+
 test('detail load returns canonical payload sections alongside compatibility projections', async () => {
   const service = createResultReadModelService({
     db: createFakeDb([

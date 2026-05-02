@@ -30,6 +30,7 @@ type AttemptFixture = {
   userId: string;
   assessmentId: string;
   assessmentVersionId: string;
+  versionTag?: string;
   lifecycleStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'SCORED' | 'RESULT_READY' | 'FAILED';
   startedAt: string;
   submittedAt: string | null;
@@ -301,6 +302,17 @@ function createFakeDb(params: {
   const inventory = [...params.inventory];
   const inventoryByKey = new Map(inventory.map((item) => [item.assessmentKey, item]));
   const inventoryById = new Map(inventory.map((item) => [item.assessmentId, item]));
+  const versionTagByVersionId = new Map<string, string>([
+    ...inventory.map((item) => [item.assessmentVersionId, item.versionTag] as const),
+    ...attempts.map((attempt) => [
+      attempt.assessmentVersionId,
+      attempt.versionTag ?? (
+        inventoryById.get(attempt.assessmentId)?.assessmentVersionId === attempt.assessmentVersionId
+          ? inventoryById.get(attempt.assessmentId)?.versionTag ?? attempt.assessmentVersionId
+          : attempt.assessmentVersionId
+      ),
+    ] as const),
+  ]);
   const questionCountByVersionId = {
     ...Object.fromEntries(inventory.map((item) => [item.assessmentVersionId, 0])),
     ...(params.questionCountByVersionId ?? {}),
@@ -344,7 +356,7 @@ function createFakeDb(params: {
         };
       }
 
-      if (text.includes('FROM attempts') && text.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+      if (text.includes('FROM attempts') && text.includes("lifecycle_status = 'IN_PROGRESS'")) {
         const [userId, assessmentId] = queryParams as [string, string];
         const row = attempts
           .filter((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId && attempt.lifecycleStatus === 'IN_PROGRESS')
@@ -360,6 +372,7 @@ function createFakeDb(params: {
             user_id: row.userId,
             assessment_id: row.assessmentId,
             assessment_version_id: row.assessmentVersionId,
+            version_tag: versionTagByVersionId.get(row.assessmentVersionId) ?? row.assessmentVersionId,
             lifecycle_status: row.lifecycleStatus,
             started_at: row.startedAt,
             submitted_at: row.submittedAt,
@@ -371,7 +384,7 @@ function createFakeDb(params: {
         };
       }
 
-      if (text.includes('FROM attempts') && !text.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+      if (text.includes('FROM attempts') && !text.includes("lifecycle_status = 'IN_PROGRESS'")) {
         const [userId, assessmentId] = queryParams as [string, string];
         const row = attempts
           .filter((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId)
@@ -387,6 +400,7 @@ function createFakeDb(params: {
             user_id: row.userId,
             assessment_id: row.assessmentId,
             assessment_version_id: row.assessmentVersionId,
+            version_tag: versionTagByVersionId.get(row.assessmentVersionId) ?? row.assessmentVersionId,
             lifecycle_status: row.lifecycleStatus,
             started_at: row.startedAt,
             submitted_at: row.submittedAt,
@@ -709,6 +723,84 @@ test('dashboard and workspace builders project canonical lifecycle and latest re
   assert.equal(dashboard.recommendation?.kind, 'view_results');
   assert.equal(dashboard.latestReadyResult?.resultId, 'result-1');
   assert.equal(dashboard.latestReadyResult?.topSignalTitle, 'Core Focus');
+});
+
+test('dashboard and workspace keep historical v1 ready result visible after v2 is published', async () => {
+  const db = createFakeDb({
+    inventory: [
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        title: 'WPLP-80',
+        description: 'Signals assessment',
+        assessmentVersionId: 'version-2',
+        versionTag: '2.00',
+        publishedAt: '2026-02-01T00:00:00.000Z',
+      },
+    ],
+    attempts: [
+      {
+        attemptId: 'attempt-v1',
+        userId: 'user-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        versionTag: '1.00',
+        lifecycleStatus: 'RESULT_READY',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        submittedAt: '2026-01-01T00:15:00.000Z',
+        completedAt: '2026-01-01T00:16:00.000Z',
+        lastActivityAt: '2026-01-01T00:16:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:16:00.000Z',
+      },
+    ],
+    results: [
+      {
+        resultId: 'result-v1',
+        attemptId: 'attempt-v1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        assessmentKey: 'wplp80',
+        assessmentTitle: 'WPLP-80',
+        versionTag: '1.00',
+        userId: 'user-1',
+        pipelineStatus: 'COMPLETED',
+        readinessStatus: 'READY',
+        generatedAt: '2026-01-01T00:16:00.000Z',
+        failureReason: null,
+        hasCanonicalResultPayload: true,
+        createdAt: '2026-01-01T00:16:00.000Z',
+        updatedAt: '2026-01-01T00:16:00.000Z',
+        canonicalResultPayload: buildPayload({
+          assessmentKey: 'wplp80',
+          version: '1.00',
+          attemptId: 'attempt-v1',
+          topSignalTitle: 'Historical Focus',
+          topSignalPercentage: 69,
+        }),
+      },
+    ],
+    questionCountByVersionId: {
+      'version-1': 80,
+      'version-2': 90,
+    },
+  });
+
+  const workspace = await buildAssessmentWorkspaceViewModel({
+    db,
+    userId: 'user-1',
+  });
+  const dashboard = await buildDashboardViewModel({
+    db,
+    userId: 'user-1',
+  });
+
+  assert.equal(workspace.assessments[0]?.versionTag, '2.00');
+  assert.equal(workspace.assessments[0]?.status, 'ready');
+  assert.equal(workspace.assessments[0]?.latestReadyResultId, 'result-v1');
+  assert.equal(workspace.assessments[0]?.latestTopSignalTitle, 'Historical Focus');
+  assert.equal(dashboard.latestReadyResult?.resultId, 'result-v1');
+  assert.equal(dashboard.latestReadyResult?.topSignalTitle, 'Historical Focus');
 });
 
 test('workspace and dashboard skip malformed ready payload rows instead of crashing the route', async () => {

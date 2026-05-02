@@ -21,6 +21,7 @@ type AttemptInsertRow = {
   user_id: string;
   assessment_id: string;
   assessment_version_id: string;
+  version_tag: string;
   lifecycle_status: AssessmentAttemptRecordSummary['lifecycleStatus'];
   started_at: string;
   submitted_at: string | null;
@@ -69,6 +70,7 @@ function mapAttemptInsertRow(row: AttemptInsertRow): AssessmentAttemptRecordSumm
     userId: row.user_id,
     assessmentId: row.assessment_id,
     assessmentVersionId: row.assessment_version_id,
+    versionTag: row.version_tag,
     lifecycleStatus: row.lifecycle_status,
     startedAt: row.started_at,
     submittedAt: row.submitted_at,
@@ -187,7 +189,7 @@ async function buildLifecycleViewModel(
     assessmentId: params.assessment.assessmentId,
     assessmentKey: params.assessment.assessmentKey,
     assessmentVersionId: params.attempt?.assessmentVersionId ?? params.assessment.assessmentVersionId,
-    versionTag: params.assessment.versionTag,
+    versionTag: params.attempt?.versionTag ?? params.assessment.versionTag,
     status,
     startedAt: params.attempt?.startedAt ?? null,
     submittedAt: params.attempt?.submittedAt ?? null,
@@ -240,7 +242,10 @@ async function createAttempt(
     throw new InvalidAssessmentLifecycleDataError('Attempt creation did not return a created attempt row');
   }
 
-  return mapAttemptInsertRow(row);
+  return mapAttemptInsertRow({
+    ...row,
+    version_tag: params.assessment.versionTag,
+  });
 }
 
 export function createAssessmentAttemptLifecycleService(

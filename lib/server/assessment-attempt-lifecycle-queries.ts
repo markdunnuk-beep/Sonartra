@@ -17,6 +17,7 @@ type AttemptLookupRow = {
   user_id: string;
   assessment_id: string;
   assessment_version_id: string;
+  version_tag: string;
   lifecycle_status: AssessmentAttemptRecordSummary['lifecycleStatus'];
   started_at: string;
   submitted_at: string | null;
@@ -53,6 +54,7 @@ function mapAttemptSummary(row: AttemptLookupRow): AssessmentAttemptRecordSummar
     userId: row.user_id,
     assessmentId: row.assessment_id,
     assessmentVersionId: row.assessment_version_id,
+    versionTag: row.version_tag,
     lifecycleStatus: row.lifecycle_status,
     startedAt: row.started_at,
     submittedAt: row.submitted_at,
@@ -108,22 +110,24 @@ export async function getLatestInProgressAttemptForUserAndAssessment(
   const result = await db.query<AttemptLookupRow>(
     `
     SELECT
-      id AS attempt_id,
-      user_id,
-      assessment_id,
-      assessment_version_id,
-      lifecycle_status,
-      started_at,
-      submitted_at,
-      completed_at,
-      last_activity_at,
-      created_at,
-      updated_at
-    FROM attempts
-    WHERE user_id = $1
-      AND assessment_id = $2
-      AND lifecycle_status = 'IN_PROGRESS'
-    ORDER BY created_at DESC, id DESC
+      t.id AS attempt_id,
+      t.user_id,
+      t.assessment_id,
+      t.assessment_version_id,
+      av.version AS version_tag,
+      t.lifecycle_status,
+      t.started_at,
+      t.submitted_at,
+      t.completed_at,
+      t.last_activity_at,
+      t.created_at,
+      t.updated_at
+    FROM attempts t
+    INNER JOIN assessment_versions av ON av.id = t.assessment_version_id
+    WHERE t.user_id = $1
+      AND t.assessment_id = $2
+      AND t.lifecycle_status = 'IN_PROGRESS'
+    ORDER BY t.created_at DESC, t.id DESC
     `,
     [params.userId, params.assessmentId],
   );
@@ -139,21 +143,23 @@ export async function getLatestAttemptForUserAndAssessment(
   const result = await db.query<AttemptLookupRow>(
     `
     SELECT
-      id AS attempt_id,
-      user_id,
-      assessment_id,
-      assessment_version_id,
-      lifecycle_status,
-      started_at,
-      submitted_at,
-      completed_at,
-      last_activity_at,
-      created_at,
-      updated_at
-    FROM attempts
-    WHERE user_id = $1
-      AND assessment_id = $2
-    ORDER BY created_at DESC, id DESC
+      t.id AS attempt_id,
+      t.user_id,
+      t.assessment_id,
+      t.assessment_version_id,
+      av.version AS version_tag,
+      t.lifecycle_status,
+      t.started_at,
+      t.submitted_at,
+      t.completed_at,
+      t.last_activity_at,
+      t.created_at,
+      t.updated_at
+    FROM attempts t
+    INNER JOIN assessment_versions av ON av.id = t.assessment_version_id
+    WHERE t.user_id = $1
+      AND t.assessment_id = $2
+    ORDER BY t.created_at DESC, t.id DESC
     `,
     [params.userId, params.assessmentId],
   );

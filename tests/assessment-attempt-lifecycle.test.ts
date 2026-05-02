@@ -17,6 +17,7 @@ type AttemptFixture = {
   userId: string;
   assessmentId: string;
   assessmentVersionId: string;
+  versionTag?: string;
   lifecycleStatus: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'SCORED' | 'RESULT_READY' | 'FAILED';
   startedAt: string;
   submittedAt: string | null;
@@ -64,6 +65,17 @@ function createFakeDb(params?: {
     [assessment.assessmentVersionId]: 80,
     ...(params?.questionCountByVersionId ?? {}),
   };
+  const versionTagByVersionId = new Map<string, string>([
+    [assessment.assessmentVersionId, assessment.versionTag],
+    ...attempts.map((attempt) => [
+      attempt.assessmentVersionId,
+      attempt.versionTag ?? (
+        attempt.assessmentVersionId === assessment.assessmentVersionId
+          ? assessment.versionTag
+          : attempt.assessmentVersionId
+      ),
+    ] as const),
+  ]);
 
   let attemptSequence = attempts.length + 1;
 
@@ -88,7 +100,7 @@ function createFakeDb(params?: {
         };
       }
 
-      if (text.includes('FROM attempts') && text.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+      if (text.includes('FROM attempts') && text.includes("lifecycle_status = 'IN_PROGRESS'")) {
         const [userId, assessmentId] = queryParams as [string, string];
         const row = attempts
           .filter((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId && attempt.lifecycleStatus === 'IN_PROGRESS')
@@ -104,6 +116,7 @@ function createFakeDb(params?: {
             user_id: row.userId,
             assessment_id: row.assessmentId,
             assessment_version_id: row.assessmentVersionId,
+            version_tag: versionTagByVersionId.get(row.assessmentVersionId) ?? row.assessmentVersionId,
             lifecycle_status: row.lifecycleStatus,
             started_at: row.startedAt,
             submitted_at: row.submittedAt,
@@ -115,7 +128,7 @@ function createFakeDb(params?: {
         };
       }
 
-      if (text.includes('FROM attempts') && !text.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+      if (text.includes('FROM attempts') && !text.includes("lifecycle_status = 'IN_PROGRESS'")) {
         const [userId, assessmentId] = queryParams as [string, string];
         const row = attempts
           .filter((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId)
@@ -131,6 +144,7 @@ function createFakeDb(params?: {
             user_id: row.userId,
             assessment_id: row.assessmentId,
             assessment_version_id: row.assessmentVersionId,
+            version_tag: versionTagByVersionId.get(row.assessmentVersionId) ?? row.assessmentVersionId,
             lifecycle_status: row.lifecycleStatus,
             started_at: row.startedAt,
             submitted_at: row.submittedAt,
@@ -210,8 +224,9 @@ function createFakeDb(params?: {
             attempt_id: attempt.attemptId,
             user_id: attempt.userId,
             assessment_id: attempt.assessmentId,
-            assessment_version_id: attempt.assessmentVersionId,
-            lifecycle_status: attempt.lifecycleStatus,
+          assessment_version_id: attempt.assessmentVersionId,
+          version_tag: versionTagByVersionId.get(attempt.assessmentVersionId) ?? assessment.versionTag,
+          lifecycle_status: attempt.lifecycleStatus,
             started_at: attempt.startedAt,
             submitted_at: attempt.submittedAt,
             completed_at: attempt.completedAt,
@@ -453,6 +468,133 @@ test('startAssessmentAttempt links the new attempt to the current published vers
   assert.equal(lifecycle.assessmentVersionId, 'version-2');
   assert.equal(lifecycle.versionTag, '2.0.0');
   assert.equal(lifecycle.totalQuestions, 24);
+});
+
+test('in-progress attempt remains locked to its original version after a newer version is published', async () => {
+  const service = createAssessmentAttemptLifecycleService({
+    db: createFakeDb({
+      assessment: {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentVersionId: 'version-2',
+        versionTag: '2.00',
+      },
+      attempts: [
+        {
+          attemptId: 'attempt-v1',
+          userId: 'user-1',
+          assessmentId: 'assessment-1',
+          assessmentVersionId: 'version-1',
+          versionTag: '1.00',
+          lifecycleStatus: 'IN_PROGRESS',
+          startedAt: '2026-01-01T00:00:01.000Z',
+          submittedAt: null,
+          completedAt: null,
+          lastActivityAt: '2026-01-01T00:00:05.000Z',
+          createdAt: '2026-01-01T00:00:01.000Z',
+          updatedAt: '2026-01-01T00:00:05.000Z',
+        },
+      ],
+      questionCountByVersionId: {
+        'version-1': 80,
+        'version-2': 90,
+      },
+    }),
+  });
+
+  const lifecycle = await service.startAssessmentAttempt({
+    userId: 'user-1',
+    assessmentKey: 'wplp80',
+  });
+
+  assert.equal(lifecycle.attemptId, 'attempt-v1');
+  assert.equal(lifecycle.status, 'in_progress');
+  assert.equal(lifecycle.assessmentVersionId, 'version-1');
+  assert.equal(lifecycle.versionTag, '1.00');
+  assert.equal(lifecycle.totalQuestions, 80);
+});
+
+test('completed ready result remains linked to its original version after a newer version is published', async () => {
+  const service = createAssessmentAttemptLifecycleService({
+    db: createFakeDb({
+      assessment: {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentVersionId: 'version-2',
+        versionTag: '2.00',
+      },
+      attempts: [
+        {
+          attemptId: 'attempt-v1',
+          userId: 'user-1',
+          assessmentId: 'assessment-1',
+          assessmentVersionId: 'version-1',
+          versionTag: '1.00',
+          lifecycleStatus: 'RESULT_READY',
+          startedAt: '2026-01-01T00:00:01.000Z',
+          submittedAt: '2026-01-01T00:01:00.000Z',
+          completedAt: '2026-01-01T00:01:10.000Z',
+          lastActivityAt: '2026-01-01T00:01:10.000Z',
+          createdAt: '2026-01-01T00:00:01.000Z',
+          updatedAt: '2026-01-01T00:01:10.000Z',
+        },
+      ],
+      results: [
+        {
+          resultId: 'result-v1',
+          attemptId: 'attempt-v1',
+          pipelineStatus: 'COMPLETED',
+          readinessStatus: 'READY',
+          generatedAt: '2026-01-01T00:01:10.000Z',
+          failureReason: null,
+          hasCanonicalResultPayload: true,
+          createdAt: '2026-01-01T00:01:10.000Z',
+          updatedAt: '2026-01-01T00:01:10.000Z',
+        },
+      ],
+      questionCountByVersionId: {
+        'version-1': 80,
+        'version-2': 90,
+      },
+    }),
+  });
+
+  const lifecycle = await service.getAssessmentAttemptLifecycle({
+    userId: 'user-1',
+    assessmentKey: 'wplp80',
+  });
+
+  assert.equal(lifecycle.status, 'ready');
+  assert.equal(lifecycle.latestResultId, 'result-v1');
+  assert.equal(lifecycle.assessmentVersionId, 'version-1');
+  assert.equal(lifecycle.versionTag, '1.00');
+  assert.equal(lifecycle.totalQuestions, 80);
+});
+
+test('new start after publication uses the newly published version for users without prior attempts', async () => {
+  const service = createAssessmentAttemptLifecycleService({
+    db: createFakeDb({
+      assessment: {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'wplp80',
+        assessmentVersionId: 'version-2',
+        versionTag: '2.00',
+      },
+      questionCountByVersionId: {
+        'version-2': 90,
+      },
+    }),
+  });
+
+  const lifecycle = await service.startAssessmentAttempt({
+    userId: 'user-new',
+    assessmentKey: 'wplp80',
+  });
+
+  assert.equal(lifecycle.status, 'in_progress');
+  assert.equal(lifecycle.assessmentVersionId, 'version-2');
+  assert.equal(lifecycle.versionTag, '2.00');
+  assert.equal(lifecycle.totalQuestions, 90);
 });
 
 test('archived assessments do not start because they are excluded from published lookup', async () => {

@@ -294,6 +294,57 @@ test('entry resolution creates or reuses runner path for start and resume states
   });
 });
 
+test('entry resolution does not create a new attempt for a completed older-version result', async () => {
+  let startCalls = 0;
+
+  const service = createAssessmentRunnerService({
+    db: createFakeDb({ attempts: [] }),
+    lifecycleService: {
+      async getAssessmentAttemptLifecycle() {
+        return {
+          attemptId: 'attempt-v1',
+          assessmentId: 'assessment-1',
+          assessmentKey: 'wplp80',
+          assessmentVersionId: 'version-1',
+          versionTag: '1.00',
+          status: 'ready',
+          startedAt: '2026-01-01T00:00:00.000Z',
+          submittedAt: '2026-01-01T00:01:00.000Z',
+          updatedAt: '2026-01-01T00:01:00.000Z',
+          completedAt: '2026-01-01T00:01:00.000Z',
+          totalQuestions: 80,
+          answeredQuestions: 80,
+          completionPercentage: 100,
+          latestResultId: 'result-v1',
+          latestResultReady: true,
+          latestResultStatus: 'READY',
+          lastError: null,
+        };
+      },
+      async startAssessmentAttempt() {
+        startCalls += 1;
+        throw new Error('start_should_not_be_called');
+      },
+      async getOrCreateInProgressAttempt() {
+        throw new Error('not_used');
+      },
+    },
+  });
+
+  const resolution = await service.resolveAssessmentEntry({
+    userId: 'user-1',
+    assessmentKey: 'wplp80',
+  });
+
+  assert.equal(startCalls, 0);
+  assert.deepEqual(resolution, {
+    kind: 'result',
+    assessmentKey: 'wplp80',
+    resultId: 'result-v1',
+    href: '/app/results/result-v1',
+  });
+});
+
 test('landing resolution returns introduction for not-started users without creating an attempt', async () => {
   let startCalls = 0;
 

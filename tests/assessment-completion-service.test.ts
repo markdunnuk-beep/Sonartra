@@ -440,16 +440,16 @@ function createFakeDb(config?: FakeDbConfig): Queryable {
         return { rows: ([{ assessment_id: 'assessment-1', assessment_key: 'wplp80', assessment_version_id: 'version-1', version_tag: '1.0.0' }] as unknown[]) as T[] };
       }
 
-      if (text.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+      if (text.includes("lifecycle_status = 'IN_PROGRESS'")) {
         const [userId, assessmentId] = params as [string, string];
         const row = attempts.find((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId && attempt.lifecycleStatus === 'IN_PROGRESS');
-        return { rows: (row ? ([{ attempt_id: row.attemptId, user_id: row.userId, assessment_id: row.assessmentId, assessment_version_id: row.assessmentVersionId, lifecycle_status: row.lifecycleStatus, started_at: row.startedAt, submitted_at: row.submittedAt, completed_at: row.completedAt, last_activity_at: row.lastActivityAt, created_at: row.createdAt, updated_at: row.updatedAt }] as unknown[]) : []) as T[] };
+        return { rows: (row ? ([{ attempt_id: row.attemptId, user_id: row.userId, assessment_id: row.assessmentId, assessment_version_id: row.assessmentVersionId, version_tag: row.versionTag, lifecycle_status: row.lifecycleStatus, started_at: row.startedAt, submitted_at: row.submittedAt, completed_at: row.completedAt, last_activity_at: row.lastActivityAt, created_at: row.createdAt, updated_at: row.updatedAt }] as unknown[]) : []) as T[] };
       }
 
-      if (text.includes('FROM attempts') && text.includes('ORDER BY created_at DESC, id DESC')) {
+      if (text.includes('FROM attempts') && text.includes('ORDER BY') && !text.includes("lifecycle_status = 'IN_PROGRESS'")) {
         const [userId, assessmentId] = params as [string, string];
         const row = attempts.find((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId);
-        return { rows: (row ? ([{ attempt_id: row.attemptId, user_id: row.userId, assessment_id: row.assessmentId, assessment_version_id: row.assessmentVersionId, lifecycle_status: row.lifecycleStatus, started_at: row.startedAt, submitted_at: row.submittedAt, completed_at: row.completedAt, last_activity_at: row.lastActivityAt, created_at: row.createdAt, updated_at: row.updatedAt }] as unknown[]) : []) as T[] };
+        return { rows: (row ? ([{ attempt_id: row.attemptId, user_id: row.userId, assessment_id: row.assessmentId, assessment_version_id: row.assessmentVersionId, version_tag: row.versionTag, lifecycle_status: row.lifecycleStatus, started_at: row.startedAt, submitted_at: row.submittedAt, completed_at: row.completedAt, last_activity_at: row.lastActivityAt, created_at: row.createdAt, updated_at: row.updatedAt }] as unknown[]) : []) as T[] };
       }
 
       if (text.includes('COUNT(DISTINCT question_id) AS answered_questions')) {
