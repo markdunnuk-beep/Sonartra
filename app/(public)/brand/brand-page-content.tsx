@@ -4,33 +4,14 @@ import type { CSSProperties, ReactNode } from 'react';
 type BrandAccent = {
   token: string;
   hex: string;
-  label?: string;
   textOnAccent: string;
 };
 
-type BrandPageContentProps = {
-  accent: BrandAccent;
-};
-
-export const BRAND_ACCENTS = {
-  currentTeal: {
-    token: 'signal-teal-current',
-    hex: '#32D6B0',
-    textOnAccent: '#07100f',
-  },
-  tealDeep: {
-    token: 'signal-teal-deep',
-    hex: '#2FBFA3',
-    label: 'Accent comparison: signal-teal-deep #2FBFA3',
-    textOnAccent: '#07100f',
-  },
-  violet: {
-    token: 'signal-violet',
-    hex: '#9B8CFF',
-    label: 'Accent comparison: signal-violet #9B8CFF',
-    textOnAccent: '#080A0D',
-  },
-} satisfies Record<string, BrandAccent>;
+const PRIMARY_ACCENT = {
+  token: 'signal-teal',
+  hex: '#32D6B0',
+  textOnAccent: '#07100f',
+} satisfies BrandAccent;
 
 const coreColours = [
   { name: 'sonar-950', value: '#080A0D', guidance: 'Primary dark foundation' },
@@ -55,9 +36,9 @@ const accentColours = [
 
 const primaryAccentExperiments = [
   {
-    name: 'signal-teal-current',
+    name: 'signal-teal',
     value: '#32D6B0',
-    guidance: 'Clean and modern, but slightly developer-platform adjacent.',
+    guidance: 'Selected primary accent. Clean, modern, and now locked as the Sonartra signal colour.',
   },
   {
     name: 'signal-teal-deep',
@@ -250,15 +231,29 @@ function AccentPill({
   );
 }
 
-export function BrandPageContent({ accent }: BrandPageContentProps) {
+function BrandBackground() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-[44rem] bg-[radial-gradient(circle_at_24%_8%,rgba(50,214,176,0.14),transparent_34%),radial-gradient(circle_at_78%_4%,rgba(245,241,234,0.08),transparent_30%),linear-gradient(180deg,rgba(8,10,13,0)_0%,#080A0D_82%)]" />
+      <div className="absolute left-1/2 top-16 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.035]" />
+      <div className="absolute left-1/2 top-28 h-[22rem] w-[22rem] -translate-x-1/2 rounded-full border border-[#32D6B0]/[0.045]" />
+      <div className="absolute inset-x-0 top-0 h-[36rem] bg-[linear-gradient(rgba(245,241,234,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.014)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_84%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_54%,rgba(0,0,0,0.28)_100%)]" />
+    </div>
+  );
+}
+
+export function BrandPageContent() {
+  const accent = PRIMARY_ACCENT;
   const primaryPanelStyle = {
     backgroundColor: withAlpha(accent.hex, 0.07),
     borderColor: withAlpha(accent.hex, 0.18),
   } satisfies CSSProperties;
 
   return (
-    <div className="bg-[#080A0D] text-[#F5F1EA]">
-      <div className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-6 lg:px-8">
+    <div className="relative isolate overflow-hidden bg-[#080A0D] text-[#F5F1EA]">
+      <BrandBackground />
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 py-10 sm:px-6 lg:px-8">
         <header className="py-16 md:py-24">
           <div className="flex flex-wrap items-center gap-5 border-b border-[#F5F1EA]/10 pb-10">
             <Image
@@ -271,7 +266,7 @@ export function BrandPageContent({ accent }: BrandPageContentProps) {
               width={220}
             />
             <AccentPill accent={accent}>Brand identity reference</AccentPill>
-            {accent.label ? <AccentPill accent={accent}>{accent.label}</AccentPill> : null}
+            <AccentPill accent={accent}>Selected primary accent: signal-teal #32D6B0</AccentPill>
           </div>
 
           <div className="grid gap-10 pt-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
@@ -400,9 +395,10 @@ export function BrandPageContent({ accent }: BrandPageContentProps) {
               </div>
             </div>
             <p className="rounded-2xl border p-5 text-sm leading-7 text-[#D8D0C3]" style={primaryPanelStyle}>
-              Teal is the primary Sonartra accent. Other accents should support interpretation,
-              status, and comparison, not decoration. Avoid neon colour, heavy gradients, and
-              excessive glow.
+              Selected primary accent: signal-teal #32D6B0. The primary accent is used for active
+              states, selected answers, CTAs, focus states, and key interpretive highlights. Other
+              accents should support interpretation, status, and comparison, not decoration. Avoid
+              neon colour, heavy gradients, and excessive glow.
             </p>
             <div className="rounded-3xl border border-[#F5F1EA]/10 bg-[#101318] p-6">
               <div className="max-w-3xl">
@@ -410,8 +406,8 @@ export function BrandPageContent({ accent }: BrandPageContentProps) {
                   Primary accent experiments
                 </h3>
                 <p className="mt-3 text-sm leading-7 text-[#D8D0C3]/82">
-                  A short comparison set for choosing the future primary accent before any brand
-                  system is applied elsewhere.
+                  Historical comparison set from the accent selection pass. Signal-teal #32D6B0 is
+                  now the selected primary accent; the alternatives remain here as context only.
                 </p>
               </div>
               <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -422,13 +418,13 @@ export function BrandPageContent({ accent }: BrandPageContentProps) {
               <p
                 className="mt-5 rounded-2xl border p-5 text-sm leading-7 text-[#D8D0C3]"
                 style={{
-                  backgroundColor: withAlpha(BRAND_ACCENTS.tealDeep.hex, 0.08),
-                  borderColor: withAlpha(BRAND_ACCENTS.tealDeep.hex, 0.18),
+                  backgroundColor: withAlpha(PRIMARY_ACCENT.hex, 0.08),
+                  borderColor: withAlpha(PRIMARY_ACCENT.hex, 0.18),
                 }}
               >
-                Recommended first challenger: signal-teal-deep (#2FBFA3). It keeps Sonartra close
-                to the current system but makes the primary accent calmer and less
-                developer-tool adjacent.
+                Decision locked: signal-teal (#32D6B0) remains the Sonartra primary accent. It is
+                the reference colour for primary actions and interpretive emphasis on this brand
+                page.
               </p>
             </div>
           </div>
