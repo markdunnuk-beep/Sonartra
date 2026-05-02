@@ -272,7 +272,7 @@ function SidebarLink({
             : 'mx-auto h-11 w-11 justify-center px-0 py-0'
           : 'w-full justify-start gap-3.5 px-3 py-2.5',
         active
-          ? 'border-white/14 bg-white/[0.055] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
+          ? 'border-[#32D6B0]/20 bg-[#32D6B0]/[0.075] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
           : 'border-transparent text-white/62 hover:border-white/10 hover:bg-white/[0.035] hover:text-white/90',
       )}
       data-sidebar-collapsed={collapsed ? 'true' : 'false'}
@@ -283,7 +283,7 @@ function SidebarLink({
       <span
         aria-hidden="true"
         className={cn(
-          'sonartra-motion-active-bar absolute left-0 top-1/2 h-7 w-[2px] -translate-y-1/2 rounded-r-full bg-white/72',
+          'sonartra-motion-active-bar absolute left-0 top-1/2 h-7 w-[2px] -translate-y-1/2 rounded-r-full bg-[#32D6B0]/85',
           active ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0',
         )}
       />
@@ -292,7 +292,7 @@ function SidebarLink({
           'sonartra-motion-nav-icon flex shrink-0 items-center justify-center border',
           active && collapsed ? 'h-10 w-10 rounded-[1rem]' : 'h-9 w-9 rounded-[0.9rem]',
           active
-            ? 'border-white/14 bg-white/[0.075] text-white'
+            ? 'border-[#32D6B0]/24 bg-[#32D6B0]/[0.10] text-white'
             : 'border-white/7 bg-black/10 text-white/62 group-hover:border-white/10 group-hover:bg-white/[0.04] group-hover:text-white/90',
         )}
       >
@@ -413,7 +413,7 @@ export function UserAppShell({
   }, [mobileOpen]);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(96,119,255,0.08),_transparent_32%),linear-gradient(180deg,rgba(9,17,31,0.98),rgba(8,15,28,1))]">
+    <div className="sonartra-user-app-shell min-h-screen bg-[radial-gradient(circle_at_top,_rgba(50,214,176,0.065),_transparent_34%),linear-gradient(180deg,rgba(9,17,31,0.98),rgba(8,15,28,1))]">
       <div className="mx-auto flex min-h-screen w-full max-w-[1560px]">
         <aside
           aria-describedby={mobileOpen ? mobileDrawerDescriptionId : undefined}

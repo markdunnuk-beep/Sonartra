@@ -216,7 +216,7 @@ function SignalMeter({
         aria-valuenow={percentage}
       >
         <div
-          className="h-full rounded-full bg-[rgba(142,162,255,0.78)]"
+          className="h-full rounded-full bg-[linear-gradient(90deg,rgba(50,214,176,0.62),rgba(50,214,176,0.88))]"
           style={{ width: `${percentage}%` }}
         />
       </div>
