@@ -44,7 +44,7 @@ test('single-domain authoring layout exposes the create-new-version placeholder 
   );
 });
 
-test('create-new-version placeholder routes explain that version creation is not implemented', () => {
+test('create-new-version routes invoke draft creation and render outcome states', () => {
   const componentSource = readSource(
     'components',
     'admin',
@@ -72,9 +72,13 @@ test('create-new-version placeholder routes explain that version creation is not
     'page.tsx',
   );
 
-  assert.match(componentSource, /Version creation is not implemented yet\./);
+  assert.match(componentSource, /Create a new draft version from the published assessment\./);
+  assert.match(componentSource, /A draft version already exists for this assessment\./);
+  assert.match(componentSource, /createDraftVersionAction\.bind\(null, mode, assessmentKey\)/);
   assert.match(multiDomainRouteSource, /AdminAssessmentVersionPlaceholder/);
+  assert.match(multiDomainRouteSource, /mode="multi_domain"/);
   assert.match(singleDomainRouteSource, /AdminAssessmentVersionPlaceholder/);
+  assert.match(singleDomainRouteSource, /mode="single_domain"/);
 });
 
 test('guarded authoring stages route published assessments into the reusable read-only state', () => {
