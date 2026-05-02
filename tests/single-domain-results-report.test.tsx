@@ -386,12 +386,13 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, /Vision-led pattern, reinforced by Delivery/);
   assert.match(markup, /This is the hero opening/);
   assert.match(markup, /Pair opening paragraph/);
-  assert.match(markup, /Result basis/);
+  assert.match(markup, /Report basis/);
   assert.doesNotMatch(markup, /Why this result was generated/);
   assert.match(markup, /Built from 24\/24 completed responses, ordered to match the result headline/);
+  assert.match(markup, /Signals carrying the headline/);
   assert.match(markup, /Headline signal evidence/);
   assert.match(markup, /Full signal rank evidence/);
-  assert.match(markup, /View full evidence/);
+  assert.match(markup, /Review full report basis/);
   assert.match(markup, /<details class="sonartra-single-domain-evidence-details">/);
   assert.match(markup, /sonartra-single-domain-proof-grid/);
   assert.match(markup, /sonartra-single-domain-proof-item/);
@@ -416,7 +417,7 @@ test('single-domain results report keeps hero, drivers, limitation, and applicat
   assert.match(markup, />Time</);
   assert.match(markup, />Assessment</);
   assert.doesNotMatch(markup, />Version</);
-  assert.match(markup, /Report version 1\.0\.0/);
+  assert.match(markup, /Version 1\.0\.0/);
   assert.match(markup, />Leading pair</);
   assert.match(markup, /data-result-section-navigation="true"/);
   assert.match(markup, /aria-label="Report section navigation"/);
@@ -609,9 +610,11 @@ test('single-domain report spacing and labels support lighter mobile scanability
     cssSource,
     /\.sonartra-single-domain-opening-grid:has\(\.sonartra-single-domain-evidence-details\[open\]\)\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\);/,
   );
-  assert.match(cssSource, /\.sonartra-single-domain-proof-grid\s*\{[\s\S]*?gap:\s*0\.56rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-evidence-details\s*\{[\s\S]*?border-top:\s*1px solid rgba\(255, 255, 255, 0\.04\);/);
-  assert.match(cssSource, /\.sonartra-single-domain-meta-block\s*\{[\s\S]*?border-bottom:\s*1px solid rgba\(255, 255, 255, 0\.03\);/);
+  assert.match(cssSource, /\.sonartra-single-domain-proof-grid\s*\{[\s\S]*?gap:\s*0\.64rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-evidence-panel\s*\{[\s\S]*?border-left-color:\s*rgba\(50, 214, 176, 0\.24\);/);
+  assert.match(cssSource, /\.sonartra-single-domain-proof-section-label\s*\{[\s\S]*?rgba\(50, 214, 176, 0\.56\);/);
+  assert.match(cssSource, /\.sonartra-single-domain-evidence-details\s*\{[\s\S]*?border-top:\s*1px solid rgba\(255, 255, 255, 0\.045\);/);
+  assert.match(cssSource, /\.sonartra-single-domain-meta-block\s*\{[\s\S]*?border-bottom:\s*1px solid rgba\(255, 255, 255, 0\.026\);/);
   assert.match(cssSource, /\.sonartra-single-domain-version-note\s*\{[\s\S]*?color:\s*rgba\(207, 218, 243, 0\.34\);/);
   assert.match(cssSource, /\.sonartra-result-section-nav summary\s*\{[\s\S]*?cursor-pointer/);
   assert.match(cssSource, /\.sonartra-result-section-nav-link\s*\{[\s\S]*?min-height:\s*2\.65rem;/);

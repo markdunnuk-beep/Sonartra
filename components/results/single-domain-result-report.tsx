@@ -33,7 +33,7 @@ function MetadataCard({
       </dl>
       {versionItem ? (
         <p className="sonartra-single-domain-version-note">
-          Report version {versionItem.value}
+          Version {versionItem.value}
         </p>
       ) : null}
     </div>
@@ -53,32 +53,35 @@ function OpeningEvidencePanel({
   const supportingProofItems = proofItems.slice(2);
 
   return (
-    <aside className="sonartra-single-domain-evidence-panel" aria-label="Result basis">
+    <aside className="sonartra-single-domain-evidence-panel" aria-label="Report basis">
       <div className="sonartra-single-domain-evidence-panel-header">
-        <p className="sonartra-report-kicker">Result basis</p>
+        <p className="sonartra-report-kicker">Report basis</p>
         <p className="sonartra-single-domain-evidence-panel-note">
           {lead}
         </p>
       </div>
 
-      <div className="sonartra-single-domain-proof-grid" aria-label="Headline signal evidence">
-        {headlineProofItems.map((item) => (
-          <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-proof-item">
-            <div>
-              <p className="sonartra-single-domain-proof-label">{item.label}</p>
-              <p className="sonartra-single-domain-proof-value">{item.value}</p>
+      <div className="sonartra-single-domain-proof-section">
+        <p className="sonartra-single-domain-proof-section-label">Signals carrying the headline</p>
+        <div className="sonartra-single-domain-proof-grid" aria-label="Headline signal evidence">
+          {headlineProofItems.map((item) => (
+            <div key={`${item.label}-${item.value}`} className="sonartra-single-domain-proof-item">
+              <div>
+                <p className="sonartra-single-domain-proof-label">{item.label}</p>
+                <p className="sonartra-single-domain-proof-value">{item.value}</p>
+              </div>
+              {item.scoreLabel ? (
+                <span className="sonartra-single-domain-proof-score">{item.scoreLabel}</span>
+              ) : null}
+              <p className="sonartra-single-domain-proof-detail">{item.detail}</p>
             </div>
-            {item.scoreLabel ? (
-              <span className="sonartra-single-domain-proof-score">{item.scoreLabel}</span>
-            ) : null}
-            <p className="sonartra-single-domain-proof-detail">{item.detail}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       <details className="sonartra-single-domain-evidence-details">
         <summary>
-          <span>View full evidence</span>
+          <span>Review full report basis</span>
         </summary>
         <div className="sonartra-single-domain-evidence-details-body">
           {supportingProofItems.length > 0 ? (
