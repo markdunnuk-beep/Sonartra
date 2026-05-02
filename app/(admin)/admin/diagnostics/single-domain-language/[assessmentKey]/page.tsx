@@ -5,13 +5,13 @@ const DEFAULT_ASSESSMENT_KEY = 'sonartra-blueprint-leadership';
 export const dynamic = 'force-dynamic';
 
 type SingleDomainLanguageDiagnosticPageProps = {
-  params: { assessmentKey: string };
+  params: Promise<{ assessmentKey: string }>;
 };
 
 export default async function SingleDomainLanguageDiagnosticPage(
   props: SingleDomainLanguageDiagnosticPageProps,
 ) {
-  const { assessmentKey: routeAssessmentKey } = props.params;
+  const { assessmentKey: routeAssessmentKey } = await props.params;
   const assessmentKey = routeAssessmentKey?.trim() || DEFAULT_ASSESSMENT_KEY;
 
   let diagnostic: Awaited<ReturnType<typeof runSingleDomainLanguageDiagnostic>> | null = null;

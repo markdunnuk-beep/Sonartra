@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { runSingleDomainLanguageDiagnostic } from '@/lib/server/single-domain-language-diagnostic';
+
+function readSource(...segments: string[]): string {
+  return readFileSync(join(process.cwd(), ...segments), 'utf8');
+}
 
 function createDiagnosticDb() {
   return {
@@ -129,4 +135,21 @@ test('single-domain language diagnostic reports driver-claim matrix issues and m
   assert.equal(resultsProcess?.completeCount, 8);
   assert.equal(resultsVision?.completeCount, 0);
   assert.ok(resultsVision?.missingTuples.includes('leadership-style|results_vision|results|primary_driver'));
+});
+
+test('single-domain language diagnostic route awaits the requested assessment key param', () => {
+  const source = readSource(
+    'app',
+    '(admin)',
+    'admin',
+    'diagnostics',
+    'single-domain-language',
+    '[assessmentKey]',
+    'page.tsx',
+  );
+
+  assert.match(source, /params: Promise<\{ assessmentKey: string \}>/);
+  assert.match(source, /await props\.params/);
+  assert.match(source, /runSingleDomainLanguageDiagnostic\(assessmentKey\)/);
+  assert.doesNotMatch(source, /const \{ assessmentKey: routeAssessmentKey \} = props\.params/);
 });
