@@ -561,9 +561,9 @@ export function UserAppShell({
         ) : null}
 
         <div
-          aria-hidden={mobileOpen ? true : undefined}
           className="min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip"
           data-user-shell-content-state={mobileOpen ? 'subordinate' : 'active'}
+          inert={mobileOpen ? true : undefined}
         >
           <div
             className={cn(
@@ -596,7 +596,7 @@ export function UserAppShell({
                 {isAssessmentRunnerRoute ? 'Assessment' : 'SONARTRA'}
               </Link>
               {isAssessmentRunnerRoute ? (
-                <p className="sonartra-type-caption text-white/42 mt-1">Runner focus</p>
+                <p className="sonartra-type-caption text-white/42 mt-1">Assessment focus</p>
               ) : null}
             </div>
             <div className="w-11" />

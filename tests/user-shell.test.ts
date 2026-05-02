@@ -88,7 +88,7 @@ test('user shell reprioritises chrome for assessment runner routes on smaller sc
   assert.match(shellSource, /shellDesktopBreakpoint === 'xl' \? 'xl:sticky' : 'lg:sticky'/);
   assert.match(shellSource, /min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip/);
   assert.match(shellSource, /sticky top-0 z-20/);
-  assert.match(shellSource, /Runner focus/);
+  assert.match(shellSource, /Assessment focus/);
   assert.match(shellSource, /isAssessmentRunnerRoute \? 'Assessment' : 'SONARTRA'/);
   assert.match(
     shellSource,
@@ -137,6 +137,8 @@ test('user mobile drawer opens as a full accessible drawer without overwriting d
   assert.match(source, /aria-describedby=\{mobileOpen \? mobileDrawerDescriptionId : undefined\}/);
   assert.match(source, /data-user-mobile-drawer=\{mobileOpen \? 'open' : 'closed'\}/);
   assert.match(source, /data-user-shell-content-state=\{mobileOpen \? 'subordinate' : 'active'\}/);
+  assert.match(source, /inert=\{mobileOpen \? true : undefined\}/);
+  assert.doesNotMatch(source, /aria-hidden=\{mobileOpen \? true : undefined\}/);
   assert.match(source, /aria-expanded=\{mobileOpen\}/);
   assert.match(source, /Workspace navigation\. Close to return to the current page\./);
   assert.match(source, /collapsed=\{mobileSidebarCollapsed\}/);
