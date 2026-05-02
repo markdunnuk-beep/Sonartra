@@ -63,8 +63,8 @@ export function AdminAssessmentVersionPlaceholder({
     <section className="space-y-6">
       <SectionHeader
         eyebrow="Versioning"
-        title="Create new version"
-        description="Start a new version of an existing assessment family."
+        title="Create draft version"
+        description="Create the next editable draft from the current published assessment."
       />
 
       <SurfaceCard className="space-y-5 p-5 lg:p-6">

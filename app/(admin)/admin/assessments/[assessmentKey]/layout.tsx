@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
 
 import { AdminAssessmentAuthoringProvider } from '@/components/admin/admin-assessment-authoring-context';
+import { AdminCreateVersionHeaderAction } from '@/components/admin/admin-create-version-header-action';
 import { AdminPublishedNoDraftBanner } from '@/components/admin/admin-assessment-draft-state';
 import { AdminAssessmentStepper } from '@/components/admin/admin-assessment-stepper';
 import {
-  ButtonLink,
   LabelPill,
   PageFrame,
   SurfaceCard,
@@ -42,9 +42,9 @@ export default async function AdminAssessmentAuthoringLayout({
                       : 'No version yet'}
                 </LabelPill>
               </div>
-              <ButtonLink href={`/admin/assessments/${assessment.assessmentKey}/versions/new`}>
-                Create new version
-              </ButtonLink>
+              <AdminCreateVersionHeaderAction
+                href={`/admin/assessments/${assessment.assessmentKey}/versions/new`}
+              />
             </div>
             <div className="space-y-2">
               <h1 className="text-[1.72rem] font-semibold leading-[1.02] tracking-[-0.032em] text-white sm:text-[2rem] lg:text-[2.2rem]">

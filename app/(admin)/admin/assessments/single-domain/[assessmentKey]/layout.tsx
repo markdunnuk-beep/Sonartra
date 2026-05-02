@@ -1,9 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
 
 import { AdminAssessmentAuthoringProvider } from '@/components/admin/admin-assessment-authoring-context';
+import { AdminCreateVersionHeaderAction } from '@/components/admin/admin-create-version-header-action';
 import { SingleDomainBuilderStepper } from '@/components/admin/single-domain-builder-stepper';
 import { SingleDomainUnsavedChangesProvider } from '@/components/admin/single-domain-unsaved-changes';
-import { ButtonLink, LabelPill, PageFrame, SurfaceCard } from '@/components/shared/user-app-ui';
+import { LabelPill, PageFrame, SurfaceCard } from '@/components/shared/user-app-ui';
 import { getSingleDomainBuilderAssessment } from '@/lib/server/admin-single-domain-builder';
 import { getDbPool } from '@/lib/server/db';
 
@@ -45,11 +46,9 @@ export default async function SingleDomainAssessmentBuilderLayout({
                         : 'No draft version yet'}
                   </LabelPill>
                 </div>
-                <ButtonLink
+                <AdminCreateVersionHeaderAction
                   href={`/admin/assessments/single-domain/${assessment.assessmentKey}/versions/new`}
-                >
-                  Create new version
-                </ButtonLink>
+                />
               </div>
               <div className="space-y-2">
                 <h1 className="text-[1.72rem] font-semibold leading-[1.02] tracking-[-0.032em] text-white sm:text-[2rem] lg:text-[2.2rem]">

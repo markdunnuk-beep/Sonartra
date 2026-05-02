@@ -20,7 +20,7 @@ test('authoring layout switches into published-no-draft banner mode', () => {
   assert.match(source, /assessment\.builderMode === 'published_no_draft'/);
   assert.match(source, /Browse the published assessment and create a draft when you are ready to change it\./);
   assert.match(source, /<AdminPublishedNoDraftBanner/);
-  assert.match(source, /Create new version/);
+  assert.match(source, /<AdminCreateVersionHeaderAction/);
   assert.match(source, /href=\{`\/admin\/assessments\/\$\{assessment\.assessmentKey\}\/versions\/new`\}/);
   assert.match(source, /space-y-4 sm:space-y-5 lg:space-y-6/);
   assert.match(source, /overflow-hidden p-4 sm:p-5 lg:p-6/);
@@ -37,11 +37,24 @@ test('single-domain authoring layout exposes the create-new-version placeholder 
     'layout.tsx',
   );
 
-  assert.match(source, /Create new version/);
+  assert.match(source, /<AdminCreateVersionHeaderAction/);
   assert.match(
     source,
     /href=\{`\/admin\/assessments\/single-domain\/\$\{assessment\.assessmentKey\}\/versions\/new`\}/,
   );
+});
+
+test('header create-version action hides itself on version creation routes only', () => {
+  const source = readSource(
+    'components',
+    'admin',
+    'admin-create-version-header-action.tsx',
+  );
+
+  assert.match(source, /usePathname/);
+  assert.match(source, /pathname\.endsWith\('\/versions\/new'\)/);
+  assert.match(source, /return null/);
+  assert.match(source, /Create new version/);
 });
 
 test('create-new-version routes invoke draft creation and render outcome states', () => {
@@ -72,7 +85,10 @@ test('create-new-version routes invoke draft creation and render outcome states'
     'page.tsx',
   );
 
+  assert.match(componentSource, /title="Create draft version"/);
+  assert.match(componentSource, /Create the next editable draft from the current published assessment\./);
   assert.match(componentSource, /Create a new draft version from the published assessment\./);
+  assert.match(componentSource, /Create draft version/);
   assert.match(componentSource, /A draft version already exists for this assessment\./);
   assert.match(componentSource, /createDraftVersionAction\.bind\(null, mode, assessmentKey\)/);
   assert.match(multiDomainRouteSource, /AdminAssessmentVersionPlaceholder/);
