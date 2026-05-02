@@ -126,7 +126,7 @@ export function ResultReadingProgress({
                     key={section.id}
                     className={cn(
                       'sonartra-motion-progress block h-1.5 rounded-full',
-                      isActive && 'w-5 bg-[rgba(194,205,255,0.56)]',
+                      isActive && 'w-5 bg-[rgba(50,214,176,0.58)]',
                       isPassed && 'w-2.5 bg-[rgba(128,166,139,0.34)]',
                       !isActive && !isPassed && 'w-2.5 bg-white/[0.08]',
                     )}
@@ -140,7 +140,7 @@ export function ResultReadingProgress({
             <div className="mt-2.5 flex items-start gap-2.5 border-t border-white/[0.05] pt-2.5">
               <span
                 aria-hidden="true"
-                className="mt-[0.34rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[rgba(142,162,255,0.22)]"
+                className="mt-[0.34rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[rgba(50,214,176,0.24)]"
               />
               <div className="min-w-0">
                 <p className="text-[0.58rem] font-medium uppercase tracking-[0.18em] text-white/26">

@@ -50,6 +50,15 @@ test('progress markers use shared motion class for restrained transitions', () =
   assert.match(markup, /sonartra-motion-progress block h-1\.5 rounded-full/);
 });
 
+test('progress markers use Sonartra signal teal instead of legacy violet', () => {
+  const markup = renderToStaticMarkup(<ResultReadingProgress activeSectionIdOverride="hero" />);
+
+  assert.match(markup, /rgba\(50,214,176,0\.58\)/);
+  assert.match(markup, /rgba\(50,214,176,0\.24\)/);
+  assert.doesNotMatch(markup, /rgba\(142,162,255/);
+  assert.doesNotMatch(markup, /rgba\(194,205,255/);
+});
+
 test('unknown sections safely resolve to first canonical top-level step', () => {
   const markup = renderToStaticMarkup(
     <ResultReadingProgress activeSectionIdOverride="not-a-real-section" />,
@@ -68,8 +77,8 @@ test('progress component can follow the single-domain top-level sequence', () =>
     />,
   );
 
-  assert.match(markup, />Limitation</);
+  assert.match(markup, />Where This Can Work Against You</);
   assert.match(markup, />05</);
-  assert.match(markup, />Application</);
+  assert.match(markup, />Putting This Into Practice</);
   assert.equal(markup.match(/sonartra-motion-progress block h-1\.5 rounded-full/g)?.length ?? 0, 6);
 });

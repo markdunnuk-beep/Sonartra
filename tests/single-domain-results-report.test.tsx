@@ -615,6 +615,10 @@ test('single-domain report spacing and labels support lighter mobile scanability
   assert.match(cssSource, /\.sonartra-single-domain-version-note\s*\{[\s\S]*?color:\s*rgba\(207, 218, 243, 0\.34\);/);
   assert.match(cssSource, /\.sonartra-result-section-nav summary\s*\{[\s\S]*?cursor-pointer/);
   assert.match(cssSource, /\.sonartra-result-section-nav-link\s*\{[\s\S]*?min-height:\s*2\.65rem;/);
+  assert.match(
+    cssSource,
+    /\.sonartra-result-section-nav-link\[data-section-nav-state='current'\]\s*\{[\s\S]*?rgba\(50, 214, 176, 0\.7\)/,
+  );
   assert.match(cssSource, /\.sonartra-single-domain-driver-entry\s*\{[\s\S]*?padding-top:\s*1\.5rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-flow\s*\{[\s\S]*?gap:\s*1\.9rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-entry\s*\{[\s\S]*?border-radius:\s*1\.4rem;/);

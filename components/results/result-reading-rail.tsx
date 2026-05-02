@@ -215,7 +215,7 @@ export function ResultReadingRail({
                       'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.58rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-white/[0.12] bg-[#0c1322] opacity-100',
                       isPassed && 'sonartra-result-rail-marker-read',
                       isTopLevelActive &&
-                        'border-[rgba(194,205,255,0.28)] bg-[rgba(194,205,255,0.26)] shadow-[0_0_0_5px_rgba(142,162,255,0.055)]',
+                        'border-[rgba(50,214,176,0.32)] bg-[rgba(50,214,176,0.22)] shadow-[0_0_0_5px_rgba(50,214,176,0.055)]',
                       isUpcoming && 'border-white/[0.1] bg-white/[0.035]',
                     )}
                   />
@@ -309,7 +309,7 @@ export function ResultReadingRail({
                                 className={cn(
                                   'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.88rem] top-1/2 h-px w-3 scale-100 rounded-full bg-white/[0.08] opacity-100',
                                   isPassedDomainSubsection && 'sonartra-result-rail-marker-read',
-                                  isDomainSubsectionActive && 'bg-[rgba(194,205,255,0.34)]',
+                                  isDomainSubsectionActive && 'bg-[rgba(50,214,176,0.38)]',
                                 )}
                               />
                               <span className="relative flex min-w-0 items-center gap-2">
@@ -319,7 +319,7 @@ export function ResultReadingRail({
                                     'h-1 w-1 rounded-full bg-white/[0.16]',
                                     isPassedDomainSubsection &&
                                       'bg-[rgba(128,166,139,0.38)]',
-                                    isDomainSubsectionActive && 'bg-[rgba(194,205,255,0.5)]',
+                                    isDomainSubsectionActive && 'bg-[rgba(50,214,176,0.52)]',
                                   )}
                                 />
                                 <span className="block min-w-0">{domainSection.label}</span>

@@ -1214,8 +1214,21 @@ main {
 
   .sonartra-result-section-nav-link:hover,
   .sonartra-result-section-nav-link[data-section-nav-state='current'] {
-    background: rgba(255, 255, 255, 0.026);
+    background:
+      linear-gradient(90deg, rgba(50, 214, 176, 0.075), rgba(255, 255, 255, 0.026)),
+      rgba(255, 255, 255, 0.018);
     color: rgba(241, 246, 255, 0.84);
+  }
+
+  .sonartra-result-section-nav-link[data-section-nav-state='current'] {
+    box-shadow:
+      inset 2px 0 0 rgba(50, 214, 176, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  }
+
+  .sonartra-result-section-nav-link[data-section-nav-state='current']
+    .sonartra-result-section-nav-number {
+    color: rgba(50, 214, 176, 0.74);
   }
 
   .sonartra-result-section-nav-number {

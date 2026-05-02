@@ -130,6 +130,17 @@ test('rail provides restrained current and next reading cues', () => {
   assert.match(markup, /data-reading-state="next"/);
 });
 
+test('reading rail active accents use Sonartra signal teal instead of legacy violet', () => {
+  const markup = renderToStaticMarkup(
+    <ResultReadingRail activeSectionIdOverride="domain-core-drivers" />,
+  );
+
+  assert.match(markup, /rgba\(50,214,176,0\.32\)/);
+  assert.match(markup, /rgba\(50,214,176,0\.52\)/);
+  assert.doesNotMatch(markup, /rgba\(142,162,255/);
+  assert.doesNotMatch(markup, /rgba\(194,205,255/);
+});
+
 test('reading rail links remain keyboard-focusable anchors with visible focus classes', () => {
   const markup = renderToStaticMarkup(
     <ResultReadingRail
