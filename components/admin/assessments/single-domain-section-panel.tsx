@@ -336,7 +336,7 @@ export function SingleDomainSectionPanel({
                 {importState.latestValidationResult
                   ?? (canImport
                     ? 'Waiting for section rows.'
-                    : 'Draft version required before this section can import.')}
+                    : 'Draft required. See the authoring state above.')}
               </p>
             </div>
           </div>
@@ -384,7 +384,7 @@ export function SingleDomainSectionPanel({
             <p className="text-sm leading-6 text-white/56">
               {canImport
                 ? 'This import replaces the stored rows for this owned section only.'
-                : 'Create or load a draft version before importing section rows.'}
+                : 'Draft required before section import.'}
             </p>
             <ImportSubmitButton disabled={!canImport} />
           </div>

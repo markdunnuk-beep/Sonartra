@@ -10,6 +10,18 @@ import { buildSingleDomainNarrativeBuilderModel } from '@/lib/assessment-languag
 export function SingleDomainNarrativeBuilder() {
   const assessment = useAdminAssessmentAuthoring();
   const model = buildSingleDomainNarrativeBuilderModel(assessment);
+  const publishedVersionTag = assessment.publishedVersion?.versionTag ?? null;
+  const draftVersionTag = assessment.latestDraftVersion?.versionTag ?? null;
+  const authoringStateTitle = draftVersionTag
+    ? 'Draft language imports are available'
+    : publishedVersionTag
+      ? 'Current live version remains available'
+      : 'Draft required before language import';
+  const authoringStateDescription = draftVersionTag
+    ? `Draft ${draftVersionTag} is editable. Section imports update draft language content before the next publish.`
+    : publishedVersionTag
+      ? `Current live version ${publishedVersionTag} remains available. No draft is currently in progress, so language imports are disabled until a draft version is created. The checks below describe what editable content will need before the next publish.`
+      : 'No live version or editable draft is available yet. Create a draft version before importing section language rows.';
 
   return (
     <section className="space-y-8">
@@ -26,12 +38,36 @@ export function SingleDomainNarrativeBuilder() {
             {assessment.modeLabel}
           </LabelPill>
           <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
-            {assessment.latestDraftVersion
-              ? `Draft ${assessment.latestDraftVersion.versionTag}`
-              : assessment.publishedVersion
-                ? `Published ${assessment.publishedVersion.versionTag}`
+            {draftVersionTag
+              ? `Draft ${draftVersionTag}`
+              : publishedVersionTag
+                ? `Published ${publishedVersionTag}`
                 : 'Draft context pending'}
           </LabelPill>
+        </div>
+
+        <div className="rounded-[1rem] border border-[rgba(50,214,176,0.18)] bg-[rgba(50,214,176,0.06)] p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="sonartra-page-eyebrow">Authoring state</p>
+            {publishedVersionTag ? (
+              <LabelPill className="border-[rgba(50,214,176,0.22)] bg-[rgba(50,214,176,0.08)] text-[rgba(213,255,245,0.86)]">
+                Live {publishedVersionTag}
+              </LabelPill>
+            ) : null}
+            {draftVersionTag ? (
+              <LabelPill className="border-[rgba(255,184,107,0.18)] bg-[rgba(255,184,107,0.08)] text-[rgba(255,227,187,0.88)]">
+                Draft {draftVersionTag}
+              </LabelPill>
+            ) : (
+              <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
+                No draft in progress
+              </LabelPill>
+            )}
+          </div>
+          <div className="mt-3 space-y-2">
+            <CardTitle>{authoringStateTitle}</CardTitle>
+            <SecondaryText>{authoringStateDescription}</SecondaryText>
+          </div>
         </div>
 
         <div className="space-y-2">

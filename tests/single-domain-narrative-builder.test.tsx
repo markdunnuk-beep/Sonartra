@@ -402,3 +402,44 @@ test('narrative builder renders the six locked sections, readiness summary, and 
   assert.ok(markup.indexOf('single-domain-section-pair') < markup.indexOf('single-domain-section-limitation'));
   assert.ok(markup.indexOf('single-domain-section-limitation') < markup.indexOf('single-domain-section-application'));
 });
+
+test('narrative builder explains the no-draft live-version state once before section imports', () => {
+  const assessment = createAssessment(
+    createLanguageBundle({
+      DOMAIN_FRAMING: [],
+      HERO_PAIRS: [],
+      DRIVER_CLAIMS: [],
+      SIGNAL_CHAPTERS: [],
+      BALANCING_SECTIONS: [],
+      PAIR_SUMMARIES: [],
+      APPLICATION_STATEMENTS: [],
+    }),
+  );
+  assessment.latestDraftVersion = null;
+  assessment.publishedVersion = {
+    assessmentVersionId: 'version-live',
+    versionTag: '2.00',
+    status: 'published',
+    publishedAt: '',
+    questionCount: 24,
+    createdAt: '',
+    updatedAt: '',
+  };
+
+  const markup = renderToStaticMarkup(
+    <AdminAssessmentAuthoringProvider assessment={assessment}>
+      <SingleDomainNarrativeBuilder />
+    </AdminAssessmentAuthoringProvider>,
+  );
+
+  assert.match(markup, /Authoring state/);
+  assert.match(markup, /Current live version remains available/);
+  assert.match(markup, /Current live version 2.00 remains available/);
+  assert.match(markup, /No draft is currently in progress/);
+  assert.match(markup, /language imports are disabled until a draft version is created/);
+  assert.match(markup, /checks below describe what editable content will need before the next publish/);
+  assert.match(markup, /Draft required\. See the authoring state above\./);
+  assert.match(markup, /Draft required before section import\./);
+  assert.doesNotMatch(markup, /Draft version required before this section can import/);
+  assert.doesNotMatch(markup, /Create or load a draft version before importing section rows/);
+});
