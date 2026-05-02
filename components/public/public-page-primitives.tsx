@@ -31,20 +31,22 @@ type PublicPageCta = {
 
 export function PublicPageCanvas({ children }: PublicPageCanvasProps) {
   return (
-    <div className="relative isolate -mx-5 overflow-hidden px-5 pb-16 pt-20 sm:-mx-6 sm:px-6 md:pb-20 md:pt-24 lg:-mx-8 lg:px-8">
+    <div className="relative isolate -mx-5 overflow-hidden px-5 pb-16 pt-20 text-[#F5F1EA] sm:-mx-6 sm:px-6 md:pb-20 md:pt-24 lg:-mx-8 lg:px-8">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_16%_0%,rgba(50,214,176,0.14),transparent_34%),radial-gradient(circle_at_84%_4%,rgba(217,164,65,0.06),transparent_30%),radial-gradient(circle_at_50%_0%,rgba(245,241,234,0.06),transparent_34%),linear-gradient(180deg,#111820_0%,#0B1016_42%,#080A0D_82%)]"
-      />
+        className="fixed left-0 top-16 bottom-0 z-0 w-full max-w-full overflow-hidden bg-[linear-gradient(180deg,#090B0F_0%,#080A0D_46rem,#080A0D_100%)]"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_7%,rgba(50,214,176,0.13),transparent_31%),radial-gradient(circle_at_84%_12%,rgba(245,241,234,0.07),transparent_29%),linear-gradient(180deg,rgba(8,10,13,0)_0%,rgba(8,10,13,0.72)_68%,rgba(8,10,13,0)_100%)]" />
+        <div className="absolute left-1/2 top-12 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.035]" />
+        <div className="absolute left-1/2 top-24 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full border border-[#32D6B0]/[0.045]" />
+        <div className="absolute inset-x-[-8rem] top-0 h-[42rem] bg-[linear-gradient(rgba(245,241,234,0.016)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_58%,rgba(0,0,0,0.2)_100%)]" />
+      </div>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[34rem] bg-[linear-gradient(rgba(245,241,234,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[34rem] bg-[radial-gradient(circle_at_18%_0%,rgba(50,214,176,0.10),transparent_32%)]"
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[30rem] bg-[linear-gradient(to_bottom,rgba(8,10,13,0)_0%,rgba(8,10,13,0.68)_82%,#080A0D_100%)]"
-      />
-      <div className="mx-auto max-w-6xl">{children}</div>
+      <div className="relative z-10 mx-auto max-w-6xl">{children}</div>
     </div>
   );
 }
