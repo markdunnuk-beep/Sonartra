@@ -372,11 +372,11 @@ export function AdminShell({
           <div
             className={cn(
               'border-white/8 rounded-[1.4rem] border bg-white/[0.03]',
-              mobileSidebarCollapsed ? 'p-2' : 'p-3',
+              mobileSidebarCollapsed ? 'p-2' : 'p-3.5',
             )}
           >
             {mobileSidebarCollapsed ? (
-              <div title={userLabel}>
+              <div aria-label={`Admin session: ${userLabel}`} title={userLabel}>
                 <SessionAvatar
                   className="border-white/8 text-white/76 mx-auto bg-white/[0.03]"
                   userLabel={userLabel}

@@ -34,6 +34,7 @@ test('admin shell sidebar constrains horizontal overflow at the container', () =
   assert.match(source, /min-h-screen overflow-x-clip/);
   assert.match(source, /max-w-\[calc\(100vw-1rem\)\]/);
   assert.match(source, /box-border flex w-\[18\.5rem\] max-w-\[calc\(100vw-1rem\)\] flex-col overflow-x-hidden/);
+  assert.match(source, /mobileSidebarCollapsed \? 'lg:w-\[5\.75rem\]' : 'lg:w-\[18\.5rem\]'/);
   assert.match(source, /overflow-y-auto overflow-x-hidden pb-4/);
   assert.match(source, /min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip/);
   assert.match(source, /sonartra-shell-nav-track space-y-1\.5/);
@@ -47,6 +48,14 @@ test('admin shell sidebar constrains horizontal overflow at the container', () =
     globalsSource,
     /\.sonartra-motion-nav-item\[data-sidebar-collapsed='true'\]\[aria-current='page'\]\s*\{\s*transform: none;/m,
   );
+});
+
+test('admin collapsed footer keeps the admin session tile intentional', () => {
+  const source = readSource(adminShellPath);
+
+  assert.match(source, /mobileSidebarCollapsed \? 'p-2' : 'p-3\.5'/);
+  assert.match(source, /aria-label=\{`Admin session: \$\{userLabel\}`\}/);
+  assert.match(source, /border-white\/8 text-white\/76 mx-auto bg-white\/\[0\.03\]/);
 });
 
 test('admin shell uses Sonartra logo and mark assets for expanded and collapsed branding', () => {

@@ -93,8 +93,8 @@ function SessionFooter({
 }) {
   if (collapsed) {
     return (
-      <div className="flex flex-col items-center gap-2">
-        <div title={userLabel}>
+      <div className="border-white/8 flex flex-col items-center gap-2 rounded-[1.4rem] border bg-white/[0.03] p-2">
+        <div aria-label={`Workspace session: ${userLabel}`} title={userLabel}>
           <SessionAvatar
             className="border-white/8 text-white/76 bg-white/[0.03]"
             userLabel={userLabel}
@@ -114,7 +114,7 @@ function SessionFooter({
   }
 
   return (
-    <div className="border-white/8 rounded-[1.4rem] border bg-white/[0.03] p-3">
+    <div className="border-white/8 rounded-[1.4rem] border bg-white/[0.03] p-3.5">
       <div className="flex items-center gap-3">
         <SessionAvatar userLabel={userLabel} />
         <div className="min-w-0 flex-1">
@@ -295,7 +295,7 @@ function SidebarSection({
   onNavigate?: () => void;
 }) {
   return (
-    <div className={cn('sonartra-shell-nav-track space-y-1.5', collapsed && 'pr-0')}>
+    <div className={cn('sonartra-shell-nav-track space-y-1.5', collapsed && 'space-y-2.5 pr-0')}>
       {section.items.map((item) => (
         <SidebarLink collapsed={collapsed} item={item} key={item.key} onNavigate={onNavigate} />
       ))}
@@ -398,8 +398,8 @@ export function UserAppShell({
               : 'lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
             mobileSidebarCollapsed
               ? shellDesktopBreakpoint === 'xl'
-                ? 'xl:w-[5.5rem]'
-                : 'lg:w-[5.5rem]'
+                ? 'xl:w-[5.75rem]'
+                : 'lg:w-[5.75rem]'
               : shellDesktopBreakpoint === 'xl'
                 ? 'xl:w-[17.5rem]'
                 : 'lg:w-[17.5rem]',
