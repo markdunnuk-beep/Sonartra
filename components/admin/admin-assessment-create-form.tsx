@@ -11,6 +11,7 @@ import {
 } from '@/components/shared/user-app-ui';
 import {
   emptyAdminAssessmentCreateFormValues,
+  DUPLICATE_ASSESSMENT_KEY_MESSAGE,
   initialAdminAssessmentCreateFormState,
   type AdminAssessmentCreateFormState,
 } from '@/lib/admin/admin-assessment-create';
@@ -212,6 +213,12 @@ export function AdminAssessmentCreateFormContent({
   const assessmentKeyLooksValid =
     assessmentKeyValue.length === 0 || ASSESSMENT_KEY_PATTERN.test(assessmentKeyValue);
   const canCreateAssessment = hasMinimumValidState && assessmentKeyLooksValid;
+  const duplicateAssessmentHref =
+    safeState.fieldErrors.assessmentKey === DUPLICATE_ASSESSMENT_KEY_MESSAGE &&
+    assessmentKeyLooksValid &&
+    assessmentKeyValue.length > 0
+      ? `/admin/assessments/${assessmentKeyValue}`
+      : null;
 
   function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const nextTitle = event.currentTarget.value;
@@ -286,6 +293,13 @@ export function AdminAssessmentCreateFormContent({
                 required
                 value={assessmentKey}
               />
+              {duplicateAssessmentHref ? (
+                <div className="pt-1">
+                  <ButtonLink href={duplicateAssessmentHref} variant="secondary">
+                    Open existing assessment
+                  </ButtonLink>
+                </div>
+              ) : null}
             </FieldShell>
           </div>
 
