@@ -201,7 +201,6 @@ function run() {
     };
   }
 
-  // eslint-disable-next-line no-console
   console.log(JSON.stringify(report, null, 2));
 }
 
