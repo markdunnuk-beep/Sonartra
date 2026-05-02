@@ -43,10 +43,10 @@ function formatFailureMessage(lastError: string | null): string {
 
 function formatLongProcessingMessage(stage: AssessmentProcessingStateProps['stage']): string {
   if (stage === 'submitting') {
-    return 'We are still waiting for the completion service to confirm your submission. Keep this tab open while Sonartra finishes the handoff.';
+    return 'We are still confirming your submission. Keep this tab open while Sonartra prepares the next step.';
   }
 
-  return 'Your result is still being prepared. Sonartra will open the persisted report as soon as the canonical result is ready.';
+  return 'Your result is still being prepared. Sonartra will open your report as soon as it is ready.';
 }
 
 function ProcessingShell({ children }: { children: ReactNode }) {
@@ -86,7 +86,7 @@ function getTransitionCopy(params: {
   if (params.resolvedReadyHref && params.stage !== 'submitting') {
     return {
       title: 'Opening your report',
-      subtitle: 'Your result is ready. Sonartra is taking you to the persisted report.',
+      subtitle: 'Your result is ready. Sonartra is opening your report.',
     };
   }
 
@@ -295,15 +295,15 @@ export function AssessmentProcessingState({
           </h1>
           <p className="max-w-[32rem] text-[0.98rem] leading-7 text-white/60">
             {isReturnToAssessment
-              ? 'This assessment is still open in the runner. Return to the assessment to continue from the saved attempt.'
+              ? 'This assessment is still open. Return to continue from your saved progress.'
               : formatFailureMessage(pollFailure)}
           </p>
         </div>
 
         <p className="max-w-[32rem] text-[0.95rem] leading-7 text-white/52">
           {isReturnToAssessment
-            ? 'No result has been marked ready yet. Continue from the saved runner state.'
-            : 'This assessment is no longer editable from the runner. Continue from your workspace.'}
+            ? 'No result is ready yet. Continue the assessment when you are ready.'
+            : 'This assessment is no longer editable here. Continue from your workspace.'}
         </p>
 
         <div className="flex flex-wrap gap-3 border-t border-white/8 pt-5">
@@ -348,8 +348,8 @@ export function AssessmentProcessingState({
         <div className="space-y-3 border-t border-white/8 pt-5">
           <p className="max-w-[32rem] text-[0.94rem] leading-7 text-white/52">
             {stage === 'processing'
-              ? 'We are still checking the real persisted status in the background.'
-              : 'Once the completion service confirms the handoff, Sonartra will continue into the persisted processing state automatically.'}
+              ? 'We are still checking the result status in the background.'
+              : 'Once your submission is confirmed, Sonartra will continue automatically.'}
           </p>
           {stage === 'processing' ? (
             <p className="max-w-[32rem] text-[0.9rem] leading-7 text-white/46">

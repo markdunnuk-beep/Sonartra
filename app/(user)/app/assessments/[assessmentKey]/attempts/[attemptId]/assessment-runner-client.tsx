@@ -14,7 +14,7 @@ import type { AssessmentMode } from '@/lib/types/assessment';
 import { getAssessmentResultHref } from '@/lib/utils/assessment-mode';
 
 const RUNNER_GUIDANCE_COPY =
-  'Choose the response that best reflects your usual approach. Your answers save automatically.';
+  'Answer for the way you usually work, not the answer that seems ideal. There are no right answers.';
 
 type AssessmentRunnerClientProps = {
   userId: string;
@@ -346,7 +346,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
       <section className="sonartra-motion-reveal sonartra-panel space-y-3">
         <h1 className="sonartra-type-page-title">Assessment unavailable</h1>
         <p className="sonartra-type-body-secondary max-w-[44rem]">
-          This attempt has no persisted question set loaded for the current assessment version.
+          We could not load the saved questions for this assessment. Return to assessments and try again.
         </p>
         <Link
           href="/app/assessments"
@@ -382,7 +382,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
           </h1>
           <p className="sonartra-type-body-secondary mt-2 max-w-[46rem] text-white/60">
             {showReviewHandoff
-              ? 'All responses are in place. Review freely, then complete the assessment when ready.'
+              ? 'All responses are saved. Review anything you want to change, then complete the assessment when ready.'
               : RUNNER_GUIDANCE_COPY}
           </p>
         </header>
@@ -432,7 +432,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="sonartra-type-body-secondary text-white/58">
-                    Jump to any question without leaving the runner.
+                    Move between questions without losing your saved progress.
                   </p>
                   <p className="sonartra-type-caption text-white/46">
                     {showReviewHandoff ? 'Review mode' : `${unansweredQuestions} remaining`}

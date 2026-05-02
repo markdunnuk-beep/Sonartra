@@ -94,7 +94,7 @@ test('runner client gives question changes and completion feedback a calmer stag
   assert.match(source, /sonartra-runner-map-item/);
   assert.match(
     source,
-    /Choose the response that best reflects your usual approach\. Your answers save automatically\./,
+    /Answer for the way you usually work, not the answer that seems ideal\. There are no right answers\./,
   );
   assert.doesNotMatch(source, /Work through each question in order\. Responses save automatically as you go\./);
   assert.doesNotMatch(source, /Answer the current question to keep moving through the assessment\./);
@@ -301,7 +301,7 @@ test('runner client adds compact orientation controls for tablet and mobile layo
   assert.match(source, /id="runner-compact-navigator"/);
   assert.match(source, /Open question navigator/);
   assert.match(source, /Hide question navigator/);
-  assert.match(source, /Jump to any question without leaving the runner\./);
+  assert.match(source, /Move between questions without losing your saved progress\./);
   assert.match(source, /sm:grid-cols-6 md:grid-cols-8/);
   assert.match(source, /rounded-\[1\.15rem\] border border-white\/8 bg-neutral-950\/72/);
   assert.match(source, /rounded-lg border px-2 py-2 text-center/);

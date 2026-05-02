@@ -80,7 +80,7 @@ export default async function AssessmentAttemptRunnerPage({
             </div>
 
             <p className="max-w-[32rem] text-[0.95rem] leading-7 text-white/52">
-              This assessment is no longer editable from the runner. Continue from your workspace.
+              This assessment is no longer editable here. Continue from your workspace.
             </p>
 
             <div className="flex flex-wrap gap-3 border-t border-white/8 pt-5">

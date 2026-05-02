@@ -67,7 +67,7 @@ export function AssessmentIntroductionPage({
                     Continue to Assessment
                   </Link>
                   <p className="sonartra-type-body-secondary text-white/56 max-w-[32rem]">
-                    Starting the assessment creates your attempt and opens the first question in the runner.
+                    Answer for the way you usually work, not the version of yourself you think would score best.
                   </p>
                 </div>
               </div>
@@ -127,7 +127,7 @@ export function AssessmentIntroductionPage({
           </div>
 
           <p className="sonartra-type-body-secondary text-white/58">
-            Progress starts once the first response is saved. Resume and completed-result routing remain separate from this introduction state.
+            There are no right answers. Consistency and honesty will make your result more useful.
           </p>
           <Link
             href={`/app/assessments#${assessmentKey}`}
