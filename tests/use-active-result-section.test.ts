@@ -4,6 +4,8 @@ import test from 'node:test';
 import {
   getSafeDefaultActiveState,
   pickActiveSectionCandidate,
+  RESULT_SECTION_JUMP_EVENT,
+  scrollToResultSection,
   toActiveResultSectionState,
 } from '@/hooks/use-active-result-section';
 import { RESULT_READING_SECTION_IDS } from '@/lib/results/result-reading-sections';
@@ -199,4 +201,65 @@ test('candidate selection stabilizes after anchor navigation until the target se
   });
 
   assert.equal(afterSmoothScrollSettles, 'drivers');
+});
+
+test('explicit result section jumps dispatch an active-section event before smooth scroll settles', () => {
+  const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
+  const originalCustomEvent = globalThis.CustomEvent;
+  const dispatchedEvents: Array<{ type: string; sectionId?: string }> = [];
+  const scrollCalls: Array<{ top: number; behavior?: ScrollBehavior }> = [];
+
+  class TestCustomEvent extends Event {
+    detail: { sectionId?: string };
+
+    constructor(type: string, init?: CustomEventInit<{ sectionId?: string }>) {
+      super(type);
+      this.detail = init?.detail ?? {};
+    }
+  }
+
+  globalThis.CustomEvent = TestCustomEvent as typeof CustomEvent;
+  globalThis.window = {
+    scrollY: 240,
+    history: {
+      replaceState: (_state: unknown, _title: string, url?: string | URL | null) => {
+        assert.equal(url, '#application');
+      },
+    },
+    dispatchEvent: (event: Event) => {
+      dispatchedEvents.push({
+        type: event.type,
+        sectionId: (event as CustomEvent<{ sectionId?: string }>).detail?.sectionId,
+      });
+      return true;
+    },
+    scrollTo: (options: ScrollToOptions) => {
+      scrollCalls.push({
+        top: Number(options.top),
+        behavior: options.behavior,
+      });
+    },
+  } as unknown as Window & typeof globalThis;
+  globalThis.document = {
+    getElementById: (id: string) =>
+      id === 'application'
+        ? {
+            getBoundingClientRect: () => ({ top: 360 }),
+          }
+        : null,
+  } as unknown as Document;
+
+  try {
+    assert.equal(scrollToResultSection('application'), true);
+  } finally {
+    globalThis.window = originalWindow;
+    globalThis.document = originalDocument;
+    globalThis.CustomEvent = originalCustomEvent;
+  }
+
+  assert.deepEqual(dispatchedEvents, [
+    { type: RESULT_SECTION_JUMP_EVENT, sectionId: 'application' },
+  ]);
+  assert.deepEqual(scrollCalls, [{ top: 504, behavior: 'smooth' }]);
 });

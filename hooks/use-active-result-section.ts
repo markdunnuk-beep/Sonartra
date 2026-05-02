@@ -12,6 +12,8 @@ const DEFAULT_ACTIVE_SECTION_ID = RESULT_READING_SECTION_IDS[0] ?? null;
 const OBSERVER_THRESHOLDS = [0, 0.08, 0.18, 0.32, 0.5, 0.68, 0.84, 1] as const;
 const READING_LINE_VIEWPORT_RATIO = 0.36;
 const ANCHOR_SCROLL_OFFSET_PX = 96;
+const ANCHOR_ACTIVE_LOCK_MS = 900;
+export const RESULT_SECTION_JUMP_EVENT = 'sonartra:result-section-jump';
 
 type SectionObservation = {
   id: string;
@@ -256,6 +258,11 @@ export function scrollToResultSection(sectionId: string): boolean {
   const top = target.getBoundingClientRect().top + window.scrollY - ANCHOR_SCROLL_OFFSET_PX;
 
   window.history.replaceState(null, '', `#${sectionId}`);
+  window.dispatchEvent(
+    new CustomEvent(RESULT_SECTION_JUMP_EVENT, {
+      detail: { sectionId },
+    }),
+  );
   window.scrollTo({
     top: Math.max(top, 0),
     behavior: 'smooth',
@@ -273,6 +280,7 @@ export function useActiveResultSectionWithConfig(
 ): string | null {
   const [activeSectionId, setActiveSectionId] = useState<string | null>(DEFAULT_ACTIVE_SECTION_ID);
   const activeSectionIdRef = useRef<string | null>(DEFAULT_ACTIVE_SECTION_ID);
+  const anchorJumpLockRef = useRef<{ sectionId: string; expiresAt: number } | null>(null);
 
   useEffect(() => {
     activeSectionIdRef.current = activeSectionId;
@@ -312,6 +320,19 @@ export function useActiveResultSectionWithConfig(
     const resolveActiveSection = () => {
       for (const sectionElement of byTopOffset) {
         observations.set(sectionElement.id, buildSectionObservation(sectionElement));
+      }
+
+      const anchorJumpLock = anchorJumpLockRef.current;
+      if (anchorJumpLock) {
+        if (Date.now() < anchorJumpLock.expiresAt) {
+          if (activeSectionIdRef.current !== anchorJumpLock.sectionId) {
+            activeSectionIdRef.current = anchorJumpLock.sectionId;
+            setActiveSectionId(anchorJumpLock.sectionId);
+          }
+          return;
+        }
+
+        anchorJumpLockRef.current = null;
       }
 
       const nextActiveSectionId = pickActiveSectionCandidate({
@@ -389,6 +410,21 @@ export function useActiveResultSectionWithConfig(
 
     window.addEventListener('scroll', scheduleResolveActiveSection, { passive: true });
     window.addEventListener('resize', scheduleResolveActiveSection);
+    const handleAnchorJump = (event: Event) => {
+      const sectionId = (event as CustomEvent<{ sectionId?: string }>).detail?.sectionId;
+      if (!sectionId || !sectionsConfig.sectionsById[sectionId]) {
+        return;
+      }
+
+      anchorJumpLockRef.current = {
+        sectionId,
+        expiresAt: Date.now() + ANCHOR_ACTIVE_LOCK_MS,
+      };
+      activeSectionIdRef.current = sectionId;
+      setActiveSectionId(sectionId);
+    };
+
+    window.addEventListener(RESULT_SECTION_JUMP_EVENT, handleAnchorJump);
 
     return () => {
       if (frameId !== null) {
@@ -398,6 +434,7 @@ export function useActiveResultSectionWithConfig(
       observer?.disconnect();
       window.removeEventListener('scroll', scheduleResolveActiveSection);
       window.removeEventListener('resize', scheduleResolveActiveSection);
+      window.removeEventListener(RESULT_SECTION_JUMP_EVENT, handleAnchorJump);
     };
   }, [sectionsConfig]);
 
