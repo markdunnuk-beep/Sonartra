@@ -4,8 +4,9 @@ import { requireAdminRequestUserContext } from '@/lib/server/admin-access';
 function getAdminShellLabel(params: {
   userId: string;
   userEmail: string | null;
+  userName: string | null;
 }): string {
-  return params.userEmail ?? params.userId;
+  return params.userName ?? params.userEmail ?? params.userId ?? 'Workspace user';
 }
 
 export default function AdminLayout({

@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const userShellPath = join(process.cwd(), 'components', 'user', 'user-app-shell.tsx');
+const userLayoutPath = join(process.cwd(), 'app', '(user)', 'app', 'layout.tsx');
 const globalsPath = join(process.cwd(), 'app', 'globals.css');
 
 function readSource(path: string): string {
@@ -48,4 +49,38 @@ test('user shell reprioritises chrome for assessment runner routes on smaller sc
     shellSource,
     /border-0 bg-transparent shadow-none[\s\S]*sm:rounded-\[1\.6rem\][\s\S]*sm:border/,
   );
+});
+
+test('user app layout passes a name-first shell label with safe fallbacks', () => {
+  const source = readSource(userLayoutPath);
+
+  assert.match(source, /userName: string \| null;/);
+  assert.match(
+    source,
+    /return params\.userName \?\? params\.userEmail \?\? params\.userId \?\? 'Workspace user';/,
+  );
+});
+
+test('user mobile drawer opens as a full accessible drawer without overwriting desktop collapse state', () => {
+  const source = readSource(userShellPath);
+
+  assert.match(source, /import \{ useEffect, useId, useState \} from 'react';/);
+  assert.match(source, /const mobileSidebarCollapsed = collapsed && !mobileOpen;/);
+  assert.match(source, /window\.localStorage\.setItem\(SHELL_COLLAPSE_STORAGE_KEY, collapsed \? 'true' : 'false'\);/);
+  assert.match(source, /document\.body\.dataset\.userMobileScrollLock = 'true';/);
+  assert.match(source, /htmlStyle\.overflow = 'hidden';/);
+  assert.match(source, /bodyStyle\.overflow = 'hidden';/);
+  assert.match(source, /bodyStyle\.touchAction = 'none';/);
+  assert.match(source, /delete document\.body\.dataset\.userMobileScrollLock;/);
+  assert.match(source, /window\.addEventListener\('keydown', handleKeyDown\);/);
+  assert.match(source, /if \(event\.key === 'Escape'\) \{\s*setMobileOpen\(false\);/);
+  assert.match(source, /role=\{mobileOpen \? 'dialog' : undefined\}/);
+  assert.match(source, /aria-modal=\{mobileOpen \? true : undefined\}/);
+  assert.match(source, /aria-labelledby=\{mobileOpen \? mobileDrawerTitleId : undefined\}/);
+  assert.match(source, /aria-describedby=\{mobileOpen \? mobileDrawerDescriptionId : undefined\}/);
+  assert.match(source, /data-user-mobile-drawer=\{mobileOpen \? 'open' : 'closed'\}/);
+  assert.match(source, /data-user-shell-content-state=\{mobileOpen \? 'subordinate' : 'active'\}/);
+  assert.match(source, /aria-expanded=\{mobileOpen\}/);
+  assert.match(source, /Workspace navigation\. Close to return to the current page\./);
+  assert.match(source, /collapsed=\{mobileSidebarCollapsed\}/);
 });

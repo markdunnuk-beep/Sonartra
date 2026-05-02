@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { adminNavItems, isAdminNavItemActive } from '@/components/admin/admin-shell-nav';
 
 const adminShellPath = join(process.cwd(), 'components', 'admin', 'admin-shell.tsx');
+const adminLayoutPath = join(process.cwd(), 'app', '(admin)', 'layout.tsx');
 
 function readSource(path: string): string {
   return readFileSync(path, 'utf8');
@@ -55,4 +56,14 @@ test('admin shell mobile drawer uses explicit overlay semantics and scroll locki
   assert.match(source, /Controlled admin navigation\. Close to return to the current record\./);
   assert.match(source, /aria-hidden=\{mobileOpen \? true : undefined\}/);
   assert.match(source, /aria-expanded=\{mobileOpen\}/);
+});
+
+test('admin layout passes a name-first shell label with safe fallbacks', () => {
+  const source = readSource(adminLayoutPath);
+
+  assert.match(source, /userName: string \| null;/);
+  assert.match(
+    source,
+    /return params\.userName \?\? params\.userEmail \?\? params\.userId \?\? 'Workspace user';/,
+  );
 });

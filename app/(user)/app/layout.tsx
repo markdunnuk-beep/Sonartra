@@ -5,8 +5,9 @@ import { isVoiceAssessmentFeatureEnabled } from '@/lib/server/voice/voice-featur
 function getUserShellLabel(params: {
   userId: string;
   userEmail: string | null;
+  userName: string | null;
 }): string {
-  return params.userEmail ?? params.userId;
+  return params.userName ?? params.userEmail ?? params.userId ?? 'Workspace user';
 }
 
 export default async function UserAppLayout({
