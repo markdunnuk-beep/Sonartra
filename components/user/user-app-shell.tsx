@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
@@ -12,6 +13,47 @@ import {
 } from '@/components/user/app-shell-nav';
 
 const SHELL_COLLAPSE_STORAGE_KEY = 'sonartra:user-shell-collapsed';
+const SONARTRA_LOGO_WHITE_SRC = '/images/brand/sonartra-logo-white.svg';
+const SONARTRA_MARK_WHITE_SRC = '/images/brand/sonartra-mark-white.svg';
+
+function SidebarBrand({
+  collapsed,
+  titleId,
+}: {
+  collapsed: boolean;
+  titleId: string;
+}) {
+  if (collapsed) {
+    return (
+      <span className="sonartra-shell-brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.04]">
+        <Image
+          alt="Sonartra"
+          className="h-[1.55rem] w-[2.25rem] object-contain"
+          height={1231}
+          priority
+          src={SONARTRA_MARK_WHITE_SRC}
+          width={1767}
+        />
+      </span>
+    );
+  }
+
+  return (
+    <span className="flex min-w-0 flex-1 flex-col gap-2">
+      <Image
+        alt="Sonartra"
+        className="h-auto w-[8.4rem] max-w-full object-contain"
+        height={1529}
+        priority
+        src={SONARTRA_LOGO_WHITE_SRC}
+        width={6259}
+      />
+      <span className="sonartra-shell-brand-title block" id={titleId}>
+        Workspace
+      </span>
+    </span>
+  );
+}
 
 function SessionAvatar({ userLabel, className }: { userLabel: string; className?: string }) {
   return (
@@ -376,17 +418,7 @@ export function UserAppShell({
               )}
               href="/app/workspace"
             >
-              <span className="sonartra-shell-brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-accent/15">
-                S
-              </span>
-              {!mobileSidebarCollapsed ? (
-                <span className="space-y-1">
-                  <span className="sonartra-shell-brand-kicker block" id={mobileDrawerTitleId}>
-                    Sonartra
-                  </span>
-                  <span className="sonartra-shell-brand-title block">Workspace</span>
-                </span>
-              ) : null}
+              <SidebarBrand collapsed={mobileSidebarCollapsed} titleId={mobileDrawerTitleId} />
             </Link>
 
             {!mobileSidebarCollapsed ? (

@@ -25,6 +25,18 @@ test('user shell reserves room for selected nav treatment without reintroducing 
   );
 });
 
+test('user shell uses Sonartra logo and mark assets for expanded and collapsed branding', () => {
+  const shellSource = readSource(userShellPath);
+
+  assert.match(shellSource, /import Image from 'next\/image';/);
+  assert.match(shellSource, /SONARTRA_LOGO_WHITE_SRC = '\/images\/brand\/sonartra-logo-white\.svg'/);
+  assert.match(shellSource, /SONARTRA_MARK_WHITE_SRC = '\/images\/brand\/sonartra-mark-white\.svg'/);
+  assert.match(shellSource, /<SidebarBrand collapsed=\{mobileSidebarCollapsed\} titleId=\{mobileDrawerTitleId\} \/>/);
+  assert.match(shellSource, /alt="Sonartra"/);
+  assert.match(shellSource, />\s*Workspace\s*<\/span>/);
+  assert.doesNotMatch(shellSource, />\s*S\s*<\/span>/);
+});
+
 test('user shell reprioritises chrome for assessment runner routes on smaller screens', () => {
   const shellSource = readSource(userShellPath);
 

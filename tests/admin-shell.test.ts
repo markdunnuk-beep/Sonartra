@@ -38,6 +38,18 @@ test('admin shell sidebar constrains horizontal overflow at the container', () =
   assert.match(source, /min-h-12 w-full items-center/);
 });
 
+test('admin shell uses Sonartra logo and mark assets for expanded and collapsed branding', () => {
+  const source = readSource(adminShellPath);
+
+  assert.match(source, /import Image from 'next\/image';/);
+  assert.match(source, /SONARTRA_LOGO_WHITE_SRC = '\/images\/brand\/sonartra-logo-white\.svg'/);
+  assert.match(source, /SONARTRA_MARK_WHITE_SRC = '\/images\/brand\/sonartra-mark-white\.svg'/);
+  assert.match(source, /<SidebarBrand collapsed=\{mobileSidebarCollapsed\} titleId=\{mobileDrawerTitleId\} \/>/);
+  assert.match(source, /alt="Sonartra"/);
+  assert.match(source, />\s*Admin Console\s*<\/span>/);
+  assert.doesNotMatch(source, />\s*A\s*<\/span>/);
+});
+
 test('admin shell mobile drawer uses explicit overlay semantics and scroll locking', () => {
   const source = readSource(adminShellPath);
 
