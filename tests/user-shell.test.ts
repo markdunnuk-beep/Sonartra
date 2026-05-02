@@ -17,11 +17,20 @@ test('user shell reserves room for selected nav treatment without reintroducing 
 
   assert.match(shellSource, /box-border flex w-\[17\.5rem\] flex-col overflow-x-hidden/);
   assert.match(shellSource, /overflow-y-auto overflow-x-hidden pb-4/);
-  assert.match(shellSource, /sonartra-shell-nav-track space-y-2/);
-  assert.match(shellSource, /min-h-12 w-full items-center/);
+  assert.match(shellSource, /sonartra-shell-nav-track space-y-1\.5/);
+  assert.match(shellSource, /min-h-\[3\.05rem\] items-center/);
+  assert.match(shellSource, /mx-auto h-11 w-11 justify-center px-0 py-0/);
+  assert.match(shellSource, /w-full justify-start gap-3\.5 px-3 py-2\.5/);
+  assert.match(shellSource, /data-sidebar-collapsed=\{collapsed \? 'true' : 'false'\}/);
+  assert.match(shellSource, /flex h-9 w-9 shrink-0 items-center justify-center rounded-\[0\.9rem\]/);
+  assert.match(shellSource, /h-\[1\.05rem\] w-\[1\.05rem\]/);
   assert.match(
     globalsSource,
     /\.sonartra-shell-nav-track\s*\{\s*padding-right: var\(--sonartra-motion-distance-soft\);/m,
+  );
+  assert.match(
+    globalsSource,
+    /\.sonartra-motion-nav-item\[data-sidebar-collapsed='true'\]\[aria-current='page'\]\s*\{\s*transform: none;/m,
   );
 });
 

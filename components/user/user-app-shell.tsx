@@ -142,90 +142,92 @@ function isItemActive(pathname: string, item: UserAppNavItem): boolean {
 }
 
 function NavIcon({ icon, active }: { icon: UserAppNavItem['icon']; active: boolean }) {
-  const strokeClass = active ? 'text-white' : 'text-white/58';
+  const strokeClass = active ? 'text-white' : 'text-white/62';
+  const iconClass = cn('h-[1.05rem] w-[1.05rem]', strokeClass);
+  const strokeWidth = 1.65;
 
   switch (icon) {
     case 'workspace':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M4.5 5.5h15v5h-15zM4.5 13.5H11v5H4.5zM13 13.5h6.5v5H13z"
             stroke="currentColor"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
     case 'assessments':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M7.5 5.5h9m-9 6h9m-9 6h6m-8-12h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-12a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
     case 'results':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M6 17.5V13m6 4.5V6.5m6 11V10M4.5 19.5h15"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
     case 'voice':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M12 4.75a3 3 0 0 1 3 3v4.5a3 3 0 1 1-6 0v-4.5a3 3 0 0 1 3-3Z"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
           <path
             d="M6.75 11.75a5.25 5.25 0 1 0 10.5 0M12 17v2.25M9 19.25h6"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
     case 'settings':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M12 8.25a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5Zm8.25 3.75-.98-.57.05-1.13-1.84-3.18-1.07.32-.82-.77-3.68-.03-.83.8-1.07-.35-1.8 3.2.05 1.12-.99.6.03 3.63 1 .58-.05 1.13 1.84 3.18 1.07-.32.82.77 3.68.03.83-.8 1.07.35 1.8-3.2-.05-1.12.99-.6-.03-3.63Z"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.4"
+            strokeWidth="1.45"
           />
         </svg>
       );
     case 'admin':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M12 3.75 5.25 6.5v4.14c0 4.12 2.48 7.96 6.32 9.77l.43.2.43-.2c3.84-1.81 6.32-5.65 6.32-9.77V6.5L12 3.75Z"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
           <path
             d="M9.5 12.25 11 13.75l3.5-3.5"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
@@ -248,12 +250,15 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-12 w-full items-center gap-3 overflow-hidden rounded-2xl border px-3 py-2.5',
-        collapsed ? 'justify-center px-0' : 'justify-start',
+        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-[3.05rem] items-center overflow-hidden rounded-[1.15rem] border outline-none',
+        collapsed
+          ? 'mx-auto h-11 w-11 justify-center px-0 py-0'
+          : 'w-full justify-start gap-3.5 px-3 py-2.5',
         active
-          ? 'border-white/12 bg-white/[0.06] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]'
-          : 'text-white/58 hover:border-white/8 hover:text-white/88 border-transparent hover:bg-white/[0.035]',
+          ? 'border-white/14 bg-white/[0.055] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
+          : 'border-transparent text-white/62 hover:border-white/10 hover:bg-white/[0.035] hover:text-white/90',
       )}
+      data-sidebar-collapsed={collapsed ? 'true' : 'false'}
       href={item.href}
       onClick={onNavigate}
       title={collapsed ? item.label : undefined}
@@ -261,16 +266,16 @@ function SidebarLink({
       <span
         aria-hidden="true"
         className={cn(
-          'sonartra-motion-active-bar absolute left-0 top-1/2 h-8 w-[3px] -translate-y-1/2 rounded-r-full bg-white/70',
+          'sonartra-motion-active-bar absolute left-0 top-1/2 h-7 w-[2px] -translate-y-1/2 rounded-r-full bg-white/72',
           active ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0',
         )}
       />
       <span
         className={cn(
-          'sonartra-motion-nav-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border',
+          'sonartra-motion-nav-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.9rem] border',
           active
-            ? 'border-white/12 bg-white/[0.08]'
-            : 'border-white/6 group-hover:border-white/8 bg-black/10 group-hover:bg-white/[0.04]',
+            ? 'border-white/14 bg-white/[0.075] text-white'
+            : 'border-white/7 bg-black/10 text-white/62 group-hover:border-white/10 group-hover:bg-white/[0.04] group-hover:text-white/90',
         )}
       >
         <NavIcon active={active} icon={item.icon} />
@@ -290,7 +295,7 @@ function SidebarSection({
   onNavigate?: () => void;
 }) {
   return (
-    <div className="sonartra-shell-nav-track space-y-2">
+    <div className={cn('sonartra-shell-nav-track space-y-1.5', collapsed && 'pr-0')}>
       {section.items.map((item) => (
         <SidebarLink collapsed={collapsed} item={item} key={item.key} onNavigate={onNavigate} />
       ))}

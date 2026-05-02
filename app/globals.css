@@ -222,6 +222,10 @@ main {
     transform: translateX(var(--sonartra-motion-distance-soft));
   }
 
+  .sonartra-motion-nav-item[data-sidebar-collapsed='true'][aria-current='page'] {
+    transform: none;
+  }
+
   .sonartra-motion-nav-icon {
     transition-property: transform, border-color, background-color, color, opacity, box-shadow;
     transition-duration: var(--sonartra-motion-duration-standard);

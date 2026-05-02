@@ -66,52 +66,54 @@ function SessionAvatar({ userLabel, className }: { userLabel: string; className?
 }
 
 function NavIcon({ itemKey, active }: { itemKey: AdminNavItem['key']; active: boolean }) {
-  const strokeClass = active ? 'text-white' : 'text-white/58';
+  const strokeClass = active ? 'text-white' : 'text-white/62';
+  const iconClass = cn('h-[1.05rem] w-[1.05rem]', strokeClass);
+  const strokeWidth = 1.65;
 
   switch (itemKey) {
     case 'dashboard':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M4.5 5.5h15v5h-15zM4.5 13.5H11v5H4.5zM13 13.5h6.5v5H13z"
             stroke="currentColor"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
     case 'assessments':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M7.5 5.5h9m-9 6h9m-9 6h6m-8-12h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-12a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
     case 'organisations':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M4.5 18.5h15M6.75 18.5v-9.75h4.5v9.75M12.75 18.5v-6.5h4.5v6.5M5.75 8.75 12 4.75l6.25 4"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
     case 'users':
       return (
-        <svg className={cn('h-5 w-5', strokeClass)} fill="none" viewBox="0 0 24 24">
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
             d="M8.25 11a3.25 3.25 0 1 0 0-6.5a3.25 3.25 0 0 0 0 6.5Zm7.5 1.5a2.75 2.75 0 1 0 0-5.5a2.75 2.75 0 0 0 0 5.5ZM3.75 18a4.5 4.5 0 0 1 9 0M13.25 18a3.75 3.75 0 0 1 7.5 0"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.7"
+            strokeWidth={strokeWidth}
           />
         </svg>
       );
@@ -134,12 +136,15 @@ function SidebarLink({
     <Link
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-12 w-full items-center gap-3 overflow-hidden rounded-2xl border px-3 py-2.5',
-        collapsed ? 'justify-center px-0' : 'justify-start',
+        'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-[3.05rem] items-center overflow-hidden rounded-[1.15rem] border outline-none',
+        collapsed
+          ? 'mx-auto h-11 w-11 justify-center px-0 py-0'
+          : 'w-full justify-start gap-3.5 px-3 py-2.5',
         active
-          ? 'border-white/12 bg-white/[0.06] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]'
-          : 'text-white/58 hover:border-white/8 hover:text-white/88 border-transparent hover:bg-white/[0.035]',
+          ? 'border-white/14 bg-white/[0.055] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
+          : 'border-transparent text-white/62 hover:border-white/10 hover:bg-white/[0.035] hover:text-white/90',
       )}
+      data-sidebar-collapsed={collapsed ? 'true' : 'false'}
       href={item.href}
       onClick={onNavigate}
       title={collapsed ? item.label : undefined}
@@ -147,16 +152,16 @@ function SidebarLink({
       <span
         aria-hidden="true"
         className={cn(
-          'sonartra-motion-active-bar absolute left-0 top-1/2 h-8 w-[3px] -translate-y-1/2 rounded-r-full bg-white/70',
+          'sonartra-motion-active-bar absolute left-0 top-1/2 h-7 w-[2px] -translate-y-1/2 rounded-r-full bg-white/72',
           active ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0',
         )}
       />
       <span
         className={cn(
-          'sonartra-motion-nav-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border',
+          'sonartra-motion-nav-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.9rem] border',
           active
-            ? 'border-white/12 bg-white/[0.08]'
-            : 'border-white/6 group-hover:border-white/8 bg-black/10 group-hover:bg-white/[0.04]',
+            ? 'border-white/14 bg-white/[0.075] text-white'
+            : 'border-white/7 bg-black/10 text-white/62 group-hover:border-white/10 group-hover:bg-white/[0.04] group-hover:text-white/90',
         )}
       >
         <NavIcon active={active} itemKey={item.key} />
@@ -347,7 +352,10 @@ export function AdminShell({
 
           <div className="mt-6 flex-1 space-y-3 overflow-y-auto overflow-x-hidden pb-4">
             <div
-              className={cn('sonartra-shell-nav-track space-y-2', mobileSidebarCollapsed && 'space-y-3')}
+              className={cn(
+                'sonartra-shell-nav-track space-y-1.5',
+                mobileSidebarCollapsed && 'space-y-2.5 pr-0',
+              )}
               data-admin-mobile-nav="true"
             >
               {adminNavItems.map((item) => (

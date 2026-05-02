@@ -7,6 +7,7 @@ import { adminNavItems, isAdminNavItemActive } from '@/components/admin/admin-sh
 
 const adminShellPath = join(process.cwd(), 'components', 'admin', 'admin-shell.tsx');
 const adminLayoutPath = join(process.cwd(), 'app', '(admin)', 'layout.tsx');
+const globalsPath = join(process.cwd(), 'app', 'globals.css');
 
 function readSource(path: string): string {
   return readFileSync(path, 'utf8');
@@ -28,14 +29,24 @@ test('admin dashboard nav item is active only on dashboard routes', () => {
 
 test('admin shell sidebar constrains horizontal overflow at the container', () => {
   const source = readSource(adminShellPath);
+  const globalsSource = readSource(globalsPath);
 
   assert.match(source, /min-h-screen overflow-x-clip/);
   assert.match(source, /max-w-\[calc\(100vw-1rem\)\]/);
   assert.match(source, /box-border flex w-\[18\.5rem\] max-w-\[calc\(100vw-1rem\)\] flex-col overflow-x-hidden/);
   assert.match(source, /overflow-y-auto overflow-x-hidden pb-4/);
   assert.match(source, /min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip/);
-  assert.match(source, /sonartra-shell-nav-track space-y-2/);
-  assert.match(source, /min-h-12 w-full items-center/);
+  assert.match(source, /sonartra-shell-nav-track space-y-1\.5/);
+  assert.match(source, /min-h-\[3\.05rem\] items-center/);
+  assert.match(source, /mx-auto h-11 w-11 justify-center px-0 py-0/);
+  assert.match(source, /w-full justify-start gap-3\.5 px-3 py-2\.5/);
+  assert.match(source, /data-sidebar-collapsed=\{collapsed \? 'true' : 'false'\}/);
+  assert.match(source, /flex h-9 w-9 shrink-0 items-center justify-center rounded-\[0\.9rem\]/);
+  assert.match(source, /h-\[1\.05rem\] w-\[1\.05rem\]/);
+  assert.match(
+    globalsSource,
+    /\.sonartra-motion-nav-item\[data-sidebar-collapsed='true'\]\[aria-current='page'\]\s*\{\s*transform: none;/m,
+  );
 });
 
 test('admin shell uses Sonartra logo and mark assets for expanded and collapsed branding', () => {
