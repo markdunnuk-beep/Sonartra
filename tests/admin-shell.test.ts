@@ -40,9 +40,11 @@ test('admin shell sidebar constrains horizontal overflow at the container', () =
   assert.match(source, /sonartra-shell-nav-track space-y-1\.5/);
   assert.match(source, /min-h-\[3\.05rem\] items-center/);
   assert.match(source, /mx-auto h-11 w-11 justify-center px-0 py-0/);
+  assert.match(source, /mx-auto h-12 w-12 justify-center px-0 py-0/);
   assert.match(source, /w-full justify-start gap-3\.5 px-3 py-2\.5/);
   assert.match(source, /data-sidebar-collapsed=\{collapsed \? 'true' : 'false'\}/);
-  assert.match(source, /flex h-9 w-9 shrink-0 items-center justify-center rounded-\[0\.9rem\]/);
+  assert.match(source, /flex shrink-0 items-center justify-center border/);
+  assert.match(source, /active && collapsed \? 'h-10 w-10 rounded-\[1rem\]' : 'h-9 w-9 rounded-\[0\.9rem\]'/);
   assert.match(source, /h-\[1\.05rem\] w-\[1\.05rem\]/);
   assert.match(
     globalsSource,
@@ -56,6 +58,10 @@ test('admin collapsed footer keeps the admin session tile intentional', () => {
   assert.match(source, /mobileSidebarCollapsed \? 'p-2' : 'p-3\.5'/);
   assert.match(source, /aria-label=\{`Admin session: \$\{userLabel\}`\}/);
   assert.match(source, /border-white\/8 text-white\/76 mx-auto bg-white\/\[0\.03\]/);
+  assert.match(source, /function SessionAvatar\(\{ className \}: \{ className\?: string \}\)/);
+  assert.match(source, /src=\{SONARTRA_MARK_WHITE_SRC\}/);
+  assert.match(source, /alt=""/);
+  assert.doesNotMatch(source, /userLabel\.charAt/);
 });
 
 test('admin shell uses Sonartra logo and mark assets for expanded and collapsed branding', () => {
@@ -66,7 +72,8 @@ test('admin shell uses Sonartra logo and mark assets for expanded and collapsed 
   assert.match(source, /SONARTRA_MARK_WHITE_SRC = '\/images\/brand\/sonartra-mark-white\.svg'/);
   assert.match(source, /<SidebarBrand collapsed=\{mobileSidebarCollapsed\} titleId=\{mobileDrawerTitleId\} \/>/);
   assert.match(source, /alt="Sonartra"/);
-  assert.match(source, />\s*Admin Console\s*<\/span>/);
+  assert.match(source, />\s*Sonartra admin navigation\s*<\/span>/);
+  assert.doesNotMatch(source, /sonartra-shell-brand-title block/);
   assert.doesNotMatch(source, />\s*A\s*<\/span>/);
 });
 

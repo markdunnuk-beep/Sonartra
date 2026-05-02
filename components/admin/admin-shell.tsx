@@ -36,23 +36,23 @@ function SidebarBrand({
   }
 
   return (
-    <span className="flex min-w-0 flex-1 flex-col gap-2">
+    <span className="flex min-w-0 flex-1 items-center">
       <Image
-        alt="Sonartra"
+        alt=""
         className="h-auto w-[8.4rem] max-w-full object-contain"
         height={1529}
         priority
         src={SONARTRA_LOGO_WHITE_SRC}
         width={6259}
       />
-      <span className="sonartra-shell-brand-title block" id={titleId}>
-        Admin Console
+      <span className="sr-only" id={titleId}>
+        Sonartra admin navigation
       </span>
     </span>
   );
 }
 
-function SessionAvatar({ userLabel, className }: { userLabel: string; className?: string }) {
+function SessionAvatar({ className }: { className?: string }) {
   return (
     <span
       className={cn(
@@ -60,7 +60,13 @@ function SessionAvatar({ userLabel, className }: { userLabel: string; className?
         className,
       )}
     >
-      {userLabel.charAt(0).toUpperCase()}
+      <Image
+        alt=""
+        className="h-[1.45rem] w-[2.05rem] object-contain"
+        height={1231}
+        src={SONARTRA_MARK_WHITE_SRC}
+        width={1767}
+      />
     </span>
   );
 }
@@ -85,7 +91,7 @@ function NavIcon({ itemKey, active }: { itemKey: AdminNavItem['key']; active: bo
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
-            d="M7.5 5.5h9m-9 6h9m-9 6h6m-8-12h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-12a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z"
+            d="M7.25 6h9.5M7.25 11.75h9.5M7.25 17.5h6.25M6 4.75h12a1.25 1.25 0 0 1 1.25 1.25v12A1.25 1.25 0 0 1 18 19.25H6A1.25 1.25 0 0 1 4.75 18V6A1.25 1.25 0 0 1 6 4.75Z"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -138,7 +144,9 @@ function SidebarLink({
       className={cn(
         'sonartra-focus-ring sonartra-motion-nav-item sonartra-type-nav group relative flex min-h-[3.05rem] items-center overflow-hidden rounded-[1.15rem] border outline-none',
         collapsed
-          ? 'mx-auto h-11 w-11 justify-center px-0 py-0'
+          ? active
+            ? 'mx-auto h-12 w-12 justify-center px-0 py-0'
+            : 'mx-auto h-11 w-11 justify-center px-0 py-0'
           : 'w-full justify-start gap-3.5 px-3 py-2.5',
         active
           ? 'border-white/14 bg-white/[0.055] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
@@ -158,7 +166,8 @@ function SidebarLink({
       />
       <span
         className={cn(
-          'sonartra-motion-nav-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.9rem] border',
+          'sonartra-motion-nav-icon flex shrink-0 items-center justify-center border',
+          active && collapsed ? 'h-10 w-10 rounded-[1rem]' : 'h-9 w-9 rounded-[0.9rem]',
           active
             ? 'border-white/14 bg-white/[0.075] text-white'
             : 'border-white/7 bg-black/10 text-white/62 group-hover:border-white/10 group-hover:bg-white/[0.04] group-hover:text-white/90',
@@ -379,12 +388,11 @@ export function AdminShell({
               <div aria-label={`Admin session: ${userLabel}`} title={userLabel}>
                 <SessionAvatar
                   className="border-white/8 text-white/76 mx-auto bg-white/[0.03]"
-                  userLabel={userLabel}
                 />
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <SessionAvatar userLabel={userLabel} />
+                <SessionAvatar />
                 <div className="min-w-0 flex-1">
                   <p className="sonartra-shell-session-label">Admin session</p>
                   <p className="sonartra-shell-session-value mt-1 truncate">{userLabel}</p>
