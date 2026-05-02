@@ -192,13 +192,8 @@ export function AdminShell({
   children: React.ReactNode;
   userLabel: string;
 }>) {
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-
-    return window.localStorage.getItem(ADMIN_SHELL_COLLAPSE_STORAGE_KEY) === 'true';
-  });
+  const [collapsed, setCollapsed] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileDrawerId = useId();
   const mobileDrawerTitleId = useId();
@@ -206,8 +201,23 @@ export function AdminShell({
   const mobileSidebarCollapsed = collapsed && !mobileOpen;
 
   useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      setCollapsed(window.localStorage.getItem(ADMIN_SHELL_COLLAPSE_STORAGE_KEY) === 'true');
+      setHasHydrated(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
     window.localStorage.setItem(ADMIN_SHELL_COLLAPSE_STORAGE_KEY, collapsed ? 'true' : 'false');
-  }, [collapsed]);
+  }, [collapsed, hasHydrated]);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -413,9 +423,9 @@ export function AdminShell({
         ) : null}
 
         <div
-          aria-hidden={mobileOpen ? true : undefined}
           className="min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip"
           data-admin-shell-content-state={mobileOpen ? 'subordinate' : 'active'}
+          inert={mobileOpen ? true : undefined}
         >
           <div className="border-white/6 flex items-center justify-between border-b px-4 py-4 lg:hidden">
             <button

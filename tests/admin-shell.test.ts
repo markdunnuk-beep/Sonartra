@@ -35,6 +35,15 @@ test('admin shell sidebar constrains horizontal overflow at the container', () =
   assert.match(source, /max-w-\[calc\(100vw-1rem\)\]/);
   assert.match(source, /box-border flex w-\[18\.5rem\] max-w-\[calc\(100vw-1rem\)\] flex-col overflow-x-hidden/);
   assert.match(source, /mobileSidebarCollapsed \? 'lg:w-\[5\.75rem\]' : 'lg:w-\[18\.5rem\]'/);
+  assert.match(source, /const \[collapsed, setCollapsed\] = useState\(false\);/);
+  assert.match(source, /const \[hasHydrated, setHasHydrated\] = useState\(false\);/);
+  assert.match(source, /const frameId = window\.requestAnimationFrame\(\(\) => \{/);
+  assert.match(source, /setCollapsed\(window\.localStorage\.getItem\(ADMIN_SHELL_COLLAPSE_STORAGE_KEY\) === 'true'\);/);
+  assert.match(source, /setHasHydrated\(true\);/);
+  assert.match(source, /window\.cancelAnimationFrame\(frameId\);/);
+  assert.match(source, /if \(!hasHydrated\) \{\s*return;\s*\}/);
+  assert.match(source, /window\.localStorage\.setItem\(ADMIN_SHELL_COLLAPSE_STORAGE_KEY, collapsed \? 'true' : 'false'\);/);
+  assert.doesNotMatch(source, /useState\(\(\) => \{\s*if \(typeof window === 'undefined'\)/);
   assert.match(source, /overflow-y-auto overflow-x-hidden pb-4/);
   assert.match(source, /min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip/);
   assert.match(source, /sonartra-shell-nav-track space-y-1\.5/);
@@ -93,7 +102,8 @@ test('admin shell mobile drawer uses explicit overlay semantics and scroll locki
   assert.match(source, /data-admin-mobile-drawer=\{mobileOpen \? 'open' : 'closed'\}/);
   assert.match(source, /data-admin-mobile-overlay="open"/);
   assert.match(source, /Controlled admin navigation\. Close to return to the current record\./);
-  assert.match(source, /aria-hidden=\{mobileOpen \? true : undefined\}/);
+  assert.match(source, /inert=\{mobileOpen \? true : undefined\}/);
+  assert.doesNotMatch(source, /aria-hidden=\{mobileOpen \? true : undefined\}/);
   assert.match(source, /aria-expanded=\{mobileOpen\}/);
 });
 
