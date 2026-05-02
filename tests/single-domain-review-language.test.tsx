@@ -523,6 +523,43 @@ test('review step keeps the publish CTA disabled with a clear reason when the dr
   assert.match(markup, /button[^>]+disabled[^>]*>Publish assessment<\/button>/i);
 });
 
+test('review step explains live published state separately from authoring blockers when no draft exists', () => {
+  const assessment = buildAssessment({
+    DOMAIN_FRAMING: [],
+    HERO_PAIRS: [],
+    SIGNAL_CHAPTERS: [],
+    BALANCING_SECTIONS: [],
+    PAIR_SUMMARIES: [],
+    APPLICATION_STATEMENTS: [],
+  });
+  const markup = renderToStaticMarkup(
+    <AdminAssessmentAuthoringProvider
+      assessment={{
+        ...assessment,
+        publishedVersion: {
+          assessmentVersionId: 'version-live',
+          versionTag: '2.00',
+          status: 'published',
+          publishedAt: '2026-04-30T09:00:00.000Z',
+          questionCount: 24,
+          createdAt: '',
+          updatedAt: '',
+        },
+        latestDraftVersion: null,
+        builderMode: 'published_no_draft',
+      }}
+    >
+      <SingleDomainReviewAuthoring />
+    </AdminAssessmentAuthoringProvider>,
+  );
+
+  assert.match(markup, /Current live version remains available/i);
+  assert.match(markup, /Published version 2\.00 is the active runtime definition/i);
+  assert.match(markup, /No draft is currently in progress/i);
+  assert.match(markup, /they do not remove the live assessment/i);
+  assert.match(markup, /These issues block the next publish or editable runtime check/i);
+});
+
 test('review step keeps the affected section out of ready when runtime readiness names a blocker there', () => {
   const assessment = buildAssessment({
     DOMAIN_FRAMING: [{

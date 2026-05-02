@@ -47,6 +47,22 @@ test('review governance surfaces separate readiness summary, blocking counts, an
   assert.match(helperSource, /Fix in Review/);
 });
 
+test('single-domain review copy separates live state from authoring readiness', () => {
+  const source = readSource(join(
+    process.cwd(),
+    'components',
+    'admin',
+    'single-domain-structural-authoring.tsx',
+  ));
+
+  assert.match(source, /Review authoring readiness/);
+  assert.match(source, /Separate the current live version from the authoring checks/);
+  assert.match(source, /Current live version remains available/);
+  assert.match(source, /No draft is currently in progress/);
+  assert.match(source, /They do not remove the currently published version/);
+  assert.doesNotMatch(source, /Assessment is live/);
+});
+
 test('publish actions use shared calm feedback notices for errors, success, and warnings', () => {
   const source = readSource(publishActionsPath);
 

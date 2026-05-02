@@ -338,12 +338,12 @@ function SingleDomainReviewPublishCard() {
 
           <div className="space-y-2">
             <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
-              Publish assessment
+              Draft publication
             </h3>
             <p className="text-sm leading-7 text-white/62">
               {isPublishReady
-                ? `Draft ${latestDraftVersion.versionTag} is runtime-ready and can be published now.`
-                : `Draft ${latestDraftVersion.versionTag} is still blocked by review issues.`}
+                ? `Draft ${latestDraftVersion.versionTag} is ready to become the next live version.`
+                : `Draft ${latestDraftVersion.versionTag} has blockers that must be resolved before it can become live.`}
             </p>
           </div>
 
@@ -357,9 +357,14 @@ function SingleDomainReviewPublishCard() {
 
           <p className="text-sm leading-6 text-white/54">
             {isPublishReady
-              ? 'Publishing will make this version live for runtime consumption and archive any previously active published version.'
+              ? 'Publishing will make this draft live for runtime consumption and archive any previously active published version.'
               : getAdminAssessmentPublishDisabledReason(assessment.draftValidation)}
           </p>
+          {publishedVersion ? (
+            <div className="rounded-[0.9rem] border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-white/58">
+              Current live version {publishedVersion.versionTag} remains available until a draft is published.
+            </div>
+          ) : null}
         </div>
       </SurfaceCard>
     );
@@ -378,10 +383,10 @@ function SingleDomainReviewPublishCard() {
 
           <div className="space-y-2">
             <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
-              Assessment is live
+              Current live version remains available
             </h3>
             <p className="text-sm leading-7 text-white/62">
-              Published version {publishedVersion.versionTag} is now the active runtime definition.
+              Published version {publishedVersion.versionTag} is the active runtime definition. No draft is currently in progress, so review blockers describe what must be authored before the next version can be prepared; they do not remove the live assessment.
             </p>
           </div>
 
@@ -1610,10 +1615,9 @@ export function SingleDomainReviewAuthoring() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="sonartra-section-header sonartra-motion-reveal-soft max-w-3xl">
           <p className="sonartra-page-eyebrow">Review</p>
-          <h2 className="sonartra-section-title">Review runtime readiness</h2>
+          <h2 className="sonartra-section-title">Review authoring readiness</h2>
           <p className="sonartra-section-description">
-            Review structural completeness, language completeness, and strict runtime
-            loadability before publishing the current version.
+            Separate the current live version from the authoring checks that must pass before the next publish.
           </p>
         </div>
 
@@ -1642,7 +1646,7 @@ export function SingleDomainReviewAuthoring() {
                   {runtimeReadiness.isReady ? 'Runtime definition can load cleanly' : 'Runtime definition is still blocked'}
                 </h3>
                 <p className="text-sm leading-7 text-white/62">
-                  Single-domain drafts become publishable only when the authored data can resolve into one deterministic runtime definition.
+                  These checks apply to editable authoring content before the next publish. A current live version remains available when one is already published.
                 </p>
               </div>
               <LabelPill
@@ -1668,7 +1672,7 @@ export function SingleDomainReviewAuthoring() {
                     <p className="text-xs font-medium uppercase tracking-[0.24em] text-white/45">Current blocker</p>
                     <p className="text-sm font-semibold text-white">{primaryRuntimeIssue.message}</p>
                     <p className="text-sm leading-6 text-white/62">
-                      Missing or invalid in {primaryRuntimeIssueRemediation.sectionLabel}. Fix that stage next so the runtime definition can resolve cleanly.
+                      Missing or invalid in {primaryRuntimeIssueRemediation.sectionLabel}. Fix that stage next so the next version can resolve cleanly before publication.
                     </p>
                   </div>
                   <ButtonLink
@@ -1697,7 +1701,7 @@ export function SingleDomainReviewAuthoring() {
               </div>
             ) : (
               <div className="rounded-[0.9rem] border border-[rgba(151,233,182,0.22)] bg-[rgba(16,61,34,0.26)] px-4 py-3 text-sm text-[rgba(217,255,229,0.94)]">
-                The current draft resolves into a strict runtime-ready single-domain definition.
+                The editable content resolves into a strict runtime-ready single-domain definition for the next publish.
               </div>
             )}
           </div>
@@ -1773,7 +1777,7 @@ export function SingleDomainReviewAuthoring() {
           <div className="space-y-3">
             <p className="sonartra-page-eyebrow">Blocking issues</p>
             <p className="text-sm leading-7 text-white/62">
-              Resolve these issues before treating the single-domain draft as runtime-loadable.
+              These issues block the next publish or editable runtime check. They do not remove the currently published version when one is already live.
             </p>
             <div className="space-y-2">
               {blockingIssues.map((issue) => (
