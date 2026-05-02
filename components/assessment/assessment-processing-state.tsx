@@ -68,10 +68,10 @@ function ResultTransitionLogo() {
       className="border-white/9 mx-auto flex h-14 w-[10rem] items-center justify-center rounded-2xl border bg-white/[0.024] px-5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] sm:w-[10.75rem]"
     >
       <Image
-        src="/images/sonartra-logo.svg"
+        src="/images/brand/sonartra-logo-white.svg"
         alt=""
-        width={1082}
-        height={335}
+        width={6259}
+        height={1529}
         className="h-auto w-full opacity-90"
         priority
       />

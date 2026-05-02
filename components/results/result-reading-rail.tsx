@@ -157,10 +157,10 @@ export function ResultReadingRail({
       <div className="space-y-3 rounded-[1.35rem] border border-white/[0.04] bg-[#09101d]/24 px-3 py-3.5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] backdrop-blur-[12px]">
         <div className="space-y-2 pb-1.5 pl-1">
           <Image
-            src="/images/sonartra-logo.svg"
+            src="/images/brand/sonartra-logo-white.svg"
             alt="Sonartra"
-            width={174}
-            height={28}
+            width={6259}
+            height={1529}
             className="h-auto w-[136px] opacity-[0.8]"
           />
         </div>

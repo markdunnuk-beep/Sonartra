@@ -49,10 +49,10 @@ test('assessment processing transition uses the decorative Sonartra logo asset',
   assert.match(source, /import Image from 'next\/image';/);
   assert.match(source, /function ResultTransitionLogo\(\)/);
   assert.match(source, /aria-hidden="true"/);
-  assert.match(source, /src="\/images\/sonartra-logo\.svg"/);
+  assert.match(source, /src="\/images\/brand\/sonartra-logo-white\.svg"/);
   assert.match(source, /alt=""/);
-  assert.match(source, /width=\{1082\}/);
-  assert.match(source, /height=\{335\}/);
+  assert.match(source, /width=\{6259\}/);
+  assert.match(source, /height=\{1529\}/);
   assert.match(source, /<ResultTransitionLogo \/>/);
   assert.doesNotMatch(source, /function ResultTransitionMark\(\)/);
   assert.doesNotMatch(source, /h-2\.5 w-2\.5 rounded-full/);

@@ -8,7 +8,7 @@ import { SINGLE_DOMAIN_RESULT_READING_SECTIONS } from '@/lib/results/result-read
 test('reading rail renders expected top-level section labels', () => {
   const markup = renderToStaticMarkup(<ResultReadingRail activeSectionIdOverride={null} />);
 
-  assert.match(markup, /src="\/images\/sonartra-logo\.svg"/);
+  assert.match(markup, /src="\/images\/brand\/sonartra-logo-white\.svg"/);
   assert.match(markup, /alt="Sonartra"/);
   assert.doesNotMatch(markup, />Reading rail</);
   assert.match(markup, />01<\/span>/);
