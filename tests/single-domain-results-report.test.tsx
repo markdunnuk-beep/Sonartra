@@ -603,8 +603,8 @@ test('single-domain results report aligns limitation prefix with accepted pair b
 test('single-domain report spacing and labels support lighter mobile scanability without changing anchors', () => {
   const cssSource = readFileSync(globalsPath, 'utf8');
 
-  assert.match(cssSource, /\.sonartra-single-domain-section::before\s*\{[\s\S]*?top:\s*-1\.35rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-report-flow\s*\{[\s\S]*?gap:\s*3\.2rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-section::before\s*\{[\s\S]*?top:\s*-1\.65rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-report-flow\s*\{[\s\S]*?gap:\s*3\.55rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-opening-grid\s*\{[\s\S]*?align-items:\s*start;/);
   assert.match(
     cssSource,
@@ -615,20 +615,20 @@ test('single-domain report spacing and labels support lighter mobile scanability
   assert.match(cssSource, /\.sonartra-single-domain-proof-section-label\s*\{[\s\S]*?rgba\(50, 214, 176, 0\.56\);/);
   assert.match(cssSource, /\.sonartra-single-domain-evidence-details\s*\{[\s\S]*?border-top:\s*1px solid rgba\(255, 255, 255, 0\.045\);/);
   assert.match(cssSource, /\.sonartra-single-domain-meta-block\s*\{[\s\S]*?border-bottom:\s*1px solid rgba\(255, 255, 255, 0\.026\);/);
-  assert.match(cssSource, /\.sonartra-single-domain-version-note\s*\{[\s\S]*?color:\s*rgba\(207, 218, 243, 0\.34\);/);
+  assert.match(cssSource, /\.sonartra-single-domain-version-note\s*\{[\s\S]*?color:\s*rgba\(207, 218, 243, 0\.28\);/);
   assert.match(cssSource, /\.sonartra-result-section-nav summary\s*\{[\s\S]*?cursor-pointer/);
   assert.match(cssSource, /\.sonartra-result-section-nav-link\s*\{[\s\S]*?min-height:\s*2\.65rem;/);
   assert.match(
     cssSource,
     /\.sonartra-result-section-nav-link\[data-section-nav-state='current'\]\s*\{[\s\S]*?rgba\(50, 214, 176, 0\.7\)/,
   );
-  assert.match(cssSource, /\.sonartra-single-domain-driver-entry\s*\{[\s\S]*?padding-top:\s*1\.5rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-application-flow\s*\{[\s\S]*?gap:\s*1\.9rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-application-entry\s*\{[\s\S]*?border-radius:\s*1\.4rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-application-entry-index\s*\{[\s\S]*?min-width:\s*2\.45rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-driver-entry\s*\{[\s\S]*?padding-top:\s*1\.65rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-application-flow\s*\{[\s\S]*?gap:\s*1\.55rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-application-entry\s*\{[\s\S]*?border-radius:\s*1\.25rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-application-entry-index\s*\{[\s\S]*?min-width:\s*2rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-application-entry-heading\s*\{[\s\S]*?flex-direction:\s*column;/);
-  assert.match(cssSource, /\.sonartra-single-domain-application-entry-subtitle\s*\{[\s\S]*?font-size:\s*0\.92rem;/);
-  assert.match(cssSource, /\.sonartra-single-domain-application-point\s*\{[\s\S]*?padding-top:\s*0\.95rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-application-entry-subtitle\s*\{[\s\S]*?font-size:\s*0\.89rem;/);
+  assert.match(cssSource, /\.sonartra-single-domain-application-point\s*\{[\s\S]*?padding-top:\s*0\.84rem;/);
   assert.match(cssSource, /\.sonartra-single-domain-section-label\s*\{[\s\S]*?text-transform:\s*none;/);
   assert.match(
     cssSource,
@@ -636,11 +636,11 @@ test('single-domain report spacing and labels support lighter mobile scanability
   );
   assert.match(
     cssSource,
-    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-single-domain-application-entry\s*\{[\s\S]*?padding:\s*1\.15rem 1rem 1\.05rem;/,
+    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-single-domain-application-entry\s*\{[\s\S]*?padding:\s*1rem 0\.95rem 0\.95rem;/,
   );
   assert.match(
     cssSource,
-    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-single-domain-application-entry-subtitle\s*\{[\s\S]*?font-size:\s*0\.87rem;/,
+    /@media \(max-width: 767px\) \{[\s\S]*?\.sonartra-single-domain-application-entry-subtitle\s*\{[\s\S]*?font-size:\s*0\.84rem;/,
   );
 });
 
