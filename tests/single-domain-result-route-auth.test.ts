@@ -351,5 +351,5 @@ test('generic result route redirects single-domain results to the canonical repo
   assert.match(source, /if \(result\.mode === 'single_domain' && result\.singleDomainResult\)/);
   assert.match(source, /redirect\(`\/app\/results\/single-domain\/\$\{resultId\}`\)/);
   assert.match(source, /buildDomainSignalRingViewModel/);
-  assert.match(source, /No persisted domain summaries are available for this result/);
+  assert.match(source, /No domain summaries are available for this result/);
 });

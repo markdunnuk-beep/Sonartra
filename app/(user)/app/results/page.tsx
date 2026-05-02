@@ -26,7 +26,10 @@ export default async function UserResultsPage() {
 
   return (
     <PageFrame>
-      <PageHeader title="Results" description="View and revisit your completed assessments." />
+      <PageHeader
+        title="Results"
+        description="Review completed assessments and return to previous reports when you need them."
+      />
 
       {results.length === 0 ? (
         <EmptyState
@@ -37,9 +40,9 @@ export default async function UserResultsPage() {
       ) : (
         <section className="sonartra-section">
           <SectionHeader
-            eyebrow="Completed Results"
+            eyebrow="Results"
             title="Ready to revisit"
-            description="Completed assessments are listed here using the persisted canonical result payload."
+            description="Completed assessment reports stay available here for reference."
           />
           {results.map((result) => (
             <SurfaceCard key={result.resultId} interactive className="p-5">

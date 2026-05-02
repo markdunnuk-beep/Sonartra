@@ -5,12 +5,12 @@ export default function UserSettingsPage() {
     <PageFrame className="space-y-8">
       <PageHeader
         title="Settings"
-        description="User-level preferences and account controls will live here as the authenticated app expands."
+        description="Account and preference controls will appear here as the workspace expands."
       />
 
       <EmptyState
-        title="Settings surface ready"
-        description="The shell is in place so future settings sections can be added without changing the authenticated layout."
+        title="Settings are coming soon"
+        description="Your current access, profile, and notification preferences will be managed from this area."
       />
     </PageFrame>
   );

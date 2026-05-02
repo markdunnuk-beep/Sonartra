@@ -24,7 +24,7 @@ export default async function UserAssessmentsPage() {
     <PageFrame>
       <PageHeader
         title="Assessments"
-        description="Browse available assessments and track your progress."
+        description="Choose an assessment, continue one you have started, or view results when they are ready."
       />
 
       {viewModel.assessments.length === 0 ? (
@@ -35,9 +35,9 @@ export default async function UserAssessmentsPage() {
       ) : (
         <section className="sonartra-section">
           <SectionHeader
-            eyebrow="Assessment Inventory"
+            eyebrow="Assessments"
             title="Available assessments"
-            description="Each assessment uses the same persisted completion pipeline. Status stays read-only here."
+            description="Your available assessments are listed with the next action that makes sense for each one."
           />
           {viewModel.assessments.map((assessment) => (
             <SurfaceCard key={assessment.assessmentId} interactive className="p-5">
@@ -52,7 +52,7 @@ export default async function UserAssessmentsPage() {
                       {assessment.title}
                     </h2>
                     <p className="text-white/62 max-w-3xl text-sm leading-7">
-                      {assessment.description ?? 'Published assessment available in the workspace.'}
+                      {assessment.description ?? 'Assessment available in your workspace.'}
                     </p>
                   </div>
 

@@ -18,7 +18,7 @@ export function PageFrame({
 }
 
 export function PageHeader({
-  eyebrow = 'User App',
+  eyebrow,
   title,
   description,
 }: Readonly<{
@@ -28,7 +28,7 @@ export function PageHeader({
 }>) {
   return (
     <header className="sonartra-page-header sonartra-motion-reveal">
-      <p className="sonartra-page-eyebrow">{eyebrow}</p>
+      {eyebrow ? <p className="sonartra-page-eyebrow">{eyebrow}</p> : null}
       <h1 className="sonartra-page-title">{title}</h1>
       <p className="sonartra-page-description">{description}</p>
     </header>

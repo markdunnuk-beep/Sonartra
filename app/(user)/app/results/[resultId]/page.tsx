@@ -407,7 +407,7 @@ function DomainChapter({
 
           {!ringModel && !domain.primarySignal && !domain.secondarySignal && !hasPairReading ? (
             <p className="sonartra-report-body-soft max-w-[50rem]">
-              No persisted domain signals are available for this area.
+              No domain signal detail is available for this area.
             </p>
           ) : null}
         </div>
@@ -429,7 +429,7 @@ function DomainSection({
   if (domainItems.length === 0) {
     return (
       <SurfaceCard className="sonartra-report-body-soft p-6">
-        No persisted domain summaries are available for this result.
+        No domain summaries are available for this result.
       </SurfaceCard>
     );
   }

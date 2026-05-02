@@ -938,7 +938,7 @@ test('Leadership result routes stay anchored to persisted retrieval paths and no
     'utf8',
   );
 
-  assert.match(resultsPageSource, /persisted canonical result payload/i);
+  assert.match(resultsPageSource, /Completed assessment reports stay available here for reference/i);
   assert.match(resultDetailPageSource, /createResultReadModelService/);
   assert.match(resultDetailPageSource, /AssessmentResultNotFoundError/);
   assert.match(resultDetailPageSource, /notFound\(\)/);
