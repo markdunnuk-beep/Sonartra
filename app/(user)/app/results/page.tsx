@@ -34,29 +34,42 @@ export default async function UserResultsPage() {
       {results.length === 0 ? (
         <EmptyState
           title="No results yet"
-          description="Complete an assessment to see your results here."
+          description="Completed reports will appear here after an assessment result is ready."
           action={<ButtonLink href="/app/assessments">Open Assessments</ButtonLink>}
         />
       ) : (
         <section className="sonartra-section">
           <SectionHeader
-            eyebrow="Results"
+            eyebrow="Result history"
             title="Ready to revisit"
             description="Completed assessment reports stay available here for reference."
           />
           {results.map((result) => (
-            <SurfaceCard key={result.resultId} interactive className="p-5">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div className="space-y-2">
-                  <h2 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
-                    {result.assessmentTitle}
-                  </h2>
-                  <p className="text-white/58 text-sm leading-7">
-                    Completed {formatResultDate(result.completedAt)}
-                  </p>
+            <SurfaceCard
+              key={result.resultId}
+              interactive
+              className="relative overflow-hidden p-0"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 w-[3px] bg-[#32D6B0]/70"
+              />
+              <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="space-y-3 p-5 pl-6 lg:p-6 lg:pl-7">
+                  <p className="sonartra-page-eyebrow">Completed report</p>
+                  <div className="space-y-2">
+                    <h2 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
+                      {result.assessmentTitle}
+                    </h2>
+                    <p className="text-white/58 text-sm leading-7">
+                      Completed {formatResultDate(result.completedAt)}
+                    </p>
+                  </div>
                 </div>
 
-                <ButtonLink href={result.href}>View Result</ButtonLink>
+                <div className="border-white/8 flex items-start border-t bg-black/10 p-5 pl-6 lg:items-end lg:border-l lg:border-t-0 lg:p-6">
+                  <ButtonLink href={result.href}>View Result</ButtonLink>
+                </div>
               </div>
             </SurfaceCard>
           ))}
