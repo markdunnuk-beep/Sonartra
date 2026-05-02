@@ -34,7 +34,7 @@ export function PublicSiteHeader() {
   const mobileMenuId = useId();
   const mobileMenuLabelId = useId();
   const pathname = usePathname();
-  const isHomepage = pathname === '/';
+  const desktopNavItems = PUBLIC_SITE_PRIMARY_NAV_ITEMS.filter((item) => item.href !== pathname);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -60,19 +60,17 @@ export function PublicSiteHeader() {
 
   const closeMobileMenu = () => setMobileOpen(false);
 
-  if (isHomepage) {
-    const homepageNavItems = PUBLIC_SITE_PRIMARY_NAV_ITEMS.filter((item) => item.href !== '/');
-
-    return (
-      <header className="relative z-30 px-4 pt-5 sm:px-6 lg:px-8">
-        <div className="mx-auto grid min-h-16 w-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-full border border-white/20 bg-white/[0.10] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_18px_48px_rgba(0,0,0,0.22)] backdrop-blur-[20px] backdrop-saturate-[1.35] sm:px-4">
+  return (
+    <header className="relative z-30 px-4 pt-5 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 rounded-full border border-white/20 bg-white/[0.10] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_18px_48px_rgba(0,0,0,0.20)] backdrop-blur-[20px] backdrop-saturate-[1.35] sm:px-4">
+        <div className="flex min-w-0 flex-1 items-center justify-start">
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-5 pl-2 text-sm font-medium text-white/72 xl:flex"
+            className="hidden items-center gap-4 pl-2 text-sm font-medium text-white/72 xl:flex 2xl:gap-5"
           >
-            {homepageNavItems.slice(0, 3).map((item) => (
+            {desktopNavItems.map((item) => (
               <Link
-                className="transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
+                className="whitespace-nowrap rounded-full px-1.5 py-2 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
                 href={item.href}
                 key={item.href}
               >
@@ -91,23 +89,25 @@ export function PublicSiteHeader() {
           >
             <MenuIcon />
           </button>
+        </div>
 
-          <Link
-            aria-label="Sonartra home"
-            className="justify-self-center rounded-full px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
-            href="/"
-          >
-            <Image
-              alt="Sonartra"
-              className="block h-auto w-[154px] sm:w-[178px]"
-              height={44}
-              priority
-              src="/images/brand/sonartra-logo-white.svg"
-              unoptimized
-              width={180}
-            />
-          </Link>
+        <Link
+          aria-label="Sonartra home"
+          className="absolute left-1/2 top-1/2 rounded-full px-3 py-2 [transform:translate(-50%,-50%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
+          href="/"
+        >
+          <Image
+            alt="Sonartra"
+            className="block h-auto w-[142px] sm:w-[168px] xl:w-[178px]"
+            height={44}
+            priority
+            src="/images/brand/sonartra-logo-white.svg"
+            unoptimized
+            width={180}
+          />
+        </Link>
 
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
           <div className="hidden items-center justify-end gap-3 pr-1 xl:flex">
             <Link
               className="rounded-full border border-white/12 px-4 py-2 text-sm font-medium text-white/78 transition hover:border-white/22 hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
@@ -124,124 +124,12 @@ export function PublicSiteHeader() {
           </div>
 
           <Link
-            className="justify-self-end rounded-full border border-[#32D6B0]/28 bg-[#32D6B0] px-3 py-2 text-xs font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F] sm:px-4 xl:hidden"
+            className="rounded-full border border-[#32D6B0]/28 bg-[#32D6B0] px-3 py-2 text-xs font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F] sm:px-4 xl:hidden"
             href="/get-started"
           >
             Start
           </Link>
         </div>
-
-        {mobileOpen ? (
-          <button
-            aria-label="Close navigation menu"
-            className="fixed inset-0 z-40 bg-[#02060d]/55 backdrop-blur-[2px] xl:hidden"
-            onClick={closeMobileMenu}
-            type="button"
-          />
-        ) : null}
-
-        <div
-          aria-labelledby={mobileMenuLabelId}
-          className={[
-            'fixed inset-x-4 top-[5.75rem] z-50 overflow-hidden rounded-[1.4rem] border border-white/16 bg-[#0b1322]/92 shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-[20px] backdrop-saturate-[1.35] xl:hidden',
-            mobileOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
-          ].join(' ')}
-          hidden={!mobileOpen}
-          id={mobileMenuId}
-          role="dialog"
-        >
-          <nav aria-label="Mobile primary" className="flex flex-col px-4 py-4">
-            <span
-              className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/48"
-              id={mobileMenuLabelId}
-            >
-              Navigate
-            </span>
-
-            {PUBLIC_SITE_PRIMARY_NAV_ITEMS.map((item) => (
-              <Link
-                className="rounded-xl px-3 py-3 text-[0.98rem] font-medium text-white/82 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
-                href={item.href}
-                key={item.href}
-                onClick={closeMobileMenu}
-              >
-                {item.label}
-              </Link>
-            ))}
-
-            <div className="mt-3 grid gap-2 border-t border-white/10 pt-3">
-              {PUBLIC_SITE_SECONDARY_NAV_ITEMS.map((item) => (
-                <Link
-                  className={[
-                    'rounded-xl px-3 py-3 text-[0.98rem] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]',
-                    item.label === 'Get Started'
-                      ? 'border border-[#32D6B0]/28 bg-[#32D6B0] text-[#07100f] hover:bg-[#52E1C0]'
-                      : 'border border-white/12 bg-white/[0.04] text-white/82 hover:bg-white/[0.08] hover:text-white',
-                  ].join(' ')}
-                  href={item.href}
-                  key={item.href}
-                  onClick={closeMobileMenu}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </nav>
-        </div>
-      </header>
-    );
-  }
-
-  return (
-    <header className="border-b border-white/10 bg-background/90 backdrop-blur">
-      <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 sm:px-6">
-        <Link
-          className="text-sm font-semibold tracking-[0.2em] text-white/80 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
-          href="/"
-        >
-          SONARTRA
-        </Link>
-
-        <nav
-          aria-label="Primary"
-          className="hidden items-center gap-6 text-sm text-white/70 xl:flex"
-        >
-          {PUBLIC_SITE_PRIMARY_NAV_ITEMS.map((item) => (
-            <Link
-              className="transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
-              href={item.href}
-              key={item.href}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden items-center gap-3 xl:flex">
-          <Link
-            className="rounded-full border border-white/12 px-4 py-2 text-sm font-medium text-white/78 transition hover:border-white/20 hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
-            href="/sign-in"
-          >
-            Login
-          </Link>
-          <Link
-            className="rounded-full border border-white/14 bg-white px-4 py-2 text-sm font-semibold text-[#08101b] transition hover:bg-white/92 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
-            href="/get-started"
-          >
-            Get Started
-          </Link>
-        </div>
-
-        <button
-          aria-controls={mobileMenuId}
-          aria-expanded={mobileOpen}
-          aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.03] text-white/82 transition hover:border-white/18 hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f] xl:hidden"
-          onClick={() => setMobileOpen((currentValue) => !currentValue)}
-          type="button"
-        >
-          <MenuIcon />
-        </button>
       </div>
 
       {mobileOpen ? (
@@ -254,9 +142,10 @@ export function PublicSiteHeader() {
       ) : null}
 
       <div
+        aria-modal="true"
         aria-labelledby={mobileMenuLabelId}
         className={[
-          'fixed inset-x-4 top-[4.5rem] z-50 overflow-hidden rounded-[1.4rem] border border-white/10 bg-[#0b1322]/96 shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur xl:hidden',
+          'fixed inset-x-4 top-[5.75rem] z-50 overflow-hidden rounded-[1.4rem] border border-white/16 bg-[#0b1322]/92 shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-[20px] backdrop-saturate-[1.35] xl:hidden',
           mobileOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
         ].join(' ')}
         hidden={!mobileOpen}
@@ -265,7 +154,7 @@ export function PublicSiteHeader() {
       >
         <nav aria-label="Mobile primary" className="flex flex-col px-4 py-4">
           <span
-            className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40"
+            className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/48"
             id={mobileMenuLabelId}
           >
             Navigate
@@ -273,7 +162,7 @@ export function PublicSiteHeader() {
 
           {PUBLIC_SITE_PRIMARY_NAV_ITEMS.map((item) => (
             <Link
-              className="rounded-xl px-3 py-3 text-[0.98rem] font-medium text-white/80 transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
+              className="rounded-xl px-3 py-3 text-[0.98rem] font-medium text-white/82 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
               href={item.href}
               key={item.href}
               onClick={closeMobileMenu}
@@ -282,14 +171,14 @@ export function PublicSiteHeader() {
             </Link>
           ))}
 
-          <div className="mt-3 grid gap-2 border-t border-white/8 pt-3">
+          <div className="mt-3 grid gap-2 border-t border-white/10 pt-3">
             {PUBLIC_SITE_SECONDARY_NAV_ITEMS.map((item) => (
               <Link
                 className={[
-                  'rounded-xl px-3 py-3 text-[0.98rem] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]',
+                  'rounded-xl px-3 py-3 text-[0.98rem] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]',
                   item.label === 'Get Started'
-                    ? 'border border-white/12 bg-white text-[#08101b] hover:bg-white/92'
-                    : 'border border-white/10 bg-white/[0.03] text-white/82 hover:bg-white/[0.06] hover:text-white',
+                    ? 'border border-[#32D6B0]/28 bg-[#32D6B0] text-[#07100f] hover:bg-[#52E1C0]'
+                    : 'border border-white/12 bg-white/[0.04] text-white/82 hover:bg-white/[0.08] hover:text-white',
                 ].join(' ')}
                 href={item.href}
                 key={item.href}

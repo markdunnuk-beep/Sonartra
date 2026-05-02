@@ -31,14 +31,18 @@ type PublicPageCta = {
 
 export function PublicPageCanvas({ children }: PublicPageCanvasProps) {
   return (
-    <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-[#080A0D] px-5 py-16 shadow-[0_28px_90px_rgba(0,0,0,0.22)] sm:px-8 md:py-20 lg:px-12">
+    <div className="relative isolate -mx-5 overflow-hidden px-5 pb-16 pt-20 sm:-mx-6 sm:px-6 md:pb-20 md:pt-24 lg:-mx-8 lg:px-8">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_16%_8%,rgba(50,214,176,0.13),transparent_30%),radial-gradient(circle_at_82%_4%,rgba(245,241,234,0.07),transparent_28%),linear-gradient(180deg,#101318_0%,#080A0D_58%,#080A0D_100%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_16%_0%,rgba(50,214,176,0.14),transparent_34%),radial-gradient(circle_at_84%_4%,rgba(217,164,65,0.06),transparent_30%),radial-gradient(circle_at_50%_0%,rgba(245,241,234,0.06),transparent_34%),linear-gradient(180deg,#111820_0%,#0B1016_42%,#080A0D_82%)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-[linear-gradient(rgba(245,241,234,0.016)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent_86%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[34rem] bg-[linear-gradient(rgba(245,241,234,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[30rem] bg-[linear-gradient(to_bottom,rgba(8,10,13,0)_0%,rgba(8,10,13,0.68)_82%,#080A0D_100%)]"
       />
       <div className="mx-auto max-w-6xl">{children}</div>
     </div>
@@ -47,7 +51,11 @@ export function PublicPageCanvas({ children }: PublicPageCanvasProps) {
 
 export function PublicPageHero({ children, eyebrow, intro, title }: PublicPageHeroProps) {
   return (
-    <header className="max-w-4xl">
+    <header className="relative max-w-4xl py-4">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-6 -top-12 -z-10 h-72 rounded-full bg-[radial-gradient(circle_at_24%_18%,rgba(50,214,176,0.10),transparent_50%)] blur-2xl"
+      />
       <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#32D6B0]">
         {eyebrow}
       </p>
