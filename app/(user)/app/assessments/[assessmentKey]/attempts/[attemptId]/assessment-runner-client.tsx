@@ -67,6 +67,20 @@ function RunnerMetaStat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function getQuestionNavigatorLabel(params: {
+  questionNumber: number;
+  active: boolean;
+  answered: boolean;
+}): string {
+  const responseState = params.answered ? 'answered' : 'unanswered';
+
+  if (params.active) {
+    return `Question ${params.questionNumber}, ${responseState}, current`;
+  }
+
+  return `Question ${params.questionNumber}, ${responseState}`;
+}
+
 function getAutosaveStateLabel(params: {
   completionState: CompletionUiState;
   isSaving: boolean;
@@ -450,13 +464,18 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                         type="button"
                         onClick={() => goToQuestion(index)}
                         disabled={interactionLocked}
-                        aria-label={`Jump to question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
+                        aria-label={getQuestionNavigatorLabel({
+                          questionNumber: index + 1,
+                          active,
+                          answered,
+                        })}
+                        aria-current={active ? 'step' : undefined}
                         className={cn(
-                          'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-lg border px-2 py-2 text-center',
+                          'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-md border px-2 py-1.5 text-center text-[0.72rem]',
                           active
-                            ? 'border-[#32D6B0]/70 bg-[#32D6B0]/16 text-[#EFFFFA] shadow-[0_10px_20px_rgba(50,214,176,0.08)]'
+                            ? 'border-[#32D6B0]/58 bg-[#32D6B0]/12 text-[#EFFFFA] shadow-[0_8px_18px_rgba(50,214,176,0.07)]'
                             : answered
-                              ? 'border-emerald-400/16 bg-emerald-400/8 text-emerald-50 hover:border-emerald-300/24 hover:bg-emerald-400/12'
+                              ? 'border-emerald-400/14 bg-emerald-400/[0.055] text-emerald-50/88 hover:border-emerald-300/22 hover:bg-emerald-400/10'
                               : 'border-white/8 bg-white/[0.018] text-white/54 hover:border-white/16 hover:bg-white/[0.04]',
                           'disabled:cursor-not-allowed disabled:opacity-60',
                         )}
@@ -834,22 +853,22 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 text-[0.68rem] font-medium leading-5 text-white/42">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-2 py-0.5">
+          <div className="flex flex-wrap gap-1.5 text-[0.66rem] font-medium leading-5 text-white/40">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/7 bg-white/[0.018] px-2 py-0.5">
               <span className="h-2 w-2 rounded-full bg-[#32D6B0]" />
               Current
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/14 bg-emerald-400/8 px-2 py-0.5 text-emerald-100/86">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/12 bg-emerald-400/[0.055] px-2 py-0.5 text-emerald-100/78">
               <span className="h-2 w-2 rounded-full bg-emerald-200" />
               Complete
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-2 py-0.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/7 bg-white/[0.018] px-2 py-0.5">
               <span className="h-2 w-2 rounded-full bg-white/35" />
               Incomplete
             </span>
           </div>
 
-          <nav className="grid grid-cols-5 gap-1.5" aria-label="Question navigator">
+          <nav className="grid grid-cols-6 gap-1.5" aria-label="Question navigator">
             {runner.questions.map((question, index) => {
               const answered = selectedByQuestionId[question.questionId] !== null;
               const active = index === currentQuestionIndex;
@@ -860,13 +879,18 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   type="button"
                   onClick={() => goToQuestion(index)}
                   disabled={interactionLocked}
-                  aria-label={`Jump to question ${index + 1}${active ? ', current' : ''}${answered ? ', answered' : ', unanswered'}`}
+                  aria-label={getQuestionNavigatorLabel({
+                    questionNumber: index + 1,
+                    active,
+                    answered,
+                  })}
+                  aria-current={active ? 'step' : undefined}
                   className={cn(
-                    'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-lg border px-2 py-2 text-center',
+                    'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-md border px-2 py-1.5 text-center text-[0.72rem]',
                     active
-                      ? 'border-[#32D6B0]/70 bg-[#32D6B0]/16 text-[#EFFFFA] shadow-[0_10px_22px_rgba(50,214,176,0.08)]'
+                      ? 'border-[#32D6B0]/58 bg-[#32D6B0]/12 text-[#EFFFFA] shadow-[0_8px_18px_rgba(50,214,176,0.07)]'
                       : answered
-                        ? 'border-emerald-400/16 bg-emerald-400/8 text-emerald-50 hover:border-emerald-300/24 hover:bg-emerald-400/12'
+                        ? 'border-emerald-400/14 bg-emerald-400/[0.055] text-emerald-50/88 hover:border-emerald-300/22 hover:bg-emerald-400/10'
                         : 'border-white/8 bg-white/[0.018] text-white/54 hover:border-white/16 hover:bg-white/[0.04]',
                     'disabled:cursor-not-allowed disabled:opacity-60',
                   )}

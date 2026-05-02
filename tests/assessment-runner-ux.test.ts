@@ -267,7 +267,10 @@ test('runner client hardens semantic structure and navigator accessibility label
   assert.match(source, /aria-label="Question navigator"/);
   assert.match(source, /aria-label="Question navigator sheet"/);
   assert.match(source, /aria-label="Review completion actions"/);
-  assert.match(source, /Jump to question/);
+  assert.match(source, /getQuestionNavigatorLabel/);
+  assert.match(source, /return `Question \$\{params\.questionNumber\}, \$\{responseState\}, current`;/);
+  assert.match(source, /return `Question \$\{params\.questionNumber\}, \$\{responseState\}`;/);
+  assert.match(source, /aria-current=\{active \? 'step' : undefined\}/);
   assert.match(source, /aria-live="polite"/);
 });
 
@@ -304,9 +307,10 @@ test('runner client adds compact orientation controls for tablet and mobile layo
   assert.match(source, /Move between questions without losing your saved progress\./);
   assert.match(source, /sm:grid-cols-6 md:grid-cols-8/);
   assert.match(source, /rounded-\[1\.15rem\] border border-white\/8 bg-neutral-950\/72/);
-  assert.match(source, /rounded-lg border px-2 py-2 text-center/);
+  assert.match(source, /rounded-md border px-2 py-1\.5 text-center text-\[0\.72rem\]/);
   assert.match(source, /setCompactNavigatorOpen\(false\);/);
   assert.match(source, /hidden xl:sticky xl:top-6 xl:block/);
+  assert.match(source, /<nav className="grid grid-cols-6 gap-1\.5" aria-label="Question navigator">/);
 });
 
 test('runner client keeps review completion accessible on smaller screens', () => {
