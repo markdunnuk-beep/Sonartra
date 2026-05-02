@@ -20,8 +20,61 @@ test('authoring layout switches into published-no-draft banner mode', () => {
   assert.match(source, /assessment\.builderMode === 'published_no_draft'/);
   assert.match(source, /Browse the published assessment and create a draft when you are ready to change it\./);
   assert.match(source, /<AdminPublishedNoDraftBanner/);
+  assert.match(source, /Create new version/);
+  assert.match(source, /href=\{`\/admin\/assessments\/\$\{assessment\.assessmentKey\}\/versions\/new`\}/);
   assert.match(source, /space-y-4 sm:space-y-5 lg:space-y-6/);
   assert.match(source, /overflow-hidden p-4 sm:p-5 lg:p-6/);
+});
+
+test('single-domain authoring layout exposes the create-new-version placeholder entry point', () => {
+  const source = readSource(
+    'app',
+    '(admin)',
+    'admin',
+    'assessments',
+    'single-domain',
+    '[assessmentKey]',
+    'layout.tsx',
+  );
+
+  assert.match(source, /Create new version/);
+  assert.match(
+    source,
+    /href=\{`\/admin\/assessments\/single-domain\/\$\{assessment\.assessmentKey\}\/versions\/new`\}/,
+  );
+});
+
+test('create-new-version placeholder routes explain that version creation is not implemented', () => {
+  const componentSource = readSource(
+    'components',
+    'admin',
+    'admin-assessment-version-placeholder.tsx',
+  );
+  const multiDomainRouteSource = readSource(
+    'app',
+    '(admin)',
+    'admin',
+    'assessments',
+    '[assessmentKey]',
+    'versions',
+    'new',
+    'page.tsx',
+  );
+  const singleDomainRouteSource = readSource(
+    'app',
+    '(admin)',
+    'admin',
+    'assessments',
+    'single-domain',
+    '[assessmentKey]',
+    'versions',
+    'new',
+    'page.tsx',
+  );
+
+  assert.match(componentSource, /Version creation is not implemented yet\./);
+  assert.match(multiDomainRouteSource, /AdminAssessmentVersionPlaceholder/);
+  assert.match(singleDomainRouteSource, /AdminAssessmentVersionPlaceholder/);
 });
 
 test('guarded authoring stages route published assessments into the reusable read-only state', () => {

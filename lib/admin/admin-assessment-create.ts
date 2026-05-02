@@ -34,6 +34,9 @@ export const initialAdminAssessmentCreateFormState: AdminAssessmentCreateFormSta
   values: emptyAdminAssessmentCreateFormValues,
 };
 
+export const DUPLICATE_ASSESSMENT_KEY_MESSAGE =
+  'This assessment already exists. To create a new version, open the existing assessment and choose Create new version.';
+
 export function validateAdminAssessmentCreateValues(
   values: AdminAssessmentCreateFormValues,
 ): AdminAssessmentCreateFormState {

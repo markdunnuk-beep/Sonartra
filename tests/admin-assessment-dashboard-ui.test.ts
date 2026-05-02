@@ -19,6 +19,8 @@ test('assessment index uses a tighter top hero and simpler card CTA hierarchy', 
 
   assert.match(source, /Manage drafts, published versions, and what needs attention next\./);
   assert.match(source, /Open builder/);
+  assert.match(source, /Create new version/);
+  assert.match(source, /const createVersionHref = `\$\{assessment\.actionHref\}\/versions\/new`;/);
   assert.match(source, /Review and publish/);
   assert.match(source, /Review draft/);
   assert.doesNotMatch(source, /Assessment list/);

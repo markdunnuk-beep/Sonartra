@@ -93,6 +93,7 @@ function AssessmentCard({
   const reviewHref = assessment.latestDraftVersion
     ? `${assessment.actionHref}/review`
     : null;
+  const createVersionHref = `${assessment.actionHref}/versions/new`;
   const reviewLabel = assessment.latestDraftReadiness === 'ready'
     ? 'Review and publish'
     : 'Review draft';
@@ -132,6 +133,14 @@ function AssessmentCard({
             <ButtonLink href={assessment.actionHref} variant="primary">
               Open builder
             </ButtonLink>
+            <Link
+              className={cn(
+                'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/72 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
+              )}
+              href={createVersionHref}
+            >
+              Create new version
+            </Link>
             {reviewHref ? (
               <Link
                 className={cn(

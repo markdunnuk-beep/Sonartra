@@ -7,6 +7,7 @@ import { normalizeAssessmentKeyInput } from '@/lib/admin/assessment-key';
 import { INITIAL_ASSESSMENT_VERSION_TAG } from '@/lib/admin/admin-assessment-versioning';
 import { getAssessmentBuilderBasePath } from '@/lib/admin/assessment-builder-paths';
 import {
+  DUPLICATE_ASSESSMENT_KEY_MESSAGE,
   type AdminAssessmentCreateFormState,
   type AdminAssessmentCreateFormValues,
   validateAdminAssessmentCreateValues,
@@ -170,7 +171,7 @@ function mapDatabaseFailureToFormState(
   }
 
   if (isAssessmentKeyExistsError(error)) {
-    return buildFieldErrorState(values, 'assessmentKey', 'That assessment key is already in use.');
+    return buildFieldErrorState(values, 'assessmentKey', DUPLICATE_ASSESSMENT_KEY_MESSAGE);
   }
 
   const candidate = toPostgresErrorLike(error);

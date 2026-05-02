@@ -1,11 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import {
   createAdminAssessmentRecords,
   createAssessmentActionWithDependencies,
 } from '@/lib/server/admin-assessment-create';
 import {
+  DUPLICATE_ASSESSMENT_KEY_MESSAGE,
   initialAdminAssessmentCreateFormState,
   validateAdminAssessmentCreateValues,
 } from '@/lib/admin/admin-assessment-create';
@@ -350,7 +353,7 @@ test('create action returns an inline field error for duplicate assessment keys'
     },
   );
 
-  assert.equal(result.fieldErrors.assessmentKey, 'That assessment key is already in use.');
+  assert.equal(result.fieldErrors.assessmentKey, DUPLICATE_ASSESSMENT_KEY_MESSAGE);
   assert.equal(result.formError, null);
   assert.ok(transactionLog.some((entry) => entry === 'BEGIN'));
   assert.ok(transactionLog.some((entry) => entry === 'ROLLBACK'));
@@ -403,9 +406,20 @@ test('create action returns an inline field error for database unique violations
     ),
   );
 
-  assert.equal(result.fieldErrors.assessmentKey, 'That assessment key is already in use.');
+  assert.equal(result.fieldErrors.assessmentKey, DUPLICATE_ASSESSMENT_KEY_MESSAGE);
   assert.equal(result.formError, null);
   assert.equal(calls.length, 0);
+});
+
+test('create form surfaces duplicate-key guidance and a link to the existing assessment', () => {
+  const formSource = readFileSync(
+    join(process.cwd(), 'components', 'admin', 'admin-assessment-create-form.tsx'),
+    'utf8',
+  );
+
+  assert.match(formSource, /DUPLICATE_ASSESSMENT_KEY_MESSAGE/);
+  assert.match(formSource, /Open existing assessment/);
+  assert.match(formSource, /`\/admin\/assessments\/\$\{assessmentKeyValue\}`/);
 });
 
 test('create action returns a targeted form error for assessment version constraint failures', async () => {
