@@ -63,8 +63,32 @@ function formatDraftReadiness(status: AdminAssessmentDraftReadiness): string {
     case 'not_ready':
       return 'Draft not ready';
     case 'no_draft':
-      return 'No draft';
+      return 'No draft in progress';
   }
+}
+
+function formatAssessmentStatusSummary(assessment: AdminAssessmentDashboardItem): string {
+  if (assessment.description) {
+    return assessment.description;
+  }
+
+  if (assessment.publishedVersion && assessment.latestDraftVersion) {
+    return `Current live version ${assessment.publishedVersion.versionTag}; draft ${assessment.latestDraftVersion.versionTag} is in progress.`;
+  }
+
+  if (assessment.publishedVersion) {
+    return `Current live version ${assessment.publishedVersion.versionTag}. No draft is currently in progress.`;
+  }
+
+  if (assessment.latestDraftVersion) {
+    return `Draft ${assessment.latestDraftVersion.versionTag} is in progress and not live yet.`;
+  }
+
+  if (assessment.versionCount === 0) {
+    return 'Assessment record exists, but no version has been created yet.';
+  }
+
+  return 'Versions exist, but none are currently live or in draft.';
 }
 
 function SummaryCard({
@@ -125,7 +149,7 @@ function AssessmentCard({
               {assessment.title}
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-white/62">
-              {assessment.description ?? assessment.overallStatusDetail}
+              {formatAssessmentStatusSummary(assessment)}
             </p>
           </div>
 
@@ -139,7 +163,7 @@ function AssessmentCard({
               )}
               href={createVersionHref}
             >
-              Create new version
+              Create draft version
             </Link>
             {reviewHref ? (
               <Link
@@ -159,10 +183,10 @@ function AssessmentCard({
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <MetaItem
-            label="Published version"
+            label="Current live version"
             value={assessment.publishedVersion?.versionTag ?? 'None'}
           />
-          <MetaItem label="Latest draft" value={assessment.latestDraftVersion?.versionTag ?? 'None'} />
+          <MetaItem label="Draft in progress" value={assessment.latestDraftVersion?.versionTag ?? 'No draft'} />
           <MetaItem label="Draft readiness" value={formatDraftReadiness(assessment.latestDraftReadiness)} />
           <MetaItem label="Last updated" value={formatDate(assessment.latestUpdatedAt)} />
           <MetaItem label="Versions" value={String(assessment.versionCount)} />
@@ -209,7 +233,7 @@ export function AdminAssessmentsDashboard({
             >
               {showArchived ? 'Hide archived' : `Show archived${summary.archivedCount > 0 ? ` (${summary.archivedCount})` : ''}`}
             </Link>
-            <p className="text-sm text-white/52">Starts a new assessment with draft version `1.0.0`.</p>
+            <p className="text-sm text-white/52">Creates a new assessment with its first editable draft.</p>
           </div>
         </div>
       </SurfaceCard>
@@ -259,7 +283,7 @@ export function AdminAssessmentsDashboard({
         <SectionHeader
           eyebrow="Assessments"
           title="Build"
-          description="Open an assessment to keep building."
+          description="Open an assessment, review readiness, or create the next draft."
         />
 
         {assessments.length === 0 ? (
