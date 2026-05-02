@@ -153,6 +153,7 @@ test('single-domain narrative builder renders section-first import controls for 
   );
 
   assert.match(markup, /Pipe-delimited section import/);
+  assert.match(markup, /Locked header and validation rules are available here before import/);
   assert.match(markup, /Import section rows/);
   assert.match(markup, /Imported rows/);
   assert.match(markup, /Latest validation result/);
@@ -166,6 +167,8 @@ test('single-domain narrative builder renders section-first import controls for 
   assert.match(markup, /domain_key\|section_key\|pair_key\|signal_key\|driver_role\|claim_type/);
   assert.match(markup, /domain_key\|section_key\|pattern_key\|pair_key\|focus_area\|guidance_type\|driver_role\|signal_key\|priority\|guidance_text\|linked_claim_type/);
   assert.match(markup, /Expected total: 144 rows/);
+  assert.match(markup, /Full-pattern import rules/);
+  assert.match(markup, /Technical reference/);
   assert.match(markup, /pattern_key plus driver_role/);
   assert.doesNotMatch(markup, /SINGLE_DOMAIN_INTRO/);
   assert.doesNotMatch(markup, /SINGLE_DOMAIN_HERO/);

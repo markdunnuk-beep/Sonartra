@@ -287,6 +287,9 @@ test('single-domain composer preview renders draft and fixture modes with full r
   assert.match(markup, /Result composer preview/);
   assert.match(markup, /Draft preview/);
   assert.match(markup, /Fixture preview/);
+  assert.match(markup, /Report preview/);
+  assert.match(markup, /Preview generated report sections/);
+  assert.match(markup, /Diagnostics and provenance/);
   assert.match(markup, /Composed report/);
   assert.match(markup, /Diagnostics/);
   assert.match(markup, /Provenance/);
@@ -317,6 +320,7 @@ test('single-domain composer preview falls back to fixture mode when draft previ
   );
 
   assert.match(markup, /Fixture preview/);
+  assert.match(markup, /Preview generated report sections/);
   assert.match(markup, /Composed report/);
   assert.match(markup, /This preview assembles the locked six-section narrative into one report flow/i);
   assert.doesNotMatch(markup, /Preview unavailable/);

@@ -254,14 +254,19 @@ export function SingleDomainSectionPanel({
               </div>
             ))}
           </div>
-          <div className="rounded-[0.95rem] border border-[rgba(126,179,255,0.14)] bg-[rgba(126,179,255,0.05)] p-4">
-            <p className="text-sm font-medium text-white">Full-pattern import rules</p>
-            <div className="mt-3 space-y-2 text-sm leading-6 text-white/60">
+          <details className="rounded-[0.95rem] border border-white/8 bg-black/10">
+            <summary className="sonartra-focus-ring flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 rounded-[0.95rem] px-4 py-3 marker:hidden">
+              <span className="text-sm font-medium text-white">Full-pattern import rules</span>
+              <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
+                Technical reference
+              </LabelPill>
+            </summary>
+            <div className="space-y-2 border-t border-white/8 px-4 py-3 text-sm leading-6 text-white/60">
               {APPLICATION_PATTERN_RULES.map((rule) => (
                 <p key={rule}>{rule}</p>
               ))}
             </div>
-          </div>
+          </details>
         </div>
       ) : null}
 
@@ -287,23 +292,28 @@ export function SingleDomainSectionPanel({
       <div className="space-y-3">
         <p className="text-sm font-medium text-white">Primary action area</p>
         <form action={formAction} className="space-y-3">
-          <div className="rounded-[0.95rem] border border-[rgba(126,179,255,0.14)] bg-[rgba(126,179,255,0.05)] p-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
+          <details className="rounded-[0.95rem] border border-[rgba(126,179,255,0.14)] bg-[rgba(126,179,255,0.05)]">
+            <summary className="sonartra-focus-ring flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 rounded-[0.95rem] px-4 py-3 marker:hidden">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-white">Pipe-delimited section import</p>
                 <p className="text-sm leading-6 text-white/56">
-                  Import only this section using the locked header below. Extra columns, missing
-                  columns, or reordered columns will fail validation.
+                  Locked header and validation rules are available here before import.
                 </p>
               </div>
               <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
                 {section.datasetLabel}
               </LabelPill>
+            </summary>
+            <div className="border-t border-white/8 p-4">
+              <p className="text-sm leading-6 text-white/56">
+                Import only this section using the locked header below. Extra columns, missing
+                columns, or reordered columns will fail validation.
+              </p>
+              <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-words rounded-[0.85rem] border border-white/8 bg-black/20 p-3 text-xs leading-6 text-white/72">
+                {section.importHeader}
+              </pre>
             </div>
-            <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-words rounded-[0.85rem] border border-white/8 bg-black/20 p-3 text-xs leading-6 text-white/72">
-              {section.importHeader}
-            </pre>
-          </div>
+          </details>
 
           <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-[0.95rem] border border-white/8 bg-black/10 p-4">

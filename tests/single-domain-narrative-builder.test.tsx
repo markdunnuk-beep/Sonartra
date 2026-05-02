@@ -386,7 +386,10 @@ test('narrative builder renders the six locked sections, readiness summary, and 
   assert.match(markup, /Expected total: 144 rows/);
   assert.match(markup, /domain_key \+ pattern_key \+ focus_area \+ guidance_type \+ driver_role/);
   assert.match(markup, /Pipe-delimited section import/);
+  assert.match(markup, /Locked header and validation rules are available here before import/);
   assert.match(markup, /Composer preview/);
+  assert.match(markup, /Preview generated report sections/);
+  assert.match(markup, /Diagnostics and provenance/);
   assert.match(markup, /Publish blockers/);
   assert.match(markup, /Intro import contract/);
   assert.doesNotMatch(markup, /SINGLE_DOMAIN_INTRO/);
