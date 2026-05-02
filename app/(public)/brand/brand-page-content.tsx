@@ -534,6 +534,68 @@ export function BrandPageContent() {
                 </button>
               </div>
             </div>
+            <div className="rounded-3xl border border-[#F5F1EA]/10 bg-[#101318] p-6">
+              <div className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
+                <div>
+                  <p
+                    className="text-xs font-semibold uppercase tracking-[0.14em]"
+                    style={{ color: accent.hex }}
+                  >
+                    Glassmorphism navbar
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold text-[#F5F1EA]">
+                    A quiet premium navigation surface for high-impact public pages.
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[#D8D0C3]/82">
+                    Use this pattern on homepage hero surfaces where navigation should feel present
+                    but recede behind the content. The full logo can sit centred in the glass
+                    surface when the layout stays balanced.
+                  </p>
+                  <div className="mt-4 space-y-2 text-sm leading-6 text-[#9A9185]">
+                    <p>Background: rgba(255,255,255,0.10)</p>
+                    <p>Backdrop filter: blur(20px) saturate(1.35)</p>
+                    <p>Border: 1px solid rgba(255,255,255,0.20)</p>
+                  </div>
+                </div>
+                <div>
+                  <div className="rounded-[1.6rem] border border-[#F5F1EA]/10 bg-[#080A0D] p-5">
+                    <div className="grid min-h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-full border border-white/20 bg-white/[0.10] px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_18px_48px_rgba(0,0,0,0.22)] backdrop-blur-[20px] backdrop-saturate-[1.35]">
+                      <div className="hidden gap-4 text-xs font-medium text-white/70 sm:flex">
+                        <span>Platform</span>
+                        <span>Signals</span>
+                      </div>
+                      <Image
+                        alt="Sonartra"
+                        className="block h-auto w-[150px]"
+                        height={44}
+                        src="/images/brand/sonartra-logo-white.svg"
+                        unoptimized
+                        width={180}
+                      />
+                      <div className="hidden items-center justify-end gap-2 sm:flex">
+                        <span className="rounded-full border border-white/12 px-3 py-2 text-xs font-medium text-white/78">
+                          Login
+                        </span>
+                        <span
+                          className="rounded-full border px-3 py-2 text-xs font-semibold"
+                          style={{
+                            backgroundColor: accent.hex,
+                            borderColor: withAlpha(accent.hex, 0.3),
+                            color: accent.textOnAccent,
+                          }}
+                        >
+                          Get Started
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-[#D8D0C3]/82">
+                    Avoid heavy blur, glow, neon colour, or glass effects that compete with the
+                    hero message. The background should remain calm and receding.
+                  </p>
+                </div>
+              </div>
+            </div>
             <div className="grid gap-4 lg:grid-cols-2">
               <div
                 className="rounded-3xl border bg-[#101318] p-6"
