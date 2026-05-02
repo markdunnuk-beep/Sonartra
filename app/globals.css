@@ -1944,14 +1944,14 @@ main {
 
   .sonartra-runner-mobile-orientation {
     background:
-      radial-gradient(circle at top left, rgba(142, 162, 255, 0.1), transparent 48%),
+      radial-gradient(circle at top left, rgba(50, 214, 176, 0.1), transparent 48%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.018)),
       rgba(8, 13, 24, 0.76);
   }
 
   .sonartra-runner-mobile-review-bar {
     background:
-      radial-gradient(circle at top left, rgba(142, 162, 255, 0.08), transparent 54%),
+      radial-gradient(circle at top left, rgba(50, 214, 176, 0.08), transparent 54%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.042), rgba(255, 255, 255, 0.018)),
       rgba(8, 13, 24, 0.82);
   }

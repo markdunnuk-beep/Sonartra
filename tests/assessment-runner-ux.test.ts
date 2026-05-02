@@ -277,11 +277,11 @@ test('runner client preserves premium answer-card treatment around hidden native
   assert.match(source, /<label key=\{option\.optionId\} htmlFor=\{optionInputId\} className="block">/);
   assert.match(
     source,
-    /sonartra-motion-choice sonartra-runner-option block rounded-\[1\.15rem\] border px-5 py-4 text-left transition peer-focus-visible:ring-2 peer-focus-visible:ring-white\/55 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950/,
+    /sonartra-motion-choice sonartra-runner-option block rounded-\[1\.15rem\] border px-5 py-4 text-left transition peer-focus-visible:ring-2 peer-focus-visible:ring-\[#32D6B0\]\/55 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950/,
   );
   assert.match(
     source,
-    /ring-white\/12 border-white\/85 bg-\[linear-gradient\(180deg,rgba\(255,255,255,0\.98\),rgba\(244,247,255,0\.94\)\)\] text-neutral-950 shadow-\[0_18px_38px_rgba\(255,255,255,0\.08\)\] ring-1/,
+    /border-\[#32D6B0\]\/70 bg-\[linear-gradient\(180deg,rgba\(50,214,176,0\.16\),rgba\(50,214,176,0\.075\)\)\] text-white shadow-\[0_18px_38px_rgba\(50,214,176,0\.08\)\] ring-1 ring-\[#32D6B0\]\/22/,
   );
   assert.match(source, /hover:border-white\/24 border-white\/10 bg-white\/\[0\.03\] text-white hover:bg-white\/\[0\.055\]/);
   assert.match(source, /interactionLocked && 'cursor-not-allowed opacity-70'/);

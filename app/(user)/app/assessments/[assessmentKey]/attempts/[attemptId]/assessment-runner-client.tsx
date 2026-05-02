@@ -454,7 +454,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                         className={cn(
                           'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-lg border px-2 py-2 text-center',
                           active
-                            ? 'border-white/80 bg-white text-neutral-950 shadow-[0_10px_20px_rgba(255,255,255,0.06)]'
+                            ? 'border-[#32D6B0]/70 bg-[#32D6B0]/16 text-[#EFFFFA] shadow-[0_10px_20px_rgba(50,214,176,0.08)]'
                             : answered
                               ? 'border-emerald-400/16 bg-emerald-400/8 text-emerald-50 hover:border-emerald-300/24 hover:bg-emerald-400/12'
                               : 'border-white/8 bg-white/[0.018] text-white/54 hover:border-white/16 hover:bg-white/[0.04]',
@@ -465,7 +465,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                         <span
                           className={`absolute right-2 top-2 h-1.5 w-1.5 rounded-full ${
                             active
-                              ? 'bg-neutral-950/45'
+                              ? 'bg-[#32D6B0]'
                               : answered
                                 ? 'bg-emerald-200'
                                 : 'bg-white/28'
@@ -535,7 +535,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 </div>
                 <div className="bg-white/8 mt-3 h-1.5 overflow-hidden rounded-full">
                   <div
-                    className="sonartra-motion-progress h-full rounded-full bg-white"
+                    className="sonartra-motion-progress h-full rounded-full bg-[#32D6B0]"
                     style={{ width: `${completionPercentage}%` }}
                   />
                 </div>
@@ -610,9 +610,9 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       />
                       <span
                         className={cn(
-                          'sonartra-motion-choice sonartra-runner-option block rounded-[1.15rem] border px-5 py-4 text-left transition peer-focus-visible:ring-2 peer-focus-visible:ring-white/55 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950',
+                          'sonartra-motion-choice sonartra-runner-option block rounded-[1.15rem] border px-5 py-4 text-left transition peer-focus-visible:ring-2 peer-focus-visible:ring-[#32D6B0]/55 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950',
                           selected
-                            ? 'ring-white/12 border-white/85 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,247,255,0.94))] text-neutral-950 shadow-[0_18px_38px_rgba(255,255,255,0.08)] ring-1'
+                            ? 'border-[#32D6B0]/70 bg-[linear-gradient(180deg,rgba(50,214,176,0.16),rgba(50,214,176,0.075))] text-white shadow-[0_18px_38px_rgba(50,214,176,0.08)] ring-1 ring-[#32D6B0]/22'
                             : 'hover:border-white/24 border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.055]',
                           interactionLocked && 'cursor-not-allowed opacity-70',
                         )}
@@ -622,7 +622,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                             <span
                               className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
                                 selected
-                                  ? 'bg-neutral-950/10 text-neutral-950'
+                                  ? 'bg-[#32D6B0] text-neutral-950'
                                   : 'bg-white/10 text-white'
                               }`}
                               aria-hidden="true"
@@ -836,7 +836,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
           <div className="flex flex-wrap gap-1.5 text-[0.68rem] font-medium leading-5 text-white/42">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-2 py-0.5">
-              <span className="h-2 w-2 rounded-full bg-white" />
+              <span className="h-2 w-2 rounded-full bg-[#32D6B0]" />
               Current
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/14 bg-emerald-400/8 px-2 py-0.5 text-emerald-100/86">
@@ -864,7 +864,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   className={cn(
                     'sonartra-motion-choice sonartra-type-nav sonartra-runner-map-item relative rounded-lg border px-2 py-2 text-center',
                     active
-                      ? 'border-white/80 bg-white text-neutral-950 shadow-[0_10px_22px_rgba(255,255,255,0.08)]'
+                      ? 'border-[#32D6B0]/70 bg-[#32D6B0]/16 text-[#EFFFFA] shadow-[0_10px_22px_rgba(50,214,176,0.08)]'
                       : answered
                         ? 'border-emerald-400/16 bg-emerald-400/8 text-emerald-50 hover:border-emerald-300/24 hover:bg-emerald-400/12'
                         : 'border-white/8 bg-white/[0.018] text-white/54 hover:border-white/16 hover:bg-white/[0.04]',
@@ -875,7 +875,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   <span
                     aria-hidden="true"
                     className={`absolute right-2 top-2 h-1.5 w-1.5 rounded-full ${
-                      active ? 'bg-neutral-950/45' : answered ? 'bg-emerald-200' : 'bg-white/28'
+                      active ? 'bg-[#32D6B0]' : answered ? 'bg-emerald-200' : 'bg-white/28'
                     }`}
                   />
                 </button>
