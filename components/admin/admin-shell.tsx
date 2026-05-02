@@ -149,7 +149,7 @@ function SidebarLink({
             : 'mx-auto h-11 w-11 justify-center px-0 py-0'
           : 'w-full justify-start gap-3.5 px-3 py-2.5',
         active
-          ? 'border-white/14 bg-white/[0.055] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
+          ? 'border-[#32D6B0]/24 bg-[#32D6B0]/[0.075] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
           : 'border-transparent text-white/62 hover:border-white/10 hover:bg-white/[0.035] hover:text-white/90',
       )}
       data-sidebar-collapsed={collapsed ? 'true' : 'false'}
@@ -160,7 +160,7 @@ function SidebarLink({
       <span
         aria-hidden="true"
         className={cn(
-          'sonartra-motion-active-bar absolute left-0 top-1/2 h-7 w-[2px] -translate-y-1/2 rounded-r-full bg-white/72',
+          'sonartra-motion-active-bar absolute left-0 top-1/2 h-7 w-[2px] -translate-y-1/2 rounded-r-full bg-[#32D6B0]/82',
           active ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0',
         )}
       />
@@ -169,7 +169,7 @@ function SidebarLink({
           'sonartra-motion-nav-icon flex shrink-0 items-center justify-center border',
           active && collapsed ? 'h-10 w-10 rounded-[1rem]' : 'h-9 w-9 rounded-[0.9rem]',
           active
-            ? 'border-white/14 bg-white/[0.075] text-white'
+            ? 'border-[#32D6B0]/26 bg-[#32D6B0]/[0.105] text-white'
             : 'border-white/7 bg-black/10 text-white/62 group-hover:border-white/10 group-hover:bg-white/[0.04] group-hover:text-white/90',
         )}
       >
@@ -269,7 +269,7 @@ export function AdminShell({
   }, [mobileOpen]);
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-[radial-gradient(circle_at_top,_rgba(96,119,255,0.08),_transparent_32%),linear-gradient(180deg,rgba(9,17,31,0.98),rgba(8,15,28,1))]">
+    <div className="min-h-screen overflow-x-clip bg-[radial-gradient(circle_at_top,_rgba(50,214,176,0.055),_transparent_32%),linear-gradient(180deg,rgba(9,17,31,0.98),rgba(8,15,28,1))]">
       <div className="mx-auto flex min-h-screen w-full max-w-[1680px] overflow-x-clip">
         <aside
           aria-describedby={mobileOpen ? mobileDrawerDescriptionId : undefined}
@@ -390,21 +390,21 @@ export function AdminShell({
 
           <div
             className={cn(
-              'border-white/8 rounded-[1.4rem] border bg-white/[0.03]',
+              'border-white/8 rounded-[1.4rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.018))] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]',
               mobileSidebarCollapsed ? 'p-2' : 'p-3.5',
             )}
           >
             {mobileSidebarCollapsed ? (
               <div aria-label={`Admin session: ${userLabel}`} title={userLabel}>
                 <SessionAvatar
-                  className="border-white/8 text-white/76 mx-auto bg-white/[0.03]"
+                  className="border-[#32D6B0]/18 text-white/76 mx-auto bg-[#32D6B0]/[0.055]"
                 />
               </div>
             ) : (
               <div className="flex items-center gap-3">
                 <SessionAvatar />
                 <div className="min-w-0 flex-1">
-                  <p className="sonartra-shell-session-label">Admin session</p>
+                  <p className="sonartra-shell-session-label">Admin access</p>
                   <p className="sonartra-shell-session-value mt-1 truncate">{userLabel}</p>
                 </div>
               </div>
@@ -455,7 +455,7 @@ export function AdminShell({
             <div className="border-white/6 min-h-full min-w-0 rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl">
               <div className="border-white/6 flex items-center justify-between gap-4 border-b px-5 py-4 lg:px-8 lg:py-5">
                 <div className="min-w-0">
-                  <p className="sonartra-shell-session-label">Phase 5</p>
+                  <p className="sonartra-shell-session-label">Admin Workspace</p>
                   <p className="sonartra-shell-session-value mt-1 truncate">Assessment admin</p>
                 </div>
                 <Link

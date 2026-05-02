@@ -53,6 +53,11 @@ test('admin shell sidebar constrains horizontal overflow at the container', () =
   assert.match(source, /w-full justify-start gap-3\.5 px-3 py-2\.5/);
   assert.match(source, /data-sidebar-collapsed=\{collapsed \? 'true' : 'false'\}/);
   assert.match(source, /flex shrink-0 items-center justify-center border/);
+  assert.match(source, /border-\[#32D6B0\]\/24 bg-\[#32D6B0\]\/\[0\.075\]/);
+  assert.match(source, /bg-\[#32D6B0\]\/82/);
+  assert.match(source, /border-\[#32D6B0\]\/26 bg-\[#32D6B0\]\/\[0\.105\]/);
+  assert.match(source, /rgba\(50,214,176,0\.055\)/);
+  assert.doesNotMatch(source, /rgba\(96,119,255/);
   assert.match(source, /active && collapsed \? 'h-10 w-10 rounded-\[1rem\]' : 'h-9 w-9 rounded-\[0\.9rem\]'/);
   assert.match(source, /h-\[1\.05rem\] w-\[1\.05rem\]/);
   assert.match(
@@ -66,7 +71,10 @@ test('admin collapsed footer keeps the admin session tile intentional', () => {
 
   assert.match(source, /mobileSidebarCollapsed \? 'p-2' : 'p-3\.5'/);
   assert.match(source, /aria-label=\{`Admin session: \$\{userLabel\}`\}/);
-  assert.match(source, /border-white\/8 text-white\/76 mx-auto bg-white\/\[0\.03\]/);
+  assert.match(source, /border-\[#32D6B0\]\/18 text-white\/76 mx-auto bg-\[#32D6B0\]\/\[0\.055\]/);
+  assert.match(source, />Admin access<\/p>/);
+  assert.match(source, />Admin Workspace<\/p>/);
+  assert.doesNotMatch(source, />Phase 5<\/p>/);
   assert.match(source, /function SessionAvatar\(\{ className \}: \{ className\?: string \}\)/);
   assert.match(source, /src=\{SONARTRA_MARK_WHITE_SRC\}/);
   assert.match(source, /alt=""/);
