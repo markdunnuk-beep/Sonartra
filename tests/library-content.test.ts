@@ -112,6 +112,26 @@ test('library articles reference existing categories and have valid sections', (
   }
 });
 
+test('library upgraded articles have editorial depth and takeaway-ready sections', () => {
+  for (const article of LIBRARY_ARTICLES) {
+    assert.ok(article.description.length >= 80, `${article.slug} description must be meaningful`);
+    assert.ok(article.heroSummary.length >= 100, `${article.slug} hero summary must be meaningful`);
+    assert.ok(article.sections.length >= 4, `${article.slug} must have at least four sections`);
+    assert.ok(article.relatedArticleSlugs.length > 0, `${article.slug} must include related reading`);
+    assert.ok(article.cta.label.length > 0, `${article.slug} must include a CTA label`);
+    assert.ok(article.cta.href.length > 0, `${article.slug} must include a CTA href`);
+
+    for (const section of article.sections) {
+      assert.ok(section.summary, `${article.slug}/${section.id} must include a summary`);
+      assert.ok(
+        section.summary.length >= 70,
+        `${article.slug}/${section.id} summary must generate a useful takeaway`,
+      );
+      assert.ok(section.body.length >= 180, `${article.slug}/${section.id} body must be meaningful`);
+    }
+  }
+});
+
 test('library related article slugs resolve unambiguously', () => {
   for (const article of LIBRARY_ARTICLES) {
     for (const relatedSlug of article.relatedArticleSlugs) {
