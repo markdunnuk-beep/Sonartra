@@ -49,7 +49,8 @@ function buildPayload(params?: {
       headline: 'Core Focus leads the current pattern',
       subheadline: null,
       summary: null,
-      narrative: 'concentrated profile with Core Focus leading and Signals holding the strongest domain share.',
+      narrative:
+        'concentrated profile with Core Focus leading and Signals holding the strongest domain share.',
       pressureOverlay: null,
       environmentOverlay: null,
       primaryPattern: {
@@ -61,34 +62,39 @@ function buildPayload(params?: {
       domainPairWinners: [],
       traitTotals: [],
       matchedPatterns: [],
-      domainHighlights: [{
-        domainKey: 'signals',
-        domainLabel: 'Signals',
-        primarySignalKey: 'core_focus',
-        primarySignalLabel: 'Core Focus',
-        summary: null,
-      }],
+      domainHighlights: [
+        {
+          domainKey: 'signals',
+          domainLabel: 'Signals',
+          primarySignalKey: 'core_focus',
+          primarySignalLabel: 'Core Focus',
+          summary: null,
+        },
+      ],
     },
     domains: Object.freeze([
       ...(includeEmptyDomain
-        ? [{
-            domainKey: 'section_a',
-            domainLabel: 'Section A',
-            chapterOpening: null,
-            signalBalance: {
-              items: Object.freeze([]),
+        ? [
+            {
+              domainKey: 'section_a',
+              domainLabel: 'Section A',
+              chapterOpening: null,
+              signalBalance: {
+                items: Object.freeze([]),
+              },
+              primarySignal: null,
+              secondarySignal: null,
+              signalPair: null,
+              pressureFocus: null,
+              environmentFocus: null,
             },
-            primarySignal: null,
-            secondarySignal: null,
-            signalPair: null,
-            pressureFocus: null,
-            environmentFocus: null,
-          }]
+          ]
         : []),
       {
         domainKey: 'signals',
         domainLabel: 'Signals',
-        chapterOpening: 'Core Focus leads this domain, with Role Executor adding a secondary influence.',
+        chapterOpening:
+          'Core Focus leads this domain, with Role Executor adding a secondary influence.',
         signalBalance: {
           items: Object.freeze([
             {
@@ -101,15 +107,17 @@ function buildPayload(params?: {
               summary: null,
             },
             ...(includeZeroSignal
-              ? [{
-                  signalKey: 'role_executor',
-                  signalLabel: 'Role Executor',
-                  withinDomainPercent: 0,
-                  rank: 2,
-                  isPrimary: false,
-                  isSecondary: true,
-                  summary: null,
-                }]
+              ? [
+                  {
+                    signalKey: 'role_executor',
+                    signalLabel: 'Role Executor',
+                    withinDomainPercent: 0,
+                    rank: 2,
+                    isPrimary: false,
+                    isSecondary: true,
+                    summary: null,
+                  },
+                ]
               : []),
           ]),
         },
@@ -146,21 +154,27 @@ function buildPayload(params?: {
       },
     ]),
     actions: {
-      strengths: Object.freeze([{
-        signalKey: 'core_focus',
-        signalLabel: 'Core Focus',
-        text: 'Core Focus strength.',
-      }]),
-      watchouts: Object.freeze([{
-        signalKey: 'role_executor',
-        signalLabel: 'Role Executor',
-        text: 'Role Executor watchout.',
-      }]),
-      developmentFocus: Object.freeze([{
-        signalKey: 'role_executor',
-        signalLabel: 'Role Executor',
-        text: 'Role Executor development.',
-      }]),
+      strengths: Object.freeze([
+        {
+          signalKey: 'core_focus',
+          signalLabel: 'Core Focus',
+          text: 'Core Focus strength.',
+        },
+      ]),
+      watchouts: Object.freeze([
+        {
+          signalKey: 'role_executor',
+          signalLabel: 'Role Executor',
+          text: 'Role Executor watchout.',
+        },
+      ]),
+      developmentFocus: Object.freeze([
+        {
+          signalKey: 'role_executor',
+          signalLabel: 'Role Executor',
+          text: 'Role Executor development.',
+        },
+      ]),
     },
     application: {
       thesis: {
@@ -243,14 +257,25 @@ function createFakeDb(
 ): Queryable {
   return {
     async query<T>(text: string, params?: unknown[]) {
-      if (text.includes('FROM results r') && text.includes('ORDER BY COALESCE(r.generated_at, r.created_at) DESC, r.id DESC')) {
-        if (text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') && options?.missingModeColumns) {
+      if (
+        text.includes('FROM results r') &&
+        text.includes('ORDER BY COALESCE(r.generated_at, r.created_at) DESC, r.id DESC')
+      ) {
+        if (
+          text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') &&
+          options?.missingModeColumns
+        ) {
           throw new Error('WITHIN GROUP is required for ordered-set aggregate mode');
         }
 
         const userId = params?.[0] as string;
         const filtered = rows
-          .filter((row) => row.userId === userId && row.readinessStatus === 'READY' && row.canonicalResultPayload !== null)
+          .filter(
+            (row) =>
+              row.userId === userId &&
+              row.readinessStatus === 'READY' &&
+              row.canonicalResultPayload !== null,
+          )
           .sort((left, right) => {
             const leftKey = left.generatedAt ?? left.createdAt;
             const rightKey = right.generatedAt ?? right.createdAt;
@@ -278,7 +303,10 @@ function createFakeDb(
       }
 
       if (text.includes('FROM results r') && text.includes('WHERE r.id = $1')) {
-        if (text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') && options?.missingModeColumns) {
+        if (
+          text.includes('COALESCE(av.mode, a.mode) AS assessment_mode') &&
+          options?.missingModeColumns
+        ) {
           throw new Error('WITHIN GROUP is required for ordered-set aggregate mode');
         }
 
@@ -294,19 +322,21 @@ function createFakeDb(
 
         return {
           rows: (row
-            ? [{
-                result_id: row.resultId,
-                attempt_id: row.attemptId,
-                assessment_id: row.assessmentId,
-                assessment_key: row.assessmentKey,
-                assessment_mode: row.mode ?? null,
-                assessment_title: row.assessmentTitle,
-                version_tag: row.versionTag,
-                readiness_status: row.readinessStatus,
-                generated_at: row.generatedAt,
-                created_at: row.createdAt,
-                canonical_result_payload: row.canonicalResultPayload,
-              }]
+            ? [
+                {
+                  result_id: row.resultId,
+                  attempt_id: row.attemptId,
+                  assessment_id: row.assessmentId,
+                  assessment_key: row.assessmentKey,
+                  assessment_mode: row.mode ?? null,
+                  assessment_title: row.assessmentTitle,
+                  version_tag: row.versionTag,
+                  readiness_status: row.readinessStatus,
+                  generated_at: row.generatedAt,
+                  created_at: row.createdAt,
+                  canonical_result_payload: row.canonicalResultPayload,
+                },
+              ]
             : []) as T[],
         };
       }
@@ -371,9 +401,34 @@ test('ready persisted result appears in list view and ordering is deterministic 
   const results = await service.listAssessmentResults({ userId: 'user-1' });
 
   assert.equal(results.length, 2);
-  assert.deepEqual(results.map((result) => result.resultId), ['result-2', 'result-1']);
+  assert.deepEqual(
+    results.map((result) => result.resultId),
+    ['result-2', 'result-1'],
+  );
   assert.equal(results[0]?.topSignal?.signalId, 'core_focus');
   assert.equal(results[0]?.topSignal?.signalKey, 'core_focus');
+  assert.deepEqual(
+    results[0]?.signalSnapshot.map((signal) => ({
+      signalKey: signal.signalKey,
+      title: signal.title,
+      percentage: signal.percentage,
+      rank: signal.rank,
+    })),
+    [
+      {
+        signalKey: 'core_focus',
+        title: 'Core Focus',
+        percentage: 70,
+        rank: 1,
+      },
+      {
+        signalKey: 'role_executor',
+        title: 'Role Executor',
+        percentage: 0,
+        rank: 2,
+      },
+    ],
+  );
   assert.equal(results[0]?.resultAvailable, true);
 });
 
@@ -433,7 +488,10 @@ test('detail load returns canonical payload sections alongside compatibility pro
   assert.equal(detail.resultId, 'result-1');
   assert.equal(detail.intro.assessmentDescription, null);
   assert.equal(detail.hero.headline, 'Core Focus leads the current pattern');
-  assert.equal(detail.hero.narrative, 'concentrated profile with Core Focus leading and Signals holding the strongest domain share.');
+  assert.equal(
+    detail.hero.narrative,
+    'concentrated profile with Core Focus leading and Signals holding the strongest domain share.',
+  );
   assert.equal(detail.hero.domainHighlights[0]?.primarySignalLabel, 'Core Focus');
   assert.equal(detail.domains[0]?.domainKey, 'section_a');
   assert.equal(detail.domains[1]?.primarySignal?.signalKey, 'core_focus');
@@ -453,7 +511,10 @@ test('detail load returns canonical payload sections alongside compatibility pro
   assert.equal(detail.normalizedScores[1]?.rawTotal, 0);
   assert.equal(detail.normalizedScores[1]?.isOverlay, false);
   assert.equal(detail.domainSummaries[1]?.interpretation?.primarySignalKey, 'core_focus');
-  assert.equal(REMOVED_DOMAIN_FOCUS_FIELD in (detail.domainSummaries[1]?.interpretation ?? {}), false);
+  assert.equal(
+    REMOVED_DOMAIN_FOCUS_FIELD in (detail.domainSummaries[1]?.interpretation ?? {}),
+    false,
+  );
   assert.equal(detail.strengths[0]?.detail, 'Core Focus strength.');
 });
 
@@ -644,7 +705,10 @@ test('detail load normalizes legacy signal chapter summaries to string or null o
   });
 
   assert.equal(detail.domains[0]?.signalBalance.items[0]?.chapterSummary, null);
-  assert.equal(detail.domains[0]?.signalBalance.items[1]?.chapterSummary, 'Legacy summary fallback');
+  assert.equal(
+    detail.domains[0]?.signalBalance.items[1]?.chapterSummary,
+    'Legacy summary fallback',
+  );
   assert.equal(detail.domains[0]?.primarySignal?.chapterSummary, null);
   assert.equal(detail.domains[0]?.secondarySignal?.chapterSummary, 'Secondary legacy summary');
   assert.equal(detail.domains[0]?.signalPair?.summary, null);
@@ -711,7 +775,10 @@ test('list view skips malformed persisted payloads without breaking other ready 
 
   const results = await service.listAssessmentResults({ userId: 'user-1' });
 
-  assert.deepEqual(results.map((result) => result.resultId), ['result-2']);
+  assert.deepEqual(
+    results.map((result) => result.resultId),
+    ['result-2'],
+  );
 });
 
 test('list view skips legacy-shaped payloads that only satisfy the shallow top-level contract', async () => {
@@ -795,7 +862,10 @@ test('list view skips legacy-shaped payloads that only satisfy the shallow top-l
 
   const results = await service.listAssessmentResults({ userId: 'user-1' });
 
-  assert.deepEqual(results.map((result) => result.resultId), ['result-2']);
+  assert.deepEqual(
+    results.map((result) => result.resultId),
+    ['result-2'],
+  );
 });
 
 test('missing or non-owned result triggers not found', async () => {
@@ -844,8 +914,14 @@ test('repeated reads are deterministic and byte-stable', async () => {
 
   const firstList = await service.listAssessmentResults({ userId: 'user-1' });
   const secondList = await service.listAssessmentResults({ userId: 'user-1' });
-  const firstDetail = await service.getAssessmentResultDetail({ userId: 'user-1', resultId: 'result-1' });
-  const secondDetail = await service.getAssessmentResultDetail({ userId: 'user-1', resultId: 'result-1' });
+  const firstDetail = await service.getAssessmentResultDetail({
+    userId: 'user-1',
+    resultId: 'result-1',
+  });
+  const secondDetail = await service.getAssessmentResultDetail({
+    userId: 'user-1',
+    resultId: 'result-1',
+  });
 
   assert.equal(JSON.stringify(firstList), JSON.stringify(secondList));
   assert.equal(JSON.stringify(firstDetail), JSON.stringify(secondDetail));

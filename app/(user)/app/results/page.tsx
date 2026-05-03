@@ -19,6 +19,10 @@ function formatResultDate(value: string): string {
   });
 }
 
+function formatPercentage(value: number): string {
+  return `${Math.round(value)}%`;
+}
+
 export default async function UserResultsPage() {
   const userId = await getRequestUserId();
   const results = await createResultsService({
@@ -65,6 +69,31 @@ export default async function UserResultsPage() {
                       Completed {formatResultDate(result.completedAt)}
                     </p>
                   </div>
+                  {result.signalSnapshot.length > 0 ? (
+                    <div
+                      aria-label={`Signal snapshot for ${result.assessmentTitle}`}
+                      className="grid gap-2 pt-1 sm:grid-cols-2 xl:grid-cols-4"
+                    >
+                      {result.signalSnapshot.map((signal) => (
+                        <div
+                          key={signal.signalKey}
+                          className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(245,241,234,0.034),rgba(245,241,234,0.014))] px-3 py-3"
+                        >
+                          <p className="sonartra-page-eyebrow">
+                            {signal.rank === 1 ? 'Primary' : `Rank ${signal.rank}`}
+                          </p>
+                          <div className="mt-2 flex items-center justify-between gap-3">
+                            <p className="truncate text-sm font-semibold text-[#F5F1EA]/90">
+                              {signal.signalLabel}
+                            </p>
+                            <p className="shrink-0 text-sm font-semibold text-[#32D6B0]">
+                              {formatPercentage(signal.percentage)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="bg-black/16 flex items-start border-t border-white/10 p-5 pl-6 lg:items-end lg:border-l lg:border-t-0 lg:p-6">

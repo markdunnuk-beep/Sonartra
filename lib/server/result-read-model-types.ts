@@ -1,7 +1,4 @@
-import type {
-  CanonicalResultPayload,
-  ResultDiagnostics,
-} from '@/lib/engine/types';
+import type { CanonicalResultPayload, ResultDiagnostics } from '@/lib/engine/types';
 import type { AssessmentMode } from '@/lib/types/assessment';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
@@ -94,6 +91,7 @@ export type AssessmentResultSummary = {
   generatedAt: string | null;
   topSignal: AssessmentResultTopSignalViewModel | null;
   topSignalPercentage: number | null;
+  signalSnapshot: readonly AssessmentResultRankedSignalViewModel[];
   resultAvailable: true;
 };
 

@@ -42,9 +42,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function normalizeNullableText(value: unknown): string | null {
-  return typeof value === 'string' && value.trim().length > 0
-    ? value
-    : null;
+  return typeof value === 'string' && value.trim().length > 0 ? value : null;
 }
 
 function readLegacyNullableText(record: unknown, key: string): string | null {
@@ -67,8 +65,8 @@ function normalizeCanonicalPayload(payload: CanonicalResultPayload): CanonicalRe
             domain.signalBalance.items.map((signal) => ({
               ...signal,
               chapterSummary:
-                normalizeNullableText(signal.chapterSummary)
-                ?? readLegacyNullableText(signal, 'summary'),
+                normalizeNullableText(signal.chapterSummary) ??
+                readLegacyNullableText(signal, 'summary'),
             })),
           ),
         },
@@ -76,16 +74,16 @@ function normalizeCanonicalPayload(payload: CanonicalResultPayload): CanonicalRe
           ? {
               ...domain.primarySignal,
               chapterSummary:
-                normalizeNullableText(domain.primarySignal.chapterSummary)
-                ?? readLegacyNullableText(domain.primarySignal, 'summary'),
+                normalizeNullableText(domain.primarySignal.chapterSummary) ??
+                readLegacyNullableText(domain.primarySignal, 'summary'),
             }
           : null,
         secondarySignal: domain.secondarySignal
           ? {
               ...domain.secondarySignal,
               chapterSummary:
-                normalizeNullableText(domain.secondarySignal.chapterSummary)
-                ?? readLegacyNullableText(domain.secondarySignal, 'summary'),
+                normalizeNullableText(domain.secondarySignal.chapterSummary) ??
+                readLegacyNullableText(domain.secondarySignal, 'summary'),
             }
           : null,
         signalPair: domain.signalPair
@@ -167,11 +165,10 @@ function isReadableLegacyPayload(value: unknown): value is ReadableResultPayload
   });
 }
 
-function getPersistedPayloadMode(record: PersistedReadyResultRecord): 'multi_domain' | 'single_domain' {
-  if (
-    isRecord(record.canonicalResultPayload)
-    && isRecord(record.canonicalResultPayload.metadata)
-  ) {
+function getPersistedPayloadMode(
+  record: PersistedReadyResultRecord,
+): 'multi_domain' | 'single_domain' {
+  if (isRecord(record.canonicalResultPayload) && isRecord(record.canonicalResultPayload.metadata)) {
     const metadataMode = readLegacyNullableText(record.canonicalResultPayload.metadata, 'mode');
     if (!metadataMode) {
       return resolveAssessmentMode(record.mode) === 'single_domain'
@@ -184,9 +181,7 @@ function getPersistedPayloadMode(record: PersistedReadyResultRecord): 'multi_dom
       : 'multi_domain';
   }
 
-  return resolveAssessmentMode(record.mode) === 'single_domain'
-    ? 'single_domain'
-    : 'multi_domain';
+  return resolveAssessmentMode(record.mode) === 'single_domain' ? 'single_domain' : 'multi_domain';
 }
 
 function parseCanonicalPayload(record: PersistedReadyResultRecord): ParsedReadablePayload {
@@ -255,7 +250,10 @@ function createCompatibilityDiagnostics(
       normalizationMethod: payload.diagnostics.normalizationMethod,
       totalScoreMass: payload.signals.reduce((total, signal) => total + signal.raw_score, 0),
       zeroMass: payload.signals.every((signal) => signal.raw_score === 0),
-      globalPercentageSum: payload.signals.reduce((total, signal) => total + signal.normalized_score, 0),
+      globalPercentageSum: payload.signals.reduce(
+        (total, signal) => total + signal.normalized_score,
+        0,
+      ),
       domainPercentageSums: Object.freeze({
         [payload.metadata.domainKey]: payload.signals.reduce(
           (total, signal) => total + signal.normalized_score,
@@ -280,9 +278,7 @@ function createCompatibilityDiagnostics(
   };
 }
 
-function createCompatibilityPayload(
-  payload: SingleDomainResultPayload,
-): CanonicalResultPayload {
+function createCompatibilityPayload(payload: SingleDomainResultPayload): CanonicalResultPayload {
   const topSignal = payload.signals[0] ?? null;
 
   return {
@@ -317,13 +313,15 @@ function createCompatibilityPayload(
       traitTotals: [],
       matchedPatterns: [],
       domainHighlights: topSignal
-        ? [{
-            domainKey: payload.metadata.domainKey,
-            domainLabel: payload.metadata.domainKey,
-            primarySignalKey: topSignal.signal_key,
-            primarySignalLabel: topSignal.signal_label,
-            summary: payload.pairSummary.pair_strength_paragraph,
-          }]
+        ? [
+            {
+              domainKey: payload.metadata.domainKey,
+              domainLabel: payload.metadata.domainKey,
+              primarySignalKey: topSignal.signal_key,
+              primarySignalLabel: topSignal.signal_label,
+              summary: payload.pairSummary.pair_strength_paragraph,
+            },
+          ]
         : [],
     },
     domains: [],
@@ -370,30 +368,38 @@ function toActionItems(
   );
 }
 
-function toDomainSummaries(payload: CanonicalResultPayload): readonly AssessmentResultDomainViewModel[] {
+function toDomainSummaries(
+  payload: CanonicalResultPayload,
+): readonly AssessmentResultDomainViewModel[] {
   return Object.freeze(
     payload.domains.map((domain) => {
-      const signalScores: AssessmentResultSignalScoreViewModel[] = domain.signalBalance.items.map((signal) => ({
-        signalId: signal.signalKey,
-        signalKey: signal.signalKey,
-        signalTitle: signal.signalLabel,
-        domainId: domain.domainKey,
-        domainKey: domain.domainKey,
-        domainSource: domain.signalBalance.items.length > 0 ? ('signal_group' as const) : ('question_section' as const),
-        isOverlay: false,
-        overlayType: 'none',
-        rawTotal: signal.withinDomainPercent,
-        normalizedValue: signal.withinDomainPercent,
-        percentage: signal.withinDomainPercent,
-        domainPercentage: signal.withinDomainPercent,
-        rank: signal.rank,
-      }));
+      const signalScores: AssessmentResultSignalScoreViewModel[] = domain.signalBalance.items.map(
+        (signal) => ({
+          signalId: signal.signalKey,
+          signalKey: signal.signalKey,
+          signalTitle: signal.signalLabel,
+          domainId: domain.domainKey,
+          domainKey: domain.domainKey,
+          domainSource:
+            domain.signalBalance.items.length > 0
+              ? ('signal_group' as const)
+              : ('question_section' as const),
+          isOverlay: false,
+          overlayType: 'none',
+          rawTotal: signal.withinDomainPercent,
+          normalizedValue: signal.withinDomainPercent,
+          percentage: signal.withinDomainPercent,
+          domainPercentage: signal.withinDomainPercent,
+          rank: signal.rank,
+        }),
+      );
 
       return {
         domainId: domain.domainKey,
         domainKey: domain.domainKey,
         domainTitle: domain.domainLabel,
-        domainSource: signalScores.length > 0 ? ('signal_group' as const) : ('question_section' as const),
+        domainSource:
+          signalScores.length > 0 ? ('signal_group' as const) : ('question_section' as const),
         rawTotal: signalScores.reduce((sum, signal) => sum + signal.rawTotal, 0),
         normalizedValue: signalScores.reduce((sum, signal) => sum + signal.normalizedValue, 0),
         percentage: signalScores.length > 0 ? 100 : 0,
@@ -405,15 +411,17 @@ function toDomainSummaries(payload: CanonicalResultPayload): readonly Assessment
           ? {
               domainKey: domain.domainKey,
               primarySignalKey: domain.primarySignal?.signalKey ?? null,
-              primaryPercent:
-                domain.primarySignal?.signalKey
-                  ? signalScores.find((signal) => signal.signalKey === domain.primarySignal?.signalKey)?.domainPercentage ?? null
-                  : null,
+              primaryPercent: domain.primarySignal?.signalKey
+                ? (signalScores.find(
+                    (signal) => signal.signalKey === domain.primarySignal?.signalKey,
+                  )?.domainPercentage ?? null)
+                : null,
               secondarySignalKey: domain.secondarySignal?.signalKey ?? null,
-              secondaryPercent:
-                domain.secondarySignal?.signalKey
-                  ? signalScores.find((signal) => signal.signalKey === domain.secondarySignal?.signalKey)?.domainPercentage ?? null
-                  : null,
+              secondaryPercent: domain.secondarySignal?.signalKey
+                ? (signalScores.find(
+                    (signal) => signal.signalKey === domain.secondarySignal?.signalKey,
+                  )?.domainPercentage ?? null)
+                : null,
               summary: domain.chapterOpening,
               supportingLine: null,
               tensionClause: null,
@@ -424,23 +432,27 @@ function toDomainSummaries(payload: CanonicalResultPayload): readonly Assessment
   );
 }
 
-function toRankedSignals(payload: CanonicalResultPayload): readonly AssessmentResultRankedSignalViewModel[] {
-  return Object.freeze(payload.domains.flatMap((domain) =>
-    domain.signalBalance.items.map((signal) => ({
-      signalId: signal.signalKey,
-      signalKey: signal.signalKey,
-      title: signal.signalLabel,
-      domainId: domain.domainKey,
-      domainKey: domain.domainKey,
-      normalizedValue: signal.withinDomainPercent,
-      rawTotal: signal.withinDomainPercent,
-      percentage: signal.withinDomainPercent,
-      domainPercentage: signal.withinDomainPercent,
-      isOverlay: false,
-      overlayType: 'none' as const,
-      rank: signal.rank,
-    })),
-  ));
+function toRankedSignals(
+  payload: CanonicalResultPayload,
+): readonly AssessmentResultRankedSignalViewModel[] {
+  return Object.freeze(
+    payload.domains.flatMap((domain) =>
+      domain.signalBalance.items.map((signal) => ({
+        signalId: signal.signalKey,
+        signalKey: signal.signalKey,
+        title: signal.signalLabel,
+        domainId: domain.domainKey,
+        domainKey: domain.domainKey,
+        normalizedValue: signal.withinDomainPercent,
+        rawTotal: signal.withinDomainPercent,
+        percentage: signal.withinDomainPercent,
+        domainPercentage: signal.withinDomainPercent,
+        isOverlay: false,
+        overlayType: 'none' as const,
+        rank: signal.rank,
+      })),
+    ),
+  );
 }
 
 function toTopSignal(payload: CanonicalResultPayload): AssessmentResultTopSignalViewModel | null {
@@ -450,7 +462,8 @@ function toTopSignal(payload: CanonicalResultPayload): AssessmentResultTopSignal
   }
 
   const rankedSignals = toRankedSignals(payload);
-  const signal = rankedSignals.find((entry) => entry.signalKey === primaryPattern.signalKey) ?? rankedSignals[0];
+  const signal =
+    rankedSignals.find((entry) => entry.signalKey === primaryPattern.signalKey) ?? rankedSignals[0];
   if (!signal) {
     return null;
   }
@@ -468,7 +481,9 @@ function toTopSignal(payload: CanonicalResultPayload): AssessmentResultTopSignal
   };
 }
 
-function toSingleDomainTopSignal(payload: SingleDomainResultPayload): AssessmentResultTopSignalViewModel | null {
+function toSingleDomainTopSignal(
+  payload: SingleDomainResultPayload,
+): AssessmentResultTopSignalViewModel | null {
   const signal = payload.signals[0];
   if (!signal) {
     return null;
@@ -487,11 +502,37 @@ function toSingleDomainTopSignal(payload: SingleDomainResultPayload): Assessment
   };
 }
 
+function toSingleDomainRankedSignals(
+  payload: SingleDomainResultPayload,
+): readonly AssessmentResultRankedSignalViewModel[] {
+  return Object.freeze(
+    payload.signals.map((signal) => ({
+      signalId: signal.signal_key,
+      signalKey: signal.signal_key,
+      title: signal.signal_label,
+      domainId: payload.metadata.domainKey,
+      domainKey: payload.metadata.domainKey,
+      normalizedValue: signal.normalized_score,
+      rawTotal: signal.raw_score,
+      percentage: signal.normalized_score,
+      domainPercentage: signal.normalized_score,
+      isOverlay: false,
+      overlayType: 'none' as const,
+      rank: signal.rank,
+    })),
+  );
+}
+
 function toListItem(record: PersistedReadyResultRecord): AssessmentResultListItem {
   const parsed = parseCanonicalPayload(record);
-  const topSignal = parsed.mode === 'single_domain'
-    ? toSingleDomainTopSignal(parsed.payload)
-    : toTopSignal(parsed.payload as CanonicalResultPayload);
+  const topSignal =
+    parsed.mode === 'single_domain'
+      ? toSingleDomainTopSignal(parsed.payload)
+      : toTopSignal(parsed.payload as CanonicalResultPayload);
+  const signalSnapshot =
+    parsed.mode === 'single_domain'
+      ? toSingleDomainRankedSignals(parsed.payload)
+      : toRankedSignals(parsed.payload as CanonicalResultPayload);
 
   return {
     resultId: record.resultId,
@@ -506,6 +547,7 @@ function toListItem(record: PersistedReadyResultRecord): AssessmentResultListIte
     generatedAt: record.generatedAt,
     topSignal,
     topSignalPercentage: topSignal?.percentage ?? null,
+    signalSnapshot: Object.freeze(signalSnapshot.slice(0, 4)),
     resultAvailable: true,
   };
 }
@@ -524,15 +566,14 @@ function tryToListItem(record: PersistedReadyResultRecord): AssessmentResultList
 
 function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResultDetailViewModel {
   const parsed = parseCanonicalPayload(record);
-  const payload = parsed.mode === 'single_domain'
-    ? createCompatibilityPayload(parsed.payload)
-    : (parsed.payload as CanonicalResultPayload);
+  const payload =
+    parsed.mode === 'single_domain'
+      ? createCompatibilityPayload(parsed.payload)
+      : (parsed.payload as CanonicalResultPayload);
   const rankedSignals = toRankedSignals(payload);
   const domainSummaries = toDomainSummaries(payload);
   const topSignal = toTopSignal(payload);
-  const normalizedScores = Object.freeze(
-    domainSummaries.flatMap((domain) => domain.signalScores),
-  );
+  const normalizedScores = Object.freeze(domainSummaries.flatMap((domain) => domain.signalScores));
 
   return {
     resultId: record.resultId,

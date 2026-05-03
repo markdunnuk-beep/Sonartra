@@ -7,6 +7,12 @@ export type ResultsListItem = {
   assessmentTitle: string;
   completedAt: string;
   href: string;
+  signalSnapshot: readonly {
+    signalKey: string;
+    signalLabel: string;
+    percentage: number;
+    rank: number;
+  }[];
 };
 
 export type ResultsServiceDeps = {
@@ -15,9 +21,7 @@ export type ResultsServiceDeps = {
 
 export function createResultsService(deps: ResultsServiceDeps) {
   return {
-    async listResults(params: {
-      userId: string;
-    }): Promise<readonly ResultsListItem[]> {
+    async listResults(params: { userId: string }): Promise<readonly ResultsListItem[]> {
       const results = await createResultReadModelService({ db: deps.db }).listAssessmentResults({
         userId: params.userId,
       });
@@ -28,6 +32,12 @@ export function createResultsService(deps: ResultsServiceDeps) {
           assessmentTitle: result.assessmentTitle,
           completedAt: result.generatedAt ?? result.createdAt,
           href: getAssessmentResultHref(result.resultId, result.mode),
+          signalSnapshot: result.signalSnapshot.map((signal) => ({
+            signalKey: signal.signalKey,
+            signalLabel: signal.title,
+            percentage: signal.percentage,
+            rank: signal.rank,
+          })),
         })),
       );
     },

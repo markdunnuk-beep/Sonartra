@@ -34,34 +34,38 @@ function buildLegacyPayloadWithoutApplication() {
       matchedPatterns: [],
       domainHighlights: [],
     },
-    domains: [{
-      domainKey: 'signals',
-      domainLabel: 'Signals',
-      chapterOpening: 'Legacy chapter opening.',
-      signalBalance: {
-        items: [{
+    domains: [
+      {
+        domainKey: 'signals',
+        domainLabel: 'Signals',
+        chapterOpening: 'Legacy chapter opening.',
+        signalBalance: {
+          items: [
+            {
+              signalKey: 'core_focus',
+              signalLabel: 'Core Focus',
+              withinDomainPercent: 100,
+              rank: 1,
+              isPrimary: true,
+              isSecondary: false,
+              chapterSummary: null,
+            },
+          ],
+        },
+        primarySignal: {
           signalKey: 'core_focus',
           signalLabel: 'Core Focus',
-          withinDomainPercent: 100,
-          rank: 1,
-          isPrimary: true,
-          isSecondary: false,
           chapterSummary: null,
-        }],
+          strength: null,
+          watchout: null,
+          development: null,
+        },
+        secondarySignal: null,
+        signalPair: null,
+        pressureFocus: null,
+        environmentFocus: null,
       },
-      primarySignal: {
-        signalKey: 'core_focus',
-        signalLabel: 'Core Focus',
-        chapterSummary: null,
-        strength: null,
-        watchout: null,
-        development: null,
-      },
-      secondarySignal: null,
-      signalPair: null,
-      pressureFocus: null,
-      environmentFocus: null,
-    }],
+    ],
     actions: {
       strengths: [],
       watchouts: [],
@@ -114,26 +118,30 @@ function createDb() {
     async query<T>(text: string, params?: unknown[]) {
       if (text.includes("WHERE av.lifecycle_status = 'PUBLISHED'")) {
         return {
-          rows: [{
-            assessment_id: 'assessment-1',
-            assessment_key: 'wplp80',
-            assessment_title: 'WPLP-80',
-            assessment_description: 'Signals assessment',
-            assessment_version_id: 'version-1',
-            version_tag: '1.0.0',
-            published_at: '2026-04-08T00:00:00.000Z',
-          }] as T[],
+          rows: [
+            {
+              assessment_id: 'assessment-1',
+              assessment_key: 'wplp80',
+              assessment_title: 'WPLP-80',
+              assessment_description: 'Signals assessment',
+              assessment_version_id: 'version-1',
+              version_tag: '1.0.0',
+              published_at: '2026-04-08T00:00:00.000Z',
+            },
+          ] as T[],
         };
       }
 
       if (text.includes('FROM assessments a') && text.includes('WHERE a.assessment_key = $1')) {
         return {
-          rows: [{
-            assessment_id: 'assessment-1',
-            assessment_key: 'wplp80',
-            assessment_version_id: 'version-1',
-            version_tag: '1.0.0',
-          }] as T[],
+          rows: [
+            {
+              assessment_id: 'assessment-1',
+              assessment_key: 'wplp80',
+              assessment_version_id: 'version-1',
+              version_tag: '1.0.0',
+            },
+          ] as T[],
         };
       }
 
@@ -141,21 +149,26 @@ function createDb() {
         return { rows: [] as T[] };
       }
 
-      if (text.includes('FROM attempts') && !text.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+      if (
+        text.includes('FROM attempts') &&
+        !text.includes("AND lifecycle_status = 'IN_PROGRESS'")
+      ) {
         return {
-          rows: [{
-            attempt_id: 'attempt-1',
-            user_id: 'user-1',
-            assessment_id: 'assessment-1',
-            assessment_version_id: 'version-1',
-            lifecycle_status: 'RESULT_READY',
-            started_at: '2026-04-08T00:00:00.000Z',
-            submitted_at: '2026-04-08T00:05:00.000Z',
-            completed_at: '2026-04-08T00:06:00.000Z',
-            last_activity_at: '2026-04-08T00:06:00.000Z',
-            created_at: '2026-04-08T00:00:00.000Z',
-            updated_at: '2026-04-08T00:06:00.000Z',
-          }] as T[],
+          rows: [
+            {
+              attempt_id: 'attempt-1',
+              user_id: 'user-1',
+              assessment_id: 'assessment-1',
+              assessment_version_id: 'version-1',
+              lifecycle_status: 'RESULT_READY',
+              started_at: '2026-04-08T00:00:00.000Z',
+              submitted_at: '2026-04-08T00:05:00.000Z',
+              completed_at: '2026-04-08T00:06:00.000Z',
+              last_activity_at: '2026-04-08T00:06:00.000Z',
+              created_at: '2026-04-08T00:00:00.000Z',
+              updated_at: '2026-04-08T00:06:00.000Z',
+            },
+          ] as T[],
         };
       }
 
@@ -230,6 +243,20 @@ test('results list still works when application is missing from an older payload
   assert.equal(results.length, 1);
   assert.equal(results[0]?.resultId, 'result-legacy');
   assert.equal(results[0]?.href, '/app/results/result-legacy');
+  assert.deepEqual(
+    results[0]?.signalSnapshot.map((signal) => ({
+      signalLabel: signal.signalLabel,
+      percentage: signal.percentage,
+      rank: signal.rank,
+    })),
+    [
+      {
+        signalLabel: 'Core Focus',
+        percentage: 100,
+        rank: 1,
+      },
+    ],
+  );
 });
 
 test('malformed rows do not break listing when a valid legacy row is still present', async () => {
@@ -241,5 +268,8 @@ test('malformed rows do not break listing when a valid legacy row is still prese
     userId: 'user-1',
   });
 
-  assert.deepEqual(results.map((result) => result.resultId), ['result-legacy']);
+  assert.deepEqual(
+    results.map((result) => result.resultId),
+    ['result-legacy'],
+  );
 });

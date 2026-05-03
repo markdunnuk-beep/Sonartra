@@ -284,12 +284,15 @@ test('single-domain smoke path reaches detail rendering from the results list en
     list[0]?.href,
     `/app/results/single-domain/${SINGLE_DOMAIN_QA_RESULT_FIXTURE.resultId}`,
   );
+  assert.ok(list[0]?.signalSnapshot.length);
+  assert.equal(list[0]?.signalSnapshot[0]?.signalLabel, 'Delivery');
 
   const listPageSource = readFileSync(
     join(process.cwd(), 'app', '(user)', 'app', 'results', 'page.tsx'),
     'utf8',
   );
   assert.match(listPageSource, /<ButtonLink href=\{result\.href\}[^>]*>/);
+  assert.match(listPageSource, /Signal snapshot for/);
   assert.match(listPageSource, /View Result/);
 
   const detail = await resultReadModel.getAssessmentResultDetail({
