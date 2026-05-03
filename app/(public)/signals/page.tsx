@@ -128,7 +128,7 @@ export default function SignalsPage() {
       >
         <PublicPageCtaRow
           actions={[
-            { href: '/get-started', label: 'Start assessment' },
+            { href: '/sign-up', label: 'Start assessment' },
             { href: '/platform', label: 'View platform', variant: 'secondary' },
           ]}
         />
@@ -216,7 +216,7 @@ export default function SignalsPage() {
           </div>
           <PublicPageCtaRow
             actions={[
-              { href: '/get-started', label: 'Start assessment' },
+              { href: '/sign-up', label: 'Start assessment' },
               { href: '/contact', label: 'Contact us', variant: 'secondary' },
             ]}
           />

@@ -117,7 +117,7 @@ export function PublicSiteHeader() {
             </Link>
             <Link
               className="rounded-full border border-[#32D6B0]/28 bg-[#32D6B0] px-4 py-2 text-sm font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
-              href="/get-started"
+              href="/sign-up"
             >
               Get Started
             </Link>
@@ -125,7 +125,7 @@ export function PublicSiteHeader() {
 
           <Link
             className="rounded-full border border-[#32D6B0]/28 bg-[#32D6B0] px-3 py-2 text-xs font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F] sm:px-4 xl:hidden"
-            href="/get-started"
+            href="/sign-up"
           >
             Start
           </Link>

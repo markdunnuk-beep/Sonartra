@@ -30,7 +30,7 @@ export default function HomePage() {
       >
         <PublicPageCtaRow
           actions={[
-            { href: '/get-started', label: 'Get Started' },
+            { href: '/sign-up', label: 'Get Started' },
             { href: '/platform', label: 'Explore Platform', variant: 'secondary' },
           ]}
         />
