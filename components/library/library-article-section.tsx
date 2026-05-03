@@ -3,7 +3,7 @@ import type { LibraryArticleSectionViewModel } from '@/lib/library/library-artic
 export function LibraryArticleSection({ section }: { section: LibraryArticleSectionViewModel }) {
   return (
     <section
-      className="scroll-mt-28 rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-sm md:p-8"
+      className="scroll-mt-32 rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-sm md:scroll-mt-36 md:p-8"
       id={section.id}
       tabIndex={-1}
     >

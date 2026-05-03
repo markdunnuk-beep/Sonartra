@@ -304,8 +304,20 @@ test('library article detail view model has unique section anchors and CTA metad
   for (const article of LIBRARY_ARTICLES) {
     const viewModel = getLibraryArticleDetailViewModel(article);
     const sectionIds = viewModel.sections.map((section) => section.id);
+    const railIds = viewModel.railItems.map((item) => item.id);
+    const railHrefs = viewModel.railItems.map((item) => item.href);
 
     assert.deepEqual(sectionIds, uniqueValues(sectionIds));
+    assert.deepEqual(railIds, sectionIds);
+    assert.deepEqual(railIds, uniqueValues(railIds));
+    assert.deepEqual(
+      railHrefs,
+      viewModel.sections.map((section) => section.href),
+    );
+    assert.deepEqual(
+      railHrefs,
+      sectionIds.map((sectionId) => `#${sectionId}`),
+    );
     assert.equal(viewModel.cta.href, article.cta.href);
     assert.equal(viewModel.cta.label, article.cta.label);
     assert.ok(viewModel.keyTakeaways.length >= article.sections.length);
@@ -391,6 +403,18 @@ test('library article detail route renders through the canonical LibraryArticleS
   assert.match(routeSource, /LibraryArticleShell/);
   assert.doesNotMatch(routeSource, /article\.sections\.map/);
   assert.doesNotMatch(routeSource, /getRelatedLibraryArticles/);
+});
+
+test('library reading rail active state is generated from supplied rail items', () => {
+  const railSource = readWorkspaceFile('components/library/library-reading-rail.tsx');
+
+  assert.match(railSource, /'use client'/);
+  assert.match(railSource, /IntersectionObserver/);
+  assert.match(railSource, /items\.map/);
+  assert.match(railSource, /aria-current/);
+  assert.match(railSource, /data-library-reading-rail/);
+  assert.doesNotMatch(railSource, /what-is-flow-state/);
+  assert.doesNotMatch(railSource, /what-is-a-behavioural-assessment/);
 });
 
 test('library index metadata is generated with canonical and social fields', () => {
