@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 
+import robots from '@/app/robots';
 import sitemap from '@/app/sitemap';
 import { LIBRARY_ARTICLES } from '@/lib/library/articles';
 import { LIBRARY_CATEGORIES } from '@/lib/library/categories';
@@ -36,6 +37,11 @@ import {
   getLibraryCategoryStaticParams,
   getLibraryStaticParams,
 } from '@/lib/library/resolve-library-content';
+import {
+  getIndexablePublicRoutes,
+  getPublicUrl,
+  PUBLIC_SITEMAP_ROUTES,
+} from '@/lib/public/public-routes';
 
 const PUBLIC_ROUTE_HREFS = new Set(['/contact', '/platform', '/sign-up', '/sonartra-signals']);
 
@@ -349,8 +355,11 @@ test('library canonical path builders generate stable category and article URLs'
   const article = getLibraryArticle('flow-state', 'what-is-flow-state');
 
   assert.ok(article);
+  assert.equal(getLibraryIndexUrl(), 'https://www.sonartra.com/library');
   assert.equal(getLibraryCategoryPath('flow-state'), '/library/flow-state');
   assert.equal(getLibraryArticlePath(article), '/library/flow-state/what-is-flow-state');
+  assert.equal(getLibraryCategoryUrl('flow-state'), getPublicUrl(getLibraryCategoryPath('flow-state')));
+  assert.equal(getLibraryArticleUrl(article), getPublicUrl(getLibraryArticlePath(article)));
   assert.equal(getLibraryCategoryUrl('flow-state'), 'https://www.sonartra.com/library/flow-state');
   assert.equal(
     getLibraryArticleUrl(article),
@@ -376,6 +385,49 @@ test('library sitemap includes index, every category, and every article without 
   }
 
   assert.deepEqual(urls, uniqueValues(urls));
+});
+
+test('public sitemap includes only intended core public routes before library expansions', () => {
+  const entries = sitemap();
+  const urls = entries.map((entry) => entry.url);
+
+  assert.deepEqual(
+    getIndexablePublicRoutes().map((route) => route.path),
+    ['/', '/platform', '/sonartra-signals', '/signals', '/library', '/pricing', '/contact'],
+  );
+
+  for (const route of getIndexablePublicRoutes()) {
+    assert.ok(urls.includes(getPublicUrl(route.path)), `sitemap must include ${route.path}`);
+  }
+
+  assert.equal(urls.filter((url) => url === getLibraryIndexUrl()).length, 1);
+  assert.ok(urls.every((url) => url.startsWith('https://www.sonartra.com/')));
+});
+
+test('public sitemap excludes non-indexable auth, admin, and app routes', () => {
+  const urls = sitemap().map((entry) => entry.url);
+
+  assert.ok(urls.every((url) => !url.includes('/admin')));
+  assert.ok(urls.every((url) => !url.includes('/app')));
+  assert.ok(urls.every((url) => !url.includes('/sign-in')));
+  assert.ok(urls.every((url) => !url.includes('/sign-up')));
+});
+
+test('public sitemap route registry is deterministic and sitemap-enabled', () => {
+  assert.deepEqual(
+    PUBLIC_SITEMAP_ROUTES.map((route) => route.path),
+    getIndexablePublicRoutes().map((route) => route.path),
+  );
+  assert.ok(PUBLIC_SITEMAP_ROUTES.every((route) => route.includeInSitemap));
+});
+
+test('robots points crawlers to sitemap while excluding non-indexable shells', () => {
+  const config = robots();
+  const rules = Array.isArray(config.rules) ? config.rules[0] : config.rules;
+
+  assert.equal(config.sitemap, getPublicUrl('/sitemap.xml'));
+  assert.equal(rules?.allow, '/');
+  assert.deepEqual(rules?.disallow, ['/admin', '/app', '/sign-in', '/sign-up']);
 });
 
 test('library article JSON-LD includes required article fields', () => {

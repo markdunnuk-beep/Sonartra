@@ -1,6 +1,5 @@
 import type { LibraryArticle, LibraryCategoryKey } from './types';
-
-export const SONARTRA_SITE_ORIGIN = 'https://www.sonartra.com';
+import { getPublicUrl } from '@/lib/public/public-routes';
 
 export function getLibraryIndexPath(): string {
   return '/library';
@@ -12,10 +11,6 @@ export function getLibraryCategoryPath(categoryKey: LibraryCategoryKey | string)
 
 export function getLibraryArticlePath(article: Pick<LibraryArticle, 'category' | 'slug'>): string {
   return `${getLibraryCategoryPath(article.category)}/${article.slug}`;
-}
-
-export function getPublicUrl(path: string): string {
-  return new URL(path, SONARTRA_SITE_ORIGIN).toString();
 }
 
 export function getLibraryIndexUrl(): string {

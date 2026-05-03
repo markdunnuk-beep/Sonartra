@@ -4,10 +4,10 @@ import {
   getLibraryArticleUrl,
   getLibraryCategoryUrl,
   getLibraryIndexUrl,
-  getPublicUrl,
 } from './library-routes';
 import { getLibraryArticle, getLibraryCategory } from './resolve-library-content';
 import type { LibraryArticle, LibraryCategory } from './types';
+import { getPublicUrl } from '@/lib/public/public-routes';
 
 const SITE_NAME = 'Sonartra';
 const LIBRARY_INDEX_TITLE = 'Sonartra Library';
