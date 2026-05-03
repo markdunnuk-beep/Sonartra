@@ -1,5 +1,6 @@
 import { LibraryArticleHero } from './library-article-hero';
 import { LibraryArticleSection } from './library-article-section';
+import { LibraryBreadcrumbs } from './library-breadcrumbs';
 import { LibraryInsightCard } from './library-insight-card';
 import { LibraryKeyTakeaways } from './library-key-takeaways';
 import { LibraryPageShell } from './library-page-shell';
@@ -7,12 +8,32 @@ import { LibraryReadingRail } from './library-reading-rail';
 import { LibraryRelatedReading } from './library-related-reading';
 import type { LibraryArticle } from '@/lib/library/types';
 import { getLibraryArticleDetailViewModel } from '@/lib/library/library-article-view-model';
+import { getLibraryIndexPath } from '@/lib/library/library-routes';
+import { getLibraryArticleJsonLd } from '@/lib/library/library-seo';
+import { getLibraryCategory } from '@/lib/library/resolve-library-content';
 
 export function LibraryArticleShell({ article }: { article: LibraryArticle }) {
   const viewModel = getLibraryArticleDetailViewModel(article);
+  const category = getLibraryCategory(article.category);
+  const jsonLd = category ? getLibraryArticleJsonLd(article, category) : null;
 
   return (
     <LibraryPageShell>
+      {jsonLd ? (
+        <script
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          type="application/ld+json"
+        />
+      ) : null}
+
+      <LibraryBreadcrumbs
+        items={[
+          { label: 'Library', href: getLibraryIndexPath() },
+          { label: viewModel.categoryLabel, href: viewModel.categoryHref },
+          { label: viewModel.title },
+        ]}
+      />
+
       <LibraryArticleHero article={viewModel} />
 
       <div className="grid gap-10 lg:grid-cols-[16rem_1fr] lg:items-start">

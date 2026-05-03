@@ -1,9 +1,16 @@
+import type { Metadata } from 'next';
+
 import { LibraryArticleCard } from '@/components/library/library-article-card';
 import { LibraryCategoryCard } from '@/components/library/library-category-card';
 import { LibraryCtaBand } from '@/components/library/library-cta-band';
 import { LibraryHero } from '@/components/library/library-hero';
 import { LibraryPageShell } from '@/components/library/library-page-shell';
 import { getLibraryIndexViewModel } from '@/lib/library/library-browse-view-model';
+import { getLibraryIndexMetadata } from '@/lib/library/library-seo';
+
+export function generateMetadata(): Metadata {
+  return getLibraryIndexMetadata();
+}
 
 export default function LibraryPage() {
   const viewModel = getLibraryIndexViewModel();

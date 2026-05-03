@@ -1,10 +1,14 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { LibraryArticleCard } from '@/components/library/library-article-card';
+import { LibraryBreadcrumbs } from '@/components/library/library-breadcrumbs';
 import { LibraryCtaBand } from '@/components/library/library-cta-band';
 import { LibraryHero } from '@/components/library/library-hero';
 import { LibraryPageShell } from '@/components/library/library-page-shell';
 import { getLibraryCategoryViewModel } from '@/lib/library/library-browse-view-model';
+import { getLibraryIndexPath } from '@/lib/library/library-routes';
+import { getLibraryCategoryMetadataByKey } from '@/lib/library/library-seo';
 import { getLibraryCategoryStaticParams } from '@/lib/library/resolve-library-content';
 
 type LibraryCategoryPageProps = {
@@ -17,6 +21,17 @@ export function generateStaticParams() {
   return getLibraryCategoryStaticParams();
 }
 
+export async function generateMetadata({ params }: LibraryCategoryPageProps): Promise<Metadata> {
+  const { category: categoryKey } = await params;
+  const metadata = getLibraryCategoryMetadataByKey(categoryKey);
+
+  if (!metadata) {
+    notFound();
+  }
+
+  return metadata;
+}
+
 export default async function LibraryCategoryPage({ params }: LibraryCategoryPageProps) {
   const { category: categoryKey } = await params;
   const viewModel = getLibraryCategoryViewModel(categoryKey);
@@ -27,6 +42,13 @@ export default async function LibraryCategoryPage({ params }: LibraryCategoryPag
 
   return (
     <LibraryPageShell>
+      <LibraryBreadcrumbs
+        items={[
+          { label: 'Library', href: getLibraryIndexPath() },
+          { label: viewModel.category.label },
+        ]}
+      />
+
       <LibraryHero
         backHref="/library"
         backLabel="Back to Library"

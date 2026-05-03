@@ -1,5 +1,6 @@
 import type { LibraryArticle, LibraryArticleSection } from './types';
 import { mapLibraryArticleCard, type LibraryArticleCardViewModel } from './library-browse-view-model';
+import { getLibraryCategoryPath } from './library-routes';
 import { getLibraryCategory, getRelatedLibraryArticles } from './resolve-library-content';
 
 export type LibraryReadingRailItem = {
@@ -62,7 +63,7 @@ export function getLibraryArticleDetailViewModel(
   }));
 
   return {
-    categoryHref: `/library/${article.category}`,
+    categoryHref: getLibraryCategoryPath(article.category),
     categoryLabel: category?.label ?? 'Library',
     title: article.title,
     description: article.description,

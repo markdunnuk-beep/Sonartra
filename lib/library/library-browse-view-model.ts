@@ -6,6 +6,7 @@ import {
   getLibraryCategories,
   getLibraryCategory,
 } from './resolve-library-content';
+import { getLibraryArticlePath, getLibraryCategoryPath } from './library-routes';
 
 export type LibraryArticleCardViewModel = {
   href: string;
@@ -56,7 +57,7 @@ function formatDateLabel(article: LibraryArticle): string {
 }
 
 export function getLibraryArticleHref(article: LibraryArticle): string {
-  return `/library/${article.category}/${article.slug}`;
+  return getLibraryArticlePath(article);
 }
 
 export function mapLibraryArticleCard(article: LibraryArticle): LibraryArticleCardViewModel {
@@ -74,7 +75,7 @@ export function mapLibraryCategoryCard(category: LibraryCategory): LibraryCatego
   const articleCount = getArticlesByCategory(category.key).length;
 
   return {
-    href: `/library/${category.key}`,
+    href: getLibraryCategoryPath(category.key),
     label: category.label,
     description: category.description,
     articleCount,
