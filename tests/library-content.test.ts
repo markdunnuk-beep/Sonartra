@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import test from 'node:test';
 
 import { LIBRARY_ARTICLES } from '@/lib/library/articles';
 import { LIBRARY_CATEGORIES } from '@/lib/library/categories';
+import { getLibraryArticleDetailViewModel } from '@/lib/library/library-article-view-model';
 import {
   getLibraryArticleHref,
   getLibraryCategoryCta,
@@ -28,6 +31,10 @@ function uniqueValues(values: readonly string[]): string[] {
 
 function getArticleBySlug(slug: string) {
   return LIBRARY_ARTICLES.filter((article) => article.slug === slug);
+}
+
+function readWorkspaceFile(relativePath: string): string {
+  return readFileSync(join(process.cwd(), relativePath), 'utf8');
 }
 
 function assertLibraryHrefExists(href: string): void {
@@ -218,4 +225,61 @@ test('library category CTA uses assessment-specific and fallback routes', () => 
   assert.ok(fallbackCategory);
   assert.equal(getLibraryCategoryCta(assessmentCategory).href, '/sonartra-signals');
   assert.equal(getLibraryCategoryCta(fallbackCategory).href, '/contact');
+});
+
+test('library article detail view model builds rail items from article sections', () => {
+  const article = getLibraryArticle('flow-state', 'what-is-flow-state');
+
+  assert.ok(article);
+  const viewModel = getLibraryArticleDetailViewModel(article);
+
+  assert.deepEqual(
+    viewModel.railItems.map((item) => item.id),
+    article.sections.map((section) => section.id),
+  );
+  assert.deepEqual(
+    viewModel.railItems.map((item) => item.href),
+    article.sections.map((section) => `#${section.id}`),
+  );
+  assert.deepEqual(
+    viewModel.sections.map((section) => section.href),
+    article.sections.map((section) => `#${section.id}`),
+  );
+});
+
+test('library article detail view model has unique section anchors and CTA metadata', () => {
+  for (const article of LIBRARY_ARTICLES) {
+    const viewModel = getLibraryArticleDetailViewModel(article);
+    const sectionIds = viewModel.sections.map((section) => section.id);
+
+    assert.deepEqual(sectionIds, uniqueValues(sectionIds));
+    assert.equal(viewModel.cta.href, article.cta.href);
+    assert.equal(viewModel.cta.label, article.cta.label);
+    assert.ok(viewModel.keyTakeaways.length >= article.sections.length);
+  }
+});
+
+test('library article detail view model resolves related reading cards', () => {
+  const article = getLibraryArticle('flow-state', 'what-is-flow-state');
+
+  assert.ok(article);
+  const viewModel = getLibraryArticleDetailViewModel(article);
+
+  assert.deepEqual(
+    viewModel.relatedArticles.map((relatedArticle) => relatedArticle.href),
+    article.relatedArticleSlugs.map((slug) => {
+      const relatedArticle = getArticleBySlug(slug)[0];
+
+      assert.ok(relatedArticle);
+      return getLibraryArticleHref(relatedArticle);
+    }),
+  );
+});
+
+test('library article detail route renders through the canonical LibraryArticleShell', () => {
+  const routeSource = readWorkspaceFile('app/(public)/library/[category]/[slug]/page.tsx');
+
+  assert.match(routeSource, /LibraryArticleShell/);
+  assert.doesNotMatch(routeSource, /article\.sections\.map/);
+  assert.doesNotMatch(routeSource, /getRelatedLibraryArticles/);
 });
