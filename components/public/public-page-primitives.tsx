@@ -34,7 +34,7 @@ export function PublicPageCanvas({ children }: PublicPageCanvasProps) {
     <div className="relative isolate -mx-5 overflow-hidden px-5 pb-16 pt-20 text-[#F5F1EA] sm:-mx-6 sm:px-6 md:pb-20 md:pt-24 lg:-mx-8 lg:px-8">
       <div
         aria-hidden="true"
-        className="fixed inset-y-0 left-0 z-0 w-full max-w-full overflow-hidden bg-[linear-gradient(180deg,#090B0F_0%,#080A0D_46rem,#080A0D_100%)]"
+        className="pointer-events-none fixed inset-y-0 left-0 z-0 w-full max-w-full overflow-hidden bg-[linear-gradient(180deg,#090B0F_0%,#080A0D_46rem,#080A0D_100%)]"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_7%,rgba(50,214,176,0.13),transparent_31%),radial-gradient(circle_at_84%_12%,rgba(245,241,234,0.07),transparent_29%),linear-gradient(180deg,rgba(8,10,13,0)_0%,rgba(8,10,13,0.72)_68%,rgba(8,10,13,0)_100%)]" />
         <div className="absolute left-1/2 top-12 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.035]" />
@@ -42,10 +42,6 @@ export function PublicPageCanvas({ children }: PublicPageCanvasProps) {
         <div className="absolute inset-x-[-8rem] top-0 h-[42rem] bg-[linear-gradient(rgba(245,241,234,0.016)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_58%,rgba(0,0,0,0.2)_100%)]" />
       </div>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[34rem] bg-[radial-gradient(circle_at_18%_0%,rgba(50,214,176,0.10),transparent_32%)]"
-      />
       <div className="relative z-10 mx-auto max-w-6xl">{children}</div>
     </div>
   );
@@ -54,10 +50,6 @@ export function PublicPageCanvas({ children }: PublicPageCanvasProps) {
 export function PublicPageHero({ children, eyebrow, intro, title }: PublicPageHeroProps) {
   return (
     <header className="relative max-w-4xl py-4">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-6 -top-12 -z-10 h-72 rounded-full bg-[radial-gradient(circle_at_24%_18%,rgba(50,214,176,0.10),transparent_50%)] blur-2xl"
-      />
       <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#32D6B0]">
         {eyebrow}
       </p>
