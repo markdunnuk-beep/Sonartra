@@ -289,7 +289,8 @@ test('single-domain smoke path reaches detail rendering from the results list en
     join(process.cwd(), 'app', '(user)', 'app', 'results', 'page.tsx'),
     'utf8',
   );
-  assert.match(listPageSource, /ButtonLink href=\{result\.href\}>View Result<\/ButtonLink>/);
+  assert.match(listPageSource, /<ButtonLink href=\{result\.href\}[^>]*>/);
+  assert.match(listPageSource, /View Result/);
 
   const detail = await resultReadModel.getAssessmentResultDetail({
     userId,

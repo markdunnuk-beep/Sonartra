@@ -27,7 +27,10 @@ test('user shell reserves room for selected nav treatment without reintroducing 
   assert.match(shellSource, /w-full justify-start gap-3\.5 px-3 py-2\.5/);
   assert.match(shellSource, /data-sidebar-collapsed=\{collapsed \? 'true' : 'false'\}/);
   assert.match(shellSource, /flex shrink-0 items-center justify-center border/);
-  assert.match(shellSource, /active && collapsed \? 'h-10 w-10 rounded-\[1rem\]' : 'h-9 w-9 rounded-\[0\.9rem\]'/);
+  assert.match(
+    shellSource,
+    /active && collapsed \? 'h-10 w-10 rounded-\[1rem\]' : 'h-9 w-9 rounded-\[0\.9rem\]'/,
+  );
   assert.match(shellSource, /h-\[1\.05rem\] w-\[1\.05rem\]/);
   assert.match(
     globalsSource,
@@ -55,9 +58,18 @@ test('user shell uses Sonartra logo and mark assets for expanded and collapsed b
   const shellSource = readSource(userShellPath);
 
   assert.match(shellSource, /import Image from 'next\/image';/);
-  assert.match(shellSource, /SONARTRA_LOGO_WHITE_SRC = '\/images\/brand\/sonartra-logo-white\.svg'/);
-  assert.match(shellSource, /SONARTRA_MARK_WHITE_SRC = '\/images\/brand\/sonartra-mark-white\.svg'/);
-  assert.match(shellSource, /<SidebarBrand collapsed=\{mobileSidebarCollapsed\} titleId=\{mobileDrawerTitleId\} \/>/);
+  assert.match(
+    shellSource,
+    /SONARTRA_LOGO_WHITE_SRC = '\/images\/brand\/sonartra-logo-white\.svg'/,
+  );
+  assert.match(
+    shellSource,
+    /SONARTRA_MARK_WHITE_SRC = '\/images\/brand\/sonartra-mark-white\.svg'/,
+  );
+  assert.match(
+    shellSource,
+    /<SidebarBrand collapsed=\{mobileSidebarCollapsed\} titleId=\{mobileDrawerTitleId\} \/>/,
+  );
   assert.match(shellSource, /alt="Sonartra"/);
   assert.match(shellSource, />\s*Sonartra workspace navigation\s*<\/span>/);
   assert.doesNotMatch(shellSource, /sonartra-shell-brand-title block/);
@@ -86,7 +98,7 @@ test('user shell reprioritises chrome for assessment runner routes on smaller sc
     /const shellDesktopBreakpoint = isAssessmentRunnerRoute \? 'xl' : 'lg';/,
   );
   assert.match(shellSource, /shellDesktopBreakpoint === 'xl' \? 'xl:sticky' : 'lg:sticky'/);
-  assert.match(shellSource, /min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip/);
+  assert.match(shellSource, /flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip/);
   assert.match(shellSource, /sticky top-0 z-20/);
   assert.match(shellSource, /Assessment focus/);
   assert.match(shellSource, /isAssessmentRunnerRoute \? 'Assessment' : 'SONARTRA'/);
@@ -117,12 +129,18 @@ test('user mobile drawer opens as a full accessible drawer without overwriting d
   assert.match(source, /const \[collapsed, setCollapsed\] = useState\(false\);/);
   assert.match(source, /const \[hasHydrated, setHasHydrated\] = useState\(false\);/);
   assert.match(source, /const frameId = window\.requestAnimationFrame\(\(\) => \{/);
-  assert.match(source, /setCollapsed\(window\.localStorage\.getItem\(SHELL_COLLAPSE_STORAGE_KEY\) === 'true'\);/);
+  assert.match(
+    source,
+    /setCollapsed\(window\.localStorage\.getItem\(SHELL_COLLAPSE_STORAGE_KEY\) === 'true'\);/,
+  );
   assert.match(source, /setHasHydrated\(true\);/);
   assert.match(source, /window\.cancelAnimationFrame\(frameId\);/);
   assert.match(source, /if \(!hasHydrated\) \{\s*return;\s*\}/);
   assert.match(source, /const mobileSidebarCollapsed = collapsed && !mobileOpen;/);
-  assert.match(source, /window\.localStorage\.setItem\(SHELL_COLLAPSE_STORAGE_KEY, collapsed \? 'true' : 'false'\);/);
+  assert.match(
+    source,
+    /window\.localStorage\.setItem\(SHELL_COLLAPSE_STORAGE_KEY, collapsed \? 'true' : 'false'\);/,
+  );
   assert.doesNotMatch(source, /useState\(\(\) => \{\s*if \(typeof window === 'undefined'\)/);
   assert.match(source, /document\.body\.dataset\.userMobileScrollLock = 'true';/);
   assert.match(source, /htmlStyle\.overflow = 'hidden';/);

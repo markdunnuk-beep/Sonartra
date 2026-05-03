@@ -1,6 +1,7 @@
 import {
   ButtonLink,
   EmptyState,
+  LabelPill,
   PageFrame,
   PageHeader,
   SectionHeader,
@@ -45,30 +46,31 @@ export default async function UserResultsPage() {
             description="Completed assessment reports stay available here for reference."
           />
           {results.map((result) => (
-            <SurfaceCard
-              key={result.resultId}
-              interactive
-              className="relative overflow-hidden p-0"
-            >
+            <SurfaceCard key={result.resultId} interactive className="relative overflow-hidden p-0">
               <span
                 aria-hidden="true"
-                className="absolute inset-y-0 left-0 w-[3px] bg-[#32D6B0]/70"
+                className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(50,214,176,0.58),rgba(245,241,234,0.12),transparent)]"
               />
               <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="space-y-3 p-5 pl-6 lg:p-6 lg:pl-7">
-                  <p className="sonartra-page-eyebrow">Completed report</p>
+                <div className="space-y-4 p-5 pl-6 lg:p-6 lg:pl-7">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <LabelPill>Ready report</LabelPill>
+                    <p className="sonartra-page-eyebrow">Completed report</p>
+                  </div>
                   <div className="space-y-2">
-                    <h2 className="text-[1.35rem] font-semibold tracking-[-0.025em] text-white">
+                    <h2 className="text-[1.35rem] font-semibold leading-tight text-[#F5F1EA]">
                       {result.assessmentTitle}
                     </h2>
-                    <p className="text-white/58 text-sm leading-7">
+                    <p className="text-[#D8D0C3]/66 text-sm leading-7">
                       Completed {formatResultDate(result.completedAt)}
                     </p>
                   </div>
                 </div>
 
-                <div className="border-white/8 flex items-start border-t bg-black/10 p-5 pl-6 lg:items-end lg:border-l lg:border-t-0 lg:p-6">
-                  <ButtonLink href={result.href}>View Result</ButtonLink>
+                <div className="bg-black/16 flex items-start border-t border-white/10 p-5 pl-6 lg:items-end lg:border-l lg:border-t-0 lg:p-6">
+                  <ButtonLink href={result.href} variant="primary">
+                    View Result
+                  </ButtonLink>
                 </div>
               </div>
             </SurfaceCard>

@@ -47,7 +47,7 @@ export default async function UserAssessmentsPage() {
             >
               <span
                 aria-hidden="true"
-                className="absolute inset-y-0 left-0 w-[3px] bg-[#32D6B0]/70"
+                className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(50,214,176,0.58),rgba(245,241,234,0.12),transparent)]"
               />
               <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="space-y-5 p-5 pl-6 lg:p-6 lg:pl-7">
@@ -57,16 +57,16 @@ export default async function UserAssessmentsPage() {
                       <StatusPill status={assessment.status} label={assessment.statusLabel} />
                     </div>
                     <div className="space-y-2">
-                      <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-white">
+                      <h2 className="text-[1.5rem] font-semibold leading-tight text-[#F5F1EA]">
                         {assessment.title}
                       </h2>
-                      <p className="text-white/62 max-w-3xl text-sm leading-7">
+                      <p className="text-[#D8D0C3]/68 max-w-3xl text-sm leading-7">
                         {assessment.description ?? 'Assessment available in your workspace.'}
                       </p>
                     </div>
                   </div>
 
-                  <div className="border-white/8 grid gap-3 border-t pt-4 sm:grid-cols-2">
+                  <div className="grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-2">
                     <MetaItem label="Assessment type" value={assessment.typeLabel} />
                     <MetaItem
                       label="Estimated time"
@@ -79,8 +79,17 @@ export default async function UserAssessmentsPage() {
                   </div>
                 </div>
 
-                <div className="border-white/8 flex items-start border-t bg-black/10 p-5 pl-6 lg:items-end lg:border-l lg:border-t-0 lg:p-6">
-                  <ButtonLink href={assessment.href}>{assessment.ctaLabel}</ButtonLink>
+                <div className="bg-black/16 flex items-start border-t border-white/10 p-5 pl-6 lg:items-end lg:border-l lg:border-t-0 lg:p-6">
+                  <ButtonLink
+                    href={assessment.href}
+                    variant={
+                      assessment.status === 'not_started' || assessment.status === 'in_progress'
+                        ? 'primary'
+                        : 'secondary'
+                    }
+                  >
+                    {assessment.ctaLabel}
+                  </ButtonLink>
                 </div>
               </div>
             </SurfaceCard>

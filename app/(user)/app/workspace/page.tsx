@@ -35,9 +35,9 @@ function getShortAssessmentTitle(title: string): string {
 
 function getProgressCopy(assessment: WorkspaceAssessmentItem): string | null {
   if (
-    assessment.answeredCount === null
-    || assessment.totalQuestionCount === null
-    || assessment.totalQuestionCount <= 0
+    assessment.answeredCount === null ||
+    assessment.totalQuestionCount === null ||
+    assessment.totalQuestionCount <= 0
   ) {
     return null;
   }
@@ -45,16 +45,16 @@ function getProgressCopy(assessment: WorkspaceAssessmentItem): string | null {
   return `${assessment.answeredCount} of ${assessment.totalQuestionCount} questions are saved.`;
 }
 
-function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): WorkspaceNextAction | null {
+function getNextAction(
+  assessments: readonly WorkspaceAssessmentItem[],
+): WorkspaceNextAction | null {
   const inProgress = assessments.find((assessment) => assessment.status === 'in_progress');
   if (inProgress) {
     const progressCopy = getProgressCopy(inProgress);
     const title = getShortAssessmentTitle(inProgress.assessmentTitle);
     return {
       headline: `Continue ${title}`,
-      description: progressCopy
-        ? progressCopy
-        : 'Pick up from your saved progress.',
+      description: progressCopy ? progressCopy : 'Pick up from your saved progress.',
       label: 'Resume assessment',
       href: inProgress.actionHref,
       disabled: inProgress.actionDisabled,
@@ -114,7 +114,8 @@ function getNextAction(assessments: readonly WorkspaceAssessmentItem[]): Workspa
 
   return {
     headline: 'No assessments are available yet',
-    description: 'Published assessments will appear here when they are available for your workspace.',
+    description:
+      'Published assessments will appear here when they are available for your workspace.',
     label: 'No assessment available',
     href: null,
     disabled: true,
@@ -140,10 +141,14 @@ function getDominantSignalDescription(signals: readonly WorkspaceSignalIndexItem
 function getLatestSignalAssessment(
   assessments: readonly WorkspaceAssessmentItem[],
 ): WorkspaceAssessmentItem | null {
-  return assessments.find((assessment) =>
-    assessment.status === 'results_ready'
-    && assessment.signalsForIndex
-    && assessment.signalsForIndex.length > 0) ?? null;
+  return (
+    assessments.find(
+      (assessment) =>
+        assessment.status === 'results_ready' &&
+        assessment.signalsForIndex &&
+        assessment.signalsForIndex.length > 0,
+    ) ?? null
+  );
 }
 
 function DisabledAction({
@@ -158,7 +163,7 @@ function DisabledAction({
       type="button"
       disabled
       aria-label={accessibleLabel}
-      className="sonartra-button sonartra-button-secondary cursor-not-allowed border-white/10 bg-white/[0.04] text-white/42 opacity-80"
+      className="sonartra-button sonartra-button-secondary text-white/42 cursor-not-allowed border-white/10 bg-white/[0.04] opacity-80"
     >
       {label}
     </button>
@@ -200,26 +205,29 @@ function SignalMeter({
   const percentageLabel = formatPercentage(signal.normalizedPercentage);
 
   return (
-    <div className="rounded-[1.05rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.022))] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+    <div className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(245,241,234,0.045),rgba(245,241,234,0.018))] p-3 shadow-[inset_0_1px_0_rgba(245,241,234,0.035)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="sonartra-page-eyebrow">{signal.displayRole}</p>
-          <p className="mt-1 truncate text-sm font-semibold text-white/90">{signal.signalLabel}</p>
+          <p className="mt-1 truncate text-sm font-semibold text-[#F5F1EA]/90">
+            {signal.signalLabel}
+          </p>
         </div>
-        <p className="shrink-0 text-sm font-semibold text-white">{percentageLabel}</p>
+        <p className="shrink-0 text-sm font-semibold text-[#F5F1EA]">{percentageLabel}</p>
       </div>
       <div
-        className={compact ? 'mt-3 h-1.5 overflow-hidden rounded-full bg-white/8' : 'mt-4 h-2 overflow-hidden rounded-full bg-white/8'}
+        className={
+          compact
+            ? 'bg-white/8 mt-3 h-1.5 overflow-hidden rounded-full'
+            : 'bg-white/8 mt-4 h-2 overflow-hidden rounded-full'
+        }
         role="meter"
         aria-label={`${signal.displayRole} signal, ${signal.signalLabel}, ${percentageLabel}`}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percentage}
       >
-        <div
-          className="h-full rounded-full bg-[linear-gradient(90deg,rgba(50,214,176,0.62),rgba(50,214,176,0.88))]"
-          style={{ width: `${percentage}%` }}
-        />
+        <div className="h-full rounded-full bg-[#32D6B0]" style={{ width: `${percentage}%` }} />
       </div>
     </div>
   );
@@ -234,10 +242,7 @@ function SignalCell({
 }>) {
   if (!signal) {
     return (
-      <span
-        className="text-sm text-white/26"
-        aria-label={`${roleLabel} signal not available yet`}
-      >
+      <span className="text-white/26 text-sm" aria-label={`${roleLabel} signal not available yet`}>
         Not available yet
       </span>
     );
@@ -246,8 +251,10 @@ function SignalCell({
   return (
     <div className="min-w-0">
       <p className="sonartra-page-eyebrow">{signal.displayRole}</p>
-      <p className="mt-1 truncate text-sm font-semibold text-white/88">{signal.signalLabel}</p>
-      <p className="mt-1 text-sm text-white/58">{formatPercentage(signal.normalizedPercentage)}</p>
+      <p className="text-[#F5F1EA]/88 mt-1 truncate text-sm font-semibold">{signal.signalLabel}</p>
+      <p className="text-[#D8D0C3]/62 mt-1 text-sm">
+        {formatPercentage(signal.normalizedPercentage)}
+      </p>
     </div>
   );
 }
@@ -266,12 +273,12 @@ function AssessmentIndexRow({
         aria-label={`${assessment.assessmentTitle}, ${assessment.statusLabel}`}
         className="hidden items-stretch gap-0 xl:grid xl:grid-cols-[minmax(250px,1.7fr)_minmax(168px,0.9fr)_repeat(4,minmax(120px,1fr))_minmax(128px,0.75fr)]"
       >
-        <div className="border-white/8 border-r bg-white/[0.012] p-5">
-          <h3 className="text-base font-semibold text-white">{assessment.assessmentTitle}</h3>
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/58">
+        <div className="border-r border-white/10 bg-white/[0.014] p-5">
+          <h3 className="text-base font-semibold text-[#F5F1EA]">{assessment.assessmentTitle}</h3>
+          <p className="text-[#D8D0C3]/64 mt-2 line-clamp-2 text-sm leading-6">
             {assessment.assessmentDescription ?? 'Assessment available in your workspace.'}
           </p>
-          <p className="mt-3 text-xs font-medium uppercase tracking-[0.12em] text-white/38">
+          <p className="text-[#9A9185]/76 mt-3 text-xs font-medium uppercase tracking-[0.12em]">
             {formatAssessmentEstimatedDuration({
               assessmentKey: assessment.assessmentKey,
               estimatedTimeMinutes: assessment.estimatedTimeMinutes,
@@ -279,13 +286,13 @@ function AssessmentIndexRow({
             })}
           </p>
         </div>
-        <div className="border-white/8 flex min-w-0 items-start border-r p-4">
+        <div className="flex min-w-0 items-start border-r border-white/10 p-4">
           <StatusPill status={assessment.status} label={assessment.statusLabel} />
         </div>
         {roleLabels.map((roleLabel, index) => {
           const rank = index + 1;
           return (
-            <div key={roleLabel} className="border-white/8 border-r p-5">
+            <div key={roleLabel} className="border-r border-white/10 p-5">
               <SignalCell
                 roleLabel={roleLabel}
                 signal={signals.find((signal) => signal.rank === rank) ?? null}
@@ -316,13 +323,13 @@ function AssessmentIndexRow({
               <LabelPill>{assessment.typeLabel}</LabelPill>
               <StatusPill status={assessment.status} label={assessment.statusLabel} />
             </div>
-            <h3 className="text-[1.25rem] font-semibold tracking-[-0.02em] text-white">
+            <h3 className="text-[1.25rem] font-semibold text-[#F5F1EA]">
               {assessment.assessmentTitle}
             </h3>
-            <p className="max-w-2xl text-sm leading-7 text-white/60">
+            <p className="text-[#D8D0C3]/66 max-w-2xl text-sm leading-7">
               {assessment.assessmentDescription ?? 'Assessment available in your workspace.'}
             </p>
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-white/38">
+            <p className="text-[#9A9185]/76 text-xs font-medium uppercase tracking-[0.12em]">
               {formatAssessmentEstimatedDuration({
                 assessmentKey: assessment.assessmentKey,
                 estimatedTimeMinutes: assessment.estimatedTimeMinutes,
@@ -368,7 +375,8 @@ export default async function UserWorkspacePage() {
       <header className="sonartra-page-header sonartra-motion-reveal max-w-[58rem]">
         <h1 className="sonartra-page-title">Workspace</h1>
         <p className="sonartra-page-description">
-          Your assessment home for continuing progress, revisiting reports, and keeping your current signal pattern in view.
+          Your assessment home for continuing progress, revisiting reports, and keeping your current
+          signal pattern in view.
         </p>
       </header>
 
@@ -377,20 +385,23 @@ export default async function UserWorkspacePage() {
           <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_auto]">
             <div className="space-y-4 p-6 lg:p-8">
               <div className="flex items-center gap-3">
-                <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#32D6B0] shadow-[0_0_18px_rgba(50,214,176,0.26)]" />
+                <span
+                  aria-hidden="true"
+                  className="h-2 w-2 rounded-full bg-[#32D6B0] shadow-[0_0_18px_rgba(50,214,176,0.26)]"
+                />
                 <p className="sonartra-page-eyebrow">Recommended next action</p>
               </div>
               <div className="space-y-3">
-                <h2 className="max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white lg:text-[2.55rem]">
+                <h2 className="max-w-3xl text-3xl font-semibold leading-tight text-[#F5F1EA] lg:text-[2.55rem]">
                   {nextAction.headline}
                 </h2>
-                <p className="text-white/68 max-w-2xl text-sm leading-7">
+                <p className="text-[#D8D0C3]/76 max-w-2xl text-sm leading-7">
                   {nextAction.description}
                 </p>
               </div>
             </div>
 
-            <div className="border-white/8 flex items-start border-t bg-black/10 p-6 lg:items-end lg:border-l lg:border-t-0 lg:p-8">
+            <div className="bg-black/16 flex items-start border-t border-white/10 p-6 lg:items-end lg:border-l lg:border-t-0 lg:p-8">
               <ActionControl
                 label={nextAction.label}
                 href={nextAction.href}
@@ -408,17 +419,16 @@ export default async function UserWorkspacePage() {
           <div className="sonartra-section-header sonartra-motion-reveal-soft">
             <h2 className="sonartra-section-title">Your current signal pattern</h2>
             <p className="sonartra-section-description">
-              {getDominantSignalDescription(latestSignals)} Use this as a quick reference before opening the full report.
+              {getDominantSignalDescription(latestSignals)} Use this as a quick reference before
+              opening the full report.
             </p>
           </div>
 
-          <SurfaceCard className="p-4 lg:p-5">
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {latestSignals.map((signal) => (
-                <SignalMeter key={signal.signalKey} signal={signal} />
-              ))}
-            </div>
-          </SurfaceCard>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {latestSignals.map((signal) => (
+              <SignalMeter key={signal.signalKey} signal={signal} />
+            ))}
+          </div>
         </section>
       ) : null}
 
@@ -426,13 +436,14 @@ export default async function UserWorkspacePage() {
         <div className="sonartra-section-header sonartra-motion-reveal-soft">
           <h2 className="sonartra-section-title">Assessment index</h2>
           <p className="sonartra-section-description">
-            Track each assessment, its current status, and the signal summary available from completed reports.
+            Track each assessment, its current status, and the signal summary available from
+            completed reports.
           </p>
         </div>
 
         {viewModel.assessments.length > 0 ? (
           <div aria-label="Assessment Index rows" className="space-y-3">
-            <div className="hidden rounded-[1.1rem] border border-white/8 bg-white/[0.025] px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/42 xl:grid xl:grid-cols-[minmax(250px,1.7fr)_minmax(168px,0.9fr)_repeat(4,minmax(120px,1fr))_minmax(128px,0.75fr)]">
+            <div className="text-[#9A9185]/76 hidden rounded-2xl border border-white/10 bg-white/[0.026] px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] xl:grid xl:grid-cols-[minmax(250px,1.7fr)_minmax(168px,0.9fr)_repeat(4,minmax(120px,1fr))_minmax(128px,0.75fr)]">
               <span>Assessment</span>
               <span>Status</span>
               <span>Primary</span>
@@ -452,7 +463,6 @@ export default async function UserWorkspacePage() {
           />
         )}
       </section>
-
     </PageFrame>
   );
 }

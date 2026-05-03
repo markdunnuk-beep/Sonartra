@@ -16,13 +16,7 @@ const SHELL_COLLAPSE_STORAGE_KEY = 'sonartra:user-shell-collapsed';
 const SONARTRA_LOGO_WHITE_SRC = '/images/brand/sonartra-logo-white.svg';
 const SONARTRA_MARK_WHITE_SRC = '/images/brand/sonartra-mark-white.svg';
 
-function SidebarBrand({
-  collapsed,
-  titleId,
-}: {
-  collapsed: boolean;
-  titleId: string;
-}) {
+function SidebarBrand({ collapsed, titleId }: { collapsed: boolean; titleId: string }) {
   if (collapsed) {
     return (
       <span className="sonartra-shell-brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.04]">
@@ -101,9 +95,7 @@ function SessionFooter({
     return (
       <div className="border-white/8 flex flex-col items-center gap-2 rounded-[1.4rem] border bg-white/[0.03] p-2">
         <div aria-label={`Workspace session: ${userLabel}`} title={userLabel}>
-          <SessionAvatar
-            className="border-white/8 text-white/76 bg-white/[0.03]"
-          />
+          <SessionAvatar className="border-white/8 text-white/76 bg-white/[0.03]" />
         </div>
         <Link
           aria-label="Log out"
@@ -273,7 +265,7 @@ function SidebarLink({
           : 'w-full justify-start gap-3.5 px-3 py-2.5',
         active
           ? 'border-[#32D6B0]/20 bg-[#32D6B0]/[0.075] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]'
-          : 'border-transparent text-white/62 hover:border-white/10 hover:bg-white/[0.035] hover:text-white/90',
+          : 'text-white/62 border-transparent hover:border-white/10 hover:bg-white/[0.035] hover:text-white/90',
       )}
       data-sidebar-collapsed={collapsed ? 'true' : 'false'}
       href={item.href}
@@ -293,7 +285,7 @@ function SidebarLink({
           active && collapsed ? 'h-10 w-10 rounded-[1rem]' : 'h-9 w-9 rounded-[0.9rem]',
           active
             ? 'border-[#32D6B0]/24 bg-[#32D6B0]/[0.10] text-white'
-            : 'border-white/7 bg-black/10 text-white/62 group-hover:border-white/10 group-hover:bg-white/[0.04] group-hover:text-white/90',
+            : 'border-white/7 text-white/62 bg-black/10 group-hover:border-white/10 group-hover:bg-white/[0.04] group-hover:text-white/90',
         )}
       >
         <NavIcon active={active} icon={item.icon} />
@@ -413,14 +405,14 @@ export function UserAppShell({
   }, [mobileOpen]);
 
   return (
-    <div className="sonartra-user-app-shell min-h-screen bg-[radial-gradient(circle_at_top,_rgba(50,214,176,0.065),_transparent_34%),linear-gradient(180deg,rgba(9,17,31,0.98),rgba(8,15,28,1))]">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1560px]">
+    <div className="sonartra-user-app-shell relative isolate min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090B0F_0%,#080A0D_46rem,#080A0D_100%)]">
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1560px]">
         <aside
           aria-describedby={mobileOpen ? mobileDrawerDescriptionId : undefined}
           aria-labelledby={mobileOpen ? mobileDrawerTitleId : undefined}
           aria-modal={mobileOpen ? true : undefined}
           className={cn(
-            'sonartra-scrollbar border-white/8 fixed inset-y-0 left-0 z-40 box-border flex w-[17.5rem] flex-col overflow-x-hidden bg-[linear-gradient(180deg,rgba(13,21,37,0.92),rgba(9,15,29,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-[width,transform] duration-300',
+            'sonartra-scrollbar fixed inset-y-0 left-0 z-40 box-border flex w-[17.5rem] flex-col overflow-x-hidden border-white/10 bg-[linear-gradient(180deg,rgba(16,19,24,0.9),rgba(8,10,13,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-[width,transform] duration-300',
             shellDesktopBreakpoint === 'xl'
               ? 'xl:inset-y-auto xl:left-auto xl:top-5 xl:mx-4 xl:my-5 xl:h-[calc(100vh-2.5rem)] xl:translate-x-0 xl:rounded-[2rem] xl:border'
               : 'lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',
@@ -480,7 +472,7 @@ export function UserAppShell({
               <button
                 aria-label="Close sidebar"
                 className={cn(
-                  'sonartra-focus-ring sonartra-motion-button border-white/10 text-white/68 hover:border-white/16 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border bg-white/[0.05] hover:bg-white/[0.08] hover:text-white',
+                  'sonartra-focus-ring sonartra-motion-button text-white/68 hover:border-white/16 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.05] hover:bg-white/[0.08] hover:text-white',
                   shellDesktopBreakpoint === 'xl' ? 'xl:hidden' : 'lg:hidden',
                 )}
                 onClick={() => setMobileOpen(false)}
@@ -523,7 +515,7 @@ export function UserAppShell({
 
           {mobileOpen ? (
             <p
-              className="mt-4 rounded-[1rem] border border-white/8 bg-black/10 px-3 py-2 text-sm leading-6 text-white/52 lg:hidden"
+              className="border-white/8 text-white/52 mt-4 rounded-[1rem] border bg-black/10 px-3 py-2 text-sm leading-6 lg:hidden"
               id={mobileDrawerDescriptionId}
             >
               Workspace navigation. Close to return to the current page.
@@ -561,7 +553,7 @@ export function UserAppShell({
         ) : null}
 
         <div
-          className="min-w-0 flex min-h-screen flex-1 flex-col overflow-x-clip"
+          className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-clip"
           data-user-shell-content-state={mobileOpen ? 'subordinate' : 'active'}
           inert={mobileOpen ? true : undefined}
         >
@@ -569,7 +561,7 @@ export function UserAppShell({
             className={cn(
               'border-white/6 flex items-center justify-between border-b',
               isAssessmentRunnerRoute
-                ? 'sticky top-0 z-20 bg-[linear-gradient(180deg,rgba(9,15,29,0.96),rgba(9,15,29,0.88))] px-3 py-2.5 backdrop-blur-xl'
+                ? 'sticky top-0 z-20 bg-[linear-gradient(180deg,rgba(8,10,13,0.96),rgba(8,10,13,0.88))] px-3 py-2.5 backdrop-blur-xl'
                 : 'px-4 py-4',
               shellDesktopBreakpoint === 'xl' ? 'xl:hidden' : 'lg:hidden',
             )}
@@ -615,7 +607,7 @@ export function UserAppShell({
                 'min-h-full min-w-0',
                 isAssessmentRunnerRoute
                   ? 'sm:border-white/6 border-0 bg-transparent shadow-none sm:rounded-[1.6rem] sm:border sm:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] sm:shadow-[0_28px_90px_rgba(0,0,0,0.22)] sm:backdrop-blur-xl'
-                  : 'border-white/6 rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] shadow-[0_28px_90px_rgba(0,0,0,0.22)] backdrop-blur-xl',
+                  : 'border-white/8 rounded-[1.75rem] border bg-[linear-gradient(180deg,rgba(245,241,234,0.026),rgba(245,241,234,0.012))] shadow-[0_28px_90px_rgba(0,0,0,0.24)] backdrop-blur-xl',
               )}
             >
               {children}
