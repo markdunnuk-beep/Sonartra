@@ -1,4 +1,8 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
+import {
+  resolveAssessmentReadingViewModel,
+  type AssessmentReadingViewModel,
+} from '@/lib/library/assessment-reading-links';
 import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
 import type { AssessmentAttemptLifecycleViewModel } from '@/lib/server/assessment-attempt-lifecycle-types';
 import { listPublishedAssessmentInventory } from '@/lib/server/published-assessment-inventory';
@@ -70,6 +74,7 @@ export type WorkspaceAssessmentItem = {
   ctaLabel: string;
   href: string;
   signalsForIndex: readonly WorkspaceSignalIndexItem[] | null;
+  recommendedReading: AssessmentReadingViewModel | null;
 };
 
 export type WorkspaceLatestResult = {
@@ -390,6 +395,7 @@ export function createWorkspaceService(deps: WorkspaceServiceDeps) {
           actionDisabled,
           ctaLabel: mapAssessmentCtaLabel(status),
           href: fallbackHref,
+          recommendedReading: resolveAssessmentReadingViewModel(assessment.assessmentKey, status),
           signalsForIndex:
             status === 'results_ready' && latestReadyResult
               ? buildSignalsForIndex(readyDetailsByResultId.get(latestReadyResult.resultId) ?? null)

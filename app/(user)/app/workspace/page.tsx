@@ -6,6 +6,7 @@ import {
   StatusPill,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
+import { AssessmentReadingCard } from '@/components/user/assessment-reading-card';
 import type {
   WorkspaceAssessmentItem,
   WorkspaceSignalIndexItem,
@@ -302,6 +303,12 @@ function AssessmentIndexRow({
         </div>
       </div>
 
+      {assessment.recommendedReading ? (
+        <div className="hidden xl:block">
+          <AssessmentReadingCard reading={assessment.recommendedReading} />
+        </div>
+      ) : null}
+
       <div className="space-y-5 p-5 xl:hidden">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
@@ -337,6 +344,10 @@ function AssessmentIndexRow({
               <SignalMeter key={signal.signalKey} signal={signal} compact />
             ))}
           </div>
+        ) : null}
+
+        {assessment.recommendedReading ? (
+          <AssessmentReadingCard reading={assessment.recommendedReading} />
         ) : null}
       </div>
     </SurfaceCard>

@@ -532,6 +532,15 @@ test('assessment index exposes a safe not-started row', async () => {
   assert.equal(row?.actionLabel, 'Start assessment');
   assert.equal(row?.actionHref, '/app/assessments/leadership');
   assert.equal(row?.actionDisabled, false);
+  assert.equal(row?.recommendedReading?.heading, 'Before you start');
+  assert.deepEqual(
+    row?.recommendedReading?.links.map((link) => link.href),
+    [
+      '/library/behavioural-assessments/what-is-a-behavioural-assessment',
+      '/library/leadership-style/what-is-leadership-style',
+      '/library/assessment-guides/how-to-use-an-assessment-report-without-over-labelling-yourself',
+    ],
+  );
 });
 
 test('assessment index exposes in-progress lifecycle and no signal scores', async () => {
@@ -560,6 +569,7 @@ test('assessment index exposes in-progress lifecycle and no signal scores', asyn
   assert.equal(row?.signalsForIndex, null);
   assert.equal(row?.actionLabel, 'Resume assessment');
   assert.equal(row?.actionHref, '/app/assessments/leadership');
+  assert.equal(row?.recommendedReading, null);
 });
 
 test('completed attempt without a listable ready result is completed_processing', async () => {
@@ -586,6 +596,7 @@ test('completed attempt without a listable ready result is completed_processing'
   assert.equal(row?.actionLabel, 'Processing');
   assert.equal(row?.actionHref, null);
   assert.equal(row?.actionDisabled, true);
+  assert.equal(row?.recommendedReading, null);
 });
 
 test('ready single-domain result exposes four persisted signal summaries', async () => {
@@ -624,6 +635,7 @@ test('ready single-domain result exposes four persisted signal summaries', async
   assert.equal(row?.resultHref, '/app/results/single-domain/result-ready');
   assert.equal(row?.actionLabel, 'View result');
   assert.equal(row?.actionHref, '/app/results/single-domain/result-ready');
+  assert.equal(row?.recommendedReading, null);
   assert.deepEqual(row?.signalsForIndex, [
     { signalKey: 'vision', signalLabel: 'Vision', normalizedPercentage: 37, rank: 1, displayRole: 'Primary' },
     { signalKey: 'delivery', signalLabel: 'Delivery', normalizedPercentage: 28, rank: 2, displayRole: 'Secondary' },

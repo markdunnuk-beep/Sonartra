@@ -8,6 +8,11 @@ import sitemap from '@/app/sitemap';
 import { LIBRARY_ARTICLES } from '@/lib/library/articles';
 import { LIBRARY_CATEGORIES } from '@/lib/library/categories';
 import { getLibraryArticleDetailViewModel } from '@/lib/library/library-article-view-model';
+import {
+  getAssessmentReadingLinks,
+  getDefaultAssessmentReadingLinks,
+  resolveAssessmentReadingViewModel,
+} from '@/lib/library/assessment-reading-links';
 import { getLibraryEntry, type LibraryEntryKey } from '@/lib/library/library-entry-links';
 import {
   getLibraryArticleHref,
@@ -337,6 +342,33 @@ test('public Library entry links are deterministic and resolve to real routes', 
       assert.ok(article.description.length > 0);
     }
   }
+});
+
+test('assessment Library reading links resolve through valid article routes', () => {
+  const knownArticleHrefs = new Set(LIBRARY_ARTICLES.map(getLibraryArticleHref));
+
+  for (const assessmentKey of ['wplp80', 'signals', 'sonartra-signals', 'leadership', 'unknown-key']) {
+    const links = getAssessmentReadingLinks(assessmentKey);
+
+    assert.equal(links.length, 3);
+    for (const link of links) {
+      assert.ok(knownArticleHrefs.has(link.href), `assessment reading href must resolve: ${link.href}`);
+    }
+  }
+
+  assert.deepEqual(getAssessmentReadingLinks('unknown-key'), getDefaultAssessmentReadingLinks());
+});
+
+test('assessment reading view model follows assessment status trigger rules', () => {
+  const notStarted = resolveAssessmentReadingViewModel('wplp80', 'not_started');
+
+  assert.ok(notStarted);
+  assert.equal(notStarted.heading, 'Before you start');
+  assert.equal(notStarted.links.length, 3);
+  assert.equal(resolveAssessmentReadingViewModel('wplp80', 'in_progress'), null);
+  assert.equal(resolveAssessmentReadingViewModel('wplp80', 'results_ready'), null);
+  assert.equal(resolveAssessmentReadingViewModel('wplp80', 'ready'), null);
+  assert.equal(resolveAssessmentReadingViewModel('wplp80', 'completed_processing'), null);
 });
 
 test('public Library entry pages use central Library entry data', () => {
