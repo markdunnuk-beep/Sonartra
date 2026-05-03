@@ -1,3 +1,4 @@
+import { LibraryEntryBand } from '@/components/library/library-entry-band';
 import {
   PublicPageCanvas,
   PublicPageCard,
@@ -5,6 +6,7 @@ import {
   PublicPageHero,
   PublicPageSection,
 } from '@/components/public/public-page-primitives';
+import { getLibraryEntry } from '@/lib/library/library-entry-links';
 
 const platformCards = [
   {
@@ -95,6 +97,8 @@ const principleCards = [
 ];
 
 export default function PlatformPage() {
+  const libraryEntry = getLibraryEntry('platform');
+
   return (
     <PublicPageCanvas>
       <PublicPageHero
@@ -156,6 +160,8 @@ export default function PlatformPage() {
           </div>
         </div>
       </PublicPageSection>
+
+      <LibraryEntryBand entry={libraryEntry} />
 
       <PublicPageSection eyebrow="Multiple surfaces" title="One result can support different moments of use.">
         <div className="grid gap-4 md:grid-cols-2">

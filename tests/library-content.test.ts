@@ -8,6 +8,7 @@ import sitemap from '@/app/sitemap';
 import { LIBRARY_ARTICLES } from '@/lib/library/articles';
 import { LIBRARY_CATEGORIES } from '@/lib/library/categories';
 import { getLibraryArticleDetailViewModel } from '@/lib/library/library-article-view-model';
+import { getLibraryEntry, type LibraryEntryKey } from '@/lib/library/library-entry-links';
 import {
   getLibraryArticleHref,
   getLibraryCategoryCta,
@@ -44,6 +45,13 @@ import {
 } from '@/lib/public/public-routes';
 
 const PUBLIC_ROUTE_HREFS = new Set(['/contact', '/platform', '/sign-up', '/sonartra-signals']);
+const PUBLIC_LIBRARY_ENTRY_KEYS: readonly LibraryEntryKey[] = [
+  'home',
+  'platform',
+  'signals',
+  'pricing',
+  'contact',
+];
 
 function uniqueValues(values: readonly string[]): string[] {
   return [...new Set(values)];
@@ -314,6 +322,35 @@ test('library article detail view model resolves related reading cards', () => {
       return getLibraryArticleHref(relatedArticle);
     }),
   );
+});
+
+test('public Library entry links are deterministic and resolve to real routes', () => {
+  for (const entryKey of PUBLIC_LIBRARY_ENTRY_KEYS) {
+    const entry = getLibraryEntry(entryKey);
+
+    assert.equal(entry.primaryHref, '/library');
+    assert.ok(entry.articles.length > 0, `${entryKey} must include curated article links`);
+
+    for (const article of entry.articles) {
+      assertLibraryHrefExists(article.href);
+      assert.ok(article.title.length > 0);
+      assert.ok(article.description.length > 0);
+    }
+  }
+});
+
+test('public Library entry pages use central Library entry data', () => {
+  const pageSources = [
+    readWorkspaceFile('app/(public)/page.tsx'),
+    readWorkspaceFile('app/(public)/platform/page.tsx'),
+    readWorkspaceFile('app/(public)/signals/page.tsx'),
+    readWorkspaceFile('app/(public)/pricing/page.tsx'),
+  ];
+
+  for (const source of pageSources) {
+    assert.match(source, /getLibraryEntry/);
+    assert.match(source, /LibraryEntryBand/);
+  }
 });
 
 test('library article detail route renders through the canonical LibraryArticleShell', () => {

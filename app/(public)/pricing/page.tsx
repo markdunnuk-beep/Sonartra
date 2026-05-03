@@ -1,3 +1,4 @@
+import { LibraryEntryBand } from '@/components/library/library-entry-band';
 import {
   PublicPageCanvas,
   PublicPageCard,
@@ -5,6 +6,7 @@ import {
   PublicPageHero,
   PublicPageSection,
 } from '@/components/public/public-page-primitives';
+import { getLibraryEntry } from '@/lib/library/library-entry-links';
 
 const pricingPrinciples = [
   {
@@ -33,6 +35,8 @@ const enquiryCards = [
 ];
 
 export default function PricingPage() {
+  const libraryEntry = getLibraryEntry('pricing');
+
   return (
     <PublicPageCanvas>
       <PublicPageHero
@@ -63,6 +67,8 @@ export default function PricingPage() {
           ))}
         </div>
       </PublicPageSection>
+
+      <LibraryEntryBand compact entry={libraryEntry} />
     </PublicPageCanvas>
   );
 }

@@ -1,9 +1,11 @@
+import { LibraryEntryBand } from '@/components/library/library-entry-band';
 import {
   PublicPageCanvas,
   PublicPageCard,
   PublicPageCtaRow,
   PublicPageHero,
 } from '@/components/public/public-page-primitives';
+import { getLibraryEntry } from '@/lib/library/library-entry-links';
 
 const homepageHighlights = [
   {
@@ -21,6 +23,8 @@ const homepageHighlights = [
 ];
 
 export default function HomePage() {
+  const libraryEntry = getLibraryEntry('home');
+
   return (
     <PublicPageCanvas>
       <PublicPageHero
@@ -41,6 +45,8 @@ export default function HomePage() {
           <PublicPageCard body={highlight.body} key={highlight.title} title={highlight.title} />
         ))}
       </div>
+
+      <LibraryEntryBand compact entry={libraryEntry} />
     </PublicPageCanvas>
   );
 }

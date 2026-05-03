@@ -1,3 +1,4 @@
+import { LibraryEntryBand } from '@/components/library/library-entry-band';
 import {
   PublicPageCanvas,
   PublicPageCard,
@@ -5,6 +6,7 @@ import {
   PublicPageHero,
   PublicPageSection,
 } from '@/components/public/public-page-primitives';
+import { getLibraryEntry } from '@/lib/library/library-entry-links';
 
 const domainCards = [
   {
@@ -119,6 +121,8 @@ const useCards = [
 ];
 
 export default function SignalsPage() {
+  const libraryEntry = getLibraryEntry('signals');
+
   return (
     <PublicPageCanvas>
       <PublicPageHero
@@ -160,6 +164,8 @@ export default function SignalsPage() {
           ))}
         </div>
       </PublicPageSection>
+
+      <LibraryEntryBand entry={libraryEntry} />
 
       <PublicPageSection eyebrow="Result profile" title="Readable insight with a consistent structure.">
         <div className="grid gap-4 sm:grid-cols-2">
