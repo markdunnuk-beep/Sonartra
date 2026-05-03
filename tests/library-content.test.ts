@@ -4,6 +4,12 @@ import test from 'node:test';
 import { LIBRARY_ARTICLES } from '@/lib/library/articles';
 import { LIBRARY_CATEGORIES } from '@/lib/library/categories';
 import {
+  getLibraryArticleHref,
+  getLibraryCategoryCta,
+  getLibraryCategoryViewModel,
+  getLibraryIndexViewModel,
+} from '@/lib/library/library-browse-view-model';
+import {
   getArticlesByCategory,
   getFeaturedLibraryArticles,
   getLibraryArticle,
@@ -158,4 +164,58 @@ test('library article lists are deterministic and category-filtered', () => {
     getArticlesByCategory('flow-state').map((article) => article.slug),
     ['what-is-flow-state'],
   );
+});
+
+test('library index view model renders every category with correct counts', () => {
+  const viewModel = getLibraryIndexViewModel();
+
+  assert.deepEqual(
+    viewModel.categories.map((category) => category.href),
+    getLibraryCategories().map((category) => `/library/${category.key}`),
+  );
+
+  for (const categoryCard of viewModel.categories) {
+    const categoryKey = categoryCard.href.replace('/library/', '');
+    const expectedCount = getArticlesByCategory(categoryKey).length;
+
+    assert.equal(categoryCard.articleCount, expectedCount);
+    assert.equal(
+      categoryCard.articleCountLabel,
+      expectedCount === 1 ? '1 article' : `${expectedCount} articles`,
+    );
+  }
+});
+
+test('library index view model generates article links from registry content', () => {
+  const viewModel = getLibraryIndexViewModel();
+  const knownArticleHrefs = new Set(LIBRARY_ARTICLES.map(getLibraryArticleHref));
+
+  for (const article of [...viewModel.featuredArticles, ...viewModel.recommendedArticles]) {
+    assert.ok(knownArticleHrefs.has(article.href), `article href must resolve: ${article.href}`);
+    assert.match(article.readingTimeLabel, /^\d+ min read$/);
+    assert.match(article.dateLabel, /^Updated \d{4}-\d{2}-\d{2}$/);
+  }
+});
+
+test('library category view model includes only articles from the requested category', () => {
+  const viewModel = getLibraryCategoryViewModel('behavioural-assessments');
+
+  assert.ok(viewModel);
+  assert.deepEqual(
+    viewModel.articles.map((article) => article.href),
+    getArticlesByCategory('behavioural-assessments').map(getLibraryArticleHref),
+  );
+  assert.ok(
+    viewModel.articles.every((article) => article.categoryLabel === 'Behavioural assessments'),
+  );
+});
+
+test('library category CTA uses assessment-specific and fallback routes', () => {
+  const assessmentCategory = getLibraryCategory('behavioural-assessments');
+  const fallbackCategory = getLibraryCategory('flow-state');
+
+  assert.ok(assessmentCategory);
+  assert.ok(fallbackCategory);
+  assert.equal(getLibraryCategoryCta(assessmentCategory).href, '/sonartra-signals');
+  assert.equal(getLibraryCategoryCta(fallbackCategory).href, '/contact');
 });
