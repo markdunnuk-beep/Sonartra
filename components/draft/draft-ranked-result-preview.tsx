@@ -8,16 +8,29 @@ import {
 import { DraftResultReadingRail } from '@/components/draft/draft-result-reading-rail';
 
 const sectionLabels = {
-  '05_Context': 'Context',
-  '06_Orientation': 'Orientation',
-  '07_Recognition': 'Recognition',
-  '08_Signal_Roles': 'Signal roles',
-  '09_Pattern_Mechanics': 'Pattern mechanics',
-  '10_Pattern_Synthesis': 'Pattern synthesis',
-  '11_Strengths': 'Strengths',
-  '12_Narrowing': 'Narrowing',
-  '13_Application': 'Application',
-  '14_Closing_Integration': 'Closing integration',
+  '05_Context': 'Introduction',
+  '06_Orientation': 'Pattern at a Glance',
+  '07_Recognition': 'Core Interpretation',
+  '08_Signal_Roles': 'Signal Profile',
+  '09_Pattern_Mechanics': 'What Shapes This Pattern',
+  '10_Pattern_Synthesis': 'How the Pattern Works',
+  '11_Strengths': 'What Comes Easily',
+  '12_Narrowing': 'Where It Can Narrow',
+  '13_Application': 'How to Use It',
+  '14_Closing_Integration': 'Take Forward',
+} as const;
+
+const sectionAnchorIds = {
+  '05_Context': 'context',
+  '06_Orientation': 'orientation',
+  '07_Recognition': 'recognition',
+  '08_Signal_Roles': 'signal-roles',
+  '09_Pattern_Mechanics': 'pattern-mechanics',
+  '10_Pattern_Synthesis': 'pattern-synthesis',
+  '11_Strengths': 'strengths',
+  '12_Narrowing': 'narrowing',
+  '13_Application': 'application',
+  '14_Closing_Integration': 'closing-integration',
 } as const;
 
 const prototypeScores = [
@@ -37,14 +50,10 @@ const draftResultRailSections = rankedPatternSectionOrder.map((sectionKey) => {
   const label = sectionLabels[sectionKey];
 
   return {
-    id: sectionId(label),
+    id: sectionAnchorIds[sectionKey],
     label,
   };
 });
-
-function sectionId(label: string) {
-  return label.toLowerCase().replaceAll(' ', '-');
-}
 
 function SchemaSection({
   children,
@@ -58,7 +67,7 @@ function SchemaSection({
   return (
     <section
       className="results-anchor-target scroll-mt-28 border-t border-[#F5F1EA]/10 py-12 md:py-16"
-      id={sectionId(label)}
+      id={sectionAnchorIds[sectionKey]}
     >
       <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>

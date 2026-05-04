@@ -5,6 +5,19 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { DraftRankedResultPreview } from '@/components/draft/draft-ranked-result-preview';
 
 const requiredHeadings = [
+  'Introduction',
+  'Pattern at a Glance',
+  'Core Interpretation',
+  'Signal Profile',
+  'What Shapes This Pattern',
+  'How the Pattern Works',
+  'What Comes Easily',
+  'Where It Can Narrow',
+  'How to Use It',
+  'Take Forward',
+] as const;
+
+const previousDisplayLabels = [
   'Context',
   'Orientation',
   'Recognition',
@@ -17,7 +30,7 @@ const requiredHeadings = [
   'Closing integration',
 ] as const;
 
-test('draft ranked result page renders all schema section headings in order', () => {
+test('draft ranked result page renders all report-facing section headings in order', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
   const headingPositions = requiredHeadings.map((heading) => {
     const position = markup.indexOf(`>${heading}</h2>`);
@@ -27,6 +40,15 @@ test('draft ranked result page renders all schema section headings in order', ()
   });
 
   assert.deepEqual(headingPositions, [...headingPositions].sort((left, right) => left - right));
+});
+
+test('draft ranked result page does not render old schema labels as h2 headings or rail labels', () => {
+  const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+
+  for (const label of previousDisplayLabels) {
+    assert.doesNotMatch(markup, new RegExp(`>${label}</h2>`));
+    assert.doesNotMatch(markup, new RegExp(`>${label}</span>`));
+  }
 });
 
 test('draft ranked result page renders the live-style reading rail cues', () => {
