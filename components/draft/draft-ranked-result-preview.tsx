@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import {
   DraftReadingModeToggle,
@@ -207,6 +207,7 @@ function DraftPatternSignature() {
 export function DraftRankedResultPreview() {
   validateRankedPatternExample();
 
+  const [focusMode, setFocusMode] = useState(false);
   const [readingMode, setReadingMode] = useState<DraftReadingMode>('dark');
 
   function toggleReadingMode() {
@@ -219,6 +220,37 @@ export function DraftRankedResultPreview() {
       }),
     );
   }
+
+  function setDraftFocusMode(nextFocusMode: boolean) {
+    setFocusMode(nextFocusMode);
+    window.dispatchEvent(
+      new CustomEvent('sonartra-draft-result-focus-mode-change', {
+        detail: { focusMode: nextFocusMode },
+      }),
+    );
+  }
+
+  function toggleFocusMode() {
+    setDraftFocusMode(!focusMode);
+  }
+
+  useEffect(() => {
+    if (!focusMode) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setDraftFocusMode(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [focusMode]);
 
   const [context] = rankedPatternExample['05_Context'];
   const [orientation] = rankedPatternExample['06_Orientation'];
@@ -234,6 +266,7 @@ export function DraftRankedResultPreview() {
   return (
     <div
       className="draft-result-shell relative isolate -mx-5 overflow-x-clip bg-[#101312] px-5 pb-16 pt-16 text-[#F3F1EA] sm:-mx-6 sm:px-6 md:pb-24 md:pt-20 lg:-mx-8 lg:px-8"
+      data-focus-mode={focusMode ? 'true' : 'false'}
       data-reading-mode={readingMode}
       data-draft-result-preview="true"
     >
@@ -318,6 +351,13 @@ export function DraftRankedResultPreview() {
             box-shadow: 0 14px 34px rgba(58, 51, 42, 0.08) !important;
           }
 
+          .draft-result-shell[data-reading-mode='light'] .draft-focus-toggle {
+            background: rgba(250, 248, 243, 0.88) !important;
+            border-color: rgba(23, 32, 28, 0.16) !important;
+            color: #17201C !important;
+            box-shadow: 0 14px 34px rgba(58, 51, 42, 0.08) !important;
+          }
+
           .draft-result-shell[data-reading-mode='light'] .draft-signature-track {
             background: rgba(23, 32, 28, 0.13) !important;
             box-shadow: inset 0 0 0 1px rgba(23, 32, 28, 0.08) !important;
@@ -387,6 +427,31 @@ export function DraftRankedResultPreview() {
             border-color: rgba(38, 148, 128, 0.34) !important;
             box-shadow: 0 0 0 5px rgba(38, 148, 128, 0.08) !important;
           }
+
+          @media (min-width: 1280px) {
+            .draft-result-shell[data-focus-mode='true'] {
+              padding-top: 2rem !important;
+            }
+
+            .draft-result-shell[data-focus-mode='true'] .draft-result-header {
+              padding-top: 1.5rem !important;
+            }
+
+            .draft-result-shell[data-focus-mode='true'] .draft-result-mobile-toggle {
+              display: none !important;
+            }
+
+            .draft-result-shell[data-focus-mode='true'] .draft-result-prototype-marker {
+              opacity: 0.64;
+            }
+
+            .draft-result-shell[data-focus-mode='true'] .draft-result-article-grid {
+              grid-template-columns: minmax(0, 1fr) 11.75rem !important;
+              max-width: 76rem;
+              margin-left: auto;
+              margin-right: auto;
+            }
+          }
         `}
       </style>
       <div
@@ -400,14 +465,14 @@ export function DraftRankedResultPreview() {
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl">
-        <header className="grid gap-8 py-8 md:py-12 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-end">
+        <header className="draft-result-header grid gap-8 py-8 md:py-12 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-end">
           <div className="max-w-5xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
+              <span className="draft-result-prototype-marker rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
                 Prototype preview
               </span>
               <DraftReadingModeToggle
-                className="xl:hidden"
+                className="draft-result-mobile-toggle xl:hidden"
                 mode={readingMode}
                 onToggle={toggleReadingMode}
               />
@@ -449,7 +514,7 @@ export function DraftRankedResultPreview() {
           </aside>
         </header>
 
-        <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_11.75rem] xl:items-start">
+        <div className="draft-result-article-grid grid gap-10 xl:grid-cols-[minmax(0,1fr)_11.75rem] xl:items-start">
           <article className="min-w-0">
             <SchemaSection sectionKey="05_Context">
               <div className="grid gap-5 lg:grid-cols-[0.72fr_1.28fr]">
@@ -692,6 +757,8 @@ export function DraftRankedResultPreview() {
           </article>
 
           <DraftResultReadingRail
+            focusMode={focusMode}
+            onFocusModeToggle={toggleFocusMode}
             onReadingModeToggle={toggleReadingMode}
             readingMode={readingMode}
             sections={draftResultRailSections}

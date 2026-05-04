@@ -12,6 +12,7 @@ import {
   scrollToResultSection,
   useActiveResultSectionWithConfig,
 } from '@/hooks/use-active-result-section';
+import { DraftFocusModeToggle } from '@/components/draft/draft-focus-mode-toggle';
 import {
   DraftReadingModeToggle,
   type DraftReadingMode,
@@ -23,6 +24,8 @@ export type DraftResultRailSection = {
 };
 
 type DraftResultReadingRailProps = {
+  focusMode: boolean;
+  onFocusModeToggle: () => void;
   onReadingModeToggle: () => void;
   readingMode: DraftReadingMode;
   sections: readonly DraftResultRailSection[];
@@ -66,6 +69,8 @@ function createDraftReadingSectionsConfig(
 }
 
 export function DraftResultReadingRail({
+  focusMode,
+  onFocusModeToggle,
   onReadingModeToggle,
   readingMode,
   sections,
@@ -112,6 +117,11 @@ export function DraftResultReadingRail({
             className="w-full justify-center px-2.5 py-2 text-[0.62rem]"
             mode={readingMode}
             onToggle={onReadingModeToggle}
+          />
+          <DraftFocusModeToggle
+            active={focusMode}
+            className="w-full justify-center px-2.5 py-2 text-[0.62rem]"
+            onToggle={onFocusModeToggle}
           />
         </div>
         <ul className="sonartra-result-rail-track relative space-y-3 pl-1.5" role="list">

@@ -12,6 +12,7 @@ import {
 
 type DraftReadingMode = 'dark' | 'light';
 
+type DraftFocusModeChangeEvent = CustomEvent<{ focusMode: boolean }>;
 type DraftReadingModeChangeEvent = CustomEvent<{ mode: DraftReadingMode }>;
 
 function MenuIcon() {
@@ -35,12 +36,14 @@ function MenuIcon() {
 
 export function PublicSiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [draftFocusMode, setDraftFocusMode] = useState(false);
   const [draftReadingMode, setDraftReadingMode] = useState<DraftReadingMode>('dark');
   const mobileMenuId = useId();
   const mobileMenuLabelId = useId();
   const pathname = usePathname();
   const desktopNavItems = PUBLIC_SITE_PRIMARY_NAV_ITEMS.filter((item) => item.href !== pathname);
   const isDraftResultRoute = pathname === '/draft-result';
+  const isDraftFocusMode = isDraftResultRoute && draftFocusMode;
   const isDraftLightMode = isDraftResultRoute && draftReadingMode === 'light';
 
   useEffect(() => {
@@ -87,8 +90,37 @@ export function PublicSiteHeader() {
     };
   }, [isDraftResultRoute]);
 
+  useEffect(() => {
+    if (!isDraftResultRoute) {
+      return;
+    }
+
+    const handleDraftFocusModeChange = (event: Event) => {
+      const focusMode = (event as DraftFocusModeChangeEvent).detail?.focusMode;
+
+      if (typeof focusMode === 'boolean') {
+        setDraftFocusMode(focusMode);
+      }
+    };
+
+    window.addEventListener('sonartra-draft-result-focus-mode-change', handleDraftFocusModeChange);
+
+    return () => {
+      window.removeEventListener('sonartra-draft-result-focus-mode-change', handleDraftFocusModeChange);
+    };
+  }, [isDraftResultRoute]);
+
   return (
-    <header className="relative z-30 px-4 pt-5 sm:px-6 lg:px-8" data-public-site-header="true">
+    <header
+      className={[
+        'relative z-30 px-4 pt-5 transition duration-300 sm:px-6 lg:px-8',
+        isDraftFocusMode && 'xl:pointer-events-none xl:fixed xl:inset-x-0 xl:top-0 xl:-translate-y-4 xl:opacity-0',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      data-draft-focus-mode={isDraftFocusMode ? 'true' : 'false'}
+      data-public-site-header="true"
+    >
       <div
         className={[
           'relative mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 rounded-full px-3 py-2 backdrop-blur-[20px] backdrop-saturate-[1.35] sm:px-4',
