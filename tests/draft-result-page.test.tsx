@@ -122,7 +122,7 @@ test('draft ranked result page renders the pattern signature signal band', () =>
   assert.match(markup, /data-draft-pattern-signature="true"/);
   assert.match(markup, /Pattern signature/);
   assert.match(markup, /Concentrated pattern/);
-  assert.match(markup, /First rank clearly anchors this result/);
+  assert.match(markup, /The first signal is the clearest starting point/);
 
   for (const signal of ['Deep Focus', 'Creative Movement', 'Physical Rhythm', 'Social Exchange']) {
     assert.match(markup, new RegExp(`>${signal}<`));
@@ -132,9 +132,28 @@ test('draft ranked result page renders the pattern signature signal band', () =>
     assert.match(markup, new RegExp(`>${percentage}<`));
   }
 
-  for (const role of ['Anchor', 'Shaper', 'Support', 'Stretch']) {
+  for (const role of ['Main route', 'Adds energy', 'Helps reset', 'Use deliberately']) {
     assert.match(markup, new RegExp(`>${role}<`));
   }
+
+  for (const previousRole of ['ANCHOR', 'SHAPER', 'STRETCH', 'STRETCH RANGE']) {
+    assert.doesNotMatch(markup, new RegExp(`>${previousRole}<`));
+  }
+});
+
+test('draft ranked result page renders plain signal profile sublabels', () => {
+  const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+
+  for (const label of ['What this helps', 'Watch for', 'Try this']) {
+    assert.match(markup, new RegExp(`>${label}<`));
+  }
+
+  for (const previousLabel of ['PRODUCTIVE EXPRESSION', 'RISK PATTERN', 'DEVELOPMENT NOTE', 'STRETCH RANGE']) {
+    assert.doesNotMatch(markup, new RegExp(`>${previousLabel}<`));
+  }
+
+  assert.match(markup, />Deep Focus first</);
+  assert.doesNotMatch(markup, />Deep focus</);
 });
 
 test('draft ranked result page renders a draft-only reading mode toggle with dark as default', () => {

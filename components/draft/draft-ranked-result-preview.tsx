@@ -41,10 +41,10 @@ const sectionAnchorIds = {
 } as const;
 
 const prototypeScores = [
-  { label: 'Deep Focus', value: 52, role: 'Anchor', rank: 1, tone: 'primary' },
-  { label: 'Creative Movement', value: 26, role: 'Shaper', rank: 2, tone: 'secondary' },
-  { label: 'Physical Rhythm', value: 14, role: 'Support', rank: 3, tone: 'support' },
-  { label: 'Social Exchange', value: 8, role: 'Stretch', rank: 4, tone: 'stretch' },
+  { label: 'Deep Focus', value: 52, role: 'Main route', rank: 1, tone: 'primary' },
+  { label: 'Creative Movement', value: 26, role: 'Adds energy', rank: 2, tone: 'secondary' },
+  { label: 'Physical Rhythm', value: 14, role: 'Helps reset', rank: 3, tone: 'support' },
+  { label: 'Social Exchange', value: 8, role: 'Use deliberately', rank: 4, tone: 'stretch' },
 ] as const;
 
 const applicationAreaLabels = {
@@ -54,10 +54,10 @@ const applicationAreaLabels = {
 } as const;
 
 const signalRoleLabels = {
-  dominant: 'Dominant',
-  secondary: 'Secondary',
-  tertiary: 'Supporting',
-  least_expressed: 'Stretch range',
+  dominant: 'Main route',
+  secondary: 'Adds energy',
+  tertiary: 'Support',
+  least_expressed: 'Use deliberately',
 } as const;
 
 const draftResultRailSections = rankedPatternSectionOrder.map((sectionKey) => ({
@@ -67,6 +67,14 @@ const draftResultRailSections = rankedPatternSectionOrder.map((sectionKey) => ({
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
+}
+
+function polishSignalCasing(text: string) {
+  return text
+    .replace(/\bDeep focus\b/g, 'Deep Focus')
+    .replace(/\bCreative movement\b/g, 'Creative Movement')
+    .replace(/\bPhysical rhythm\b/g, 'Physical Rhythm')
+    .replace(/\bSocial exchange\b/g, 'Social Exchange');
 }
 
 function SchemaSection({
@@ -139,7 +147,9 @@ function DraftPatternSignature() {
           <FieldLabel tone="teal">Pattern signature</FieldLabel>
           <p className="mt-2 text-lg font-semibold text-[#F3F1EA]">Concentrated pattern</p>
         </div>
-        <p className="max-w-[16rem] text-sm leading-6 text-[#A8B0AA]/82">First rank clearly anchors this result.</p>
+        <p className="max-w-[16rem] text-sm leading-6 text-[#A8B0AA]/82">
+          The first signal is the clearest starting point.
+        </p>
       </div>
 
       <div className="mt-4 space-y-2.5">
@@ -581,13 +591,15 @@ export function DraftRankedResultPreview() {
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
                 <DraftPatternSignature />
                 <div className="draft-teal-surface rounded-[1.5rem] border border-[#32D6B0]/20 bg-[linear-gradient(135deg,rgba(50,214,176,0.085),rgba(243,241,234,0.032))] p-6 md:p-7">
-                  <FieldLabel tone="teal">{orientation.orientation_title}</FieldLabel>
+                  <FieldLabel tone="teal">{polishSignalCasing(orientation.orientation_title)}</FieldLabel>
                   <p className="mt-5 text-2xl font-semibold leading-snug text-[#F3F1EA]">
-                    {orientation.orientation_summary}
+                    {polishSignalCasing(orientation.orientation_summary)}
                   </p>
                   <div className="mt-6 border-t border-[#F3F1EA]/[0.085] pt-5">
                     <FieldLabel>Concentrated pattern</FieldLabel>
-                    <p className="mt-3 text-base leading-8 text-[#B8BDB7]/92">{orientation.score_shape_summary}</p>
+                    <p className="mt-3 text-base leading-8 text-[#B8BDB7]/92">
+                      {polishSignalCasing(orientation.score_shape_summary)}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -606,7 +618,7 @@ export function DraftRankedResultPreview() {
                         Rank {index + 1}
                       </FieldLabel>
                       <p className={cx('mt-3 leading-7 text-[#B8BDB7]/90', index === 0 ? 'text-xl md:text-2xl md:leading-9' : 'text-sm')}>
-                        {phrase}
+                        {polishSignalCasing(phrase)}
                       </p>
                     </Panel>
                   ),
@@ -659,15 +671,15 @@ export function DraftRankedResultPreview() {
                         <p className="mt-3 text-base leading-8 text-[#B8BDB7]/90">{role.description}</p>
                         <div className="mt-5 grid gap-3 lg:grid-cols-3">
                           <Panel className="bg-[#151A18]/78 p-4">
-                            <FieldLabel>At its best</FieldLabel>
+                            <FieldLabel>What this helps</FieldLabel>
                             <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/88">{role.productive_expression}</p>
                           </Panel>
                           <Panel className="bg-[#151A18]/78 p-4">
-                            <FieldLabel tone={isStretchRole ? 'warm' : 'neutral'}>Risk pattern</FieldLabel>
+                            <FieldLabel tone={isStretchRole ? 'warm' : 'neutral'}>Watch for</FieldLabel>
                             <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/88">{role.risk_pattern}</p>
                           </Panel>
                           <Panel className="bg-[#151A18]/78 p-4">
-                            <FieldLabel>Development note</FieldLabel>
+                            <FieldLabel>Try this</FieldLabel>
                             <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/88">{role.development_note}</p>
                           </Panel>
                         </div>
