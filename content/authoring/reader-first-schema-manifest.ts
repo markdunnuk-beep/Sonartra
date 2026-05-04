@@ -168,6 +168,21 @@ export type ReaderFirstRowCountRule = {
   readonly note?: string;
 };
 
+export type ReaderFirstSectionCoveragePolicy =
+  | 'context'
+  | 'score_shape_specific'
+  | 'signal_rank'
+  | 'pattern_strengths'
+  | 'pattern_narrowing'
+  | 'pattern_application'
+  | 'pattern_only';
+
+export type ReaderFirstSectionPolicy = {
+  readonly coverage: ReaderFirstSectionCoveragePolicy;
+  readonly expectedRows: number;
+  readonly configurableCoverage?: readonly ['pattern_only', 'score_shape_specific'];
+};
+
 export const readerFirstRowCountRules: Record<ReaderFirstSectionKey, ReaderFirstRowCountRule> = {
   '05_Context': {
     basis: 'one row per domain',
@@ -194,14 +209,12 @@ export const readerFirstRowCountRules: Record<ReaderFirstSectionKey, ReaderFirst
     expectedRows: 96,
   },
   '11_Strengths': {
-    basis: 'pattern-level rows',
-    expectedRows: 24,
-    note: 'May become score-shape-specific later if explicit variants are added.',
+    basis: '24 ranked patterns x 3 strength rows',
+    expectedRows: 72,
   },
   '12_Narrowing': {
-    basis: 'pattern-level rows',
-    expectedRows: 24,
-    note: 'May become score-shape-specific later if explicit variants are added.',
+    basis: '24 ranked patterns x 3 narrowing rows',
+    expectedRows: 72,
   },
   '13_Application': {
     basis: '24 ranked patterns x 3 application areas',
@@ -211,6 +224,53 @@ export const readerFirstRowCountRules: Record<ReaderFirstSectionKey, ReaderFirst
   '14_Closing_Integration': {
     basis: '24 ranked patterns x 4 score shapes',
     expectedRows: 96,
+  },
+};
+
+export const readerFirstSectionPolicies: Record<ReaderFirstSectionKey, ReaderFirstSectionPolicy> = {
+  '05_Context': {
+    coverage: 'context',
+    expectedRows: 1,
+  },
+  '06_Orientation': {
+    coverage: 'score_shape_specific',
+    expectedRows: 96,
+  },
+  '07_Recognition': {
+    coverage: 'score_shape_specific',
+    expectedRows: 96,
+    configurableCoverage: ['pattern_only', 'score_shape_specific'],
+  },
+  '08_Signal_Roles': {
+    coverage: 'signal_rank',
+    expectedRows: 16,
+  },
+  '09_Pattern_Mechanics': {
+    coverage: 'score_shape_specific',
+    expectedRows: 96,
+    configurableCoverage: ['pattern_only', 'score_shape_specific'],
+  },
+  '10_Pattern_Synthesis': {
+    coverage: 'score_shape_specific',
+    expectedRows: 96,
+    configurableCoverage: ['pattern_only', 'score_shape_specific'],
+  },
+  '11_Strengths': {
+    coverage: 'pattern_strengths',
+    expectedRows: 72,
+  },
+  '12_Narrowing': {
+    coverage: 'pattern_narrowing',
+    expectedRows: 72,
+  },
+  '13_Application': {
+    coverage: 'pattern_application',
+    expectedRows: 72,
+  },
+  '14_Closing_Integration': {
+    coverage: 'score_shape_specific',
+    expectedRows: 96,
+    configurableCoverage: ['pattern_only', 'score_shape_specific'],
   },
 };
 
