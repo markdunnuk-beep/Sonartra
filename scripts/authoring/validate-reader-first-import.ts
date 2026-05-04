@@ -35,9 +35,9 @@ export type ReaderFirstValidationResult = {
   readonly scoreShapeCoverage: Partial<Record<ReaderFirstSectionKey, number>>;
 };
 
-const allowedStatuses = new Set(['draft', 'review', 'approved', 'ready']);
+const allowedStatuses = new Set(['draft', 'review', 'approved', 'ready', 'active']);
 const allowedPriorityValues = new Set(['1', '2', '3']);
-const allowedGuidanceTypes = new Set(readerFirstAllowedApplicationAreas);
+const allowedGuidanceTypes = new Set(['guidance', ...readerFirstAllowedApplicationAreas]);
 const allowedSignals = new Set(readerFirstAllowedSignalKeys);
 const allowedScoreShapes = new Set(readerFirstAllowedScoreShapes);
 const allowedRankRoles = new Set(readerFirstAllowedRankRoles);
