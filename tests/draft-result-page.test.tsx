@@ -105,6 +105,15 @@ test('draft ranked result page renders the pattern signature signal band', () =>
   }
 });
 
+test('draft ranked result page renders a draft-only reading mode toggle with dark as default', () => {
+  const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+
+  assert.match(markup, /data-reading-mode="dark"/);
+  assert.match(markup, /aria-label="Switch to light reading mode"/);
+  assert.match(markup, /aria-pressed="false"/);
+  assert.match(markup, />light<\/span>/);
+});
+
 test('draft ranked result page does not expose legacy single-domain section labels', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
 

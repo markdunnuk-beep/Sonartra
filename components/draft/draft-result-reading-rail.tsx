@@ -81,18 +81,18 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
   return (
     <nav
       aria-label="Draft report reading navigation"
-      className="hidden xl:sticky xl:top-[5.7rem] xl:block xl:w-[11.75rem] xl:shrink-0 xl:self-start"
+      className="draft-reading-rail hidden xl:sticky xl:top-[5.7rem] xl:block xl:w-[11.75rem] xl:shrink-0 xl:self-start"
       data-draft-result-reading-rail="true"
       data-result-reading-rail="true"
     >
-      <div className="space-y-3 rounded-[1.35rem] border border-[#F3F1EA]/[0.075] bg-[#171D1A]/58 px-3 py-3.5 shadow-[0_16px_36px_rgba(4,7,6,0.12)] backdrop-blur-[14px]">
+      <div className="draft-reading-rail-card space-y-3 rounded-[1.35rem] border border-[#F3F1EA]/[0.075] bg-[#171D1A]/58 px-3 py-3.5 shadow-[0_16px_36px_rgba(4,7,6,0.12)] backdrop-blur-[14px]">
         <div className="space-y-2 pb-1.5 pl-1">
           <Image
             src="/images/brand/sonartra-logo-white.svg"
             alt="Sonartra"
             width={6259}
             height={1529}
-            className="h-auto w-[136px] opacity-[0.8]"
+            className="draft-logo h-auto w-[136px] opacity-[0.8]"
           />
         </div>
         <ul className="sonartra-result-rail-track relative space-y-3 pl-1.5" role="list">
@@ -103,7 +103,7 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
 
             return (
               <li key={group.label}>
-                <p className="mb-1.5 pl-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#A8B0AA]/50">
+                <p className="draft-rail-group-label mb-1.5 pl-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#A8B0AA]/50">
                   {group.label}
                 </p>
                 <ul className="space-y-0.5" role="list">
@@ -134,7 +134,7 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
                                     : 'idle'
                           }
                           className={cx(
-                            'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring text-[#A8B0AA]/68 group relative block rounded-[0.9rem] px-3 py-2 text-[0.78rem] leading-5 tracking-[0.01em] outline-none',
+                            'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring draft-reading-rail-item text-[#A8B0AA]/68 group relative block rounded-[0.9rem] px-3 py-2 text-[0.78rem] leading-5 tracking-[0.01em] outline-none',
                             'hover:bg-[#F3F1EA]/[0.035] hover:text-[#F3F1EA]/82 focus-visible:text-[#F3F1EA]/90',
                             isPassed && 'sonartra-result-rail-item-read',
                             isActive &&
@@ -145,7 +145,7 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
                           <span
                             aria-hidden="true"
                             className={cx(
-                              'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.58rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-[#F3F1EA]/[0.13] bg-[#101312] opacity-100',
+                              'sonartra-motion-active-bar sonartra-result-rail-marker draft-reading-rail-marker absolute left-[-0.58rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-[#F3F1EA]/[0.13] bg-[#101312] opacity-100',
                               isPassed && 'sonartra-result-rail-marker-read',
                               isActive &&
                                 'border-[rgba(50,214,176,0.32)] bg-[rgba(50,214,176,0.22)] shadow-[0_0_0_5px_rgba(50,214,176,0.055)]',
