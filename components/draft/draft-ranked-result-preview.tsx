@@ -5,6 +5,7 @@ import {
   rankedPatternSectionOrder,
   validateRankedPatternExample,
 } from '@/content/draft-result/ranked-pattern-example';
+import { DraftResultReadingRail } from '@/components/draft/draft-result-reading-rail';
 
 const sectionLabels = {
   '05_Context': 'Context',
@@ -32,6 +33,15 @@ const applicationAreaLabels = {
   develop_by: 'Develop by',
 } as const;
 
+const draftResultRailSections = rankedPatternSectionOrder.map((sectionKey) => {
+  const label = sectionLabels[sectionKey];
+
+  return {
+    id: sectionId(label),
+    label,
+  };
+});
+
 function sectionId(label: string) {
   return label.toLowerCase().replaceAll(' ', '-');
 }
@@ -47,7 +57,7 @@ function SchemaSection({
 
   return (
     <section
-      className="scroll-mt-28 border-t border-[#F5F1EA]/10 py-12 md:py-16"
+      className="results-anchor-target scroll-mt-28 border-t border-[#F5F1EA]/10 py-12 md:py-16"
       id={sectionId(label)}
     >
       <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -165,7 +175,7 @@ export function DraftRankedResultPreview() {
           </dl>
         </header>
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_11.75rem] xl:items-start">
           <article className="min-w-0">
             <SchemaSection sectionKey="05_Context">
               <div className="grid gap-5 md:grid-cols-[0.75fr_1.25fr]">
@@ -443,31 +453,7 @@ export function DraftRankedResultPreview() {
             </SchemaSection>
           </article>
 
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 rounded-2xl border border-[#F5F1EA]/10 bg-[#080A0D]/72 p-5 backdrop-blur-md">
-              <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#32D6B0]/80">
-                Section list
-              </p>
-              <nav aria-label="Draft report sections" className="mt-5 space-y-2">
-                {rankedPatternSectionOrder.map((sectionKey) => {
-                  const label = sectionLabels[sectionKey];
-
-                  return (
-                    <a
-                      className="block rounded-xl border border-transparent px-3 py-2 text-sm text-[#D8D0C3]/72 transition hover:border-[#F5F1EA]/10 hover:bg-[#F5F1EA]/[0.04] hover:text-[#F5F1EA]"
-                      href={`#${sectionId(label)}`}
-                      key={sectionKey}
-                    >
-                      {label}
-                    </a>
-                  );
-                })}
-              </nav>
-              <p className="mt-5 border-t border-[#F5F1EA]/10 pt-4 text-xs leading-5 text-[#9A9185]">
-                Placeholder rail for static validation. Final reading behaviour belongs to Task 3.
-              </p>
-            </div>
-          </aside>
+          <DraftResultReadingRail sections={draftResultRailSections} />
         </div>
       </div>
     </div>

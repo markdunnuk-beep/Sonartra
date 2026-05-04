@@ -29,6 +29,21 @@ test('draft ranked result page renders all schema section headings in order', ()
   assert.deepEqual(headingPositions, [...headingPositions].sort((left, right) => left - right));
 });
 
+test('draft ranked result page renders the live-style reading rail cues', () => {
+  const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+
+  assert.match(markup, /data-draft-result-reading-rail="true"/);
+  assert.match(markup, /src="\/images\/brand\/sonartra-logo-white\.svg"/);
+  assert.match(markup, /alt="Sonartra"/);
+  assert.match(markup, /aria-current="step"/);
+  assert.match(markup, /Now reading/);
+  assert.match(markup, /Up next/);
+
+  for (const heading of requiredHeadings) {
+    assert.match(markup, new RegExp(`>${heading}<`));
+  }
+});
+
 test('draft ranked result page is clearly marked as static prototype content', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
 
