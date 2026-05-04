@@ -258,10 +258,14 @@ export function DraftRankedResultPreview() {
   const [readingMode, setReadingMode] = useState<DraftReadingMode>('dark');
 
   function toggleReadingMode() {
-    setReadingMode((currentMode) => {
-      const nextMode = currentMode === 'dark' ? 'light' : 'dark';
-      return nextMode;
-    });
+    const nextMode = readingMode === 'dark' ? 'light' : 'dark';
+
+    setReadingMode(nextMode);
+    window.dispatchEvent(
+      new CustomEvent('sonartra-draft-result-reading-mode-change', {
+        detail: { mode: nextMode },
+      }),
+    );
   }
 
   const [context] = rankedPatternExample['05_Context'];
@@ -384,7 +388,7 @@ export function DraftRankedResultPreview() {
           }
 
           .draft-result-shell[data-reading-mode='light'] .draft-logo {
-            filter: invert(1) brightness(0.45) sepia(0.14) saturate(0.8);
+            filter: none !important;
             opacity: 0.8 !important;
           }
 
@@ -402,10 +406,23 @@ export function DraftRankedResultPreview() {
             color: rgba(23, 32, 28, 0.72) !important;
           }
 
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item span {
+            color: rgba(23, 32, 28, 0.7) !important;
+          }
+
           .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item:hover,
           .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item[aria-current='step'] {
             background: rgba(38, 148, 128, 0.08) !important;
             color: #17201C !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item:hover span,
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item[aria-current='step'] span {
+            color: #17201C !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item[data-reading-state='next'] span {
+            color: rgba(39, 50, 45, 0.78) !important;
           }
 
           .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-marker {
@@ -718,7 +735,7 @@ export function DraftRankedResultPreview() {
             </SchemaSection>
           </article>
 
-          <DraftResultReadingRail sections={draftResultRailSections} />
+          <DraftResultReadingRail readingMode={readingMode} sections={draftResultRailSections} />
         </div>
       </div>
     </div>

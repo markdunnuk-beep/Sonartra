@@ -19,6 +19,7 @@ export type DraftResultRailSection = {
 };
 
 type DraftResultReadingRailProps = {
+  readingMode?: 'dark' | 'light';
   sections: readonly DraftResultRailSection[];
 };
 
@@ -59,7 +60,7 @@ function createDraftReadingSectionsConfig(
   });
 }
 
-export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps) {
+export function DraftResultReadingRail({ readingMode = 'dark', sections }: DraftResultReadingRailProps) {
   const sectionsConfig = useMemo(() => createDraftReadingSectionsConfig(sections), [sections]);
   const activeSectionIdFromScroll = useActiveResultSectionWithConfig(sectionsConfig);
   const fallbackSectionId = sections[0]?.id ?? null;
@@ -88,7 +89,11 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
       <div className="draft-reading-rail-card space-y-3 rounded-[1.35rem] border border-[#F3F1EA]/[0.075] bg-[#171D1A]/58 px-3 py-3.5 shadow-[0_16px_36px_rgba(4,7,6,0.12)] backdrop-blur-[14px]">
         <div className="space-y-2 pb-1.5 pl-1">
           <Image
-            src="/images/brand/sonartra-logo-white.svg"
+            src={
+              readingMode === 'light'
+                ? '/images/brand/sonartra-logo-black.svg'
+                : '/images/brand/sonartra-logo-white.svg'
+            }
             alt="Sonartra"
             width={6259}
             height={1529}

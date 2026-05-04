@@ -10,6 +10,10 @@ import {
   PUBLIC_SITE_SECONDARY_NAV_ITEMS,
 } from '@/lib/public/public-site-nav';
 
+type DraftReadingMode = 'dark' | 'light';
+
+type DraftReadingModeChangeEvent = CustomEvent<{ mode: DraftReadingMode }>;
+
 function MenuIcon() {
   return (
     <svg
@@ -31,10 +35,13 @@ function MenuIcon() {
 
 export function PublicSiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [draftReadingMode, setDraftReadingMode] = useState<DraftReadingMode>('dark');
   const mobileMenuId = useId();
   const mobileMenuLabelId = useId();
   const pathname = usePathname();
   const desktopNavItems = PUBLIC_SITE_PRIMARY_NAV_ITEMS.filter((item) => item.href !== pathname);
+  const isDraftResultRoute = pathname === '/draft-result';
+  const isDraftLightMode = isDraftResultRoute && draftReadingMode === 'light';
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -60,17 +67,53 @@ export function PublicSiteHeader() {
 
   const closeMobileMenu = () => setMobileOpen(false);
 
+  useEffect(() => {
+    if (!isDraftResultRoute) {
+      return;
+    }
+
+    const handleDraftReadingModeChange = (event: Event) => {
+      const mode = (event as DraftReadingModeChangeEvent).detail?.mode;
+
+      if (mode === 'dark' || mode === 'light') {
+        setDraftReadingMode(mode);
+      }
+    };
+
+    window.addEventListener('sonartra-draft-result-reading-mode-change', handleDraftReadingModeChange);
+
+    return () => {
+      window.removeEventListener('sonartra-draft-result-reading-mode-change', handleDraftReadingModeChange);
+    };
+  }, [isDraftResultRoute]);
+
   return (
-    <header className="relative z-30 px-4 pt-5 sm:px-6 lg:px-8">
-      <div className="relative mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 rounded-full border border-white/20 bg-white/[0.10] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_18px_48px_rgba(0,0,0,0.20)] backdrop-blur-[20px] backdrop-saturate-[1.35] sm:px-4">
+    <header className="relative z-30 px-4 pt-5 sm:px-6 lg:px-8" data-public-site-header="true">
+      <div
+        className={[
+          'relative mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 rounded-full px-3 py-2 backdrop-blur-[20px] backdrop-saturate-[1.35] sm:px-4',
+          isDraftLightMode
+            ? 'border border-[#17201C]/15 bg-[#FAF8F3]/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_18px_48px_rgba(58,51,42,0.10)]'
+            : 'border border-white/20 bg-white/[0.10] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_18px_48px_rgba(0,0,0,0.20)]',
+        ].join(' ')}
+      >
         <div className="flex min-w-0 flex-1 items-center justify-start">
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-4 pl-2 text-sm font-medium text-white/72 xl:flex 2xl:gap-5"
+            className={[
+              'hidden items-center gap-4 pl-2 text-sm font-medium xl:flex 2xl:gap-5',
+              isDraftLightMode ? 'text-[#27322D]/78' : 'text-white/72',
+            ].join(' ')}
+            style={isDraftLightMode ? { color: 'rgba(39, 50, 45, 0.82)' } : undefined}
           >
             {desktopNavItems.map((item) => (
               <Link
-                className="whitespace-nowrap rounded-full px-1.5 py-2 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
+                className={[
+                  'whitespace-nowrap rounded-full px-1.5 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                  isDraftLightMode
+                    ? 'hover:text-[#17201C] focus-visible:ring-[#137F70]/35 focus-visible:ring-offset-[#F4F1EA]'
+                    : 'hover:text-white focus-visible:ring-white/35 focus-visible:ring-offset-[#090B0F]',
+                ].join(' ')}
                 href={item.href}
                 key={item.href}
               >
@@ -83,7 +126,13 @@ export function PublicSiteHeader() {
             aria-controls={mobileMenuId}
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/16 bg-white/[0.06] text-white/86 transition hover:border-white/24 hover:bg-white/[0.10] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F] xl:hidden"
+            className={[
+              'inline-flex h-11 w-11 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 xl:hidden',
+              isDraftLightMode
+                ? 'border-[#17201C]/14 bg-[#17201C]/[0.045] text-[#27322D] hover:border-[#17201C]/24 hover:bg-[#17201C]/[0.075] hover:text-[#17201C] focus-visible:ring-[#137F70]/35 focus-visible:ring-offset-[#F4F1EA]'
+                : 'border-white/16 bg-white/[0.06] text-white/86 hover:border-white/24 hover:bg-white/[0.10] hover:text-white focus-visible:ring-white/35 focus-visible:ring-offset-[#090B0F]',
+            ].join(' ')}
+            style={isDraftLightMode ? { color: '#27322D' } : undefined}
             onClick={() => setMobileOpen((currentValue) => !currentValue)}
             type="button"
           >
@@ -93,7 +142,12 @@ export function PublicSiteHeader() {
 
         <Link
           aria-label="Sonartra home"
-          className="absolute left-1/2 top-1/2 rounded-full px-3 py-2 [transform:translate(-50%,-50%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
+          className={[
+            'absolute left-1/2 top-1/2 rounded-full px-3 py-2 [transform:translate(-50%,-50%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+            isDraftLightMode
+              ? 'focus-visible:ring-[#137F70]/35 focus-visible:ring-offset-[#F4F1EA]'
+              : 'focus-visible:ring-white/35 focus-visible:ring-offset-[#090B0F]',
+          ].join(' ')}
           href="/"
         >
           <Image
@@ -101,7 +155,11 @@ export function PublicSiteHeader() {
             className="block h-auto w-[142px] sm:w-[168px] xl:w-[178px]"
             height={44}
             priority
-            src="/images/brand/sonartra-logo-white.svg"
+            src={
+              isDraftLightMode
+                ? '/images/brand/sonartra-logo-black.svg'
+                : '/images/brand/sonartra-logo-white.svg'
+            }
             unoptimized
             width={180}
           />
@@ -110,7 +168,17 @@ export function PublicSiteHeader() {
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
           <div className="hidden items-center justify-end gap-3 pr-1 xl:flex">
             <Link
-              className="rounded-full border border-white/12 px-4 py-2 text-sm font-medium text-white/78 transition hover:border-white/22 hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
+              className={[
+                'rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                isDraftLightMode
+                  ? 'border-[#17201C]/16 text-[#27322D]/82 hover:border-[#137F70]/28 hover:bg-[#137F70]/[0.07] hover:text-[#17201C] focus-visible:ring-[#137F70]/35 focus-visible:ring-offset-[#F4F1EA]'
+                  : 'border-white/12 text-white/78 hover:border-white/22 hover:bg-white/[0.06] hover:text-white focus-visible:ring-white/35 focus-visible:ring-offset-[#090B0F]',
+              ].join(' ')}
+              style={
+                isDraftLightMode
+                  ? { borderColor: 'rgba(23, 32, 28, 0.16)', color: 'rgba(39, 50, 45, 0.86)' }
+                  : undefined
+              }
               href="/sign-in"
             >
               Login
