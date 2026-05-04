@@ -6,6 +6,7 @@ import {
   DraftReadingModeToggle,
   type DraftReadingMode,
 } from '@/components/draft/draft-reading-mode-toggle';
+import { DraftMobileSectionNavigator } from '@/components/draft/draft-mobile-section-navigator';
 import { DraftResultReadingRail } from '@/components/draft/draft-result-reading-rail';
 import {
   rankedPatternExample,
@@ -428,6 +429,35 @@ export function DraftRankedResultPreview() {
             box-shadow: 0 0 0 5px rgba(38, 148, 128, 0.08) !important;
           }
 
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-nav-card {
+            background: rgba(250, 248, 243, 0.9) !important;
+            border-color: rgba(23, 32, 28, 0.12) !important;
+            box-shadow: 0 18px 42px rgba(58, 51, 42, 0.1) !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-kicker {
+            color: #137F70 !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-current,
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link[aria-current='step'] {
+            color: #17201C !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-button-label,
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link {
+            color: rgba(39, 50, 45, 0.78) !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-panel {
+            border-color: rgba(23, 32, 28, 0.1) !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link:hover,
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link[aria-current='step'] {
+            background: rgba(38, 148, 128, 0.08) !important;
+          }
+
           @media (min-width: 1280px) {
             .draft-result-shell[data-focus-mode='true'] {
               padding-top: 2rem !important;
@@ -465,6 +495,8 @@ export function DraftRankedResultPreview() {
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl">
+        <DraftMobileSectionNavigator sections={draftResultRailSections} />
+
         <header className="draft-result-header grid gap-8 py-8 md:py-12 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-end">
           <div className="max-w-5xl">
             <div className="flex flex-wrap items-center justify-between gap-3">

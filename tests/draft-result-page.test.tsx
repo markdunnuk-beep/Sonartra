@@ -31,6 +31,19 @@ const previousDisplayLabels = [
   'Closing integration',
 ] as const;
 
+const requiredSectionHrefs = [
+  '#context',
+  '#orientation',
+  '#recognition',
+  '#signal-roles',
+  '#pattern-mechanics',
+  '#pattern-synthesis',
+  '#strengths',
+  '#narrowing',
+  '#application',
+  '#closing-integration',
+] as const;
+
 function countOccurrences(markup: string, value: string) {
   return markup.split(value).length - 1;
 }
@@ -68,6 +81,25 @@ test('draft ranked result page renders the live-style reading rail cues', () => 
 
   for (const heading of requiredHeadings) {
     assert.match(markup, new RegExp(`>${heading}<`));
+  }
+});
+
+test('draft ranked result page renders a compact mobile section navigator', () => {
+  const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+
+  assert.match(markup, /data-draft-mobile-section-navigator="true"/);
+  assert.match(markup, /aria-label="Mobile draft report sections"/);
+  assert.match(markup, /aria-label="Open report sections"/);
+  assert.match(markup, /aria-expanded="false"/);
+  assert.match(markup, />Reading</);
+  assert.match(markup, />Sections</);
+
+  for (const heading of requiredHeadings) {
+    assert.match(markup, new RegExp(`>${heading}<`));
+  }
+
+  for (const href of requiredSectionHrefs) {
+    assert.match(markup, new RegExp(`href="${href}"`));
   }
 });
 
