@@ -34,10 +34,10 @@ const sectionAnchorIds = {
 } as const;
 
 const prototypeScores = [
-  { label: 'Deep Focus', value: 52, role: 'Anchor', tone: 'primary' },
-  { label: 'Creative Movement', value: 26, role: 'Shape', tone: 'secondary' },
-  { label: 'Physical Rhythm', value: 14, role: 'Support', tone: 'support' },
-  { label: 'Social Exchange', value: 8, role: 'Stretch', tone: 'stretch' },
+  { label: 'Deep Focus', value: 52, role: 'Anchor', rank: 1, tone: 'primary' },
+  { label: 'Creative Movement', value: 26, role: 'Shaper', rank: 2, tone: 'secondary' },
+  { label: 'Physical Rhythm', value: 14, role: 'Support', rank: 3, tone: 'support' },
+  { label: 'Social Exchange', value: 8, role: 'Stretch', rank: 4, tone: 'stretch' },
 ] as const;
 
 const applicationAreaLabels = {
@@ -139,36 +139,79 @@ function SignalKey({ children, tone = 'teal' }: { children: ReactNode; tone?: 't
   );
 }
 
-function ScoreBar({ label, value, role, tone }: (typeof prototypeScores)[number]) {
-  const isPrimary = tone === 'primary';
-  const barClass =
-    tone === 'stretch'
-      ? 'bg-[#D99A66]'
-      : tone === 'support'
-        ? 'bg-[#8FD0BE]'
-        : tone === 'secondary'
-          ? 'bg-[#6BE2C8]'
-          : 'bg-[#32D6B0]';
-
+function DraftPatternSignature() {
   return (
     <div
-      className={cx(
-        'grid gap-3 rounded-[1rem] border p-4 sm:grid-cols-[8.5rem_minmax(0,1fr)_4rem] sm:items-center',
-        isPrimary
-          ? 'border-[#32D6B0]/24 bg-[#32D6B0]/[0.07]'
-          : tone === 'stretch'
-            ? 'border-[#D99A66]/18 bg-[#D99A66]/[0.045]'
-            : 'border-[#F5F1EA]/10 bg-[#F5F1EA]/[0.032]',
-      )}
+      className="rounded-[1.5rem] border border-[#F5F1EA]/10 bg-[#0D1218]/88 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.2)] sm:p-5"
+      data-draft-pattern-signature="true"
     >
-      <div>
-        <p className="text-sm font-semibold text-[#F5F1EA]">{label}</p>
-        <p className="mt-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[#9A9185]">{role}</p>
+      <div className="flex flex-col gap-3 border-b border-[#F5F1EA]/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <FieldLabel tone="teal">Pattern signature</FieldLabel>
+          <p className="mt-2 text-lg font-semibold text-[#F5F1EA]">Concentrated pattern</p>
+        </div>
+        <p className="max-w-[16rem] text-sm leading-6 text-[#D8D0C3]/70">First rank clearly anchors this result.</p>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-[#F5F1EA]/10">
-        <div className={cx('h-full rounded-full', barClass)} style={{ width: `${value}%` }} />
+
+      <div className="mt-4 space-y-2.5">
+        {prototypeScores.map(({ label, value, role, rank, tone }) => {
+          const isPrimary = tone === 'primary';
+          const fillClass =
+            tone === 'stretch'
+              ? 'bg-[linear-gradient(90deg,rgba(217,154,102,0.86),rgba(217,154,102,0.58))]'
+              : tone === 'support'
+                ? 'bg-[linear-gradient(90deg,rgba(143,208,190,0.82),rgba(143,208,190,0.5))]'
+                : tone === 'secondary'
+                  ? 'bg-[linear-gradient(90deg,rgba(107,226,200,0.94),rgba(107,226,200,0.62))]'
+                  : 'bg-[linear-gradient(90deg,#32D6B0,rgba(50,214,176,0.72))]';
+
+          return (
+            <div
+              aria-label={`${label}, rank ${rank}, ${role}, ${value}%`}
+              aria-valuemax={100}
+              aria-valuemin={0}
+              aria-valuenow={value}
+              className={cx(
+                'grid gap-3 rounded-[1rem] border p-3 sm:grid-cols-[minmax(10rem,0.78fr)_minmax(10rem,1.2fr)_3.75rem] sm:items-center sm:p-3.5',
+                isPrimary
+                  ? 'border-[#32D6B0]/26 bg-[#32D6B0]/[0.075]'
+                  : tone === 'stretch'
+                    ? 'border-[#D99A66]/18 bg-[#D99A66]/[0.045]'
+                    : 'border-[#F5F1EA]/10 bg-[#F5F1EA]/[0.028]',
+              )}
+              key={label}
+              role="meter"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <span
+                  className={cx(
+                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-mono text-xs',
+                    isPrimary
+                      ? 'border-[#32D6B0]/32 bg-[#32D6B0]/12 text-[#F5F1EA]'
+                      : 'border-[#F5F1EA]/12 bg-[#080A0D]/58 text-[#D8D0C3]/76',
+                  )}
+                >
+                  {rank}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold leading-5 text-[#F5F1EA]">{label}</p>
+                  <p className="mt-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[#9A9185]">{role}</p>
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <div className="h-2 overflow-hidden rounded-full bg-[#05070A]/80 ring-1 ring-[#F5F1EA]/10">
+                  <div className={cx('h-full rounded-full shadow-[0_0_18px_rgba(50,214,176,0.18)]', fillClass)} style={{ width: `${value}%` }} />
+                </div>
+              </div>
+
+              <p className={cx('font-mono text-xl sm:text-right', isPrimary ? 'text-[#F5F1EA]' : 'text-[#D8D0C3]/84')}>
+                {value}%
+              </p>
+            </div>
+          );
+        })}
       </div>
-      <p className={cx('font-mono text-2xl', isPrimary ? 'text-[#F5F1EA]' : 'text-[#D8D0C3]/86')}>{value}%</p>
     </div>
   );
 }
@@ -255,22 +298,6 @@ export function DraftRankedResultPreview() {
           </aside>
         </header>
 
-        <div className="mb-10 rounded-[1.5rem] border border-[#F5F1EA]/10 bg-[#F5F1EA]/[0.035] p-3 md:p-4">
-          <div className="grid gap-3 md:grid-cols-4">
-            {prototypeScores.map((score) => (
-              <div key={score.label} className="rounded-[1rem] bg-[#080A0D]/45 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-[#F5F1EA]">{score.label}</p>
-                  <p className="font-mono text-sm text-[#D8D0C3]/78">{score.value}%</p>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#F5F1EA]/10">
-                  <div className="h-full rounded-full bg-[#32D6B0]" style={{ width: `${score.value}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_11.75rem] xl:items-start">
           <article className="min-w-0">
             <SchemaSection sectionKey="05_Context">
@@ -307,6 +334,7 @@ export function DraftRankedResultPreview() {
 
             <SchemaSection sectionKey="06_Orientation">
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+                <DraftPatternSignature />
                 <div className="rounded-[1.5rem] border border-[#32D6B0]/22 bg-[linear-gradient(135deg,rgba(50,214,176,0.11),rgba(245,241,234,0.035))] p-6 md:p-7">
                   <FieldLabel tone="teal">{orientation.orientation_title}</FieldLabel>
                   <p className="mt-5 text-2xl font-semibold leading-snug text-[#F5F1EA]">
@@ -316,11 +344,6 @@ export function DraftRankedResultPreview() {
                     <FieldLabel>Concentrated pattern</FieldLabel>
                     <p className="mt-3 text-base leading-8 text-[#D8D0C3]/86">{orientation.score_shape_summary}</p>
                   </div>
-                </div>
-                <div className="space-y-3">
-                  {prototypeScores.map((score) => (
-                    <ScoreBar key={score.label} {...score} />
-                  ))}
                 </div>
               </div>
 

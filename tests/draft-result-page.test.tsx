@@ -75,6 +75,27 @@ test('draft ranked result page is clearly marked as static prototype content', (
   assert.match(markup, /ranked pattern import schema/);
 });
 
+test('draft ranked result page renders the pattern signature signal band', () => {
+  const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+
+  assert.match(markup, /data-draft-pattern-signature="true"/);
+  assert.match(markup, /Pattern signature/);
+  assert.match(markup, /Concentrated pattern/);
+  assert.match(markup, /First rank clearly anchors this result/);
+
+  for (const signal of ['Deep Focus', 'Creative Movement', 'Physical Rhythm', 'Social Exchange']) {
+    assert.match(markup, new RegExp(`>${signal}<`));
+  }
+
+  for (const percentage of ['52%', '26%', '14%', '8%']) {
+    assert.match(markup, new RegExp(`>${percentage}<`));
+  }
+
+  for (const role of ['Anchor', 'Shaper', 'Support', 'Stretch']) {
+    assert.match(markup, new RegExp(`>${role}<`));
+  }
+});
+
 test('draft ranked result page does not expose legacy single-domain section labels', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
 
