@@ -44,8 +44,21 @@ const requiredSectionHrefs = [
   '#closing-integration',
 ] as const;
 
+const expectedPreviewScoresByScoreShape = {
+  concentrated: [52, 26, 14, 8],
+  paired: [40, 36, 14, 10],
+  graduated: [40, 30, 20, 10],
+  balanced: [28, 26, 24, 22],
+} as const;
+
+type ExpectedPreviewScoreShape = keyof typeof expectedPreviewScoresByScoreShape;
+
 function countOccurrences(markup: string, value: string) {
   return markup.split(value).length - 1;
+}
+
+function renderedText(value: string) {
+  return renderToStaticMarkup(<>{value}</>);
 }
 
 function expectedPolishedSignalCasing(text: string) {
@@ -65,7 +78,9 @@ function getExpectedSignatureRows() {
     orientation.rank_3_signal_key,
     orientation.rank_4_signal_key,
   ] as const;
-  const scores = [52, 26, 14, 8] as const;
+  const scores =
+    expectedPreviewScoresByScoreShape[orientation.score_shape as ExpectedPreviewScoreShape] ??
+    expectedPreviewScoresByScoreShape.concentrated;
   const roles = ['Main route', 'Adds energy', 'Support', 'Use deliberately'] as const;
 
   return rankedSignalKeys.map((signalKey, index) => ({
@@ -75,6 +90,19 @@ function getExpectedSignatureRows() {
     score: scores[index],
   }));
 }
+
+function formatExpectedScoreShapeLabel(scoreShape: string) {
+  const normalisedScoreShape = scoreShape.replace(/_/g, ' ');
+
+  return `${normalisedScoreShape.charAt(0).toUpperCase()}${normalisedScoreShape.slice(1)} pattern`;
+}
+
+test('draft preview score shape map uses expected static rank scores', () => {
+  assert.deepEqual(expectedPreviewScoresByScoreShape.concentrated, [52, 26, 14, 8]);
+  assert.deepEqual(expectedPreviewScoresByScoreShape.paired, [40, 36, 14, 10]);
+  assert.deepEqual(expectedPreviewScoresByScoreShape.graduated, [40, 30, 20, 10]);
+  assert.deepEqual(expectedPreviewScoresByScoreShape.balanced, [28, 26, 24, 22]);
+});
 
 test('draft ranked result page renders all report-facing section headings in order', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
@@ -146,11 +174,13 @@ test('draft ranked result page keeps one subtle prototype marker without schema 
 
 test('draft ranked result page renders the pattern signature signal band', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+  const [orientation] = rankedPatternExample['06_Orientation'];
   const expectedSignatureRows = getExpectedSignatureRows();
+  const expectedScoreShapeLabel = formatExpectedScoreShapeLabel(orientation.score_shape);
 
   assert.match(markup, /data-draft-pattern-signature="true"/);
   assert.match(markup, /Pattern signature/);
-  assert.match(markup, /Concentrated pattern/);
+  assert.match(markup, new RegExp(`>${expectedScoreShapeLabel}<`));
   assert.match(markup, /The first signal is the clearest starting point/);
 
   const ariaLabelPositions = expectedSignatureRows.map(({ label, rank, role, score }) => {
@@ -168,6 +198,15 @@ test('draft ranked result page renders the pattern signature signal band', () =>
 
   for (const { label, score } of expectedSignatureRows.slice(0, 2)) {
     assert.match(markup, new RegExp(`>${score}%<.*>${label}<`, 's'));
+  }
+
+  if (orientation.score_shape === 'paired') {
+    const [firstRow, secondRow] = expectedSignatureRows;
+
+    assert.equal(firstRow.score, 40);
+    assert.equal(secondRow.score, 36);
+    assert.doesNotMatch(markup, new RegExp(`aria-label="${firstRow.label}, rank 1, ${firstRow.role}, 52%"`));
+    assert.doesNotMatch(markup, />Concentrated pattern</);
   }
 
   for (const previousRole of ['ANCHOR', 'SHAPER', 'STRETCH', 'STRETCH RANGE']) {
@@ -225,10 +264,10 @@ test('draft ranked result page keeps fixture-driven content without duplicate me
   const [mechanics] = rankedPatternExample['09_Pattern_Mechanics'];
   const [synthesis] = rankedPatternExample['10_Pattern_Synthesis'];
 
-  assert.ok(markup.includes(context.domain_definition));
-  assert.ok(markup.includes(synthesis.synthesis_title));
-  assert.ok(markup.includes(synthesis.synthesis_text));
-  assert.equal(countOccurrences(markup, mechanics.core_mechanism), 1);
-  assert.ok(markup.includes(mechanics.why_it_shows_up));
-  assert.ok(markup.includes(mechanics.what_it_protects));
+  assert.ok(markup.includes(renderedText(context.domain_definition)));
+  assert.ok(markup.includes(renderedText(synthesis.synthesis_title)));
+  assert.ok(markup.includes(renderedText(synthesis.synthesis_text)));
+  assert.equal(countOccurrences(markup, renderedText(mechanics.core_mechanism)), 1);
+  assert.ok(markup.includes(renderedText(mechanics.why_it_shows_up)));
+  assert.ok(markup.includes(renderedText(mechanics.what_it_protects)));
 });

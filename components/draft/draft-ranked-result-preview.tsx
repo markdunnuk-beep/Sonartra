@@ -40,7 +40,14 @@ const sectionAnchorIds = {
   '14_Closing_Integration': 'closing-integration',
 } as const;
 
-const previewScoresByRank = [52, 26, 14, 8] as const;
+const previewScoresByScoreShape = {
+  concentrated: [52, 26, 14, 8],
+  paired: [40, 36, 14, 10],
+  graduated: [40, 30, 20, 10],
+  balanced: [28, 26, 24, 22],
+} as const;
+
+type DraftPreviewScoreShape = keyof typeof previewScoresByScoreShape;
 
 const signatureTonesByRank = ['primary', 'secondary', 'support', 'stretch'] as const;
 
@@ -84,10 +91,25 @@ function getSignatureRoleLabel(signalKey: string, rankIndex: number) {
   return signatureRoleLabelsByRank[rankIndex] ?? 'Support';
 }
 
+function getPreviewScoresByRank(scoreShape: string) {
+  return previewScoresByScoreShape[scoreShape as DraftPreviewScoreShape] ?? previewScoresByScoreShape.concentrated;
+}
+
+function formatScoreShapeLabel(scoreShape: string) {
+  const normalisedScoreShape = scoreShape.replace(/_/g, ' ');
+
+  return `${normalisedScoreShape.charAt(0).toUpperCase()}${normalisedScoreShape.slice(1)} pattern`;
+}
+
+function formatRankedSpread(scoreShape: string) {
+  return getPreviewScoresByRank(scoreShape).join(' / ');
+}
+
 function buildDraftSignatureRows(
   orientation: (typeof rankedPatternExample)['06_Orientation'][number],
   signalRoles: (typeof rankedPatternExample)['08_Signal_Roles'],
 ) {
+  const previewScoresByRank = getPreviewScoresByRank(orientation.score_shape);
   const rankedSignalKeys = [
     orientation.rank_1_signal_key,
     orientation.rank_2_signal_key,
@@ -170,8 +192,10 @@ function FieldLabel({ children, tone = 'neutral' }: { children: ReactNode; tone?
 }
 
 function DraftPatternSignature({
+  scoreShape,
   signatureRows,
 }: {
+  scoreShape: string;
   signatureRows: ReturnType<typeof buildDraftSignatureRows>;
 }) {
   return (
@@ -182,7 +206,7 @@ function DraftPatternSignature({
       <div className="flex flex-col gap-3 border-b border-[#F3F1EA]/[0.085] pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <FieldLabel tone="teal">Pattern signature</FieldLabel>
-          <p className="mt-2 text-lg font-semibold text-[#F3F1EA]">Concentrated pattern</p>
+          <p className="mt-2 text-lg font-semibold text-[#F3F1EA]">{formatScoreShapeLabel(scoreShape)}</p>
         </div>
         <p className="max-w-[16rem] text-sm leading-6 text-[#A8B0AA]/82">
           The first signal is the clearest starting point.
@@ -594,7 +618,7 @@ export function DraftRankedResultPreview() {
               </div>
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-sm text-[#A8B0AA]">Ranked spread</dt>
-                <dd className="font-mono text-sm text-[#F3F1EA]/88">52 / 26 / 14 / 8</dd>
+                <dd className="font-mono text-sm text-[#F3F1EA]/88">{formatRankedSpread(orientation.score_shape)}</dd>
               </div>
             </dl>
           </aside>
@@ -633,14 +657,14 @@ export function DraftRankedResultPreview() {
 
             <SchemaSection sectionKey="06_Orientation">
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-                <DraftPatternSignature signatureRows={signatureRows} />
+                <DraftPatternSignature scoreShape={orientation.score_shape} signatureRows={signatureRows} />
                 <div className="draft-teal-surface rounded-[1.5rem] border border-[#32D6B0]/20 bg-[linear-gradient(135deg,rgba(50,214,176,0.085),rgba(243,241,234,0.032))] p-6 md:p-7">
                   <FieldLabel tone="teal">{polishSignalCasing(orientation.orientation_title)}</FieldLabel>
                   <p className="mt-5 text-2xl font-semibold leading-snug text-[#F3F1EA]">
                     {polishSignalCasing(orientation.orientation_summary)}
                   </p>
                   <div className="mt-6 border-t border-[#F3F1EA]/[0.085] pt-5">
-                    <FieldLabel>Concentrated pattern</FieldLabel>
+                    <FieldLabel>{formatScoreShapeLabel(orientation.score_shape)}</FieldLabel>
                     <p className="mt-3 text-base leading-8 text-[#B8BDB7]/92">
                       {polishSignalCasing(orientation.score_shape_summary)}
                     </p>
