@@ -78,9 +78,6 @@ function SchemaSection({
     >
       <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-3xl">
-          <p className="font-mono text-[0.68rem] uppercase tracking-[0.2em] text-[#32D6B0]/72">
-            Briefing section
-          </p>
           <h2 className="mt-3 text-[2rem] font-semibold leading-tight text-[#F3F1EA] md:text-[2.75rem]">
             {label}
           </h2>
@@ -121,21 +118,6 @@ function FieldLabel({ children, tone = 'neutral' }: { children: ReactNode; tone?
     >
       {children}
     </p>
-  );
-}
-
-function SignalKey({ children, tone = 'teal' }: { children: ReactNode; tone?: 'teal' | 'warm' | 'neutral' }) {
-  return (
-    <span
-      className={cx(
-        'mt-4 inline-flex w-fit rounded-full border px-3 py-1 font-mono text-xs',
-        tone === 'teal' && 'border-[#32D6B0]/18 bg-[#32D6B0]/[0.07] text-[#32D6B0]/90',
-        tone === 'warm' && 'border-[#C98E68]/20 bg-[#C98E68]/[0.07] text-[#D9A77B]/90',
-        tone === 'neutral' && 'border-[#F3F1EA]/[0.09] bg-[#F3F1EA]/[0.035] text-[#B8BDB7]/82',
-      )}
-    >
-      {children}
-    </span>
   );
 }
 
@@ -246,17 +228,10 @@ export function DraftRankedResultPreview() {
         <header className="grid gap-8 py-8 md:py-12 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-end">
           <div className="max-w-5xl">
             <div className="flex flex-wrap items-center gap-3">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#32D6B0]">
-                Draft report prototype
-              </p>
-              <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.08] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
-                Static sample / not live result
+              <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
+                Prototype preview
               </span>
             </div>
-            <p className="mt-5 max-w-2xl text-sm leading-6 text-[#A8B0AA]/78">
-              Static schema-faithful UX validation page for testing report layout, reading rhythm,
-              section order, rail behaviour, and mobile flow.
-            </p>
 
             <p className="mt-7 text-sm font-medium uppercase tracking-[0.18em] text-[#B8BDB7]/72">
               {context.domain_title}
@@ -270,7 +245,7 @@ export function DraftRankedResultPreview() {
           </div>
 
           <aside className="rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)]">
-            <FieldLabel tone="teal">Result object</FieldLabel>
+            <FieldLabel tone="teal">Pattern snapshot</FieldLabel>
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.06] p-4">
                 <p className="text-3xl font-semibold text-[#F3F1EA]">52%</p>
@@ -290,10 +265,6 @@ export function DraftRankedResultPreview() {
                 <dt className="text-sm text-[#A8B0AA]">Ranked spread</dt>
                 <dd className="font-mono text-sm text-[#F3F1EA]/88">52 / 26 / 14 / 8</dd>
               </div>
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#A8B0AA]">Source</dt>
-                <dd className="text-sm text-[#F3F1EA]/80">ranked pattern import schema</dd>
-              </div>
             </dl>
           </aside>
         </header>
@@ -303,11 +274,8 @@ export function DraftRankedResultPreview() {
             <SchemaSection sectionKey="05_Context">
               <div className="grid gap-5 lg:grid-cols-[0.72fr_1.28fr]">
                 <Panel className="border-[#32D6B0]/18 bg-[#32D6B0]/[0.055]">
-                  <FieldLabel tone="teal">{context.domain_key}</FieldLabel>
+                  <FieldLabel tone="teal">Foundation</FieldLabel>
                   <h3 className="mt-4 text-3xl font-semibold text-[#F3F1EA]">{context.domain_title}</h3>
-                  <p className="mt-5 rounded-[1rem] border border-[#C98E68]/18 bg-[#C98E68]/[0.055] p-4 text-sm leading-6 text-[#B8BDB7]/88">
-                    {context.intro_note}
-                  </p>
                 </Panel>
                 <div className="grid gap-4 md:grid-cols-3">
                   <Panel>
@@ -387,13 +355,16 @@ export function DraftRankedResultPreview() {
                   const isPrimaryRole = role.rank_position === '1' || role.rank_position === '2';
                   const isStretchRole = role.rank_position === '4';
 
+                  const isDominantRole = role.rank_position === '1';
+
                   return (
                     <article
                       className={cx(
-                        'grid gap-5 rounded-[1.35rem] border p-5 md:grid-cols-[10rem_minmax(0,1fr)] md:p-6',
-                        isPrimaryRole && 'border-[#32D6B0]/22 bg-[#32D6B0]/[0.055]',
-                        role.rank_position === '3' && 'border-[#F3F1EA]/[0.085] bg-[#202622]/50',
-                        isStretchRole && 'border-[#C98E68]/18 bg-[#C98E68]/[0.045]',
+                        'grid gap-5 rounded-[1.35rem] border p-5 md:p-6',
+                        isDominantRole && 'border-[#32D6B0]/26 bg-[#32D6B0]/[0.07] md:grid-cols-[12rem_minmax(0,1fr)] md:p-7',
+                        role.rank_position === '2' && 'border-[#32D6B0]/18 bg-[#32D6B0]/[0.045] md:grid-cols-[11rem_minmax(0,1fr)]',
+                        role.rank_position === '3' && 'border-[#F3F1EA]/[0.085] bg-[#202622]/50 md:grid-cols-[9.5rem_minmax(0,1fr)]',
+                        isStretchRole && 'border-[#C98E68]/18 bg-[#C98E68]/[0.045] md:grid-cols-[9.5rem_minmax(0,1fr)]',
                       )}
                       key={role.signal_key}
                     >
@@ -407,7 +378,7 @@ export function DraftRankedResultPreview() {
                         <h3 className="mt-3 text-xl font-semibold text-[#F3F1EA]">{role.signal_label}</h3>
                       </div>
                       <div>
-                        <h4 className="text-xl font-semibold text-[#F3F1EA]/94">{role.title}</h4>
+                        <h4 className={cx('font-semibold text-[#F3F1EA]/94', isDominantRole ? 'text-2xl' : 'text-xl')}>{role.title}</h4>
                         <p className="mt-3 text-base leading-8 text-[#B8BDB7]/90">{role.description}</p>
                         <div className="mt-5 grid gap-3 lg:grid-cols-3">
                           <Panel className="bg-[#151A18]/78 p-4">
@@ -439,10 +410,6 @@ export function DraftRankedResultPreview() {
                   </blockquote>
                 </div>
                 <div className="grid gap-4">
-                  <Panel>
-                    <FieldLabel>Entry point</FieldLabel>
-                    <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{mechanics.core_mechanism}</p>
-                  </Panel>
                   <Panel>
                     <FieldLabel>Reward loop</FieldLabel>
                     <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{mechanics.why_it_shows_up}</p>
@@ -483,10 +450,7 @@ export function DraftRankedResultPreview() {
               <div className="grid gap-4 lg:grid-cols-3">
                 {strengths.map((strength) => (
                   <Panel key={strength.strength_key} className="border-[#32D6B0]/18 bg-[#32D6B0]/[0.05]">
-                    <div className="flex items-start justify-between gap-4">
-                      <FieldLabel tone="teal">Priority {strength.priority}</FieldLabel>
-                      <SignalKey>{strength.linked_signal_key}</SignalKey>
-                    </div>
+                    <FieldLabel tone="teal">Priority {strength.priority}</FieldLabel>
                     <h3 className="mt-4 text-xl font-semibold text-[#F3F1EA]">{strength.strength_title}</h3>
                     <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{strength.strength_text}</p>
                   </Panel>
@@ -498,10 +462,7 @@ export function DraftRankedResultPreview() {
               <div className="grid gap-4 lg:grid-cols-3">
                 {narrowing.map((item) => (
                   <Panel key={item.narrowing_key} className="border-[#C98E68]/18 bg-[#C98E68]/[0.045]">
-                    <div className="flex items-start justify-between gap-4">
-                      <FieldLabel tone="warm">Priority {item.priority}</FieldLabel>
-                      <SignalKey tone="warm">{item.missing_range_signal_key}</SignalKey>
-                    </div>
+                    <FieldLabel tone="warm">Priority {item.priority}</FieldLabel>
                     <h3 className="mt-4 text-xl font-semibold text-[#F3F1EA]">{item.narrowing_title}</h3>
                     <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{item.narrowing_text}</p>
                   </Panel>
@@ -519,7 +480,6 @@ export function DraftRankedResultPreview() {
                       </FieldLabel>
                       <p className="mt-5 text-base leading-8 text-[#B8BDB7]/92">{item.guidance_text}</p>
                     </div>
-                    <SignalKey tone={item.application_area === 'watch_for' ? 'warm' : 'teal'}>{item.linked_signal_key}</SignalKey>
                   </Panel>
                 ))}
               </div>

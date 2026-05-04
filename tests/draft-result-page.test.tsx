@@ -3,6 +3,7 @@ import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { DraftRankedResultPreview } from '@/components/draft/draft-ranked-result-preview';
+import { rankedPatternExample } from '@/content/draft-result/ranked-pattern-example';
 
 const requiredHeadings = [
   'Introduction',
@@ -29,6 +30,10 @@ const previousDisplayLabels = [
   'Application',
   'Closing integration',
 ] as const;
+
+function countOccurrences(markup: string, value: string) {
+  return markup.split(value).length - 1;
+}
 
 test('draft ranked result page renders all report-facing section headings in order', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
@@ -66,13 +71,17 @@ test('draft ranked result page renders the live-style reading rail cues', () => 
   }
 });
 
-test('draft ranked result page is clearly marked as static prototype content', () => {
+test('draft ranked result page keeps one subtle prototype marker without schema chrome', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
 
-  assert.match(markup, /Draft report prototype/);
-  assert.match(markup, /Static schema-faithful UX validation page/);
-  assert.match(markup, /Static sample \/ not live result/);
-  assert.match(markup, /ranked pattern import schema/);
+  assert.equal(countOccurrences(markup, 'Prototype preview'), 1);
+  assert.doesNotMatch(markup, /Draft report prototype/i);
+  assert.doesNotMatch(markup, /Static schema-faithful UX validation page/);
+  assert.doesNotMatch(markup, /Static sample \/ not live result/i);
+  assert.doesNotMatch(markup, /ranked pattern import schema/);
+  assert.doesNotMatch(markup, /Briefing section/i);
+  assert.doesNotMatch(markup, /Draft example only\. Replace with final domain copy before release\./);
+  assert.doesNotMatch(markup, />flow-state</i);
 });
 
 test('draft ranked result page renders the pattern signature signal band', () => {
@@ -103,4 +112,18 @@ test('draft ranked result page does not expose legacy single-domain section labe
   assert.doesNotMatch(markup, />Drivers</);
   assert.doesNotMatch(markup, />Pair</);
   assert.doesNotMatch(markup, />Limitation</);
+});
+
+test('draft ranked result page keeps fixture-driven content without duplicate mechanism output', () => {
+  const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+  const [context] = rankedPatternExample['05_Context'];
+  const [mechanics] = rankedPatternExample['09_Pattern_Mechanics'];
+  const [synthesis] = rankedPatternExample['10_Pattern_Synthesis'];
+
+  assert.ok(markup.includes(context.domain_definition));
+  assert.ok(markup.includes(synthesis.synthesis_title));
+  assert.ok(markup.includes(synthesis.synthesis_text));
+  assert.equal(countOccurrences(markup, mechanics.core_mechanism), 1);
+  assert.ok(markup.includes(mechanics.why_it_shows_up));
+  assert.ok(markup.includes(mechanics.what_it_protects));
 });
