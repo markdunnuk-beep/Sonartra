@@ -73,7 +73,7 @@ function SchemaSection({
 
   return (
     <section
-      className="results-anchor-target scroll-mt-28 border-t border-[#F5F1EA]/[0.07] py-12 md:py-16"
+      className="results-anchor-target scroll-mt-28 border-t border-[#F3F1EA]/[0.075] py-12 md:py-16"
       id={sectionAnchorIds[sectionKey]}
     >
       <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -81,7 +81,7 @@ function SchemaSection({
           <p className="font-mono text-[0.68rem] uppercase tracking-[0.2em] text-[#32D6B0]/72">
             Briefing section
           </p>
-          <h2 className="mt-3 text-[2rem] font-semibold leading-tight text-[#F5F1EA] md:text-[2.75rem]">
+          <h2 className="mt-3 text-[2rem] font-semibold leading-tight text-[#F3F1EA] md:text-[2.75rem]">
             {label}
           </h2>
         </div>
@@ -92,7 +92,7 @@ function SchemaSection({
 }
 
 function BodyText({ children }: { children: ReactNode }) {
-  return <p className="text-base leading-8 text-[#D8D0C3]/84">{children}</p>;
+  return <p className="text-base leading-8 text-[#B8BDB7]/90">{children}</p>;
 }
 
 function Panel({
@@ -103,7 +103,7 @@ function Panel({
   className?: string;
 }) {
   return (
-    <article className={cx('rounded-[1.25rem] border border-[#F5F1EA]/10 bg-[#F5F1EA]/[0.035] p-5', className)}>
+    <article className={cx('rounded-[1.25rem] border border-[#F3F1EA]/[0.085] bg-[#1B211F]/72 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)]', className)}>
       {children}
     </article>
   );
@@ -115,8 +115,8 @@ function FieldLabel({ children, tone = 'neutral' }: { children: ReactNode; tone?
       className={cx(
         'font-mono text-[0.68rem] uppercase tracking-[0.18em]',
         tone === 'teal' && 'text-[#32D6B0]/82',
-        tone === 'warm' && 'text-[#D99A66]/88',
-        tone === 'neutral' && 'text-[#9A9185]',
+        tone === 'warm' && 'text-[#C98E68]/88',
+        tone === 'neutral' && 'text-[#A8B0AA]',
       )}
     >
       {children}
@@ -130,8 +130,8 @@ function SignalKey({ children, tone = 'teal' }: { children: ReactNode; tone?: 't
       className={cx(
         'mt-4 inline-flex w-fit rounded-full border px-3 py-1 font-mono text-xs',
         tone === 'teal' && 'border-[#32D6B0]/18 bg-[#32D6B0]/[0.07] text-[#32D6B0]/90',
-        tone === 'warm' && 'border-[#D99A66]/20 bg-[#D99A66]/[0.07] text-[#F0B884]/90',
-        tone === 'neutral' && 'border-[#F5F1EA]/12 bg-[#F5F1EA]/[0.045] text-[#D8D0C3]/76',
+        tone === 'warm' && 'border-[#C98E68]/20 bg-[#C98E68]/[0.07] text-[#D9A77B]/90',
+        tone === 'neutral' && 'border-[#F3F1EA]/[0.09] bg-[#F3F1EA]/[0.035] text-[#B8BDB7]/82',
       )}
     >
       {children}
@@ -142,15 +142,15 @@ function SignalKey({ children, tone = 'teal' }: { children: ReactNode; tone?: 't
 function DraftPatternSignature() {
   return (
     <div
-      className="rounded-[1.5rem] border border-[#F5F1EA]/10 bg-[#0D1218]/88 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.2)] sm:p-5"
+      className="rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/90 p-4 shadow-[0_24px_70px_rgba(4,7,6,0.18)] sm:p-5"
       data-draft-pattern-signature="true"
     >
-      <div className="flex flex-col gap-3 border-b border-[#F5F1EA]/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-[#F3F1EA]/[0.085] pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <FieldLabel tone="teal">Pattern signature</FieldLabel>
-          <p className="mt-2 text-lg font-semibold text-[#F5F1EA]">Concentrated pattern</p>
+          <p className="mt-2 text-lg font-semibold text-[#F3F1EA]">Concentrated pattern</p>
         </div>
-        <p className="max-w-[16rem] text-sm leading-6 text-[#D8D0C3]/70">First rank clearly anchors this result.</p>
+        <p className="max-w-[16rem] text-sm leading-6 text-[#A8B0AA]/82">First rank clearly anchors this result.</p>
       </div>
 
       <div className="mt-4 space-y-2.5">
@@ -158,9 +158,9 @@ function DraftPatternSignature() {
           const isPrimary = tone === 'primary';
           const fillClass =
             tone === 'stretch'
-              ? 'bg-[linear-gradient(90deg,rgba(217,154,102,0.86),rgba(217,154,102,0.58))]'
+              ? 'bg-[linear-gradient(90deg,rgba(201,142,104,0.86),rgba(201,142,104,0.58))]'
               : tone === 'support'
-                ? 'bg-[linear-gradient(90deg,rgba(143,208,190,0.82),rgba(143,208,190,0.5))]'
+                ? 'bg-[linear-gradient(90deg,rgba(139,196,181,0.82),rgba(139,196,181,0.5))]'
                 : tone === 'secondary'
                   ? 'bg-[linear-gradient(90deg,rgba(107,226,200,0.94),rgba(107,226,200,0.62))]'
                   : 'bg-[linear-gradient(90deg,#32D6B0,rgba(50,214,176,0.72))]';
@@ -176,8 +176,8 @@ function DraftPatternSignature() {
                 isPrimary
                   ? 'border-[#32D6B0]/26 bg-[#32D6B0]/[0.075]'
                   : tone === 'stretch'
-                    ? 'border-[#D99A66]/18 bg-[#D99A66]/[0.045]'
-                    : 'border-[#F5F1EA]/10 bg-[#F5F1EA]/[0.028]',
+                    ? 'border-[#C98E68]/18 bg-[#C98E68]/[0.045]'
+                    : 'border-[#F3F1EA]/[0.085] bg-[#202622]/45',
               )}
               key={label}
               role="meter"
@@ -187,25 +187,25 @@ function DraftPatternSignature() {
                   className={cx(
                     'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-mono text-xs',
                     isPrimary
-                      ? 'border-[#32D6B0]/32 bg-[#32D6B0]/12 text-[#F5F1EA]'
-                      : 'border-[#F5F1EA]/12 bg-[#080A0D]/58 text-[#D8D0C3]/76',
+                      ? 'border-[#32D6B0]/32 bg-[#32D6B0]/12 text-[#F3F1EA]'
+                      : 'border-[#F3F1EA]/12 bg-[#101312]/58 text-[#B8BDB7]/82',
                   )}
                 >
                   {rank}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold leading-5 text-[#F5F1EA]">{label}</p>
-                  <p className="mt-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[#9A9185]">{role}</p>
+                  <p className="text-sm font-semibold leading-5 text-[#F3F1EA]">{label}</p>
+                  <p className="mt-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-[#A8B0AA]">{role}</p>
                 </div>
               </div>
 
               <div className="min-w-0">
-                <div className="h-2 overflow-hidden rounded-full bg-[#05070A]/80 ring-1 ring-[#F5F1EA]/10">
+                <div className="h-2 overflow-hidden rounded-full bg-[#0E1110]/85 ring-1 ring-[#F3F1EA]/[0.085]">
                   <div className={cx('h-full rounded-full shadow-[0_0_18px_rgba(50,214,176,0.18)]', fillClass)} style={{ width: `${value}%` }} />
                 </div>
               </div>
 
-              <p className={cx('font-mono text-xl sm:text-right', isPrimary ? 'text-[#F5F1EA]' : 'text-[#D8D0C3]/84')}>
+              <p className={cx('font-mono text-xl sm:text-right', isPrimary ? 'text-[#F3F1EA]' : 'text-[#B8BDB7]/90')}>
                 {value}%
               </p>
             </div>
@@ -231,15 +231,15 @@ export function DraftRankedResultPreview() {
   const [closing] = rankedPatternExample['14_Closing_Integration'];
 
   return (
-    <div className="relative isolate -mx-5 overflow-x-clip px-5 pb-16 pt-16 text-[#F5F1EA] sm:-mx-6 sm:px-6 md:pb-24 md:pt-20 lg:-mx-8 lg:px-8">
+    <div className="relative isolate -mx-5 overflow-x-clip bg-[#101312] px-5 pb-16 pt-16 text-[#F3F1EA] sm:-mx-6 sm:px-6 md:pb-24 md:pt-20 lg:-mx-8 lg:px-8">
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-y-0 left-0 z-0 w-full max-w-full overflow-hidden bg-[linear-gradient(180deg,#080A0D_0%,#0B0D11_34rem,#080A0D_100%)]"
+        className="pointer-events-none fixed inset-y-0 left-0 z-0 w-full max-w-full overflow-hidden bg-[linear-gradient(180deg,#101312_0%,#141816_34rem,#0E1110_100%)]"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_6%,rgba(50,214,176,0.11),transparent_29%),radial-gradient(circle_at_82%_8%,rgba(217,154,102,0.08),transparent_28%),linear-gradient(180deg,rgba(8,10,13,0)_0%,rgba(8,10,13,0.78)_74%,rgba(8,10,13,0)_100%)]" />
-        <div className="absolute inset-x-[-8rem] top-0 h-[38rem] bg-[linear-gradient(rgba(245,241,234,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_86%)]" />
-        <div className="absolute left-1/2 top-10 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.03]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_56%,rgba(0,0,0,0.24)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_6%,rgba(50,214,176,0.075),transparent_31%),radial-gradient(circle_at_82%_8%,rgba(201,142,104,0.055),transparent_30%),linear-gradient(180deg,rgba(16,19,18,0)_0%,rgba(16,19,18,0.62)_74%,rgba(16,19,18,0)_100%)]" />
+        <div className="absolute inset-x-[-8rem] top-0 h-[38rem] bg-[linear-gradient(rgba(243,241,234,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(243,241,234,0.009)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_86%)]" />
+        <div className="absolute left-1/2 top-10 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#F3F1EA]/[0.024]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_58%,rgba(7,9,8,0.16)_100%)]" />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl">
@@ -253,46 +253,46 @@ export function DraftRankedResultPreview() {
                 Static sample / not live result
               </span>
             </div>
-            <p className="mt-5 max-w-2xl text-sm leading-6 text-[#D8D0C3]/58">
+            <p className="mt-5 max-w-2xl text-sm leading-6 text-[#A8B0AA]/78">
               Static schema-faithful UX validation page for testing report layout, reading rhythm,
               section order, rail behaviour, and mobile flow.
             </p>
 
-            <p className="mt-7 text-sm font-medium uppercase tracking-[0.18em] text-[#D8D0C3]/64">
+            <p className="mt-7 text-sm font-medium uppercase tracking-[0.18em] text-[#B8BDB7]/72">
               {context.domain_title}
             </p>
-            <h1 className="mt-3 max-w-4xl text-5xl font-semibold leading-[1.02] text-[#F5F1EA] md:text-7xl">
+            <h1 className="mt-3 max-w-4xl text-5xl font-semibold leading-[1.02] text-[#F3F1EA] md:text-7xl">
               {recognition.headline}
             </h1>
-            <p className="mt-6 max-w-3xl text-xl leading-8 text-[#D8D0C3]/88 md:text-2xl md:leading-10">
+            <p className="mt-6 max-w-3xl text-xl leading-8 text-[#B8BDB7]/95 md:text-2xl md:leading-10">
               {recognition.recognition_statement}
             </p>
           </div>
 
-          <aside className="rounded-[1.5rem] border border-[#F5F1EA]/10 bg-[#0D1218]/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
+          <aside className="rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)]">
             <FieldLabel tone="teal">Result object</FieldLabel>
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.06] p-4">
-                <p className="text-3xl font-semibold text-[#F5F1EA]">52%</p>
-                <p className="mt-2 text-sm leading-5 text-[#D8D0C3]/78">Deep Focus</p>
+                <p className="text-3xl font-semibold text-[#F3F1EA]">52%</p>
+                <p className="mt-2 text-sm leading-5 text-[#B8BDB7]/88">Deep Focus</p>
               </div>
-              <div className="rounded-[1rem] border border-[#F5F1EA]/10 bg-[#F5F1EA]/[0.035] p-4">
-                <p className="text-3xl font-semibold text-[#F5F1EA]">26%</p>
-                <p className="mt-2 text-sm leading-5 text-[#D8D0C3]/78">Creative Movement</p>
+              <div className="rounded-[1rem] border border-[#F3F1EA]/[0.085] bg-[#202622]/58 p-4">
+                <p className="text-3xl font-semibold text-[#F3F1EA]">26%</p>
+                <p className="mt-2 text-sm leading-5 text-[#B8BDB7]/88">Creative Movement</p>
               </div>
             </div>
-            <dl className="mt-4 space-y-3 border-t border-[#F5F1EA]/10 pt-4">
+            <dl className="mt-4 space-y-3 border-t border-[#F3F1EA]/[0.085] pt-4">
               <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#9A9185]">Pattern shape</dt>
-                <dd className="font-mono text-sm text-[#F5F1EA]/88">{orientation.score_shape}</dd>
+                <dt className="text-sm text-[#A8B0AA]">Pattern shape</dt>
+                <dd className="font-mono text-sm text-[#F3F1EA]/88">{orientation.score_shape}</dd>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#9A9185]">Ranked spread</dt>
-                <dd className="font-mono text-sm text-[#F5F1EA]/88">52 / 26 / 14 / 8</dd>
+                <dt className="text-sm text-[#A8B0AA]">Ranked spread</dt>
+                <dd className="font-mono text-sm text-[#F3F1EA]/88">52 / 26 / 14 / 8</dd>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#9A9185]">Source</dt>
-                <dd className="text-sm text-[#F5F1EA]/80">ranked pattern import schema</dd>
+                <dt className="text-sm text-[#A8B0AA]">Source</dt>
+                <dd className="text-sm text-[#F3F1EA]/80">ranked pattern import schema</dd>
               </div>
             </dl>
           </aside>
@@ -304,8 +304,8 @@ export function DraftRankedResultPreview() {
               <div className="grid gap-5 lg:grid-cols-[0.72fr_1.28fr]">
                 <Panel className="border-[#32D6B0]/18 bg-[#32D6B0]/[0.055]">
                   <FieldLabel tone="teal">{context.domain_key}</FieldLabel>
-                  <h3 className="mt-4 text-3xl font-semibold text-[#F5F1EA]">{context.domain_title}</h3>
-                  <p className="mt-5 rounded-[1rem] border border-[#D99A66]/20 bg-[#D99A66]/[0.06] p-4 text-sm leading-6 text-[#D8D0C3]/78">
+                  <h3 className="mt-4 text-3xl font-semibold text-[#F3F1EA]">{context.domain_title}</h3>
+                  <p className="mt-5 rounded-[1rem] border border-[#C98E68]/18 bg-[#C98E68]/[0.055] p-4 text-sm leading-6 text-[#B8BDB7]/88">
                     {context.intro_note}
                   </p>
                 </Panel>
@@ -335,14 +335,14 @@ export function DraftRankedResultPreview() {
             <SchemaSection sectionKey="06_Orientation">
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
                 <DraftPatternSignature />
-                <div className="rounded-[1.5rem] border border-[#32D6B0]/22 bg-[linear-gradient(135deg,rgba(50,214,176,0.11),rgba(245,241,234,0.035))] p-6 md:p-7">
+                <div className="rounded-[1.5rem] border border-[#32D6B0]/20 bg-[linear-gradient(135deg,rgba(50,214,176,0.085),rgba(243,241,234,0.032))] p-6 md:p-7">
                   <FieldLabel tone="teal">{orientation.orientation_title}</FieldLabel>
-                  <p className="mt-5 text-2xl font-semibold leading-snug text-[#F5F1EA]">
+                  <p className="mt-5 text-2xl font-semibold leading-snug text-[#F3F1EA]">
                     {orientation.orientation_summary}
                   </p>
-                  <div className="mt-6 border-t border-[#F5F1EA]/10 pt-5">
+                  <div className="mt-6 border-t border-[#F3F1EA]/[0.085] pt-5">
                     <FieldLabel>Concentrated pattern</FieldLabel>
-                    <p className="mt-3 text-base leading-8 text-[#D8D0C3]/86">{orientation.score_shape_summary}</p>
+                    <p className="mt-3 text-base leading-8 text-[#B8BDB7]/92">{orientation.score_shape_summary}</p>
                   </div>
                 </div>
               </div>
@@ -354,13 +354,13 @@ export function DraftRankedResultPreview() {
                       key={phrase}
                       className={cx(
                         index === 0 && 'border-[#32D6B0]/22 bg-[#32D6B0]/[0.06] md:row-span-2',
-                        index === 3 && 'border-[#D99A66]/18 bg-[#D99A66]/[0.045]',
+                        index === 3 && 'border-[#C98E68]/18 bg-[#C98E68]/[0.045]',
                       )}
                     >
                       <FieldLabel tone={index === 3 ? 'warm' : index === 0 ? 'teal' : 'neutral'}>
                         Rank {index + 1}
                       </FieldLabel>
-                      <p className={cx('mt-3 leading-7 text-[#D8D0C3]/84', index === 0 ? 'text-xl md:text-2xl md:leading-9' : 'text-sm')}>
+                      <p className={cx('mt-3 leading-7 text-[#B8BDB7]/90', index === 0 ? 'text-xl md:text-2xl md:leading-9' : 'text-sm')}>
                         {phrase}
                       </p>
                     </Panel>
@@ -370,12 +370,12 @@ export function DraftRankedResultPreview() {
             </SchemaSection>
 
             <SchemaSection sectionKey="07_Recognition">
-              <div className="rounded-[1.65rem] border border-[#32D6B0]/22 bg-[linear-gradient(135deg,rgba(50,214,176,0.11),rgba(245,241,234,0.035))] p-6 md:p-8">
+              <div className="rounded-[1.65rem] border border-[#32D6B0]/20 bg-[linear-gradient(135deg,rgba(50,214,176,0.085),rgba(243,241,234,0.032))] p-6 md:p-8">
                 <FieldLabel tone="teal">{recognition.headline}</FieldLabel>
-                <p className="mt-5 text-2xl font-semibold leading-snug text-[#F5F1EA] md:text-3xl">
+                <p className="mt-5 text-2xl font-semibold leading-snug text-[#F3F1EA] md:text-3xl">
                   {recognition.recognition_statement}
                 </p>
-                <p className="mt-6 max-w-4xl text-base leading-8 text-[#D8D0C3]/84">
+                <p className="mt-6 max-w-4xl text-base leading-8 text-[#B8BDB7]/90">
                   {recognition.recognition_expansion}
                 </p>
               </div>
@@ -392,35 +392,35 @@ export function DraftRankedResultPreview() {
                       className={cx(
                         'grid gap-5 rounded-[1.35rem] border p-5 md:grid-cols-[10rem_minmax(0,1fr)] md:p-6',
                         isPrimaryRole && 'border-[#32D6B0]/22 bg-[#32D6B0]/[0.055]',
-                        role.rank_position === '3' && 'border-[#F5F1EA]/10 bg-[#F5F1EA]/[0.035]',
-                        isStretchRole && 'border-[#D99A66]/18 bg-[#D99A66]/[0.045]',
+                        role.rank_position === '3' && 'border-[#F3F1EA]/[0.085] bg-[#202622]/50',
+                        isStretchRole && 'border-[#C98E68]/18 bg-[#C98E68]/[0.045]',
                       )}
                       key={role.signal_key}
                     >
                       <div>
-                        <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#F5F1EA]/12 bg-[#080A0D]/60 font-mono text-lg text-[#F5F1EA]">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#F3F1EA]/12 bg-[#101312]/62 font-mono text-lg text-[#F3F1EA]">
                           {role.rank_position}
                         </span>
                         <FieldLabel tone={isStretchRole ? 'warm' : isPrimaryRole ? 'teal' : 'neutral'}>
                           {signalRoleLabels[role.rank_role]}
                         </FieldLabel>
-                        <h3 className="mt-3 text-xl font-semibold text-[#F5F1EA]">{role.signal_label}</h3>
+                        <h3 className="mt-3 text-xl font-semibold text-[#F3F1EA]">{role.signal_label}</h3>
                       </div>
                       <div>
-                        <h4 className="text-xl font-semibold text-[#F5F1EA]/94">{role.title}</h4>
-                        <p className="mt-3 text-base leading-8 text-[#D8D0C3]/84">{role.description}</p>
+                        <h4 className="text-xl font-semibold text-[#F3F1EA]/94">{role.title}</h4>
+                        <p className="mt-3 text-base leading-8 text-[#B8BDB7]/90">{role.description}</p>
                         <div className="mt-5 grid gap-3 lg:grid-cols-3">
-                          <Panel className="bg-[#080A0D]/35 p-4">
+                          <Panel className="bg-[#151A18]/78 p-4">
                             <FieldLabel>At its best</FieldLabel>
-                            <p className="mt-3 text-sm leading-6 text-[#D8D0C3]/80">{role.productive_expression}</p>
+                            <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/88">{role.productive_expression}</p>
                           </Panel>
-                          <Panel className="bg-[#080A0D]/35 p-4">
+                          <Panel className="bg-[#151A18]/78 p-4">
                             <FieldLabel tone={isStretchRole ? 'warm' : 'neutral'}>Risk pattern</FieldLabel>
-                            <p className="mt-3 text-sm leading-6 text-[#D8D0C3]/80">{role.risk_pattern}</p>
+                            <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/88">{role.risk_pattern}</p>
                           </Panel>
-                          <Panel className="bg-[#080A0D]/35 p-4">
+                          <Panel className="bg-[#151A18]/78 p-4">
                             <FieldLabel>Development note</FieldLabel>
-                            <p className="mt-3 text-sm leading-6 text-[#D8D0C3]/80">{role.development_note}</p>
+                            <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/88">{role.development_note}</p>
                           </Panel>
                         </div>
                       </div>
@@ -434,48 +434,48 @@ export function DraftRankedResultPreview() {
               <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
                 <div className="rounded-[1.65rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.055] p-6 md:p-7">
                   <FieldLabel tone="teal">{mechanics.mechanics_title}</FieldLabel>
-                  <blockquote className="mt-5 text-2xl font-semibold leading-snug text-[#F5F1EA] md:text-3xl">
+                  <blockquote className="mt-5 text-2xl font-semibold leading-snug text-[#F3F1EA] md:text-3xl">
                     {mechanics.core_mechanism}
                   </blockquote>
                 </div>
                 <div className="grid gap-4">
                   <Panel>
                     <FieldLabel>Entry point</FieldLabel>
-                    <p className="mt-3 text-sm leading-7 text-[#D8D0C3]/84">{mechanics.core_mechanism}</p>
+                    <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{mechanics.core_mechanism}</p>
                   </Panel>
                   <Panel>
                     <FieldLabel>Reward loop</FieldLabel>
-                    <p className="mt-3 text-sm leading-7 text-[#D8D0C3]/84">{mechanics.why_it_shows_up}</p>
+                    <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{mechanics.why_it_shows_up}</p>
                   </Panel>
                   <Panel>
                     <FieldLabel>Protected condition</FieldLabel>
-                    <p className="mt-3 text-sm leading-7 text-[#D8D0C3]/84">{mechanics.what_it_protects}</p>
+                    <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{mechanics.what_it_protects}</p>
                   </Panel>
                 </div>
               </div>
             </SchemaSection>
 
             <SchemaSection sectionKey="10_Pattern_Synthesis">
-              <div className="rounded-[1.85rem] border border-[#F5F1EA]/12 bg-[#171B22]/82 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.18)] md:p-8">
+              <div className="rounded-[1.85rem] border border-[#F3F1EA]/[0.09] bg-[#1B211F]/84 p-6 shadow-[0_30px_90px_rgba(4,7,6,0.16)] md:p-8">
                 <FieldLabel>Editorial centre</FieldLabel>
-                <h3 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-[#F5F1EA] md:text-4xl">
+                <h3 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-[#F3F1EA] md:text-4xl">
                   {synthesis.synthesis_title}
                 </h3>
                 <div className="mt-7 grid gap-4 lg:grid-cols-[1fr_1fr_1.15fr]">
                   <Panel className="border-[#32D6B0]/22 bg-[#32D6B0]/[0.06]">
                     <FieldLabel tone="teal">Gift</FieldLabel>
-                    <p className="mt-4 text-lg font-semibold leading-7 text-[#F5F1EA]">{synthesis.gift}</p>
+                    <p className="mt-4 text-lg font-semibold leading-7 text-[#F3F1EA]">{synthesis.gift}</p>
                   </Panel>
-                  <Panel className="border-[#D99A66]/18 bg-[#D99A66]/[0.045]">
+                  <Panel className="border-[#C98E68]/18 bg-[#C98E68]/[0.045]">
                     <FieldLabel tone="warm">Trap</FieldLabel>
-                    <p className="mt-4 text-lg font-semibold leading-7 text-[#F5F1EA]">{synthesis.trap}</p>
+                    <p className="mt-4 text-lg font-semibold leading-7 text-[#F3F1EA]">{synthesis.trap}</p>
                   </Panel>
-                  <Panel className="border-[#F5F1EA]/12 bg-[#F5F1EA]/[0.045]">
+                  <Panel className="border-[#F3F1EA]/[0.09] bg-[#202622]/58">
                     <FieldLabel>Takeaway</FieldLabel>
-                    <p className="mt-4 text-lg font-semibold leading-7 text-[#F5F1EA]">{synthesis.takeaway}</p>
+                    <p className="mt-4 text-lg font-semibold leading-7 text-[#F3F1EA]">{synthesis.takeaway}</p>
                   </Panel>
                 </div>
-                <p className="mt-8 max-w-5xl text-lg leading-9 text-[#D8D0C3]/88">{synthesis.synthesis_text}</p>
+                <p className="mt-8 max-w-5xl text-lg leading-9 text-[#B8BDB7]/94">{synthesis.synthesis_text}</p>
               </div>
             </SchemaSection>
 
@@ -487,8 +487,8 @@ export function DraftRankedResultPreview() {
                       <FieldLabel tone="teal">Priority {strength.priority}</FieldLabel>
                       <SignalKey>{strength.linked_signal_key}</SignalKey>
                     </div>
-                    <h3 className="mt-4 text-xl font-semibold text-[#F5F1EA]">{strength.strength_title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-[#D8D0C3]/84">{strength.strength_text}</p>
+                    <h3 className="mt-4 text-xl font-semibold text-[#F3F1EA]">{strength.strength_title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{strength.strength_text}</p>
                   </Panel>
                 ))}
               </div>
@@ -497,13 +497,13 @@ export function DraftRankedResultPreview() {
             <SchemaSection sectionKey="12_Narrowing">
               <div className="grid gap-4 lg:grid-cols-3">
                 {narrowing.map((item) => (
-                  <Panel key={item.narrowing_key} className="border-[#D99A66]/18 bg-[#D99A66]/[0.045]">
+                  <Panel key={item.narrowing_key} className="border-[#C98E68]/18 bg-[#C98E68]/[0.045]">
                     <div className="flex items-start justify-between gap-4">
                       <FieldLabel tone="warm">Priority {item.priority}</FieldLabel>
                       <SignalKey tone="warm">{item.missing_range_signal_key}</SignalKey>
                     </div>
-                    <h3 className="mt-4 text-xl font-semibold text-[#F5F1EA]">{item.narrowing_title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-[#D8D0C3]/84">{item.narrowing_text}</p>
+                    <h3 className="mt-4 text-xl font-semibold text-[#F3F1EA]">{item.narrowing_title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{item.narrowing_text}</p>
                   </Panel>
                 ))}
               </div>
@@ -517,7 +517,7 @@ export function DraftRankedResultPreview() {
                       <FieldLabel tone={item.application_area === 'watch_for' ? 'warm' : 'teal'}>
                         {applicationAreaLabels[item.application_area]}
                       </FieldLabel>
-                      <p className="mt-5 text-base leading-8 text-[#D8D0C3]/86">{item.guidance_text}</p>
+                      <p className="mt-5 text-base leading-8 text-[#B8BDB7]/92">{item.guidance_text}</p>
                     </div>
                     <SignalKey tone={item.application_area === 'watch_for' ? 'warm' : 'teal'}>{item.linked_signal_key}</SignalKey>
                   </Panel>
@@ -526,25 +526,25 @@ export function DraftRankedResultPreview() {
             </SchemaSection>
 
             <SchemaSection sectionKey="14_Closing_Integration">
-              <div className="rounded-[1.85rem] border border-[#32D6B0]/24 bg-[linear-gradient(135deg,rgba(50,214,176,0.12),rgba(245,241,234,0.04))] p-6 md:p-8">
-                <p className="max-w-4xl text-2xl font-semibold leading-9 text-[#F5F1EA]">
+              <div className="rounded-[1.85rem] border border-[#32D6B0]/22 bg-[linear-gradient(135deg,rgba(50,214,176,0.09),rgba(243,241,234,0.035))] p-6 md:p-8">
+                <p className="max-w-4xl text-2xl font-semibold leading-9 text-[#F3F1EA]">
                   {closing.closing_summary}
                 </p>
                 <div className="mt-8 grid gap-4 md:grid-cols-3">
-                  <Panel className="border-[#32D6B0]/18 bg-[#080A0D]/32">
+                  <Panel className="border-[#32D6B0]/18 bg-[#151A18]/70">
                     <FieldLabel tone="teal">Core gift</FieldLabel>
-                    <p className="mt-3 text-sm leading-6 text-[#D8D0C3]/84">{closing.core_gift}</p>
+                    <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/90">{closing.core_gift}</p>
                   </Panel>
-                  <Panel className="border-[#D99A66]/18 bg-[#080A0D]/32">
+                  <Panel className="border-[#C98E68]/18 bg-[#151A18]/70">
                     <FieldLabel tone="warm">Core trap</FieldLabel>
-                    <p className="mt-3 text-sm leading-6 text-[#D8D0C3]/84">{closing.core_trap}</p>
+                    <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/90">{closing.core_trap}</p>
                   </Panel>
-                  <Panel className="bg-[#080A0D]/32">
+                  <Panel className="bg-[#151A18]/70">
                     <FieldLabel>Development edge</FieldLabel>
-                    <p className="mt-3 text-sm leading-6 text-[#D8D0C3]/84">{closing.development_edge}</p>
+                    <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/90">{closing.development_edge}</p>
                   </Panel>
                 </div>
-                <p className="mt-8 border-t border-[#F5F1EA]/10 pt-6 text-3xl font-semibold leading-tight text-[#F5F1EA] md:text-4xl">
+                <p className="mt-8 border-t border-[#F3F1EA]/[0.085] pt-6 text-3xl font-semibold leading-tight text-[#F3F1EA] md:text-4xl">
                   {closing.memorable_line}
                 </p>
               </div>

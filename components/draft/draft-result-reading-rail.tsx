@@ -85,7 +85,7 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
       data-draft-result-reading-rail="true"
       data-result-reading-rail="true"
     >
-      <div className="space-y-3 rounded-[1.35rem] border border-white/[0.04] bg-[#09101d]/24 px-3 py-3.5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] backdrop-blur-[12px]">
+      <div className="space-y-3 rounded-[1.35rem] border border-[#F3F1EA]/[0.075] bg-[#171D1A]/58 px-3 py-3.5 shadow-[0_16px_36px_rgba(4,7,6,0.12)] backdrop-blur-[14px]">
         <div className="space-y-2 pb-1.5 pl-1">
           <Image
             src="/images/brand/sonartra-logo-white.svg"
@@ -103,7 +103,7 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
 
             return (
               <li key={group.label}>
-                <p className="mb-1.5 pl-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-white/24">
+                <p className="mb-1.5 pl-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#A8B0AA]/50">
                   {group.label}
                 </p>
                 <ul className="space-y-0.5" role="list">
@@ -134,30 +134,30 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
                                     : 'idle'
                           }
                           className={cx(
-                            'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring text-white/40 group relative block rounded-[0.9rem] px-3 py-2 text-[0.78rem] leading-5 tracking-[0.01em] outline-none',
-                            'hover:bg-white/[0.018] hover:text-white/62 focus-visible:text-white/82',
+                            'sonartra-motion-nav-item sonartra-result-rail-item sonartra-focus-ring text-[#A8B0AA]/68 group relative block rounded-[0.9rem] px-3 py-2 text-[0.78rem] leading-5 tracking-[0.01em] outline-none',
+                            'hover:bg-[#F3F1EA]/[0.035] hover:text-[#F3F1EA]/82 focus-visible:text-[#F3F1EA]/90',
                             isPassed && 'sonartra-result-rail-item-read',
                             isActive &&
-                              'bg-white/[0.028] text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.028)]',
-                            isNext && 'text-white/48',
+                              'bg-[#F3F1EA]/[0.045] text-[#F3F1EA]/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]',
+                            isNext && 'text-[#B8BDB7]/78',
                           )}
                         >
                           <span
                             aria-hidden="true"
                             className={cx(
-                              'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.58rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-white/[0.12] bg-[#0c1322] opacity-100',
+                              'sonartra-motion-active-bar sonartra-result-rail-marker absolute left-[-0.58rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 scale-100 rounded-full border border-[#F3F1EA]/[0.13] bg-[#101312] opacity-100',
                               isPassed && 'sonartra-result-rail-marker-read',
                               isActive &&
                                 'border-[rgba(50,214,176,0.32)] bg-[rgba(50,214,176,0.22)] shadow-[0_0_0_5px_rgba(50,214,176,0.055)]',
-                              isUpcoming && 'border-white/[0.1] bg-white/[0.035]',
+                              isUpcoming && 'border-[#F3F1EA]/[0.1] bg-[#F3F1EA]/[0.035]',
                             )}
                           />
                           <span className="relative flex min-w-0 items-start gap-2.5">
                             <span
                               aria-hidden="true"
                               className={cx(
-                                'pt-0.5 text-[0.63rem] font-medium tracking-[0.16em] text-white/24',
-                                isActive && 'text-white/42',
+                                'pt-0.5 text-[0.63rem] font-medium tracking-[0.16em] text-[#A8B0AA]/50',
+                                isActive && 'text-[#B8BDB7]/72',
                                 isPassed && 'sonartra-result-rail-number-read',
                               )}
                             >
@@ -168,7 +168,7 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
                               {isActive ? (
                                 <span
                                   aria-hidden="true"
-                                  className="block text-[0.54rem] font-medium uppercase tracking-[0.2em] text-white/34"
+                                  className="block text-[0.54rem] font-medium uppercase tracking-[0.2em] text-[#B8BDB7]/58"
                                 >
                                   Now reading
                                 </span>
@@ -184,7 +184,7 @@ export function DraftResultReadingRail({ sections }: DraftResultReadingRailProps
                               {isNext ? (
                                 <span
                                   aria-hidden="true"
-                                  className="block text-[0.54rem] font-medium uppercase tracking-[0.2em] text-white/24"
+                                  className="block text-[0.54rem] font-medium uppercase tracking-[0.2em] text-[#A8B0AA]/54"
                                 >
                                   Up next
                                 </span>
