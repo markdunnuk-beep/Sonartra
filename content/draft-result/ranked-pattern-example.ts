@@ -154,11 +154,13 @@ export const rankedPatternExample = {
       section_key: 'intro',
       domain_title: 'Flow State',
       domain_definition:
-        'Flow is a state of absorbed engagement where attention, effort, and progress start to align.',
-      domain_scope: 'This assessment identifies the conditions under which flow is most likely to emerge.',
+        'Flow State describes the conditions under which attention becomes absorbed, effort feels steady, and progress starts to gather its own momentum.',
+      domain_scope:
+        'This domain looks at the kinds of work, movement, and contact that make absorbed engagement more likely to appear and easier to sustain.',
       interpretation_guidance:
-        'Read the ranked pattern as a guide to likely flow conditions, not as a fixed identity.',
-      intro_note: 'Draft example only. Replace with final domain copy before release.',
+        'Read the ranked signals as a practical map of likely flow conditions, not as a fixed identity or a complete account of how you work.',
+      intro_note:
+        'This is a ranked reading of the conditions most likely to help flow emerge, deepen, and stay useful.',
       status: 'active',
     },
   ],
@@ -171,17 +173,15 @@ export const rankedPatternExample = {
       rank_2_signal_key: 'creative_movement',
       rank_3_signal_key: 'physical_rhythm',
       rank_4_signal_key: 'social_exchange',
-      orientation_title: 'Deep Focus pattern at a glance',
+      orientation_title: 'Pattern at a glance',
       orientation_summary:
-        'Deep Focus leads the pattern, Creative Movement shapes it, Physical Rhythm gives it support, and Social Exchange is the least expressed route.',
+        'Your flow gathers most quickly through private depth, then becomes more original when ideas can move. Physical Rhythm helps you reset, while Social Exchange is the range to bring in before the work becomes too private.',
       score_shape_summary:
-        'Because the result is concentrated, Deep Focus should be read as the clear anchor rather than one equal signal among four.',
-      rank_1_phrase: 'Deep Focus leads: private depth and sustained attention.',
-      rank_2_phrase: 'Creative Movement shapes: ideas, expression, and possibility.',
-      rank_3_phrase:
-        'Physical Rhythm supports: Physical Rhythm helps reset energy, release pressure, and keep the pattern from becoming too static.',
-      rank_4_phrase:
-        'Social Exchange is least expressed: Social Exchange is the stretch route, so the pattern may need deliberate feedback before private clarity becomes private certainty.',
+        'The result is concentrated: Deep Focus is the clear anchor, with a noticeable drop before the other signals begin to shape, steady, and stretch the pattern.',
+      rank_1_phrase: 'Rank 1: private depth, sustained attention, and demanding problems.',
+      rank_2_phrase: 'Rank 2: ideas, expression, and movement that keep the depth alive.',
+      rank_3_phrase: 'Rank 3: physical reset, energy change, and a way back into the work.',
+      rank_4_phrase: 'Rank 4: conversation and feedback that may need to be invited deliberately.',
       status: 'active',
     },
   ],
@@ -194,11 +194,11 @@ export const rankedPatternExample = {
       rank_2_signal_key: 'creative_movement',
       rank_3_signal_key: 'physical_rhythm',
       rank_4_signal_key: 'social_exchange',
-      headline: 'Deep Focus led, shaped by Creative Movement',
+      headline: 'Depth first, originality second',
       recognition_statement:
-        'Your flow is most likely to begin in depth, then open into ideas. You tend to do your best work when you can stay with a demanding problem long enough for new possibilities to appear inside it.',
+        'You are most likely to find flow when you can stay with something long enough for it to become interesting from the inside. The work usually needs quiet concentration first, then room for ideas to shift, connect, and take shape.',
       recognition_expansion:
-        'This pattern suggests that Deep Focus is the main entry point, while Creative Movement gives that route its strongest shape. Physical Rhythm helps reset energy, release pressure, and keep the pattern from becoming too static. Social Exchange is the stretch route, so the pattern may need deliberate feedback before private clarity becomes private certainty. Because the result is concentrated, Deep Focus should be read as the clear anchor rather than one equal signal among four.',
+        'This pattern often belongs to someone who does not need constant stimulation to feel engaged. You may prefer to work a problem privately until it starts to reveal its structure, then use creative movement to open new angles or make the thinking feel alive. Physical Rhythm helps when attention has become too enclosed or static. Social Exchange is useful, but it may arrive late: you may wait until the work feels clear to you before letting another person test it.',
       status: 'active',
     },
   ],
@@ -211,13 +211,13 @@ export const rankedPatternExample = {
       rank_role: 'dominant',
       title: 'Deep Focus as dominant',
       description:
-        'Deep Focus is your strongest route into flow. You are most likely to become absorbed when your attention has a demanding problem to hold, enough quiet to settle, and enough time to move beyond the obvious first answer.',
+        'Deep Focus is the strongest condition for your flow. Absorption is most likely when your attention can settle on a substantial problem, stay there without too much interruption, and move past the first obvious answer.',
       productive_expression:
-        'At its best, this gives you sustained concentration, careful judgement, precision, and the ability to work through complexity without needing constant external stimulation.',
+        'At its best, this gives you depth, patience, careful judgement, and the ability to keep working when the material is complex or unresolved.',
       risk_pattern:
-        'When overused, Deep Focus can become narrowing. You may stay inside a problem for too long, resist interruption even when input would help, or mistake isolation for quality.',
+        'When overused, the same depth can become private overwork. You may keep refining after the work needs feedback, movement, or a decision.',
       development_note:
-        'Protect deep work, but build deliberate points where the work is moved, tested, or shared before it becomes too private.',
+        'Protect serious concentration, but set deliberate points where the work is tested before it becomes too complete in your own mind.',
       status: 'active',
     },
     {
@@ -228,13 +228,13 @@ export const rankedPatternExample = {
       rank_role: 'secondary',
       title: 'Creative Movement as secondary',
       description:
-        'When Creative Movement sits second, it shapes and loosens your leading route into flow. You may begin through focus, movement, or exchange, but creativity helps the work develop beyond the obvious path.',
+        'Creative Movement sits close behind the lead signal. It gives your depth more range, helping ideas shift, connect, and become more expressive rather than staying purely analytical.',
       productive_expression:
-        'At its best, this helps you reframe problems, make connections, improve ideas, and bring freshness into work that might otherwise become too narrow or repetitive.',
+        'At its best, this brings originality, reframing, experimentation, and a sense that the work is opening rather than simply being solved.',
       risk_pattern:
-        'When underused, your primary route may become too fixed. When overused, it may pull you away from the discipline needed to finish.',
+        'When underused, your focus may become too fixed. When overused, possibility can pull attention away from the discipline needed to finish.',
       development_note:
-        'Use Creative Movement to open the work at the right moment, then return to enough structure to make the insight usable.',
+        'Use creative movement to loosen the work at the right moment, then return to enough structure to make the insight usable.',
       status: 'active',
     },
     {
@@ -245,13 +245,13 @@ export const rankedPatternExample = {
       rank_role: 'tertiary',
       title: 'Physical Rhythm as tertiary',
       description:
-        'When Physical Rhythm sits third, movement may support your flow without defining it. You may not always seek physical engagement first, but it can help you recover attention, shift state, and return to work with more clarity.',
+        'Physical Rhythm is not the main source of flow, but it helps the system reset. Movement, pacing, or a change of physical state can make it easier to return with clearer attention.',
       productive_expression:
-        'At its best, this gives you a practical way to release pressure and change mental state when your primary routes become too intense or repetitive.',
+        'At its best, this gives you a practical way to release pressure, interrupt mental looping, and recover energy without abandoning the work.',
       risk_pattern:
-        'When neglected, your flow may become too mental, too static, or too dependent on ideal conditions.',
+        'When neglected, flow can become too mental and enclosed. You may try to think your way through a state that needs physical interruption.',
       development_note:
-        'Use movement deliberately between work phases. Short walks, training, stretching, or changes of location can help your stronger signals work better.',
+        'Build movement into transitions between phases of work, especially when concentration has become heavy, circular, or too still.',
       status: 'active',
     },
     {
@@ -262,13 +262,13 @@ export const rankedPatternExample = {
       rank_role: 'least_expressed',
       title: 'Social Exchange as least expressed',
       description:
-        'When Social Exchange is least expressed, conversation, group energy, and live collaboration may not be your most natural entry point into flow. You may prefer to work something through before exposing it to other people.',
+        'Social Exchange is the least expressed signal, which means live discussion may not be your natural first move. You may prefer to understand something privately before exposing it to another person.',
       productive_expression:
-        'At its best, Social Exchange can test, sharpen, and translate work that might otherwise stay too private or internally complete.',
+        'At its best, Social Exchange sharpens, tests, and translates thinking that might otherwise remain too internal or over-finished.',
       risk_pattern:
-        'When neglected, your flow may become too private. You may delay sharing, miss useful challenge, or make it harder for others to engage with your best thinking.',
+        'When neglected, useful challenge can arrive too late. The work may feel complete to you before it has been made clear, relevant, or usable for others.',
       development_note:
-        'Develop Social Exchange as a deliberate refining tool. You do not need constant collaboration, but the right conversation at the right time can sharpen and extend your flow.',
+        'Invite one well-chosen conversation earlier than feels natural, especially when the work has reached private clarity but not yet external proof.',
       status: 'active',
     },
   ],
@@ -281,13 +281,13 @@ export const rankedPatternExample = {
       rank_2_signal_key: 'creative_movement',
       rank_3_signal_key: 'physical_rhythm',
       rank_4_signal_key: 'social_exchange',
-      mechanics_title: 'Why this Deep Focus / Creative Movement pattern shows up',
+      mechanics_title: 'Why this pattern shows up',
       core_mechanism:
-        'Deep Focus creates the entry point. Creative Movement gives that entry point its main character. Physical Rhythm provides a useful support route. Social Exchange names the range that may need to be developed deliberately.',
+        'Flow begins when attention can settle deeply, then gains energy when ideas start to move inside that depth. Physical Rhythm helps reset the system, while Social Exchange is the outside check that may need to be invited sooner.',
       why_it_shows_up:
-        'You may return to this pattern because private depth and sustained attention feels like the most reliable way to organise attention. Creative Movement then makes that attention feel more productive, rewarding, or alive.',
+        'This pattern tends to repeat because private concentration feels reliable. It gives the mind somewhere to go, and Creative Movement keeps that depth from becoming flat, repetitive, or purely controlled.',
       what_it_protects:
-        'This pattern may protect the conditions you need most: enough access to sustained concentration, demanding problems, quiet depth, and careful thinking and enough reinforcement from ideas, expression, experimentation, reframing, and imaginative movement. The risk is that Social Exchange is only brought in after the pattern has already narrowed. Because the result is concentrated, Deep Focus should be read as the clear anchor rather than one equal signal among four.',
+        'It protects the conditions needed for serious work: quiet, time, complexity, and the freedom to follow an idea until it becomes clearer. The cost is that feedback may be delayed until the thinking is already highly shaped.',
       status: 'active',
     },
   ],
@@ -300,14 +300,14 @@ export const rankedPatternExample = {
       rank_2_signal_key: 'creative_movement',
       rank_3_signal_key: 'physical_rhythm',
       rank_4_signal_key: 'social_exchange',
-      synthesis_title: 'Deep Focus / Creative Movement synthesis',
-      gift: 'You can find originality through depth, not just through quick inspiration.',
+      synthesis_title: 'The private-depth originality loop',
+      gift: 'You can reach originality by staying with something longer than most people would.',
       trap:
-        'The trap is that the same pattern that gives you flow may also make Social Exchange arrive too late, leaving the result narrower than it needs to be.',
+        'The same privacy that creates depth can delay the feedback that would make the work sharper, clearer, or more useful.',
       takeaway:
-        'Use Deep Focus and Creative Movement deliberately, but build in Social Exchange before the work becomes too fixed.',
+        'Keep the depth, keep the originality, but bring in one external test before the work becomes too self-contained.',
       synthesis_text:
-        'This pattern suggests that flow begins when your attention can settle into something substantial. Creative Movement then gives that depth freshness, helping ideas emerge from sustained contact with the problem rather than from surface-level inspiration. Physical Rhythm may act as a reset route, helping you release pressure and return with clearer attention. Social Exchange is least expressed, so conversation may be most useful before the work becomes over-polished, not only after it is finished. Because the result is concentrated, Deep Focus should be read as the clear anchor rather than one equal signal among four.',
+        'Your flow is not usually built from quick stimulation. It is built from sustained contact with a problem, followed by the point where ideas begin to move. Creative Movement gives the depth freshness; Physical Rhythm helps you reset when the work becomes too enclosed. Social Exchange matters most before the work is polished, because that is when a conversation can still widen it rather than simply react to it.',
       status: 'active',
     },
   ],
@@ -317,9 +317,9 @@ export const rankedPatternExample = {
       pattern_key: 'deep_focus_creative_movement_physical_rhythm_social_exchange',
       strength_key: 'strength_1',
       priority: '1',
-      strength_title: 'Deep Focus with Creative Movement',
+      strength_title: 'Originality through depth',
       strength_text:
-        'This pattern combines private depth and sustained attention with ideas, expression, and possibility, giving flow both a clear entry point and a strong shaping force.',
+        'You can produce ideas that feel earned rather than scattered, because they come from staying with the material until less obvious connections appear.',
       linked_signal_key: 'deep_focus',
       status: 'active',
     },
@@ -328,9 +328,9 @@ export const rankedPatternExample = {
       pattern_key: 'deep_focus_creative_movement_physical_rhythm_social_exchange',
       strength_key: 'strength_2',
       priority: '2',
-      strength_title: 'Sustained problem solving',
+      strength_title: 'Sustained problem contact',
       strength_text:
-        'You can stay with difficult material long enough to see what is really happening. This supports patience, depth, and careful judgement.',
+        'You can remain with difficult or unfinished material long enough to understand what is really happening beneath the surface.',
       linked_signal_key: 'deep_focus',
       status: 'active',
     },
@@ -339,9 +339,9 @@ export const rankedPatternExample = {
       pattern_key: 'deep_focus_creative_movement_physical_rhythm_social_exchange',
       strength_key: 'strength_3',
       priority: '3',
-      strength_title: 'Restorative rhythm',
+      strength_title: 'Useful reset rhythm',
       strength_text:
-        'Physical Rhythm gives the pattern a practical reset route, helping you release pressure and return with better attention.',
+        'You have access to a practical recovery signal: movement, pacing, or physical change can help attention return without forcing a complete restart.',
       linked_signal_key: 'physical_rhythm',
       status: 'active',
     },
@@ -352,9 +352,9 @@ export const rankedPatternExample = {
       pattern_key: 'deep_focus_creative_movement_physical_rhythm_social_exchange',
       narrowing_key: 'narrowing_1',
       priority: '1',
-      narrowing_title: 'Overworking in private',
+      narrowing_title: 'Private over-refinement',
       narrowing_text:
-        'You may keep refining, researching, or thinking after the work now needs feedback, distance, or a decision.',
+        'You may keep improving the work internally after it has reached the point where feedback, distance, or a decision would be more useful.',
       missing_range_signal_key: 'deep_focus',
       status: 'active',
     },
@@ -363,9 +363,9 @@ export const rankedPatternExample = {
       pattern_key: 'deep_focus_creative_movement_physical_rhythm_social_exchange',
       narrowing_key: 'narrowing_2',
       priority: '2',
-      narrowing_title: 'Delayed external testing',
+      narrowing_title: 'Late external testing',
       narrowing_text:
-        'When Social Exchange is least expressed, the work may feel clear to you before it is clear to anyone else.',
+        'Because Social Exchange is least expressed, you may delay the conversation that would reveal whether the work is clear to anyone else.',
       missing_range_signal_key: 'social_exchange',
       status: 'active',
     },
@@ -374,9 +374,9 @@ export const rankedPatternExample = {
       pattern_key: 'deep_focus_creative_movement_physical_rhythm_social_exchange',
       narrowing_key: 'narrowing_3',
       priority: '3',
-      narrowing_title: 'Pattern becoming too self-contained',
+      narrowing_title: 'Self-contained certainty',
       narrowing_text:
-        'When Deep Focus and Creative Movement dominate, the pattern may keep repeating what already works instead of inviting Social Exchange early enough to widen the range.',
+        'Depth and originality can start to reinforce each other until the work feels convincing privately but has not yet been tested in the open.',
       missing_range_signal_key: 'social_exchange',
       status: 'active',
     },
@@ -389,7 +389,7 @@ export const rankedPatternExample = {
       guidance_type: 'guidance',
       priority: '1',
       guidance_text:
-        'Use this pattern when the work needs protected depth and original thinking. Start with uninterrupted attention, then allow Creative Movement to open new angles before the work is closed down.',
+        'Use this when the work requires protected thought, careful judgement, or an original angle. Give yourself enough uninterrupted time to find the real problem, then let Creative Movement open the next way in.',
       linked_signal_key: 'deep_focus',
       status: 'active',
     },
@@ -400,7 +400,7 @@ export const rankedPatternExample = {
       guidance_type: 'guidance',
       priority: '2',
       guidance_text:
-        'Watch for the point where Deep Focus becomes too dominant. If the work stops improving, the missing range may be Social Exchange, not more of the same effort.',
+        'Watch for the moment when more private thinking stops improving the work. That is usually the sign to move, pause, or bring in one external view rather than keep tightening alone.',
       linked_signal_key: 'deep_focus',
       status: 'active',
     },
@@ -411,7 +411,7 @@ export const rankedPatternExample = {
       guidance_type: 'guidance',
       priority: '3',
       guidance_text:
-        'Develop by bringing in one trusted person before the work feels fully finished. Use the conversation to test clarity, relevance, and whether your private logic can be understood by others.',
+        'Develop by inviting feedback before the work feels fully finished. Choose one person who can test clarity, relevance, or usefulness without pulling the work away from its centre.',
       linked_signal_key: 'social_exchange',
       status: 'active',
     },
@@ -422,13 +422,12 @@ export const rankedPatternExample = {
       pattern_key: 'deep_focus_creative_movement_physical_rhythm_social_exchange',
       score_shape: 'concentrated',
       closing_summary:
-        'Your flow is strongest when Deep Focus comes first and Creative Movement gives it shape. Physical Rhythm can support the pattern, while Social Exchange is the range to bring in deliberately.',
-      core_gift: 'You can find originality through depth, not just through quick inspiration.',
-      core_trap:
-        'The trap is that the same pattern that gives you flow may also make Social Exchange arrive too late, leaving the result narrower than it needs to be.',
+        'Your flow is strongest when depth comes first and originality grows from sustained contact with the work. Physical Rhythm helps you reset the system; Social Exchange is the range to bring in before private clarity becomes too closed.',
+      core_gift: 'You can find original insight by staying with complexity long enough for it to open.',
+      core_trap: 'You may wait too long to let the work meet another mind.',
       development_edge:
-        'Your development edge is to invite Social Exchange earlier, before the lead pattern becomes too fixed.',
-      memorable_line: 'Use Deep Focus to enter flow, but use Social Exchange to widen it.',
+        'Bring in one external test while the work is still shapeable, not only once it feels complete.',
+      memorable_line: 'Let depth create the work, then let contact sharpen it.',
       status: 'active',
     },
   ],
