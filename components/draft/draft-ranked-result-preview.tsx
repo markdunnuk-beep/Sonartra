@@ -40,12 +40,11 @@ const sectionAnchorIds = {
   '14_Closing_Integration': 'closing-integration',
 } as const;
 
-const prototypeScores = [
-  { label: 'Deep Focus', value: 52, role: 'Main route', rank: 1, tone: 'primary' },
-  { label: 'Creative Movement', value: 26, role: 'Adds energy', rank: 2, tone: 'secondary' },
-  { label: 'Physical Rhythm', value: 14, role: 'Helps reset', rank: 3, tone: 'support' },
-  { label: 'Social Exchange', value: 8, role: 'Use deliberately', rank: 4, tone: 'stretch' },
-] as const;
+const previewScoresByRank = [52, 26, 14, 8] as const;
+
+const signatureTonesByRank = ['primary', 'secondary', 'support', 'stretch'] as const;
+
+const signatureRoleLabelsByRank = ['Main route', 'Adds energy', 'Support', 'Use deliberately'] as const;
 
 const applicationAreaLabels = {
   use_this_when: 'Use this when',
@@ -75,6 +74,40 @@ function polishSignalCasing(text: string) {
     .replace(/\bCreative movement\b/g, 'Creative Movement')
     .replace(/\bPhysical rhythm\b/g, 'Physical Rhythm')
     .replace(/\bSocial exchange\b/g, 'Social Exchange');
+}
+
+function getSignatureRoleLabel(signalKey: string, rankIndex: number) {
+  if (rankIndex === 2 && signalKey === 'physical_rhythm') {
+    return 'Helps reset';
+  }
+
+  return signatureRoleLabelsByRank[rankIndex] ?? 'Support';
+}
+
+function buildDraftSignatureRows(
+  orientation: (typeof rankedPatternExample)['06_Orientation'][number],
+  signalRoles: (typeof rankedPatternExample)['08_Signal_Roles'],
+) {
+  const rankedSignalKeys = [
+    orientation.rank_1_signal_key,
+    orientation.rank_2_signal_key,
+    orientation.rank_3_signal_key,
+    orientation.rank_4_signal_key,
+  ] as const;
+
+  return rankedSignalKeys.map((signalKey, index) => {
+    const signalRole = signalRoles.find((role) => role.signal_key === signalKey);
+    const rank = index + 1;
+
+    return {
+      label: signalRole?.signal_label ?? polishSignalCasing(signalKey.replace(/_/g, ' ')),
+      rank,
+      role: getSignatureRoleLabel(signalKey, index),
+      signalKey,
+      tone: signatureTonesByRank[index],
+      value: previewScoresByRank[index],
+    };
+  });
 }
 
 function SchemaSection({
@@ -136,7 +169,11 @@ function FieldLabel({ children, tone = 'neutral' }: { children: ReactNode; tone?
   );
 }
 
-function DraftPatternSignature() {
+function DraftPatternSignature({
+  signatureRows,
+}: {
+  signatureRows: ReturnType<typeof buildDraftSignatureRows>;
+}) {
   return (
     <div
       className="draft-surface rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/90 p-4 shadow-[0_24px_70px_rgba(4,7,6,0.18)] sm:p-5"
@@ -153,7 +190,7 @@ function DraftPatternSignature() {
       </div>
 
       <div className="mt-4 space-y-2.5">
-        {prototypeScores.map(({ label, value, role, rank, tone }) => {
+        {signatureRows.map(({ label, value, role, rank, tone, signalKey }) => {
           const isPrimary = tone === 'primary';
           const fillClass =
             tone === 'stretch'
@@ -178,7 +215,7 @@ function DraftPatternSignature() {
                     ? 'border-[#C98E68]/18 bg-[#C98E68]/[0.045]'
                     : 'border-[#F3F1EA]/[0.085] bg-[#202622]/45',
               )}
-              key={label}
+              key={signalKey}
               role="meter"
             >
               <div className="flex min-w-0 items-center gap-3">
@@ -273,6 +310,7 @@ export function DraftRankedResultPreview() {
   const narrowing = rankedPatternExample['12_Narrowing'];
   const application = rankedPatternExample['13_Application'];
   const [closing] = rankedPatternExample['14_Closing_Integration'];
+  const signatureRows = buildDraftSignatureRows(orientation, signalRoles);
 
   return (
     <div
@@ -534,14 +572,20 @@ export function DraftRankedResultPreview() {
           <aside className="draft-surface rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)]">
             <FieldLabel tone="teal">Pattern snapshot</FieldLabel>
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="draft-teal-surface rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.06] p-4">
-                <p className="draft-percent text-3xl font-semibold text-[#F3F1EA]">52%</p>
-                <p className="mt-2 text-sm leading-5 text-[#B8BDB7]/88">Deep Focus</p>
-              </div>
-              <div className="draft-panel rounded-[1rem] border border-[#F3F1EA]/[0.085] bg-[#202622]/58 p-4">
-                <p className="draft-percent text-3xl font-semibold text-[#F3F1EA]">26%</p>
-                <p className="mt-2 text-sm leading-5 text-[#B8BDB7]/88">Creative Movement</p>
-              </div>
+              {signatureRows.slice(0, 2).map((row, index) => (
+                <div
+                  className={cx(
+                    'rounded-[1rem] border p-4',
+                    index === 0
+                      ? 'draft-teal-surface border-[#32D6B0]/18 bg-[#32D6B0]/[0.06]'
+                      : 'draft-panel border-[#F3F1EA]/[0.085] bg-[#202622]/58',
+                  )}
+                  key={row.signalKey}
+                >
+                  <p className="draft-percent text-3xl font-semibold text-[#F3F1EA]">{row.value}%</p>
+                  <p className="mt-2 text-sm leading-5 text-[#B8BDB7]/88">{row.label}</p>
+                </div>
+              ))}
             </div>
             <dl className="mt-4 space-y-3 border-t border-[#F3F1EA]/[0.085] pt-4">
               <div className="flex items-center justify-between gap-4">
@@ -589,7 +633,7 @@ export function DraftRankedResultPreview() {
 
             <SchemaSection sectionKey="06_Orientation">
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-                <DraftPatternSignature />
+                <DraftPatternSignature signatureRows={signatureRows} />
                 <div className="draft-teal-surface rounded-[1.5rem] border border-[#32D6B0]/20 bg-[linear-gradient(135deg,rgba(50,214,176,0.085),rgba(243,241,234,0.032))] p-6 md:p-7">
                   <FieldLabel tone="teal">{polishSignalCasing(orientation.orientation_title)}</FieldLabel>
                   <p className="mt-5 text-2xl font-semibold leading-snug text-[#F3F1EA]">

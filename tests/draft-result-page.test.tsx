@@ -48,6 +48,34 @@ function countOccurrences(markup: string, value: string) {
   return markup.split(value).length - 1;
 }
 
+function expectedPolishedSignalCasing(text: string) {
+  return text
+    .replace(/\bDeep focus\b/g, 'Deep Focus')
+    .replace(/\bCreative movement\b/g, 'Creative Movement')
+    .replace(/\bPhysical rhythm\b/g, 'Physical Rhythm')
+    .replace(/\bSocial exchange\b/g, 'Social Exchange');
+}
+
+function getExpectedSignatureRows() {
+  const [orientation] = rankedPatternExample['06_Orientation'];
+  const signalRoles = rankedPatternExample['08_Signal_Roles'];
+  const rankedSignalKeys = [
+    orientation.rank_1_signal_key,
+    orientation.rank_2_signal_key,
+    orientation.rank_3_signal_key,
+    orientation.rank_4_signal_key,
+  ] as const;
+  const scores = [52, 26, 14, 8] as const;
+  const roles = ['Main route', 'Adds energy', 'Support', 'Use deliberately'] as const;
+
+  return rankedSignalKeys.map((signalKey, index) => ({
+    label: signalRoles.find((role) => role.signal_key === signalKey)?.signal_label ?? signalKey,
+    rank: index + 1,
+    role: index === 2 && signalKey === 'physical_rhythm' ? 'Helps reset' : roles[index],
+    score: scores[index],
+  }));
+}
+
 test('draft ranked result page renders all report-facing section headings in order', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
   const headingPositions = requiredHeadings.map((heading) => {
@@ -118,22 +146,28 @@ test('draft ranked result page keeps one subtle prototype marker without schema 
 
 test('draft ranked result page renders the pattern signature signal band', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+  const expectedSignatureRows = getExpectedSignatureRows();
 
   assert.match(markup, /data-draft-pattern-signature="true"/);
   assert.match(markup, /Pattern signature/);
   assert.match(markup, /Concentrated pattern/);
   assert.match(markup, /The first signal is the clearest starting point/);
 
-  for (const signal of ['Deep Focus', 'Creative Movement', 'Physical Rhythm', 'Social Exchange']) {
-    assert.match(markup, new RegExp(`>${signal}<`));
-  }
+  const ariaLabelPositions = expectedSignatureRows.map(({ label, rank, role, score }) => {
+    const ariaLabel = `${label}, rank ${rank}, ${role}, ${score}%`;
+    const position = markup.indexOf(`aria-label="${ariaLabel}"`);
 
-  for (const percentage of ['52%', '26%', '14%', '8%']) {
-    assert.match(markup, new RegExp(`>${percentage}<`));
-  }
+    assert.notEqual(position, -1, `${ariaLabel} should render in the pattern signature`);
+    assert.match(markup, new RegExp(`>${score}%<`));
+    assert.match(markup, new RegExp(`>${label}<`));
 
-  for (const role of ['Main route', 'Adds energy', 'Helps reset', 'Use deliberately']) {
-    assert.match(markup, new RegExp(`>${role}<`));
+    return position;
+  });
+
+  assert.deepEqual(ariaLabelPositions, [...ariaLabelPositions].sort((left, right) => left - right));
+
+  for (const { label, score } of expectedSignatureRows.slice(0, 2)) {
+    assert.match(markup, new RegExp(`>${score}%<.*>${label}<`, 's'));
   }
 
   for (const previousRole of ['ANCHOR', 'SHAPER', 'STRETCH', 'STRETCH RANGE']) {
@@ -143,6 +177,7 @@ test('draft ranked result page renders the pattern signature signal band', () =>
 
 test('draft ranked result page renders plain signal profile sublabels', () => {
   const markup = renderToStaticMarkup(<DraftRankedResultPreview />);
+  const [orientation] = rankedPatternExample['06_Orientation'];
 
   for (const label of ['What this helps', 'Watch for', 'Try this']) {
     assert.match(markup, new RegExp(`>${label}<`));
@@ -152,8 +187,8 @@ test('draft ranked result page renders plain signal profile sublabels', () => {
     assert.doesNotMatch(markup, new RegExp(`>${previousLabel}<`));
   }
 
-  assert.match(markup, />Deep Focus first</);
-  assert.doesNotMatch(markup, />Deep focus</);
+  assert.match(markup, new RegExp(`>${expectedPolishedSignalCasing(orientation.orientation_title)}<`));
+  assert.doesNotMatch(markup, />Deep focus|>Creative movement|>Physical rhythm|>Social exchange/);
 });
 
 test('draft ranked result page renders a draft-only reading mode toggle with dark as default', () => {
