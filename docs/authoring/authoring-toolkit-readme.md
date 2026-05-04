@@ -2,6 +2,8 @@
 
 This toolkit is for authoring-side preparation of reader-first full-domain language packs. It creates structure for schemas, prompts, generated draft rows, validators, rubric checks, and future exporters.
 
+Start with `docs/authoring/reader-first-authoring-runbook.md`. The prompt pack lives in `content/authoring/prompts`.
+
 ## Boundaries
 
 - No runtime AI generation.
