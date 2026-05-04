@@ -133,6 +133,59 @@ const applications = [
   },
 ];
 
+const resultJourneySections = [
+  { title: 'Introduction', purpose: 'Context' },
+  { title: 'Pattern at a Glance', purpose: 'Orientation' },
+  { title: 'Core Interpretation', purpose: 'Recognition' },
+  { title: 'Signal Profile', purpose: 'Ranked role clarity' },
+  { title: 'What Shapes This Pattern', purpose: 'Mechanism' },
+  { title: 'How the Pattern Works', purpose: 'Synthesis' },
+  { title: 'What Comes Easily', purpose: 'Strengths and value' },
+  { title: 'Where It Can Narrow', purpose: 'Constructive limitation and missing range' },
+  { title: 'How to Use It', purpose: 'Practical behaviour' },
+  { title: 'Take Forward', purpose: 'Closing integration' },
+];
+
+const resultExperiencePrinciples = [
+  {
+    title: 'Schema-backed content',
+    body: 'Result pages render authored, schema-backed sections. The UI displays the result contract; it does not write, reinterpret, or recompute meaning.',
+  },
+  {
+    title: 'Ranked pattern signature',
+    body: 'Every result should make the pattern visually understandable before deep reading. Use compact signal distribution, not decorative charts or dashboard metrics.',
+  },
+  {
+    title: 'Reading rail',
+    body: 'Desktop results use a guided rail for progress and section position, grouped into Understand, Decode, and Apply. Mobile should not force a desktop rail.',
+  },
+  {
+    title: 'Reading modes',
+    body: 'Dark editorial mode can remain the default. A warm light reading mode should support longer reflective reading without becoming pure white.',
+  },
+  {
+    title: 'Focus mode',
+    body: 'Desktop Focus mode may reduce distractions without browser fullscreen. It should preserve the rail, controls, theme choice, and anchor navigation.',
+  },
+  {
+    title: 'Visual tone',
+    body: 'Use warm charcoal and graphite surfaces, restrained signal-teal accents, and clay or amber only for narrowing. Avoid terminal contrast and gamified visuals.',
+  },
+];
+
+const resultExperienceAvoidList = [
+  'Raw schema labels',
+  'Prototype, debug, or source residue',
+  'Equal-weight card stacks',
+  'Overuse of metrics',
+  'Decorative charts',
+  'Repeated explanatory model language',
+  'Report-like section dumps',
+  'Visible import mechanics',
+  'UI-side recomputation',
+  'Hardcoded interpretive labels that should be schema-backed',
+];
+
 function withAlpha(hex: string, alpha: number) {
   const red = Number.parseInt(hex.slice(1, 3), 16);
   const green = Number.parseInt(hex.slice(3, 5), 16);
@@ -671,7 +724,123 @@ export function BrandPageContent() {
           </div>
         </Section>
 
-        <Section accent={accent} eyebrow="08 Layout and spacing" title="Spacing should make the intelligence easier to scan.">
+        <Section
+          accent={accent}
+          eyebrow="08 Assessment results"
+          title="Assessment Results Experience"
+        >
+          <div className="space-y-8">
+            <div className="rounded-3xl border border-[#F5F1EA]/10 bg-[#101318] p-6">
+              <p className="max-w-3xl text-lg leading-8 text-[#D8D0C3]">
+                Sonartra results should feel like guided behavioural intelligence briefings:
+                clear enough to scan, deep enough to recognise yourself, and structured enough to
+                act on. They should not feel like PDF reports, form output, schema renderers,
+                dashboards, or assessment worksheets.
+              </p>
+              <div className="mt-6 rounded-2xl border p-5" style={primaryPanelStyle}>
+                <p className="text-base font-semibold leading-7 text-[#F5F1EA]">
+                  A Sonartra result should feel like a guided behavioural intelligence briefing:
+                  clear enough to scan, deep enough to recognise yourself, and structured enough to
+                  act on.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-[#F5F1EA]/10 bg-[#171B22]/78 p-6">
+              <div className="max-w-3xl">
+                <p
+                  className="text-xs font-semibold uppercase tracking-[0.14em]"
+                  style={{ color: accent.hex }}
+                >
+                  Reader journey
+                </p>
+                <h3 className="mt-3 text-2xl font-semibold text-[#F5F1EA]">
+                  Standard section flow for monetisable result experiences.
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[#D8D0C3]/82">
+                  Results pages should render authored, schema-backed sections in a stable journey.
+                  The UI supports understanding; it does not generate new interpretation.
+                </p>
+              </div>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {resultJourneySections.map((section, index) => (
+                  <div
+                    className="rounded-2xl border border-[#F5F1EA]/10 bg-[#101318] p-4"
+                    key={section.title}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold"
+                        style={{
+                          backgroundColor: withAlpha(accent.hex, 0.08),
+                          borderColor: withAlpha(accent.hex, 0.22),
+                          color: accent.hex,
+                        }}
+                      >
+                        {index + 1}
+                      </span>
+                      <div>
+                        <h4 className="text-sm font-semibold text-[#F5F1EA]">
+                          {section.title}
+                        </h4>
+                        <p className="mt-1 text-sm leading-6 text-[#D8D0C3]/82">
+                          {section.purpose}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {resultExperiencePrinciples.map((principle) => (
+                <GuidanceCard
+                  body={principle.body}
+                  key={principle.title}
+                  title={principle.title}
+                />
+              ))}
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+              <div
+                className="rounded-3xl border bg-[#101318] p-6"
+                style={{ borderColor: withAlpha(accent.hex, 0.2) }}
+              >
+                <p
+                  className="text-xs font-semibold uppercase tracking-[0.14em]"
+                  style={{ color: accent.hex }}
+                >
+                  Do
+                </p>
+                <ul className="mt-4 space-y-3 text-sm leading-6 text-[#D8D0C3]">
+                  <li>Make the result shape visible before deep reading.</li>
+                  <li>Use the reading rail to hold journey, progress, and controls.</li>
+                  <li>Keep active state, Now reading, and Up next treatments calm and premium.</li>
+                  <li>Let narrowing areas feel constructive, not like warning or error states.</li>
+                </ul>
+              </div>
+              <div className="rounded-3xl border border-[#F5F1EA]/10 bg-[#101318] p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9A9185]">
+                  Avoid
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {resultExperienceAvoidList.map((item) => (
+                    <span
+                      className="rounded-full border border-[#F5F1EA]/10 bg-[#F5F1EA]/5 px-3 py-1 text-xs font-medium text-[#D8D0C3]/82"
+                      key={item}
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        <Section accent={accent} eyebrow="09 Layout and spacing" title="Spacing should make the intelligence easier to scan.">
           <div className="grid gap-4 md:grid-cols-2">
             <GuidanceCard
               title="Generous spacing"
@@ -692,7 +861,7 @@ export function BrandPageContent() {
           </div>
         </Section>
 
-        <Section accent={accent} eyebrow="09 Motion" title="Movement should orient, not impress.">
+        <Section accent={accent} eyebrow="10 Motion" title="Movement should orient, not impress.">
           <div className="grid gap-4 md:grid-cols-2">
             <GuidanceCard
               title="Use"
@@ -705,7 +874,7 @@ export function BrandPageContent() {
           </div>
         </Section>
 
-        <Section accent={accent} eyebrow="10 Example applications" title="How the direction translates across Sonartra surfaces.">
+        <Section accent={accent} eyebrow="11 Example applications" title="How the direction translates across Sonartra surfaces.">
           <div className="grid gap-4">
             {applications.map((application) => (
               <article
