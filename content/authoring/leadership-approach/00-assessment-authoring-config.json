@@ -1,0 +1,111 @@
+{
+  "assessmentKey": "leadership-approach",
+  "domainKey": "leadership-approach",
+  "domainTitle": "Leadership Approach",
+  "signals": [
+    {
+      "key": "results",
+      "label": "Results",
+      "shortDefinition": "Direction, outcomes, decisions, follow-through, and attention to what must be achieved."
+    },
+    {
+      "key": "process",
+      "label": "Process",
+      "shortDefinition": "Structure, sequencing, standards, repeatability, and how work is organised."
+    },
+    {
+      "key": "vision",
+      "label": "Vision",
+      "shortDefinition": "Future direction, framing, possibility, meaning, and seeing what the work could become."
+    },
+    {
+      "key": "people",
+      "label": "People",
+      "shortDefinition": "Trust, communication, inclusion, development, and how people are brought with the work."
+    }
+  ],
+  "rankRoles": [
+    {
+      "rank": 1,
+      "role": "clearest leadership starting point"
+    },
+    {
+      "rank": 2,
+      "role": "main shaping influence"
+    },
+    {
+      "rank": 3,
+      "role": "useful support or balancing range"
+    },
+    {
+      "rank": 4,
+      "role": "deliberate range to add when the main approach narrows"
+    }
+  ],
+  "scoreShapes": [
+    {
+      "key": "concentrated",
+      "meaning": "One signal is clearly stronger. Treat rank 1 as the main leadership route."
+    },
+    {
+      "key": "paired",
+      "meaning": "Top two signals are close and clearly ahead. Treat rank 1 and rank 2 as a close leadership pair."
+    },
+    {
+      "key": "graduated",
+      "meaning": "Scores step down clearly. Treat the full rank order as meaningful."
+    },
+    {
+      "key": "balanced",
+      "meaning": "All four scores are close. Read rank order lightly and keep several leadership routes available."
+    }
+  ],
+  "sectionSequence": [
+    "05_Context",
+    "06_Orientation",
+    "07_Recognition",
+    "08_Signal_Roles",
+    "09_Pattern_Mechanics",
+    "10_Pattern_Synthesis",
+    "11_Strengths",
+    "12_Narrowing",
+    "13_Application",
+    "14_Closing_Integration"
+  ],
+  "batchStrategy": {
+    "patternCount": 24,
+    "primarySignalBatches": 4,
+    "patternsPerPrimarySignalBatch": 6,
+    "scoreShapeRowsPerPattern": 4,
+    "patternLevelRowsPerPattern": 3,
+    "signalRankRows": 16
+  },
+  "generatedFileNamingPattern": "content/authoring/generated/{{section_slug}}-leadership-approach.psv",
+  "primaryBatchFileNamingPattern": "content/authoring/generated/{{section_slug}}-leadership-approach-{{primary_signal_slug}}.psv",
+  "requiredSourceFiles": [
+    "docs/authoring/assessment-authoring-factory.md",
+    "docs/authoring/plain-behavioural-intelligence-language-standard.md",
+    "docs/authoring/reader-first-section-purpose-guide.md",
+    "docs/authoring/reader-first-authoring-runbook.md",
+    "content/authoring/leadership-approach/01-context-seed.md",
+    "content/authoring/leadership-approach/02-signal-model.md",
+    "content/authoring/leadership-approach/03-section-plan.md",
+    "content/authoring/leadership-approach/04-language-notes.md",
+    "content/authoring/reader-first-schema-manifest.ts"
+  ],
+  "patternCommands": [
+    "cmd /c npx tsx scripts/authoring/list-reader-first-patterns.ts --signals results,process,vision,people",
+    "cmd /c npx tsx scripts/authoring/list-reader-first-patterns.ts --signals results,process,vision,people --primary results"
+  ],
+  "validationCommands": [
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 06_Orientation --input content/authoring/generated/06-orientation-leadership-approach.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 07_Recognition --input content/authoring/generated/07-recognition-leadership-approach.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 08_Signal_Roles --input content/authoring/generated/08-signal-roles-leadership-approach.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 09_Pattern_Mechanics --input content/authoring/generated/09-pattern-mechanics-leadership-approach.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 10_Pattern_Synthesis --input content/authoring/generated/10-pattern-synthesis-leadership-approach.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 11_Strengths --input content/authoring/generated/11-strengths-leadership-approach.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 12_Narrowing --input content/authoring/generated/12-narrowing-leadership-approach.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 13_Application --input content/authoring/generated/13-application-leadership-approach.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 14_Closing_Integration --input content/authoring/generated/14-closing-integration-leadership-approach.psv"
+  ]
+}
