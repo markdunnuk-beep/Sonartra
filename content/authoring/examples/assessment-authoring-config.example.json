@@ -1,0 +1,95 @@
+{
+  "assessmentKey": "flow-state",
+  "domainKey": "flow-state",
+  "domainTitle": "Flow State",
+  "signals": [
+    {
+      "key": "deep_focus",
+      "label": "Deep Focus",
+      "shortDefinition": "Sustained attention, depth, careful thinking, and finishing hard thinking."
+    },
+    {
+      "key": "creative_movement",
+      "label": "Creative Movement",
+      "shortDefinition": "Options, reframing, experimentation, and generative thinking."
+    },
+    {
+      "key": "physical_rhythm",
+      "label": "Physical Rhythm",
+      "shortDefinition": "Movement, pacing, hands-on rhythm, environment, and practical reset."
+    },
+    {
+      "key": "social_exchange",
+      "label": "Social Exchange",
+      "shortDefinition": "Live thinking, feedback, shared sense-making, teaching, and testing ideas with others."
+    }
+  ],
+  "rankRoles": [
+    {
+      "rank": 1,
+      "role": "clearest starting point"
+    },
+    {
+      "rank": 2,
+      "role": "main shaping influence"
+    },
+    {
+      "rank": 3,
+      "role": "useful support or reset"
+    },
+    {
+      "rank": 4,
+      "role": "deliberate range to add when needed"
+    }
+  ],
+  "scoreShapes": [
+    {
+      "key": "concentrated",
+      "meaning": "One signal is clearly stronger. Treat rank 1 as the main route."
+    },
+    {
+      "key": "paired",
+      "meaning": "Top two signals are close and clearly ahead. Treat rank 1 and rank 2 as a close pair."
+    },
+    {
+      "key": "graduated",
+      "meaning": "Scores step down clearly. Treat the full rank order as meaningful."
+    },
+    {
+      "key": "balanced",
+      "meaning": "All four scores are close. Read rank order lightly and keep several routes available."
+    }
+  ],
+  "sectionSequence": [
+    "05_Context",
+    "06_Orientation",
+    "07_Recognition",
+    "08_Signal_Roles",
+    "09_Pattern_Mechanics",
+    "10_Pattern_Synthesis",
+    "11_Strengths",
+    "12_Narrowing",
+    "13_Application",
+    "14_Closing_Integration"
+  ],
+  "batchStrategy": {
+    "patternCount": 24,
+    "primarySignalBatches": 4,
+    "patternsPerPrimarySignalBatch": 6,
+    "scoreShapeRowsPerPattern": 4,
+    "patternLevelRowsPerPattern": 3
+  },
+  "generatedFileNamingPattern": "content/authoring/generated/{{section_slug}}-{{domain_key}}.psv",
+  "primaryBatchFileNamingPattern": "content/authoring/generated/{{section_slug}}-{{domain_key}}-{{primary_signal_slug}}.psv",
+  "validationCommands": [
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 06_Orientation --input content/authoring/generated/06-orientation-flow-state.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 07_Recognition --input content/authoring/generated/07-recognition-flow-state.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 08_Signal_Roles --input content/authoring/generated/08-signal-roles-flow-state.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 09_Pattern_Mechanics --input content/authoring/generated/09-pattern-mechanics-flow-state.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 10_Pattern_Synthesis --input content/authoring/generated/10-pattern-synthesis-flow-state.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 11_Strengths --input content/authoring/generated/11-strengths-flow-state.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 12_Narrowing --input content/authoring/generated/12-narrowing-flow-state.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 13_Application --input content/authoring/generated/13-application-flow-state.psv",
+    "cmd /c npx tsx scripts/authoring/validate-reader-first-import.ts --section 14_Closing_Integration --input content/authoring/generated/14-closing-integration-flow-state.psv"
+  ]
+}
