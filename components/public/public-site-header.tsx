@@ -45,7 +45,7 @@ export function PublicSiteHeader() {
   const pathname = usePathname();
   const desktopNavItems = PUBLIC_SITE_PRIMARY_NAV_ITEMS.filter((item) => item.href !== pathname);
   const isDraftPrototypeRoute = pathname === '/draft-result' || pathname === '/draft-runner';
-  const isDraftFocusMode = isDraftPrototypeRoute && draftFocusMode;
+  const isDraftFocusMode = isDraftPrototypeRoute && pathname !== '/draft-runner' && draftFocusMode;
   const isDraftLightMode = isDraftPrototypeRoute && draftReadingMode === 'light';
 
   useEffect(() => {
@@ -116,7 +116,8 @@ export function PublicSiteHeader() {
     <header
       className={[
         'relative z-30 px-4 pt-5 transition duration-300 sm:px-6 lg:px-8',
-        isDraftFocusMode && 'xl:pointer-events-none xl:fixed xl:inset-x-0 xl:top-0 xl:-translate-y-4 xl:opacity-0',
+        isDraftFocusMode &&
+          'xl:pointer-events-none xl:fixed xl:inset-x-0 xl:top-0 xl:-translate-y-4 xl:opacity-0',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -127,7 +128,7 @@ export function PublicSiteHeader() {
         className={[
           'relative mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 rounded-full px-3 py-2 backdrop-blur-[20px] backdrop-saturate-[1.35] sm:px-4',
           isDraftLightMode
-            ? 'border border-[#17201C]/15 bg-[#FAF8F3]/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_18px_48px_rgba(58,51,42,0.10)]'
+            ? 'border border-[#17201C]/15 bg-[rgba(250,248,243,0.82)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_18px_48px_rgba(58,51,42,0.10)]'
             : 'border border-white/20 bg-white/[0.10] shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_18px_48px_rgba(0,0,0,0.20)]',
         ].join(' ')}
       >
@@ -163,8 +164,8 @@ export function PublicSiteHeader() {
             className={[
               'inline-flex h-11 w-11 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 xl:hidden',
               isDraftLightMode
-                ? 'border-[#17201C]/14 bg-[#17201C]/[0.045] text-[#27322D] hover:border-[#17201C]/24 hover:bg-[#17201C]/[0.075] hover:text-[#17201C] focus-visible:ring-[#137F70]/35 focus-visible:ring-offset-[#F4F1EA]'
-                : 'border-white/16 bg-white/[0.06] text-white/86 hover:border-white/24 hover:bg-white/[0.10] hover:text-white focus-visible:ring-white/35 focus-visible:ring-offset-[#090B0F]',
+                ? 'border-[#17201C]/14 hover:border-[#17201C]/24 bg-[#17201C]/[0.045] text-[#27322D] hover:bg-[#17201C]/[0.075] hover:text-[#17201C] focus-visible:ring-[#137F70]/35 focus-visible:ring-offset-[#F4F1EA]'
+                : 'border-white/16 text-white/86 hover:border-white/24 bg-white/[0.06] hover:bg-white/[0.10] hover:text-white focus-visible:ring-white/35 focus-visible:ring-offset-[#090B0F]',
             ].join(' ')}
             style={isDraftLightMode ? { color: '#27322D' } : undefined}
             onClick={() => setMobileOpen((currentValue) => !currentValue)}
@@ -218,7 +219,7 @@ export function PublicSiteHeader() {
               Login
             </Link>
             <Link
-              className="rounded-full border border-[#32D6B0]/28 bg-[#32D6B0] px-4 py-2 text-sm font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
+              className="border-[#32D6B0]/28 rounded-full border bg-[#32D6B0] px-4 py-2 text-sm font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F]"
               href="/sign-up"
             >
               Get Started
@@ -226,7 +227,7 @@ export function PublicSiteHeader() {
           </div>
 
           <Link
-            className="rounded-full border border-[#32D6B0]/28 bg-[#32D6B0] px-3 py-2 text-xs font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F] sm:px-4 xl:hidden"
+            className="border-[#32D6B0]/28 rounded-full border bg-[#32D6B0] px-3 py-2 text-xs font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090B0F] sm:px-4 xl:hidden"
             href="/sign-up"
           >
             Start
@@ -247,7 +248,7 @@ export function PublicSiteHeader() {
         aria-modal="true"
         aria-labelledby={mobileMenuLabelId}
         className={[
-          'fixed inset-x-4 top-[5.75rem] z-50 overflow-hidden rounded-[1.4rem] border border-white/16 bg-[#0b1322]/92 shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-[20px] backdrop-saturate-[1.35] xl:hidden',
+          'border-white/16 bg-[#0b1322]/92 fixed inset-x-4 top-[5.75rem] z-50 overflow-hidden rounded-[1.4rem] border shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-[20px] backdrop-saturate-[1.35] xl:hidden',
           mobileOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
         ].join(' ')}
         hidden={!mobileOpen}
@@ -256,7 +257,7 @@ export function PublicSiteHeader() {
       >
         <nav aria-label="Mobile primary" className="flex flex-col px-4 py-4">
           <span
-            className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/48"
+            className="text-white/48 mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.16em]"
             id={mobileMenuLabelId}
           >
             Navigate
@@ -264,7 +265,7 @@ export function PublicSiteHeader() {
 
           {PUBLIC_SITE_PRIMARY_NAV_ITEMS.map((item) => (
             <Link
-              className="rounded-xl px-3 py-3 text-[0.98rem] font-medium text-white/82 transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
+              className="text-white/82 rounded-xl px-3 py-3 text-[0.98rem] font-medium transition hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]"
               href={item.href}
               key={item.href}
               onClick={closeMobileMenu}
@@ -279,8 +280,8 @@ export function PublicSiteHeader() {
                 className={[
                   'rounded-xl px-3 py-3 text-[0.98rem] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09111f]',
                   item.label === 'Get Started'
-                    ? 'border border-[#32D6B0]/28 bg-[#32D6B0] text-[#07100f] hover:bg-[#52E1C0]'
-                    : 'border border-white/12 bg-white/[0.04] text-white/82 hover:bg-white/[0.08] hover:text-white',
+                    ? 'border-[#32D6B0]/28 border bg-[#32D6B0] text-[#07100f] hover:bg-[#52E1C0]'
+                    : 'border-white/12 text-white/82 border bg-white/[0.04] hover:bg-white/[0.08] hover:text-white',
                 ].join(' ')}
                 href={item.href}
                 key={item.href}

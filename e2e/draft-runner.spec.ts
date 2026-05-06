@@ -32,7 +32,15 @@ test('draft runner supports selection, display modes, and mobile layout', async 
   await expect(lightToggle).toBeVisible();
   await lightToggle.click();
   await expect(page.locator('.draft-runner-shell')).toHaveAttribute('data-reading-mode', 'light');
+  await expect(page.locator('body')).toHaveAttribute('data-draft-runner-reading-mode', 'light');
+  await expect(page.locator('html')).toHaveAttribute('data-draft-runner-reading-mode', 'light');
   await expect(page.getByRole('button', { name: 'Switch to dark reading mode' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible();
+
+  const lightPageBackground = await page.evaluate(
+    () => getComputedStyle(document.body).backgroundImage,
+  );
+  expect(lightPageBackground).toContain('rgb(244, 241, 234)');
 
   const focusToggle = page.getByRole('button', { name: 'Enter focus mode' });
   await focusToggle.click();

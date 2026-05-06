@@ -50,6 +50,14 @@ export function DraftRunnerPrototype() {
         detail: { mode: readingMode },
       }),
     );
+
+    document.documentElement.dataset.draftRunnerReadingMode = readingMode;
+    document.body.dataset.draftRunnerReadingMode = readingMode;
+
+    return () => {
+      delete document.documentElement.dataset.draftRunnerReadingMode;
+      delete document.body.dataset.draftRunnerReadingMode;
+    };
   }, [readingMode]);
 
   useEffect(() => {
