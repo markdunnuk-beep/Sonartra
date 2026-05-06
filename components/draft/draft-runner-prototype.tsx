@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
+import {
+  DRAFT_FOCUS_MODE_CHANGE_EVENT,
+  DRAFT_READING_MODE_CHANGE_EVENT,
+  type DraftReadingMode,
+} from '@/components/draft/draft-display-mode-events';
 import { DraftFocusModeToggle } from '@/components/draft/draft-focus-mode-toggle';
-import { DraftReadingModeToggle, type DraftReadingMode } from '@/components/draft/draft-reading-mode-toggle';
+import { DraftReadingModeToggle } from '@/components/draft/draft-reading-mode-toggle';
 
 type RunnerOption = {
   id: 'a' | 'b' | 'c' | 'd';
@@ -29,6 +34,22 @@ export function DraftRunnerPrototype() {
   const [readingMode, setReadingMode] = useState<DraftReadingMode>('dark');
 
   useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent(DRAFT_READING_MODE_CHANGE_EVENT, {
+        detail: { mode: readingMode },
+      }),
+    );
+  }, [readingMode]);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent(DRAFT_FOCUS_MODE_CHANGE_EVENT, {
+        detail: { focusMode },
+      }),
+    );
+  }, [focusMode]);
+
+  useEffect(() => {
     if (!focusMode) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setFocusMode(false);
@@ -39,7 +60,7 @@ export function DraftRunnerPrototype() {
 
   return (
     <main
-      className="draft-runner-shell relative isolate min-h-screen overflow-hidden bg-[#070A0F] px-4 pb-16 pt-20 text-[#F5F1EA] sm:px-6 md:pb-20 md:pt-24 lg:px-8"
+      className="draft-runner-shell relative isolate -mx-5 min-h-screen overflow-hidden bg-[#070A0F] px-5 pb-16 pt-20 text-[#F5F1EA] sm:-mx-6 sm:px-6 md:pb-20 md:pt-24 lg:-mx-8 lg:px-8"
       data-focus-mode={focusMode ? 'true' : 'false'}
       data-reading-mode={readingMode}
     >
