@@ -160,13 +160,14 @@ export default function PricingPage() {
       </section>
 
       <PublicPageSection eyebrow="Premium insight library" title="Unlock your full potential with Sonartra.">
-        <div className="grid gap-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start md:gap-8 md:p-6">
+        <div className="grid gap-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] md:items-start md:gap-8 md:p-6">
           <div>
             <p className="max-w-xl text-sm leading-6 text-[#D8D0C3]/82">
               Explore the patterns that shape how you lead, focus, decide and respond under pressure.
             </p>
           </div>
-          <div className="grid gap-2.5 sm:grid-cols-2">
+
+          <ul className="divide-y divide-white/10" aria-label="Premium insight questions">
             {[
               'What type of leader are you?',
               'Where do you find your best flow state?',
@@ -174,14 +175,12 @@ export default function PricingPage() {
               'How do you respond to stress, conflict and pressure?',
               'What motivates your best work?',
             ].map((prompt) => (
-              <p
-                key={prompt}
-                className="rounded-xl border border-white/14 bg-white/[0.04] px-3.5 py-2.5 text-sm leading-5 text-[#E7DED2]/90 sm:last:col-span-2"
-              >
-                {prompt}
-              </p>
+              <li key={prompt} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#32D6B0]/80" />
+                <span className="text-sm leading-6 text-[#E7DED2]/88">{prompt}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </PublicPageSection>
 
