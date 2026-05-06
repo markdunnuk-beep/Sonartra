@@ -289,6 +289,11 @@ export const flowStateAuthoringConstants = {
   requiredScoreShapeCount: 4,
 } as const;
 
+export const readerFirstAuthoringDomainSignalKeys = {
+  [flowStateAuthoringConstants.domainKey]: flowStateAuthoringConstants.signals,
+  'leadership-approach': ['results', 'process', 'vision', 'people'],
+} as const;
+
 export const readerFirstLookupKeyRecommendation = {
   delimiter: '::',
   warning: 'Do not use pipe characters inside lookup_key values if exporting pipe-delimited data.',

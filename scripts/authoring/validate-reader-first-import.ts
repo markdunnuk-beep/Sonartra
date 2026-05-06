@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 
 import {
   flowStateAuthoringConstants,
+  readerFirstAuthoringDomainSignalKeys,
   readerFirstAllowedRankRoles,
   readerFirstAllowedScoreShapes,
   readerFirstAllowedSignalKeys,
@@ -37,9 +38,9 @@ export type ReaderFirstValidationResult = {
 const allowedStatuses = new Set(['draft', 'review', 'approved', 'ready', 'active']);
 const allowedPriorityValues = new Set(['1', '2', '3']);
 const allowedApplicationKeys = new Set(['application_1', 'application_2', 'application_3']);
-const allowedSignals = new Set(readerFirstAllowedSignalKeys);
 const allowedScoreShapes = new Set(readerFirstAllowedScoreShapes);
 const allowedRankRoles = new Set(readerFirstAllowedRankRoles);
+const allowedDomainKeys = new Set(Object.keys(readerFirstAuthoringDomainSignalKeys));
 const sectionKeySet = new Set<string>(readerFirstSectionKeys);
 const lookupDelimiter = readerFirstLookupKeyRecommendation.delimiter;
 
@@ -151,6 +152,16 @@ function getRankedSignals(row: ReaderFirstRow): readonly string[] {
   ].filter((value): value is string => Boolean(value));
 }
 
+function getAllowedSignalsForDomain(domainKey: string | undefined): readonly string[] {
+  if (!domainKey || !(domainKey in readerFirstAuthoringDomainSignalKeys)) {
+    return readerFirstAllowedSignalKeys;
+  }
+
+  return readerFirstAuthoringDomainSignalKeys[
+    domainKey as keyof typeof readerFirstAuthoringDomainSignalKeys
+  ];
+}
+
 function validatePatternKey(
   sectionKey: ReaderFirstSectionKey,
   row: ReaderFirstRow,
@@ -161,7 +172,8 @@ function validatePatternKey(
   }
 
   const patternSignals = row.pattern_key.split('_');
-  const validSignalKeys = readerFirstAllowedSignalKeys;
+  const validSignalKeys = getAllowedSignalsForDomain(row.domain_key);
+  const allowedSignalsForDomain = new Set(validSignalKeys);
   const resolvedSignals: string[] = [];
   let cursor = 0;
 
@@ -180,9 +192,9 @@ function validatePatternKey(
   }
 
   if (
-    resolvedSignals.length !== flowStateAuthoringConstants.signals.length ||
-    new Set(resolvedSignals).size !== flowStateAuthoringConstants.signals.length ||
-    resolvedSignals.some((signal) => !allowedSignals.has(signal as never))
+    resolvedSignals.length !== validSignalKeys.length ||
+    new Set(resolvedSignals).size !== validSignalKeys.length ||
+    resolvedSignals.some((signal) => !allowedSignalsForDomain.has(signal))
   ) {
     errors.push(`${sectionKey}: pattern_key "${row.pattern_key}" must contain all four valid signals exactly once.`);
     return;
@@ -195,32 +207,34 @@ function validatePatternKey(
 }
 
 function expectedLookupKey(sectionKey: ReaderFirstSectionKey, row: ReaderFirstRow): string | null {
+  const domainKey = row.domain_key || flowStateAuthoringConstants.domainKey;
+
   if (sectionKey === '05_Context') {
-    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}intro`;
+    return `${domainKey}${lookupDelimiter}intro`;
   }
 
   if (sectionKey === '08_Signal_Roles') {
-    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}${row.signal_key}${lookupDelimiter}${row.rank_position}`;
+    return `${domainKey}${lookupDelimiter}${row.signal_key}${lookupDelimiter}${row.rank_position}`;
   }
 
   if (sectionKey === '11_Strengths') {
-    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.strength_key}`;
+    return `${domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.strength_key}`;
   }
 
   if (sectionKey === '12_Narrowing') {
-    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.narrowing_key}`;
+    return `${domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.narrowing_key}`;
   }
 
   if (sectionKey === '13_Application') {
-    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.application_key}`;
+    return `${domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.application_key}`;
   }
 
   if (readerFirstSectionPolicies[sectionKey].coverage === 'score_shape_specific') {
-    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.score_shape}`;
+    return `${domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.score_shape}`;
   }
 
   if (readerFirstSectionPolicies[sectionKey].coverage === 'pattern_only') {
-    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}${row.pattern_key}`;
+    return `${domainKey}${lookupDelimiter}${row.pattern_key}`;
   }
 
   return null;
@@ -262,8 +276,8 @@ function validateSectionRows(section: ParsedSection, result: MutableValidationRe
       }
     }
 
-    if (row.domain_key && row.domain_key !== flowStateAuthoringConstants.domainKey) {
-      result.errors.push(`${rowLabel}: domain_key must be ${flowStateAuthoringConstants.domainKey}.`);
+    if (row.domain_key && !allowedDomainKeys.has(row.domain_key)) {
+      result.errors.push(`${rowLabel}: domain_key has unsupported value ${row.domain_key}.`);
     }
 
     if (row.lookup_key) {
@@ -300,7 +314,8 @@ function validateSectionRows(section: ParsedSection, result: MutableValidationRe
       'missing_range_signal_key',
     ]) {
       const value = row[signalField];
-      if (value && !allowedSignals.has(value as never)) {
+      const allowedSignalsForRow = new Set(getAllowedSignalsForDomain(row.domain_key));
+      if (value && !allowedSignalsForRow.has(value)) {
         result.errors.push(`${rowLabel}: ${signalField} has invalid signal key ${value}.`);
       }
     }

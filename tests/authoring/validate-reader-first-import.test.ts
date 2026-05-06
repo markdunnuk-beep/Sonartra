@@ -201,6 +201,44 @@ test('generated 06_Orientation file passes in individual section mode', () => {
   assert.equal(result.rowCounts['06_Orientation'], 96);
 });
 
+test('Leadership Approach 06_Orientation rows pass in individual section mode', () => {
+  const signals = ['results', 'process', 'vision', 'people'];
+  const header = readerFirstRequiredHeaders['06_Orientation'];
+  const rows = permuteSignals(signals).flatMap((rankedSignals) => {
+    const patternKey = rankedSignals.join('_');
+
+    return readerFirstAllowedScoreShapes.map((scoreShape) => ({
+      domain_key: 'leadership-approach',
+      pattern_key: patternKey,
+      score_shape: scoreShape,
+      rank_1_signal_key: rankedSignals[0],
+      rank_2_signal_key: rankedSignals[1],
+      rank_3_signal_key: rankedSignals[2],
+      rank_4_signal_key: rankedSignals[3],
+      orientation_title: 'Draft leadership route',
+      orientation_summary: 'Draft leadership orientation.',
+      score_shape_summary: 'Draft score shape summary.',
+      rank_1_phrase: 'Draft rank one.',
+      rank_2_phrase: 'Draft rank two.',
+      rank_3_phrase: 'Draft rank three.',
+      rank_4_phrase: 'Draft rank four.',
+      status: 'draft',
+      lookup_key: `leadership-approach::${patternKey}::${scoreShape}`,
+    }));
+  });
+  const source = [
+    header.join('|'),
+    ...rows.map((row) => header.map((field) => row[field]).join('|')),
+  ].join('\n');
+  const result = validateReaderFirstImportText(source, {
+    type: 'section',
+    sectionKey: '06_Orientation',
+  });
+
+  assert.equal(result.pass, true);
+  assert.equal(result.rowCounts['06_Orientation'], 96);
+});
+
 test('missing section fails', () => {
   const source = buildValidFullImport().replace(/^14_Closing_Integration[\s\S]*$/m, '');
   const result = validateReaderFirstImportText(source);
