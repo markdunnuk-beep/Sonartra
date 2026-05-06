@@ -5,7 +5,6 @@ import test from 'node:test';
 
 import {
   flowStateAuthoringConstants,
-  readerFirstAllowedApplicationAreas,
   readerFirstAllowedRankRoles,
   readerFirstAllowedScoreShapes,
   readerFirstAllowedSignalKeys,
@@ -131,17 +130,21 @@ function applicationRows(): Row[] {
   return permuteSignals(readerFirstAllowedSignalKeys).flatMap((signals) => {
     const patternKey = signals.join('_');
 
-    return readerFirstAllowedApplicationAreas.map((applicationArea, index) => ({
+    return ['1', '2', '3'].map((priority) => {
+      const applicationKey = `application_${priority}`;
+
+      return {
       domain_key: flowStateAuthoringConstants.domainKey,
       pattern_key: patternKey,
-      application_area: applicationArea,
-      guidance_type: applicationArea,
-      priority: String(index + 1),
-      guidance_text: 'Draft guidance',
-      linked_signal_key: signals[index],
+      application_key: applicationKey,
+      priority,
+      application_title: 'Draft application',
+      application_text: 'Draft application guidance',
+      linked_signal_key: signals[Number(priority) - 1],
       status: 'draft',
-      lookup_key: `${flowStateAuthoringConstants.domainKey}::${patternKey}::${applicationArea}`,
-    }));
+      lookup_key: `${flowStateAuthoringConstants.domainKey}::${patternKey}::${applicationKey}`,
+      };
+    });
   });
 }
 
@@ -309,14 +312,13 @@ test('missing score shape variant fails for score-shape-specific section', () =>
   assert.ok(result.errors.some((error) => error.includes('missing score_shape balanced')));
 });
 
-test('duplicate application_area within a pattern fails', () => {
+test('duplicate application_key within a pattern fails', () => {
   const source = serializeSection('13_Application', applicationRows().map((row, index) => {
     if (index === 1) {
       return {
         ...row,
-        application_area: 'use_this_when',
-        guidance_type: 'use_this_when',
-        lookup_key: `${flowStateAuthoringConstants.domainKey}::${row.pattern_key}::watch_for`,
+        application_key: 'application_1',
+        lookup_key: `${flowStateAuthoringConstants.domainKey}::${row.pattern_key}::application_1`,
       };
     }
 
@@ -328,5 +330,5 @@ test('duplicate application_area within a pattern fails', () => {
   });
 
   assert.equal(result.pass, false);
-  assert.ok(result.errors.some((error) => error.includes('duplicate application_area')));
+  assert.ok(result.errors.some((error) => error.includes('duplicate application_key')));
 });

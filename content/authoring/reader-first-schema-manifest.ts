@@ -140,10 +140,10 @@ export const readerFirstRequiredHeaders: Record<ReaderFirstSectionKey, readonly 
   '13_Application': [
     'domain_key',
     'pattern_key',
-    'application_area',
-    'guidance_type',
+    'application_key',
     'priority',
-    'guidance_text',
+    'application_title',
+    'application_text',
     'linked_signal_key',
     'status',
     'lookup_key',
@@ -217,7 +217,7 @@ export const readerFirstRowCountRules: Record<ReaderFirstSectionKey, ReaderFirst
     expectedRows: 72,
   },
   '13_Application': {
-    basis: '24 ranked patterns x 3 application areas',
+    basis: '24 ranked patterns x 3 application rows',
     expectedRows: 72,
     note: 'Pattern-level application rows; score-shape-specific variants are not required in this scaffold.',
   },

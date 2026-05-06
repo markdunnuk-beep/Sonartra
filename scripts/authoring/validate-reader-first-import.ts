@@ -4,7 +4,6 @@ import { pathToFileURL } from 'node:url';
 
 import {
   flowStateAuthoringConstants,
-  readerFirstAllowedApplicationAreas,
   readerFirstAllowedRankRoles,
   readerFirstAllowedScoreShapes,
   readerFirstAllowedSignalKeys,
@@ -37,7 +36,7 @@ export type ReaderFirstValidationResult = {
 
 const allowedStatuses = new Set(['draft', 'review', 'approved', 'ready', 'active']);
 const allowedPriorityValues = new Set(['1', '2', '3']);
-const allowedGuidanceTypes = new Set(['guidance', ...readerFirstAllowedApplicationAreas]);
+const allowedApplicationKeys = new Set(['application_1', 'application_2', 'application_3']);
 const allowedSignals = new Set(readerFirstAllowedSignalKeys);
 const allowedScoreShapes = new Set(readerFirstAllowedScoreShapes);
 const allowedRankRoles = new Set(readerFirstAllowedRankRoles);
@@ -213,7 +212,7 @@ function expectedLookupKey(sectionKey: ReaderFirstSectionKey, row: ReaderFirstRo
   }
 
   if (sectionKey === '13_Application') {
-    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.application_area}`;
+    return `${flowStateAuthoringConstants.domainKey}${lookupDelimiter}${row.pattern_key}${lookupDelimiter}${row.application_key}`;
   }
 
   if (readerFirstSectionPolicies[sectionKey].coverage === 'score_shape_specific') {
@@ -251,7 +250,7 @@ function validateSectionRows(section: ParsedSection, result: MutableValidationRe
   const rowKeys = new Set<string>();
   const strengthKeysByPattern = new Map<string, Set<string>>();
   const narrowingKeysByPattern = new Map<string, Set<string>>();
-  const applicationAreasByPattern = new Map<string, Set<string>>();
+  const applicationKeysByPattern = new Map<string, Set<string>>();
   const signalRankKeys = new Set<string>();
 
   for (const [rowIndex, row] of section.rows.entries()) {
@@ -314,12 +313,8 @@ function validateSectionRows(section: ParsedSection, result: MutableValidationRe
       result.errors.push(`${rowLabel}: rank_role has invalid value ${row.rank_role}.`);
     }
 
-    if (row.application_area && !allowedGuidanceTypes.has(row.application_area as never)) {
-      result.errors.push(`${rowLabel}: application_area has invalid value ${row.application_area}.`);
-    }
-
-    if (row.guidance_type && !allowedGuidanceTypes.has(row.guidance_type as never)) {
-      result.errors.push(`${rowLabel}: guidance_type has invalid value ${row.guidance_type}.`);
+    if (row.application_key && !allowedApplicationKeys.has(row.application_key)) {
+      result.errors.push(`${rowLabel}: application_key has invalid value ${row.application_key}.`);
     }
 
     if (row.status && !allowedStatuses.has(row.status)) {
@@ -368,12 +363,12 @@ function validateSectionRows(section: ParsedSection, result: MutableValidationRe
     }
 
     if (section.sectionKey === '13_Application') {
-      const keys = applicationAreasByPattern.get(row.pattern_key) ?? new Set<string>();
-      if (keys.has(row.application_area)) {
-        result.errors.push(`${rowLabel}: duplicate application_area ${row.application_area} within ${row.pattern_key}.`);
+      const keys = applicationKeysByPattern.get(row.pattern_key) ?? new Set<string>();
+      if (keys.has(row.application_key)) {
+        result.errors.push(`${rowLabel}: duplicate application_key ${row.application_key} within ${row.pattern_key}.`);
       }
-      keys.add(row.application_area);
-      applicationAreasByPattern.set(row.pattern_key, keys);
+      keys.add(row.application_key);
+      applicationKeysByPattern.set(row.pattern_key, keys);
     }
   }
 }
