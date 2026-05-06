@@ -97,7 +97,7 @@ export default function PricingPage() {
       <PublicPageHero
         eyebrow="Pricing"
         intro="Start with a focused preview, unlock full access to Sonartra’s premium insight library, or speak to us about organisation access with volume-based pricing."
-        title="Choose the level of access that fits how you want to use Sonartra."
+        title="Start using the Sonartra behavioural intelligence platform today."
       >
         <p className="max-w-2xl text-sm leading-6 text-[#D8D0C3]/73">
           Built for individuals first, with a clear path for organisations purchasing access at scale.
@@ -116,10 +116,10 @@ export default function PricingPage() {
               ].join(' ')}
               key={plan.title}
             >
-              <div className="flex min-h-10 items-start justify-between gap-3">
+              <div className="flex min-h-10 flex-wrap items-center justify-between gap-x-3 gap-y-2">
                 <h2 className="text-2xl font-semibold text-[#F5F1EA]">{plan.title}</h2>
                 {plan.badge ? (
-                  <span className="rounded-full border border-[#7DE8CD]/34 bg-[#7DE8CD]/14 px-3 py-1 text-xs font-medium uppercase tracking-[0.11em] text-[#C6F6EA]">
+                  <span className="inline-flex items-center rounded-full border border-[#7DE8CD]/34 bg-[#7DE8CD]/14 px-3 py-1 text-xs font-medium uppercase leading-none tracking-[0.11em] text-[#C6F6EA]">
                     {plan.badge}
                   </span>
                 ) : null}
@@ -159,26 +159,26 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <PublicPageSection eyebrow="Engine integrity" title="Built around one assessment engine.">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:p-6">
-          <p className="text-sm leading-6 text-[#D8D0C3]/82">
-            Every Sonartra result is generated through the same deterministic assessment engine. Access
-            level changes what users can access across the platform, not how results are calculated.
-          </p>
-          <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+      <PublicPageSection eyebrow="Premium insight library" title="Unlock your full potential with Sonartra.">
+        <div className="grid gap-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start md:gap-8 md:p-6">
+          <div>
+            <p className="max-w-xl text-sm leading-6 text-[#D8D0C3]/82">
+              Explore the patterns that shape how you lead, focus, decide and respond under pressure.
+            </p>
+          </div>
+          <div className="grid gap-2.5 sm:grid-cols-2">
             {[
-              'One scoring engine',
-              'One persisted result payload',
-              'No UI-side recalculation',
-            ].map((proof) => (
+              'What type of leader are you?',
+              'Where do you find your best flow state?',
+              'What kind of culture helps you perform at your best?',
+              'How do you respond to stress, conflict and pressure?',
+              'What motivates your best work?',
+            ].map((prompt) => (
               <p
-                key={proof}
-                className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/[0.04] px-3 py-1.5 text-xs font-medium tracking-[0.01em] text-[#E7DED2]/92"
+                key={prompt}
+                className="rounded-xl border border-white/14 bg-white/[0.04] px-3.5 py-2.5 text-sm leading-5 text-[#E7DED2]/90 sm:last:col-span-2"
               >
-                <span aria-hidden="true" className="text-[#7DE8CD]">
-                  ✓
-                </span>
-                <span>{proof}</span>
+                {prompt}
               </p>
             ))}
           </div>
