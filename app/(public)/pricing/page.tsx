@@ -1,8 +1,6 @@
 import Link from 'next/link';
 
-import { LibraryEntryBand } from '@/components/library/library-entry-band';
 import { PublicPageCanvas, PublicPageHero, PublicPageSection } from '@/components/public/public-page-primitives';
-import { getLibraryEntry } from '@/lib/library/library-entry-links';
 
 type PricingPlan = {
   title: string;
@@ -94,8 +92,6 @@ function BenefitIcon({ featured = false }: { featured?: boolean }) {
 }
 
 export default function PricingPage() {
-  const libraryEntry = getLibraryEntry('pricing');
-
   return (
     <PublicPageCanvas>
       <PublicPageHero
@@ -169,15 +165,52 @@ export default function PricingPage() {
             Every Sonartra result is generated through the same deterministic assessment engine. Access
             level changes what users can access across the platform, not how results are calculated.
           </p>
-          <ul className="mt-4 space-y-2 text-sm text-[#E7DED2]/90">
-            <li>• One scoring engine</li>
-            <li>• One persisted result payload</li>
-            <li>• No UI-side recalculation</li>
-          </ul>
+          <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+            {[
+              'One scoring engine',
+              'One persisted result payload',
+              'No UI-side recalculation',
+            ].map((proof) => (
+              <p
+                key={proof}
+                className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/[0.04] px-3 py-1.5 text-xs font-medium tracking-[0.01em] text-[#E7DED2]/92"
+              >
+                <span aria-hidden="true" className="text-[#7DE8CD]">
+                  ✓
+                </span>
+                <span>{proof}</span>
+              </p>
+            ))}
+          </div>
         </div>
       </PublicPageSection>
 
-      <LibraryEntryBand compact entry={libraryEntry} />
+      <section className="mt-2" aria-label="Get started with Sonartra">
+        <div className="rounded-2xl border border-white/12 bg-white/[0.03] p-6 md:flex md:items-center md:justify-between md:gap-6">
+          <div>
+            <h2 className="text-xl font-semibold text-[#F5F1EA]">Ready to explore Sonartra?</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#D8D0C3]/82">
+              Start with a focused preview or speak to us about organisation access.
+            </p>
+          </div>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row md:mt-0">
+            <Link
+              href="/get-started"
+              aria-label="Get started with Sonartra"
+              className="inline-flex items-center justify-center rounded-full border border-[#32D6B0]/28 bg-[#32D6B0] px-5 py-3 text-sm font-semibold text-[#07100f] transition hover:bg-[#52E1C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080A0D]"
+            >
+              Get Started
+            </Link>
+            <Link
+              href="/contact"
+              aria-label="Discuss Sonartra enterprise access"
+              className="inline-flex items-center justify-center rounded-full border border-white/14 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-[#F5F1EA] transition hover:border-white/24 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080A0D]"
+            >
+              Discuss Enterprise Access
+            </Link>
+          </div>
+        </div>
+      </section>
     </PublicPageCanvas>
   );
 }
