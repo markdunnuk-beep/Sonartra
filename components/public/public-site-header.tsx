@@ -6,14 +6,16 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
 
 import {
+  DRAFT_FOCUS_MODE_CHANGE_EVENT,
+  DRAFT_READING_MODE_CHANGE_EVENT,
+  type DraftFocusModeChangeEvent,
+  type DraftReadingMode,
+  type DraftReadingModeChangeEvent,
+} from '@/components/draft/draft-display-mode-events';
+import {
   PUBLIC_SITE_PRIMARY_NAV_ITEMS,
   PUBLIC_SITE_SECONDARY_NAV_ITEMS,
 } from '@/lib/public/public-site-nav';
-
-type DraftReadingMode = 'dark' | 'light';
-
-type DraftFocusModeChangeEvent = CustomEvent<{ focusMode: boolean }>;
-type DraftReadingModeChangeEvent = CustomEvent<{ mode: DraftReadingMode }>;
 
 function MenuIcon() {
   return (
@@ -42,9 +44,9 @@ export function PublicSiteHeader() {
   const mobileMenuLabelId = useId();
   const pathname = usePathname();
   const desktopNavItems = PUBLIC_SITE_PRIMARY_NAV_ITEMS.filter((item) => item.href !== pathname);
-  const isDraftResultRoute = pathname === '/draft-result';
-  const isDraftFocusMode = isDraftResultRoute && draftFocusMode;
-  const isDraftLightMode = isDraftResultRoute && draftReadingMode === 'light';
+  const isDraftPrototypeRoute = pathname === '/draft-result' || pathname === '/draft-runner';
+  const isDraftFocusMode = isDraftPrototypeRoute && draftFocusMode;
+  const isDraftLightMode = isDraftPrototypeRoute && draftReadingMode === 'light';
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -71,7 +73,7 @@ export function PublicSiteHeader() {
   const closeMobileMenu = () => setMobileOpen(false);
 
   useEffect(() => {
-    if (!isDraftResultRoute) {
+    if (!isDraftPrototypeRoute) {
       return;
     }
 
@@ -83,15 +85,15 @@ export function PublicSiteHeader() {
       }
     };
 
-    window.addEventListener('sonartra-draft-result-reading-mode-change', handleDraftReadingModeChange);
+    window.addEventListener(DRAFT_READING_MODE_CHANGE_EVENT, handleDraftReadingModeChange);
 
     return () => {
-      window.removeEventListener('sonartra-draft-result-reading-mode-change', handleDraftReadingModeChange);
+      window.removeEventListener(DRAFT_READING_MODE_CHANGE_EVENT, handleDraftReadingModeChange);
     };
-  }, [isDraftResultRoute]);
+  }, [isDraftPrototypeRoute]);
 
   useEffect(() => {
-    if (!isDraftResultRoute) {
+    if (!isDraftPrototypeRoute) {
       return;
     }
 
@@ -103,12 +105,12 @@ export function PublicSiteHeader() {
       }
     };
 
-    window.addEventListener('sonartra-draft-result-focus-mode-change', handleDraftFocusModeChange);
+    window.addEventListener(DRAFT_FOCUS_MODE_CHANGE_EVENT, handleDraftFocusModeChange);
 
     return () => {
-      window.removeEventListener('sonartra-draft-result-focus-mode-change', handleDraftFocusModeChange);
+      window.removeEventListener(DRAFT_FOCUS_MODE_CHANGE_EVENT, handleDraftFocusModeChange);
     };
-  }, [isDraftResultRoute]);
+  }, [isDraftPrototypeRoute]);
 
   return (
     <header

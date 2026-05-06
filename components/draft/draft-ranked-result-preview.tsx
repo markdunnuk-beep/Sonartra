@@ -3,9 +3,11 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import {
-  DraftReadingModeToggle,
+  DRAFT_FOCUS_MODE_CHANGE_EVENT,
+  DRAFT_READING_MODE_CHANGE_EVENT,
   type DraftReadingMode,
-} from '@/components/draft/draft-reading-mode-toggle';
+} from '@/components/draft/draft-display-mode-events';
+import { DraftReadingModeToggle } from '@/components/draft/draft-reading-mode-toggle';
 import { DraftMobileSectionNavigator } from '@/components/draft/draft-mobile-section-navigator';
 import { DraftResultReadingRail } from '@/components/draft/draft-result-reading-rail';
 import {
@@ -287,7 +289,7 @@ export function DraftRankedResultPreview() {
 
     setReadingMode(nextMode);
     window.dispatchEvent(
-      new CustomEvent('sonartra-draft-result-reading-mode-change', {
+      new CustomEvent(DRAFT_READING_MODE_CHANGE_EVENT, {
         detail: { mode: nextMode },
       }),
     );
@@ -296,7 +298,7 @@ export function DraftRankedResultPreview() {
   function setDraftFocusMode(nextFocusMode: boolean) {
     setFocusMode(nextFocusMode);
     window.dispatchEvent(
-      new CustomEvent('sonartra-draft-result-focus-mode-change', {
+      new CustomEvent(DRAFT_FOCUS_MODE_CHANGE_EVENT, {
         detail: { focusMode: nextFocusMode },
       }),
     );
