@@ -169,6 +169,33 @@ function activeOptionsByQuestionOptionKey(
   );
 }
 
+function addDuplicateOptionDiagnostics(
+  context: PlanContext,
+  options: readonly NormalisedOptionRecord[],
+): void {
+  const seenOptions = new Map<string, NormalisedOptionRecord>();
+
+  for (const option of options.filter(
+    (item) => activeStatus(item.status) && requiredText(item.questionKey) && requiredText(item.optionKey),
+  )) {
+    const key = naturalOptionKey(option.questionKey, option.optionKey);
+    const existing = seenOptions.get(key);
+    if (!existing) {
+      seenOptions.set(key, option);
+      continue;
+    }
+
+    addDiagnostic(context, {
+      code: 'DUPLICATE_QUESTION_OPTION_KEY',
+      message: 'Active option_key values must be unique within each question_key.',
+      sheetKey: '03_Options',
+      rowNumber: option.sourceRowNumber,
+      fieldKey: 'option_key',
+      lookupKey: option.lookupKey,
+    });
+  }
+}
+
 function activeSignalsByKey(
   signals: readonly NormalisedSignalRecord[],
 ): ReadonlyMap<string, NormalisedSignalRecord> {
@@ -282,6 +309,8 @@ export function planRankedPatternRuntimeDefinitionPersistence(
   const activeQuestions = [...questionsByKey.values()];
   const activeOptions = [...optionsByKey.values()];
   const activeWeights = normalisedPackage.optionWeights.filter((weight) => activeStatus(weight.status));
+
+  addDuplicateOptionDiagnostics(context, normalisedPackage.options);
 
   for (const question of activeQuestions) {
     if (question.domainKey !== domainKey) {

@@ -691,3 +691,30 @@ test('ranked-pattern import storage migration declares normalized import and res
   assert.doesNotMatch(sql, /archetype/i);
   assert.doesNotMatch(sql, /sentence_library/i);
 });
+
+test('question-scoped option key migration removes assessment-version-wide option uniqueness', async () => {
+  const baseSchemaSql = await readFile(
+    join(process.cwd(), 'db', 'migrations', '202603260001_mvp_canonical_schema.sql'),
+    'utf8',
+  );
+  const oldScopeSql = await readFile(
+    join(process.cwd(), 'db', 'migrations', '202603290001_option_version_key_scope.sql'),
+    'utf8',
+  );
+  const questionScopeSql = await readFile(
+    join(process.cwd(), 'db', 'migrations', '202605070002_question_scoped_option_keys.sql'),
+    'utf8',
+  );
+
+  assert.match(baseSchemaSql, /UNIQUE \(question_id, option_key\)/i);
+  assert.match(oldScopeSql, /options_assessment_version_option_key_idx/i);
+  assert.match(oldScopeSql, /ON options \(assessment_version_id, option_key\)/i);
+
+  assert.match(questionScopeSql, /DROP INDEX IF EXISTS options_assessment_version_option_key_idx/i);
+  assert.match(questionScopeSql, /CREATE UNIQUE INDEX IF NOT EXISTS options_question_option_key_idx/i);
+  assert.match(questionScopeSql, /ON options \(question_id, option_key\)/i);
+  assert.doesNotMatch(
+    questionScopeSql,
+    /CREATE\s+UNIQUE\s+INDEX[\s\S]+ON options \(assessment_version_id, option_key\)/i,
+  );
+});

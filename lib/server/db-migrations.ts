@@ -167,12 +167,19 @@ export async function reconcileKnownMigrations(params: {
         'options',
         'assessment_version_id',
       );
-      const hasScopedOptionKeyIndex = await indexExists(
+      const hasVersionScopedOptionKeyIndex = await indexExists(
         params.db,
         'options_assessment_version_option_key_idx',
       );
+      const hasQuestionScopedOptionKeyIndex = await indexExists(
+        params.db,
+        'options_question_option_key_idx',
+      );
 
-      if (hasAssessmentVersionColumn && hasScopedOptionKeyIndex) {
+      if (
+        hasAssessmentVersionColumn
+        && (hasVersionScopedOptionKeyIndex || hasQuestionScopedOptionKeyIndex)
+      ) {
         await recordAppliedMigration(params.db, migration.filename);
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);
@@ -460,6 +467,25 @@ export async function reconcileKnownMigrations(params: {
         && hasPatternLookupIndex
         && hasFullPatternUniqueIndex
       ) {
+        await recordAppliedMigration(params.db, migration.filename);
+        reconciled.push(migration.filename);
+        appliedMigrationFilenames.add(migration.filename);
+      }
+
+      continue;
+    }
+
+    if (migration.filename === '202605070002_question_scoped_option_keys.sql') {
+      const hasQuestionScopedOptionKeyIndex = await indexExists(
+        params.db,
+        'options_question_option_key_idx',
+      );
+      const hasVersionScopedOptionKeyIndex = await indexExists(
+        params.db,
+        'options_assessment_version_option_key_idx',
+      );
+
+      if (hasQuestionScopedOptionKeyIndex && !hasVersionScopedOptionKeyIndex) {
         await recordAppliedMigration(params.db, migration.filename);
         reconciled.push(migration.filename);
         appliedMigrationFilenames.add(migration.filename);

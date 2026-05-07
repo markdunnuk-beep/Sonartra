@@ -143,6 +143,127 @@ function planFromWorkbook(
   return planRankedPatternRuntimeDefinitionPersistence(normaliseRankedPatternWorkbook(parsedWorkbook));
 }
 
+test('dry-run planner accepts repeated A-D option keys across different questions', () => {
+  const optionKeys = ['A', 'B', 'C', 'D'];
+  const questions = ['question_1', 'question_2'];
+  const plan = planFromWorkbook(
+    baseRuntimeDefinitionWorkbook({
+      '02_Questions': parsedSheet(
+        '02_Questions',
+        questions.map((questionKey, index) =>
+          parsedRow(
+            {
+              domain_key: 'domain_key',
+              question_key: questionKey,
+              question_order: String(index + 1),
+              question_text: `Question ${index + 1}`,
+              status: 'active',
+              lookup_key: `question::${index + 1}`,
+            },
+            index + 2,
+          ),
+        ),
+      ),
+      '03_Options': parsedSheet(
+        '03_Options',
+        questions.flatMap((questionKey, questionIndex) =>
+          optionKeys.map((optionKey, optionIndex) =>
+            parsedRow(
+              {
+                domain_key: 'domain_key',
+                question_key: questionKey,
+                option_key: optionKey,
+                option_order: optionKey,
+                option_text: `Option ${optionKey} for ${questionKey}`,
+                is_scored: 'true',
+                status: 'active',
+                lookup_key: `option::${questionIndex + 1}::${optionKey.toLowerCase()}`,
+              },
+              questionIndex * optionKeys.length + optionIndex + 2,
+            ),
+          ),
+        ),
+      ),
+      '04_Option_Weights': parsedSheet(
+        '04_Option_Weights',
+        questions.flatMap((questionKey, questionIndex) =>
+          optionKeys.map((optionKey, optionIndex) =>
+            parsedRow(
+              {
+                domain_key: 'domain_key',
+                question_key: questionKey,
+                option_key: optionKey,
+                signal_key: `signal_${optionKey.toLowerCase()}`,
+                weight: '1',
+                status: 'active',
+                lookup_key: `weight::${questionIndex + 1}::${optionKey.toLowerCase()}`,
+              },
+              questionIndex * optionKeys.length + optionIndex + 2,
+            ),
+          ),
+        ),
+      ),
+    }),
+  );
+
+  assert.deepEqual(plan.diagnostics, []);
+  assert.equal(plan.operationCountsByTable.questions, 2);
+  assert.equal(plan.operationCountsByTable.options, 8);
+  assert.equal(plan.operationCountsByTable.option_signal_weights, 8);
+  assert.equal(plan.operations.some((operation) => operation.key === 'question_1::A'), true);
+  assert.equal(plan.operations.some((operation) => operation.key === 'question_2::A'), true);
+  assert.equal(
+    plan.operations.some(
+      (operation) =>
+        operation.table === 'option_signal_weights'
+        && operation.key === 'question_2::A::signal_a'
+        && operation.values.question_key === 'question_2'
+        && operation.values.option_key === 'A'
+        && operation.values.signal_key === 'signal_a',
+    ),
+    true,
+  );
+});
+
+test('dry-run planner rejects duplicate option keys within the same question', () => {
+  const plan = planFromWorkbook(
+    baseRuntimeDefinitionWorkbook({
+      '03_Options': parsedSheet('03_Options', [
+        parsedRow({
+          domain_key: 'domain_key',
+          question_key: 'question_1',
+          option_key: 'A',
+          option_order: '1',
+          option_text: 'First option text',
+          is_scored: 'true',
+          status: 'active',
+          lookup_key: 'option::1::a',
+        }),
+        parsedRow(
+          {
+            domain_key: 'domain_key',
+            question_key: 'question_1',
+            option_key: 'A',
+            option_order: '2',
+            option_text: 'Duplicate option text',
+            is_scored: 'true',
+            status: 'active',
+            lookup_key: 'option::1::a-duplicate',
+          },
+          3,
+        ),
+      ]),
+    }),
+  );
+
+  const duplicate = plan.diagnostics.find(
+    (diagnostic) => diagnostic.code === 'DUPLICATE_QUESTION_OPTION_KEY',
+  );
+
+  assert.equal(duplicate?.rowNumber, 3);
+  assert.equal(duplicate?.fieldKey, 'option_key');
+});
+
 test('dry-run planner accepts one single-domain ranked-pattern metadata row', () => {
   const plan = planFromWorkbook(baseRuntimeDefinitionWorkbook());
 
