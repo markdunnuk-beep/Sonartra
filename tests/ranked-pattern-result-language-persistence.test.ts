@@ -467,8 +467,15 @@ test('Flow State workbook plans twenty-four active ranked patterns without unkno
     (operation) =>
       operation.table === 'assessment_ranked_patterns' && operation.values.status === 'active',
   );
+  const activeOrientationOps = plan.operations.filter(
+    (operation) =>
+      operation.table === 'assessment_result_language_rows' &&
+      operation.sourceSheetKey === '06_Orientation' &&
+      operation.values.status === 'active',
+  );
 
   assert.equal(activeRankedPatternOps.length, 24);
+  assert.equal(activeOrientationOps.length, 96);
   assert.equal(
     plan.diagnostics.some((diagnostic) => diagnostic.code === 'RESULT_LANGUAGE_UNKNOWN_PATTERN'),
     false,

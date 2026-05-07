@@ -14,6 +14,7 @@ import type {
   ParsedRankedPatternWorkbookRow,
   ParsedRankedPatternWorkbookSheet,
 } from '@/content/assessment-packages/import-contract/ranked-pattern-workbook-parser';
+import { parseRankedPatternWorkbookFile } from '@/content/assessment-packages/import-contract/ranked-pattern-workbook-parser';
 
 function parsedRow(
   values: Readonly<Record<string, unknown>>,
@@ -190,6 +191,30 @@ test('result content rows preserve score shape, rank position, pattern keys, and
   assert.equal(normalised.signalRoles[0]?.rankPosition, 4);
   assert.equal(normalised.signalRoles[0]?.fieldValues.title, 'Role title');
   assert.equal(getNormalisedRuntimeResultContentCount(normalised), 2);
+});
+
+test('Flow State workbook runtime result content rows normalise as publishable active rows', () => {
+  const normalised = normaliseRankedPatternWorkbook(
+    parseRankedPatternWorkbookFile(
+      'content/assessment-packages/flow-state/sonartra_reader_first_import_schema_FLOW_STATE_EXAMPLE.xlsx',
+    ),
+  );
+  const runtimeSections = [
+    normalised.context,
+    normalised.orientation,
+    normalised.recognition,
+    normalised.signalRoles,
+    normalised.patternMechanics,
+    normalised.patternSynthesis,
+    normalised.strengths,
+    normalised.narrowing,
+    normalised.application,
+    normalised.closingIntegration,
+  ];
+
+  assert.equal(normalised.orientation.length, 96);
+  assert.equal(normalised.orientation.every((row) => row.status === 'active'), true);
+  assert.equal(runtimeSections.flat().every((row) => row.status === 'active'), true);
 });
 
 test('invalid score shape, rank position, pattern order, mode, model, and weight produce diagnostics', () => {

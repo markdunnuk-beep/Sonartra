@@ -460,6 +460,19 @@ test('publish audit blocks missing context row and incomplete required coverage'
   assert.equal(hasCode(result, 'INCOMPLETE_PATTERN_COVERAGE'), true);
 });
 
+test('publish audit blocks draft-only orientation coverage', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      resultLanguageRows: fixture.resultLanguageRows.map((row) =>
+        row.section_key === 'orientation' ? { ...row, status: 'draft' } : row,
+      ),
+    })),
+  );
+
+  assert.equal(hasCode(result, 'INCOMPLETE_PATTERN_SCORE_SHAPE_COVERAGE'), true);
+});
+
 test('publish audit blocks missing preview case and invalid preview references', async () => {
   const missing = await auditFixture(mutateFixture((fixture) => ({ ...fixture, previewCases: [] })));
   const invalid = await auditFixture(

@@ -12,5 +12,5 @@ Current source status:
 - `02_Questions`, `03_Options`, and `04_Option_Weights` are structurally complete with a proposed 24-question Flow State runtime definition layer.
 - The `02`-`04` rows are marked `active` so the package can serve as a full importer/audit fixture, but the question, option, and weight content source status is still draft/proposed pending review because no approved Flow State question set was found in the repository.
 - `05_Context` is populated from the Flow State authoring context.
-- `06_Orientation` through `14_Closing_Integration` are populated from the existing Flow State PSV files in `content/authoring/generated`.
+- `06_Orientation` through `14_Closing_Integration` are populated from the existing Flow State PSV files in `content/authoring/generated` and marked `active` so they can satisfy runtime result-content publish coverage.
 - `15_Report_Preview` contains generic Flow State preview cases for import/audit testing.
