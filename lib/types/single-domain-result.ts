@@ -7,6 +7,28 @@ export type SingleDomainResultScoreShape = {
   policyVersion: string;
 };
 
+export type RankedPatternResultPayloadSections = {
+  assessment?: unknown;
+  attempt?: unknown;
+  domain?: unknown;
+  topSignal?: unknown;
+  rankedSignals?: unknown;
+  normalizedScores?: unknown;
+  scoreShape?: SingleDomainResultScoreShape;
+  patternKey?: string;
+  context?: unknown;
+  orientation?: unknown;
+  recognition?: unknown;
+  signalRoles?: unknown;
+  patternMechanics?: unknown;
+  patternSynthesis?: unknown;
+  strengths?: unknown;
+  narrowing?: unknown;
+  application?: unknown;
+  closingIntegration?: unknown;
+  lookupKeys?: readonly string[];
+};
+
 export type SingleDomainResultMetadata = {
   assessmentKey: string;
   assessmentTitle: string;
@@ -143,6 +165,21 @@ export type SingleDomainResultPayload = {
   metadata: SingleDomainResultMetadata;
   patternKey?: string;
   scoreShape?: SingleDomainResultScoreShape;
+  assessment?: unknown;
+  attempt?: unknown;
+  domain?: unknown;
+  topSignal?: unknown;
+  rankedSignals?: unknown;
+  normalizedScores?: unknown;
+  context?: unknown;
+  orientation?: unknown;
+  recognition?: unknown;
+  signalRoles?: unknown;
+  patternMechanics?: unknown;
+  patternSynthesis?: unknown;
+  strengths?: unknown;
+  narrowing?: unknown;
+  closingIntegration?: unknown;
   intro: SingleDomainResultIntro;
   hero: SingleDomainResultHero;
   signals: readonly SingleDomainResultSignal[];
@@ -180,6 +217,47 @@ function isScoreShape(value: unknown): value is SingleDomainResultScoreShape {
     )
     && isNonEmptyString(value.policyKey)
     && isNonEmptyString(value.policyVersion);
+}
+
+function isNonEmptyArray(value: unknown): value is readonly unknown[] {
+  return Array.isArray(value) && value.length > 0;
+}
+
+function isRankedPatternResultPayload(value: Record<string, unknown>): boolean {
+  return isRecord(value.metadata)
+    && value.metadata.mode === 'single_domain'
+    && value.metadata.resultModelKey === 'ranked_pattern'
+    && isNonEmptyString(value.metadata.assessmentVersionId)
+    && isNonEmptyString(value.metadata.attemptId)
+    && isNonEmptyString(value.metadata.domainKey)
+    && isNonEmptyString(value.metadata.generatedAt)
+    && isRecord(value.assessment)
+    && isRecord(value.attempt)
+    && isRecord(value.domain)
+    && isRecord(value.topSignal)
+    && isNonEmptyArray(value.rankedSignals)
+    && isNonEmptyArray(value.normalizedScores)
+    && isScoreShape(value.scoreShape)
+    && isNonEmptyString(value.patternKey)
+    && isRecord(value.context)
+    && isRecord(value.orientation)
+    && isRecord(value.recognition)
+    && isNonEmptyArray(value.signalRoles)
+    && isRecord(value.patternMechanics)
+    && isRecord(value.patternSynthesis)
+    && isNonEmptyArray(value.strengths)
+    && isNonEmptyArray(value.narrowing)
+    && isNonEmptyArray(value.application)
+    && isRecord(value.closingIntegration)
+    && isRecord(value.diagnostics)
+    && value.diagnostics.readinessStatus === 'ready'
+    && value.diagnostics.scoringMethod === 'option_signal_weights_only'
+    && value.diagnostics.normalizationMethod === 'largest_remainder_integer_percentages'
+    && isFiniteNumber(value.diagnostics.answeredQuestionCount)
+    && isFiniteNumber(value.diagnostics.totalQuestionCount)
+    && isRecord(value.diagnostics.scoreShapePolicy)
+    && isRecord(value.diagnostics.patternLookup)
+    && Array.isArray(value.diagnostics.resultLanguageLookupKeys);
 }
 
 function isApplicationStatement(value: unknown): value is SingleDomainApplicationStatement {
@@ -240,6 +318,10 @@ function isSignal(value: unknown): value is SingleDomainResultSignal {
 export function isSingleDomainResultPayload(value: unknown): value is SingleDomainResultPayload {
   if (!isRecord(value)) {
     return false;
+  }
+
+  if (isRankedPatternResultPayload(value)) {
+    return true;
   }
 
   if (

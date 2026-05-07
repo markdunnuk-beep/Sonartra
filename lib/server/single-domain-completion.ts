@@ -18,6 +18,10 @@ import type {
   RuntimeResponseSet,
 } from '@/lib/engine/types';
 import { loadSingleDomainRuntimeDefinition } from '@/lib/server/single-domain-runtime-definition';
+import {
+  buildRankedPatternCanonicalResultSections,
+  loadRankedPatternResultLanguage,
+} from '@/lib/server/ranked-pattern-result-language';
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
@@ -230,6 +234,33 @@ export function classifyRankedPatternResultSignals(
       normalizedPercentage: signal.normalized_score,
     })),
   );
+}
+
+function buildRankedPatternResultSignal(params: {
+  signalKey: string;
+  signalLabel: string;
+  rank: number;
+  normalizedScore: number;
+  rawScore: number;
+  signalCount: number;
+}): SingleDomainResultSignal {
+  const position = getSignalPosition(params.rank, params.signalCount);
+  return Object.freeze({
+    signal_key: params.signalKey,
+    signal_label: params.signalLabel,
+    rank: params.rank,
+    normalized_score: params.normalizedScore,
+    raw_score: params.rawScore,
+    position,
+    position_label: POSITION_LABELS[position],
+    chapter_intro: '',
+    chapter_how_it_shows_up: '',
+    chapter_value_outcome: '',
+    chapter_value_team_effect: '',
+    chapter_risk_behaviour: '',
+    chapter_risk_impact: '',
+    chapter_development: '',
+  });
 }
 
 function formatApplicationSourceDiagnostic(diagnostic: ApplicationSourceDiagnostic): string {
@@ -897,6 +928,146 @@ export async function buildSingleDomainResultPayload(params: {
     || left.signalKey.localeCompare(right.signalKey)
     || left.signalId.localeCompare(right.signalId)
   ));
+  if (runtimeDefinition.metadata.resultModelKey === rankedPatternResultModelKey) {
+    const signals: readonly SingleDomainResultSignal[] = Object.freeze(
+      rankedSignals.map((signal) =>
+        buildRankedPatternResultSignal({
+          signalKey: signal.signalKey,
+          signalLabel: signal.signalTitle,
+          rank: signal.rank,
+          normalizedScore: signal.percentage,
+          rawScore: signal.rawTotal,
+          signalCount: rankedSignals.length,
+        }),
+      ),
+    );
+    const rankedPatternScoreShape = classifyRankedPatternResultSignals(signals);
+
+    if (rankedPatternScoreShape.diagnostics.length > 0 || !rankedPatternScoreShape.scoreShape) {
+      throw new SingleDomainCompletionError(
+        [
+          'ranked_pattern_score_shape_classification_failed',
+          ...rankedPatternScoreShape.diagnostics.map((diagnostic) => diagnostic.code),
+        ].join(': '),
+      );
+    }
+
+    const scoreShape = Object.freeze({
+      value: rankedPatternScoreShape.scoreShape,
+      policyKey: rankedPatternScoreShape.policyKey,
+      policyVersion: rankedPatternScoreShape.policyVersion,
+    } satisfies SingleDomainResultScoreShape);
+    const patternKey = buildRankedPatternKeyFromResultSignals(signals);
+    const rankedPatternLanguage = await loadRankedPatternResultLanguage({
+      db: params.db,
+      assessmentVersionId: params.assessmentVersionId,
+      domainKey: runtimeDefinition.domain.key,
+      patternKey,
+      scoreShape: scoreShape.value,
+      rankedSignals: signals,
+    });
+    const rankedPatternSections = buildRankedPatternCanonicalResultSections({
+      language: rankedPatternLanguage,
+      rankedSignals: signals,
+      scoreShape,
+      patternKey,
+    });
+    const topRankedSignal = signals[0]!;
+    const payload = Object.freeze({
+      metadata: Object.freeze({
+        payloadVersion: 'ranked_pattern_v1',
+        contract: 'single_domain_ranked_pattern',
+        assessmentVersionId: runtimeDefinition.metadata.assessmentVersionId,
+        assessmentKey: runtimeDefinition.metadata.assessmentKey,
+        assessmentTitle: runtimeDefinition.metadata.assessmentTitle,
+        version: runtimeDefinition.metadata.assessmentVersionTag,
+        attemptId: params.responses.attemptId,
+        mode: 'single_domain',
+        resultModelKey: rankedPatternResultModelKey,
+        domainKey: runtimeDefinition.domain.key,
+        generatedAt: normalizedResult.diagnostics.generatedAt,
+        completedAt: params.responses.submittedAt,
+      }),
+      assessment: Object.freeze({
+        key: runtimeDefinition.metadata.assessmentKey,
+        title: runtimeDefinition.metadata.assessmentTitle,
+        version: runtimeDefinition.metadata.assessmentVersionTag,
+        description: runtimeDefinition.metadata.assessmentDescription,
+      }),
+      attempt: Object.freeze({
+        attemptId: params.responses.attemptId,
+        submittedAt: params.responses.submittedAt,
+        completedAt: params.responses.submittedAt,
+        answeredQuestionCount: scoreResult.diagnostics.answeredQuestions,
+        totalQuestionCount: scoreResult.diagnostics.totalQuestions,
+      }),
+      domain: Object.freeze({
+        key: runtimeDefinition.domain.key,
+        title: runtimeDefinition.domain.title,
+        description: runtimeDefinition.domain.description,
+        context: rankedPatternSections.context,
+      }),
+      topSignal: Object.freeze({
+        signalKey: topRankedSignal.signal_key,
+        signalLabel: topRankedSignal.signal_label,
+        rank: topRankedSignal.rank,
+        rawScore: topRankedSignal.raw_score,
+        normalizedPercentage: topRankedSignal.normalized_score,
+      }),
+      rankedSignals: rankedPatternSections.rankedSignals,
+      normalizedScores: rankedPatternSections.normalizedScores,
+      scoreShape,
+      patternKey,
+      context: rankedPatternSections.context,
+      orientation: rankedPatternSections.orientation,
+      recognition: rankedPatternSections.recognition,
+      signalRoles: rankedPatternSections.signalRoles,
+      patternMechanics: rankedPatternSections.patternMechanics,
+      patternSynthesis: rankedPatternSections.patternSynthesis,
+      strengths: rankedPatternSections.strengths,
+      narrowing: rankedPatternSections.narrowing,
+      application: rankedPatternSections.application,
+      closingIntegration: rankedPatternSections.closingIntegration,
+      diagnostics: Object.freeze({
+        readinessStatus: 'ready' as const,
+        scoringMethod: scoreResult.diagnostics.scoringMethod,
+        normalizationMethod: normalizedResult.diagnostics.normalizationMethod,
+        answeredQuestionCount: scoreResult.diagnostics.answeredQuestions,
+        totalQuestionCount: scoreResult.diagnostics.totalQuestions,
+        signalCount: runtimeDefinition.diagnostics.counts.signalCount,
+        derivedPairCount: runtimeDefinition.diagnostics.counts.derivedPairCount,
+        topPair: null,
+        scoreShapePolicy: Object.freeze({
+          policyKey: scoreShape.policyKey,
+          policyVersion: scoreShape.policyVersion,
+        }),
+        patternLookup: Object.freeze({
+          patternKey,
+          rankSignalKeys: signals.map((signal) => signal.signal_key),
+        }),
+        resultLanguageLookupKeys: rankedPatternLanguage.lookupKeys,
+        counts: {
+          domainCount: runtimeDefinition.diagnostics.counts.domainCount,
+          questionCount: runtimeDefinition.diagnostics.counts.questionCount,
+          optionCount: runtimeDefinition.diagnostics.counts.optionCount,
+          weightCount: runtimeDefinition.diagnostics.counts.weightCount,
+        },
+        warnings: Object.freeze([
+          ...scoreResult.diagnostics.warnings,
+          ...normalizedResult.diagnostics.warnings,
+        ]),
+      }),
+    });
+
+    if (!isSingleDomainResultPayload(payload)) {
+      throw new SingleDomainCompletionError(
+        `Generated ranked-pattern result payload is malformed for attempt "${params.responses.attemptId}".`,
+      );
+    }
+
+    return payload as SingleDomainResultPayload;
+  }
+
   const topSignal = rankedSignals[0]!;
   const secondSignal = rankedSignals[1];
   const topPairKey = secondSignal

@@ -738,7 +738,17 @@ export async function evaluateSingleDomainRuntimeDefinition(
     loadQuestions(db, assessmentVersionId),
     loadOptions(db, assessmentVersionId),
     loadWeights(db, assessmentVersionId),
-    getSingleDomainLanguageBundle(db, assessmentVersionId, { includeSignalChapters: false }),
+    context.result_model_key === 'ranked_pattern'
+      ? Promise.resolve({
+          DOMAIN_FRAMING: Object.freeze([]),
+          HERO_PAIRS: Object.freeze([]),
+          DRIVER_CLAIMS: Object.freeze([]),
+          SIGNAL_CHAPTERS: Object.freeze([]),
+          BALANCING_SECTIONS: Object.freeze([]),
+          PAIR_SUMMARIES: Object.freeze([]),
+          APPLICATION_STATEMENTS: Object.freeze([]),
+        })
+      : getSingleDomainLanguageBundle(db, assessmentVersionId, { includeSignalChapters: false }),
   ]);
 
   const issues: SingleDomainDraftReadinessIssue[] = [];
@@ -992,16 +1002,18 @@ export async function evaluateSingleDomainRuntimeDefinition(
     );
   }
 
-  validateLanguageKeys({
-    assessmentVersionId,
-    domainKey: runtimeDomainRow?.domain_key ?? null,
-    signalKeys: expectedSignalKeys,
-    pairKeys: derivedPairKeys,
-    languageBundle,
-    issues,
-  });
+  if (context.result_model_key !== 'ranked_pattern') {
+    validateLanguageKeys({
+      assessmentVersionId,
+      domainKey: runtimeDomainRow?.domain_key ?? null,
+      signalKeys: expectedSignalKeys,
+      pairKeys: derivedPairKeys,
+      languageBundle,
+      issues,
+    });
+  }
 
-  if (languageRowCounts.DOMAIN_FRAMING < expectedLanguageRowCounts.DOMAIN_FRAMING) {
+  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.DOMAIN_FRAMING < expectedLanguageRowCounts.DOMAIN_FRAMING) {
     issues.push(
       createIssue(
         'domain_framing_count_mismatch',
@@ -1010,7 +1022,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.HERO_PAIRS !== expectedLanguageRowCounts.HERO_PAIRS) {
+  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.HERO_PAIRS !== expectedLanguageRowCounts.HERO_PAIRS) {
     issues.push(
       createIssue(
         'hero_pairs_count_mismatch',
@@ -1019,7 +1031,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.DRIVER_CLAIMS !== expectedLanguageRowCounts.DRIVER_CLAIMS) {
+  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.DRIVER_CLAIMS !== expectedLanguageRowCounts.DRIVER_CLAIMS) {
     issues.push(
       createIssue(
         'driver_claims_count_mismatch',
@@ -1028,7 +1040,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.BALANCING_SECTIONS > expectedLanguageRowCounts.BALANCING_SECTIONS) {
+  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.BALANCING_SECTIONS > expectedLanguageRowCounts.BALANCING_SECTIONS) {
     issues.push(
       createIssue(
         'balancing_sections_count_mismatch',
@@ -1037,7 +1049,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.PAIR_SUMMARIES !== expectedLanguageRowCounts.PAIR_SUMMARIES) {
+  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.PAIR_SUMMARIES !== expectedLanguageRowCounts.PAIR_SUMMARIES) {
     issues.push(
       createIssue(
         'pair_summaries_count_mismatch',
@@ -1046,7 +1058,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (languageRowCounts.APPLICATION_STATEMENTS !== expectedLanguageRowCounts.APPLICATION_STATEMENTS) {
+  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.APPLICATION_STATEMENTS !== expectedLanguageRowCounts.APPLICATION_STATEMENTS) {
     issues.push(
       createIssue(
         'application_statements_count_mismatch',
