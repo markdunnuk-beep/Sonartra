@@ -415,6 +415,23 @@ async function loadPersistedPayload(db: Queryable, resultId: string): Promise<un
   return payload;
 }
 
+async function markFixtureAssessmentVersionPublished(params: {
+  readonly db: Queryable;
+  readonly assessmentVersionId: string;
+}): Promise<void> {
+  await params.db.query(
+    `
+    UPDATE assessment_versions
+    SET
+      lifecycle_status = 'PUBLISHED',
+      published_at = COALESCE(published_at, NOW()),
+      updated_at = NOW()
+    WHERE id = $1::uuid
+    `,
+    [params.assessmentVersionId],
+  );
+}
+
 function payloadRecord(payload: unknown): Record<string, unknown> {
   if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
     throw new Error('Expected persisted payload object.');
@@ -499,6 +516,10 @@ export async function runFlowStateRankedPatternFixtureProof(argv: readonly strin
             .map((finding) => `[${finding.code}] ${finding.message}`),
         ].join('\n'));
       }
+      await markFixtureAssessmentVersionPublished({
+        db: client,
+        assessmentVersionId: runtimeApply.assessmentVersionId,
+      });
 
       const version = await loadAssessmentVersion(client, runtimeApply.assessmentVersionId);
       const userId = await upsertFixtureUser(client);

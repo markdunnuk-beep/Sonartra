@@ -121,3 +121,14 @@ test('Flow State proof harness uses the real completion service and excludes adm
   assert.equal(FLOW_STATE_REQUIRED_PAYLOAD_SECTIONS.includes('validationReference' as never), false);
   assert.equal(FLOW_STATE_REQUIRED_PAYLOAD_SECTIONS.includes('lookups' as never), false);
 });
+
+test('Flow State proof publishes the local fixture version before workspace summary verification', () => {
+  const source = readFileSync(
+    'scripts/assessment-packages/prove-flow-state-ranked-pattern-fixture.ts',
+    'utf8',
+  );
+
+  assert.match(source, /markFixtureAssessmentVersionPublished/);
+  assert.match(source, /lifecycle_status = 'PUBLISHED'/);
+  assert.match(source, /buildAssessmentWorkspaceViewModel\(\{ db: client, userId \}\)/);
+});
