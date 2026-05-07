@@ -256,15 +256,15 @@ function dbForFixture(fixture: Fixture): RankedPatternPersistenceDbClient {
       } else if (text.includes('FROM option_signal_weights')) {
         rows = fixture.optionWeights;
       } else if (text.includes('FROM assessment_ranked_patterns')) {
-        rows = fixture.rankedPatterns;
+        rows = fixture.rankedPatterns.filter((row) => row.status === 'active');
       } else if (text.includes('FROM assessment_score_shape_rules')) {
-        rows = fixture.scoreShapeRules;
+        rows = fixture.scoreShapeRules.filter((row) => row.status === 'active');
       } else if (text.includes('FROM assessment_result_section_definitions')) {
-        rows = fixture.sectionDefinitions;
+        rows = fixture.sectionDefinitions.filter((row) => row.status === 'active');
       } else if (text.includes('FROM assessment_result_language_rows')) {
-        rows = fixture.resultLanguageRows;
+        rows = fixture.resultLanguageRows.filter((row) => row.status === 'active');
       } else if (text.includes('FROM assessment_report_preview_cases')) {
-        rows = fixture.previewCases;
+        rows = fixture.previewCases.filter((row) => row.status === 'active');
       }
       return { rows: rows as readonly T[] };
     },
@@ -360,6 +360,19 @@ test('publish audit blocks fewer than twenty-four ranked patterns and invalid pa
   assert.equal(hasCode(result, 'INVALID_RANKED_PATTERN_COUNT'), true);
   assert.equal(hasCode(result, 'PATTERN_KEY_RANK_ORDER_MISMATCH'), true);
   assert.equal(hasCode(result, 'RANK_TUPLE_SIGNAL_SET_MISMATCH'), true);
+});
+
+test('publish audit ignores draft ranked patterns and blocks active language references to them', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      rankedPatterns: fixture.rankedPatterns.map((pattern) => ({ ...pattern, status: 'draft' })),
+    })),
+  );
+
+  assert.equal(hasCode(result, 'INVALID_RANKED_PATTERN_COUNT'), true);
+  assert.equal(hasCode(result, 'MISSING_RANKED_PATTERN_PERMUTATIONS'), true);
+  assert.equal(hasCode(result, 'RESULT_LANGUAGE_UNKNOWN_PATTERN'), true);
 });
 
 test('publish audit blocks duplicate pattern keys and duplicate rank tuples', async () => {

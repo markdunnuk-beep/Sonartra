@@ -7,6 +7,7 @@ import {
   persistRankedPatternResultLanguage,
   planRankedPatternResultLanguagePersistence,
 } from '@/content/assessment-packages/import-contract/ranked-pattern-import-persistence';
+import { parseRankedPatternWorkbookFile } from '@/content/assessment-packages/import-contract/ranked-pattern-workbook-parser';
 import type {
   ParsedRankedPatternWorkbookFile,
   ParsedRankedPatternWorkbookRow,
@@ -214,6 +215,20 @@ function planFromWorkbook(
   });
 }
 
+function permutations<T>(items: readonly T[]): readonly (readonly T[])[] {
+  if (items.length === 0) {
+    return Object.freeze([Object.freeze([])]);
+  }
+
+  return Object.freeze(
+    items.flatMap((item, index) =>
+      permutations([...items.slice(0, index), ...items.slice(index + 1)]).map((rest) =>
+        Object.freeze([item, ...rest]),
+      ),
+    ),
+  );
+}
+
 test('dry-run planner creates section definitions exactly for runtime result sheets 05 through 14', () => {
   const plan = planFromWorkbook(baseResultWorkbook());
   const sectionDefinitionOps = plan.operations.filter(
@@ -284,6 +299,29 @@ test('ranked patterns are derived and duplicate matching tuples are deduplicated
   );
 });
 
+test('ranked pattern derivation merges active status from matching rank-bearing sections', () => {
+  const plan = planFromWorkbook(
+    baseResultWorkbook({
+      '06_Orientation': parsedSheet('06_Orientation', [
+        patternRow({ status: 'draft', lookup_key: 'orientation::balanced' }, 2),
+      ]),
+      '07_Recognition': parsedSheet('07_Recognition', [
+        patternRow({ status: 'active', lookup_key: 'recognition::balanced' }, 3),
+      ]),
+    }),
+  );
+  const rankedPatternOps = plan.operations.filter(
+    (operation) => operation.table === 'assessment_ranked_patterns',
+  );
+
+  assert.equal(rankedPatternOps.length, 1);
+  assert.equal(rankedPatternOps[0]?.values.status, 'active');
+  assert.equal(
+    plan.diagnostics.some((diagnostic) => diagnostic.code === 'RESULT_LANGUAGE_UNKNOWN_PATTERN'),
+    false,
+  );
+});
+
 test('conflicting duplicate pattern tuple is blocked with source row number', () => {
   const plan = planFromWorkbook(
     baseResultWorkbook({
@@ -304,6 +342,44 @@ test('conflicting duplicate pattern tuple is blocked with source row number', ()
   );
 
   assert.equal(conflict?.rowNumber, 9);
+});
+
+test('active result language rows cannot reference an unknown ranked pattern', () => {
+  const plan = planFromWorkbook(
+    baseResultWorkbook({
+      '11_Strengths': parsedSheet('11_Strengths', [
+        parsedRow(
+          {
+            domain_key: 'domain_key',
+            pattern_key: 'signal_a_signal_b_signal_d_signal_c',
+            strength_key: 'strength_1',
+            priority: '1',
+            strength_title: 'Strength',
+            strength_text: 'Strength text',
+            linked_signal_key: 'signal_a',
+            status: 'active',
+            lookup_key: 'strength::unknown',
+          },
+          11,
+        ),
+      ]),
+    }),
+  );
+  const unknownPattern = plan.diagnostics.find(
+    (diagnostic) => diagnostic.code === 'RESULT_LANGUAGE_UNKNOWN_PATTERN',
+  );
+
+  assert.equal(unknownPattern?.sheetKey, '11_Strengths');
+  assert.equal(unknownPattern?.rowNumber, 11);
+});
+
+test('non-rank-bearing pattern rows are accepted when they resolve to a derived pattern', () => {
+  const plan = planFromWorkbook(baseResultWorkbook());
+
+  assert.equal(
+    plan.diagnostics.some((diagnostic) => diagnostic.code === 'RESULT_LANGUAGE_UNKNOWN_PATTERN'),
+    false,
+  );
 });
 
 test('pattern key mismatch, invalid score shape, and invalid rank position are blocked', () => {
@@ -339,6 +415,64 @@ test('pattern key mismatch, invalid score shape, and invalid rank position are b
   assert.equal(codes.has('PATTERN_KEY_RANK_ORDER_MISMATCH'), true);
   assert.equal(codes.has('UNSUPPORTED_SCORE_SHAPE'), true);
   assert.equal(codes.has('UNSUPPORTED_RANK_POSITION'), true);
+});
+
+test('all twenty-four permutations of four generic signals are accepted by the planner', () => {
+  const signalPermutations = permutations(['signal_a', 'signal_b', 'signal_c', 'signal_d']);
+  const patternRows = signalPermutations.map((signals, index) =>
+    patternRow(
+      {
+        pattern_key: signals.join('_'),
+        rank_1_signal_key: signals[0],
+        rank_2_signal_key: signals[1],
+        rank_3_signal_key: signals[2],
+        rank_4_signal_key: signals[3],
+        lookup_key: `orientation::${index + 1}`,
+      },
+      index + 2,
+    ),
+  );
+  const plan = planFromWorkbook(
+    baseResultWorkbook({
+      '06_Orientation': parsedSheet('06_Orientation', patternRows),
+      '07_Recognition': parsedSheet('07_Recognition', []),
+      '09_Pattern_Mechanics': parsedSheet('09_Pattern_Mechanics', []),
+      '10_Pattern_Synthesis': parsedSheet('10_Pattern_Synthesis', []),
+      '11_Strengths': parsedSheet('11_Strengths', []),
+      '12_Narrowing': parsedSheet('12_Narrowing', []),
+      '13_Application': parsedSheet('13_Application', []),
+      '14_Closing_Integration': parsedSheet('14_Closing_Integration', []),
+    }),
+  );
+
+  assert.equal(plan.operationCountsByTable.assessment_ranked_patterns, 24);
+  assert.equal(
+    plan.diagnostics.some((diagnostic) =>
+      [
+        'CONFLICTING_RANKED_PATTERN_TUPLE',
+        'PATTERN_KEY_RANK_ORDER_MISMATCH',
+        'RESULT_LANGUAGE_UNKNOWN_PATTERN',
+      ].includes(diagnostic.code),
+    ),
+    false,
+  );
+});
+
+test('Flow State workbook plans twenty-four active ranked patterns without unknown result-language patterns', () => {
+  const parsedWorkbook = parseRankedPatternWorkbookFile(
+    'content/assessment-packages/flow-state/sonartra_reader_first_import_schema_FLOW_STATE_EXAMPLE.xlsx',
+  );
+  const plan = planFromWorkbook(parsedWorkbook);
+  const activeRankedPatternOps = plan.operations.filter(
+    (operation) =>
+      operation.table === 'assessment_ranked_patterns' && operation.values.status === 'active',
+  );
+
+  assert.equal(activeRankedPatternOps.length, 24);
+  assert.equal(
+    plan.diagnostics.some((diagnostic) => diagnostic.code === 'RESULT_LANGUAGE_UNKNOWN_PATTERN'),
+    false,
+  );
 });
 
 test('result language rows preserve field values', () => {

@@ -1195,6 +1195,7 @@ function planRankedPatterns(params: {
       continue;
     }
     rankTupleByPatternKey.set(key, rankTuple);
+    const rowStatus = resultStatus(row.status);
 
     if (!operations.has(key)) {
       operations.set(
@@ -1213,14 +1214,78 @@ function planRankedPatterns(params: {
             rank_2_signal_key: row.rank2SignalKey,
             rank_3_signal_key: row.rank3SignalKey,
             rank_4_signal_key: row.rank4SignalKey,
-            status: resultStatus(row.status),
+            status: rowStatus,
           },
         }),
       );
+    } else {
+      const existingOperation = operations.get(key);
+      if (existingOperation && existingOperation.values.status !== 'active' && rowStatus === 'active') {
+        operations.set(
+          key,
+          resultLanguageOperation({
+            ...existingOperation,
+            sourceSheetKey: row.sourceSheetKey,
+            sourceRowNumber: row.sourceRowNumber,
+            values: {
+              ...existingOperation.values,
+              status: 'active',
+            },
+          }),
+        );
+      }
     }
   }
 
   return Object.freeze([...operations.values()]);
+}
+
+type PatternLanguageReferenceRow = {
+  readonly sourceSheetKey: RankedPatternImportSheetKey;
+  readonly sourceRowNumber: number;
+  readonly status: string | null;
+  readonly lookupKey: string | null;
+  readonly domainKey: string | null;
+  readonly patternKey: string | null;
+};
+
+function patternLanguageReferenceRows(
+  normalisedPackage: NormalisedRankedPatternPackage,
+): readonly PatternLanguageReferenceRow[] {
+  return [
+    ...normalisedPackage.orientation,
+    ...normalisedPackage.recognition,
+    ...normalisedPackage.patternMechanics,
+    ...normalisedPackage.patternSynthesis,
+    ...normalisedPackage.strengths,
+    ...normalisedPackage.narrowing,
+    ...normalisedPackage.application,
+    ...normalisedPackage.closingIntegration,
+  ];
+}
+
+function validateResultLanguagePatternReferences(params: {
+  readonly normalisedPackage: NormalisedRankedPatternPackage;
+  readonly activeRankedPatternKeys: ReadonlySet<string>;
+  readonly diagnostics: RankedPatternResultLanguagePersistenceDiagnostic[];
+}): void {
+  for (const row of patternLanguageReferenceRows(params.normalisedPackage)) {
+    if (resultStatus(row.status) !== 'active' || !row.domainKey || !row.patternKey) {
+      continue;
+    }
+
+    const key = `${row.domainKey}::${row.patternKey}`;
+    if (!params.activeRankedPatternKeys.has(key)) {
+      addResultLanguageDiagnostic(params.diagnostics, {
+        code: 'RESULT_LANGUAGE_UNKNOWN_PATTERN',
+        message: `Runtime result language row references unknown active ranked pattern ${row.patternKey}.`,
+        sheetKey: row.sourceSheetKey,
+        rowNumber: row.sourceRowNumber,
+        fieldKey: 'pattern_key',
+        lookupKey: row.lookupKey,
+      });
+    }
+  }
 }
 
 function fieldValuesPresent(values: Readonly<Record<string, unknown>>): boolean {
@@ -1595,11 +1660,21 @@ export function planRankedPatternResultLanguagePersistence(
     });
   }
 
-  operations.push(...planRankedPatterns({
+  const rankedPatternOperations = planRankedPatterns({
     assessmentVersionId: input.assessmentVersionId,
     normalisedPackage: input.normalisedPackage,
     diagnostics,
-  }));
+  });
+  operations.push(...rankedPatternOperations);
+  validateResultLanguagePatternReferences({
+    normalisedPackage: input.normalisedPackage,
+    activeRankedPatternKeys: new Set(
+      rankedPatternOperations
+        .filter((operation) => operation.values.status === 'active')
+        .map((operation) => `${operation.values.domain_key ?? ''}::${operation.values.pattern_key ?? ''}`),
+    ),
+    diagnostics,
+  });
   operations.push(
     resultLanguageOperation({
       table: 'assessment_score_shape_rules',
