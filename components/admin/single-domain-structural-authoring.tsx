@@ -4,6 +4,7 @@ import { useActionState, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { AdminPublishedNoDraftStageState } from '@/components/admin/admin-assessment-draft-state';
+import { RankedPatternImportPanel } from '@/components/admin/ranked-pattern-import-panel';
 import {
   AdminAssessmentPublishForm,
   getAdminAssessmentPublishDisabledReason,
@@ -1707,6 +1708,11 @@ export function SingleDomainReviewAuthoring() {
           </div>
         </SurfaceCard>
       ) : null}
+      <RankedPatternImportPanel
+        assessmentId={assessment.assessmentId}
+        assessmentKey={assessment.assessmentKey}
+        latestDraftVersion={assessment.latestDraftVersion}
+      />
       <div className="grid gap-4 xl:grid-cols-2">
         {reviewSections.map((section) => (
           <SurfaceCard className="p-5" key={section.key}>

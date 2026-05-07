@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 
 import {
   rankedPatternImportManifestBySheetKey,
