@@ -374,22 +374,35 @@ test('publish audit blocks duplicate pattern keys and duplicate rank tuples', as
   assert.equal(hasCode(result, 'DUPLICATE_RANK_TUPLE'), true);
 });
 
-test('publish audit blocks unsupported score shape and missing score-shape policy', async () => {
-  const unsupported = await auditFixture(
-    mutateFixture((fixture) => ({
-      ...fixture,
-      resultLanguageRows: [{ ...fixture.resultLanguageRows[1], score_shape: 'unsupported_shape' }, ...fixture.resultLanguageRows.slice(2)],
-    })),
-  );
-  const missingRules = await auditFixture(
+test('publish audit uses the fixed platform score-shape policy when explicit rules are absent', async () => {
+  const result = await auditFixture(
     mutateFixture((fixture) => ({
       ...fixture,
       scoreShapeRules: [],
     })),
   );
 
+  assert.equal(result.canPublish, true);
+  assert.equal(hasCode(result, 'MISSING_SCORE_SHAPE_POLICY'), false);
+  assert.equal(hasCode(result, 'FIXED_SCORE_SHAPE_POLICY_ACTIVE'), true);
+});
+
+test('publish audit blocks unsupported score shape and incomplete explicit score-shape rules', async () => {
+  const unsupported = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      resultLanguageRows: [{ ...fixture.resultLanguageRows[1], score_shape: 'unsupported_shape' }, ...fixture.resultLanguageRows.slice(2)],
+    })),
+  );
+  const incompleteRules = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      scoreShapeRules: fixture.scoreShapeRules.slice(0, 3),
+    })),
+  );
+
   assert.equal(hasCode(unsupported, 'UNSUPPORTED_SCORE_SHAPE_IN_RESULT_LANGUAGE'), true);
-  assert.equal(hasCode(missingRules, 'MISSING_SCORE_SHAPE_POLICY'), true);
+  assert.equal(hasCode(incompleteRules, 'INCOMPLETE_SCORE_SHAPE_RULES'), true);
 });
 
 test('publish audit blocks missing section definitions and admin support runtime sections', async () => {

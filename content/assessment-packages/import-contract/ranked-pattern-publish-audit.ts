@@ -6,6 +6,7 @@ import {
   rankedPatternSupportedScoreShapes,
 } from './ranked-pattern-import-manifest';
 import type { RankedPatternPersistenceDbClient } from './ranked-pattern-import-persistence';
+import { getRankedPatternScoreShapePolicySummary } from './ranked-pattern-score-shape-policy';
 
 export type RankedPatternPublishAuditSeverity = 'blocking' | 'warning' | 'info';
 
@@ -244,6 +245,13 @@ function addBlocking(
   params: Omit<RankedPatternPublishAuditFinding, 'severity'>,
 ): void {
   findings.push(makeFinding({ ...params, severity: 'blocking' }));
+}
+
+function addInfo(
+  findings: RankedPatternPublishAuditFinding[],
+  params: Omit<RankedPatternPublishAuditFinding, 'severity'>,
+): void {
+  findings.push(makeFinding({ ...params, severity: 'info' }));
 }
 
 function uniqueTextValues(values: readonly (string | null)[]): readonly string[] {
@@ -955,11 +963,12 @@ function auditScoreShapes(
     }
   }
   if (state.scoreShapeRules.length === 0) {
-    addBlocking(findings, {
-      code: 'MISSING_SCORE_SHAPE_POLICY',
-      message: 'Publish requires explicit active score-shape rules or a named fixed platform policy; no fixed policy is currently configured.',
+    const policy = getRankedPatternScoreShapePolicySummary();
+    addInfo(findings, {
+      code: 'FIXED_SCORE_SHAPE_POLICY_ACTIVE',
+      message: `No explicit score-shape rules are stored; publish audit will use fixed platform policy ${policy.policyKey} ${policy.policyVersion}.`,
       category: 'score_shapes',
-      tableName: 'assessment_score_shape_rules',
+      relatedKeys: [policy.policyKey, policy.policyVersion],
     });
   } else {
     const missingShapes = rankedPatternSupportedScoreShapes.filter((shape) => !activeRuleShapes.includes(shape));
