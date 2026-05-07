@@ -511,9 +511,32 @@ export const rankedPatternImportManifest = [
   },
 ] as const satisfies readonly RankedPatternImportSheetManifestEntry[];
 
-export const rankedPatternImportManifestBySheetKey = Object.freeze(
-  Object.fromEntries(rankedPatternImportManifest.map((entry) => [entry.sheet_key, entry])),
-) as Readonly<Record<RankedPatternImportSheetKey, RankedPatternImportSheetManifestEntry>>;
+function buildRankedPatternManifestBySheetKey(): Readonly<
+  Record<RankedPatternImportSheetKey, RankedPatternImportSheetManifestEntry>
+> {
+  const manifestBySheetKey: Partial<
+    Record<RankedPatternImportSheetKey, RankedPatternImportSheetManifestEntry>
+  > = {};
+
+  for (const entry of rankedPatternImportManifest) {
+    manifestBySheetKey[entry.sheet_key] = entry;
+  }
+
+  for (const sheetKey of rankedPatternImportSheetKeys) {
+    if (!manifestBySheetKey[sheetKey]) {
+      throw new Error(`Missing ranked-pattern import manifest entry for sheet ${sheetKey}`);
+    }
+  }
+
+  return Object.freeze(
+    manifestBySheetKey as Record<
+      RankedPatternImportSheetKey,
+      RankedPatternImportSheetManifestEntry
+    >,
+  );
+}
+
+export const rankedPatternImportManifestBySheetKey = buildRankedPatternManifestBySheetKey();
 
 export function getRuntimeResultSectionKeys(): readonly RankedPatternRuntimeResultSheetKey[] {
   return rankedPatternRuntimeResultSheetKeys;

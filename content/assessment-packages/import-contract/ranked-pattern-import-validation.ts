@@ -34,6 +34,7 @@ export type RankedPatternImportDiagnostic = {
   readonly message: string;
   readonly sheetKey?: string;
   readonly rowIndex?: number;
+  readonly rowNumber?: number;
   readonly fieldKey?: string;
   readonly lookupKey?: string;
 };

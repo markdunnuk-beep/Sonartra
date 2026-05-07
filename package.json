@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "db:migrate": "tsx scripts/apply-db-migrations.ts",
     "audit:result-payloads": "tsx scripts/audit-legacy-result-payloads.ts",
+    "audit:ranked-pattern-package": "tsx scripts/assessment-packages/audit-ranked-pattern-workbook.ts",
     "convert:wplp80": "tsx scripts/convert-wplp80-excel-to-seeds.ts",
     "verify:wplp80": "tsx scripts/verify-wplp80-seeds.ts",
     "seed:wplp80": "tsx scripts/seed-wplp80.ts",
