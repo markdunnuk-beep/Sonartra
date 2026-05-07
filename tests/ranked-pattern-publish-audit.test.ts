@@ -475,6 +475,12 @@ test('publish audit blocks draft-only orientation coverage', async () => {
 
 test('publish audit blocks missing preview case and invalid preview references', async () => {
   const missing = await auditFixture(mutateFixture((fixture) => ({ ...fixture, previewCases: [] })));
+  const draftOnly = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      previewCases: fixture.previewCases.map((preview) => ({ ...preview, status: 'draft' })),
+    })),
+  );
   const invalid = await auditFixture(
     mutateFixture((fixture) => ({
       ...fixture,
@@ -491,6 +497,7 @@ test('publish audit blocks missing preview case and invalid preview references',
   );
 
   assert.equal(hasCode(missing, 'MISSING_PREVIEW_CASE'), true);
+  assert.equal(hasCode(draftOnly, 'MISSING_PREVIEW_CASE'), true);
   assert.equal(hasCode(invalid, 'PREVIEW_UNKNOWN_PATTERN'), true);
   assert.equal(hasCode(invalid, 'PREVIEW_UNSUPPORTED_SCORE_SHAPE'), true);
   assert.equal(hasCode(invalid, 'PREVIEW_RANKED_SIGNAL_KEYS_INVALID'), true);

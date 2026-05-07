@@ -217,6 +217,29 @@ test('Flow State workbook runtime result content rows normalise as publishable a
   assert.equal(runtimeSections.flat().every((row) => row.status === 'active'), true);
 });
 
+test('Flow State workbook preview cases normalise as active admin/import proof rows', () => {
+  const normalised = normaliseRankedPatternWorkbook(
+    parseRankedPatternWorkbookFile(
+      'content/assessment-packages/flow-state/sonartra_reader_first_import_schema_FLOW_STATE_EXAMPLE.xlsx',
+    ),
+  );
+
+  assert.equal(normalised.reportPreviewCases.length, 4);
+  assert.equal(normalised.reportPreviewCases.every((row) => row.status === 'active'), true);
+  assert.equal(
+    normalised.reportPreviewCases.every(
+      (row) =>
+        !!row.previewCaseKey &&
+        !!row.domainKey &&
+        row.rankedSignalKeys.length === 4 &&
+        row.normalisedScores.length === 4 &&
+        !!row.expectedScoreShape &&
+        !!row.expectedPatternKey,
+    ),
+    true,
+  );
+});
+
 test('invalid score shape, rank position, pattern order, mode, model, and weight produce diagnostics', () => {
   const normalised = normaliseRankedPatternWorkbook(
     parsedWorkbook({

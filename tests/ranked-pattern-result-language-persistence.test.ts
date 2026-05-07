@@ -270,8 +270,50 @@ test('dry-run planner creates result language rows for sheets 05 through 14 only
 
 test('dry-run planner creates preview cases without creating runtime result rows for preview sheet', () => {
   const plan = planFromWorkbook(baseResultWorkbook());
+  const previewOperation = plan.operations.find(
+    (operation) => operation.table === 'assessment_report_preview_cases',
+  );
 
   assert.equal(plan.operationCountsByTable.assessment_report_preview_cases, 1);
+  assert.equal(previewOperation?.values.status, 'active');
+  assert.equal(
+    plan.operations.some(
+      (operation) =>
+        operation.table === 'assessment_result_language_rows' &&
+        operation.sourceSheetKey === '15_Report_Preview',
+    ),
+    false,
+  );
+});
+
+test('draft preview cases persist as draft without becoming runtime result rows', () => {
+  const plan = planFromWorkbook(
+    baseResultWorkbook({
+      '15_Report_Preview': parsedSheet('15_Report_Preview', [
+        parsedRow({
+          preview_case_key: 'case_1',
+          domain_key: 'domain_key',
+          rank_1_signal_key: 'signal_a',
+          rank_2_signal_key: 'signal_b',
+          rank_3_signal_key: 'signal_c',
+          rank_4_signal_key: 'signal_d',
+          normalized_rank_1_percentage: '40',
+          normalized_rank_2_percentage: '30',
+          normalized_rank_3_percentage: '20',
+          normalized_rank_4_percentage: '10',
+          expected_score_shape: 'balanced',
+          expected_pattern_key: 'signal_a_signal_b_signal_c_signal_d',
+          status: 'draft',
+          lookup_key: 'preview::draft',
+        }),
+      ]),
+    }),
+  );
+  const previewOperation = plan.operations.find(
+    (operation) => operation.table === 'assessment_report_preview_cases',
+  );
+
+  assert.equal(previewOperation?.values.status, 'draft');
   assert.equal(
     plan.operations.some(
       (operation) =>
@@ -473,9 +515,14 @@ test('Flow State workbook plans twenty-four active ranked patterns without unkno
       operation.sourceSheetKey === '06_Orientation' &&
       operation.values.status === 'active',
   );
+  const activePreviewOps = plan.operations.filter(
+    (operation) =>
+      operation.table === 'assessment_report_preview_cases' && operation.values.status === 'active',
+  );
 
   assert.equal(activeRankedPatternOps.length, 24);
   assert.equal(activeOrientationOps.length, 96);
+  assert.equal(activePreviewOps.length, 4);
   assert.equal(
     plan.diagnostics.some((diagnostic) => diagnostic.code === 'RESULT_LANGUAGE_UNKNOWN_PATTERN'),
     false,
