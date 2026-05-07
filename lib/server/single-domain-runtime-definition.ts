@@ -36,6 +36,7 @@ type RuntimeContextRow = {
   assessment_version_id: string;
   assessment_version_tag: string;
   assessment_mode: string | null;
+  result_model_key: string | null;
 };
 
 type RuntimeDomainRow = {
@@ -155,7 +156,8 @@ async function loadRuntimeContext(
       a.description AS assessment_description,
       av.id AS assessment_version_id,
       av.version AS assessment_version_tag,
-      COALESCE(av.mode, a.mode) AS assessment_mode
+      COALESCE(av.mode, a.mode) AS assessment_mode,
+      av.result_model_key
     FROM assessment_versions av
     INNER JOIN assessments a ON a.id = av.assessment_id
     WHERE av.id = $1
@@ -1097,6 +1099,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
     assessmentVersionId: context.assessment_version_id,
     assessmentVersionTag: context.assessment_version_tag,
     mode: 'single_domain',
+    resultModelKey: context.result_model_key,
     assessmentDescription: context.assessment_description,
   };
 

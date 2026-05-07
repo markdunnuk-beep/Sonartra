@@ -1,4 +1,11 @@
 import type { AssessmentMode } from '@/lib/types/assessment';
+import type { RankedPatternScoreShape } from '@/content/assessment-packages/import-contract/ranked-pattern-import-manifest';
+
+export type SingleDomainResultScoreShape = {
+  value: RankedPatternScoreShape;
+  policyKey: string;
+  policyVersion: string;
+};
 
 export type SingleDomainResultMetadata = {
   assessmentKey: string;
@@ -119,6 +126,10 @@ export type SingleDomainResultDiagnostics = {
   signalCount: number;
   derivedPairCount: number;
   topPair: string | null;
+  scoreShapePolicy?: {
+    policyKey: string;
+    policyVersion: string;
+  };
   counts: {
     domainCount: number;
     questionCount: number;
@@ -130,6 +141,8 @@ export type SingleDomainResultDiagnostics = {
 
 export type SingleDomainResultPayload = {
   metadata: SingleDomainResultMetadata;
+  patternKey?: string;
+  scoreShape?: SingleDomainResultScoreShape;
   intro: SingleDomainResultIntro;
   hero: SingleDomainResultHero;
   signals: readonly SingleDomainResultSignal[];
@@ -155,6 +168,18 @@ function isNullableString(value: unknown): value is string | null {
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isScoreShape(value: unknown): value is SingleDomainResultScoreShape {
+  return isRecord(value)
+    && (
+      value.value === 'concentrated'
+      || value.value === 'paired'
+      || value.value === 'graduated'
+      || value.value === 'balanced'
+    )
+    && isNonEmptyString(value.policyKey)
+    && isNonEmptyString(value.policyVersion);
 }
 
 function isApplicationStatement(value: unknown): value is SingleDomainApplicationStatement {
@@ -227,6 +252,8 @@ export function isSingleDomainResultPayload(value: unknown): value is SingleDoma
     || !isNonEmptyString(value.metadata.domainKey)
     || !isNonEmptyString(value.metadata.generatedAt)
     || !isNullableString(value.metadata.completedAt)
+    || !(value.patternKey === undefined || isNonEmptyString(value.patternKey))
+    || !(value.scoreShape === undefined || isScoreShape(value.scoreShape))
   ) {
     return false;
   }

@@ -2,6 +2,11 @@ import { loadRuntimeExecutionModel } from '@/lib/engine/runtime-loader';
 import { normalizeScoreResult } from '@/lib/engine/normalization';
 import { scoreAssessmentResponses } from '@/lib/engine/scoring';
 import { resolveSingleDomainPairKey } from '@/lib/assessment-language/single-domain-pair-keys';
+import { rankedPatternResultModelKey } from '@/content/assessment-packages/import-contract/ranked-pattern-import-manifest';
+import {
+  classifyRankedPatternScoreShape,
+  type RankedPatternScoreShapeClassificationResult,
+} from '@/content/assessment-packages/import-contract/ranked-pattern-score-shape-policy';
 import {
   buildSingleDomainApplicationPattern,
   isFullPatternApplicationRow,
@@ -33,6 +38,7 @@ import type {
   SingleDomainResultPayload,
   SingleDomainResultSignal,
   SingleDomainSignalPosition,
+  SingleDomainResultScoreShape,
 } from '@/lib/types/single-domain-result';
 import { isSingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import type { Queryable } from '@/lib/engine/repository-sql';
@@ -204,6 +210,26 @@ function formatDriverClaimSourceDiagnostics(
   });
 
   return Object.freeze(formatted);
+}
+
+export function buildRankedPatternKeyFromResultSignals(
+  rankedSignals: readonly Pick<SingleDomainResultSignal, 'signal_key' | 'rank'>[],
+): string {
+  return [...rankedSignals]
+    .sort((left, right) => left.rank - right.rank || left.signal_key.localeCompare(right.signal_key))
+    .map((signal) => signal.signal_key)
+    .join('_');
+}
+
+export function classifyRankedPatternResultSignals(
+  rankedSignals: readonly Pick<SingleDomainResultSignal, 'signal_key' | 'normalized_score'>[],
+): RankedPatternScoreShapeClassificationResult {
+  return classifyRankedPatternScoreShape(
+    rankedSignals.map((signal) => ({
+      signalKey: signal.signal_key,
+      normalizedPercentage: signal.normalized_score,
+    })),
+  );
 }
 
 function formatApplicationSourceDiagnostic(diagnostic: ApplicationSourceDiagnostic): string {
@@ -948,6 +974,29 @@ export async function buildSingleDomainResultPayload(params: {
     assessmentVersionId: params.assessmentVersionId,
     sourceDiagnostics: applicationSourceDiagnostics,
   });
+  const rankedPatternScoreShape =
+    runtimeDefinition.metadata.resultModelKey === rankedPatternResultModelKey
+      ? classifyRankedPatternResultSignals(signals)
+      : null;
+
+  if (rankedPatternScoreShape && rankedPatternScoreShape.diagnostics.length > 0) {
+    throw new SingleDomainCompletionError(
+      [
+        'ranked_pattern_score_shape_classification_failed',
+        ...rankedPatternScoreShape.diagnostics.map((diagnostic) => diagnostic.code),
+      ].join(': '),
+    );
+  }
+
+  const scoreShape: SingleDomainResultScoreShape | undefined =
+    rankedPatternScoreShape?.scoreShape
+      ? Object.freeze({
+          value: rankedPatternScoreShape.scoreShape,
+          policyKey: rankedPatternScoreShape.policyKey,
+          policyVersion: rankedPatternScoreShape.policyVersion,
+        })
+      : undefined;
+  const rankedPatternKey = scoreShape ? buildRankedPatternKeyFromResultSignals(signals) : undefined;
 
   const payload = Object.freeze({
     metadata: Object.freeze({
@@ -960,6 +1009,8 @@ export async function buildSingleDomainResultPayload(params: {
       generatedAt: normalizedResult.diagnostics.generatedAt,
       completedAt: params.responses.submittedAt,
     }),
+    ...(rankedPatternKey ? { patternKey: rankedPatternKey } : {}),
+    ...(scoreShape ? { scoreShape } : {}),
     intro: Object.freeze(toIntro(introRow)),
     hero: Object.freeze(
       toHero(heroRow, topPairKey),
@@ -981,6 +1032,14 @@ export async function buildSingleDomainResultPayload(params: {
       signalCount: runtimeDefinition.diagnostics.counts.signalCount,
       derivedPairCount: runtimeDefinition.diagnostics.counts.derivedPairCount,
       topPair: topPairKey,
+      ...(scoreShape
+        ? {
+            scoreShapePolicy: Object.freeze({
+              policyKey: scoreShape.policyKey,
+              policyVersion: scoreShape.policyVersion,
+            }),
+          }
+        : {}),
       counts: {
         domainCount: runtimeDefinition.diagnostics.counts.domainCount,
         questionCount: runtimeDefinition.diagnostics.counts.questionCount,

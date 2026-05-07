@@ -7,6 +7,7 @@ export type SingleDomainRuntimeMetadata = {
   assessmentVersionId: string;
   assessmentVersionTag: string;
   mode: 'single_domain';
+  resultModelKey: string | null;
   assessmentDescription: string | null;
 };
 
