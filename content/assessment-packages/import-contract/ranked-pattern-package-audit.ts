@@ -14,6 +14,13 @@ import {
   validateRankedPatternPackageShape,
   type RankedPatternImportDiagnostic,
 } from './ranked-pattern-import-validation';
+import {
+  getNormalisedAdminImportSupportCount,
+  getNormalisedRuntimeDefinitionCount,
+  getNormalisedRuntimeResultContentCount,
+  normaliseRankedPatternWorkbook,
+  type NormalisedRankedPatternPackage,
+} from './ranked-pattern-import-normalise';
 
 export type RankedPatternPackageAuditRowCounts = {
   readonly bySheet: Readonly<Record<RankedPatternImportSheetKey, number>>;
@@ -27,14 +34,24 @@ export type RankedPatternPackageAuditDiagnosticCounts = {
   readonly warning: number;
 };
 
+export type RankedPatternPackageAuditNormalisedCounts = {
+  readonly runtimeDefinition: number;
+  readonly runtimeResultContent: number;
+  readonly adminImportSupport: number;
+};
+
 export type RankedPatternPackageAuditResult = {
   readonly parsedWorkbook: ParsedRankedPatternWorkbookFile;
+  readonly normalisedPackage: NormalisedRankedPatternPackage;
   readonly detectedSheets: readonly string[];
   readonly missingSheets: readonly RankedPatternImportSheetKey[];
   readonly unexpectedSheets: readonly string[];
   readonly rowCounts: RankedPatternPackageAuditRowCounts;
+  readonly normalisedCounts: RankedPatternPackageAuditNormalisedCounts;
   readonly diagnosticCounts: RankedPatternPackageAuditDiagnosticCounts;
+  readonly normalisationDiagnosticCounts: RankedPatternPackageAuditDiagnosticCounts;
   readonly diagnostics: readonly RankedPatternImportDiagnostic[];
+  readonly normalisationDiagnostics: readonly RankedPatternImportDiagnostic[];
   readonly pass: boolean;
 };
 
@@ -115,21 +132,31 @@ export function auditParsedRankedPatternWorkbook(
   parsedWorkbook: ParsedRankedPatternWorkbookFile,
 ): RankedPatternPackageAuditResult {
   const validationWorkbook = toValidationWorkbook(parsedWorkbook);
+  const normalisedPackage = normaliseRankedPatternWorkbook(parsedWorkbook);
   const diagnostics = attachWorkbookRowNumbers(
     parsedWorkbook,
     validateRankedPatternPackageShape(validationWorkbook),
   );
   const diagnosticCounts = countDiagnostics(diagnostics);
+  const normalisationDiagnosticCounts = countDiagnostics(normalisedPackage.diagnostics);
 
   return Object.freeze({
     parsedWorkbook,
+    normalisedPackage,
     detectedSheets: Object.freeze(Object.keys(parsedWorkbook.sheets).sort()),
     missingSheets: parsedWorkbook.missingSheets,
     unexpectedSheets: parsedWorkbook.unexpectedSheets,
     rowCounts: buildRowCounts(parsedWorkbook),
+    normalisedCounts: Object.freeze({
+      runtimeDefinition: getNormalisedRuntimeDefinitionCount(normalisedPackage),
+      runtimeResultContent: getNormalisedRuntimeResultContentCount(normalisedPackage),
+      adminImportSupport: getNormalisedAdminImportSupportCount(normalisedPackage),
+    }),
     diagnosticCounts,
+    normalisationDiagnosticCounts,
     diagnostics: Object.freeze([...diagnostics]),
-    pass: diagnosticCounts.error === 0,
+    normalisationDiagnostics: normalisedPackage.diagnostics,
+    pass: diagnosticCounts.error === 0 && normalisationDiagnosticCounts.error === 0,
   });
 }
 

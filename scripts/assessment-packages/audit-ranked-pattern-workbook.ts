@@ -69,16 +69,38 @@ export function formatRankedPatternPackageAudit(result: RankedPatternPackageAudi
     `- Admin/import support total: ${result.rowCounts.adminImportSupport}`,
     ...formatRowCountsForSheets(result, rankedPatternAdminImportSupportSheetKeys),
     '',
+    'Normalised row counts',
+    `- Runtime definition total: ${result.normalisedCounts.runtimeDefinition}`,
+    `- Runtime result content total: ${result.normalisedCounts.runtimeResultContent}`,
+    `- Admin/import support total: ${result.normalisedCounts.adminImportSupport}`,
+    '',
     'Validation summary',
     `- Blocking diagnostics: ${result.diagnosticCounts.error}`,
     `- Warnings: ${result.diagnosticCounts.warning}`,
+    `- Normalisation blocking diagnostics: ${result.normalisationDiagnosticCounts.error}`,
+    `- Normalisation warnings: ${result.normalisationDiagnosticCounts.warning}`,
     `- Verdict: ${result.pass ? 'PASS' : 'FAIL'}`,
     '',
     'Blocking diagnostics',
-    ...(blockingDiagnostics.length === 0 ? ['- none'] : blockingDiagnostics.map(formatDiagnostic)),
+    ...(blockingDiagnostics.length === 0 && result.normalisationDiagnostics.length === 0
+      ? ['- none']
+      : [
+          ...blockingDiagnostics.map(formatDiagnostic),
+          ...result.normalisationDiagnostics
+            .filter((diagnostic) => diagnostic.severity === 'error')
+            .map(formatDiagnostic),
+        ]),
     '',
     'Warnings',
-    ...(warningDiagnostics.length === 0 ? ['- none'] : warningDiagnostics.map(formatDiagnostic)),
+    ...(warningDiagnostics.length === 0 &&
+    result.normalisationDiagnostics.filter((diagnostic) => diagnostic.severity === 'warning').length === 0
+      ? ['- none']
+      : [
+          ...warningDiagnostics.map(formatDiagnostic),
+          ...result.normalisationDiagnostics
+            .filter((diagnostic) => diagnostic.severity === 'warning')
+            .map(formatDiagnostic),
+        ]),
   ].join('\n');
 }
 
