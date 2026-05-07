@@ -185,6 +185,46 @@ test('preserves deterministic ordering across domains, signals, questions, and o
   );
 });
 
+test('accepts repeated option keys across different questions', () => {
+  const definition = buildValidDefinition();
+  definition.questions[0] = {
+    ...definition.questions[0]!,
+    options: definition.questions[0]!.options.map((option) => ({ ...option, key: 'A' })),
+  };
+  definition.questions[1] = {
+    ...definition.questions[1]!,
+    options: definition.questions[1]!.options.map((option) => ({
+      ...option,
+      key: option.id === 'option-1' ? 'A' : 'B',
+    })),
+  };
+
+  const model = loadRuntimeExecutionModel(definition);
+
+  assert.equal(model.indexes.optionById['option-1']?.key, 'A');
+  assert.equal(model.indexes.optionById['option-3']?.key, 'A');
+  assert.deepEqual(
+    model.indexes.optionsByQuestionId['question-1']?.map((option) => option.key),
+    ['A', 'B'],
+  );
+});
+
+test('fails on duplicate option keys within the same question', () => {
+  const definition = buildValidDefinition();
+  definition.questions[1] = {
+    ...definition.questions[1]!,
+    options: definition.questions[1]!.options.map((option) => ({ ...option, key: 'A' })),
+  };
+
+  assert.throws(
+    () => loadRuntimeExecutionModel(definition),
+    (error: unknown) =>
+      error instanceof RuntimeExecutionModelValidationError &&
+      error.code === 'duplicate_option_key' &&
+      error.message === 'Duplicate option key detected for question question-1: A',
+  );
+});
+
 test('fails when a question references a missing domain', () => {
   const definition = buildValidDefinition();
   definition.questions[0] = {

@@ -68,6 +68,35 @@ function assertUniqueIdsAndKeys<
   }
 }
 
+function assertUniqueOptionIdsAndQuestionScopedKeys(
+  options: readonly RuntimeOption[],
+): void {
+  const ids = new Set<string>();
+  const keysByQuestionId = new Map<string, Set<string>>();
+
+  for (const option of options) {
+    if (ids.has(option.id)) {
+      throw new RuntimeExecutionModelValidationError(
+        'duplicate_option_id',
+        `Duplicate option id detected: ${option.id}`,
+      );
+    }
+
+    ids.add(option.id);
+
+    const keys = keysByQuestionId.get(option.questionId) ?? new Set<string>();
+    if (keys.has(option.key)) {
+      throw new RuntimeExecutionModelValidationError(
+        'duplicate_option_key',
+        `Duplicate option key detected for question ${option.questionId}: ${option.key}`,
+      );
+    }
+
+    keys.add(option.key);
+    keysByQuestionId.set(option.questionId, keys);
+  }
+}
+
 function validateSignalRelationships(
   signals: readonly RuntimeSignal[],
   domainIds: ReadonlySet<string>,
@@ -184,7 +213,7 @@ function validateDefinition(definition: RuntimeAssessmentDefinition): void {
   assertUniqueIdsAndKeys('question', definition.questions);
 
   const allOptions = definition.questions.flatMap((question) => question.options);
-  assertUniqueIdsAndKeys('option', allOptions);
+  assertUniqueOptionIdsAndQuestionScopedKeys(allOptions);
 
   const domainIds = new Set(definition.domains.map((domain) => domain.id));
   const signalIds = new Set(definition.signals.map((signal) => signal.id));
