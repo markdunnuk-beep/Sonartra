@@ -1,5 +1,9 @@
 import { notFound } from 'next/navigation';
 
+import {
+  isRankedPatternRenderablePayload,
+  RankedPatternResultReport,
+} from '@/components/results/ranked-pattern-result-report';
 import { SingleDomainResultReport } from '@/components/results/single-domain-result-report';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
@@ -37,6 +41,10 @@ export default async function SingleDomainResultPage(
 
   if (detail.mode !== 'single_domain' || !detail.singleDomainResult) {
     notFound();
+  }
+
+  if (isRankedPatternRenderablePayload(detail.singleDomainResult)) {
+    return <RankedPatternResultReport payload={detail.singleDomainResult} />;
   }
 
   return (
