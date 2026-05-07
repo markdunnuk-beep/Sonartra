@@ -1,0 +1,525 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import {
+  applyRankedPatternImportForAdmin,
+  auditRankedPatternPublishReadinessForAdmin,
+  auditRankedPatternWorkbookForAdmin,
+  dryRunRankedPatternImportForAdmin,
+  requireRankedPatternPublishableForAdmin,
+} from '@/lib/server/ranked-pattern-admin-import-workflow';
+import {
+  auditRankedPatternPackageActionWithDependencies,
+  dryRunRankedPatternImportActionWithDependencies,
+} from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
+import type { RankedPatternImportDiagnostic } from '@/content/assessment-packages/import-contract/ranked-pattern-import-validation';
+import type { ParsedRankedPatternWorkbookFile } from '@/content/assessment-packages/import-contract/ranked-pattern-workbook-parser';
+
+const runtimeCounts = Object.freeze({
+  assessments: 0,
+  assessment_versions: 0,
+  domains: 0,
+  signals: 0,
+  questions: 0,
+  options: 0,
+  option_signal_weights: 0,
+});
+
+const resultLanguageCounts = Object.freeze({
+  assessment_ranked_patterns: 0,
+  assessment_score_shape_rules: 0,
+  assessment_result_section_definitions: 0,
+  assessment_result_language_rows: 0,
+  assessment_report_preview_cases: 0,
+});
+
+const parsedWorkbook: ParsedRankedPatternWorkbookFile = Object.freeze({
+  sourcePath: 'ranked-pattern.xlsx',
+  workbookName: 'ranked-pattern.xlsx',
+  sheets: Object.freeze({}),
+  missingSheets: Object.freeze([]),
+  unexpectedSheets: Object.freeze([]),
+  parsedAt: '2026-05-07T00:00:00.000Z',
+});
+
+const blockingDiagnostic: RankedPatternImportDiagnostic = Object.freeze({
+  severity: 'error',
+  code: 'MISSING_REQUIRED_FIELD',
+  message: 'Required value is missing.',
+  sheetKey: '06_Orientation',
+  rowNumber: 12,
+  fieldKey: 'pattern_key',
+  lookupKey: 'orientation::bad',
+});
+
+const warningDiagnostic: RankedPatternImportDiagnostic = Object.freeze({
+  severity: 'warning',
+  code: 'SCORE_SHAPE_RULES_NOT_SUPPLIED',
+  message: 'Fixed platform score-shape policy is active.',
+});
+
+function adminUser() {
+  return {
+    internalUserId: 'admin-1',
+    clerkUserId: 'clerk-admin-1',
+    userEmail: 'admin@example.com',
+    userRole: 'admin',
+    userStatus: 'active',
+    isAdmin: true,
+  };
+}
+
+function fakeAudit(pass = true, diagnostics: readonly RankedPatternImportDiagnostic[] = []) {
+  return Object.freeze({
+    parsedWorkbook,
+    normalisedPackage: Object.freeze({
+      sourcePath: parsedWorkbook.sourcePath,
+      workbookName: parsedWorkbook.workbookName,
+      metadata: Object.freeze([]),
+      signals: Object.freeze([]),
+      questions: Object.freeze([]),
+      options: Object.freeze([]),
+      optionWeights: Object.freeze([]),
+      context: Object.freeze([]),
+      orientation: Object.freeze([]),
+      recognition: Object.freeze([]),
+      signalRoles: Object.freeze([]),
+      patternMechanics: Object.freeze([]),
+      patternSynthesis: Object.freeze([]),
+      strengths: Object.freeze([]),
+      narrowing: Object.freeze([]),
+      application: Object.freeze([]),
+      closingIntegration: Object.freeze([]),
+      reportPreviewCases: Object.freeze([]),
+      importSummaryRows: Object.freeze([]),
+      validationReferenceRows: Object.freeze([]),
+      lookupRows: Object.freeze([]),
+      diagnostics: Object.freeze([]),
+    }),
+    detectedSheets: Object.freeze(['00_Metadata', '15_Report_Preview', '18_Lookups']),
+    missingSheets: Object.freeze([]),
+    unexpectedSheets: Object.freeze([]),
+    rowCounts: Object.freeze({
+      bySheet: Object.freeze({}) as never,
+      runtimeDefinition: 5,
+      runtimeResultContent: 10,
+      adminImportSupport: 4,
+    }),
+    normalisedCounts: Object.freeze({
+      runtimeDefinition: 5,
+      runtimeResultContent: 10,
+      adminImportSupport: 4,
+    }),
+    diagnosticCounts: Object.freeze({
+      error: diagnostics.filter((diagnostic) => diagnostic.severity === 'error').length,
+      warning: diagnostics.filter((diagnostic) => diagnostic.severity === 'warning').length,
+    }),
+    normalisationDiagnosticCounts: Object.freeze({ error: 0, warning: 0 }),
+    diagnostics: Object.freeze([...diagnostics]),
+    normalisationDiagnostics: Object.freeze([]),
+    pass,
+  });
+}
+
+function runtimeResult(overrides: Record<string, unknown> = {}) {
+  const plan = Object.freeze({
+    assessmentKey: 'assessment_key',
+    version: '1.0.0',
+    domainKey: 'domain_key',
+    operations: Object.freeze([]),
+    operationCountsByTable: Object.freeze({ ...runtimeCounts, assessments: 1, assessment_versions: 1 }),
+    diagnostics: Object.freeze([]),
+  });
+
+  return Object.freeze({
+    dryRun: true,
+    plan,
+    assessmentId: null,
+    assessmentVersionId: null,
+    importBatchId: null,
+    countsByTable: runtimeCounts,
+    diagnostics: Object.freeze([]),
+    ...overrides,
+  });
+}
+
+function resultLanguageResult(overrides: Record<string, unknown> = {}) {
+  const plan = Object.freeze({
+    assessmentVersionId: 'version-1',
+    domainKey: 'domain_key',
+    operations: Object.freeze([]),
+    operationCountsByTable: Object.freeze({
+      ...resultLanguageCounts,
+      assessment_result_language_rows: 10,
+      assessment_report_preview_cases: 1,
+    }),
+    diagnostics: Object.freeze([warningDiagnostic]),
+  });
+
+  return Object.freeze({
+    dryRun: true,
+    assessmentVersionId: 'version-1',
+    importBatchId: null,
+    plan,
+    countsByTable: resultLanguageCounts,
+    diagnostics: Object.freeze([warningDiagnostic]),
+    ...overrides,
+  });
+}
+
+test('audit workflow returns workbook diagnostics without database writes', async () => {
+  let adminGuardCalls = 0;
+  let getDbPoolCalls = 0;
+  const result = await auditRankedPatternWorkbookForAdmin(
+    { parsedWorkbook },
+    {
+      async requireAdminUser() {
+        adminGuardCalls += 1;
+        return adminUser() as never;
+      },
+      getDbPool() {
+        getDbPoolCalls += 1;
+        throw new Error('SHOULD_NOT_REQUEST_DB');
+      },
+      auditParsedWorkbook() {
+        return fakeAudit(false, [blockingDiagnostic]) as never;
+      },
+    },
+  );
+
+  assert.equal(adminGuardCalls, 1);
+  assert.equal(getDbPoolCalls, 0);
+  assert.equal(result.status, 'blocked');
+  assert.equal(result.blockingDiagnostics[0]?.sheetKey, '06_Orientation');
+  assert.equal(result.blockingDiagnostics[0]?.rowNumber, 12);
+});
+
+test('dry-run workflow returns runtime and result-language plans without database writes', async () => {
+  let getDbPoolCalls = 0;
+  const dryRunFlags: boolean[] = [];
+  const result = await dryRunRankedPatternImportForAdmin(
+    { parsedWorkbook, targetAssessmentVersionId: 'target-version' },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      getDbPool() {
+        getDbPoolCalls += 1;
+        throw new Error('SHOULD_NOT_REQUEST_DB');
+      },
+      auditParsedWorkbook() {
+        return fakeAudit(true) as never;
+      },
+      async persistRuntimeDefinition(input) {
+        dryRunFlags.push(input.dryRun === true);
+        return runtimeResult() as never;
+      },
+      async persistResultLanguage(input) {
+        dryRunFlags.push(input.dryRun === true);
+        assert.equal(input.assessmentVersionId, 'target-version');
+        return resultLanguageResult() as never;
+      },
+    },
+  );
+
+  assert.equal(getDbPoolCalls, 0);
+  assert.deepEqual(dryRunFlags, [true, true]);
+  assert.equal(result.status, 'ready');
+  assert.equal(result.resultLanguagePlanSummary?.operationCountsByTable.assessment_report_preview_cases, 1);
+  assert.equal(result.warningDiagnostics.some((diagnostic) => diagnostic.code === 'SCORE_SHAPE_RULES_NOT_SUPPLIED'), true);
+});
+
+test('apply workflow aborts before persistence when workbook audit has blocking diagnostics', async () => {
+  let persistCalls = 0;
+  const result = await applyRankedPatternImportForAdmin(
+    { parsedWorkbook },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      auditParsedWorkbook() {
+        return fakeAudit(false, [blockingDiagnostic]) as never;
+      },
+      async persistRuntimeDefinition() {
+        persistCalls += 1;
+        throw new Error('SHOULD_NOT_PERSIST');
+      },
+      async persistResultLanguage() {
+        persistCalls += 1;
+        throw new Error('SHOULD_NOT_PERSIST');
+      },
+    },
+  );
+
+  assert.equal(persistCalls, 0);
+  assert.equal(result.status, 'blocked');
+  assert.equal(result.createdOrUpdatedIds.assessmentVersionId, null);
+});
+
+test('apply workflow writes runtime definition before result language and never publishes', async () => {
+  const calls: string[] = [];
+  const result = await applyRankedPatternImportForAdmin(
+    { parsedWorkbook },
+    {
+      async requireAdminUser() {
+        calls.push('guard');
+        return adminUser() as never;
+      },
+      getDbPool() {
+        calls.push('pool');
+        return {} as never;
+      },
+      auditParsedWorkbook() {
+        calls.push('audit-workbook');
+        return fakeAudit(true) as never;
+      },
+      async persistRuntimeDefinition(input) {
+        calls.push('persist-runtime');
+        assert.equal(input.dryRun, false);
+        return runtimeResult({
+          dryRun: false,
+          assessmentId: 'assessment-1',
+          assessmentVersionId: 'version-1',
+          countsByTable: Object.freeze({ ...runtimeCounts, assessments: 1, assessment_versions: 1 }),
+        }) as never;
+      },
+      async persistResultLanguage(input) {
+        calls.push('persist-result-language');
+        assert.equal(input.dryRun, false);
+        assert.equal(input.assessmentVersionId, 'version-1');
+        return resultLanguageResult({
+          dryRun: false,
+          countsByTable: Object.freeze({
+            ...resultLanguageCounts,
+            assessment_result_language_rows: 10,
+            assessment_report_preview_cases: 1,
+          }),
+        }) as never;
+      },
+      async auditAssessmentVersion() {
+        calls.push('publish-audit');
+        throw new Error('SHOULD_NOT_PUBLISH_AUDIT_DURING_APPLY');
+      },
+    },
+  );
+
+  assert.deepEqual(calls, ['guard', 'audit-workbook', 'pool', 'persist-runtime', 'persist-result-language']);
+  assert.equal(result.status, 'applied');
+  assert.equal(result.createdOrUpdatedIds.assessmentId, 'assessment-1');
+  assert.equal(result.createdOrUpdatedIds.assessmentVersionId, 'version-1');
+});
+
+test('publish audit workflow is read-only and releases the database client', async () => {
+  let released = false;
+  const result = await auditRankedPatternPublishReadinessForAdmin(
+    { targetAssessmentVersionId: 'version-1' },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      getDbPool() {
+        return {
+          async connect() {
+            return {
+              async query() {
+                throw new Error('QUERY_SHOULD_BE_MOCKED_BY_AUDITOR');
+              },
+              release() {
+                released = true;
+              },
+            };
+          },
+        } as never;
+      },
+      async auditAssessmentVersion(input) {
+        assert.equal(input.assessmentVersionId, 'version-1');
+        return {
+          assessmentVersionId: 'version-1',
+          canPublish: true,
+          blockingCount: 0,
+          warningCount: 0,
+          findings: Object.freeze([]),
+          summaryCountsByCategory: Object.freeze({}) as never,
+        };
+      },
+    },
+  );
+
+  assert.equal(result.canPublish, true);
+  assert.equal(released, true);
+});
+
+test('publish gating helper returns blocking diagnostics without changing lifecycle status', async () => {
+  const result = await requireRankedPatternPublishableForAdmin(
+    { targetAssessmentVersionId: 'version-1' },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      getDbPool() {
+        return {
+          async connect() {
+            return {
+              async query() {
+                return { rows: [] };
+              },
+              release() {},
+            };
+          },
+        } as never;
+      },
+      async auditAssessmentVersion() {
+        return {
+          assessmentVersionId: 'version-1',
+          canPublish: false,
+          blockingCount: 1,
+          warningCount: 0,
+          findings: Object.freeze([
+            {
+              severity: 'blocking',
+              code: 'MISSING_PREVIEW_CASE',
+              message: 'At least one preview case is required.',
+              category: 'preview_cases',
+            },
+          ]),
+          summaryCountsByCategory: Object.freeze({}) as never,
+        };
+      },
+    },
+  );
+
+  assert.equal(result.canPublish, false);
+  assert.deepEqual(result.blockingDiagnostics, [
+    {
+      severity: 'error',
+      code: 'MISSING_PREVIEW_CASE',
+      message: 'At least one preview case is required.',
+    },
+  ]);
+});
+
+test('workflow rejects missing admin context before parsing or persistence', async () => {
+  let parsed = false;
+  await assert.rejects(
+    auditRankedPatternWorkbookForAdmin(
+      { sourcePath: 'ranked-pattern.xlsx' },
+      {
+        async requireAdminUser() {
+          throw new Error('NOT_ADMIN');
+        },
+        parseWorkbookFile() {
+          parsed = true;
+          return parsedWorkbook;
+        },
+      },
+    ),
+    /NOT_ADMIN/,
+  );
+
+  assert.equal(parsed, false);
+});
+
+test('server action returns diagnostics from the guarded audit workflow', async () => {
+  const formData = new FormData();
+  formData.set('sourcePath', 'ranked-pattern.xlsx');
+  const result = await auditRankedPatternPackageActionWithDependencies(
+    { targetAssessmentVersionId: 'version-1' },
+    formData,
+    {
+      async auditWorkbook(input) {
+        assert.equal(input.sourcePath, 'ranked-pattern.xlsx');
+        return {
+          status: 'blocked',
+          source: {
+            sourceName: 'ranked-pattern.xlsx',
+            sourceHash: null,
+            workbookName: 'ranked-pattern.xlsx',
+            sourcePath: 'ranked-pattern.xlsx',
+            parsedAt: '2026-05-07T00:00:00.000Z',
+          },
+          workbookAuditSummary: {
+            pass: false,
+            detectedSheets: [],
+            missingSheets: [],
+            unexpectedSheets: [],
+            diagnosticCounts: { error: 1, warning: 0 },
+            normalisationDiagnosticCounts: { error: 0, warning: 0 },
+          },
+          normalisationDiagnostics: [],
+          blockingDiagnostics: [blockingDiagnostic],
+          warningDiagnostics: [],
+          createdOrUpdatedIds: { assessmentId: null, assessmentVersionId: 'version-1', importBatchId: null },
+          countsByStorageTarget: {
+            workbookRowsByStorageTarget: { bySheet: {} as never, runtimeDefinition: 0, runtimeResultContent: 0, adminImportSupport: 0 },
+            normalisedRowsByStorageTarget: { runtimeDefinition: 0, runtimeResultContent: 0, adminImportSupport: 0 },
+          },
+        };
+      },
+      async dryRunImport() {
+        throw new Error('SHOULD_NOT_DRY_RUN');
+      },
+      async applyImport() {
+        throw new Error('SHOULD_NOT_APPLY');
+      },
+      async auditPublishReadiness() {
+        throw new Error('SHOULD_NOT_PUBLISH_AUDIT');
+      },
+    },
+  );
+
+  assert.equal(result.formError, null);
+  assert.equal(result.result?.blockingDiagnostics[0]?.code, 'MISSING_REQUIRED_FIELD');
+});
+
+test('dry-run server action does not call apply persistence', async () => {
+  const formData = new FormData();
+  formData.set('sourcePath', 'ranked-pattern.xlsx');
+  let dryRunCalled = false;
+  const result = await dryRunRankedPatternImportActionWithDependencies(
+    {},
+    formData,
+    {
+      async auditWorkbook() {
+        throw new Error('SHOULD_NOT_AUDIT_ONLY');
+      },
+      async dryRunImport() {
+        dryRunCalled = true;
+        return {
+          status: 'ready',
+          source: {
+            sourceName: 'ranked-pattern.xlsx',
+            sourceHash: null,
+            workbookName: 'ranked-pattern.xlsx',
+            sourcePath: 'ranked-pattern.xlsx',
+            parsedAt: '2026-05-07T00:00:00.000Z',
+          },
+          workbookAuditSummary: {
+            pass: true,
+            detectedSheets: [],
+            missingSheets: [],
+            unexpectedSheets: [],
+            diagnosticCounts: { error: 0, warning: 0 },
+            normalisationDiagnosticCounts: { error: 0, warning: 0 },
+          },
+          normalisationDiagnostics: [],
+          blockingDiagnostics: [],
+          warningDiagnostics: [],
+          createdOrUpdatedIds: { assessmentId: null, assessmentVersionId: null, importBatchId: null },
+          countsByStorageTarget: {
+            workbookRowsByStorageTarget: { bySheet: {} as never, runtimeDefinition: 0, runtimeResultContent: 0, adminImportSupport: 0 },
+            normalisedRowsByStorageTarget: { runtimeDefinition: 0, runtimeResultContent: 0, adminImportSupport: 0 },
+          },
+        };
+      },
+      async applyImport() {
+        throw new Error('SHOULD_NOT_APPLY');
+      },
+      async auditPublishReadiness() {
+        throw new Error('SHOULD_NOT_PUBLISH_AUDIT');
+      },
+    },
+  );
+
+  assert.equal(dryRunCalled, true);
+  assert.equal(result.result?.status, 'ready');
+});
