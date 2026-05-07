@@ -619,3 +619,59 @@ test('full-pattern single-domain application migration declares storage columns 
   assert.match(sql, /assessment_version_single_domain_application_pattern_lookup_idx/i);
   assert.match(sql, /driver_role IN \(\s*'primary_driver',\s*'secondary_driver',\s*'supporting_context',\s*'range_limitation'/is);
 });
+
+test('ranked-pattern import storage migration declares normalized import and result-language tables', async () => {
+  const sql = await readFile(
+    join(process.cwd(), 'db', 'migrations', '202605070001_ranked_pattern_import_storage.sql'),
+    'utf8',
+  );
+
+  assert.match(sql, /ADD COLUMN result_model_key TEXT/i);
+  assert.match(sql, /result_model_key IS NULL OR result_model_key IN \('ranked_pattern'\)/i);
+  assert.match(sql, /assessment_versions_mode_result_model_idx/i);
+
+  for (const tableName of [
+    'assessment_import_batches',
+    'assessment_import_files',
+    'assessment_import_audit_items',
+    'assessment_ranked_patterns',
+    'assessment_score_shape_rules',
+    'assessment_result_section_definitions',
+    'assessment_result_language_rows',
+    'assessment_report_preview_cases',
+  ]) {
+    assert.match(sql, new RegExp(`CREATE TABLE ${tableName}`, 'i'));
+  }
+
+  assert.match(sql, /UNIQUE \(assessment_version_id, domain_key, pattern_key\)/i);
+  assert.match(
+    sql,
+    /UNIQUE \(\s*assessment_version_id,\s*domain_key,\s*rank_1_signal_key,\s*rank_2_signal_key,\s*rank_3_signal_key,\s*rank_4_signal_key\s*\)/is,
+  );
+  assert.match(sql, /assessment_ranked_patterns_distinct_rank_keys_check/i);
+
+  assert.match(sql, /score_shape IN \('concentrated', 'paired', 'graduated', 'balanced'\)/i);
+  assert.match(sql, /rule_config JSONB NOT NULL/i);
+  assert.doesNotMatch(sql, /minimum_gap\s+NUMERIC/i);
+  assert.doesNotMatch(sql, /maximum_gap\s+NUMERIC/i);
+
+  assert.match(sql, /source_sheet_key IN \(\s*'05_Context'/is);
+  assert.match(sql, /'14_Closing_Integration'/i);
+  assert.doesNotMatch(sql, /'15_Report_Preview'.*runtime_result_content/is);
+
+  assert.match(sql, /UNIQUE \(assessment_version_id, section_key, lookup_key\)/i);
+  assert.match(sql, /field_values JSONB NOT NULL/i);
+  assert.match(sql, /rank_position INTEGER CHECK \(rank_position IS NULL OR rank_position BETWEEN 1 AND 4\)/i);
+  assert.match(sql, /assessment_result_language_rows_pattern_shape_idx/i);
+  assert.match(sql, /assessment_result_language_rows_signal_rank_idx/i);
+
+  assert.match(sql, /ranked_signal_keys JSONB NOT NULL/i);
+  assert.match(sql, /normalized_scores JSONB NOT NULL/i);
+  assert.match(sql, /expected_payload_snapshot JSONB/i);
+
+  assert.doesNotMatch(sql, /flow-state/i);
+  assert.doesNotMatch(sql, /wplp/i);
+  assert.doesNotMatch(sql, /pair_key/i);
+  assert.doesNotMatch(sql, /archetype/i);
+  assert.doesNotMatch(sql, /sentence_library/i);
+});
