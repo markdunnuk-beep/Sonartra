@@ -40,6 +40,7 @@ export type AssessmentWorkspaceItemViewModel = {
   latestReadyResultAt: string | null;
   latestTopSignalTitle: string | null;
   latestTopSignalPercentage: number | null;
+  latestResultSummary: string | null;
   cta: AssessmentCardCta;
 };
 
@@ -167,6 +168,7 @@ export function projectAssessmentWorkspaceItem(params: {
   const latestReadyResultId = params.latestReadyResult?.resultId ?? null;
   const topSignalTitle = params.latestReadyResult?.topSignal?.title ?? null;
   const topSignalPercentage = params.latestReadyResult?.topSignalPercentage ?? null;
+  const latestResultSummary = params.latestReadyResult?.summaryLine ?? null;
   const latestReadyResultAt = params.latestReadyResult?.generatedAt ?? params.latestReadyResult?.createdAt ?? null;
   const errorCode = formatErrorCode(params.lifecycle.lastError);
   const cta = mapLifecycleStatusToCta({
@@ -190,7 +192,9 @@ export function projectAssessmentWorkspaceItem(params: {
       break;
     case 'ready':
       statusLabel = 'Ready';
-      statusDetail = topSignalTitle
+      statusDetail = latestResultSummary
+        ? latestResultSummary
+        : topSignalTitle
         ? `Latest ready result led by ${topSignalTitle}${topSignalPercentage !== null ? ` (${topSignalPercentage}%)` : ''}.`
         : 'Latest ready result is available.';
       break;
@@ -221,6 +225,7 @@ export function projectAssessmentWorkspaceItem(params: {
     latestReadyResultAt,
     latestTopSignalTitle: topSignalTitle,
     latestTopSignalPercentage: topSignalPercentage,
+    latestResultSummary,
     cta,
   };
 }
@@ -243,7 +248,9 @@ export function selectDashboardRecommendation(
     return {
       kind: 'view_results',
       title: `Review ${latestReadyResult.assessmentTitle}`,
-      description: latestReadyResult.topSignal
+      description: latestReadyResult.summaryLine
+        ? latestReadyResult.summaryLine
+        : latestReadyResult.topSignal
         ? `${latestReadyResult.topSignal.title} is the latest leading signal.`
         : 'Your latest ready result is available to review.',
       cta: {

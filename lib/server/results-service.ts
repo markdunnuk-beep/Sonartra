@@ -7,6 +7,9 @@ export type ResultsListItem = {
   assessmentTitle: string;
   completedAt: string;
   href: string;
+  scoreShape: string | null;
+  patternKey: string | null;
+  summaryLine: string | null;
   signalSnapshot: readonly {
     signalKey: string;
     signalLabel: string;
@@ -32,6 +35,9 @@ export function createResultsService(deps: ResultsServiceDeps) {
           assessmentTitle: result.assessmentTitle,
           completedAt: result.generatedAt ?? result.createdAt,
           href: getAssessmentResultHref(result.resultId, result.mode),
+          scoreShape: result.scoreShape ?? null,
+          patternKey: result.patternKey ?? null,
+          summaryLine: result.summaryLine ?? null,
           signalSnapshot: result.signalSnapshot.map((signal) => ({
             signalKey: signal.signalKey,
             signalLabel: signal.title,

@@ -12,6 +12,7 @@ import {
   AssessmentResultPayloadError,
   type AssessmentResultDetailViewModel,
   type AssessmentResultListItem,
+  type AssessmentResultRankedSignalViewModel,
 } from '@/lib/server/result-read-model-types';
 import type { AssessmentMode } from '@/lib/types/assessment';
 import type { SingleDomainResultSignal } from '@/lib/types/single-domain-result';
@@ -74,6 +75,9 @@ export type WorkspaceAssessmentItem = {
   ctaLabel: string;
   href: string;
   signalsForIndex: readonly WorkspaceSignalIndexItem[] | null;
+  scoreShape: string | null;
+  patternKey: string | null;
+  resultSummary: string | null;
   recommendedReading: AssessmentReadingViewModel | null;
 };
 
@@ -242,7 +246,16 @@ function mapSignalDisplayRole(rank: number): WorkspaceSignalIndexDisplayRole | n
   }
 }
 
-function isReadableSignal(signal: SingleDomainResultSignal): boolean {
+function isReadableRankedSignal(signal: AssessmentResultRankedSignalViewModel): boolean {
+  return (
+    signal.signalKey.trim().length > 0
+    && signal.title.trim().length > 0
+    && Number.isFinite(signal.percentage)
+    && Number.isFinite(signal.rank)
+  );
+}
+
+function isReadableLegacySignal(signal: SingleDomainResultSignal): boolean {
   return (
     signal.signal_key.trim().length > 0
     && signal.signal_label.trim().length > 0
@@ -259,8 +272,32 @@ function buildSignalsForIndex(
     return null;
   }
 
-  const signals = detail.singleDomainResult.signals
-    .filter(isReadableSignal)
+  const rankedSignals = detail.rankedSignals
+    .filter(isReadableRankedSignal)
+    .sort((left, right) => left.rank - right.rank || left.signalKey.localeCompare(right.signalKey))
+    .slice(0, 4)
+    .map((signal) => {
+      const displayRole = mapSignalDisplayRole(signal.rank);
+      if (!displayRole) {
+        return null;
+      }
+
+      return {
+        signalKey: signal.signalKey,
+        signalLabel: signal.title,
+        normalizedPercentage: signal.percentage,
+        rank: signal.rank,
+        displayRole,
+      } satisfies WorkspaceSignalIndexItem;
+    })
+    .filter((signal): signal is WorkspaceSignalIndexItem => signal !== null);
+
+  if (rankedSignals.length > 0) {
+    return Object.freeze(rankedSignals);
+  }
+
+  const legacySignals = detail.singleDomainResult.signals
+    .filter(isReadableLegacySignal)
     .sort((left, right) => left.rank - right.rank || left.signal_key.localeCompare(right.signal_key))
     .slice(0, 4)
     .map((signal) => {
@@ -279,7 +316,7 @@ function buildSignalsForIndex(
     })
     .filter((signal): signal is WorkspaceSignalIndexItem => signal !== null);
 
-  return Object.freeze(signals);
+  return Object.freeze(legacySignals);
 }
 
 function buildLatestResult(result: AssessmentResultListItem | null): WorkspaceLatestResult | null {
@@ -395,6 +432,9 @@ export function createWorkspaceService(deps: WorkspaceServiceDeps) {
           actionDisabled,
           ctaLabel: mapAssessmentCtaLabel(status),
           href: fallbackHref,
+          scoreShape: latestReadyResult?.scoreShape ?? null,
+          patternKey: latestReadyResult?.patternKey ?? null,
+          resultSummary: latestReadyResult?.summaryLine ?? null,
           recommendedReading: resolveAssessmentReadingViewModel(assessment.assessmentKey, status),
           signalsForIndex:
             status === 'results_ready' && latestReadyResult
