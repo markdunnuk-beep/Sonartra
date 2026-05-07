@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 import type { WorkspaceAssessmentStatus } from '@/lib/server/workspace-service';
 
@@ -60,6 +60,7 @@ export function SurfaceCard({
   muted = false,
   dashed = false,
   interactive = false,
+  ...props
 }: Readonly<{
   children: ReactNode;
   className?: string;
@@ -67,9 +68,10 @@ export function SurfaceCard({
   muted?: boolean;
   dashed?: boolean;
   interactive?: boolean;
-}>) {
+}> & Omit<ComponentPropsWithoutRef<'article'>, 'className' | 'children'>) {
   return (
     <article
+      {...props}
       className={cn(
         'sonartra-card',
         accent && 'sonartra-card-hero',

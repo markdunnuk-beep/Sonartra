@@ -29,6 +29,10 @@ function formatPercentage(value: number): string {
   return `${Math.round(value)}%`;
 }
 
+function formatScoreShapeLabel(value: string): string {
+  return `${value.replace(/_/g, ' ')} pattern`;
+}
+
 function getShortAssessmentTitle(title: string): string {
   return title.replace(/^Sonartra\s+/i, '');
 }
@@ -136,6 +140,14 @@ function getDominantSignalDescription(signals: readonly WorkspaceSignalIndexItem
   }
 
   return `Your latest result is led by ${primary.signalLabel}, with ${secondary.signalLabel} as the secondary signal.`;
+}
+
+function getLatestSignalDescription(assessment: WorkspaceAssessmentItem): string {
+  if (assessment.resultSummary) {
+    return assessment.resultSummary;
+  }
+
+  return getDominantSignalDescription(assessment.signalsForIndex ?? []);
 }
 
 function getLatestSignalAssessment(
@@ -268,7 +280,7 @@ function AssessmentIndexRow({
   const roleLabels = ['Primary', 'Secondary', 'Third', 'Fourth'] as const;
 
   return (
-    <SurfaceCard className="overflow-hidden p-0">
+    <SurfaceCard className="overflow-hidden p-0" data-pattern-key={assessment.patternKey ?? undefined}>
       <div
         aria-label={`${assessment.assessmentTitle}, ${assessment.statusLabel}`}
         className="hidden items-stretch gap-0 xl:grid xl:grid-cols-[minmax(250px,1.7fr)_minmax(168px,0.9fr)_repeat(4,minmax(120px,1fr))_minmax(128px,0.75fr)]"
@@ -276,8 +288,15 @@ function AssessmentIndexRow({
         <div className="border-r border-white/10 bg-white/[0.014] p-5">
           <h3 className="text-base font-semibold text-[#F5F1EA]">{assessment.assessmentTitle}</h3>
           <p className="text-[#D8D0C3]/64 mt-2 line-clamp-2 text-sm leading-6">
-            {assessment.assessmentDescription ?? 'Assessment available in your workspace.'}
+            {assessment.resultSummary ??
+              assessment.assessmentDescription ??
+              'Assessment available in your workspace.'}
           </p>
+          {assessment.scoreShape ? (
+            <p className="text-[#9A9185]/76 mt-3 text-xs font-medium uppercase tracking-[0.12em]">
+              {formatScoreShapeLabel(assessment.scoreShape)}
+            </p>
+          ) : null}
           <p className="text-[#9A9185]/76 mt-3 text-xs font-medium uppercase tracking-[0.12em]">
             {formatAssessmentEstimatedDuration({
               assessmentKey: assessment.assessmentKey,
@@ -321,13 +340,18 @@ function AssessmentIndexRow({
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <LabelPill>{assessment.typeLabel}</LabelPill>
+              {assessment.scoreShape ? (
+                <LabelPill>{formatScoreShapeLabel(assessment.scoreShape)}</LabelPill>
+              ) : null}
               <StatusPill status={assessment.status} label={assessment.statusLabel} />
             </div>
             <h3 className="text-[1.25rem] font-semibold text-[#F5F1EA]">
               {assessment.assessmentTitle}
             </h3>
             <p className="text-[#D8D0C3]/66 max-w-2xl text-sm leading-7">
-              {assessment.assessmentDescription ?? 'Assessment available in your workspace.'}
+              {assessment.resultSummary ??
+                assessment.assessmentDescription ??
+                'Assessment available in your workspace.'}
             </p>
             <p className="text-[#9A9185]/76 text-xs font-medium uppercase tracking-[0.12em]">
               {formatAssessmentEstimatedDuration({
@@ -414,13 +438,13 @@ export default async function UserWorkspacePage() {
         </SurfaceCard>
       ) : null}
 
-      {latestSignals ? (
+      {latestSignalAssessment && latestSignals ? (
         <section className="sonartra-section">
           <div className="sonartra-section-header sonartra-motion-reveal-soft">
             <h2 className="sonartra-section-title">Your current signal pattern</h2>
             <p className="sonartra-section-description">
-              {getDominantSignalDescription(latestSignals)} Use this as a quick reference before
-              opening the full report.
+              {getLatestSignalDescription(latestSignalAssessment)} Use this as a quick reference
+              before opening the full report.
             </p>
           </div>
 

@@ -23,6 +23,10 @@ function formatPercentage(value: number): string {
   return `${Math.round(value)}%`;
 }
 
+function formatScoreShapeLabel(value: string): string {
+  return `${value.replace(/_/g, ' ')} pattern`;
+}
+
 export default async function UserResultsPage() {
   const userId = await getRequestUserId();
   const results = await createResultsService({
@@ -50,7 +54,12 @@ export default async function UserResultsPage() {
             description="Completed assessment reports stay available here for reference."
           />
           {results.map((result) => (
-            <SurfaceCard key={result.resultId} interactive className="relative overflow-hidden p-0">
+            <SurfaceCard
+              key={result.resultId}
+              interactive
+              className="relative overflow-hidden p-0"
+              data-pattern-key={result.patternKey ?? undefined}
+            >
               <span
                 aria-hidden="true"
                 className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(50,214,176,0.58),rgba(245,241,234,0.12),transparent)]"
@@ -59,6 +68,9 @@ export default async function UserResultsPage() {
                 <div className="space-y-4 p-5 pl-6 lg:p-6 lg:pl-7">
                   <div className="flex flex-wrap items-center gap-2">
                     <LabelPill>Ready report</LabelPill>
+                    {result.scoreShape ? (
+                      <LabelPill>{formatScoreShapeLabel(result.scoreShape)}</LabelPill>
+                    ) : null}
                     <p className="sonartra-page-eyebrow">Completed report</p>
                   </div>
                   <div className="space-y-2">
@@ -68,6 +80,11 @@ export default async function UserResultsPage() {
                     <p className="text-[#D8D0C3]/66 text-sm leading-7">
                       Completed {formatResultDate(result.completedAt)}
                     </p>
+                    {result.summaryLine ? (
+                      <p className="text-[#D8D0C3]/76 max-w-3xl text-sm leading-7">
+                        {result.summaryLine}
+                      </p>
+                    ) : null}
                   </div>
                   {result.signalSnapshot.length > 0 ? (
                     <div

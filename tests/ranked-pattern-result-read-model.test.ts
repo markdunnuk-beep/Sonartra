@@ -128,6 +128,7 @@ test('read model accepts persisted ranked-pattern payload and exposes persisted 
   );
   assert.equal(detail.scoreShape, 'concentrated');
   assert.equal(detail.patternKey, 'alpha_beta_gamma_delta');
+  assert.equal(detail.summaryLine, 'You may recognise this as a clear first-route pattern.');
   assert.equal(detail.singleDomainResult?.scoreShape?.value, 'concentrated');
   assert.equal(detail.singleDomainResult?.patternKey, 'alpha_beta_gamma_delta');
 });
@@ -142,6 +143,7 @@ test('result list projects ranked-pattern summary without recomputing pattern me
   assert.equal(results[0]?.topSignalPercentage, 55);
   assert.equal(results[0]?.scoreShape, 'concentrated');
   assert.equal(results[0]?.patternKey, 'alpha_beta_gamma_delta');
+  assert.equal(results[0]?.summaryLine, 'You may recognise this as a clear first-route pattern.');
   assert.deepEqual(
     results[0]?.signalSnapshot.map((signal) => [signal.signalKey, signal.percentage, signal.rank]),
     [['alpha', 55, 1], ['beta', 25, 2], ['gamma', 12, 3], ['delta', 8, 4]],

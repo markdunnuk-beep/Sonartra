@@ -94,6 +94,7 @@ export type AssessmentResultSummary = {
   signalSnapshot: readonly AssessmentResultRankedSignalViewModel[];
   scoreShape?: string | null;
   patternKey?: string | null;
+  summaryLine?: string | null;
   resultAvailable: true;
 };
 
@@ -123,6 +124,7 @@ export type AssessmentResultDetailViewModel = {
   normalizedScores: readonly AssessmentResultSignalScoreViewModel[];
   scoreShape?: string | null;
   patternKey?: string | null;
+  summaryLine?: string | null;
   domainSummaries: readonly AssessmentResultDomainViewModel[];
   overviewSummary: {
     headline: string;

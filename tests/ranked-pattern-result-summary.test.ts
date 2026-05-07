@@ -56,6 +56,9 @@ test('results list summary reads ranked-pattern fields from persisted payload on
   assert.equal(results[0]?.assessmentTitle, 'Test Assessment');
   assert.equal(results[0]?.completedAt, '2026-05-07T10:00:00.000Z');
   assert.equal(results[0]?.href, '/app/results/single-domain/result-ranked-1');
+  assert.equal(results[0]?.scoreShape, 'concentrated');
+  assert.equal(results[0]?.patternKey, 'alpha_beta_gamma_delta');
+  assert.equal(results[0]?.summaryLine, 'You may recognise this as a clear first-route pattern.');
   assert.deepEqual(
     results[0]?.signalSnapshot.map((signal) => ({
       signalKey: signal.signalKey,
@@ -99,6 +102,7 @@ test('workspace and dashboard summaries can use ranked-pattern compact read-mode
     signalSnapshot: [],
     scoreShape: 'concentrated',
     patternKey: 'alpha_beta_gamma_delta',
+    summaryLine: 'You may recognise this as a clear first-route pattern.',
     resultAvailable: true as const,
   };
   const workspaceItem = projectAssessmentWorkspaceItem({
@@ -136,7 +140,8 @@ test('workspace and dashboard summaries can use ranked-pattern compact read-mode
   assert.equal(workspaceItem.latestReadyResultId, 'result-ranked-1');
   assert.equal(workspaceItem.latestTopSignalTitle, 'Alpha');
   assert.equal(workspaceItem.latestTopSignalPercentage, 55);
+  assert.equal(workspaceItem.latestResultSummary, 'You may recognise this as a clear first-route pattern.');
   assert.equal(workspaceItem.cta.href, '/app/results/single-domain/result-ranked-1');
   assert.equal(recommendation?.kind, 'view_results');
-  assert.match(recommendation?.description ?? '', /Alpha is the latest leading signal/);
+  assert.equal(recommendation?.description, 'You may recognise this as a clear first-route pattern.');
 });

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import type { Queryable } from '@/lib/engine/repository-sql';
 import type { CanonicalResultPayload } from '@/lib/engine/types';
 import { createWorkspaceService } from '@/lib/server/workspace-service';
+import { buildRankedPatternResultPayload } from '@/tests/fixtures/ranked-pattern-result-payload';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
 type InventoryFixture = {
@@ -641,6 +642,44 @@ test('ready single-domain result exposes four persisted signal summaries', async
     { signalKey: 'delivery', signalLabel: 'Delivery', normalizedPercentage: 28, rank: 2, displayRole: 'Secondary' },
     { signalKey: 'people', signalLabel: 'People', normalizedPercentage: 21, rank: 3, displayRole: 'Third' },
     { signalKey: 'rigor', signalLabel: 'Rigor', normalizedPercentage: 14, rank: 4, displayRole: 'Fourth' },
+  ]);
+});
+
+test('ready ranked-pattern result exposes persisted compact summary fields', async () => {
+  const payload = buildRankedPatternResultPayload();
+  const workspace = await createWorkspaceService({
+    db: createFakeDb({
+      inventory: [baseInventory],
+      attempts: [createAttempt({
+        attemptId: 'attempt-ranked-pattern',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        lifecycleStatus: 'RESULT_READY',
+        submittedAt: '2026-05-07T09:59:00.000Z',
+        completedAt: '2026-05-07T10:00:00.000Z',
+      })],
+      results: [createResult({
+        resultId: 'result-ranked-pattern',
+        attemptId: 'attempt-ranked-pattern',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        assessmentKey: 'leadership',
+        assessmentTitle: 'Leadership',
+        canonicalResultPayload: payload,
+      })],
+    }),
+  }).getWorkspaceViewModel({ userId: 'user-1' });
+
+  const row = workspace.assessments[0];
+  assert.equal(row?.status, 'results_ready');
+  assert.equal(row?.scoreShape, 'concentrated');
+  assert.equal(row?.patternKey, 'alpha_beta_gamma_delta');
+  assert.equal(row?.resultSummary, 'You may recognise this as a clear first-route pattern.');
+  assert.deepEqual(row?.signalsForIndex, [
+    { signalKey: 'alpha', signalLabel: 'Alpha', normalizedPercentage: 55, rank: 1, displayRole: 'Primary' },
+    { signalKey: 'beta', signalLabel: 'Beta', normalizedPercentage: 25, rank: 2, displayRole: 'Secondary' },
+    { signalKey: 'gamma', signalLabel: 'Gamma', normalizedPercentage: 12, rank: 3, displayRole: 'Third' },
+    { signalKey: 'delta', signalLabel: 'Delta', normalizedPercentage: 8, rank: 4, displayRole: 'Fourth' },
   ]);
 });
 

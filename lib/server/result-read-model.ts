@@ -60,6 +60,22 @@ function readText(record: Record<string, unknown>, key: string): string | null {
   return typeof value === 'string' && value.trim().length > 0 ? value : null;
 }
 
+function readNestedText(value: unknown, keys: readonly string[]): string | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const fieldValues = isRecord(value.fieldValues) ? value.fieldValues : value;
+  for (const key of keys) {
+    const text = readText(fieldValues, key);
+    if (text) {
+      return text;
+    }
+  }
+
+  return null;
+}
+
 function readLegacyNullableText(record: unknown, key: string): string | null {
   if (!isRecord(record) || !(key in record)) {
     return null;
@@ -649,6 +665,17 @@ function getSingleDomainPatternKey(payload: SingleDomainResultPayload): string |
     : null;
 }
 
+function getSingleDomainSummaryLine(payload: SingleDomainResultPayload): string | null {
+  if (!isRankedPatternSingleDomainPayload(payload)) {
+    return null;
+  }
+
+  return (
+    readNestedText(payload.recognition, ['headline', 'recognitionStatement', 'summary']) ??
+    readNestedText(payload.orientation, ['summary', 'headline', 'title'])
+  );
+}
+
 function toListItem(record: PersistedReadyResultRecord): AssessmentResultListItem {
   const parsed = parseCanonicalPayload(record);
   const topSignal =
@@ -676,6 +703,7 @@ function toListItem(record: PersistedReadyResultRecord): AssessmentResultListIte
     signalSnapshot: Object.freeze(signalSnapshot.slice(0, 4)),
     scoreShape: parsed.mode === 'single_domain' ? getSingleDomainScoreShape(parsed.payload) : null,
     patternKey: parsed.mode === 'single_domain' ? getSingleDomainPatternKey(parsed.payload) : null,
+    summaryLine: parsed.mode === 'single_domain' ? getSingleDomainSummaryLine(parsed.payload) : null,
     resultAvailable: true,
   };
 }
@@ -742,10 +770,11 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
       normalizedScores,
       scoreShape: getSingleDomainScoreShape(parsed.payload),
       patternKey: getSingleDomainPatternKey(parsed.payload),
+      summaryLine: getSingleDomainSummaryLine(parsed.payload),
       domainSummaries: [],
       overviewSummary: {
         headline: topSignal ? `${topSignal.title} leads the current pattern` : '',
-        narrative: '',
+        narrative: getSingleDomainSummaryLine(parsed.payload) ?? '',
       },
       strengths: [],
       watchouts: [],
@@ -786,6 +815,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     normalizedScores,
     scoreShape: parsed.mode === 'single_domain' ? getSingleDomainScoreShape(parsed.payload) : null,
     patternKey: parsed.mode === 'single_domain' ? getSingleDomainPatternKey(parsed.payload) : null,
+    summaryLine: parsed.mode === 'single_domain' ? getSingleDomainSummaryLine(parsed.payload) : null,
     domainSummaries,
     overviewSummary: {
       headline: payload.hero.headline ?? '',
