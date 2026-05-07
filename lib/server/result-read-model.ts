@@ -41,7 +41,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+function isRankedPatternSingleDomainPayload(payload: SingleDomainResultPayload): boolean {
+  const metadata: unknown = payload.metadata;
+  return isRecord(metadata) && metadata.resultModelKey === 'ranked_pattern';
+}
+
 function normalizeNullableText(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0 ? value : null;
+}
+
+function readNumber(record: Record<string, unknown>, key: string): number | null {
+  const value = record[key];
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function readText(record: Record<string, unknown>, key: string): string | null {
+  const value = record[key];
   return typeof value === 'string' && value.trim().length > 0 ? value : null;
 }
 
@@ -484,6 +499,10 @@ function toTopSignal(payload: CanonicalResultPayload): AssessmentResultTopSignal
 function toSingleDomainTopSignal(
   payload: SingleDomainResultPayload,
 ): AssessmentResultTopSignalViewModel | null {
+  if (isRankedPatternSingleDomainPayload(payload)) {
+    return toRankedPatternTopSignal(payload);
+  }
+
   const signal = payload.signals[0];
   if (!signal) {
     return null;
@@ -505,6 +524,10 @@ function toSingleDomainTopSignal(
 function toSingleDomainRankedSignals(
   payload: SingleDomainResultPayload,
 ): readonly AssessmentResultRankedSignalViewModel[] {
+  if (isRankedPatternSingleDomainPayload(payload)) {
+    return toRankedPatternRankedSignals(payload);
+  }
+
   return Object.freeze(
     payload.signals.map((signal) => ({
       signalId: signal.signal_key,
@@ -521,6 +544,109 @@ function toSingleDomainRankedSignals(
       rank: signal.rank,
     })),
   );
+}
+
+function toRankedPatternRankedSignals(
+  payload: SingleDomainResultPayload,
+): readonly AssessmentResultRankedSignalViewModel[] {
+  const rankedSignals = Array.isArray(payload.rankedSignals) ? payload.rankedSignals : [];
+  const domainKey = payload.metadata.domainKey;
+
+  return Object.freeze(
+    rankedSignals
+      .filter(isRecord)
+      .map((signal) => {
+        const signalKey = readText(signal, 'signalKey') ?? '';
+        const rank = readNumber(signal, 'rank') ?? 0;
+        const normalizedPercentage = readNumber(signal, 'normalizedPercentage') ?? 0;
+        const rawScore = readNumber(signal, 'rawScore') ?? normalizedPercentage;
+
+        return {
+          signalId: signalKey,
+          signalKey,
+          title: readText(signal, 'signalLabel') ?? signalKey,
+          domainId: domainKey,
+          domainKey,
+          normalizedValue: normalizedPercentage,
+          rawTotal: rawScore,
+          percentage: normalizedPercentage,
+          domainPercentage: normalizedPercentage,
+          isOverlay: false,
+          overlayType: 'none' as const,
+          rank,
+        };
+      })
+      .filter((signal) => signal.signalKey.length > 0 && signal.rank > 0),
+  );
+}
+
+function toRankedPatternTopSignal(
+  payload: SingleDomainResultPayload,
+): AssessmentResultTopSignalViewModel | null {
+  const rankedTopSignal = toRankedPatternRankedSignals(payload)[0];
+  if (!rankedTopSignal) {
+    return null;
+  }
+
+  return {
+    signalId: rankedTopSignal.signalId,
+    signalKey: rankedTopSignal.signalKey,
+    title: rankedTopSignal.title,
+    domainId: rankedTopSignal.domainId,
+    domainKey: rankedTopSignal.domainKey,
+    normalizedValue: rankedTopSignal.normalizedValue,
+    rawTotal: rankedTopSignal.rawTotal,
+    percentage: rankedTopSignal.percentage,
+    rank: 1,
+  };
+}
+
+function toRankedPatternNormalizedScores(
+  payload: SingleDomainResultPayload,
+): readonly AssessmentResultSignalScoreViewModel[] {
+  const normalizedScores = Array.isArray(payload.normalizedScores) ? payload.normalizedScores : [];
+  const rankedSignalsByKey = new Map(
+    toRankedPatternRankedSignals(payload).map((signal) => [signal.signalKey, signal]),
+  );
+  const domainKey = payload.metadata.domainKey;
+
+  return Object.freeze(
+    normalizedScores
+      .filter(isRecord)
+      .map((score) => {
+        const signalKey = readText(score, 'signalKey') ?? '';
+        const rankedSignal = rankedSignalsByKey.get(signalKey);
+        const normalizedPercentage = readNumber(score, 'normalizedPercentage') ?? rankedSignal?.percentage ?? 0;
+        const rawScore = readNumber(score, 'rawScore') ?? rankedSignal?.rawTotal ?? normalizedPercentage;
+
+        return {
+          signalId: signalKey,
+          signalKey,
+          signalTitle: rankedSignal?.title ?? signalKey,
+          domainId: domainKey,
+          domainKey,
+          domainSource: 'signal_group' as const,
+          isOverlay: false,
+          overlayType: 'none' as const,
+          rawTotal: rawScore,
+          normalizedValue: normalizedPercentage,
+          percentage: normalizedPercentage,
+          domainPercentage: normalizedPercentage,
+          rank: rankedSignal?.rank ?? 0,
+        };
+      })
+      .filter((score) => score.signalKey.length > 0),
+  );
+}
+
+function getSingleDomainScoreShape(payload: SingleDomainResultPayload): string | null {
+  return payload.scoreShape?.value ?? null;
+}
+
+function getSingleDomainPatternKey(payload: SingleDomainResultPayload): string | null {
+  return typeof payload.patternKey === 'string' && payload.patternKey.trim().length > 0
+    ? payload.patternKey
+    : null;
 }
 
 function toListItem(record: PersistedReadyResultRecord): AssessmentResultListItem {
@@ -548,6 +674,8 @@ function toListItem(record: PersistedReadyResultRecord): AssessmentResultListIte
     topSignal,
     topSignalPercentage: topSignal?.percentage ?? null,
     signalSnapshot: Object.freeze(signalSnapshot.slice(0, 4)),
+    scoreShape: parsed.mode === 'single_domain' ? getSingleDomainScoreShape(parsed.payload) : null,
+    patternKey: parsed.mode === 'single_domain' ? getSingleDomainPatternKey(parsed.payload) : null,
     resultAvailable: true,
   };
 }
@@ -566,6 +694,69 @@ function tryToListItem(record: PersistedReadyResultRecord): AssessmentResultList
 
 function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResultDetailViewModel {
   const parsed = parseCanonicalPayload(record);
+  if (parsed.mode === 'single_domain' && isRankedPatternSingleDomainPayload(parsed.payload)) {
+    const topSignal = toRankedPatternTopSignal(parsed.payload);
+    const rankedSignals = toRankedPatternRankedSignals(parsed.payload);
+    const normalizedScores = toRankedPatternNormalizedScores(parsed.payload);
+
+    return {
+      resultId: record.resultId,
+      attemptId: record.attemptId,
+      assessmentId: record.assessmentId,
+      assessmentKey: record.assessmentKey,
+      mode: parsed.mode,
+      assessmentTitle: record.assessmentTitle,
+      version: record.version,
+      metadata: parsed.payload.metadata as AssessmentResultDetailViewModel['metadata'],
+      intro: { assessmentDescription: null },
+      hero: {
+        headline: topSignal ? `${topSignal.title} leads the current pattern` : '',
+        subheadline: null,
+        summary: null,
+        narrative: '',
+        pressureOverlay: null,
+        environmentOverlay: null,
+        primaryPattern: topSignal
+          ? {
+              label: topSignal.title,
+              signalKey: topSignal.signalKey,
+              signalLabel: topSignal.title,
+            }
+          : null,
+        heroPattern: null,
+        domainPairWinners: [],
+        traitTotals: [],
+        matchedPatterns: [],
+        domainHighlights: [],
+      },
+      domains: [],
+      actions: {
+        strengths: [],
+        watchouts: [],
+        developmentFocus: [],
+      },
+      application: null,
+      hasApplicationPlan: false,
+      topSignal,
+      rankedSignals,
+      normalizedScores,
+      scoreShape: getSingleDomainScoreShape(parsed.payload),
+      patternKey: getSingleDomainPatternKey(parsed.payload),
+      domainSummaries: [],
+      overviewSummary: {
+        headline: topSignal ? `${topSignal.title} leads the current pattern` : '',
+        narrative: '',
+      },
+      strengths: [],
+      watchouts: [],
+      developmentFocus: [],
+      diagnostics: parsed.payload.diagnostics as unknown as AssessmentResultDetailViewModel['diagnostics'],
+      singleDomainResult: parsed.singleDomainResult,
+      createdAt: record.createdAt,
+      generatedAt: record.generatedAt,
+    };
+  }
+
   const payload =
     parsed.mode === 'single_domain'
       ? createCompatibilityPayload(parsed.payload)
@@ -593,6 +784,8 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     topSignal,
     rankedSignals,
     normalizedScores,
+    scoreShape: parsed.mode === 'single_domain' ? getSingleDomainScoreShape(parsed.payload) : null,
+    patternKey: parsed.mode === 'single_domain' ? getSingleDomainPatternKey(parsed.payload) : null,
     domainSummaries,
     overviewSummary: {
       headline: payload.hero.headline ?? '',

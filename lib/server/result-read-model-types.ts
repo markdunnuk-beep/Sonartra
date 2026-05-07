@@ -92,6 +92,8 @@ export type AssessmentResultSummary = {
   topSignal: AssessmentResultTopSignalViewModel | null;
   topSignalPercentage: number | null;
   signalSnapshot: readonly AssessmentResultRankedSignalViewModel[];
+  scoreShape?: string | null;
+  patternKey?: string | null;
   resultAvailable: true;
 };
 
@@ -119,6 +121,8 @@ export type AssessmentResultDetailViewModel = {
   topSignal: AssessmentResultTopSignalViewModel | null;
   rankedSignals: readonly AssessmentResultRankedSignalViewModel[];
   normalizedScores: readonly AssessmentResultSignalScoreViewModel[];
+  scoreShape?: string | null;
+  patternKey?: string | null;
   domainSummaries: readonly AssessmentResultDomainViewModel[];
   overviewSummary: {
     headline: string;
