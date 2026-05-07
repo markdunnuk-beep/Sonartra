@@ -26,6 +26,7 @@ type RuntimeFixture = {
     assessment_version_id: string;
     assessment_version_tag: string;
     assessment_mode: string | null;
+    result_model_key: string | null;
   } | null;
   domains: Array<{
     domain_id: string;
@@ -186,6 +187,7 @@ function buildFixture(overrides?: Partial<RuntimeFixture>): RuntimeFixture {
       assessment_version_id: 'version-1',
       assessment_version_tag: '0.1.0',
       assessment_mode: 'single_domain',
+      result_model_key: null,
     },
     domains: [{
       domain_id: 'domain-1',
@@ -401,6 +403,73 @@ function buildFixture(overrides?: Partial<RuntimeFixture>): RuntimeFixture {
   };
 }
 
+function buildRankedPatternFixture(overrides?: Partial<RuntimeFixture>): RuntimeFixture {
+  const base = buildFixture();
+  return {
+    ...base,
+    context: base.context
+      ? {
+          ...base.context,
+          result_model_key: 'ranked_pattern',
+        }
+      : null,
+    signals: [
+      {
+        signal_id: 'signal-1',
+        signal_key: 'deep_focus',
+        signal_label: 'Deep focus',
+        signal_description: null,
+        signal_order_index: 0,
+        domain_id: 'domain-1',
+      },
+      {
+        signal_id: 'signal-2',
+        signal_key: 'creative_movement',
+        signal_label: 'Creative movement',
+        signal_description: null,
+        signal_order_index: 1,
+        domain_id: 'domain-1',
+      },
+      {
+        signal_id: 'signal-3',
+        signal_key: 'physical_rhythm',
+        signal_label: 'Physical rhythm',
+        signal_description: null,
+        signal_order_index: 2,
+        domain_id: 'domain-1',
+      },
+      {
+        signal_id: 'signal-4',
+        signal_key: 'social_exchange',
+        signal_label: 'Social exchange',
+        signal_description: null,
+        signal_order_index: 3,
+        domain_id: 'domain-1',
+      },
+    ],
+    weights: [
+      {
+        option_signal_weight_id: 'weight-1',
+        option_id: 'option-1',
+        signal_id: 'signal-1',
+        signal_key: 'deep_focus',
+        weight: '1.0',
+        source_weight_key: '1|A|deep_focus',
+      },
+      {
+        option_signal_weight_id: 'weight-2',
+        option_id: 'option-2',
+        signal_id: 'signal-2',
+        signal_key: 'creative_movement',
+        weight: '1.0',
+        source_weight_key: '1|B|creative_movement',
+      },
+    ],
+    language: undefined,
+    ...overrides,
+  };
+}
+
 test('single-domain runtime loader assembles a deterministic runtime object from authored DB state', async () => {
   const runtime = await loadSingleDomainRuntimeDefinition(createSingleDomainDb(buildFixture()), 'version-1');
 
@@ -418,6 +487,78 @@ test('single-domain runtime loader assembles a deterministic runtime object from
   assert.equal(runtime.optionSignalWeights.length, 2);
   assert.equal(runtime.languageBundle.DRIVER_CLAIMS.length, 15);
   assert.equal(runtime.languageBundle.SIGNAL_CHAPTERS.length, 0);
+});
+
+test('ranked-pattern runtime loader bypasses legacy pair readiness and language bundle requirements', async () => {
+  const runtime = await loadSingleDomainRuntimeDefinition(
+    createSingleDomainDb(buildRankedPatternFixture()),
+    'version-1',
+  );
+
+  assert.equal(runtime.metadata.resultModelKey, 'ranked_pattern');
+  assert.equal(runtime.signals.length, 4);
+  assert.equal(runtime.derivedPairs.length, 0);
+  assert.equal(runtime.languageBundle.HERO_PAIRS.length, 0);
+  assert.equal(runtime.diagnostics.expectations.expectedDerivedPairCount, 0);
+  assert.equal(runtime.diagnostics.invariants.derivedPairCountMatchesSignals, true);
+});
+
+test('ranked-pattern runtime loader still requires exactly four signals', async () => {
+  const rankedFixture = buildRankedPatternFixture();
+  const readiness = await getSingleDomainDraftReadiness(
+    createSingleDomainDb(
+      buildRankedPatternFixture({
+        signals: rankedFixture.signals.slice(0, 3),
+      }),
+    ),
+    'version-1',
+  );
+
+  assert.equal(readiness.isReady, false);
+  assert.equal(
+    readiness.issues.some(
+      (issue) =>
+        issue.code === 'runtime_definition_incomplete' &&
+        issue.message === 'Ranked-pattern runtime loading requires exactly four active scored signals.',
+    ),
+    true,
+  );
+});
+
+test('ranked-pattern runtime loader still requires option weights', async () => {
+  const readiness = await getSingleDomainDraftReadiness(
+    createSingleDomainDb(buildRankedPatternFixture({ weights: [] })),
+    'version-1',
+  );
+
+  assert.equal(readiness.isReady, false);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'missing_weights'), true);
+  assert.equal(readiness.issues.some((issue) => issue.code === 'option_without_weights'), true);
+});
+
+test('unknown result model key does not bypass legacy pair readiness checks', async () => {
+  const fixture = buildRankedPatternFixture();
+  const readiness = await getSingleDomainDraftReadiness(
+    createSingleDomainDb({
+      ...fixture,
+      context: fixture.context
+        ? {
+            ...fixture.context,
+            result_model_key: 'unknown_model',
+          }
+        : null,
+      language: undefined,
+    }),
+    'version-1',
+  );
+
+  assert.equal(readiness.isReady, false);
+  assert.equal(
+    readiness.issues.some(
+      (issue) => issue.message === 'Derived pair count does not match the current authored signal count.',
+    ),
+    true,
+  );
 });
 
 test('single-domain runtime readiness rejects reversed pair language keys', async () => {

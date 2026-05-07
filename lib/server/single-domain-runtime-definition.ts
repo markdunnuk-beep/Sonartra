@@ -1,4 +1,5 @@
 import type { Queryable } from '@/lib/engine/repository-sql';
+import { rankedPatternResultModelKey } from '@/content/assessment-packages/import-contract/ranked-pattern-import-manifest';
 import {
   DRIVER_CLAIM_ROLES,
   getExpectedDriverClaimTuples,
@@ -82,6 +83,16 @@ type RuntimeWeightRow = {
   weight: string;
   source_weight_key: string | null;
 };
+
+const emptySingleDomainLanguageBundle = Object.freeze({
+  DOMAIN_FRAMING: Object.freeze([]),
+  HERO_PAIRS: Object.freeze([]),
+  DRIVER_CLAIMS: Object.freeze([]),
+  SIGNAL_CHAPTERS: Object.freeze([]),
+  BALANCING_SECTIONS: Object.freeze([]),
+  PAIR_SUMMARIES: Object.freeze([]),
+  APPLICATION_STATEMENTS: Object.freeze([]),
+});
 
 const DRIVER_ROLE_TO_CLAIM_TYPE = {
   primary_driver: 'driver_primary',
@@ -732,22 +743,15 @@ export async function evaluateSingleDomainRuntimeDefinition(
     };
   }
 
+  const isRankedPatternVersion = context.result_model_key === rankedPatternResultModelKey;
   const [domainRows, signalRows, questionRows, optionRows, weightRows, languageBundle] = await Promise.all([
     loadDomains(db, assessmentVersionId),
     loadSignals(db, assessmentVersionId),
     loadQuestions(db, assessmentVersionId),
     loadOptions(db, assessmentVersionId),
     loadWeights(db, assessmentVersionId),
-    context.result_model_key === 'ranked_pattern'
-      ? Promise.resolve({
-          DOMAIN_FRAMING: Object.freeze([]),
-          HERO_PAIRS: Object.freeze([]),
-          DRIVER_CLAIMS: Object.freeze([]),
-          SIGNAL_CHAPTERS: Object.freeze([]),
-          BALANCING_SECTIONS: Object.freeze([]),
-          PAIR_SUMMARIES: Object.freeze([]),
-          APPLICATION_STATEMENTS: Object.freeze([]),
-        })
+    isRankedPatternVersion
+      ? Promise.resolve(emptySingleDomainLanguageBundle)
       : getSingleDomainLanguageBundle(db, assessmentVersionId, { includeSignalChapters: false }),
   ]);
 
@@ -780,21 +784,32 @@ export async function evaluateSingleDomainRuntimeDefinition(
 
   const runtimeDomainRow = domainRows[0] ?? null;
   const signalCount = signalRows.length;
-  const derivedPairCount = getSingleDomainExpectedPairCount(signalCount);
+  const derivedPairCount = isRankedPatternVersion ? 0 : getSingleDomainExpectedPairCount(signalCount);
   const expectedSignalKeys = signalRows.map((row) => row.signal_key);
-  const expectedPairKeys = [...getSingleDomainCanonicalPairKeys(expectedSignalKeys)];
-  const expectedLanguageRowCounts = buildLanguageExpectations({
-    signalCount,
-    derivedPairCount,
-    domainKey: runtimeDomainRow?.domain_key ?? null,
-    signalKeys: expectedSignalKeys,
-    pairKeys: expectedPairKeys,
-    applicationRows: languageBundle.APPLICATION_STATEMENTS,
-  });
+  const expectedPairKeys = isRankedPatternVersion ? [] : [...getSingleDomainCanonicalPairKeys(expectedSignalKeys)];
+  const expectedLanguageRowCounts = isRankedPatternVersion
+    ? emptyLanguageCounts
+    : buildLanguageExpectations({
+        signalCount,
+        derivedPairCount,
+        domainKey: runtimeDomainRow?.domain_key ?? null,
+        signalKeys: expectedSignalKeys,
+        pairKeys: expectedPairKeys,
+        applicationRows: languageBundle.APPLICATION_STATEMENTS,
+      });
   const languageRowCounts = createLanguageRowCounts(languageBundle);
 
   if (signalCount === 0) {
     issues.push(createIssue('missing_signals', 'signals', 'At least one authored signal is required.'));
+  } else if (isRankedPatternVersion && signalCount !== 4) {
+    issues.push(
+      createIssue(
+        'runtime_definition_incomplete',
+        'signals',
+        'Ranked-pattern runtime loading requires exactly four active scored signals.',
+        expectedSignalKeys,
+      ),
+    );
   }
 
   if (questionRows.length === 0) {
@@ -842,7 +857,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
   const signalById = new Map(signals.map((signal) => [signal.id, signal]));
 
   const signalByKey = new Map(signals.map((signal) => [signal.key, signal]));
-  const derivedPairKeys = [...getSingleDomainCanonicalPairKeys(signals.map((signal) => signal.key))];
+  const derivedPairKeys = isRankedPatternVersion ? [] : [...getSingleDomainCanonicalPairKeys(signals.map((signal) => signal.key))];
   const derivedPairs: readonly SingleDomainRuntimeDerivedPair[] = Object.freeze(
     derivedPairKeys.flatMap((pairKey, index) => {
       const [leftSignalKey, rightSignalKey] = pairKey.split('_');
@@ -1002,7 +1017,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
     );
   }
 
-  if (context.result_model_key !== 'ranked_pattern') {
+  if (!isRankedPatternVersion) {
     validateLanguageKeys({
       assessmentVersionId,
       domainKey: runtimeDomainRow?.domain_key ?? null,
@@ -1013,7 +1028,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
     });
   }
 
-  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.DOMAIN_FRAMING < expectedLanguageRowCounts.DOMAIN_FRAMING) {
+  if (!isRankedPatternVersion && languageRowCounts.DOMAIN_FRAMING < expectedLanguageRowCounts.DOMAIN_FRAMING) {
     issues.push(
       createIssue(
         'domain_framing_count_mismatch',
@@ -1022,7 +1037,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.HERO_PAIRS !== expectedLanguageRowCounts.HERO_PAIRS) {
+  if (!isRankedPatternVersion && languageRowCounts.HERO_PAIRS !== expectedLanguageRowCounts.HERO_PAIRS) {
     issues.push(
       createIssue(
         'hero_pairs_count_mismatch',
@@ -1031,7 +1046,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.DRIVER_CLAIMS !== expectedLanguageRowCounts.DRIVER_CLAIMS) {
+  if (!isRankedPatternVersion && languageRowCounts.DRIVER_CLAIMS !== expectedLanguageRowCounts.DRIVER_CLAIMS) {
     issues.push(
       createIssue(
         'driver_claims_count_mismatch',
@@ -1040,7 +1055,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.BALANCING_SECTIONS > expectedLanguageRowCounts.BALANCING_SECTIONS) {
+  if (!isRankedPatternVersion && languageRowCounts.BALANCING_SECTIONS > expectedLanguageRowCounts.BALANCING_SECTIONS) {
     issues.push(
       createIssue(
         'balancing_sections_count_mismatch',
@@ -1049,7 +1064,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.PAIR_SUMMARIES !== expectedLanguageRowCounts.PAIR_SUMMARIES) {
+  if (!isRankedPatternVersion && languageRowCounts.PAIR_SUMMARIES !== expectedLanguageRowCounts.PAIR_SUMMARIES) {
     issues.push(
       createIssue(
         'pair_summaries_count_mismatch',
@@ -1058,7 +1073,7 @@ export async function evaluateSingleDomainRuntimeDefinition(
       ),
     );
   }
-  if (context.result_model_key !== 'ranked_pattern' && languageRowCounts.APPLICATION_STATEMENTS !== expectedLanguageRowCounts.APPLICATION_STATEMENTS) {
+  if (!isRankedPatternVersion && languageRowCounts.APPLICATION_STATEMENTS !== expectedLanguageRowCounts.APPLICATION_STATEMENTS) {
     issues.push(
       createIssue(
         'application_statements_count_mismatch',
@@ -1086,12 +1101,13 @@ export async function evaluateSingleDomainRuntimeDefinition(
     requiredDomainCount: 1,
     minimumSignalCount: 1,
     minimumQuestionCount: 1,
-    expectedDerivedPairCount: getSingleDomainExpectedPairCount(signalCount),
+    expectedDerivedPairCount: isRankedPatternVersion ? 0 : getSingleDomainExpectedPairCount(signalCount),
     expectedLanguageRowCounts,
   };
 
   if (
-    counts.domainCount === 1
+    !isRankedPatternVersion
+    && counts.domainCount === 1
     && counts.derivedPairCount !== expectations.expectedDerivedPairCount
   ) {
     issues.push(
