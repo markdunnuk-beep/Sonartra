@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-import { join } from 'node:path';
+import path, { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { Pool } from 'pg';
 
 import {
@@ -9,6 +10,19 @@ import {
   loadMigrationsFromDirectory,
   reconcileKnownMigrations,
 } from '../lib/server/db-migrations';
+
+export function getMigrationPoolSsl(databaseUrl: string): false | { rejectUnauthorized: false } {
+  try {
+    const url = new URL(databaseUrl);
+    if (['localhost', '127.0.0.1', '::1'].includes(url.hostname)) {
+      return false;
+    }
+  } catch {
+    return { rejectUnauthorized: false };
+  }
+
+  return { rejectUnauthorized: false };
+}
 
 async function main() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -19,7 +33,7 @@ async function main() {
 
   const pool = new Pool({
     connectionString: databaseUrl,
-    ssl: { rejectUnauthorized: false },
+    ssl: getMigrationPoolSsl(databaseUrl),
   });
 
   try {
@@ -61,8 +75,12 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error('Database migration run failed.');
-  console.error(error);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : '';
+
+if (import.meta.url === invokedPath) {
+  main().catch((error) => {
+    console.error('Database migration run failed.');
+    console.error(error);
+    process.exit(1);
+  });
+}

@@ -10,6 +10,7 @@ import {
   loadMigrationsFromDirectory,
   reconcileKnownMigrations,
 } from '@/lib/server/db-migrations';
+import { getMigrationPoolSsl } from '@/scripts/apply-db-migrations';
 
 function createFakeMigrationDb(applied: string[] = []) {
   const state = {
@@ -126,6 +127,21 @@ test('compareMigrationFilenames sorts migration files deterministically', () => 
       '202604260001_pair_scoped_single_domain_driver_claims.sql',
       '202604290001_full_pattern_single_domain_application.sql',
     ],
+  );
+});
+
+test('migration pool disables SSL only for localhost database URLs', () => {
+  assert.equal(
+    getMigrationPoolSsl('postgresql://sonartra_local:sonartra_local@localhost:54329/sonartra_local'),
+    false,
+  );
+  assert.equal(
+    getMigrationPoolSsl('postgresql://sonartra_local:sonartra_local@127.0.0.1:54329/sonartra_local'),
+    false,
+  );
+  assert.deepEqual(
+    getMigrationPoolSsl('postgresql://user:pass@db.example.supabase.co:5432/postgres'),
+    { rejectUnauthorized: false },
   );
 });
 

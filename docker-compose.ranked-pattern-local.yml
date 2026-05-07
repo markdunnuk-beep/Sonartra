@@ -1,0 +1,21 @@
+services:
+  ranked-pattern-postgres:
+    image: postgres:16-alpine
+    container_name: sonartra-ranked-pattern-local-postgres
+    environment:
+      POSTGRES_DB: sonartra_local
+      POSTGRES_USER: sonartra_local
+      POSTGRES_PASSWORD: sonartra_local
+    ports:
+      - "54329:5432"
+    volumes:
+      - sonartra_ranked_pattern_local_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonartra_local -d sonartra_local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  sonartra_ranked_pattern_local_pgdata:
+    name: sonartra_ranked_pattern_local_pgdata
