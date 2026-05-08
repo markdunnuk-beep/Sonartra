@@ -164,7 +164,13 @@ test('ranked-pattern result renderer reads persisted ranks, percentages, score s
   }
 
   assert.match(markup, /data-ranked-pattern-signal-distribution="true"/);
-  assert.match(markup, /Score shape/);
+  assert.equal([...markup.matchAll(/data-ranked-pattern-snapshot-card="true"/g)].length, 4);
+  const snapshotOrder = ['Alpha', 'Beta', 'Gamma', 'Delta'].map((label) => markup.indexOf(`>${label}</p>`));
+  assert.deepEqual(snapshotOrder, [...snapshotOrder].sort((left, right) => left - right));
+  assert.match(markup, /Signal shape/);
+  assert.doesNotMatch(markup, /Score shape/);
+  assert.doesNotMatch(markup, /Pattern shape/);
+  assert.doesNotMatch(markup, /Ranked spread/);
   assert.match(markup, /Concentrated pattern/);
   assert.match(markup, /Pattern reference: alpha_beta_gamma_delta/);
   assert.doesNotMatch(markup, /Leading pair/);

@@ -844,27 +844,47 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
             </p>
           </div>
 
-          <aside className="draft-surface rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)]">
+          <aside
+            className="draft-surface rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)]"
+            data-ranked-pattern-snapshot="true"
+          >
             <FieldLabel tone="teal">Pattern snapshot</FieldLabel>
             <div className="mt-5 grid grid-cols-2 gap-3">
-              {rankedSignals.slice(0, 2).map((signal, index) => (
+              {rankedSignals.slice(0, 4).map((signal, index) => (
                 <div
                   className={cx(
-                    'rounded-[1rem] border p-4',
+                    'min-w-0 rounded-[1rem] border p-3.5 sm:p-4',
                     index === 0
-                      ? 'draft-teal-surface border-[#32D6B0]/18 bg-[#32D6B0]/[0.06]'
-                      : 'draft-panel border-[#F3F1EA]/[0.085] bg-[#202622]/58',
+                      ? 'draft-teal-surface border-[#32D6B0]/22 bg-[#32D6B0]/[0.075]'
+                      : index === 1
+                        ? 'draft-teal-surface border-[#32D6B0]/16 bg-[#32D6B0]/[0.045]'
+                        : index === 3
+                          ? 'draft-warm-surface border-[#C98E68]/16 bg-[#C98E68]/[0.042]'
+                          : 'draft-panel border-[#F3F1EA]/[0.085] bg-[#202622]/58',
                   )}
+                  data-ranked-pattern-snapshot-card="true"
                   key={signal.signalKey}
                 >
-                  <p className="draft-percent text-3xl font-semibold text-[#F3F1EA]">{signal.normalizedPercentage}%</p>
-                  <p className="mt-2 text-sm leading-5 text-[#B8BDB7]/88">{signal.signalLabel}</p>
+                  <p
+                    className={cx(
+                      'draft-percent font-semibold text-[#F3F1EA]',
+                      index === 0 ? 'text-3xl' : 'text-2xl',
+                    )}
+                  >
+                    {signal.normalizedPercentage}%
+                  </p>
+                  <p className="mt-2 truncate text-sm font-semibold leading-5 text-[#F3F1EA]/90">
+                    {signal.signalLabel}
+                  </p>
+                  <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[#A8B0AA]/76">
+                    Rank {signal.rank}
+                  </p>
                 </div>
               ))}
             </div>
             <dl className="mt-4 space-y-3 border-t border-[#F3F1EA]/[0.085] pt-4">
               <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#A8B0AA]">Score shape</dt>
+                <dt className="text-sm text-[#A8B0AA]">Signal shape</dt>
                 <dd className="font-mono text-sm text-[#F3F1EA]/88">{formatScoreShape(scoreShape)}</dd>
               </div>
               {answeredCount !== null && totalCount !== null ? (

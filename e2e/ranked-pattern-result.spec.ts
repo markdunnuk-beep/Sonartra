@@ -27,6 +27,8 @@ for (const viewport of viewports) {
     await expect(page.getByRole('definition').filter({ hasText: 'Concentrated pattern' })).toBeVisible();
     await expect(page.getByText('Pattern reference: alpha_beta_gamma_delta')).toBeVisible();
     await expect(page.locator('[data-ranked-pattern-signal-distribution="true"]')).toBeVisible();
+    await expect(page.locator('[data-ranked-pattern-snapshot="true"]')).toBeVisible();
+    await expect(page.locator('[data-ranked-pattern-snapshot-card="true"]')).toHaveCount(4);
 
     for (const heading of [
       'Introduction',
@@ -49,6 +51,19 @@ for (const viewport of viewports) {
     await expect(
       page.locator('[data-ranked-pattern-signal-distribution="true"]').getByText('55%', { exact: true }),
     ).toBeVisible();
+    const snapshotCards = page.locator('[data-ranked-pattern-snapshot-card="true"]');
+    await expect(snapshotCards.nth(0)).toContainText('Alpha');
+    await expect(snapshotCards.nth(0)).toContainText('55%');
+    await expect(snapshotCards.nth(1)).toContainText('Beta');
+    await expect(snapshotCards.nth(1)).toContainText('25%');
+    await expect(snapshotCards.nth(2)).toContainText('Gamma');
+    await expect(snapshotCards.nth(2)).toContainText('12%');
+    await expect(snapshotCards.nth(3)).toContainText('Delta');
+    await expect(snapshotCards.nth(3)).toContainText('8%');
+    await expect(page.locator('[data-ranked-pattern-snapshot="true"]').getByText('Signal shape')).toBeVisible();
+    await expect(page.getByText('Pattern shape')).toHaveCount(0);
+    await expect(page.getByText('Score shape')).toHaveCount(0);
+    await expect(page.getByText('Ranked spread')).toHaveCount(0);
     await expect(page.getByText('Use the ranked order')).toBeVisible();
     await expect(page.getByText('Take the whole pattern forward')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Drivers' })).toHaveCount(0);
