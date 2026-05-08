@@ -1,8 +1,6 @@
-import {
-  isRankedPatternRenderablePayload,
-  RankedPatternResultReport,
-} from '@/components/results/ranked-pattern-result-report';
+import { RankedPatternResultReport } from '@/components/results/ranked-pattern-result-report';
 import { buildRankedPatternResultPayload } from '@/content/draft-result/ranked-pattern-canonical-payload';
+import { isRankedPatternRenderablePayload } from '@/lib/results/ranked-pattern-renderable';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
 export default function DraftRankedPatternResultPage() {

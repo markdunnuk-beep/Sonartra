@@ -3,9 +3,9 @@ import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import {
-  isRankedPatternRenderablePayload,
   RankedPatternResultReport,
 } from '@/components/results/ranked-pattern-result-report';
+import { isRankedPatternRenderablePayload } from '@/lib/results/ranked-pattern-renderable';
 import { SingleDomainResultReport } from '@/components/results/single-domain-result-report';
 import { createSingleDomainResultsViewModel } from '@/lib/server/single-domain-results-view-model';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
@@ -126,16 +126,16 @@ function legacyPayload(): SingleDomainResultPayload {
 test('ranked-pattern result renderer displays persisted reader-first sections in order', () => {
   const markup = renderToStaticMarkup(<RankedPatternResultReport payload={rankedPayload()} />);
   const expectedHeadings = [
-    'Context',
-    'Orientation',
-    'Recognition',
-    'Signal Roles',
-    'Pattern Mechanics',
-    'Pattern Synthesis',
-    'Strengths',
-    'Narrowing',
-    'Application',
-    'Closing Integration',
+    'Introduction',
+    'Pattern at a Glance',
+    'Core Interpretation',
+    'Signal Profile',
+    'What Shapes This Pattern',
+    'How the Pattern Works',
+    'What Comes Easily',
+    'Where It Can Narrow',
+    'How to Use It',
+    'Take Forward',
   ];
   const headingPositions = expectedHeadings.map((heading) => {
     const position = markup.indexOf(`>${heading}</h2>`);
@@ -145,10 +145,10 @@ test('ranked-pattern result renderer displays persisted reader-first sections in
 
   assert.deepEqual(headingPositions, [...headingPositions].sort((left, right) => left - right));
   assert.match(markup, /data-ranked-pattern-result="true"/);
-  assert.match(markup, /Alpha leads the current pattern/);
+  assert.match(markup, /You may recognise this as a clear first-route pattern/);
   assert.match(markup, /Concentrated pattern/);
-  assert.match(markup, /Pattern alpha_beta_gamma_delta/);
-  assert.match(markup, /The result context/);
+  assert.doesNotMatch(markup, /Version 1\.0\.0 · Pattern alpha_beta_gamma_delta/);
+  assert.match(markup, /How to read this result/);
   assert.match(markup, /You may recognise this as a clear first-route pattern/);
   assert.match(markup, /Clear starting point/);
   assert.match(markup, /Range can compress/);
@@ -166,7 +166,7 @@ test('ranked-pattern result renderer reads persisted ranks, percentages, score s
   assert.match(markup, /data-ranked-pattern-signal-distribution="true"/);
   assert.match(markup, /Score shape/);
   assert.match(markup, /Concentrated pattern/);
-  assert.match(markup, /alpha_beta_gamma_delta/);
+  assert.match(markup, /Pattern reference: alpha_beta_gamma_delta/);
   assert.doesNotMatch(markup, /Leading pair/);
   assert.doesNotMatch(markup, /Hero pair/);
   assert.doesNotMatch(markup, /Balancing pair/);

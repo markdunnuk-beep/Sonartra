@@ -44,9 +44,12 @@ export function PublicSiteHeader() {
   const mobileMenuLabelId = useId();
   const pathname = usePathname();
   const desktopNavItems = PUBLIC_SITE_PRIMARY_NAV_ITEMS.filter((item) => item.href !== pathname);
-  const isDraftPrototypeRoute = pathname === '/draft-result' || pathname === '/draft-runner';
-  const isDraftFocusMode = isDraftPrototypeRoute && pathname !== '/draft-runner' && draftFocusMode;
-  const isDraftLightMode = isDraftPrototypeRoute && draftReadingMode === 'light';
+  const isDraftDisplayModeRoute =
+    pathname === '/draft-result' ||
+    pathname === '/draft-runner' ||
+    pathname === '/draft-ranked-pattern-result';
+  const isDraftFocusMode = pathname === '/draft-result' && draftFocusMode;
+  const isDraftLightMode = isDraftDisplayModeRoute && draftReadingMode === 'light';
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -73,7 +76,7 @@ export function PublicSiteHeader() {
   const closeMobileMenu = () => setMobileOpen(false);
 
   useEffect(() => {
-    if (!isDraftPrototypeRoute) {
+    if (!isDraftDisplayModeRoute) {
       return;
     }
 
@@ -90,10 +93,10 @@ export function PublicSiteHeader() {
     return () => {
       window.removeEventListener(DRAFT_READING_MODE_CHANGE_EVENT, handleDraftReadingModeChange);
     };
-  }, [isDraftPrototypeRoute]);
+  }, [isDraftDisplayModeRoute]);
 
   useEffect(() => {
-    if (!isDraftPrototypeRoute) {
+    if (!isDraftDisplayModeRoute) {
       return;
     }
 
@@ -110,7 +113,7 @@ export function PublicSiteHeader() {
     return () => {
       window.removeEventListener(DRAFT_FOCUS_MODE_CHANGE_EVENT, handleDraftFocusModeChange);
     };
-  }, [isDraftPrototypeRoute]);
+  }, [isDraftDisplayModeRoute]);
 
   return (
     <header

@@ -20,19 +20,19 @@ export function buildRankedPatternResultPayload(params?: {
       payloadVersion: 'ranked_pattern_v1',
       contract: 'single_domain_ranked_pattern',
       assessmentVersionId: 'version-ranked-1',
-      assessmentKey: 'test_assessment',
-      assessmentTitle: 'Test Assessment',
+      assessmentKey: 'decision_style',
+      assessmentTitle: 'Decision Style',
       version: '1.0.0',
       attemptId,
       mode: 'single_domain',
       resultModelKey: 'ranked_pattern',
-      domainKey: 'test_domain',
+      domainKey: 'decision_style',
       generatedAt,
       completedAt: generatedAt,
     },
     assessment: {
-      assessmentKey: 'test_assessment',
-      title: 'Test Assessment',
+      assessmentKey: 'decision_style',
+      title: 'Decision Style',
       version: '1.0.0',
     },
     attempt: {
@@ -40,8 +40,8 @@ export function buildRankedPatternResultPayload(params?: {
       completedAt: generatedAt,
     },
     domain: {
-      domainKey: 'test_domain',
-      label: 'Test Domain',
+      domainKey: 'decision_style',
+      label: 'Decision Style',
     },
     topSignal: rankedSignals[0],
     rankedSignals,
@@ -57,25 +57,26 @@ export function buildRankedPatternResultPayload(params?: {
     },
     patternKey,
     context: {
-      lookupKey: 'context_test_domain',
+      lookupKey: 'context_decision_style',
       fieldValues: {
-        title: 'The result context',
-        definition: 'This result describes the ranked signal pattern for the active domain.',
-        scope: 'It uses the persisted canonical result payload only.',
+        title: 'How to read this result',
+        definition: 'This report describes the current signal pattern behind how decisions tend to organise.',
+        scope: 'Read the order as a practical guide to attention, trade-offs, and range, not as a fixed identity.',
       },
     },
     orientation: {
       lookupKey: 'orientation_alpha_beta_gamma_delta_concentrated',
       fieldValues: {
         title: 'Alpha gives this result its first direction',
-        summary: 'The strongest signal sets the starting point for reading the rest of the pattern.',
+        summary: 'The strongest signal gives the first route into the result, while the supporting signals show the range around it.',
+        scoreShapeSummary: 'This is a concentrated pattern: one signal is clearly ahead, but the full result still depends on how the remaining signals balance the reading.',
       },
     },
     recognition: {
       lookupKey: 'recognition_alpha_beta_gamma_delta_concentrated',
       fieldValues: {
         headline: 'You may recognise this as a clear first-route pattern.',
-        recognitionStatement: 'The result starts with the strongest signal and then reads the supporting order.',
+        recognitionStatement: 'Your result has a clear lead signal, with the other signals shaping how that lead becomes useful in practice.',
       },
     },
     signalRoles: rankedSignals.map((signal) => ({
@@ -84,8 +85,9 @@ export function buildRankedPatternResultPayload(params?: {
       rankPosition: signal.rank,
       fieldValues: {
         title: `${signal.signalLabel} at rank ${signal.rank}`,
-        productiveExpression: `${signal.signalLabel} contributes from its persisted rank position.`,
-        developmentNote: 'Use this role as a reading aid, not as a recomputed score.',
+        productiveExpression: `${signal.signalLabel} gives this part of the pattern a distinct role.`,
+        riskPattern: `${signal.signalLabel} can become less useful when it is read in isolation from the full order.`,
+        developmentNote: 'Use this role as one part of the whole pattern, then check what the next signal adds.',
       },
     })),
     patternMechanics: {
@@ -93,16 +95,18 @@ export function buildRankedPatternResultPayload(params?: {
       fieldValues: {
         title: 'How this pattern works',
         coreMechanism: 'The top signal gives direction while the other signals shape the range around it.',
-        whatItProtects: 'This keeps the result anchored in the persisted rank order.',
+        whyItShowsUp: 'This pattern often appears when one route is clearly available, but the work still benefits from checking what the supporting signals add.',
+        whatItProtects: 'It protects clarity without letting the result become too narrow.',
       },
     },
     patternSynthesis: {
       lookupKey: 'synthesis_alpha_beta_gamma_delta_concentrated',
       fieldValues: {
         title: 'What the pattern adds up to',
-        gift: 'The pattern gives the reader a clear starting point.',
+        gift: 'The pattern gives you a clear starting point.',
         trap: 'It can narrow if the lower-ranked signals are ignored.',
         takeaway: 'Read the full order rather than only the first signal.',
+        synthesisText: 'This result is most useful when the lead signal starts the interpretation and the remaining signals keep the pattern flexible.',
       },
     },
     strengths: [
@@ -112,7 +116,7 @@ export function buildRankedPatternResultPayload(params?: {
         priority: 1,
         fieldValues: {
           title: 'Clear starting point',
-          text: 'The reader can see which signal currently leads the pattern.',
+          text: 'You can see which signal currently gives the pattern its clearest direction.',
         },
       },
     ],
@@ -142,7 +146,10 @@ export function buildRankedPatternResultPayload(params?: {
       lookupKey: 'closing_alpha_beta_gamma_delta_concentrated',
       fieldValues: {
         title: 'Take the whole pattern forward',
-        memorableLine: 'The order matters because it shows how the result is currently organised.',
+        coreGift: 'The strongest signal gives you a clear first route.',
+        coreTrap: 'The result can become too narrow if the supporting signals are treated as irrelevant.',
+        developmentEdge: 'The useful edge is to let the lead signal begin the interpretation, then deliberately widen the reading.',
+        memorableLine: 'Start with the lead signal. Keep the whole pattern in view.',
       },
     },
     diagnostics: {
@@ -162,7 +169,7 @@ export function buildRankedPatternResultPayload(params?: {
         patternKey,
       },
       resultLanguageLookupKeys: [
-        'context_test_domain',
+        'context_decision_style',
         'orientation_alpha_beta_gamma_delta_concentrated',
         'recognition_alpha_beta_gamma_delta_concentrated',
         'role_alpha_1',

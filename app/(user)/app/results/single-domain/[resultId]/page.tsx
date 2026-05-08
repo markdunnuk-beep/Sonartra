@@ -1,10 +1,8 @@
 import { notFound } from 'next/navigation';
 
-import {
-  isRankedPatternRenderablePayload,
-  RankedPatternResultReport,
-} from '@/components/results/ranked-pattern-result-report';
+import { RankedPatternResultReport } from '@/components/results/ranked-pattern-result-report';
 import { SingleDomainResultReport } from '@/components/results/single-domain-result-report';
+import { isRankedPatternRenderablePayload } from '@/lib/results/ranked-pattern-renderable';
 import { getDbPool } from '@/lib/server/db';
 import { getRequestUserId } from '@/lib/server/request-user';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
