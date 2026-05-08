@@ -6,7 +6,6 @@ import { useFormStatus } from 'react-dom';
 import { AdminPublishedNoDraftStageState } from '@/components/admin/admin-assessment-draft-state';
 import { RankedPatternImportPanel } from '@/components/admin/ranked-pattern-import-panel';
 import {
-  AdminAssessmentPublishForm,
   getAdminAssessmentPublishDisabledReason,
   getAdminAssessmentPublishStatusClass,
   getAdminAssessmentPublishStatusLabel,
@@ -348,17 +347,9 @@ function SingleDomainReviewPublishCard() {
             </p>
           </div>
 
-          <AdminAssessmentPublishForm
-            assessmentKey={assessment.assessmentKey}
-            disabled={!isPublishReady}
-            draftVersionId={latestDraftVersion.assessmentVersionId}
-            idleLabel="Publish assessment"
-            pendingLabel="Publishing assessment..."
-          />
-
           <p className="text-sm leading-6 text-white/54">
             {isPublishReady
-              ? 'Publishing will make this draft live for runtime consumption and archive any previously active published version.'
+              ? 'Use the ranked-pattern package panel to run publish audit and explicitly publish this draft.'
               : getAdminAssessmentPublishDisabledReason(assessment.draftValidation)}
           </p>
           {publishedVersion ? (

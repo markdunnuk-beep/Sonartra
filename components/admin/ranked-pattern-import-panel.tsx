@@ -11,11 +11,17 @@ import {
   applyRankedPatternImportAction,
   auditRankedPatternPackageAction,
   auditRankedPatternPublishReadinessAction,
+  createRankedPatternDraftVersionAction,
   dryRunRankedPatternImportAction,
   initialRankedPatternAdminImportActionState,
+  initialRankedPatternDraftVersionActionState,
   initialRankedPatternPublishAuditActionState,
+  initialRankedPatternPublishVersionActionState,
+  publishRankedPatternVersionAction,
   type RankedPatternAdminImportActionState,
+  type RankedPatternDraftVersionActionState,
   type RankedPatternPublishAuditActionState,
+  type RankedPatternPublishVersionActionState,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
 import type {
   RankedPatternAdminImportWorkflowResult,
@@ -143,6 +149,31 @@ function PublishAuditForm({
         idleLabel="Run publish audit"
         pendingLabel="Auditing publish..."
         tone="secondary"
+      />
+    </form>
+  );
+}
+
+function VersionMutationForm({
+  action,
+  disabled,
+  idleLabel,
+  pendingLabel,
+  tone = 'secondary',
+}: Readonly<{
+  action: (payload: FormData) => void;
+  disabled: boolean;
+  idleLabel: string;
+  pendingLabel: string;
+  tone?: 'primary' | 'secondary' | 'apply';
+}>) {
+  return (
+    <form action={action}>
+      <SubmitButton
+        disabled={disabled}
+        idleLabel={idleLabel}
+        pendingLabel={pendingLabel}
+        tone={tone}
       />
     </form>
   );
@@ -322,6 +353,48 @@ function PublishAuditResultBlock({
   );
 }
 
+function DraftVersionActionResultBlock({
+  state,
+}: Readonly<{
+  state: RankedPatternDraftVersionActionState;
+}>) {
+  if (state.formError) {
+    return <AdminFeedbackNotice tone="danger">{state.formError}</AdminFeedbackNotice>;
+  }
+
+  if (state.formSuccess) {
+    return <AdminFeedbackNotice tone="success">{state.formSuccess}</AdminFeedbackNotice>;
+  }
+
+  return null;
+}
+
+function PublishVersionActionResultBlock({
+  state,
+}: Readonly<{
+  state: RankedPatternPublishVersionActionState;
+}>) {
+  if (state.formError) {
+    const blocking = state.result?.status === 'blocked' ? state.result.blockingDiagnostics : [];
+    return (
+      <AdminFeedbackNotice tone="danger" title="Publish blocked">
+        <span>{state.formError}</span>
+        {blocking.length > 0 ? (
+          <span className="mt-3 block">
+            {blocking.slice(0, 4).map((diagnostic) => diagnostic.message).join(' ')}
+          </span>
+        ) : null}
+      </AdminFeedbackNotice>
+    );
+  }
+
+  if (state.formSuccess) {
+    return <AdminFeedbackNotice tone="success">{state.formSuccess}</AdminFeedbackNotice>;
+  }
+
+  return null;
+}
+
 function WorkflowResultBlock({
   state,
 }: Readonly<{
@@ -398,6 +471,10 @@ export function RankedPatternImportPanel({
   const publishAuditContext = {
     targetAssessmentVersionId: latestDraftVersion?.assessmentVersionId ?? '',
   };
+  const versionContext = {
+    assessmentKey,
+    targetAssessmentVersionId: latestDraftVersion?.assessmentVersionId ?? '',
+  };
   const [auditState, auditAction] = useActionState(
     auditRankedPatternPackageAction.bind(null, actionContext),
     initialRankedPatternAdminImportActionState,
@@ -414,7 +491,16 @@ export function RankedPatternImportPanel({
     auditRankedPatternPublishReadinessAction.bind(null, publishAuditContext),
     initialRankedPatternPublishAuditActionState,
   );
+  const [draftVersionState, draftVersionAction] = useActionState(
+    createRankedPatternDraftVersionAction.bind(null, versionContext),
+    initialRankedPatternDraftVersionActionState,
+  );
+  const [publishVersionState, publishVersionAction] = useActionState(
+    publishRankedPatternVersionAction.bind(null, versionContext),
+    initialRankedPatternPublishVersionActionState,
+  );
   const hasDraft = latestDraftVersion !== null;
+  const canPublishFromAudit = publishAuditState.result?.canPublish === true;
 
   return (
     <SurfaceCard className="space-y-6 p-5 lg:p-6" data-ranked-pattern-import-panel="true">
@@ -448,6 +534,7 @@ export function RankedPatternImportPanel({
             <p className="break-all">
               Draft version id: {latestDraftVersion?.assessmentVersionId ?? 'Create a draft first'}
             </p>
+            <p>Status: {latestDraftVersion?.status ?? 'No editable draft'}</p>
           </div>
         </div>
       </div>
@@ -455,7 +542,8 @@ export function RankedPatternImportPanel({
       <AdminFeedbackNotice tone="neutral" title="Workflow safety">
         Audit and dry-run do not write to the database. Apply import writes package data but does
         not publish. Publish audit is read-only, and publishing remains a separate explicit action.
-        Existing completed results remain tied to their original assessment version.
+        Publishing affects new attempts only. Existing completed results remain tied to their
+        original assessment version and persisted payload.
       </AdminFeedbackNotice>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.45fr)]">
@@ -502,6 +590,13 @@ export function RankedPatternImportPanel({
         </div>
 
         <div className="sonartra-admin-feedback-card space-y-3 rounded-[1.2rem] border p-4">
+          <VersionMutationForm
+            action={draftVersionAction}
+            disabled={hasDraft}
+            idleLabel="Create draft version"
+            pendingLabel="Creating draft..."
+            tone="secondary"
+          />
           <WorkflowForm
             action={auditAction}
             idleLabel="Audit package"
@@ -531,9 +626,20 @@ export function RankedPatternImportPanel({
             tone="apply"
           />
           <PublishAuditForm action={publishAuditAction} disabled={!hasDraft} />
+          <VersionMutationForm
+            action={publishVersionAction}
+            disabled={!hasDraft || !canPublishFromAudit}
+            idleLabel="Publish audited draft"
+            pendingLabel="Publishing..."
+            tone="apply"
+          />
           {!hasDraft ? (
             <p className="text-xs leading-5 text-white/46">
               Create a draft version before applying package data or running publish audit.
+            </p>
+          ) : !canPublishFromAudit ? (
+            <p className="text-xs leading-5 text-white/46">
+              Run publish audit and resolve all blocking findings before explicit publish is enabled.
             </p>
           ) : null}
         </div>
@@ -551,10 +657,12 @@ export function RankedPatternImportPanel({
       </div>
 
       <div className="space-y-4">
+        <DraftVersionActionResultBlock state={draftVersionState} />
         <WorkflowResultBlock state={auditState} />
         <WorkflowResultBlock state={dryRunState} />
         <WorkflowResultBlock state={applyState} />
         <PublishAuditResultBlock state={publishAuditState} />
+        <PublishVersionActionResultBlock state={publishVersionState} />
       </div>
     </SurfaceCard>
   );

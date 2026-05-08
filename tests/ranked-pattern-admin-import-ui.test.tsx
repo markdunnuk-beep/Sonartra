@@ -1,56 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import path from 'node:path';
 
-function readSource(...segments: string[]): string {
-  return readFileSync(join(process.cwd(), ...segments), 'utf8');
-}
+const panelSource = readFileSync(
+  path.join(process.cwd(), 'components/admin/ranked-pattern-import-panel.tsx'),
+  'utf8',
+);
 
-test('ranked-pattern import panel renders the four separate admin workflow controls', () => {
-  const source = readSource('components', 'admin', 'ranked-pattern-import-panel.tsx');
+const reviewSource = readFileSync(
+  path.join(process.cwd(), 'components/admin/single-domain-structural-authoring.tsx'),
+  'utf8',
+);
 
-  assert.match(source, /Workbook file path or package reference/);
-  assert.match(source, /Audit package/);
-  assert.match(source, /Dry-run import/);
-  assert.match(source, /Apply import/);
-  assert.match(source, /Run publish audit/);
-  assert.match(source, /auditRankedPatternPackageAction\.bind/);
-  assert.match(source, /dryRunRankedPatternImportAction\.bind/);
-  assert.match(source, /applyRankedPatternImportAction\.bind/);
-  assert.match(source, /auditRankedPatternPublishReadinessAction\.bind/);
-});
-
-test('ranked-pattern import panel explains safety and draft-version workflow', () => {
-  const source = readSource('components', 'admin', 'ranked-pattern-import-panel.tsx');
-
-  assert.match(source, /Audit and dry-run do not write to the database/);
-  assert.match(source, /Apply import writes package data but does\s+not publish/);
-  assert.match(source, /Publish audit is read-only/);
-  assert.match(source, /publishing remains a separate explicit action/);
-  assert.match(source, /Existing completed results remain tied to their original assessment version/);
-  assert.match(source, /Create or open the next draft version/);
-  assert.match(source, /Completed results continue to render from their persisted payload/);
-});
-
-test('ranked-pattern import panel displays counts and diagnostics without workbook contents', () => {
-  const source = readSource('components', 'admin', 'ranked-pattern-import-panel.tsx');
-
-  assert.match(source, /Runtime definition planned counts/);
-  assert.match(source, /Result-language planned counts/);
-  assert.match(source, /Runtime definition applied counts/);
-  assert.match(source, /Result-language applied counts/);
-  assert.match(source, /Blocking diagnostics/);
-  assert.match(source, /Warnings/);
-  assert.match(source, /sheetKey/);
-  assert.match(source, /rowNumber/);
-  assert.doesNotMatch(source, /rawValues/);
-  assert.doesNotMatch(source, /sourceValues/);
-});
-
-test('ranked-pattern import panel is wired into the existing single-domain review route only', () => {
-  const reviewSource = readSource('components', 'admin', 'single-domain-structural-authoring.tsx');
-  const genericReviewSource = readSource(
+const genericReviewSource = readFileSync(
+  path.join(
+    process.cwd(),
     'app',
     '(admin)',
     'admin',
@@ -58,8 +23,58 @@ test('ranked-pattern import panel is wired into the existing single-domain revie
     '[assessmentKey]',
     'review',
     'page.tsx',
-  );
+  ),
+  'utf8',
+);
 
+test('ranked-pattern import panel exposes draft creation, publish audit, and explicit publish controls', () => {
+  assert.match(panelSource, /createRankedPatternDraftVersionAction/);
+  assert.match(panelSource, /auditRankedPatternPublishReadinessAction/);
+  assert.match(panelSource, /publishRankedPatternVersionAction/);
+  assert.match(panelSource, /Workbook file path or package reference/);
+  assert.match(panelSource, /Audit package/);
+  assert.match(panelSource, /Dry-run import/);
+  assert.match(panelSource, /Apply import/);
+  assert.match(panelSource, /Create draft version/);
+  assert.match(panelSource, /Run publish audit/);
+  assert.match(panelSource, /Publish audited draft/);
+  assert.match(panelSource, /auditRankedPatternPackageAction\.bind/);
+  assert.match(panelSource, /dryRunRankedPatternImportAction\.bind/);
+  assert.match(panelSource, /applyRankedPatternImportAction\.bind/);
+  assert.match(panelSource, /auditRankedPatternPublishReadinessAction\.bind/);
+});
+
+test('ranked-pattern publish control stays disabled until publish audit can publish', () => {
+  assert.match(panelSource, /const canPublishFromAudit = publishAuditState\.result\?\.canPublish === true;/);
+  assert.match(panelSource, /disabled=\{!hasDraft \|\| !canPublishFromAudit\}/);
+  assert.match(panelSource, /Run publish audit and resolve all blocking findings/);
+});
+
+test('admin copy keeps versioning and persisted-result boundaries explicit', () => {
+  assert.match(panelSource, /Audit and dry-run do not write to the database/);
+  assert.match(panelSource, /Publishing affects new attempts only/);
+  assert.match(panelSource, /Existing completed results remain tied to their\s+original assessment version and persisted payload/);
+  assert.match(panelSource, /Apply import writes package data but does\s+not publish/);
+  assert.match(panelSource, /Publish audit is read-only/);
+  assert.match(panelSource, /publishing remains a separate explicit action/);
+  assert.match(panelSource, /Create or open the next draft version/);
+  assert.match(panelSource, /Completed results continue to render from their persisted payload/);
+});
+
+test('ranked-pattern import panel displays counts and diagnostics without workbook contents', () => {
+  assert.match(panelSource, /Runtime definition planned counts/);
+  assert.match(panelSource, /Result-language planned counts/);
+  assert.match(panelSource, /Runtime definition applied counts/);
+  assert.match(panelSource, /Result-language applied counts/);
+  assert.match(panelSource, /Blocking diagnostics/);
+  assert.match(panelSource, /Warnings/);
+  assert.match(panelSource, /sheetKey/);
+  assert.match(panelSource, /rowNumber/);
+  assert.doesNotMatch(panelSource, /rawValues/);
+  assert.doesNotMatch(panelSource, /sourceValues/);
+});
+
+test('ranked-pattern import panel is wired into the existing single-domain review route only', () => {
   assert.match(reviewSource, /<RankedPatternImportPanel/);
   assert.match(reviewSource, /assessmentId=\{assessment\.assessmentId\}/);
   assert.match(reviewSource, /latestDraftVersion=\{assessment\.latestDraftVersion\}/);
@@ -67,10 +82,13 @@ test('ranked-pattern import panel is wired into the existing single-domain revie
 });
 
 test('ranked-pattern import UI stays assessment agnostic', () => {
-  const source = readSource('components', 'admin', 'ranked-pattern-import-panel.tsx');
+  assert.doesNotMatch(panelSource, /flow state/i);
+  assert.doesNotMatch(panelSource, /flow_state/i);
+  assert.doesNotMatch(panelSource, /operating-style/i);
+  assert.doesNotMatch(panelSource, /results_vision/i);
+});
 
-  assert.doesNotMatch(source, /flow state/i);
-  assert.doesNotMatch(source, /flow_state/i);
-  assert.doesNotMatch(source, /operating-style/i);
-  assert.doesNotMatch(source, /results_vision/i);
+test('legacy generic single-domain publish form is not rendered as a ranked-pattern bypass', () => {
+  assert.doesNotMatch(reviewSource, /<AdminAssessmentPublishForm/);
+  assert.match(reviewSource, /Use the ranked-pattern package panel to run publish audit and explicitly publish this draft/);
 });

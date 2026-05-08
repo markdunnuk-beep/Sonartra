@@ -10,7 +10,9 @@ import {
 } from '@/lib/server/ranked-pattern-admin-import-workflow';
 import {
   auditRankedPatternPackageActionWithDependencies,
+  createRankedPatternDraftVersionActionWithDependencies,
   dryRunRankedPatternImportActionWithDependencies,
+  publishRankedPatternVersionActionWithDependencies,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
 import type { RankedPatternImportDiagnostic } from '@/content/assessment-packages/import-contract/ranked-pattern-import-validation';
 import type { ParsedRankedPatternWorkbookFile } from '@/content/assessment-packages/import-contract/ranked-pattern-workbook-parser';
@@ -259,7 +261,7 @@ test('apply workflow aborts before persistence when workbook audit has blocking 
 test('apply workflow writes runtime definition before result language and never publishes', async () => {
   const calls: string[] = [];
   const result = await applyRankedPatternImportForAdmin(
-    { parsedWorkbook },
+    { parsedWorkbook, targetAssessmentId: 'assessment-1', targetAssessmentVersionId: 'version-1' },
     {
       async requireAdminUser() {
         calls.push('guard');
@@ -267,11 +269,26 @@ test('apply workflow writes runtime definition before result language and never 
       },
       getDbPool() {
         calls.push('pool');
-        return {} as never;
+        return {
+          async connect() {
+            return {
+              async query() {
+                throw new Error('TARGET_QUERY_SHOULD_BE_MOCKED');
+              },
+              release() {},
+            };
+          },
+        } as never;
       },
       auditParsedWorkbook() {
         calls.push('audit-workbook');
         return fakeAudit(true) as never;
+      },
+      async validateImportTarget(input) {
+        calls.push('validate-target');
+        assert.equal(input.targetAssessmentVersionId, 'version-1');
+        assert.equal(input.targetAssessmentId, 'assessment-1');
+        return { summary: null, diagnostics: Object.freeze([]) };
       },
       async persistRuntimeDefinition(input) {
         calls.push('persist-runtime');
@@ -303,10 +320,61 @@ test('apply workflow writes runtime definition before result language and never 
     },
   );
 
-  assert.deepEqual(calls, ['guard', 'audit-workbook', 'pool', 'persist-runtime', 'persist-result-language']);
+  assert.deepEqual(calls, ['guard', 'audit-workbook', 'pool', 'validate-target', 'persist-runtime', 'persist-result-language']);
   assert.equal(result.status, 'applied');
   assert.equal(result.createdOrUpdatedIds.assessmentId, 'assessment-1');
   assert.equal(result.createdOrUpdatedIds.assessmentVersionId, 'version-1');
+});
+
+test('apply workflow rejects missing target draft version before persistence', async () => {
+  let persistCalls = 0;
+  const result = await applyRankedPatternImportForAdmin(
+    { parsedWorkbook },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      getDbPool() {
+        return {
+          async connect() {
+            return {
+              async query() {
+                throw new Error('TARGET_QUERY_SHOULD_BE_MOCKED');
+              },
+              release() {},
+            };
+          },
+        } as never;
+      },
+      auditParsedWorkbook() {
+        return fakeAudit(true) as never;
+      },
+      async validateImportTarget() {
+        return {
+          summary: null,
+          diagnostics: Object.freeze([
+            {
+              severity: 'error' as const,
+              code: 'MISSING_TARGET_DRAFT_VERSION',
+              message: 'Apply import requires an explicit target draft assessment version.',
+            },
+          ]),
+        };
+      },
+      async persistRuntimeDefinition() {
+        persistCalls += 1;
+        throw new Error('SHOULD_NOT_PERSIST');
+      },
+      async persistResultLanguage() {
+        persistCalls += 1;
+        throw new Error('SHOULD_NOT_PERSIST');
+      },
+    },
+  );
+
+  assert.equal(persistCalls, 0);
+  assert.equal(result.status, 'blocked');
+  assert.equal(result.blockingDiagnostics[0]?.code, 'MISSING_TARGET_DRAFT_VERSION');
 });
 
 test('publish audit workflow is read-only and releases the database client', async () => {
@@ -522,4 +590,109 @@ test('dry-run server action does not call apply persistence', async () => {
 
   assert.equal(dryRunCalled, true);
   assert.equal(result.result?.status, 'ready');
+});
+
+function actionDependencies(overrides: Record<string, unknown> = {}) {
+  return {
+    async auditWorkbook() {
+      throw new Error('SHOULD_NOT_AUDIT');
+    },
+    async dryRunImport() {
+      throw new Error('SHOULD_NOT_DRY_RUN');
+    },
+    async applyImport() {
+      throw new Error('SHOULD_NOT_APPLY');
+    },
+    async auditPublishReadiness() {
+      throw new Error('SHOULD_NOT_AUDIT_PUBLISH');
+    },
+    ...overrides,
+  } as never;
+}
+
+test('create draft server action returns structured success', async () => {
+  const result = await createRankedPatternDraftVersionActionWithDependencies(
+    { assessmentKey: 'decision-style' },
+    actionDependencies({
+      async createDraftVersion(input: { assessmentKeyOrId: string }) {
+        assert.equal(input.assessmentKeyOrId, 'decision-style');
+        return {
+          status: 'created',
+          assessmentId: 'assessment-1',
+          assessmentKey: 'decision-style',
+          draftVersionId: 'version-2',
+          draftVersionTag: '2.00',
+          sourceVersionTag: '1.00',
+          lifecycleStatus: 'DRAFT',
+          mode: 'single_domain',
+          resultModelKey: 'ranked_pattern',
+          copied: {},
+          diagnostics: [],
+        };
+      },
+    }),
+  );
+
+  assert.equal(result.formError, null);
+  assert.match(result.formSuccess ?? '', /Draft 2\.00/);
+  assert.equal(result.result?.status, 'created');
+});
+
+test('publish server action blocks with publish-audit diagnostics', async () => {
+  const result = await publishRankedPatternVersionActionWithDependencies(
+    { assessmentKey: 'decision-style', targetAssessmentVersionId: 'version-2' },
+    actionDependencies({
+      async publishVersion(input: { targetAssessmentVersionId: string }) {
+        assert.equal(input.targetAssessmentVersionId, 'version-2');
+        return {
+          status: 'blocked',
+          assessmentVersionId: 'version-2',
+          versionSummary: null,
+          publishAudit: null,
+          blockingDiagnostics: [
+            {
+              severity: 'error',
+              code: 'MISSING_RANKED_PATTERNS',
+              message: 'Exactly twenty-four ranked patterns are required.',
+            },
+          ],
+          warningDiagnostics: [],
+        };
+      },
+    }),
+  );
+
+  assert.match(result.formError ?? '', /twenty-four ranked patterns/);
+  assert.equal(result.result?.status, 'blocked');
+});
+
+test('publish server action returns structured success only after service publish succeeds', async () => {
+  const result = await publishRankedPatternVersionActionWithDependencies(
+    { assessmentKey: 'decision-style', targetAssessmentVersionId: 'version-2' },
+    actionDependencies({
+      async publishVersion() {
+        return {
+          status: 'published',
+          assessmentId: 'assessment-1',
+          assessmentKey: 'decision-style',
+          publishedVersionId: 'version-2',
+          publishedVersionTag: '2.00',
+          archivedVersionIds: ['version-1'],
+          publishAudit: {
+            assessmentVersionId: 'version-2',
+            canPublish: true,
+            blockingCount: 0,
+            warningCount: 0,
+            findings: [],
+            summaryCountsByCategory: {},
+          },
+          warningDiagnostics: [],
+        };
+      },
+    }),
+  );
+
+  assert.equal(result.formError, null);
+  assert.match(result.formSuccess ?? '', /active ranked-pattern version for new attempts/);
+  assert.equal(result.result?.status, 'published');
 });

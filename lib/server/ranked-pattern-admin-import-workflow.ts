@@ -27,6 +27,10 @@ import type { RankedPatternImportDiagnostic } from '@/content/assessment-package
 import { getDbPool } from '@/lib/server/db';
 import { requireAdminUser } from '@/lib/server/admin-access';
 import type { RequestUserContext } from '@/lib/server/request-user';
+import {
+  validateRankedPatternDraftImportTarget,
+  type RankedPatternVersionDiagnostic,
+} from '@/lib/server/ranked-pattern-admin-versioning';
 
 type AdminImportStatus = 'blocked' | 'ready' | 'applied' | 'publishable' | 'not_publishable';
 
@@ -113,6 +117,7 @@ type WorkflowDependencies = {
   readonly persistRuntimeDefinition: typeof persistRankedPatternRuntimeDefinition;
   readonly persistResultLanguage: typeof persistRankedPatternResultLanguage;
   readonly auditAssessmentVersion: typeof auditRankedPatternAssessmentVersion;
+  readonly validateImportTarget: typeof validateRankedPatternDraftImportTarget;
   readonly nowIso: () => string;
 };
 
@@ -124,6 +129,7 @@ const defaultDependencies: WorkflowDependencies = {
   persistRuntimeDefinition: persistRankedPatternRuntimeDefinition,
   persistResultLanguage: persistRankedPatternResultLanguage,
   auditAssessmentVersion: auditRankedPatternAssessmentVersion,
+  validateImportTarget: validateRankedPatternDraftImportTarget,
   nowIso: () => new Date().toISOString(),
 };
 
@@ -225,6 +231,12 @@ function workbookDiagnostics(audit: RankedPatternPackageAuditResult): readonly R
   return Object.freeze([...audit.diagnostics, ...audit.normalisationDiagnostics]);
 }
 
+function versionDiagnostics(
+  diagnostics: readonly RankedPatternVersionDiagnostic[],
+): readonly RankedPatternAdminWorkflowDiagnostic[] {
+  return Object.freeze(diagnostics.map((item) => Object.freeze({ ...item })));
+}
+
 export async function auditRankedPatternWorkbookForAdmin(
   input: RankedPatternAdminWorkflowBaseInput,
   dependencies: Partial<WorkflowDependencies> = {},
@@ -302,6 +314,29 @@ export async function applyRankedPatternImportForAdmin(
   }
 
   const db = deps.getDbPool();
+  const targetClient = await db.connect();
+  try {
+    const target = await deps.validateImportTarget({
+      db: targetClient,
+      targetAssessmentVersionId: input.targetAssessmentVersionId ?? '',
+      targetAssessmentId: input.targetAssessmentId,
+      metadata: audit.normalisedPackage.metadata[0] ?? null,
+    });
+    const targetDiagnostics = versionDiagnostics(target.diagnostics);
+
+    if (splitDiagnostics(targetDiagnostics).blockingDiagnostics.length > 0) {
+      return baseResult({
+        status: 'blocked',
+        input,
+        audit,
+        source: sourceMetadata(input, parsedWorkbook),
+        diagnostics: Object.freeze([...auditDiagnostics, ...targetDiagnostics]),
+      });
+    }
+  } finally {
+    targetClient.release?.();
+  }
+
   const runtimeResult = await deps.persistRuntimeDefinition({
     normalisedPackage: audit.normalisedPackage,
     sourceName: input.sourceName,
@@ -309,6 +344,28 @@ export async function applyRankedPatternImportForAdmin(
     dryRun: false,
     db,
   });
+  const runtimeTargetMismatch =
+    input.targetAssessmentVersionId &&
+    runtimeResult.assessmentVersionId &&
+    runtimeResult.assessmentVersionId !== input.targetAssessmentVersionId;
+  if (runtimeTargetMismatch) {
+    return baseResult({
+      status: 'blocked',
+      input,
+      audit,
+      source: sourceMetadata(input, parsedWorkbook),
+      diagnostics: Object.freeze([
+        ...auditDiagnostics,
+        ...runtimeResult.diagnostics,
+        {
+          severity: 'error' as const,
+          code: 'RUNTIME_PERSISTED_VERSION_MISMATCH',
+          message: 'Runtime import resolved a different assessment version than the selected draft target.',
+        },
+      ]),
+      runtimeResult,
+    });
+  }
   const runtimeBlocking = runtimeResult.diagnostics.some((diagnostic) => diagnostic.severity === 'error');
   if (runtimeBlocking || !runtimeResult.assessmentVersionId) {
     return baseResult({
