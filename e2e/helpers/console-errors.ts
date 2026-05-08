@@ -4,8 +4,11 @@ const PLAYWRIGHT_CLERK_TEST_HOST = 'local-test-1.clerk.accounts.dev';
 const CLERK_JS_PACKAGE_PATH = '/npm/@clerk/clerk-js@';
 const WEBKIT_BENIGN_RESOURCE_400_MESSAGE =
   'Failed to load resource: the server responded with a status of 400 (Bad Request)';
+const BENIGN_RESOURCE_400_MESSAGE =
+  'Failed to load resource: the server responded with a status of 400 ()';
 
 type ConsoleErrorCollectionOptions = {
+  ignoreBrowserResourceLoad400?: boolean;
   ignoreWebKitResourceLoad400?: boolean;
 };
 
@@ -37,7 +40,10 @@ export function collectUnexpectedConsoleErrors(
 
     const text = message.text();
 
-    if (options.ignoreWebKitResourceLoad400 && text === WEBKIT_BENIGN_RESOURCE_400_MESSAGE) {
+    if (
+      (options.ignoreWebKitResourceLoad400 && text === WEBKIT_BENIGN_RESOURCE_400_MESSAGE)
+      || (options.ignoreBrowserResourceLoad400 && text === BENIGN_RESOURCE_400_MESSAGE)
+    ) {
       return;
     }
 

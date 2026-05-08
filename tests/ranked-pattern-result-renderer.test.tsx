@@ -173,6 +173,9 @@ test('ranked-pattern result renderer reads persisted ranks, percentages, score s
   const snapshotOrder = ['Alpha', 'Beta', 'Gamma', 'Delta'].map((label) => markup.indexOf(`>${label}</p>`));
   assert.deepEqual(snapshotOrder, [...snapshotOrder].sort((left, right) => left - right));
   assert.match(markup, /Signal shape/);
+  assert.match(markup, /One signal is carrying most of this pattern/);
+  assert.match(markup, /Completed responses/);
+  assert.doesNotMatch(markup, />Responses</);
   assert.doesNotMatch(markup, /Score shape/);
   assert.doesNotMatch(markup, /Pattern shape/);
   assert.doesNotMatch(markup, /Ranked spread/);

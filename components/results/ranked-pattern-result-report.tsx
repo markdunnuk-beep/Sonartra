@@ -113,6 +113,17 @@ function formatScoreShape(value: string): string {
   return `${toLabel(value)} pattern`;
 }
 
+function scoreShapeDescription(value: string): string {
+  const descriptions: Record<string, string> = {
+    concentrated: 'One signal is carrying most of this pattern, with the others playing quieter supporting roles.',
+    paired: 'Two signals are carrying most of this pattern together.',
+    graduated: 'The signals step down in a clear ranked order.',
+    balanced: 'The four signals are contributing with a relatively even spread.',
+  };
+
+  return descriptions[value] ?? 'Signal shape summarises how the persisted ranked percentages are distributed.';
+}
+
 function formatResultDate(value: string | null | undefined): string {
   if (!value) {
     return 'No completion date';
@@ -937,13 +948,18 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
               ))}
             </div>
             <dl className="mt-4 space-y-3 border-t border-[#F3F1EA]/[0.085] pt-4">
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#A8B0AA]">Signal shape</dt>
-                <dd className="font-mono text-sm text-[#F3F1EA]/88">{formatScoreShape(scoreShape)}</dd>
+              <div className="grid gap-1.5">
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-sm text-[#A8B0AA]">Signal shape</dt>
+                  <dd className="font-mono text-sm text-[#F3F1EA]/88">{formatScoreShape(scoreShape)}</dd>
+                </div>
+                <dd className="draft-shape-description text-sm leading-6 text-[#A8B0AA]/84">
+                  {scoreShapeDescription(scoreShape)}
+                </dd>
               </div>
               {answeredCount !== null && totalCount !== null ? (
                 <div className="flex items-center justify-between gap-4">
-                  <dt className="text-sm text-[#A8B0AA]">Responses</dt>
+                  <dt className="text-sm text-[#A8B0AA]">Completed responses</dt>
                   <dd className="font-mono text-sm text-[#F3F1EA]/88">{answeredCount}/{totalCount}</dd>
                 </div>
               ) : null}

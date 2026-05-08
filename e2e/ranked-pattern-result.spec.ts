@@ -16,6 +16,7 @@ for (const viewport of viewports) {
     page,
   }) => {
     const consoleErrors = collectUnexpectedConsoleErrors(page, {
+      ignoreBrowserResourceLoad400: browserName === 'chromium' || browserName === 'webkit',
       ignoreWebKitResourceLoad400: browserName === 'webkit',
     });
 
@@ -61,6 +62,10 @@ for (const viewport of viewports) {
     await expect(snapshotCards.nth(3)).toContainText('Delta');
     await expect(snapshotCards.nth(3)).toContainText('8%');
     await expect(page.locator('[data-ranked-pattern-snapshot="true"]').getByText('Signal shape')).toBeVisible();
+    await expect(
+      page.locator('[data-ranked-pattern-snapshot="true"]').getByText('One signal is carrying most of this pattern'),
+    ).toBeVisible();
+    await expect(page.locator('[data-ranked-pattern-snapshot="true"]').getByText('Completed responses')).toBeVisible();
     await expect(page.getByText('Pattern shape')).toHaveCount(0);
     await expect(page.getByText('Score shape')).toHaveCount(0);
     await expect(page.getByText('Ranked spread')).toHaveCount(0);
