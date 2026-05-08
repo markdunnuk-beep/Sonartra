@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 const adminImportRoute =
   process.env.RANKED_PATTERN_ADMIN_IMPORT_ROUTE ??
-  '/admin/assessments/single-domain/role-focus/review';
+  '/admin/assessments/ranked-pattern/role-focus/workflow';
 
 const viewports = [
   { name: 'desktop', width: 1440, height: 1000 },

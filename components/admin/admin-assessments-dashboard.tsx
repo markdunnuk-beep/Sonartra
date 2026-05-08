@@ -115,11 +115,17 @@ function AssessmentCard({
   assessment: AdminAssessmentDashboardItem;
 }) {
   const isSingleDomain = assessment.mode === 'single_domain';
+  const rankedPatternWorkflowHref = `/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`;
+  const primaryHref = isSingleDomain ? rankedPatternWorkflowHref : assessment.actionHref;
   const reviewHref =
     isSingleDomain || assessment.latestDraftVersion
-      ? `${assessment.actionHref}/review`
+      ? isSingleDomain
+        ? rankedPatternWorkflowHref
+        : `${assessment.actionHref}/review`
       : null;
-  const createVersionHref = `${assessment.actionHref}/versions/new`;
+  const createVersionHref = isSingleDomain
+    ? rankedPatternWorkflowHref
+    : `${assessment.actionHref}/versions/new`;
   const reviewLabel = isSingleDomain
     ? 'Open import panel'
     : assessment.latestDraftReadiness === 'ready'
@@ -160,7 +166,7 @@ function AssessmentCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <ButtonLink href={assessment.actionHref} variant="primary">
+            <ButtonLink href={primaryHref} variant="primary">
               {builderLabel}
             </ButtonLink>
             <Link

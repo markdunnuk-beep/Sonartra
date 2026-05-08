@@ -21,7 +21,8 @@ test('assessment index uses a tighter top hero and simpler card CTA hierarchy', 
   assert.match(source, /Open ranked-pattern workflow/);
   assert.match(source, /Open legacy builder/);
   assert.match(source, /Create draft version/);
-  assert.match(source, /const createVersionHref = `\$\{assessment\.actionHref\}\/versions\/new`;/);
+  assert.match(source, /const rankedPatternWorkflowHref = `\/admin\/assessments\/ranked-pattern\/\$\{assessment\.assessmentKey\}\/workflow`;/);
+  assert.match(source, /const createVersionHref = isSingleDomain/);
   assert.match(source, /Open import panel/);
   assert.match(source, /Review and publish/);
   assert.match(source, /Review draft/);

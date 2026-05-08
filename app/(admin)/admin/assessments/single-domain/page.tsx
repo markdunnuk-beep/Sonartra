@@ -20,7 +20,7 @@ function WorkflowAssessmentCard({
 }: Readonly<{
   assessment: AdminAssessmentDashboardItem;
 }>) {
-  const baseHref = assessment.actionHref;
+  const workflowHref = `/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`;
   const draftStatus = assessment.latestDraftVersion
     ? `Draft ${assessment.latestDraftVersion.versionTag}`
     : 'No draft';
@@ -49,11 +49,14 @@ function WorkflowAssessmentCard({
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <ButtonLink href={`${baseHref}/review`} variant="primary">
+          <ButtonLink href={workflowHref} variant="primary">
             Open import workflow
           </ButtonLink>
-          <ButtonLink href={`${baseHref}/versions/new`}>
+          <ButtonLink href={workflowHref}>
             Create draft version
+          </ButtonLink>
+          <ButtonLink href={`${assessment.actionHref}/review`}>
+            Open legacy builder review
           </ButtonLink>
         </div>
       </div>

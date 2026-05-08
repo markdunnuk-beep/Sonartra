@@ -13,6 +13,21 @@ const reviewSource = readFileSync(
   'utf8',
 );
 
+const dedicatedWorkflowRouteSource = readFileSync(
+  path.join(
+    process.cwd(),
+    'app',
+    '(admin)',
+    'admin',
+    'assessments',
+    'ranked-pattern',
+    '[assessmentKey]',
+    'workflow',
+    'page.tsx',
+  ),
+  'utf8',
+);
+
 const genericReviewSource = readFileSync(
   path.join(
     process.cwd(),
@@ -74,11 +89,27 @@ test('ranked-pattern import panel displays counts and diagnostics without workbo
   assert.doesNotMatch(panelSource, /sourceValues/);
 });
 
-test('ranked-pattern import panel is wired into the existing single-domain review route only', () => {
-  assert.match(reviewSource, /<RankedPatternImportPanel/);
-  assert.match(reviewSource, /assessmentId=\{assessment\.assessmentId\}/);
-  assert.match(reviewSource, /latestDraftVersion=\{assessment\.latestDraftVersion\}/);
+test('ranked-pattern import panel is wired into the dedicated workflow route only', () => {
+  assert.match(dedicatedWorkflowRouteSource, /<RankedPatternImportPanel/);
+  assert.match(dedicatedWorkflowRouteSource, /assessmentId=\{assessment\.assessmentId\}/);
+  assert.match(dedicatedWorkflowRouteSource, /latestDraftVersion=\{assessment\.latestDraftVersion\}/);
+  assert.match(dedicatedWorkflowRouteSource, /Ranked-pattern package workflow/);
+  assert.match(dedicatedWorkflowRouteSource, /Active ranked-pattern workflow/);
+  assert.match(dedicatedWorkflowRouteSource, /does not include the\s+legacy single-domain builder stages/);
+  assert.doesNotMatch(reviewSource, /<RankedPatternImportPanel/);
+  assert.match(reviewSource, /Open ranked-pattern workflow/);
+  assert.match(reviewSource, /Legacy builder page/);
   assert.doesNotMatch(genericReviewSource, /RankedPatternImportPanel/);
+});
+
+test('dedicated ranked-pattern workflow route does not render legacy builder scaffold labels', () => {
+  assert.doesNotMatch(dedicatedWorkflowRouteSource, /SingleDomainReviewPageContent/);
+  assert.doesNotMatch(dedicatedWorkflowRouteSource, /SingleDomainReviewAuthoring/);
+  assert.doesNotMatch(dedicatedWorkflowRouteSource, /SingleDomainBuilderStepper/);
+  assert.doesNotMatch(dedicatedWorkflowRouteSource, /Review authoring readiness/);
+  assert.doesNotMatch(dedicatedWorkflowRouteSource, /Expected pairs/);
+  assert.doesNotMatch(dedicatedWorkflowRouteSource, /Derived pairs/);
+  assert.doesNotMatch(dedicatedWorkflowRouteSource, /AdminAssessmentPublishForm/);
 });
 
 test('ranked-pattern import UI stays assessment agnostic', () => {
@@ -90,5 +121,6 @@ test('ranked-pattern import UI stays assessment agnostic', () => {
 
 test('legacy generic single-domain publish form is not rendered as a ranked-pattern bypass', () => {
   assert.doesNotMatch(reviewSource, /<AdminAssessmentPublishForm/);
-  assert.match(reviewSource, /Use the ranked-pattern package panel to run publish audit and explicitly publish this draft/);
+  assert.match(reviewSource, /Use the dedicated ranked-pattern workflow page to run publish audit and explicitly publish this draft/);
+  assert.doesNotMatch(dedicatedWorkflowRouteSource, /AdminAssessmentPublishForm/);
 });

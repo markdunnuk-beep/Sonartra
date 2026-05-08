@@ -4,7 +4,6 @@ import { useActionState, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { AdminPublishedNoDraftStageState } from '@/components/admin/admin-assessment-draft-state';
-import { RankedPatternImportPanel } from '@/components/admin/ranked-pattern-import-panel';
 import {
   getAdminAssessmentPublishDisabledReason,
   getAdminAssessmentPublishStatusClass,
@@ -349,7 +348,7 @@ function SingleDomainReviewPublishCard() {
 
           <p className="text-sm leading-6 text-white/54">
             {isPublishReady
-              ? 'Use the ranked-pattern package panel to run publish audit and explicitly publish this draft.'
+              ? 'Use the dedicated ranked-pattern workflow page to run publish audit and explicitly publish this draft.'
               : getAdminAssessmentPublishDisabledReason(assessment.draftValidation)}
           </p>
           {publishedVersion ? (
@@ -1699,11 +1698,32 @@ export function SingleDomainReviewAuthoring() {
           </div>
         </SurfaceCard>
       ) : null}
-      <RankedPatternImportPanel
-        assessmentId={assessment.assessmentId}
-        assessmentKey={assessment.assessmentKey}
-        latestDraftVersion={assessment.latestDraftVersion}
-      />
+      <SurfaceCard className="space-y-4 p-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="sonartra-page-eyebrow">Ranked-pattern workflow</p>
+          <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
+            Dedicated active path
+          </LabelPill>
+          <LabelPill className="border-white/10 bg-white/[0.04] text-white/62">
+            Legacy builder page
+          </LabelPill>
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">
+            Use the dedicated ranked-pattern workflow page.
+          </h3>
+          <p className="text-sm leading-7 text-white/62">
+            Workbook audit, dry-run, draft apply, publish audit, and explicit publish now live on a
+            focused workflow page. This legacy review page remains for historical builder checks.
+          </p>
+        </div>
+        <ButtonLink
+          href={`/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`}
+          variant="primary"
+        >
+          Open ranked-pattern workflow
+        </ButtonLink>
+      </SurfaceCard>
       <div className="grid gap-4 xl:grid-cols-2">
         {reviewSections.map((section) => (
           <SurfaceCard className="p-5" key={section.key}>

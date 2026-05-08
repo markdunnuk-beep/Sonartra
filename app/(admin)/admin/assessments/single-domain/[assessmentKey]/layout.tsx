@@ -4,7 +4,7 @@ import { AdminAssessmentAuthoringProvider } from '@/components/admin/admin-asses
 import { AdminCreateVersionHeaderAction } from '@/components/admin/admin-create-version-header-action';
 import { SingleDomainBuilderStepper } from '@/components/admin/single-domain-builder-stepper';
 import { SingleDomainUnsavedChangesProvider } from '@/components/admin/single-domain-unsaved-changes';
-import { LabelPill, PageFrame, SurfaceCard } from '@/components/shared/user-app-ui';
+import { ButtonLink, LabelPill, PageFrame, SurfaceCard } from '@/components/shared/user-app-ui';
 import { getSingleDomainBuilderAssessment } from '@/lib/server/admin-single-domain-builder';
 import { getDbPool } from '@/lib/server/db';
 
@@ -38,6 +38,9 @@ export default async function SingleDomainAssessmentBuilderLayout({
                   <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
                     {assessment.modeLabel}
                   </LabelPill>
+                  <LabelPill className="border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]">
+                    Legacy builder
+                  </LabelPill>
                   <LabelPill className="max-w-full whitespace-normal border-white/10 bg-white/[0.04] text-white/68">
                     {assessment.latestDraftVersion
                       ? `Editable draft ${assessment.latestDraftVersion.versionTag}`
@@ -49,18 +52,23 @@ export default async function SingleDomainAssessmentBuilderLayout({
                 <AdminCreateVersionHeaderAction
                   href={`/admin/assessments/single-domain/${assessment.assessmentKey}/versions/new`}
                 />
+                <ButtonLink
+                  href={`/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`}
+                  variant="primary"
+                >
+                  Ranked-pattern workflow
+                </ButtonLink>
               </div>
               <div className="space-y-2">
                 <h1 className="text-[1.72rem] font-semibold leading-[1.02] tracking-[-0.032em] text-white sm:text-[2rem] lg:text-[2.2rem]">
                   {assessment.title}
                 </h1>
                 <p className="max-w-3xl text-sm leading-6 text-white/68 sm:leading-7">
-                  Single-domain builder scaffold for one domain only, variable signals, and the full
-                  assessment authoring workflow that follows.
+                  Legacy single-domain builder scaffold for historical maintenance.
                 </p>
                 <p className="max-w-3xl text-sm leading-6 text-white/52 sm:leading-7">
-                  This builder supports one domain only. Signal count is flexible; pair coverage will
-                  be validated from the signals you define.
+                  Use the dedicated ranked-pattern workflow for package import, draft apply,
+                  publish audit, and explicit publish.
                 </p>
               </div>
             </div>

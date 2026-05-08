@@ -25,10 +25,12 @@ test('single-domain entry page points operators to ranked-pattern package workfl
   assert.match(source, /Ranked-pattern package workflow/);
   assert.match(source, /Recommended active workflow/);
   assert.match(source, /Start from an existing single-domain assessment/);
+  assert.match(source, /const workflowHref = `\/admin\/assessments\/ranked-pattern\/\$\{assessment\.assessmentKey\}\/workflow`;/);
   assert.match(source, /Open import workflow/);
-  assert.match(source, /href=\{`\$\{baseHref\}\/review`\}/);
+  assert.match(source, /href=\{workflowHref\}/);
   assert.match(source, /Create draft version/);
-  assert.match(source, /href=\{`\$\{baseHref\}\/versions\/new`\}/);
+  assert.match(source, /Open legacy builder review/);
+  assert.match(source, /href=\{`\$\{assessment\.actionHref\}\/review`\}/);
   assert.match(source, /Open legacy single-domain shell/);
   assert.match(source, /href="\/admin\/assessments\/single-domain\/new"/);
   assert.doesNotMatch(source, /Open assessment dashboard/);
@@ -39,6 +41,8 @@ test('assessment dashboard create actions route through the ranked-pattern workf
 
   assert.match(source, /href="\/admin\/assessments\/new"/);
   assert.match(source, /assessment\.modeLabel/);
+  assert.match(source, /rankedPatternWorkflowHref/);
+  assert.match(source, /\/admin\/assessments\/ranked-pattern\/\$\{assessment\.assessmentKey\}\/workflow/);
   assert.match(source, /Open ranked-pattern workflow/);
   assert.match(source, /Open import panel/);
   assert.match(source, /Create ranked-pattern draft/);
