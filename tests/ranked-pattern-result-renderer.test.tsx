@@ -150,6 +150,11 @@ test('ranked-pattern result renderer displays persisted reader-first sections in
   assert.doesNotMatch(markup, /Version 1\.0\.0 · Pattern alpha_beta_gamma_delta/);
   assert.match(markup, /How to read this result/);
   assert.match(markup, /You may recognise this as a clear first-route pattern/);
+  assert.equal([...markup.matchAll(/data-ranked-pattern-signal-role-group="true"/g)].length, 4);
+  assert.equal([...markup.matchAll(/data-ranked-pattern-signal-role-card="true"/g)].length, 12);
+  assert.equal([...markup.matchAll(/What this helps/g)].length, 4);
+  assert.equal([...markup.matchAll(/Watch for/g)].length, 4);
+  assert.equal([...markup.matchAll(/Try this/g)].length, 4);
   assert.match(markup, /Clear starting point/);
   assert.match(markup, /Range can compress/);
   assert.match(markup, /Use the ranked order/);

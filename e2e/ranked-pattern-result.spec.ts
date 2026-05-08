@@ -66,6 +66,29 @@ for (const viewport of viewports) {
     await expect(page.getByText('Ranked spread')).toHaveCount(0);
     await expect(page.getByText('Use the ranked order')).toBeVisible();
     await expect(page.getByText('Take the whole pattern forward')).toBeVisible();
+    await expect(page.locator('[data-ranked-pattern-signal-role-group="true"]')).toHaveCount(4);
+    await expect(page.locator('[data-ranked-pattern-signal-role-card="true"]')).toHaveCount(12);
+    await expect(page.getByText('What this helps')).toHaveCount(4);
+    await expect(page.getByText('Watch for')).toHaveCount(4);
+    await expect(page.getByText('Try this')).toHaveCount(4);
+
+    const signalRoleLayout = await page.evaluate(() => {
+      const groups = [...document.querySelectorAll('[data-ranked-pattern-signal-role-group="true"]')];
+      const firstCardLefts = groups.map((group) => {
+        const firstCard = group.querySelector('[data-ranked-pattern-signal-role-card="true"]');
+        return firstCard ? Math.round(firstCard.getBoundingClientRect().left) : 0;
+      });
+      const cardHeights = [...document.querySelectorAll('[data-ranked-pattern-signal-role-card="true"]')]
+        .map((card) => Math.round(card.getBoundingClientRect().height));
+
+      return {
+        maxLeftDelta: Math.max(...firstCardLefts) - Math.min(...firstCardLefts),
+        minCardHeight: Math.min(...cardHeights),
+      };
+    });
+
+    expect(signalRoleLayout.maxLeftDelta).toBeLessThanOrEqual(2);
+    expect(signalRoleLayout.minCardHeight).toBeGreaterThanOrEqual(110);
     await expect(page.getByRole('heading', { name: 'Drivers' })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Pair' })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Limitation' })).toHaveCount(0);

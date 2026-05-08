@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 
 import {
   DRAFT_FOCUS_MODE_CHANGE_EVENT,
@@ -143,12 +143,16 @@ function FieldLabel({ children, tone = 'neutral' }: { children: ReactNode; tone?
 function Panel({
   children,
   className,
+  ...props
 }: {
   children: ReactNode;
   className?: string;
-}) {
+} & Omit<ComponentPropsWithoutRef<'article'>, 'children' | 'className'>) {
   return (
-    <article className={cx('draft-panel rounded-[1.25rem] border border-[#F3F1EA]/[0.085] bg-[#1B211F]/72 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)]', className)}>
+    <article
+      {...props}
+      className={cx('draft-panel rounded-[1.25rem] border border-[#F3F1EA]/[0.085] bg-[#1B211F]/72 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.018)]', className)}
+    >
       {children}
     </article>
   );
@@ -373,12 +377,13 @@ function SignalRolesSection({ items }: { items: readonly PayloadListItem[] }) {
           return (
             <article
               className={cx(
-                'grid gap-5 rounded-[1.35rem] border p-5 md:p-6',
-                isDominantRole && 'draft-teal-surface border-[#32D6B0]/26 bg-[#32D6B0]/[0.07] md:grid-cols-[12rem_minmax(0,1fr)] md:p-7',
-                index === 1 && 'draft-teal-surface border-[#32D6B0]/18 bg-[#32D6B0]/[0.045] md:grid-cols-[11rem_minmax(0,1fr)]',
-                index === 2 && 'draft-panel border-[#F3F1EA]/[0.085] bg-[#202622]/50 md:grid-cols-[9.5rem_minmax(0,1fr)]',
-                isStretchRole && 'draft-warm-surface border-[#C98E68]/18 bg-[#C98E68]/[0.045] md:grid-cols-[9.5rem_minmax(0,1fr)]',
+                'grid gap-5 rounded-[1.35rem] border p-5 md:grid-cols-[10.75rem_minmax(0,1fr)] md:items-stretch md:p-6',
+                isDominantRole && 'draft-teal-surface border-[#32D6B0]/26 bg-[#32D6B0]/[0.07]',
+                index === 1 && 'draft-teal-surface border-[#32D6B0]/18 bg-[#32D6B0]/[0.045]',
+                index === 2 && 'draft-panel border-[#F3F1EA]/[0.085] bg-[#202622]/50',
+                isStretchRole && 'draft-warm-surface border-[#C98E68]/18 bg-[#C98E68]/[0.045]',
               )}
+              data-ranked-pattern-signal-role-group="true"
               key={item.lookupKey ?? `${item.signalKey}-${item.rankPosition}`}
             >
               <div>
@@ -398,9 +403,13 @@ function SignalRolesSection({ items }: { items: readonly PayloadListItem[] }) {
                     {title}
                   </h4>
                 ) : null}
-                <div className="mt-5 grid gap-3 lg:grid-cols-3">
+                <div className="mt-5 grid auto-rows-fr items-stretch gap-3 lg:grid-cols-3">
                   {fieldGroups.map(([key, value], fieldIndex) => (
-                    <Panel className="bg-[#151A18]/78 p-4" key={key}>
+                    <Panel
+                      className="flex h-full min-h-[7.5rem] flex-col bg-[#151A18]/78 p-4"
+                      data-ranked-pattern-signal-role-card="true"
+                      key={key}
+                    >
                       <FieldLabel tone={fieldIndex === 1 && isStretchRole ? 'warm' : 'neutral'}>
                         {fieldIndex === 0 ? 'What this helps' : fieldIndex === 1 ? 'Watch for' : 'Try this'}
                       </FieldLabel>
