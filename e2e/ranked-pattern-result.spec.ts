@@ -72,6 +72,7 @@ for (const viewport of viewports) {
 
     await page.locator('button[aria-label="Switch to light reading mode"]:visible').first().click();
     const publicHeader = page.locator('[data-public-site-header="true"]');
+    await expect(publicHeader).toBeVisible();
     await expect(publicHeader.locator('img[alt="Sonartra"]')).toHaveAttribute(
       'src',
       /sonartra-logo-black\.svg/,
@@ -84,6 +85,34 @@ for (const viewport of viewports) {
       return readableHeaderControl ? window.getComputedStyle(readableHeaderControl).color : '';
     });
     expect(lightHeaderColor).not.toBe('rgb(255, 255, 255)');
+
+    if (viewport.name === 'mobile') {
+      const mobileNavigator = page.locator('[data-draft-mobile-section-navigator="true"]');
+      const currentSection = mobileNavigator.locator('.draft-mobile-section-current');
+      await expect(currentSection).toHaveText('Introduction');
+      await expect(currentSection).not.toHaveCSS('color', 'rgb(255, 255, 255)');
+
+      await page.getByRole('button', { name: 'Open report sections' }).click();
+      const activeSectionLink = mobileNavigator.locator('.draft-mobile-section-link[aria-current="step"]');
+      await expect(activeSectionLink).toBeVisible();
+      await expect(activeSectionLink).not.toHaveCSS('color', 'rgb(255, 255, 255)');
+
+      const activeItemLayout = await activeSectionLink.evaluate((link) => {
+        const card = link.closest('.draft-mobile-section-nav-card');
+        const linkRect = link.getBoundingClientRect();
+        const cardRect = card?.getBoundingClientRect();
+
+        return {
+          borderColor: window.getComputedStyle(link).borderColor,
+          leftInset: cardRect ? linkRect.left - cardRect.left : 0,
+          rightInset: cardRect ? cardRect.right - linkRect.right : 0,
+        };
+      });
+
+      expect(activeItemLayout.borderColor).not.toBe('rgba(0, 0, 0, 0)');
+      expect(activeItemLayout.leftInset).toBeGreaterThan(8);
+      expect(activeItemLayout.rightInset).toBeGreaterThan(8);
+    }
 
     await page.locator('button[aria-label="Switch to dark reading mode"]:visible').first().click();
     await expect(publicHeader.locator('img[alt="Sonartra"]')).toHaveAttribute(

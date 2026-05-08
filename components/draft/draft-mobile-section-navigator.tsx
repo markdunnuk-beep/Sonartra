@@ -67,13 +67,13 @@ export function DraftMobileSectionNavigator({
       className="draft-mobile-section-nav sticky top-3 z-20 mb-3 mt-4 xl:hidden"
       data-draft-mobile-section-navigator="true"
     >
-      <div className="draft-mobile-section-nav-card rounded-[1.15rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/88 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.18)] backdrop-blur-[16px]">
+      <div className="draft-mobile-section-nav-card rounded-[1.15rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/88 p-2.5 shadow-[0_18px_46px_rgba(4,7,6,0.18)] backdrop-blur-[16px] sm:p-3">
         <button
           type="button"
           aria-label={open ? 'Close report sections' : 'Open report sections'}
           aria-controls={panelId}
           aria-expanded={open}
-          className="sonartra-focus-ring flex w-full items-center justify-between gap-3 rounded-[0.9rem] px-3 py-2.5 text-left outline-none transition hover:bg-[#F3F1EA]/[0.035] focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55"
+          className="sonartra-focus-ring flex w-full items-center justify-between gap-3 rounded-[0.9rem] px-3.5 py-2.5 text-left outline-none transition hover:bg-[#F3F1EA]/[0.035] focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55"
           onClick={() => setOpen((currentValue) => !currentValue)}
         >
           <span className="min-w-0">
@@ -113,7 +113,7 @@ export function DraftMobileSectionNavigator({
         >
           <div id={panelId} className="min-h-0 overflow-hidden">
             <ul
-              className="draft-mobile-section-panel mt-2 grid gap-1 border-t border-[#F3F1EA]/[0.085] pt-2"
+              className="draft-mobile-section-panel mt-2.5 grid gap-1.5 border-t border-[#F3F1EA]/[0.085] px-1 pt-2.5"
               role="list"
             >
               {sectionsConfig.topLevelSections.map((section) => {
@@ -126,9 +126,9 @@ export function DraftMobileSectionNavigator({
                       aria-current={isActive ? 'step' : undefined}
                       className={cx(
                         'sonartra-focus-ring draft-mobile-section-link flex items-center justify-between gap-3 rounded-[0.85rem] px-3 py-2 text-sm leading-5 text-[#A8B0AA]/78 outline-none transition',
-                        'hover:bg-[#F3F1EA]/[0.035] hover:text-[#F3F1EA]/88 focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55',
+                        'border border-transparent hover:bg-[#F3F1EA]/[0.035] hover:text-[#F3F1EA]/88 focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55',
                         isActive &&
-                          'bg-[#32D6B0]/[0.075] text-[#F3F1EA]/92 ring-1 ring-[#32D6B0]/18',
+                          'border-[#32D6B0]/20 bg-[#32D6B0]/[0.075] text-[#F3F1EA]/92 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]',
                       )}
                       onClick={handleSectionAnchorClick(section.id)}
                     >

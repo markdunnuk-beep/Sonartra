@@ -756,24 +756,43 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
             opacity: 0.8 !important;
           }
 
-          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-card,
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-card {
+            background: rgba(250, 248, 243, 0.78) !important;
+            border-color: rgba(23, 32, 28, 0.1) !important;
+            box-shadow: 0 16px 36px rgba(58, 51, 42, 0.08) !important;
+          }
+
           .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-nav-card {
-            background: rgba(250, 248, 243, 0.82) !important;
+            background: rgba(250, 248, 243, 0.9) !important;
             border-color: rgba(23, 32, 28, 0.12) !important;
             box-shadow: 0 18px 42px rgba(58, 51, 42, 0.1) !important;
           }
 
-          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item,
-          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link {
+          .draft-result-shell[data-reading-mode='light'] .draft-rail-group-label {
+            color: rgba(93, 104, 97, 0.72) !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item {
             color: rgba(23, 32, 28, 0.72) !important;
           }
 
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item span {
+            color: rgba(23, 32, 28, 0.7) !important;
+          }
+
           .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item:hover,
-          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item[aria-current='step'],
-          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link:hover,
-          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link[aria-current='step'] {
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item[aria-current='step'] {
             background: rgba(38, 148, 128, 0.08) !important;
             color: #17201C !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item:hover span,
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item[aria-current='step'] span {
+            color: #17201C !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item[data-reading-state='next'] span {
+            color: rgba(39, 50, 45, 0.78) !important;
           }
 
           .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-marker {
@@ -781,8 +800,34 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
             border-color: rgba(23, 32, 28, 0.16) !important;
           }
 
+          .draft-result-shell[data-reading-mode='light'] .draft-reading-rail-item[aria-current='step'] .draft-reading-rail-marker {
+            background: rgba(38, 148, 128, 0.2) !important;
+            border-color: rgba(38, 148, 128, 0.34) !important;
+            box-shadow: 0 0 0 5px rgba(38, 148, 128, 0.08) !important;
+          }
+
           .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-kicker {
             color: #137F70 !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-current,
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link[aria-current='step'] {
+            color: #17201C !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-button-label,
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link {
+            color: rgba(39, 50, 45, 0.78) !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-panel {
+            border-color: rgba(23, 32, 28, 0.1) !important;
+          }
+
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link:hover,
+          .draft-result-shell[data-reading-mode='light'] .draft-mobile-section-link[aria-current='step'] {
+            background: rgba(38, 148, 128, 0.08) !important;
+            border-color: rgba(38, 148, 128, 0.22) !important;
           }
 
           @media (min-width: 1280px) {
