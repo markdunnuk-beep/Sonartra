@@ -1,17 +1,15 @@
 import type { AssessmentMode } from '@/lib/types/assessment';
 
 const KNOWN_ASSESSMENT_MODES = new Set<AssessmentMode>(['multi_domain', 'single_domain']);
-const warnedUnknownAssessmentModes = new Set<string>();
 
-function warnUnknownAssessmentMode(mode: string): void {
-  if (warnedUnknownAssessmentModes.has(mode)) {
-    return;
+export class UnsupportedAssessmentModeError extends Error {
+  readonly mode: string;
+
+  constructor(mode: string) {
+    super(`Unsupported assessment mode "${mode}". Expected "multi_domain" or "single_domain".`);
+    this.name = 'UnsupportedAssessmentModeError';
+    this.mode = mode;
   }
-
-  warnedUnknownAssessmentModes.add(mode);
-  console.warn(
-    `[assessment-mode] Unknown assessment mode "${mode}" received. Falling back to "multi_domain".`,
-  );
 }
 
 export function resolveAssessmentMode(mode?: string | null): AssessmentMode {
@@ -24,8 +22,7 @@ export function resolveAssessmentMode(mode?: string | null): AssessmentMode {
     return normalized as AssessmentMode;
   }
 
-  warnUnknownAssessmentMode(normalized);
-  return 'multi_domain';
+  throw new UnsupportedAssessmentModeError(normalized);
 }
 
 export function getAssessmentModeLabel(mode?: string | null): 'Multi-Domain' | 'Single-Domain' {

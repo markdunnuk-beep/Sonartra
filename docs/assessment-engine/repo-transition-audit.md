@@ -38,7 +38,8 @@ A. Executive Summary
   D. Remove
   Obsolete for the active model:
 
-  - WPLP seed pipeline and scripts: convert:wplp80, verify:wplp80, seed:wplp80.
+  - WPLP seed pipeline and scripts are no longer active operator commands. They are quarantined as archive:wplp80:convert,
+    archive:wplp80:verify, and archive:wplp80:seed for historical local reference only.
   - WPLP seed data and exports.
   - WPLP acceptance docs/tests as active product truth.
   - Multi-domain admin creation and builder routes.
@@ -48,7 +49,7 @@ A. Executive Summary
   E. Rename/Refactor
   Refactor:
 
-  - multi_domain fallback in resolveAssessmentMode; unknown modes currently fall back to multi-domain.
+  - multi_domain fallback in resolveAssessmentMode; unknown modes must fail explicitly instead of falling back to multi-domain.
   - SingleDomainResultPayload naming/content: currently older intro/hero/signals/balancing/pairSummary/application, not ranked-pattern sections.
   - application.patternKey should become part of a broader canonical ranked-pattern result contract, not only application rows.
   - “pair” language should be demoted or replaced where the new model is full ranked pattern first.

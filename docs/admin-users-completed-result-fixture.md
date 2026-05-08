@@ -39,7 +39,7 @@ This fixture keeps the Admin Users completed branch inspectable through normal p
 Recommended local sequence:
 
 1. `npm run db:migrate`
-2. `npm run seed:wplp80`
+2. `npm run archive:wplp80:seed`
 3. `npm run seed:admin-users-fixture`
 
 The fixture seed validates the persisted list/detail read models before it commits and prints the admin detail path plus result path for local inspection.

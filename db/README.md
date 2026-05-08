@@ -16,15 +16,13 @@ Apply them before running seed inserts or admin authoring writes:
 npm run db:migrate
 ```
 
-## Seed data
+## Legacy seed data
 
-WPLP-80 structured seed files remain under `db/seed/wplp80/`.
+WPLP-80 structured seed files remain under `db/seed/wplp80/` for archived reference and legacy local QA only. They are not part of the active ranked-pattern assessment workflow.
 
-Task 4 introduces schema only; WPLP-80 inserts come in Task 5.
-
-For local Admin Users QA, a dedicated completed-result fixture can be created after the core seed path:
+For historical Admin Users QA, a dedicated completed-result fixture can be created after the archived WPLP seed path:
 
 ```bash
-npm run seed:wplp80
+npm run archive:wplp80:seed
 npm run seed:admin-users-fixture
 ```

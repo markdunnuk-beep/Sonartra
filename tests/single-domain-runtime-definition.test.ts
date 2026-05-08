@@ -8,6 +8,7 @@ import {
   loadSingleDomainRuntimeDefinition,
   SingleDomainRuntimeDefinitionError,
 } from '@/lib/server/single-domain-runtime-definition';
+import { UnsupportedAssessmentModeError } from '@/lib/utils/assessment-mode';
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
@@ -587,7 +588,7 @@ test('single-domain runtime readiness rejects reversed pair language keys', asyn
   assert.ok(readiness.issues.some((issue) => issue.code === 'pair_summaries_key_mismatch'));
 });
 
-test('unknown or undefined mode values never resolve through the single-domain runtime path', async () => {
+test('unknown mode values fail explicitly before resolving through the single-domain runtime path', async () => {
   await assert.rejects(
     () => loadSingleDomainRuntimeDefinition(
       createSingleDomainDb(buildFixture({
@@ -598,9 +599,7 @@ test('unknown or undefined mode values never resolve through the single-domain r
       })),
       'version-1',
     ),
-    (error: unknown) =>
-      error instanceof SingleDomainRuntimeDefinitionError
-      && error.code === 'single_domain_mode_required',
+    UnsupportedAssessmentModeError,
   );
 });
 

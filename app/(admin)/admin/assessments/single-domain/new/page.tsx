@@ -6,17 +6,17 @@ export default function SingleDomainAssessmentCreatePage() {
     <PageFrame className="space-y-8">
       <PageHeader
         eyebrow="Admin Workspace"
-        title="Create single-domain assessment"
-        description="Create a one-domain assessment draft that can later support questions, responses, weightings, and language datasets."
+        title="Legacy single-domain shell"
+        description="Archived one-domain CRUD creation path for transitional maintenance. New active builds should use the ranked-pattern package workflow."
       />
 
       <AdminAssessmentCreateFormContent
         mode="single_domain"
         submitLabel="Create single-domain assessment"
-        heading="Create a single-domain assessment and start a draft."
-        introDescription="Start the single-domain builder with one domain only, then extend it with variable signals, questions, responses, weightings, and richer language datasets."
+        heading="Create a legacy single-domain assessment shell."
+        introDescription="Start the archived one-domain builder only for records that still need the historical questions, responses, weightings, and language dataset surfaces."
         resultDescription="This creates a single-domain assessment and its first draft, version `1.0.0`."
-        resultSupport="Use this path when the assessment should stay in one domain while still supporting full authoring and review later."
+        resultSupport="Do not use this path to bypass ranked-pattern package import, publish audit, or explicit publish."
         showIntroCard={false}
       />
     </PageFrame>

@@ -6,6 +6,7 @@ function AssessmentTypeCard(props: {
   points: readonly string[];
   href: string;
   cta: string;
+  variant?: 'primary' | 'secondary';
 }) {
   return (
     <SurfaceCard interactive className="flex h-full flex-col justify-between gap-6 p-6 lg:p-7">
@@ -25,7 +26,7 @@ function AssessmentTypeCard(props: {
       </div>
 
       <div>
-        <ButtonLink href={props.href} variant="primary">
+        <ButtonLink href={props.href} variant={props.variant ?? 'secondary'}>
           {props.cta}
         </ButtonLink>
       </div>
@@ -38,33 +39,34 @@ export default function AdminAssessmentTypeSelectionPage() {
     <PageFrame className="space-y-8">
       <PageHeader
         eyebrow="Admin Workspace"
-        title="Choose assessment type"
-        description="Select the builder path before creating the first draft."
+        title="Create assessment version"
+        description="Use the ranked-pattern package workflow for new active builds. Legacy builders remain available only for historical maintenance."
       />
 
       <section className="grid gap-6 xl:grid-cols-2">
         <AssessmentTypeCard
-          title="Multi-Domain Assessment"
-          description="Broad profile across multiple domains using the current builder path."
+          title="Ranked-Pattern Package Workflow"
+          description="The active Sonartra build path: one domain, four scored signals, twenty-four ranked patterns, import audit, draft apply, publish audit, and explicit publish."
           points={[
-            'Uses multiple domains and the existing builder flow.',
-            'Best when the assessment needs a wider behavioural profile.',
-            'Routes directly into the current multi-domain creation path.',
+            'Create or select a draft single-domain ranked-pattern version.',
+            'Import a reader-first package into draft only, then run publish audit.',
+            'Publishing affects new attempts; completed results stay tied to their persisted payload.',
           ]}
-          href="/admin/assessments/create"
-          cta="Continue to multi-domain builder"
+          href="/admin/assessments/single-domain"
+          cta="Open ranked-pattern workflow"
+          variant="primary"
         />
 
         <AssessmentTypeCard
-          title="Single-Domain Assessment"
-          description="One domain, deeper reporting, and richer language datasets."
+          title="Legacy Builders"
+          description="Archived transitional builder paths for old assessment history and maintenance only."
           points={[
-            'Restricted to one domain, with a variable number of signals.',
-            'Designed for full authoring later: questions, responses, weightings, and language datasets.',
-            'Starts from the dedicated single-domain builder entry path.',
+            'Multi-domain and flexible signal authoring are superseded for new active builds.',
+            'Do not use these paths to create ranked-pattern assessment versions.',
+            'Use only when preserving or inspecting legacy records that still require these routes.',
           ]}
-          href="/admin/assessments/single-domain"
-          cta="Continue to single-domain builder"
+          href="/admin/assessments/create"
+          cta="Open legacy multi-domain builder"
         />
       </section>
     </PageFrame>
