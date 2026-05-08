@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { collectUnexpectedConsoleErrors } from './helpers/console-errors';
+
 const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 const resultUrl = process.env.FLOW_STATE_RANKED_PATTERN_RESULT_URL?.trim() ?? '';
 
@@ -17,12 +19,7 @@ test.describe('generated Flow State ranked-pattern result', () => {
 
   for (const viewport of viewports) {
     test(`renders on ${viewport.name}`, async ({ page }) => {
-      const consoleErrors: string[] = [];
-      page.on('console', (message) => {
-        if (message.type() === 'error') {
-          consoleErrors.push(message.text());
-        }
-      });
+      const consoleErrors = collectUnexpectedConsoleErrors(page);
 
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await page.goto(new URL(resultUrl, baseUrl).toString());

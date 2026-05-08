@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { collectUnexpectedConsoleErrors } from './helpers/console-errors';
+
 const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 
 const viewports = [
@@ -10,12 +12,7 @@ const viewports = [
 
 for (const viewport of viewports) {
   test(`ranked-pattern result fixture renders persisted sections on ${viewport.name}`, async ({ page }) => {
-    const consoleErrors: string[] = [];
-    page.on('console', (message) => {
-      if (message.type() === 'error') {
-        consoleErrors.push(message.text());
-      }
-    });
+    const consoleErrors = collectUnexpectedConsoleErrors(page);
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto(`${baseUrl}/draft-ranked-pattern-result`);
