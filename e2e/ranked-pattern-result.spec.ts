@@ -76,6 +76,17 @@ for (const viewport of viewports) {
       /sonartra-logo-white\.svg/,
     );
 
+    await expect(publicHeader).toHaveAttribute('data-draft-focus-mode', 'false');
+    if (viewport.name === 'desktop') {
+      await page.getByRole('button', { name: 'Enter focus mode' }).click();
+      await expect(publicHeader).toHaveAttribute('data-draft-focus-mode', 'true');
+      await expect(publicHeader).toHaveCSS('opacity', '0');
+
+      await page.getByRole('button', { name: 'Exit focus mode' }).click();
+      await expect(publicHeader).toHaveAttribute('data-draft-focus-mode', 'false');
+      await expect(publicHeader).toHaveCSS('opacity', '1');
+    }
+
     const hasHorizontalOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
     );

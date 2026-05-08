@@ -48,7 +48,9 @@ export function PublicSiteHeader() {
     pathname === '/draft-result' ||
     pathname === '/draft-runner' ||
     pathname === '/draft-ranked-pattern-result';
-  const isDraftFocusMode = pathname === '/draft-result' && draftFocusMode;
+  const hidesHeaderInDraftFocusMode =
+    pathname === '/draft-result' || pathname === '/draft-ranked-pattern-result';
+  const isDraftFocusMode = hidesHeaderInDraftFocusMode && draftFocusMode;
   const isDraftLightMode = isDraftDisplayModeRoute && draftReadingMode === 'light';
 
   useEffect(() => {
