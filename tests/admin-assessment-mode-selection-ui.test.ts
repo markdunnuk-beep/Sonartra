@@ -23,17 +23,26 @@ test('single-domain entry page points operators to ranked-pattern package workfl
   const source = readSource('app', '(admin)', 'admin', 'assessments', 'single-domain', 'page.tsx');
 
   assert.match(source, /Ranked-pattern package workflow/);
-  assert.match(source, /one domain, four signals, twenty-four ranked patterns/i);
-  assert.match(source, /draft versions, audits workbook content, applies imports to draft only/i);
+  assert.match(source, /Recommended active workflow/);
+  assert.match(source, /Start from an existing single-domain assessment/);
+  assert.match(source, /Open import workflow/);
+  assert.match(source, /href=\{`\$\{baseHref\}\/review`\}/);
+  assert.match(source, /Create draft version/);
+  assert.match(source, /href=\{`\$\{baseHref\}\/versions\/new`\}/);
   assert.match(source, /Open legacy single-domain shell/);
   assert.match(source, /href="\/admin\/assessments\/single-domain\/new"/);
+  assert.doesNotMatch(source, /Open assessment dashboard/);
 });
 
-test('assessment dashboard create actions route through the new selection page and show mode labels', () => {
+test('assessment dashboard create actions route through the ranked-pattern workflow entry and show mode labels', () => {
   const source = readSource('components', 'admin', 'admin-assessments-dashboard.tsx');
 
   assert.match(source, /href="\/admin\/assessments\/new"/);
   assert.match(source, /assessment\.modeLabel/);
+  assert.match(source, /Open ranked-pattern workflow/);
+  assert.match(source, /Open import panel/);
+  assert.match(source, /Create ranked-pattern draft/);
+  assert.doesNotMatch(source, /Creates a new assessment with its first editable draft/);
 });
 
 test('single-domain create route is labelled as a legacy scaffold', () => {

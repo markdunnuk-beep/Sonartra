@@ -114,13 +114,19 @@ function AssessmentCard({
 }: {
   assessment: AdminAssessmentDashboardItem;
 }) {
-  const reviewHref = assessment.latestDraftVersion
-    ? `${assessment.actionHref}/review`
-    : null;
+  const isSingleDomain = assessment.mode === 'single_domain';
+  const reviewHref =
+    isSingleDomain || assessment.latestDraftVersion
+      ? `${assessment.actionHref}/review`
+      : null;
   const createVersionHref = `${assessment.actionHref}/versions/new`;
-  const reviewLabel = assessment.latestDraftReadiness === 'ready'
-    ? 'Review and publish'
-    : 'Review draft';
+  const reviewLabel = isSingleDomain
+    ? 'Open import panel'
+    : assessment.latestDraftReadiness === 'ready'
+      ? 'Review and publish'
+      : 'Review draft';
+  const builderLabel = isSingleDomain ? 'Open ranked-pattern workflow' : 'Open legacy builder';
+  const createVersionLabel = isSingleDomain ? 'Create ranked-pattern draft' : 'Create draft version';
 
   return (
     <SurfaceCard className="p-5 lg:p-6">
@@ -155,7 +161,7 @@ function AssessmentCard({
 
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href={assessment.actionHref} variant="primary">
-              Open builder
+              {builderLabel}
             </ButtonLink>
             <Link
               className={cn(
@@ -163,7 +169,7 @@ function AssessmentCard({
               )}
               href={createVersionHref}
             >
-              Create draft version
+              {createVersionLabel}
             </Link>
             {reviewHref ? (
               <Link
@@ -220,7 +226,7 @@ export function AdminAssessmentsDashboard({
 
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href="/admin/assessments/new" variant="primary">
-              Create assessment
+              Open ranked-pattern workflow
             </ButtonLink>
             <Link
               className={cn(
@@ -233,7 +239,9 @@ export function AdminAssessmentsDashboard({
             >
               {showArchived ? 'Hide archived' : `Show archived${summary.archivedCount > 0 ? ` (${summary.archivedCount})` : ''}`}
             </Link>
-            <p className="text-sm text-white/52">Creates a new assessment with its first editable draft.</p>
+            <p className="text-sm text-white/52">
+              Start the active package workflow or choose a clearly labelled legacy builder.
+            </p>
           </div>
         </div>
       </SurfaceCard>
@@ -292,7 +300,7 @@ export function AdminAssessmentsDashboard({
             description={showArchived ? 'No active or archived assessments are available.' : 'Create your first assessment.'}
             action={
               <ButtonLink href="/admin/assessments/new" variant="primary">
-                Create assessment
+                Open ranked-pattern workflow
               </ButtonLink>
             }
           />
