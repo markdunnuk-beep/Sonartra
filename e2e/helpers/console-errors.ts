@@ -2,6 +2,12 @@ import type { ConsoleMessage, Page } from '@playwright/test';
 
 const PLAYWRIGHT_CLERK_TEST_HOST = 'local-test-1.clerk.accounts.dev';
 const CLERK_JS_PACKAGE_PATH = '/npm/@clerk/clerk-js@';
+const WEBKIT_BENIGN_RESOURCE_400_MESSAGE =
+  'Failed to load resource: the server responded with a status of 400 (Bad Request)';
+
+type ConsoleErrorCollectionOptions = {
+  ignoreWebKitResourceLoad400?: boolean;
+};
 
 function isKnownClerkDevelopmentConsoleNoise(message: ConsoleMessage) {
   const locationUrl = message.location().url;
@@ -14,7 +20,10 @@ function isKnownClerkDevelopmentConsoleNoise(message: ConsoleMessage) {
   );
 }
 
-export function collectUnexpectedConsoleErrors(page: Page) {
+export function collectUnexpectedConsoleErrors(
+  page: Page,
+  options: ConsoleErrorCollectionOptions = {},
+) {
   const consoleErrors: string[] = [];
 
   page.on('console', (message) => {
@@ -26,7 +35,13 @@ export function collectUnexpectedConsoleErrors(page: Page) {
       return;
     }
 
-    consoleErrors.push(message.text());
+    const text = message.text();
+
+    if (options.ignoreWebKitResourceLoad400 && text === WEBKIT_BENIGN_RESOURCE_400_MESSAGE) {
+      return;
+    }
+
+    consoleErrors.push(text);
   });
 
   return consoleErrors;

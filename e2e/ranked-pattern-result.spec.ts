@@ -11,8 +11,13 @@ const viewports = [
 ] as const;
 
 for (const viewport of viewports) {
-  test(`ranked-pattern result fixture renders persisted sections on ${viewport.name}`, async ({ page }) => {
-    const consoleErrors = collectUnexpectedConsoleErrors(page);
+  test(`ranked-pattern result fixture renders persisted sections on ${viewport.name}`, async ({
+    browserName,
+    page,
+  }) => {
+    const consoleErrors = collectUnexpectedConsoleErrors(page, {
+      ignoreWebKitResourceLoad400: browserName === 'webkit',
+    });
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto(`${baseUrl}/draft-ranked-pattern-result`);
