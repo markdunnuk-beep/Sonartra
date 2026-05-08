@@ -35,7 +35,8 @@ test('repo defines Clerk middleware for authenticated app and admin route reques
   );
   assert.match(source, /await auth\.protect\(\);/);
   assert.match(source, /export const config =/);
-  assert.match(source, /'\/\(\(\?!_next/);
-  assert.match(source, /\/\(api\|trpc\)\(\.\*\)/);
+  assert.match(source, /'\/app\/:path\*'/);
+  assert.match(source, /'\/api\/assessments\/:path\*'/);
+  assert.match(source, /'\/admin\/:path\*'/);
   assert.doesNotMatch(source, /sonartra\.vercel\.app/i);
 });

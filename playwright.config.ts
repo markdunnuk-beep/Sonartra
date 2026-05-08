@@ -1,6 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const playwrightBaseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim() || 'http://localhost:3000';
+const playwrightClerkPublishableKey =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim() ||
+  'pk_test_bG9jYWwtdGVzdC0xLmNsZXJrLmFjY291bnRzLmRldiQ=';
+const playwrightClerkSecretKey =
+  process.env.CLERK_SECRET_KEY?.trim() || 'sk_test_playwright_local_placeholder';
 
 process.env.PLAYWRIGHT_BASE_URL = playwrightBaseUrl;
 
@@ -83,6 +88,13 @@ export default defineConfig({
     env: {
       PLAYWRIGHT_BASE_URL: playwrightBaseUrl,
       PORT: '3000',
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: playwrightClerkPublishableKey,
+      CLERK_SECRET_KEY: playwrightClerkSecretKey,
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: '/sign-in',
+      NEXT_PUBLIC_CLERK_SIGN_UP_URL: '/sign-up',
+      NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: '/app/workspace',
+      NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: '/app/workspace',
+      NEXT_PUBLIC_CLERK_TELEMETRY_DISABLED: 'true',
     },
   },
 });
