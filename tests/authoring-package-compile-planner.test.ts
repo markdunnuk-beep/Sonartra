@@ -3,9 +3,12 @@ import assert from 'node:assert/strict';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import XLSX from 'xlsx';
 
+import { auditRankedPatternWorkbookFile } from '@/content/assessment-packages/import-contract/ranked-pattern-package-audit';
 import {
   REQUIRED_PACKAGE_SHEETS,
+  compileAuthoringPackageWorkbook,
   planAuthoringPackageCompile,
   runAuthoringPackageCompilerCli,
   type AuthoringPackageCompilerArgs,
@@ -22,6 +25,7 @@ const leadershipArgs: AuthoringPackageCompilerArgs = {
     'tmp/compiled-packages/leadership-approach/sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_COMPILED.xlsx',
   dryRun: true,
   write: false,
+  overwrite: false,
 };
 
 test('dry-run discovers Leadership Approach authoring config metadata', () => {
@@ -30,7 +34,7 @@ test('dry-run discovers Leadership Approach authoring config metadata', () => {
   assert.equal(plan.mode, 'dry-run');
   assert.equal(plan.configPath, 'content/authoring/leadership-approach/00-assessment-authoring-config.json');
   assert.equal(plan.configMetadata.assessmentKey, 'leadership-approach');
-  assert.equal(plan.configMetadata.domainKey, 'leadership-approach');
+  assert.equal(plan.configMetadata.domainKey, 'leadership_approach');
   assert.equal(plan.configMetadata.signals.map((signal) => signal.key).join(','), 'results,process,vision,people');
   assert.equal(plan.wroteWorkbook, false);
 });
@@ -96,11 +100,140 @@ test('missing generated section is reported clearly', () => {
   }
 });
 
-test('--write returns not implemented and does not write workbook', () => {
+test('--write no longer returns not implemented and creates an output workbook', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-write-'));
+  const outputWorkbook = path.join(tempRoot, 'compiled.xlsx');
+  try {
+    const result = compileAuthoringPackageWorkbook({
+      ...leadershipArgs,
+      outputWorkbook,
+      write: true,
+      overwrite: false,
+    });
+
+    assert.equal(existsSync(outputWorkbook), true);
+    assert.equal(result.audit.pass, true);
+    assert.equal(result.rowCountsBySheet['00_Metadata'], 1);
+    assert.equal(result.rowCountsBySheet['01_Signals'], 4);
+    assert.equal(result.rowCountsBySheet['06_Orientation'], 96);
+    assert.equal(result.rowCountsBySheet['14_Closing_Integration'], 96);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('written workbook has all package sheets and preserves template headers', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-headers-'));
+  const outputWorkbook = path.join(tempRoot, 'compiled.xlsx');
+  try {
+    compileAuthoringPackageWorkbook({
+      ...leadershipArgs,
+      outputWorkbook,
+      write: true,
+      overwrite: false,
+    });
+
+    const template = XLSX.readFile(leadershipArgs.templateWorkbook);
+    const output = XLSX.readFile(outputWorkbook);
+    assert.deepEqual(output.SheetNames, [...REQUIRED_PACKAGE_SHEETS]);
+    for (const sheet of REQUIRED_PACKAGE_SHEETS) {
+      const templateHeader = XLSX.utils.sheet_to_json<unknown[]>(template.Sheets[sheet]!, { header: 1, defval: '' })[0];
+      const outputHeader = XLSX.utils.sheet_to_json<unknown[]>(output.Sheets[sheet]!, { header: 1, defval: '' })[0];
+      assert.deepEqual(outputHeader, templateHeader, `${sheet} header should match template`);
+    }
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write refuses overwrite unless --overwrite is supplied', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-overwrite-'));
+  const outputWorkbook = path.join(tempRoot, 'compiled.xlsx');
+  try {
+    compileAuthoringPackageWorkbook({
+      ...leadershipArgs,
+      outputWorkbook,
+      write: true,
+      overwrite: false,
+    });
+
+    assert.throws(
+      () =>
+        compileAuthoringPackageWorkbook({
+          ...leadershipArgs,
+          outputWorkbook,
+          write: true,
+          overwrite: false,
+        }),
+      /already exists/,
+    );
+
+    assert.doesNotThrow(() =>
+      compileAuthoringPackageWorkbook({
+        ...leadershipArgs,
+        outputWorkbook,
+        write: true,
+        overwrite: true,
+      }),
+    );
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('output workbook passes package audit for Leadership Approach', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-audit-'));
+  const outputWorkbook = path.join(tempRoot, 'compiled.xlsx');
+  try {
+    compileAuthoringPackageWorkbook({
+      ...leadershipArgs,
+      outputWorkbook,
+      write: true,
+      overwrite: false,
+    });
+    const audit = auditRankedPatternWorkbookFile(outputWorkbook);
+
+    assert.equal(audit.pass, true);
+    assert.equal(audit.diagnosticCounts.error, 0);
+    assert.equal(audit.normalisationDiagnosticCounts.error, 0);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('domain_key mismatch fails clearly in write mode', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-domain-'));
+  const outputWorkbook = path.join(tempRoot, 'compiled.xlsx');
+  try {
+    assert.throws(
+      () =>
+        compileAuthoringPackageWorkbook({
+          ...leadershipArgs,
+          domainKey: 'leadership-approach',
+          outputWorkbook,
+          write: true,
+          overwrite: false,
+        }),
+      /domain_key mismatch/,
+    );
+    assert.equal(existsSync(outputWorkbook), false);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('--write CLI no longer returns not implemented', () => {
   const errors: string[] = [];
+  const logs: string[] = [];
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-cli-write-'));
+  const outputWorkbook = path.join(tempRoot, 'compiled.xlsx');
   const originalError = console.error;
+  const originalLog = console.log;
   console.error = (message?: unknown) => {
     errors.push(String(message));
+  };
+  console.log = (message?: unknown) => {
+    logs.push(String(message));
   };
   try {
     const exitCode = runAuthoringPackageCompilerCli([
@@ -115,15 +248,19 @@ test('--write returns not implemented and does not write workbook', () => {
       '--template-workbook',
       leadershipArgs.templateWorkbook,
       '--output-workbook',
-      leadershipArgs.outputWorkbook,
+      outputWorkbook,
       '--write',
+      '--overwrite',
     ]);
 
-    assert.equal(exitCode, 1);
-    assert.match(errors.join('\n'), /Write mode is not implemented yet/);
-    assert.equal(existsSync(leadershipArgs.outputWorkbook), false);
+    assert.equal(exitCode, 0);
+    assert.doesNotMatch(errors.join('\n'), /not implemented/i);
+    assert.match(logs.join('\n'), /Authoring package workbook written/);
+    assert.equal(existsSync(outputWorkbook), true);
   } finally {
     console.error = originalError;
+    console.log = originalLog;
+    rmSync(tempRoot, { recursive: true, force: true });
   }
 });
 
