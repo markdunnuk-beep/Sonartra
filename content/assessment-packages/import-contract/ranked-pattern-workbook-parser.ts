@@ -139,6 +139,37 @@ export function parseRankedPatternWorkbookFile(
   options: { readonly parsedAt?: string } = {},
 ): ParsedRankedPatternWorkbookFile {
   const workbook = XLSX.readFile(sourcePath, { cellDates: false });
+  return parseRankedPatternWorkbook(workbook, {
+    sourcePath,
+    workbookName: path.basename(sourcePath),
+    parsedAt: options.parsedAt,
+  });
+}
+
+export function parseRankedPatternWorkbookBuffer(
+  bytes: Buffer,
+  options: {
+    readonly sourcePath?: string;
+    readonly workbookName: string;
+    readonly parsedAt?: string;
+  },
+): ParsedRankedPatternWorkbookFile {
+  const workbook = XLSX.read(bytes, { cellDates: false, type: 'buffer' });
+  return parseRankedPatternWorkbook(workbook, {
+    sourcePath: options.sourcePath ?? options.workbookName,
+    workbookName: options.workbookName,
+    parsedAt: options.parsedAt,
+  });
+}
+
+function parseRankedPatternWorkbook(
+  workbook: XLSX.WorkBook,
+  options: {
+    readonly sourcePath: string;
+    readonly workbookName: string;
+    readonly parsedAt?: string;
+  },
+): ParsedRankedPatternWorkbookFile {
   const workbookSheetNames = new Set(workbook.SheetNames);
   const expectedSheetNames = new Set<string>(rankedPatternImportSheetKeys);
   const sheets: Partial<Record<RankedPatternImportSheetKey, ParsedRankedPatternWorkbookSheet>> = {};
@@ -157,8 +188,8 @@ export function parseRankedPatternWorkbookFile(
   const unexpectedSheets = workbook.SheetNames.filter((sheetName) => !expectedSheetNames.has(sheetName));
 
   return Object.freeze({
-    sourcePath,
-    workbookName: path.basename(sourcePath),
+    sourcePath: options.sourcePath,
+    workbookName: options.workbookName,
     sheets: Object.freeze(sheets),
     missingSheets: Object.freeze(missingSheets),
     unexpectedSheets: Object.freeze(unexpectedSheets),

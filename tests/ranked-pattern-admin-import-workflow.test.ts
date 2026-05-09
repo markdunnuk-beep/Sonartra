@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 
 import {
   applyRankedPatternImportForAdmin,
@@ -17,8 +19,12 @@ import {
   applyRankedPatternImportActionWithDependencies,
   publishRankedPatternVersionActionWithDependencies,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
+import { resolveRankedPatternPackageSource } from '@/lib/server/ranked-pattern-package-source-resolver';
 import type { RankedPatternImportDiagnostic } from '@/content/assessment-packages/import-contract/ranked-pattern-import-validation';
 import type { ParsedRankedPatternWorkbookFile } from '@/content/assessment-packages/import-contract/ranked-pattern-workbook-parser';
+
+const leadershipWorkbookPath =
+  'content/assessment-packages/leadership-approach/sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_TEST.xlsx';
 
 const runtimeCounts = Object.freeze({
   assessments: 0,
@@ -45,6 +51,61 @@ const parsedWorkbook: ParsedRankedPatternWorkbookFile = Object.freeze({
   missingSheets: Object.freeze([]),
   unexpectedSheets: Object.freeze([]),
   parsedAt: '2026-05-07T00:00:00.000Z',
+});
+
+test('package source resolver resolves an existing local workbook path and computes a stable hash', () => {
+  const result = resolveRankedPatternPackageSource({ sourcePath: leadershipWorkbookPath });
+  const expectedHash = createHash('sha256').update(readFileSync(leadershipWorkbookPath)).digest('hex');
+
+  assert.equal(result.ok, true);
+  assert.equal(result.sourceKind, 'local_path');
+  assert.equal(result.sourceName, 'sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_TEST.xlsx');
+  assert.equal(result.sourceHash, expectedHash);
+  assert.equal(result.bytes.length > 0, true);
+  assert.deepEqual(result.diagnostics, []);
+});
+
+test('package source resolver derives source name and respects provided source name', () => {
+  const derived = resolveRankedPatternPackageSource({ sourcePath: leadershipWorkbookPath });
+  const provided = resolveRankedPatternPackageSource({
+    sourcePath: leadershipWorkbookPath,
+    sourceName: 'Leadership Approach test upload.xlsx',
+  });
+
+  assert.equal(derived.ok, true);
+  assert.equal(derived.sourceName, 'sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_TEST.xlsx');
+  assert.equal(provided.ok, true);
+  assert.equal(provided.sourceName, 'Leadership Approach test upload.xlsx');
+  assert.equal(provided.sourceHash, derived.sourceHash);
+});
+
+test('package source resolver supports package references without exposing broad filesystem reads', () => {
+  const result = resolveRankedPatternPackageSource({ sourcePath: 'leadership-approach' });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.sourceKind, 'package_reference');
+  assert.equal(result.resolvedPath?.endsWith('sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_TEST.xlsx'), true);
+
+  const unsafe = resolveRankedPatternPackageSource({ sourcePath: '../package.json' });
+  assert.equal(unsafe.ok, false);
+  assert.equal(unsafe.diagnostics[0]?.code, 'UNSAFE_PACKAGE_SOURCE_REFERENCE');
+});
+
+test('package source resolver returns structured errors for missing, unsupported, and unreadable sources', () => {
+  const missing = resolveRankedPatternPackageSource({ sourcePath: '' });
+  const unsupported = resolveRankedPatternPackageSource({
+    sourcePath: 'content/assessment-packages/leadership-approach/README.md',
+  });
+  const unreadable = resolveRankedPatternPackageSource({
+    sourcePath: 'content/assessment-packages/leadership-approach/missing.xlsx',
+  });
+
+  assert.equal(missing.ok, false);
+  assert.equal(missing.diagnostics[0]?.code, 'PACKAGE_SOURCE_REQUIRED');
+  assert.equal(unsupported.ok, false);
+  assert.equal(unsupported.diagnostics[0]?.code, 'UNSUPPORTED_PACKAGE_SOURCE_EXTENSION');
+  assert.equal(unreadable.ok, false);
+  assert.equal(unreadable.diagnostics[0]?.code, 'PACKAGE_SOURCE_UNREADABLE');
 });
 
 const blockingDiagnostic: RankedPatternImportDiagnostic = Object.freeze({
@@ -232,6 +293,46 @@ test('dry-run workflow returns runtime and result-language plans without databas
   assert.equal(result.status, 'ready');
   assert.equal(result.resultLanguagePlanSummary?.operationCountsByTable.assessment_report_preview_cases, 1);
   assert.equal(result.warningDiagnostics.some((diagnostic) => diagnostic.code === 'SCORE_SHAPE_RULES_NOT_SUPPLIED'), true);
+});
+
+test('package audit works through the package source resolver', async () => {
+  const result = await auditRankedPatternWorkbookForAdmin(
+    { sourcePath: leadershipWorkbookPath },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+    },
+  );
+
+  assert.equal(result.status, 'ready');
+  assert.equal(result.source.sourceHash?.length, 64);
+  assert.equal(result.packageMetadata?.assessmentKey, 'leadership-approach');
+  assert.equal(result.packageMetadata?.version, '1.00-test');
+  assert.equal(result.blockingDiagnostics.length, 0);
+});
+
+test('dry-run import works through the package source resolver without database writes', async () => {
+  let getDbPoolCalls = 0;
+  const result = await dryRunRankedPatternImportForAdmin(
+    { sourcePath: 'leadership-approach' },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      getDbPool() {
+        getDbPoolCalls += 1;
+        throw new Error('SHOULD_NOT_REQUEST_DB');
+      },
+    },
+  );
+
+  assert.equal(getDbPoolCalls, 0);
+  assert.equal(result.status, 'ready');
+  assert.equal(result.source.sourceHash?.length, 64);
+  assert.equal(result.source.sourceName, 'sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_TEST.xlsx');
+  assert.equal(result.runtimeDefinitionPlanSummary?.operationCountsByTable.questions, 16);
+  assert.equal(result.resultLanguagePlanSummary?.operationCountsByTable.assessment_result_language_rows, 713);
 });
 
 test('apply workflow aborts before persistence when workbook audit has blocking diagnostics', async () => {

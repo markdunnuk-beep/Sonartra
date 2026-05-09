@@ -1,7 +1,3 @@
-import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-
 import {
   auditParsedRankedPatternWorkbook,
   type RankedPatternPackageAuditResult,
@@ -20,6 +16,7 @@ import {
   type RankedPatternRuntimeDefinitionPersistenceResult,
 } from '@/content/assessment-packages/import-contract/ranked-pattern-import-persistence';
 import {
+  parseRankedPatternWorkbookBuffer,
   parseRankedPatternWorkbookFile,
   type ParsedRankedPatternWorkbookFile,
 } from '@/content/assessment-packages/import-contract/ranked-pattern-workbook-parser';
@@ -32,6 +29,11 @@ import {
   validateRankedPatternDraftImportTarget,
   type RankedPatternVersionDiagnostic,
 } from '@/lib/server/ranked-pattern-admin-versioning';
+import {
+  resolveRankedPatternPackageSource,
+  type RankedPatternPackageSourceDiagnostic,
+  type RankedPatternResolvedPackageSource,
+} from '@/lib/server/ranked-pattern-package-source-resolver';
 
 type AdminImportStatus = 'blocked' | 'ready' | 'applied' | 'publishable' | 'not_publishable';
 
@@ -120,6 +122,8 @@ type WorkflowDependencies = {
   readonly requireAdminUser: () => Promise<RequestUserContext>;
   readonly getDbPool: () => RankedPatternPersistenceDbPool;
   readonly parseWorkbookFile: typeof parseRankedPatternWorkbookFile;
+  readonly parseWorkbookBuffer: typeof parseRankedPatternWorkbookBuffer;
+  readonly resolvePackageSource: typeof resolveRankedPatternPackageSource;
   readonly auditParsedWorkbook: typeof auditParsedRankedPatternWorkbook;
   readonly persistRuntimeDefinition: typeof persistRankedPatternRuntimeDefinition;
   readonly persistResultLanguage: typeof persistRankedPatternResultLanguage;
@@ -133,6 +137,8 @@ const defaultDependencies: WorkflowDependencies = {
   requireAdminUser,
   getDbPool,
   parseWorkbookFile: parseRankedPatternWorkbookFile,
+  parseWorkbookBuffer: parseRankedPatternWorkbookBuffer,
+  resolvePackageSource: resolveRankedPatternPackageSource,
   auditParsedWorkbook: auditParsedRankedPatternWorkbook,
   persistRuntimeDefinition: persistRankedPatternRuntimeDefinition,
   persistResultLanguage: persistRankedPatternResultLanguage,
@@ -156,33 +162,135 @@ function splitDiagnostics(diagnostics: readonly RankedPatternAdminWorkflowDiagno
   });
 }
 
-function sourceHashForPath(sourcePath: string): string | null {
-  try {
-    return createHash('sha256').update(readFileSync(sourcePath)).digest('hex');
-  } catch {
-    return null;
-  }
+type PreparedWorkbookInput =
+  | {
+      readonly ok: true;
+      readonly parsedWorkbook: ParsedRankedPatternWorkbookFile;
+      readonly source: RankedPatternAdminWorkflowSourceMetadata;
+    }
+  | {
+      readonly ok: false;
+      readonly result: RankedPatternAdminImportWorkflowResult;
+    };
+
+function sourceResolutionDiagnostics(
+  diagnostics: readonly RankedPatternPackageSourceDiagnostic[],
+): readonly RankedPatternAdminWorkflowDiagnostic[] {
+  return Object.freeze(
+    diagnostics.map((diagnostic) =>
+      Object.freeze({
+        severity: diagnostic.severity,
+        code: diagnostic.code,
+        message: diagnostic.message,
+        fieldKey: diagnostic.fieldKey,
+      }),
+    ),
+  );
 }
 
-function workbookFromInput(
+function blockedSourceResult(
+  input: RankedPatternAdminWorkflowBaseInput,
+  resolved: RankedPatternResolvedPackageSource,
+): RankedPatternAdminImportWorkflowResult {
+  const diagnostics = sourceResolutionDiagnostics(resolved.diagnostics);
+  const split = splitDiagnostics(diagnostics);
+  return Object.freeze({
+    status: 'blocked' as const,
+    source: Object.freeze({
+      sourceName: resolved.sourceName ?? input.sourceName ?? resolved.safeDisplayName,
+      sourceHash: null,
+      workbookName: resolved.safeDisplayName,
+      sourcePath: resolved.resolvedPath,
+      parsedAt: new Date().toISOString(),
+    }),
+    packageMetadata: null,
+    workbookAuditSummary: Object.freeze({
+      pass: false,
+      detectedSheets: Object.freeze([]),
+      missingSheets: Object.freeze([]),
+      unexpectedSheets: Object.freeze([]),
+      diagnosticCounts: Object.freeze({ error: split.blockingDiagnostics.length, warning: split.warningDiagnostics.length }),
+      normalisationDiagnosticCounts: Object.freeze({ error: 0, warning: 0 }),
+    }),
+    normalisationDiagnostics: Object.freeze([]),
+    blockingDiagnostics: split.blockingDiagnostics,
+    warningDiagnostics: split.warningDiagnostics,
+    createdOrUpdatedIds: Object.freeze({
+      assessmentId: input.targetAssessmentId ?? null,
+      assessmentVersionId: input.targetAssessmentVersionId ?? null,
+      importBatchId: null,
+    }),
+    countsByStorageTarget: Object.freeze({
+      workbookRowsByStorageTarget: Object.freeze({
+        bySheet: Object.freeze({}) as never,
+        runtimeDefinition: 0,
+        runtimeResultContent: 0,
+        adminImportSupport: 0,
+      }),
+      normalisedRowsByStorageTarget: Object.freeze({
+        runtimeDefinition: 0,
+        runtimeResultContent: 0,
+        adminImportSupport: 0,
+      }),
+    }),
+  });
+}
+
+function sourceMetadataFromParsedWorkbook(
+  input: RankedPatternAdminWorkflowBaseInput,
+  parsedWorkbook: ParsedRankedPatternWorkbookFile,
+): RankedPatternAdminWorkflowSourceMetadata {
+  return Object.freeze({
+    sourceName: input.sourceName ?? parsedWorkbook.workbookName ?? 'ranked-pattern-workbook',
+    sourceHash: input.sourceHash ?? null,
+    workbookName: parsedWorkbook.workbookName,
+    sourcePath: input.sourcePath ?? parsedWorkbook.sourcePath ?? null,
+    parsedAt: parsedWorkbook.parsedAt,
+  });
+}
+
+function sourceMetadataFromResolvedSource(
+  resolved: Extract<RankedPatternResolvedPackageSource, { readonly ok: true }>,
+  parsedWorkbook: ParsedRankedPatternWorkbookFile,
+): RankedPatternAdminWorkflowSourceMetadata {
+  return Object.freeze({
+    sourceName: resolved.sourceName,
+    sourceHash: resolved.sourceHash,
+    workbookName: parsedWorkbook.workbookName,
+    sourcePath: resolved.resolvedPath,
+    parsedAt: parsedWorkbook.parsedAt,
+  });
+}
+
+function prepareWorkbookInput(
   input: RankedPatternAdminWorkflowBaseInput,
   dependencies: WorkflowDependencies,
-): ParsedRankedPatternWorkbookFile {
+): PreparedWorkbookInput {
   if ('parsedWorkbook' in input && input.parsedWorkbook) {
-    return input.parsedWorkbook;
+    return Object.freeze({
+      ok: true as const,
+      parsedWorkbook: input.parsedWorkbook,
+      source: sourceMetadataFromParsedWorkbook(input, input.parsedWorkbook),
+    });
   }
 
-  return dependencies.parseWorkbookFile(input.sourcePath);
-}
+  const resolved = dependencies.resolvePackageSource(input);
+  if (!resolved.ok) {
+    return Object.freeze({
+      ok: false as const,
+      result: blockedSourceResult(input, resolved),
+    });
+  }
 
-function sourceMetadata(input: RankedPatternAdminWorkflowBaseInput, parsedWorkbook: ParsedRankedPatternWorkbookFile): RankedPatternAdminWorkflowSourceMetadata {
-  const sourcePath = input.sourcePath ?? parsedWorkbook.sourcePath ?? null;
+  const parsedWorkbook = dependencies.parseWorkbookBuffer(resolved.bytes, {
+    sourcePath: resolved.resolvedPath ?? resolved.originalReference,
+    workbookName: resolved.sourceName,
+  });
+
   return Object.freeze({
-    sourceName: input.sourceName ?? parsedWorkbook.workbookName ?? (sourcePath ? path.basename(sourcePath) : 'ranked-pattern-workbook'),
-    sourceHash: input.sourceHash ?? (sourcePath ? sourceHashForPath(sourcePath) : null),
-    workbookName: parsedWorkbook.workbookName,
-    sourcePath,
-    parsedAt: parsedWorkbook.parsedAt,
+    ok: true as const,
+    parsedWorkbook,
+    source: sourceMetadataFromResolvedSource(resolved, parsedWorkbook),
   });
 }
 
@@ -260,14 +368,18 @@ export async function auditRankedPatternWorkbookForAdmin(
 ): Promise<RankedPatternAdminImportWorkflowResult> {
   const deps = { ...defaultDependencies, ...dependencies };
   await deps.requireAdminUser();
-  const parsedWorkbook = workbookFromInput(input, deps);
+  const prepared = prepareWorkbookInput(input, deps);
+  if (!prepared.ok) {
+    return prepared.result;
+  }
+  const parsedWorkbook = prepared.parsedWorkbook;
   const audit = deps.auditParsedWorkbook(parsedWorkbook);
   const diagnostics = workbookDiagnostics(audit);
   return baseResult({
     status: audit.pass ? 'ready' : 'blocked',
     input,
     audit,
-    source: sourceMetadata(input, parsedWorkbook),
+    source: prepared.source,
     diagnostics,
   });
 }
@@ -278,7 +390,14 @@ export async function createOrResolveRankedPatternPackageDraftForAdmin(
 ) {
   const deps = { ...defaultDependencies, ...dependencies };
   const adminUser = await deps.requireAdminUser();
-  const parsedWorkbook = workbookFromInput(input, deps);
+  const prepared = prepareWorkbookInput(input, deps);
+  if (!prepared.ok) {
+    return Object.freeze({
+      status: 'blocked' as const,
+      diagnostics: prepared.result.blockingDiagnostics,
+    });
+  }
+  const parsedWorkbook = prepared.parsedWorkbook;
   const audit = deps.auditParsedWorkbook(parsedWorkbook);
   const diagnostics = workbookDiagnostics(audit);
   const blocking = splitDiagnostics(diagnostics).blockingDiagnostics;
@@ -319,12 +438,16 @@ export async function dryRunRankedPatternImportForAdmin(
 ): Promise<RankedPatternAdminImportWorkflowResult> {
   const deps = { ...defaultDependencies, ...dependencies };
   await deps.requireAdminUser();
-  const parsedWorkbook = workbookFromInput(input, deps);
+  const prepared = prepareWorkbookInput(input, deps);
+  if (!prepared.ok) {
+    return prepared.result;
+  }
+  const parsedWorkbook = prepared.parsedWorkbook;
   const audit = deps.auditParsedWorkbook(parsedWorkbook);
   const runtimeResult = await deps.persistRuntimeDefinition({
     normalisedPackage: audit.normalisedPackage,
-    sourceName: input.sourceName,
-    sourceHash: input.sourceHash,
+    sourceName: prepared.source.sourceName,
+    sourceHash: prepared.source.sourceHash ?? undefined,
     dryRun: true,
   });
   const assessmentVersionId =
@@ -345,7 +468,7 @@ export async function dryRunRankedPatternImportForAdmin(
     status: splitDiagnostics(diagnostics).blockingDiagnostics.length === 0 ? 'ready' : 'blocked',
     input,
     audit,
-    source: sourceMetadata(input, parsedWorkbook),
+    source: prepared.source,
     diagnostics,
     runtimeResult,
     resultLanguageResult,
@@ -358,7 +481,11 @@ export async function applyRankedPatternImportForAdmin(
 ): Promise<RankedPatternAdminImportWorkflowResult> {
   const deps = { ...defaultDependencies, ...dependencies };
   await deps.requireAdminUser();
-  const parsedWorkbook = workbookFromInput(input, deps);
+  const prepared = prepareWorkbookInput(input, deps);
+  if (!prepared.ok) {
+    return prepared.result;
+  }
+  const parsedWorkbook = prepared.parsedWorkbook;
   const audit = deps.auditParsedWorkbook(parsedWorkbook);
   const auditDiagnostics = workbookDiagnostics(audit);
   if (splitDiagnostics(auditDiagnostics).blockingDiagnostics.length > 0) {
@@ -366,7 +493,7 @@ export async function applyRankedPatternImportForAdmin(
       status: 'blocked',
       input,
       audit,
-      source: sourceMetadata(input, parsedWorkbook),
+      source: prepared.source,
       diagnostics: auditDiagnostics,
     });
   }
@@ -387,7 +514,7 @@ export async function applyRankedPatternImportForAdmin(
         status: 'blocked',
         input,
         audit,
-        source: sourceMetadata(input, parsedWorkbook),
+        source: prepared.source,
         diagnostics: Object.freeze([...auditDiagnostics, ...targetDiagnostics]),
       });
     }
@@ -397,8 +524,8 @@ export async function applyRankedPatternImportForAdmin(
 
   const runtimeResult = await deps.persistRuntimeDefinition({
     normalisedPackage: audit.normalisedPackage,
-    sourceName: input.sourceName,
-    sourceHash: input.sourceHash,
+    sourceName: prepared.source.sourceName,
+    sourceHash: prepared.source.sourceHash ?? undefined,
     dryRun: false,
     db,
   });
@@ -411,7 +538,7 @@ export async function applyRankedPatternImportForAdmin(
       status: 'blocked',
       input,
       audit,
-      source: sourceMetadata(input, parsedWorkbook),
+      source: prepared.source,
       diagnostics: Object.freeze([
         ...auditDiagnostics,
         ...runtimeResult.diagnostics,
@@ -430,7 +557,7 @@ export async function applyRankedPatternImportForAdmin(
       status: 'blocked',
       input,
       audit,
-      source: sourceMetadata(input, parsedWorkbook),
+      source: prepared.source,
       diagnostics: Object.freeze([...auditDiagnostics, ...runtimeResult.diagnostics]),
       runtimeResult,
     });
@@ -453,7 +580,7 @@ export async function applyRankedPatternImportForAdmin(
     status: splitDiagnostics(diagnostics).blockingDiagnostics.length === 0 ? 'applied' : 'blocked',
     input,
     audit,
-    source: sourceMetadata(input, parsedWorkbook),
+    source: prepared.source,
     diagnostics,
     runtimeResult,
     resultLanguageResult,
@@ -503,9 +630,11 @@ export function planRankedPatternImportForAdmin(input: RankedPatternAdminWorkflo
   readonly runtimeDefinitionPlan: ReturnType<typeof planRankedPatternRuntimeDefinitionPersistence>;
   readonly resultLanguagePlan: ReturnType<typeof planRankedPatternResultLanguagePersistence>;
 } {
-  const parsedWorkbook = 'parsedWorkbook' in input && input.parsedWorkbook
-    ? input.parsedWorkbook
-    : parseRankedPatternWorkbookFile(input.sourcePath);
+  const prepared = prepareWorkbookInput(input, defaultDependencies);
+  if (!prepared.ok) {
+    throw new Error(prepared.result.blockingDiagnostics[0]?.message ?? 'Package source could not be resolved.');
+  }
+  const parsedWorkbook = prepared.parsedWorkbook;
   const audit = auditParsedRankedPatternWorkbook(parsedWorkbook);
   const runtimeDefinitionPlan = planRankedPatternRuntimeDefinitionPersistence(audit.normalisedPackage);
   const resultLanguagePlan = planRankedPatternResultLanguagePersistence({
