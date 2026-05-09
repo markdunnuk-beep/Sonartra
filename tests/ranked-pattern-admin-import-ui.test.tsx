@@ -57,10 +57,14 @@ const genericReviewSource = readFileSync(
 );
 
 test('ranked-pattern import panel exposes package draft resolution, publish audit, and explicit publish controls', () => {
+  assert.match(panelSource, /uploadRankedPatternWorkbookPackageAction/);
   assert.match(panelSource, /createRankedPatternPackageDraftVersionAction/);
   assert.match(panelSource, /auditRankedPatternPublishReadinessAction/);
   assert.match(panelSource, /publishRankedPatternVersionAction/);
   assert.match(panelSource, /Workbook file path or package reference/);
+  assert.match(panelSource, /Upload ranked-pattern workbook/);
+  assert.match(panelSource, /Upload workbook/);
+  assert.match(panelSource, /Use uploaded workbook/);
   assert.match(panelSource, /Audit package/);
   assert.match(panelSource, /Dry-run import/);
   assert.match(panelSource, /Apply import/);
@@ -94,13 +98,22 @@ test('existing draft state is passive and does not render create draft as loadin
   assert.doesNotMatch(panelSource, /disabled=\{hasDraft\}/);
 });
 
-test('workbook path field exposes long path affordances without upload storage', () => {
+test('workbook source field exposes upload metadata and local fallback affordances', () => {
+  assert.match(panelSource, /function WorkbookUploadResultBlock/);
+  assert.match(panelSource, /Uploaded/);
+  assert.match(panelSource, /Selected source/);
+  assert.match(panelSource, /formatFileSize/);
+  assert.match(panelSource, /shortSourceHash/);
+  assert.match(panelSource, /Storage object:/);
   assert.match(panelSource, /function SourcePathPreview/);
   assert.match(panelSource, /sourcePathFileName/);
   assert.match(panelSource, /title=\{sourcePath\}/);
   assert.match(panelSource, /Selected package:/);
-  assert.match(panelSource, /Upload UI is not wired yet/);
-  assert.match(panelSource, /private storage references are resolved server-side/);
+  assert.match(panelSource, /Advanced fallback/);
+  assert.match(panelSource, /Local\/admin only/);
+  assert.match(panelSource, /Manual fallback selected/);
+  assert.match(panelSource, /private storage and never exposes a public workbook URL/);
+  assert.doesNotMatch(panelSource, /publicUrl/);
 });
 
 test('admin copy keeps versioning and persisted-result boundaries explicit', () => {

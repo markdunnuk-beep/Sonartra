@@ -9,6 +9,7 @@ import {
   createOrResolveRankedPatternPackageDraftForAdmin,
   dryRunRankedPatternImportForAdmin,
 } from '@/lib/server/ranked-pattern-admin-import-workflow';
+import { requireAdminUser } from '@/lib/server/admin-access';
 import {
   createRankedPatternDraftVersion,
   publishRankedPatternAssessmentVersion,
@@ -18,7 +19,13 @@ import type {
   RankedPatternDraftVersionActionState,
   RankedPatternPublishAuditActionState,
   RankedPatternPublishVersionActionState,
+  RankedPatternWorkbookUploadActionState,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-action-state';
+import {
+  signRankedPatternWorkbookStorageReference,
+  uploadRankedPatternWorkbookPackage,
+  verifyRankedPatternWorkbookStorageReferenceToken,
+} from '@/lib/server/ranked-pattern-workbook-storage';
 
 type RankedPatternAdminImportActionContext = {
   readonly targetAssessmentId?: string;
@@ -31,6 +38,10 @@ type RankedPatternVersionActionContext = {
 };
 
 type RankedPatternAdminImportActionDependencies = {
+  readonly requireAdminUser?: typeof requireAdminUser;
+  readonly uploadWorkbook?: typeof uploadRankedPatternWorkbookPackage;
+  readonly signStorageReference?: typeof signRankedPatternWorkbookStorageReference;
+  readonly verifyStorageReferenceToken?: typeof verifyRankedPatternWorkbookStorageReferenceToken;
   readonly auditWorkbook: typeof auditRankedPatternWorkbookForAdmin;
   readonly dryRunImport: typeof dryRunRankedPatternImportForAdmin;
   readonly applyImport: typeof applyRankedPatternImportForAdmin;
@@ -42,6 +53,10 @@ type RankedPatternAdminImportActionDependencies = {
 };
 
 const defaultDependencies: RankedPatternAdminImportActionDependencies = {
+  requireAdminUser,
+  uploadWorkbook: uploadRankedPatternWorkbookPackage,
+  signStorageReference: signRankedPatternWorkbookStorageReference,
+  verifyStorageReferenceToken: verifyRankedPatternWorkbookStorageReferenceToken,
   auditWorkbook: auditRankedPatternWorkbookForAdmin,
   dryRunImport: dryRunRankedPatternImportForAdmin,
   applyImport: applyRankedPatternImportForAdmin,
@@ -55,15 +70,22 @@ const defaultDependencies: RankedPatternAdminImportActionDependencies = {
 function actionInputFromFormData(
   context: RankedPatternAdminImportActionContext,
   formData: FormData,
+  dependencies: Pick<RankedPatternAdminImportActionDependencies, 'verifyStorageReferenceToken'> = defaultDependencies,
 ) {
   const sourcePath = String(formData.get('sourcePath') ?? '').trim();
   const sourceName = String(formData.get('sourceName') ?? '').trim();
   const sourceHash = String(formData.get('sourceHash') ?? '').trim();
+  const storageReferenceToken = String(formData.get('storageReferenceToken') ?? '').trim();
+  const storageReference = storageReferenceToken
+    ? dependencies.verifyStorageReferenceToken?.(storageReferenceToken) ?? null
+    : null;
 
   return {
     sourcePath,
     sourceName: sourceName || undefined,
     sourceHash: sourceHash || undefined,
+    storageReference: storageReference ?? undefined,
+    storageReferenceToken,
     targetAssessmentId: String(formData.get('targetAssessmentId') ?? '').trim() || context.targetAssessmentId,
     targetAssessmentVersionId:
       String(formData.get('targetAssessmentVersionId') ?? '').trim() || context.targetAssessmentVersionId,
@@ -72,13 +94,26 @@ function actionInputFromFormData(
 
 function missingSourcePathState(): RankedPatternAdminImportActionState {
   const message =
-    'Provide a ranked-pattern workbook file path. Upload storage is intentionally deferred until the admin file convention is settled.';
+    'Upload a ranked-pattern workbook or provide a local/admin package reference.';
   return {
     ok: false,
     message,
     formError: message,
     fieldErrors: {
       sourcePath: 'Workbook file path or package reference is required.',
+    },
+    result: null,
+  };
+}
+
+function invalidStorageReferenceState(): RankedPatternAdminImportActionState {
+  const message = 'The uploaded workbook reference could not be verified. Upload the workbook again.';
+  return {
+    ok: false,
+    message,
+    formError: message,
+    fieldErrors: {
+      storageReferenceToken: 'Uploaded workbook reference is invalid or expired.',
     },
     result: null,
   };
@@ -159,13 +194,120 @@ export async function publishRankedPatternVersionAction(
   return publishRankedPatternVersionActionWithDependencies(context, defaultDependencies);
 }
 
+export async function uploadRankedPatternWorkbookPackageAction(
+  _previousState: RankedPatternWorkbookUploadActionState,
+  formData: FormData,
+): Promise<RankedPatternWorkbookUploadActionState> {
+  return uploadRankedPatternWorkbookPackageActionWithDependencies(formData, defaultDependencies);
+}
+
+export async function uploadRankedPatternWorkbookPackageActionWithDependencies(
+  formData: FormData,
+  dependencies: RankedPatternAdminImportActionDependencies,
+): Promise<RankedPatternWorkbookUploadActionState> {
+  try {
+    const requireAdmin = dependencies.requireAdminUser ?? requireAdminUser;
+    await requireAdmin();
+  } catch {
+    const message = 'Only admins can upload ranked-pattern workbook packages.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      fieldErrors: {},
+      result: null,
+    };
+  }
+
+  const file = formData.get('workbookFile');
+  if (!(file instanceof File)) {
+    const message = 'Choose a ranked-pattern .xlsx workbook to upload.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      fieldErrors: {
+        workbookFile: 'A .xlsx workbook file is required.',
+      },
+      result: null,
+    };
+  }
+
+  try {
+    const uploadWorkbook = dependencies.uploadWorkbook ?? uploadRankedPatternWorkbookPackage;
+    const upload = await uploadWorkbook({
+      bytes: await file.arrayBuffer(),
+      originalFileName: file.name,
+      contentType: file.type,
+    });
+
+    if (!upload.ok) {
+      const message = upload.diagnostics[0]?.message ?? 'Workbook upload failed.';
+      return {
+        ok: false,
+        message,
+        formError: message,
+        fieldErrors: Object.fromEntries(
+          upload.diagnostics
+            .filter((diagnostic) => diagnostic.fieldKey)
+            .map((diagnostic) => [diagnostic.fieldKey === 'file' ? 'workbookFile' : diagnostic.fieldKey, diagnostic.message]),
+        ),
+        result: null,
+      };
+    }
+
+    const signStorageReference = dependencies.signStorageReference ?? signRankedPatternWorkbookStorageReference;
+    const signed = signStorageReference(upload.storageReference);
+    if (!signed) {
+      const message = 'Workbook upload succeeded, but the private storage reference could not be signed.';
+      return {
+        ok: false,
+        message,
+        formError: message,
+        fieldErrors: {
+          storageReferenceToken: 'Private workbook storage signing is not configured.',
+        },
+        result: null,
+      };
+    }
+
+    return {
+      ok: true,
+      message: 'Workbook uploaded to private storage.',
+      formError: null,
+      fieldErrors: {},
+      result: {
+        storageReference: signed.storageReference,
+        storageReferenceToken: signed.token,
+        fileName: signed.storageReference.originalFileName,
+        sizeBytes: signed.storageReference.sizeBytes,
+        sourceHash: signed.storageReference.sourceHash,
+        shortSourceHash: signed.storageReference.sourceHash.slice(0, 12),
+        safeObjectPath: `${signed.storageReference.bucket}/${signed.storageReference.objectPath}`,
+      },
+    };
+  } catch {
+    const message = 'Workbook upload could not run. Try again or contact an administrator.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      fieldErrors: {},
+      result: null,
+    };
+  }
+}
+
 export async function auditRankedPatternPackageActionWithDependencies(
   context: RankedPatternAdminImportActionContext,
   formData: FormData,
   dependencies: RankedPatternAdminImportActionDependencies,
 ): Promise<RankedPatternAdminImportActionState> {
-  const input = actionInputFromFormData(context, formData);
-  if (!input.sourcePath) {
+  const input = actionInputFromFormData(context, formData, dependencies);
+  if (input.storageReferenceToken && !input.storageReference) {
+    return invalidStorageReferenceState();
+  }
+  if (!input.sourcePath && !input.storageReference) {
     return missingSourcePathState();
   }
 
@@ -187,8 +329,11 @@ export async function dryRunRankedPatternImportActionWithDependencies(
   formData: FormData,
   dependencies: RankedPatternAdminImportActionDependencies,
 ): Promise<RankedPatternAdminImportActionState> {
-  const input = actionInputFromFormData(context, formData);
-  if (!input.sourcePath) {
+  const input = actionInputFromFormData(context, formData, dependencies);
+  if (input.storageReferenceToken && !input.storageReference) {
+    return invalidStorageReferenceState();
+  }
+  if (!input.sourcePath && !input.storageReference) {
     return missingSourcePathState();
   }
 
@@ -210,8 +355,11 @@ export async function applyRankedPatternImportActionWithDependencies(
   formData: FormData,
   dependencies: RankedPatternAdminImportActionDependencies,
 ): Promise<RankedPatternAdminImportActionState> {
-  const input = actionInputFromFormData(context, formData);
-  if (!input.sourcePath) {
+  const input = actionInputFromFormData(context, formData, dependencies);
+  if (input.storageReferenceToken && !input.storageReference) {
+    return invalidStorageReferenceState();
+  }
+  if (!input.sourcePath && !input.storageReference) {
     return missingSourcePathState();
   }
 
@@ -330,8 +478,21 @@ export async function createRankedPatternPackageDraftVersionActionWithDependenci
   formData: FormData,
   dependencies: RankedPatternAdminImportActionDependencies,
 ): Promise<RankedPatternDraftVersionActionState> {
-  const input = actionInputFromFormData({}, formData);
-  if (!input.sourcePath) {
+  const input = actionInputFromFormData({}, formData, dependencies);
+  if (input.storageReferenceToken && !input.storageReference) {
+    const message = 'The uploaded workbook reference could not be verified. Upload the workbook again.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      formSuccess: null,
+      fieldErrors: {
+        storageReferenceToken: 'Uploaded workbook reference is invalid or expired.',
+      },
+      result: null,
+    };
+  }
+  if (!input.sourcePath && !input.storageReference) {
     const sourceState = missingSourcePathState();
     return {
       ok: false,

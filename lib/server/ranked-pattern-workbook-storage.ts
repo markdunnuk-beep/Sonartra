@@ -1,8 +1,9 @@
-import { createHash } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
 
 export const DEFAULT_RANKED_PATTERN_WORKBOOK_STORAGE_BUCKET = 'assessment-import-packages';
 export const DEFAULT_RANKED_PATTERN_WORKBOOK_MAX_BYTES = 10 * 1024 * 1024;
+export const DEFAULT_RANKED_PATTERN_WORKBOOK_STORAGE_TIMEOUT_MS = 15_000;
 
 export type RankedPatternWorkbookStorageDiagnostic = {
   readonly severity: 'error' | 'warning';
@@ -19,6 +20,11 @@ export type RankedPatternWorkbookStorageReference = {
   readonly contentType: string;
   readonly sizeBytes: number;
   readonly sourceHash: string;
+};
+
+export type SignedRankedPatternWorkbookStorageReference = {
+  readonly storageReference: RankedPatternWorkbookStorageReference;
+  readonly token: string;
 };
 
 export type RankedPatternWorkbookUploadInput = {
@@ -171,6 +177,98 @@ function getSupabaseStorageConfig(env: NodeJS.ProcessEnv = process.env): Supabas
   });
 }
 
+function base64UrlEncode(value: string): string {
+  return Buffer.from(value, 'utf8').toString('base64url');
+}
+
+function base64UrlDecode(value: string): string {
+  return Buffer.from(value, 'base64url').toString('utf8');
+}
+
+function storageSigningSecret(env: NodeJS.ProcessEnv = process.env): string | null {
+  return (
+    env.RANKED_PATTERN_WORKBOOK_STORAGE_SIGNING_SECRET ??
+    env.SUPABASE_SERVICE_ROLE_KEY ??
+    env.CLERK_SECRET_KEY ??
+    ''
+  ).trim() || null;
+}
+
+function signatureForPayload(payload: string, secret: string): string {
+  return createHmac('sha256', secret).update(payload).digest('base64url');
+}
+
+function isStorageReference(value: unknown): value is RankedPatternWorkbookStorageReference {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return (
+    record.sourceKind === 'storage_object' &&
+    typeof record.bucket === 'string' &&
+    typeof record.objectPath === 'string' &&
+    typeof record.originalFileName === 'string' &&
+    typeof record.contentType === 'string' &&
+    typeof record.sizeBytes === 'number' &&
+    typeof record.sourceHash === 'string'
+  );
+}
+
+export function signRankedPatternWorkbookStorageReference(
+  storageReference: RankedPatternWorkbookStorageReference,
+  env: NodeJS.ProcessEnv = process.env,
+): SignedRankedPatternWorkbookStorageReference | null {
+  const secret = storageSigningSecret(env);
+  if (!secret) {
+    return null;
+  }
+
+  const payload = base64UrlEncode(JSON.stringify(storageReference));
+  const signature = signatureForPayload(payload, secret);
+  return Object.freeze({
+    storageReference,
+    token: `${payload}.${signature}`,
+  });
+}
+
+export function verifyRankedPatternWorkbookStorageReferenceToken(
+  token: string,
+  env: NodeJS.ProcessEnv = process.env,
+): RankedPatternWorkbookStorageReference | null {
+  const secret = storageSigningSecret(env);
+  if (!secret) {
+    return null;
+  }
+
+  const [payload, signature, extra] = token.split('.');
+  if (!payload || !signature || extra !== undefined) {
+    return null;
+  }
+
+  const expectedSignature = signatureForPayload(payload, secret);
+  const provided = Buffer.from(signature);
+  const expected = Buffer.from(expectedSignature);
+  if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
+    return null;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(base64UrlDecode(payload));
+    if (!isStorageReference(parsed)) {
+      return null;
+    }
+
+    if (validateStorageReference(parsed).length > 0) {
+      return null;
+    }
+
+    return Object.freeze(parsed);
+  } catch {
+    return null;
+  }
+}
+
 function createSupabaseStorageAdapter(config: SupabaseStorageConfig): RankedPatternWorkbookStorageAdapter {
   async function request(params: {
     readonly method: 'GET' | 'PUT' | 'DELETE';
@@ -184,16 +282,26 @@ function createSupabaseStorageAdapter(config: SupabaseStorageConfig): RankedPatt
       .map((segment) => encodeURIComponent(segment))
       .join('/')}`;
     const body = params.bytes ? new Uint8Array(params.bytes) : undefined;
-    return fetch(objectUrl, {
-      method: params.method,
-      headers: {
-        apikey: config.serviceRoleKey,
-        Authorization: `Bearer ${config.serviceRoleKey}`,
-        ...(params.contentType ? { 'Content-Type': params.contentType } : {}),
-        ...(params.method === 'PUT' ? { 'x-upsert': 'false' } : {}),
-      },
-      body,
-    });
+    const timeoutMs = Number(
+      process.env.RANKED_PATTERN_WORKBOOK_STORAGE_TIMEOUT_MS ?? DEFAULT_RANKED_PATTERN_WORKBOOK_STORAGE_TIMEOUT_MS,
+    );
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), timeoutMs);
+    try {
+      return await fetch(objectUrl, {
+        method: params.method,
+        headers: {
+          apikey: config.serviceRoleKey,
+          Authorization: `Bearer ${config.serviceRoleKey}`,
+          ...(params.contentType ? { 'Content-Type': params.contentType } : {}),
+          ...(params.method === 'PUT' ? { 'x-upsert': 'false' } : {}),
+        },
+        body,
+        signal: abortController.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   return Object.freeze({

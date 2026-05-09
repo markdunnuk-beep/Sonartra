@@ -40,13 +40,8 @@ type AdminImportStatus = 'blocked' | 'ready' | 'applied' | 'publishable' | 'not_
 
 export type RankedPatternAdminWorkflowSourceInput =
   | {
-      readonly sourcePath: string;
-      readonly storageReference?: never;
-      readonly parsedWorkbook?: never;
-    }
-  | {
       readonly sourcePath?: string;
-      readonly storageReference: RankedPatternWorkbookStorageReference;
+      readonly storageReference?: RankedPatternWorkbookStorageReference;
       readonly parsedWorkbook?: never;
     }
   | {

@@ -14,16 +14,19 @@ import {
   createRankedPatternPackageDraftVersionAction,
   dryRunRankedPatternImportAction,
   publishRankedPatternVersionAction,
+  uploadRankedPatternWorkbookPackageAction,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
 import {
   initialRankedPatternAdminImportActionState,
   initialRankedPatternDraftVersionActionState,
   initialRankedPatternPublishAuditActionState,
   initialRankedPatternPublishVersionActionState,
+  initialRankedPatternWorkbookUploadActionState,
   type RankedPatternAdminImportActionState,
   type RankedPatternDraftVersionActionState,
   type RankedPatternPublishAuditActionState,
   type RankedPatternPublishVersionActionState,
+  type RankedPatternWorkbookUploadActionState,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-action-state';
 import type {
   RankedPatternAdminImportWorkflowResult,
@@ -74,6 +77,23 @@ function SubmitButton({
       type="submit"
     >
       {pending ? pendingLabel : idleLabel}
+    </button>
+  );
+}
+
+function UploadSubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      className={cn(
+        'sonartra-button sonartra-focus-ring w-full justify-center sm:w-auto',
+        pending ? 'cursor-wait border-white/8 bg-white/[0.05] text-white/48' : 'sonartra-button-primary',
+      )}
+      disabled={pending}
+      type="submit"
+    >
+      {pending ? 'Uploading...' : 'Upload workbook'}
     </button>
   );
 }
@@ -152,12 +172,14 @@ function HiddenWorkflowFields({
   sourcePath,
   sourceName,
   sourceHash,
+  storageReferenceToken,
   targetAssessmentId,
   targetAssessmentVersionId,
 }: Readonly<{
   sourcePath: string;
   sourceName: string;
   sourceHash: string;
+  storageReferenceToken: string;
   targetAssessmentId?: string;
   targetAssessmentVersionId?: string;
 }>) {
@@ -166,6 +188,7 @@ function HiddenWorkflowFields({
       <input name="sourcePath" type="hidden" value={sourcePath} />
       <input name="sourceName" type="hidden" value={sourceName} />
       <input name="sourceHash" type="hidden" value={sourceHash} />
+      <input name="storageReferenceToken" type="hidden" value={storageReferenceToken} />
       <input name="targetAssessmentId" type="hidden" value={targetAssessmentId ?? ''} />
       <input name="targetAssessmentVersionId" type="hidden" value={targetAssessmentVersionId ?? ''} />
     </>
@@ -177,6 +200,7 @@ function WorkflowForm({
   sourcePath,
   sourceName,
   sourceHash,
+  storageReferenceToken,
   targetAssessmentId,
   targetAssessmentVersionId,
   idleLabel,
@@ -188,6 +212,7 @@ function WorkflowForm({
   sourcePath: string;
   sourceName: string;
   sourceHash: string;
+  storageReferenceToken: string;
   targetAssessmentId?: string;
   targetAssessmentVersionId?: string;
   idleLabel: string;
@@ -201,6 +226,7 @@ function WorkflowForm({
         sourceHash={sourceHash}
         sourceName={sourceName}
         sourcePath={sourcePath}
+        storageReferenceToken={storageReferenceToken}
         targetAssessmentId={targetAssessmentId}
         targetAssessmentVersionId={targetAssessmentVersionId}
       />
@@ -214,21 +240,111 @@ function PackageDraftForm({
   sourcePath,
   sourceName,
   sourceHash,
+  storageReferenceToken,
 }: Readonly<{
   action: (payload: FormData) => void;
   sourcePath: string;
   sourceName: string;
   sourceHash: string;
+  storageReferenceToken: string;
 }>) {
   return (
     <form action={action}>
-      <HiddenWorkflowFields sourceHash={sourceHash} sourceName={sourceName} sourcePath={sourcePath} />
+      <HiddenWorkflowFields
+        sourceHash={sourceHash}
+        sourceName={sourceName}
+        sourcePath={sourcePath}
+        storageReferenceToken={storageReferenceToken}
+      />
       <SubmitButton
         idleLabel="Create or resolve package draft"
         pendingLabel="Resolving package draft..."
         tone="secondary"
       />
     </form>
+  );
+}
+
+function formatFileSize(sizeBytes: number): string {
+  if (sizeBytes < 1024) {
+    return `${sizeBytes} B`;
+  }
+
+  if (sizeBytes < 1024 * 1024) {
+    return `${(sizeBytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function StorageReferenceDisplay({ value }: Readonly<{ value: string }>) {
+  const [bucket, ...pathParts] = value.split('/');
+  const objectPath = pathParts.join('/');
+  const fileName = objectPath.split('/').at(-1) ?? objectPath;
+  return (
+    <p className="break-words text-xs leading-5 text-white/46">
+      Storage object:{' '}
+      <span className="font-medium text-white/68" title={value}>
+        {bucket}/{fileName}
+      </span>
+    </p>
+  );
+}
+
+function WorkbookUploadResultBlock({
+  state,
+  selected,
+  onSelect,
+}: Readonly<{
+  state: RankedPatternWorkbookUploadActionState;
+  selected: boolean;
+  onSelect: () => void;
+}>) {
+  if (state.formError) {
+    return (
+      <AdminFeedbackNotice tone="danger" title="Upload failed">
+        <span>{state.formError}</span>
+        {Object.values(state.fieldErrors).length > 0 ? (
+          <span className="mt-3 block">{Object.values(state.fieldErrors).join(' ')}</span>
+        ) : null}
+      </AdminFeedbackNotice>
+    );
+  }
+
+  if (!state.result) {
+    return (
+      <div className="rounded-[0.9rem] border border-white/8 bg-black/10 px-4 py-3 text-sm leading-6 text-white/52">
+        Upload a private .xlsx package to use the production-safe source path. No public URL is generated.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3 rounded-[0.9rem] border border-[rgba(116,209,177,0.2)] bg-[rgba(116,209,177,0.08)] p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
+          Uploaded
+        </LabelPill>
+        {selected ? (
+          <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
+            Selected source
+          </LabelPill>
+        ) : null}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <AdminFeedbackStat label="File" value={state.result.fileName} />
+        <AdminFeedbackStat label="Size" value={formatFileSize(state.result.sizeBytes)} />
+        <AdminFeedbackStat label="Hash" value={state.result.shortSourceHash} />
+      </div>
+      <StorageReferenceDisplay value={state.result.safeObjectPath} />
+      <button
+        className="sonartra-button sonartra-button-secondary sonartra-focus-ring w-full justify-center sm:w-auto"
+        onClick={onSelect}
+        type="button"
+      >
+        Use uploaded workbook
+      </button>
+    </div>
   );
 }
 
@@ -607,6 +723,7 @@ export function RankedPatternImportPanel({
   const [sourcePath, setSourcePath] = useState('');
   const [sourceName, setSourceName] = useState('');
   const [sourceHash, setSourceHash] = useState('');
+  const [sourceMode, setSourceMode] = useState<'upload' | 'manual'>('upload');
   const actionContext = {
     targetAssessmentId: assessmentId,
     targetAssessmentVersionId: latestDraftVersion?.assessmentVersionId,
@@ -670,9 +787,18 @@ export function RankedPatternImportPanel({
     publishRankedPatternVersionAction.bind(null, publishVersionContext),
     initialRankedPatternPublishVersionActionState,
   );
+  const [uploadState, uploadAction] = useActionState(
+    uploadRankedPatternWorkbookPackageAction,
+    initialRankedPatternWorkbookUploadActionState,
+  );
   const hasDraft = resolvedDraft !== null;
   const canPublishFromAudit = publishAuditState.result?.canPublish === true;
   const packageTargetLabel = resolvedAssessmentKey ?? 'package metadata';
+  const uploadedSourceSelected = sourceMode === 'upload' && uploadState.result !== null;
+  const workflowSourcePath = uploadedSourceSelected ? '' : sourcePath;
+  const workflowSourceName = uploadedSourceSelected ? uploadState.result?.fileName ?? '' : sourceName;
+  const workflowSourceHash = uploadedSourceSelected ? uploadState.result?.sourceHash ?? '' : sourceHash;
+  const workflowStorageReferenceToken = uploadedSourceSelected ? uploadState.result?.storageReferenceToken ?? '' : '';
 
   return (
     <SurfaceCard className="space-y-6 p-5 lg:p-6" data-ranked-pattern-import-panel="true">
@@ -727,48 +853,86 @@ export function RankedPatternImportPanel({
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.45fr)]">
         <div className="space-y-4">
-          <label className="block space-y-2" htmlFor="ranked-pattern-workbook-path">
-            <span className="text-sm font-medium text-white">Workbook file path or package reference</span>
-            <input
-              className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
-              id="ranked-pattern-workbook-path"
-              onChange={(event) => setSourcePath(event.currentTarget.value)}
-              placeholder="C:\\path\\to\\ranked-pattern-package.xlsx"
-              title={sourcePath}
-              type="text"
-              value={sourcePath}
+          <div className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="sonartra-page-eyebrow">Package source</p>
+              <LabelPill>{uploadedSourceSelected ? 'Uploaded workbook selected' : 'Awaiting source'}</LabelPill>
+            </div>
+            <form action={uploadAction} className="space-y-3" encType="multipart/form-data">
+              <label className="block space-y-2" htmlFor="ranked-pattern-workbook-upload">
+                <span className="text-sm font-medium text-white">Upload ranked-pattern workbook</span>
+                <input
+                  accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-white/15"
+                  id="ranked-pattern-workbook-upload"
+                  name="workbookFile"
+                  type="file"
+                />
+              </label>
+              <UploadSubmitButton />
+            </form>
+            <WorkbookUploadResultBlock
+              onSelect={() => setSourceMode('upload')}
+              selected={uploadedSourceSelected}
+              state={uploadState}
             />
-          </label>
-          <SourcePathPreview sourcePath={sourcePath} />
-          <div className="grid gap-3 md:grid-cols-2">
-            <label className="block space-y-2" htmlFor="ranked-pattern-source-name">
-              <span className="text-sm font-medium text-white">Source name</span>
-              <input
-                className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
-                id="ranked-pattern-source-name"
-                onChange={(event) => setSourceName(event.currentTarget.value)}
-                placeholder="Optional"
-                type="text"
-                value={sourceName}
-              />
-            </label>
-            <label className="block space-y-2" htmlFor="ranked-pattern-source-hash">
-              <span className="text-sm font-medium text-white">Source hash</span>
-              <input
-                className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
-                id="ranked-pattern-source-hash"
-                onChange={(event) => setSourceHash(event.currentTarget.value)}
-                placeholder="Optional"
-                type="text"
-                value={sourceHash}
-              />
-            </label>
           </div>
-          <p className="text-sm leading-6 text-white/48">
-            Upload UI is not wired yet. This field still uses a server-readable workbook path or
-            package reference; private storage references are resolved server-side when supplied by
-            future upload controls.
-          </p>
+
+          <div className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="sonartra-page-eyebrow">Advanced fallback</p>
+              <LabelPill className="border-white/10 bg-white/[0.04] text-white/64">Local/admin only</LabelPill>
+            </div>
+            <label className="block space-y-2" htmlFor="ranked-pattern-workbook-path">
+              <span className="text-sm font-medium text-white">Workbook file path or package reference</span>
+              <input
+                className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
+                id="ranked-pattern-workbook-path"
+                onChange={(event) => {
+                  setSourcePath(event.currentTarget.value);
+                  setSourceMode('manual');
+                }}
+                placeholder="leadership-approach"
+                title={sourcePath}
+                type="text"
+                value={sourcePath}
+              />
+            </label>
+            <SourcePathPreview sourcePath={sourcePath} />
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="block space-y-2" htmlFor="ranked-pattern-source-name">
+                <span className="text-sm font-medium text-white">Source name</span>
+                <input
+                  className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
+                  id="ranked-pattern-source-name"
+                  onChange={(event) => setSourceName(event.currentTarget.value)}
+                  placeholder="Optional"
+                  type="text"
+                  value={sourceName}
+                />
+              </label>
+              <label className="block space-y-2" htmlFor="ranked-pattern-source-hash">
+                <span className="text-sm font-medium text-white">Source hash</span>
+                <input
+                  className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
+                  id="ranked-pattern-source-hash"
+                  onChange={(event) => setSourceHash(event.currentTarget.value)}
+                  placeholder="Optional"
+                  type="text"
+                  value={sourceHash}
+                />
+              </label>
+            </div>
+            <p className="text-sm leading-6 text-white/48">
+              Manual package references remain available for local/admin testing. Production upload
+              uses private storage and never exposes a public workbook URL.
+            </p>
+            {sourceMode === 'manual' && sourcePath.trim() ? (
+              <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
+                Manual fallback selected
+              </LabelPill>
+            ) : null}
+          </div>
         </div>
 
         <div className="sonartra-admin-feedback-card space-y-3 rounded-[1.2rem] border p-4">
@@ -777,18 +941,20 @@ export function RankedPatternImportPanel({
           ) : (
             <PackageDraftForm
               action={draftVersionAction}
-              sourceHash={sourceHash}
-              sourceName={sourceName}
-              sourcePath={sourcePath}
+              sourceHash={workflowSourceHash}
+              sourceName={workflowSourceName}
+              sourcePath={workflowSourcePath}
+              storageReferenceToken={workflowStorageReferenceToken}
             />
           )}
           <WorkflowForm
             action={auditAction}
             idleLabel="Audit package"
             pendingLabel="Auditing..."
-            sourceHash={sourceHash}
-            sourceName={sourceName}
-            sourcePath={sourcePath}
+            sourceHash={workflowSourceHash}
+            sourceName={workflowSourceName}
+            sourcePath={workflowSourcePath}
+            storageReferenceToken={workflowStorageReferenceToken}
             targetAssessmentId={resolvedAssessmentId}
             targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
             tone="secondary"
@@ -797,9 +963,10 @@ export function RankedPatternImportPanel({
             action={dryRunAction}
             idleLabel="Dry-run import"
             pendingLabel="Planning..."
-            sourceHash={sourceHash}
-            sourceName={sourceName}
-            sourcePath={sourcePath}
+            sourceHash={workflowSourceHash}
+            sourceName={workflowSourceName}
+            sourcePath={workflowSourcePath}
+            storageReferenceToken={workflowStorageReferenceToken}
             targetAssessmentId={resolvedAssessmentId}
             targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
             tone="primary"
@@ -809,9 +976,10 @@ export function RankedPatternImportPanel({
             disabled={!hasDraft}
             idleLabel="Apply import"
             pendingLabel="Applying..."
-            sourceHash={sourceHash}
-            sourceName={sourceName}
-            sourcePath={sourcePath}
+            sourceHash={workflowSourceHash}
+            sourceName={workflowSourceName}
+            sourcePath={workflowSourcePath}
+            storageReferenceToken={workflowStorageReferenceToken}
             targetAssessmentId={resolvedAssessmentId}
             targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
             tone="apply"
@@ -841,6 +1009,7 @@ export function RankedPatternImportPanel({
         <p className="text-sm font-medium text-white">Draft/version workflow</p>
         <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-white/60">
           <li>Enter the workbook path or package reference.</li>
+          <li>Upload a private .xlsx workbook, or choose the local/admin fallback source.</li>
           <li>Audit the package and review workbook metadata before a target exists.</li>
           <li>Create or resolve the compatible draft version from package metadata.</li>
           <li>Dry-run and apply the ranked-pattern package against that draft.</li>

@@ -6,6 +6,7 @@ import type {
   RankedPatternDraftVersionResult,
   RankedPatternPublishVersionResult,
 } from '@/lib/server/ranked-pattern-admin-versioning';
+import type { RankedPatternWorkbookStorageReference } from '@/lib/server/ranked-pattern-workbook-storage';
 
 export type RankedPatternAdminImportActionState = {
   readonly ok: boolean;
@@ -13,6 +14,22 @@ export type RankedPatternAdminImportActionState = {
   readonly formError: string | null;
   readonly fieldErrors: Readonly<Record<string, string>>;
   readonly result: RankedPatternAdminImportWorkflowResult | null;
+};
+
+export type RankedPatternWorkbookUploadActionState = {
+  readonly ok: boolean;
+  readonly message: string | null;
+  readonly formError: string | null;
+  readonly fieldErrors: Readonly<Record<string, string>>;
+  readonly result: {
+    readonly storageReference: RankedPatternWorkbookStorageReference;
+    readonly storageReferenceToken: string;
+    readonly fileName: string;
+    readonly sizeBytes: number;
+    readonly sourceHash: string;
+    readonly shortSourceHash: string;
+    readonly safeObjectPath: string;
+  } | null;
 };
 
 export type RankedPatternPublishAuditActionState = {
@@ -42,6 +59,14 @@ export type RankedPatternPublishVersionActionState = {
 };
 
 export const initialRankedPatternAdminImportActionState: RankedPatternAdminImportActionState = {
+  ok: false,
+  message: null,
+  formError: null,
+  fieldErrors: {},
+  result: null,
+};
+
+export const initialRankedPatternWorkbookUploadActionState: RankedPatternWorkbookUploadActionState = {
   ok: false,
   message: null,
   formError: null,

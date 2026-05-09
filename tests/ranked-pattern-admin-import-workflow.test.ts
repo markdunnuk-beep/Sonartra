@@ -18,6 +18,7 @@ import {
   dryRunRankedPatternImportActionWithDependencies,
   applyRankedPatternImportActionWithDependencies,
   publishRankedPatternVersionActionWithDependencies,
+  uploadRankedPatternWorkbookPackageActionWithDependencies,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
 import { resolveRankedPatternPackageSource } from '@/lib/server/ranked-pattern-package-source-resolver';
 import {
@@ -793,7 +794,7 @@ test('server action returns inline field error when workbook source is missing',
   );
 
   assert.equal(result.ok, false);
-  assert.match(result.formError ?? '', /Provide a ranked-pattern workbook file path/);
+  assert.match(result.formError ?? '', /Upload a ranked-pattern workbook/);
   assert.equal(result.fieldErrors.sourcePath, 'Workbook file path or package reference is required.');
 });
 
@@ -853,6 +854,9 @@ test('dry-run server action does not call apply persistence', async () => {
 
 function actionDependencies(overrides: Record<string, unknown> = {}) {
   return {
+    async requireAdminUser() {
+      return adminUser() as never;
+    },
     async auditWorkbook() {
       throw new Error('SHOULD_NOT_AUDIT');
     },
@@ -868,6 +872,168 @@ function actionDependencies(overrides: Record<string, unknown> = {}) {
     ...overrides,
   } as never;
 }
+
+function uploadedReference(overrides: Partial<RankedPatternWorkbookStorageReference> = {}): RankedPatternWorkbookStorageReference {
+  return {
+    sourceKind: 'storage_object',
+    bucket: 'assessment-import-packages',
+    objectPath: '2026/05/test.xlsx',
+    originalFileName: 'test.xlsx',
+    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    sizeBytes: 123,
+    sourceHash: 'a'.repeat(64),
+    ...overrides,
+  };
+}
+
+test('workbook upload server action returns safe private storage metadata without public URL', async () => {
+  const formData = new FormData();
+  formData.set('workbookFile', new File([new Uint8Array([1, 2, 3])], 'test.xlsx', {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  }));
+
+  const result = await uploadRankedPatternWorkbookPackageActionWithDependencies(
+    formData,
+    actionDependencies({
+      async uploadWorkbook(input: { originalFileName?: string | null }) {
+        assert.equal(input.originalFileName, 'test.xlsx');
+        return {
+          ok: true,
+          storageReference: uploadedReference(),
+          diagnostics: [],
+        };
+      },
+      signStorageReference(reference: RankedPatternWorkbookStorageReference) {
+        return { storageReference: reference, token: 'signed-storage-reference' };
+      },
+    }),
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.result?.fileName, 'test.xlsx');
+  assert.equal(result.result?.shortSourceHash, 'aaaaaaaaaaaa');
+  assert.equal(result.result?.safeObjectPath, 'assessment-import-packages/2026/05/test.xlsx');
+  assert.equal(result.result?.storageReferenceToken, 'signed-storage-reference');
+  assert.equal(JSON.stringify(result).includes('publicUrl'), false);
+});
+
+test('workbook upload server action rejects missing file and upload validation failures', async () => {
+  const missing = await uploadRankedPatternWorkbookPackageActionWithDependencies(new FormData(), actionDependencies());
+  const nonXlsxForm = new FormData();
+  nonXlsxForm.set('workbookFile', new File(['bad'], 'bad.csv', { type: 'text/csv' }));
+  const nonXlsx = await uploadRankedPatternWorkbookPackageActionWithDependencies(
+    nonXlsxForm,
+    actionDependencies({
+      async uploadWorkbook() {
+        return {
+          ok: false,
+          storageReference: null,
+          diagnostics: [
+            {
+              severity: 'error',
+              code: 'UNSUPPORTED_WORKBOOK_EXTENSION',
+              message: 'Ranked-pattern workbook uploads must be .xlsx files.',
+              fieldKey: 'file',
+            },
+          ],
+        };
+      },
+    }),
+  );
+  const oversizedForm = new FormData();
+  oversizedForm.set('workbookFile', new File(['too-large'], 'large.xlsx'));
+  const oversized = await uploadRankedPatternWorkbookPackageActionWithDependencies(
+    oversizedForm,
+    actionDependencies({
+      async uploadWorkbook() {
+        return {
+          ok: false,
+          storageReference: null,
+          diagnostics: [
+            {
+              severity: 'error',
+              code: 'WORKBOOK_FILE_TOO_LARGE',
+              message: 'Ranked-pattern workbook upload exceeds the configured size limit.',
+              fieldKey: 'file',
+            },
+          ],
+        };
+      },
+    }),
+  );
+
+  assert.equal(missing.ok, false);
+  assert.equal(missing.fieldErrors.workbookFile, 'A .xlsx workbook file is required.');
+  assert.equal(nonXlsx.ok, false);
+  assert.equal(nonXlsx.fieldErrors.workbookFile, 'Ranked-pattern workbook uploads must be .xlsx files.');
+  assert.equal(oversized.ok, false);
+  assert.equal(oversized.fieldErrors.workbookFile, 'Ranked-pattern workbook upload exceeds the configured size limit.');
+});
+
+test('workflow server action audits uploaded storage reference after token verification', async () => {
+  const formData = new FormData();
+  formData.set('storageReferenceToken', 'signed-storage-reference');
+  const result = await auditRankedPatternPackageActionWithDependencies(
+    {},
+    formData,
+    actionDependencies({
+      verifyStorageReferenceToken(token: string) {
+        assert.equal(token, 'signed-storage-reference');
+        return uploadedReference();
+      },
+      async auditWorkbook(input: { storageReference?: RankedPatternWorkbookStorageReference }) {
+        assert.equal(input.storageReference?.sourceKind, 'storage_object');
+        return {
+          status: 'ready',
+          source: {
+            sourceName: 'test.xlsx',
+            sourceHash: 'a'.repeat(64),
+            workbookName: 'test.xlsx',
+            sourcePath: null,
+            parsedAt: '2026-05-07T00:00:00.000Z',
+          },
+          workbookAuditSummary: {
+            pass: true,
+            detectedSheets: [],
+            missingSheets: [],
+            unexpectedSheets: [],
+            diagnosticCounts: { error: 0, warning: 0 },
+            normalisationDiagnosticCounts: { error: 0, warning: 0 },
+          },
+          normalisationDiagnostics: [],
+          blockingDiagnostics: [],
+          warningDiagnostics: [],
+          createdOrUpdatedIds: { assessmentId: null, assessmentVersionId: null, importBatchId: null },
+          countsByStorageTarget: {
+            workbookRowsByStorageTarget: { bySheet: {} as never, runtimeDefinition: 0, runtimeResultContent: 0, adminImportSupport: 0 },
+            normalisedRowsByStorageTarget: { runtimeDefinition: 0, runtimeResultContent: 0, adminImportSupport: 0 },
+          },
+        };
+      },
+    }),
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.result?.source.sourcePath, null);
+  assert.equal(result.result?.source.sourceHash, 'a'.repeat(64));
+});
+
+test('workflow server action rejects tampered uploaded storage reference token inline', async () => {
+  const formData = new FormData();
+  formData.set('storageReferenceToken', 'tampered');
+  const result = await auditRankedPatternPackageActionWithDependencies(
+    {},
+    formData,
+    actionDependencies({
+      verifyStorageReferenceToken() {
+        return null;
+      },
+    }),
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.fieldErrors.storageReferenceToken, 'Uploaded workbook reference is invalid or expired.');
+});
 
 test('create draft server action returns structured success', async () => {
   const result = await createRankedPatternDraftVersionActionWithDependencies(
@@ -937,7 +1103,7 @@ test('package-first draft server action validates missing workbook source inline
 
   assert.equal(result.ok, false);
   assert.equal(result.fieldErrors.sourcePath, 'Workbook file path or package reference is required.');
-  assert.match(result.formError ?? '', /Provide a ranked-pattern workbook file path/);
+  assert.match(result.formError ?? '', /Upload a ranked-pattern workbook/);
 });
 
 test('package-first draft server action returns resolved draft target from metadata workflow', async () => {
