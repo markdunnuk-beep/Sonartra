@@ -216,6 +216,39 @@ test('create draft version marks the draft as single-domain ranked-pattern and d
   assert.deepEqual(fake.state.attempts, attemptsBefore);
 });
 
+test('create draft version returns existing-draft blocker without creating a second concurrent draft', async () => {
+  const fake = createFakeDb();
+  const versionsBefore = structuredClone(fake.state.versions);
+
+  const result = await createRankedPatternDraftVersion(
+    { assessmentKeyOrId: 'decision-style' },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      getDbPool() {
+        return fake.pool;
+      },
+      async createDraftVersionRecords() {
+        return {
+          status: 'draft_exists',
+          assessmentId: 'assessment-1',
+          assessmentKey: 'decision-style',
+          draftVersionId: 'version-2',
+          draftVersionTag: '2.00',
+        };
+      },
+    },
+  );
+
+  assert.equal(result.status, 'blocked');
+  assert.equal(result.draftVersionId, 'version-2');
+  assert.equal(result.draftVersionTag, '2.00');
+  assert.equal(result.diagnostics[0]?.code, 'DRAFT_VERSION_ALREADY_EXISTS');
+  assert.deepEqual(fake.state.versions, versionsBefore);
+  assert.deepEqual(fake.state.transactions, ['BEGIN', 'ROLLBACK', 'RELEASE']);
+});
+
 test('draft import target validation rejects published or non-ranked-pattern versions', async () => {
   const publishedFake = createFakeDb(buildSeed({ targetLifecycle: 'PUBLISHED' }));
   const publishedResult = await validateRankedPatternDraftImportTarget({

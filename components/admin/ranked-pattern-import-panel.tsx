@@ -60,19 +60,75 @@ function SubmitButton({
     <button
       className={cn(
         'sonartra-button sonartra-focus-ring w-full justify-center sm:w-auto',
-        isDisabled
+        pending
           ? 'cursor-wait border-white/8 bg-white/[0.05] text-white/48'
-          : tone === 'primary'
-            ? 'sonartra-button-primary'
-            : tone === 'apply'
-              ? 'border-[rgba(255,184,107,0.28)] bg-[rgba(255,184,107,0.12)] text-[rgba(255,235,204,0.96)] hover:bg-[rgba(255,184,107,0.18)]'
-              : 'sonartra-button-secondary',
+          : disabled
+            ? 'cursor-not-allowed border-white/8 bg-white/[0.04] text-white/42'
+            : tone === 'primary'
+              ? 'sonartra-button-primary'
+              : tone === 'apply'
+                ? 'border-[rgba(255,184,107,0.28)] bg-[rgba(255,184,107,0.12)] text-[rgba(255,235,204,0.96)] hover:bg-[rgba(255,184,107,0.18)]'
+                : 'sonartra-button-secondary',
       )}
       disabled={isDisabled}
       type="submit"
     >
       {pending ? pendingLabel : idleLabel}
     </button>
+  );
+}
+
+function PassiveDraftStatus({
+  latestDraftVersion,
+}: Readonly<{
+  latestDraftVersion: AdminAssessmentDetailVersion;
+}>) {
+  return (
+    <div
+      aria-label={`Using existing draft ${latestDraftVersion.versionTag}`}
+      className="rounded-[0.9rem] border border-[rgba(126,179,255,0.18)] bg-[rgba(126,179,255,0.08)] px-4 py-3"
+      data-ranked-pattern-existing-draft-status="true"
+      role="status"
+    >
+      <p className="text-sm font-medium text-[rgba(222,236,255,0.92)]">
+        Using draft {latestDraftVersion.versionTag}
+      </p>
+      <p className="mt-1 break-all text-xs leading-5 text-white/50">
+        Draft version already exists. This workflow will continue with{' '}
+        {latestDraftVersion.assessmentVersionId}.
+      </p>
+    </div>
+  );
+}
+
+function sourcePathFileName(sourcePath: string): string | null {
+  const trimmed = sourcePath.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const parts = trimmed.split(/[\\/]/);
+  return parts[parts.length - 1] || trimmed;
+}
+
+function SourcePathPreview({
+  sourcePath,
+}: Readonly<{
+  sourcePath: string;
+}>) {
+  const fileName = sourcePathFileName(sourcePath);
+
+  if (!fileName) {
+    return null;
+  }
+
+  return (
+    <p className="rounded-[0.8rem] border border-white/8 bg-black/10 px-3 py-2 text-xs leading-5 text-white/52">
+      Selected package:{' '}
+      <span className="break-all font-medium text-white/72" title={sourcePath}>
+        {fileName}
+      </span>
+    </p>
   );
 }
 
@@ -593,10 +649,12 @@ export function RankedPatternImportPanel({
               id="ranked-pattern-workbook-path"
               onChange={(event) => setSourcePath(event.currentTarget.value)}
               placeholder="C:\\path\\to\\ranked-pattern-package.xlsx"
+              title={sourcePath}
               type="text"
               value={sourcePath}
             />
           </label>
+          <SourcePathPreview sourcePath={sourcePath} />
           <div className="grid gap-3 md:grid-cols-2">
             <label className="block space-y-2" htmlFor="ranked-pattern-source-name">
               <span className="text-sm font-medium text-white">Source name</span>
@@ -628,13 +686,17 @@ export function RankedPatternImportPanel({
         </div>
 
         <div className="sonartra-admin-feedback-card space-y-3 rounded-[1.2rem] border p-4">
-          <VersionMutationForm
-            action={draftVersionAction}
-            disabled={hasDraft}
-            idleLabel="Create draft version"
-            pendingLabel="Creating draft..."
-            tone="secondary"
-          />
+          {latestDraftVersion ? (
+            <PassiveDraftStatus latestDraftVersion={latestDraftVersion} />
+          ) : (
+            <VersionMutationForm
+              action={draftVersionAction}
+              disabled={false}
+              idleLabel="Create draft version"
+              pendingLabel="Creating draft..."
+              tone="secondary"
+            />
+          )}
           <WorkflowForm
             action={auditAction}
             idleLabel="Audit package"

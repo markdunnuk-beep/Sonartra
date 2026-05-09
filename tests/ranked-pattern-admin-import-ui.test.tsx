@@ -65,6 +65,27 @@ test('ranked-pattern publish control stays disabled until publish audit can publ
   assert.match(panelSource, /Run publish audit and resolve all blocking findings/);
 });
 
+test('existing draft state is passive and does not render create draft as loading control', () => {
+  assert.match(panelSource, /function PassiveDraftStatus/);
+  assert.match(panelSource, /data-ranked-pattern-existing-draft-status="true"/);
+  assert.match(panelSource, /Using draft \{latestDraftVersion\.versionTag\}/);
+  assert.match(panelSource, /Draft version already exists/);
+  assert.match(panelSource, /This workflow will continue with/);
+  assert.match(panelSource, /latestDraftVersion \? \(/);
+  assert.match(panelSource, /<PassiveDraftStatus latestDraftVersion=\{latestDraftVersion\} \/>/);
+  assert.match(panelSource, /cursor-not-allowed/);
+  assert.match(panelSource, /pending\s+\?\s+'cursor-wait/);
+  assert.doesNotMatch(panelSource, /disabled=\{hasDraft\}/);
+});
+
+test('workbook path field exposes long path affordances without upload storage', () => {
+  assert.match(panelSource, /function SourcePathPreview/);
+  assert.match(panelSource, /sourcePathFileName/);
+  assert.match(panelSource, /title=\{sourcePath\}/);
+  assert.match(panelSource, /Selected package:/);
+  assert.match(panelSource, /Upload storage is not wired yet/);
+});
+
 test('admin copy keeps versioning and persisted-result boundaries explicit', () => {
   assert.match(panelSource, /Audit and dry-run do not write to the database/);
   assert.match(panelSource, /Publishing affects new attempts only/);

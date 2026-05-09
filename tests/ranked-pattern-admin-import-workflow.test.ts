@@ -656,6 +656,36 @@ test('create draft server action returns structured success', async () => {
   assert.equal(result.result?.status, 'created');
 });
 
+test('create draft server action returns structured existing-draft blocker', async () => {
+  const result = await createRankedPatternDraftVersionActionWithDependencies(
+    { assessmentKey: 'decision-style' },
+    actionDependencies({
+      async createDraftVersion(input: { assessmentKeyOrId: string }) {
+        assert.equal(input.assessmentKeyOrId, 'decision-style');
+        return {
+          status: 'blocked',
+          assessmentId: 'assessment-1',
+          assessmentKey: 'decision-style',
+          draftVersionId: 'version-2',
+          draftVersionTag: '2.00',
+          diagnostics: [
+            {
+              severity: 'error',
+              code: 'DRAFT_VERSION_ALREADY_EXISTS',
+              message: 'A draft version already exists. Continue authoring that draft before creating another one.',
+            },
+          ],
+        };
+      },
+    }),
+  );
+
+  assert.equal(result.ok, false);
+  assert.match(result.formError ?? '', /draft version already exists/i);
+  assert.equal(result.result?.status, 'blocked');
+  assert.equal(result.result?.draftVersionId, 'version-2');
+});
+
 test('publish audit server action returns structured draft-version validation errors', async () => {
   const result = await auditRankedPatternPublishReadinessActionWithDependencies(
     { targetAssessmentVersionId: '' },
