@@ -20,6 +20,13 @@ import {
   publishRankedPatternVersionActionWithDependencies,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
 import { resolveRankedPatternPackageSource } from '@/lib/server/ranked-pattern-package-source-resolver';
+import {
+  buildRankedPatternWorkbookStorageObjectPath,
+  readRankedPatternWorkbookPackage,
+  uploadRankedPatternWorkbookPackage,
+  type RankedPatternWorkbookStorageAdapter,
+  type RankedPatternWorkbookStorageReference,
+} from '@/lib/server/ranked-pattern-workbook-storage';
 import type { RankedPatternImportDiagnostic } from '@/content/assessment-packages/import-contract/ranked-pattern-import-validation';
 import type { ParsedRankedPatternWorkbookFile } from '@/content/assessment-packages/import-contract/ranked-pattern-workbook-parser';
 
@@ -53,8 +60,27 @@ const parsedWorkbook: ParsedRankedPatternWorkbookFile = Object.freeze({
   parsedAt: '2026-05-07T00:00:00.000Z',
 });
 
-test('package source resolver resolves an existing local workbook path and computes a stable hash', () => {
-  const result = resolveRankedPatternPackageSource({ sourcePath: leadershipWorkbookPath });
+function memoryWorkbookStorageAdapter(store = new Map<string, Buffer>()): RankedPatternWorkbookStorageAdapter {
+  return Object.freeze({
+    async uploadObject(params) {
+      store.set(`${params.bucket}/${params.objectPath}`, Buffer.from(params.bytes));
+    },
+    async readObject(params) {
+      const bytes = store.get(`${params.bucket}/${params.objectPath}`);
+      if (!bytes) {
+        throw new Error('MISSING_OBJECT');
+      }
+
+      return Buffer.from(bytes);
+    },
+    async deleteObject(params) {
+      store.delete(`${params.bucket}/${params.objectPath}`);
+    },
+  });
+}
+
+test('package source resolver resolves an existing local workbook path and computes a stable hash', async () => {
+  const result = await resolveRankedPatternPackageSource({ sourcePath: leadershipWorkbookPath });
   const expectedHash = createHash('sha256').update(readFileSync(leadershipWorkbookPath)).digest('hex');
 
   assert.equal(result.ok, true);
@@ -65,9 +91,9 @@ test('package source resolver resolves an existing local workbook path and compu
   assert.deepEqual(result.diagnostics, []);
 });
 
-test('package source resolver derives source name and respects provided source name', () => {
-  const derived = resolveRankedPatternPackageSource({ sourcePath: leadershipWorkbookPath });
-  const provided = resolveRankedPatternPackageSource({
+test('package source resolver derives source name and respects provided source name', async () => {
+  const derived = await resolveRankedPatternPackageSource({ sourcePath: leadershipWorkbookPath });
+  const provided = await resolveRankedPatternPackageSource({
     sourcePath: leadershipWorkbookPath,
     sourceName: 'Leadership Approach test upload.xlsx',
   });
@@ -79,24 +105,24 @@ test('package source resolver derives source name and respects provided source n
   assert.equal(provided.sourceHash, derived.sourceHash);
 });
 
-test('package source resolver supports package references without exposing broad filesystem reads', () => {
-  const result = resolveRankedPatternPackageSource({ sourcePath: 'leadership-approach' });
+test('package source resolver supports package references without exposing broad filesystem reads', async () => {
+  const result = await resolveRankedPatternPackageSource({ sourcePath: 'leadership-approach' });
 
   assert.equal(result.ok, true);
   assert.equal(result.sourceKind, 'package_reference');
   assert.equal(result.resolvedPath?.endsWith('sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_TEST.xlsx'), true);
 
-  const unsafe = resolveRankedPatternPackageSource({ sourcePath: '../package.json' });
+  const unsafe = await resolveRankedPatternPackageSource({ sourcePath: '../package.json' });
   assert.equal(unsafe.ok, false);
   assert.equal(unsafe.diagnostics[0]?.code, 'UNSAFE_PACKAGE_SOURCE_REFERENCE');
 });
 
-test('package source resolver returns structured errors for missing, unsupported, and unreadable sources', () => {
-  const missing = resolveRankedPatternPackageSource({ sourcePath: '' });
-  const unsupported = resolveRankedPatternPackageSource({
+test('package source resolver returns structured errors for missing, unsupported, and unreadable sources', async () => {
+  const missing = await resolveRankedPatternPackageSource({ sourcePath: '' });
+  const unsupported = await resolveRankedPatternPackageSource({
     sourcePath: 'content/assessment-packages/leadership-approach/README.md',
   });
-  const unreadable = resolveRankedPatternPackageSource({
+  const unreadable = await resolveRankedPatternPackageSource({
     sourcePath: 'content/assessment-packages/leadership-approach/missing.xlsx',
   });
 
@@ -106,6 +132,120 @@ test('package source resolver returns structured errors for missing, unsupported
   assert.equal(unsupported.diagnostics[0]?.code, 'UNSUPPORTED_PACKAGE_SOURCE_EXTENSION');
   assert.equal(unreadable.ok, false);
   assert.equal(unreadable.diagnostics[0]?.code, 'PACKAGE_SOURCE_UNREADABLE');
+});
+
+test('ranked-pattern workbook storage accepts .xlsx uploads and returns private storage reference', async () => {
+  const bytes = readFileSync(leadershipWorkbookPath);
+  const storageAdapter = memoryWorkbookStorageAdapter();
+  const result = await uploadRankedPatternWorkbookPackage({
+    bytes,
+    originalFileName: 'Leadership Approach TEST.xlsx',
+    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    uploadedAt: new Date('2026-05-09T12:34:56.000Z'),
+    storageAdapter,
+  });
+
+  const expectedHash = createHash('sha256').update(bytes).digest('hex');
+  assert.equal(result.ok, true);
+  assert.equal(result.storageReference.sourceKind, 'storage_object');
+  assert.equal(result.storageReference.bucket, 'assessment-import-packages');
+  assert.equal(result.storageReference.sourceHash, expectedHash);
+  assert.equal(result.storageReference.sizeBytes, bytes.length);
+  assert.equal(result.storageReference.objectPath, `2026/05/20260509T123456Z-${expectedHash.slice(0, 12)}-leadership-approach-test.xlsx`);
+  assert.equal('publicUrl' in result.storageReference, false);
+});
+
+test('ranked-pattern workbook storage rejects missing, non-xlsx, empty, oversized, and unconfigured uploads', async () => {
+  const bytes = Buffer.from('not a workbook');
+  const missing = await uploadRankedPatternWorkbookPackage({ originalFileName: 'package.xlsx', storageAdapter: memoryWorkbookStorageAdapter() });
+  const unsupported = await uploadRankedPatternWorkbookPackage({ bytes, originalFileName: 'package.csv', storageAdapter: memoryWorkbookStorageAdapter() });
+  const empty = await uploadRankedPatternWorkbookPackage({ bytes: Buffer.alloc(0), originalFileName: 'package.xlsx', storageAdapter: memoryWorkbookStorageAdapter() });
+  const oversized = await uploadRankedPatternWorkbookPackage({ bytes, originalFileName: 'package.xlsx', maxBytes: 2, storageAdapter: memoryWorkbookStorageAdapter() });
+  const unconfigured = await uploadRankedPatternWorkbookPackage({ bytes, originalFileName: 'package.xlsx', storageAdapter: null as never });
+
+  assert.equal(missing.ok, false);
+  assert.equal(missing.diagnostics[0]?.code, 'WORKBOOK_FILE_REQUIRED');
+  assert.equal(unsupported.ok, false);
+  assert.equal(unsupported.diagnostics[0]?.code, 'UNSUPPORTED_WORKBOOK_EXTENSION');
+  assert.equal(empty.ok, false);
+  assert.equal(empty.diagnostics[0]?.code, 'WORKBOOK_FILE_EMPTY');
+  assert.equal(oversized.ok, false);
+  assert.equal(oversized.diagnostics[0]?.code, 'WORKBOOK_FILE_TOO_LARGE');
+  assert.equal(unconfigured.ok, false);
+  assert.equal(unconfigured.diagnostics[0]?.code, 'WORKBOOK_STORAGE_CONFIG_MISSING');
+});
+
+test('ranked-pattern workbook storage builds safe object paths without trusting client paths', () => {
+  const objectPath = buildRankedPatternWorkbookStorageObjectPath({
+    originalFileName: '../../Leadership Approach FINAL TEST.xlsx',
+    sourceHash: 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+    uploadedAt: new Date('2026-05-09T01:02:03.000Z'),
+  });
+
+  assert.equal(objectPath, '2026/05/20260509T010203Z-abcdef123456-leadership-approach-final-test.xlsx');
+});
+
+test('storage object reference resolves through package source resolver and matches local workbook metadata', async () => {
+  const bytes = readFileSync(leadershipWorkbookPath);
+  const storageAdapter = memoryWorkbookStorageAdapter();
+  const upload = await uploadRankedPatternWorkbookPackage({
+    bytes,
+    originalFileName: 'Leadership Approach Upload.xlsx',
+    uploadedAt: new Date('2026-05-09T12:00:00.000Z'),
+    storageAdapter,
+  });
+  assert.equal(upload.ok, true);
+
+  const local = await auditRankedPatternWorkbookForAdmin(
+    { sourcePath: 'leadership-approach' },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+    },
+  );
+  const storage = await auditRankedPatternWorkbookForAdmin(
+    { storageReference: upload.storageReference },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      resolvePackageSource(input) {
+        return resolveRankedPatternPackageSource({ ...input, storageAdapter });
+      },
+    },
+  );
+
+  assert.equal(storage.status, 'ready');
+  assert.equal(storage.source.sourceHash, local.source.sourceHash);
+  assert.equal(storage.packageMetadata?.assessmentKey, local.packageMetadata?.assessmentKey);
+  assert.equal(storage.packageMetadata?.version, local.packageMetadata?.version);
+  assert.equal(storage.packageMetadata?.domainKey, local.packageMetadata?.domainKey);
+});
+
+test('private storage reads validate hash and missing config with structured diagnostics', async () => {
+  const bytes = readFileSync(leadershipWorkbookPath);
+  const sourceHash = createHash('sha256').update(bytes).digest('hex');
+  const reference: RankedPatternWorkbookStorageReference = Object.freeze({
+    sourceKind: 'storage_object',
+    bucket: 'assessment-import-packages',
+    objectPath: '2026/05/test.xlsx',
+    originalFileName: 'test.xlsx',
+    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    sizeBytes: bytes.length,
+    sourceHash,
+  });
+
+  const missingConfig = await readRankedPatternWorkbookPackage(reference, null);
+  const mismatchedHash = await readRankedPatternWorkbookPackage(
+    { ...reference, sourceHash: '0'.repeat(64) },
+    memoryWorkbookStorageAdapter(new Map([[`${reference.bucket}/${reference.objectPath}`, bytes]])),
+  );
+
+  assert.equal(missingConfig.ok, false);
+  assert.equal(missingConfig.diagnostics[0]?.code, 'WORKBOOK_STORAGE_CONFIG_MISSING');
+  assert.equal(mismatchedHash.ok, false);
+  assert.equal(mismatchedHash.diagnostics[0]?.code, 'WORKBOOK_SOURCE_HASH_MISMATCH');
 });
 
 const blockingDiagnostic: RankedPatternImportDiagnostic = Object.freeze({

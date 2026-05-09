@@ -765,8 +765,9 @@ export function RankedPatternImportPanel({
             </label>
           </div>
           <p className="text-sm leading-6 text-white/48">
-            Upload storage is not wired yet, so this field uses a server-readable workbook path or
-            package reference for local/admin testing.
+            Upload UI is not wired yet. This field still uses a server-readable workbook path or
+            package reference; private storage references are resolved server-side when supplied by
+            future upload controls.
           </p>
         </div>
 

@@ -1,19 +1,26 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
+import {
+  readRankedPatternWorkbookPackage,
+  type RankedPatternWorkbookStorageAdapter,
+  type RankedPatternWorkbookStorageReference,
+} from '@/lib/server/ranked-pattern-workbook-storage';
 
-export type RankedPatternPackageSourceKind = 'local_path' | 'package_reference';
+export type RankedPatternPackageSourceKind = 'local_path' | 'package_reference' | 'storage_object';
 
 export type RankedPatternPackageSourceDiagnostic = {
   readonly severity: 'error' | 'warning';
   readonly code: string;
   readonly message: string;
-  readonly fieldKey?: 'sourcePath' | 'sourceName';
+  readonly fieldKey?: 'sourcePath' | 'sourceName' | 'storageReference' | 'storageConfig';
 };
 
 export type RankedPatternPackageSourceInput = {
   readonly sourcePath?: string;
   readonly sourceName?: string;
+  readonly storageReference?: RankedPatternWorkbookStorageReference;
+  readonly storageAdapter?: RankedPatternWorkbookStorageAdapter;
 };
 
 export type RankedPatternResolvedPackageSource =
@@ -230,9 +237,63 @@ function buildSourceName(input: RankedPatternPackageSourceInput, resolvedPath: s
   return path.basename(resolvedPath) || safeDisplayReference(originalReference);
 }
 
-export function resolveRankedPatternPackageSource(
+async function resolveStorageObjectSource(
   input: RankedPatternPackageSourceInput,
-): RankedPatternResolvedPackageSource {
+): Promise<RankedPatternResolvedPackageSource> {
+  const reference = input.storageReference;
+  if (!reference) {
+    return blockedSource({
+      originalReference: '',
+      sourceKind: 'storage_object',
+      diagnostics: Object.freeze([
+        diagnostic('STORAGE_REFERENCE_REQUIRED', 'Workbook storage reference is required.', 'storageReference'),
+      ]),
+    });
+  }
+
+  const originalReference = `${reference.bucket}/${reference.objectPath}`;
+  const readResult = await readRankedPatternWorkbookPackage(reference, input.storageAdapter);
+  if (!readResult.ok) {
+    return blockedSource({
+      originalReference,
+      safeDisplayName: safeDisplayReference(reference.originalFileName),
+      sourceName: input.sourceName ?? reference.originalFileName,
+      sourceKind: 'storage_object',
+      diagnostics: Object.freeze(
+        readResult.diagnostics.map((item) =>
+          Object.freeze({
+            severity: item.severity,
+            code: item.code,
+            message: item.message,
+            fieldKey: item.fieldKey === 'file' ? 'storageReference' : item.fieldKey,
+          }),
+        ),
+      ),
+    });
+  }
+
+  const sourceHash = createHash('sha256').update(readResult.bytes).digest('hex');
+  const sourceName = input.sourceName?.trim() || reference.originalFileName;
+  return Object.freeze({
+    ok: true as const,
+    bytes: readResult.bytes,
+    sourceName,
+    sourceHash,
+    sourceKind: 'storage_object',
+    originalReference,
+    safeDisplayName: sourceName,
+    resolvedPath: null,
+    diagnostics: Object.freeze([]),
+  });
+}
+
+export async function resolveRankedPatternPackageSource(
+  input: RankedPatternPackageSourceInput,
+): Promise<RankedPatternResolvedPackageSource> {
+  if (input.storageReference) {
+    return resolveStorageObjectSource(input);
+  }
+
   const originalReference = input.sourcePath?.trim() ?? '';
   if (!originalReference) {
     return blockedSource({

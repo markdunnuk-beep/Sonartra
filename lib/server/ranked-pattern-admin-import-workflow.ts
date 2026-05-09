@@ -34,16 +34,24 @@ import {
   type RankedPatternPackageSourceDiagnostic,
   type RankedPatternResolvedPackageSource,
 } from '@/lib/server/ranked-pattern-package-source-resolver';
+import type { RankedPatternWorkbookStorageReference } from '@/lib/server/ranked-pattern-workbook-storage';
 
 type AdminImportStatus = 'blocked' | 'ready' | 'applied' | 'publishable' | 'not_publishable';
 
 export type RankedPatternAdminWorkflowSourceInput =
   | {
       readonly sourcePath: string;
+      readonly storageReference?: never;
       readonly parsedWorkbook?: never;
     }
   | {
       readonly sourcePath?: string;
+      readonly storageReference: RankedPatternWorkbookStorageReference;
+      readonly parsedWorkbook?: never;
+    }
+  | {
+      readonly sourcePath?: string;
+      readonly storageReference?: never;
       readonly parsedWorkbook: ParsedRankedPatternWorkbookFile;
     };
 
@@ -262,10 +270,10 @@ function sourceMetadataFromResolvedSource(
   });
 }
 
-function prepareWorkbookInput(
+async function prepareWorkbookInput(
   input: RankedPatternAdminWorkflowBaseInput,
   dependencies: WorkflowDependencies,
-): PreparedWorkbookInput {
+): Promise<PreparedWorkbookInput> {
   if ('parsedWorkbook' in input && input.parsedWorkbook) {
     return Object.freeze({
       ok: true as const,
@@ -274,7 +282,7 @@ function prepareWorkbookInput(
     });
   }
 
-  const resolved = dependencies.resolvePackageSource(input);
+  const resolved = await dependencies.resolvePackageSource(input);
   if (!resolved.ok) {
     return Object.freeze({
       ok: false as const,
@@ -368,7 +376,7 @@ export async function auditRankedPatternWorkbookForAdmin(
 ): Promise<RankedPatternAdminImportWorkflowResult> {
   const deps = { ...defaultDependencies, ...dependencies };
   await deps.requireAdminUser();
-  const prepared = prepareWorkbookInput(input, deps);
+  const prepared = await prepareWorkbookInput(input, deps);
   if (!prepared.ok) {
     return prepared.result;
   }
@@ -390,7 +398,7 @@ export async function createOrResolveRankedPatternPackageDraftForAdmin(
 ) {
   const deps = { ...defaultDependencies, ...dependencies };
   const adminUser = await deps.requireAdminUser();
-  const prepared = prepareWorkbookInput(input, deps);
+  const prepared = await prepareWorkbookInput(input, deps);
   if (!prepared.ok) {
     return Object.freeze({
       status: 'blocked' as const,
@@ -438,7 +446,7 @@ export async function dryRunRankedPatternImportForAdmin(
 ): Promise<RankedPatternAdminImportWorkflowResult> {
   const deps = { ...defaultDependencies, ...dependencies };
   await deps.requireAdminUser();
-  const prepared = prepareWorkbookInput(input, deps);
+  const prepared = await prepareWorkbookInput(input, deps);
   if (!prepared.ok) {
     return prepared.result;
   }
@@ -481,7 +489,7 @@ export async function applyRankedPatternImportForAdmin(
 ): Promise<RankedPatternAdminImportWorkflowResult> {
   const deps = { ...defaultDependencies, ...dependencies };
   await deps.requireAdminUser();
-  const prepared = prepareWorkbookInput(input, deps);
+  const prepared = await prepareWorkbookInput(input, deps);
   if (!prepared.ok) {
     return prepared.result;
   }
@@ -626,11 +634,11 @@ export async function requireRankedPatternPublishableForAdmin(
   });
 }
 
-export function planRankedPatternImportForAdmin(input: RankedPatternAdminWorkflowBaseInput): {
+export async function planRankedPatternImportForAdmin(input: RankedPatternAdminWorkflowBaseInput): Promise<{
   readonly runtimeDefinitionPlan: ReturnType<typeof planRankedPatternRuntimeDefinitionPersistence>;
   readonly resultLanguagePlan: ReturnType<typeof planRankedPatternResultLanguagePersistence>;
-} {
-  const prepared = prepareWorkbookInput(input, defaultDependencies);
+}> {
+  const prepared = await prepareWorkbookInput(input, defaultDependencies);
   if (!prepared.ok) {
     throw new Error(prepared.result.blockingDiagnostics[0]?.message ?? 'Package source could not be resolved.');
   }
