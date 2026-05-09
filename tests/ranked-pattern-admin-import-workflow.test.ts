@@ -10,8 +10,10 @@ import {
 } from '@/lib/server/ranked-pattern-admin-import-workflow';
 import {
   auditRankedPatternPackageActionWithDependencies,
+  auditRankedPatternPublishReadinessActionWithDependencies,
   createRankedPatternDraftVersionActionWithDependencies,
   dryRunRankedPatternImportActionWithDependencies,
+  applyRankedPatternImportActionWithDependencies,
   publishRankedPatternVersionActionWithDependencies,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
 import type { RankedPatternImportDiagnostic } from '@/content/assessment-packages/import-contract/ranked-pattern-import-validation';
@@ -536,7 +538,21 @@ test('server action returns diagnostics from the guarded audit workflow', async 
   );
 
   assert.equal(result.formError, null);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.fieldErrors, {});
   assert.equal(result.result?.blockingDiagnostics[0]?.code, 'MISSING_REQUIRED_FIELD');
+});
+
+test('server action returns inline field error when workbook source is missing', async () => {
+  const result = await applyRankedPatternImportActionWithDependencies(
+    { targetAssessmentVersionId: 'version-1' },
+    new FormData(),
+    actionDependencies(),
+  );
+
+  assert.equal(result.ok, false);
+  assert.match(result.formError ?? '', /Provide a ranked-pattern workbook file path/);
+  assert.equal(result.fieldErrors.sourcePath, 'Workbook file path or package reference is required.');
 });
 
 test('dry-run server action does not call apply persistence', async () => {
@@ -589,6 +605,7 @@ test('dry-run server action does not call apply persistence', async () => {
   );
 
   assert.equal(dryRunCalled, true);
+  assert.equal(result.ok, true);
   assert.equal(result.result?.status, 'ready');
 });
 
@@ -634,8 +651,20 @@ test('create draft server action returns structured success', async () => {
   );
 
   assert.equal(result.formError, null);
+  assert.equal(result.ok, true);
   assert.match(result.formSuccess ?? '', /Draft 2\.00/);
   assert.equal(result.result?.status, 'created');
+});
+
+test('publish audit server action returns structured draft-version validation errors', async () => {
+  const result = await auditRankedPatternPublishReadinessActionWithDependencies(
+    { targetAssessmentVersionId: '' },
+    actionDependencies(),
+  );
+
+  assert.equal(result.ok, false);
+  assert.match(result.formError ?? '', /No target draft version is available/);
+  assert.equal(result.fieldErrors.targetAssessmentVersionId, 'Publish audit requires an editable draft version.');
 });
 
 test('publish server action blocks with publish-audit diagnostics', async () => {
@@ -663,6 +692,7 @@ test('publish server action blocks with publish-audit diagnostics', async () => 
   );
 
   assert.match(result.formError ?? '', /twenty-four ranked patterns/);
+  assert.equal(result.ok, false);
   assert.equal(result.result?.status, 'blocked');
 });
 
@@ -693,6 +723,7 @@ test('publish server action returns structured success only after service publis
   );
 
   assert.equal(result.formError, null);
+  assert.equal(result.ok, true);
   assert.match(result.formSuccess ?? '', /active ranked-pattern version for new attempts/);
   assert.equal(result.result?.status, 'published');
 });

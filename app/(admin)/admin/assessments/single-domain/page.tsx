@@ -17,8 +17,10 @@ import { getDbPool } from '@/lib/server/db';
 
 function WorkflowAssessmentCard({
   assessment,
+  tone = 'active',
 }: Readonly<{
   assessment: AdminAssessmentDashboardItem;
+  tone?: 'active' | 'legacy';
 }>) {
   const workflowHref = `/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`;
   const draftStatus = assessment.latestDraftVersion
@@ -32,7 +34,7 @@ function WorkflowAssessmentCard({
           <div className="flex flex-wrap items-center gap-2">
             <LabelPill>{assessment.assessmentKey}</LabelPill>
             <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
-              Active ranked-pattern path
+              {tone === 'legacy' ? 'Legacy / test record' : 'Active ranked-pattern path'}
             </LabelPill>
             <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
               {draftStatus}
@@ -50,14 +52,18 @@ function WorkflowAssessmentCard({
 
         <div className="flex flex-wrap gap-3">
           <ButtonLink href={workflowHref} variant="primary">
-            Open import workflow
+            {tone === 'legacy' ? 'Open archived workflow' : 'Open import workflow'}
           </ButtonLink>
-          <ButtonLink href={workflowHref}>
-            Create draft version
-          </ButtonLink>
-          <ButtonLink href={`${assessment.actionHref}/review`}>
-            Open legacy builder review
-          </ButtonLink>
+          {tone === 'active' ? (
+            <>
+              <ButtonLink href={workflowHref}>
+                Create draft version
+              </ButtonLink>
+              <ButtonLink href={`${assessment.actionHref}/review`}>
+                Open legacy builder review
+              </ButtonLink>
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -77,10 +83,21 @@ function WorkflowAssessmentCard({
   );
 }
 
+function isTestOrLegacyAssessment(assessment: AdminAssessmentDashboardItem): boolean {
+  const haystack = `${assessment.assessmentKey} ${assessment.title}`.toLowerCase();
+  return !assessment.isActive || haystack.includes('test') || haystack.includes('legacy');
+}
+
 export default async function SingleDomainBuilderEntryPage() {
   const viewModel = await buildAdminAssessmentDashboardViewModel(getDbPool());
   const singleDomainAssessments = viewModel.assessments.filter(
     (assessment) => assessment.mode === 'single_domain',
+  );
+  const activeRankedPatternAssessments = singleDomainAssessments.filter(
+    (assessment) => !isTestOrLegacyAssessment(assessment),
+  );
+  const legacySingleDomainAssessments = singleDomainAssessments.filter((assessment) =>
+    isTestOrLegacyAssessment(assessment),
   );
 
   return (
@@ -110,9 +127,9 @@ export default async function SingleDomainBuilderEntryPage() {
         </SecondaryText>
       </SurfaceCard>
 
-      {singleDomainAssessments.length > 0 ? (
+      {activeRankedPatternAssessments.length > 0 ? (
         <section className="space-y-4">
-          {singleDomainAssessments.map((assessment) => (
+          {activeRankedPatternAssessments.map((assessment) => (
             <WorkflowAssessmentCard
               assessment={assessment}
               key={assessment.assessmentId}
@@ -130,6 +147,25 @@ export default async function SingleDomainBuilderEntryPage() {
           }
         />
       )}
+
+      {legacySingleDomainAssessments.length > 0 ? (
+        <section className="space-y-4">
+          <div className="space-y-2">
+            <p className="sonartra-page-eyebrow">Legacy / test records</p>
+            <SecondaryText>
+              These records remain visible for maintenance, but they are not the active package
+              workflow for new ranked-pattern assessment operations.
+            </SecondaryText>
+          </div>
+          {legacySingleDomainAssessments.map((assessment) => (
+            <WorkflowAssessmentCard
+              assessment={assessment}
+              key={assessment.assessmentId}
+              tone="legacy"
+            />
+          ))}
+        </section>
+      ) : null}
 
       <SurfaceCard muted className="space-y-3 p-5">
         <CardTitle className="text-lg">Legacy single-domain shell</CardTitle>

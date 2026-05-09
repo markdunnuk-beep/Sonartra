@@ -7,58 +7,17 @@ import {
   auditRankedPatternPublishReadinessForAdmin,
   auditRankedPatternWorkbookForAdmin,
   dryRunRankedPatternImportForAdmin,
-  type RankedPatternAdminImportWorkflowResult,
 } from '@/lib/server/ranked-pattern-admin-import-workflow';
 import {
   createRankedPatternDraftVersion,
   publishRankedPatternAssessmentVersion,
-  type RankedPatternDraftVersionResult,
-  type RankedPatternPublishVersionResult,
 } from '@/lib/server/ranked-pattern-admin-versioning';
-
-export type RankedPatternAdminImportActionState = {
-  readonly formError: string | null;
-  readonly result: RankedPatternAdminImportWorkflowResult | null;
-};
-
-export type RankedPatternPublishAuditActionState = {
-  readonly formError: string | null;
-  readonly result: Awaited<ReturnType<typeof auditRankedPatternPublishReadinessForAdmin>> | null;
-};
-
-export type RankedPatternDraftVersionActionState = {
-  readonly formError: string | null;
-  readonly formSuccess: string | null;
-  readonly result: RankedPatternDraftVersionResult | null;
-};
-
-export type RankedPatternPublishVersionActionState = {
-  readonly formError: string | null;
-  readonly formSuccess: string | null;
-  readonly result: RankedPatternPublishVersionResult | null;
-};
-
-export const initialRankedPatternAdminImportActionState: RankedPatternAdminImportActionState = {
-  formError: null,
-  result: null,
-};
-
-export const initialRankedPatternPublishAuditActionState: RankedPatternPublishAuditActionState = {
-  formError: null,
-  result: null,
-};
-
-export const initialRankedPatternDraftVersionActionState: RankedPatternDraftVersionActionState = {
-  formError: null,
-  formSuccess: null,
-  result: null,
-};
-
-export const initialRankedPatternPublishVersionActionState: RankedPatternPublishVersionActionState = {
-  formError: null,
-  formSuccess: null,
-  result: null,
-};
+import type {
+  RankedPatternAdminImportActionState,
+  RankedPatternDraftVersionActionState,
+  RankedPatternPublishAuditActionState,
+  RankedPatternPublishVersionActionState,
+} from '@/lib/server/ranked-pattern-admin-import-workflow-action-state';
 
 type RankedPatternAdminImportActionContext = {
   readonly targetAssessmentId?: string;
@@ -108,16 +67,26 @@ function actionInputFromFormData(
 }
 
 function missingSourcePathState(): RankedPatternAdminImportActionState {
+  const message =
+    'Provide a ranked-pattern workbook file path. Upload storage is intentionally deferred until the admin file convention is settled.';
   return {
-    formError:
-      'Provide a ranked-pattern workbook file path. Upload storage is intentionally deferred until the admin file convention is settled.',
+    ok: false,
+    message,
+    formError: message,
+    fieldErrors: {
+      sourcePath: 'Workbook file path or package reference is required.',
+    },
     result: null,
   };
 }
 
 function safeImportErrorState(): RankedPatternAdminImportActionState {
+  const message = 'The ranked-pattern package workflow could not run. Check the file path and try again.';
   return {
-    formError: 'The ranked-pattern package workflow could not run. Check the file path and try again.',
+    ok: false,
+    message,
+    formError: message,
+    fieldErrors: {},
     result: null,
   };
 }
@@ -190,7 +159,10 @@ export async function auditRankedPatternPackageActionWithDependencies(
 
   try {
     return {
+      ok: true,
+      message: 'Package audit completed.',
       formError: null,
+      fieldErrors: {},
       result: await dependencies.auditWorkbook(input),
     };
   } catch {
@@ -210,7 +182,10 @@ export async function dryRunRankedPatternImportActionWithDependencies(
 
   try {
     return {
+      ok: true,
+      message: 'Dry-run import completed.',
       formError: null,
+      fieldErrors: {},
       result: await dependencies.dryRunImport(input),
     };
   } catch {
@@ -230,7 +205,10 @@ export async function applyRankedPatternImportActionWithDependencies(
 
   try {
     return {
+      ok: true,
+      message: 'Import apply completed.',
       formError: null,
+      fieldErrors: {},
       result: await dependencies.applyImport(input),
     };
   } catch {
@@ -243,22 +221,35 @@ export async function auditRankedPatternPublishReadinessActionWithDependencies(
   dependencies: RankedPatternAdminImportActionDependencies,
 ): Promise<RankedPatternPublishAuditActionState> {
   if (!context.targetAssessmentVersionId.trim()) {
+    const message = 'No target draft version is available for publish audit. Create or open a draft first.';
     return {
-      formError: 'No target assessment version was supplied for publish audit.',
+      ok: false,
+      message,
+      formError: message,
+      fieldErrors: {
+        targetAssessmentVersionId: 'Publish audit requires an editable draft version.',
+      },
       result: null,
     };
   }
 
   try {
     return {
+      ok: true,
+      message: 'Publish readiness audit completed.',
       formError: null,
+      fieldErrors: {},
       result: await dependencies.auditPublishReadiness({
         targetAssessmentVersionId: context.targetAssessmentVersionId,
       }),
     };
   } catch {
+    const message = 'Publish readiness audit could not run. Try again after refreshing the page.';
     return {
-      formError: 'Publish readiness audit could not run. Try again after refreshing the page.',
+      ok: false,
+      message,
+      formError: message,
+      fieldErrors: {},
       result: null,
     };
   }
@@ -269,9 +260,15 @@ export async function createRankedPatternDraftVersionActionWithDependencies(
   dependencies: RankedPatternAdminImportActionDependencies,
 ): Promise<RankedPatternDraftVersionActionState> {
   if (!context.assessmentKey.trim()) {
+    const message = 'No assessment was supplied for draft creation.';
     return {
-      formError: 'No assessment was supplied for draft creation.',
+      ok: false,
+      message,
+      formError: message,
       formSuccess: null,
+      fieldErrors: {
+        assessmentKey: 'Assessment key is required.',
+      },
       result: null,
     };
   }
@@ -285,21 +282,32 @@ export async function createRankedPatternDraftVersionActionWithDependencies(
     if (result.status === 'created') {
       revalidateAssessmentAdminPaths(context.assessmentKey, dependencies);
       return {
+        ok: true,
+        message: `Draft ${result.draftVersionTag} was created for ranked-pattern import.`,
         formError: null,
         formSuccess: `Draft ${result.draftVersionTag} was created for ranked-pattern import.`,
+        fieldErrors: {},
         result,
       };
     }
 
+    const message = result.diagnostics[0]?.message ?? 'A ranked-pattern draft version could not be created.';
     return {
-      formError: result.diagnostics[0]?.message ?? 'A ranked-pattern draft version could not be created.',
+      ok: false,
+      message,
+      formError: message,
       formSuccess: null,
+      fieldErrors: {},
       result,
     };
   } catch {
+    const message = 'A ranked-pattern draft version could not be created. Try again after refreshing the page.';
     return {
-      formError: 'A ranked-pattern draft version could not be created. Try again after refreshing the page.',
+      ok: false,
+      message,
+      formError: message,
       formSuccess: null,
+      fieldErrors: {},
       result: null,
     };
   }
@@ -311,9 +319,15 @@ export async function publishRankedPatternVersionActionWithDependencies(
 ): Promise<RankedPatternPublishVersionActionState> {
   const targetAssessmentVersionId = context.targetAssessmentVersionId?.trim() ?? '';
   if (!targetAssessmentVersionId) {
+    const message = 'No target draft version was supplied for publishing.';
     return {
-      formError: 'No target draft version was supplied for publishing.',
+      ok: false,
+      message,
+      formError: message,
       formSuccess: null,
+      fieldErrors: {
+        targetAssessmentVersionId: 'Publishing requires an audited draft version.',
+      },
       result: null,
     };
   }
@@ -325,23 +339,34 @@ export async function publishRankedPatternVersionActionWithDependencies(
     if (result.status === 'published') {
       revalidateAssessmentAdminPaths(context.assessmentKey, dependencies);
       return {
+        ok: true,
+        message: `Draft ${result.publishedVersionTag} is now the active ranked-pattern version for new attempts.`,
         formError: null,
         formSuccess: `Draft ${result.publishedVersionTag} is now the active ranked-pattern version for new attempts.`,
+        fieldErrors: {},
         result,
       };
     }
 
+    const message =
+      result.blockingDiagnostics[0]?.message ??
+      'Publish audit found blocking findings. Resolve them before publishing.';
     return {
-      formError:
-        result.blockingDiagnostics[0]?.message ??
-        'Publish audit found blocking findings. Resolve them before publishing.',
+      ok: false,
+      message,
+      formError: message,
       formSuccess: null,
+      fieldErrors: {},
       result,
     };
   } catch {
+    const message = 'The ranked-pattern draft could not be published. Try again after refreshing the page.';
     return {
-      formError: 'The ranked-pattern draft could not be published. Try again after refreshing the page.',
+      ok: false,
+      message,
+      formError: message,
       formSuccess: null,
+      fieldErrors: {},
       result: null,
     };
   }

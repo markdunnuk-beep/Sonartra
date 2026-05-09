@@ -13,16 +13,18 @@ import {
   auditRankedPatternPublishReadinessAction,
   createRankedPatternDraftVersionAction,
   dryRunRankedPatternImportAction,
+  publishRankedPatternVersionAction,
+} from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
+import {
   initialRankedPatternAdminImportActionState,
   initialRankedPatternDraftVersionActionState,
   initialRankedPatternPublishAuditActionState,
   initialRankedPatternPublishVersionActionState,
-  publishRankedPatternVersionAction,
   type RankedPatternAdminImportActionState,
   type RankedPatternDraftVersionActionState,
   type RankedPatternPublishAuditActionState,
   type RankedPatternPublishVersionActionState,
-} from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
+} from '@/lib/server/ranked-pattern-admin-import-workflow-action-state';
 import type {
   RankedPatternAdminImportWorkflowResult,
   RankedPatternAdminWorkflowDiagnostic,
@@ -313,7 +315,14 @@ function PublishAuditResultBlock({
   state: RankedPatternPublishAuditActionState;
 }>) {
   if (state.formError) {
-    return <AdminFeedbackNotice tone="danger">{state.formError}</AdminFeedbackNotice>;
+    return (
+      <AdminFeedbackNotice tone="danger" title="Publish audit blocked">
+        <span>{state.formError}</span>
+        {Object.values(state.fieldErrors).length > 0 ? (
+          <span className="mt-3 block">{Object.values(state.fieldErrors).join(' ')}</span>
+        ) : null}
+      </AdminFeedbackNotice>
+    );
   }
 
   if (!state.result) {
@@ -359,7 +368,20 @@ function DraftVersionActionResultBlock({
   state: RankedPatternDraftVersionActionState;
 }>) {
   if (state.formError) {
-    return <AdminFeedbackNotice tone="danger">{state.formError}</AdminFeedbackNotice>;
+    const diagnostics = state.result?.diagnostics ?? [];
+    return (
+      <AdminFeedbackNotice tone="danger" title="Draft version not created">
+        <span>{state.formError}</span>
+        {Object.values(state.fieldErrors).length > 0 ? (
+          <span className="mt-3 block">{Object.values(state.fieldErrors).join(' ')}</span>
+        ) : null}
+        {diagnostics.length > 0 ? (
+          <span className="mt-3 block">
+            {diagnostics.slice(0, 4).map((diagnostic) => diagnostic.message).join(' ')}
+          </span>
+        ) : null}
+      </AdminFeedbackNotice>
+    );
   }
 
   if (state.formSuccess) {
@@ -401,7 +423,14 @@ function WorkflowResultBlock({
   state: RankedPatternAdminImportActionState;
 }>) {
   if (state.formError) {
-    return <AdminFeedbackNotice tone="danger">{state.formError}</AdminFeedbackNotice>;
+    return (
+      <AdminFeedbackNotice tone="danger" title="Workflow action blocked">
+        <span>{state.formError}</span>
+        {Object.values(state.fieldErrors).length > 0 ? (
+          <span className="mt-3 block">{Object.values(state.fieldErrors).join(' ')}</span>
+        ) : null}
+      </AdminFeedbackNotice>
+    );
   }
 
   const result: RankedPatternAdminImportWorkflowResult | null = state.result;
@@ -501,6 +530,9 @@ export function RankedPatternImportPanel({
   );
   const hasDraft = latestDraftVersion !== null;
   const canPublishFromAudit = publishAuditState.result?.canPublish === true;
+  const nextDraftLabel = latestDraftVersion
+    ? latestDraftVersion.versionTag
+    : 'the next version after the latest published version';
 
   return (
     <SurfaceCard className="space-y-6 p-5 lg:p-6" data-ranked-pattern-import-panel="true">
@@ -538,6 +570,12 @@ export function RankedPatternImportPanel({
           </div>
         </div>
       </div>
+
+      <AdminFeedbackNotice tone="neutral" title="Draft version requirements">
+        {latestDraftVersion
+          ? `Draft ${latestDraftVersion.versionTag} already exists for ${assessmentKey}. Continue with that draft; this workflow will not create a second concurrent draft.`
+          : `Create draft version will create ${nextDraftLabel} for ${assessmentKey} from the latest published version. If no published source exists, the action returns an inline blocking message.`}
+      </AdminFeedbackNotice>
 
       <AdminFeedbackNotice tone="neutral" title="Workflow safety">
         Audit and dry-run do not write to the database. Apply import writes package data but does
@@ -635,7 +673,7 @@ export function RankedPatternImportPanel({
           />
           {!hasDraft ? (
             <p className="text-xs leading-5 text-white/46">
-              Create a draft version before applying package data or running publish audit.
+              Create a draft version before applying package data, running publish audit, or publishing.
             </p>
           ) : !canPublishFromAudit ? (
             <p className="text-xs leading-5 text-white/46">

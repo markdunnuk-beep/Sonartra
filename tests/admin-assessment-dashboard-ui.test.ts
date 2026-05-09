@@ -14,11 +14,20 @@ function readSource(): string {
   return readFileSync(dashboardPath, 'utf8');
 }
 
-test('assessment index uses a tighter top hero and simpler card CTA hierarchy', () => {
+test('assessment index presents ranked-pattern package operations as the active path', () => {
   const source = readSource();
 
-  assert.match(source, /Manage drafts, published versions, and what needs attention next\./);
-  assert.match(source, /Open ranked-pattern workflow/);
+  assert.match(source, /Assessment packages/);
+  assert.match(source, /Create ranked-pattern assessment/);
+  assert.match(source, /Open package workflow/);
+  assert.match(source, /Active ranked-pattern packages/);
+  assert.match(source, /Draft\/import work/);
+  assert.match(source, /Legacy builders/);
+  assert.match(source, /Archived builder paths/);
+  assert.match(source, /isTestOrLegacyAssessment/);
+  assert.match(source, /haystack\.includes\('test'\)/);
+  assert.match(source, /Legacy \/ archive/);
+  assert.match(source, /Old test records and builder-created assessments stay secondary\./);
   assert.match(source, /Open legacy builder/);
   assert.match(source, /Create draft version/);
   assert.match(source, /const rankedPatternWorkflowHref = `\/admin\/assessments\/ranked-pattern\/\$\{assessment\.assessmentKey\}\/workflow`;/);
@@ -26,7 +35,6 @@ test('assessment index uses a tighter top hero and simpler card CTA hierarchy', 
   assert.match(source, /Open import panel/);
   assert.match(source, /Review and publish/);
   assert.match(source, /Review draft/);
-  assert.match(source, /Start the active package workflow or choose a clearly labelled legacy builder\./);
   assert.match(source, /Current live version/);
   assert.match(source, /No draft in progress/);
   assert.doesNotMatch(source, /Starts a new assessment with draft version/);

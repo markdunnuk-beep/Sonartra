@@ -91,6 +91,16 @@ function formatAssessmentStatusSummary(assessment: AdminAssessmentDashboardItem)
   return 'Versions exist, but none are currently live or in draft.';
 }
 
+function isTestOrLegacyAssessment(assessment: AdminAssessmentDashboardItem): boolean {
+  const haystack = `${assessment.assessmentKey} ${assessment.title}`.toLowerCase();
+  return (
+    assessment.mode !== 'single_domain' ||
+    !assessment.isActive ||
+    haystack.includes('test') ||
+    haystack.includes('legacy')
+  );
+}
+
 function SummaryCard({
   label,
   value,
@@ -111,8 +121,10 @@ function SummaryCard({
 
 function AssessmentCard({
   assessment,
+  tone = 'active',
 }: {
   assessment: AdminAssessmentDashboardItem;
+  tone?: 'active' | 'draft' | 'legacy';
 }) {
   const isSingleDomain = assessment.mode === 'single_domain';
   const rankedPatternWorkflowHref = `/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`;
@@ -131,11 +143,18 @@ function AssessmentCard({
     : assessment.latestDraftReadiness === 'ready'
       ? 'Review and publish'
       : 'Review draft';
-  const builderLabel = isSingleDomain ? 'Open ranked-pattern workflow' : 'Open legacy builder';
+  const builderLabel =
+    tone === 'legacy'
+      ? isSingleDomain
+        ? 'Open archived builder path'
+        : 'Open legacy builder'
+      : isSingleDomain
+        ? 'Open workflow'
+        : 'Open legacy builder';
   const createVersionLabel = isSingleDomain ? 'Create ranked-pattern draft' : 'Create draft version';
 
   return (
-    <SurfaceCard className="p-5 lg:p-6">
+    <SurfaceCard className={cn('p-5 lg:p-6', tone === 'legacy' ? 'border-white/8 bg-white/[0.025]' : '')}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2.5">
@@ -150,6 +169,16 @@ function AssessmentCard({
               <LabelPill className={getDraftReadinessPillClass(assessment.latestDraftReadiness)}>
                 {formatDraftReadiness(assessment.latestDraftReadiness)}
               </LabelPill>
+              {tone === 'active' ? (
+                <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
+                  Active package workflow
+                </LabelPill>
+              ) : null}
+              {tone === 'legacy' ? (
+                <LabelPill className="border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]">
+                  Legacy / archive
+                </LabelPill>
+              ) : null}
               {!assessment.isActive ? (
                 <LabelPill className="border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]">
                   Archived
@@ -161,23 +190,27 @@ function AssessmentCard({
               {assessment.title}
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-white/62">
-              {formatAssessmentStatusSummary(assessment)}
+              {tone === 'legacy'
+                ? `${formatAssessmentStatusSummary(assessment)} This record is secondary to the ranked-pattern package workflow.`
+                : formatAssessmentStatusSummary(assessment)}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <ButtonLink href={primaryHref} variant="primary">
+            <ButtonLink href={primaryHref} variant={tone === 'legacy' ? 'secondary' : 'primary'}>
               {builderLabel}
             </ButtonLink>
-            <Link
-              className={cn(
-                'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/72 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
-              )}
-              href={createVersionHref}
-            >
-              {createVersionLabel}
-            </Link>
-            {reviewHref ? (
+            {tone !== 'legacy' ? (
+              <Link
+                className={cn(
+                  'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/72 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
+                )}
+                href={createVersionHref}
+              >
+                {createVersionLabel}
+              </Link>
+            ) : null}
+            {reviewHref && tone !== 'legacy' ? (
               <Link
                 className={cn(
                   'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/72 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
@@ -217,22 +250,33 @@ export function AdminAssessmentsDashboard({
   assessments: readonly AdminAssessmentDashboardItem[];
   showArchived: boolean;
 }) {
+  const activeRankedPatternAssessments = assessments.filter(
+    (assessment) => !isTestOrLegacyAssessment(assessment),
+  );
+  const draftImportAssessments = activeRankedPatternAssessments.filter(
+    (assessment) => assessment.latestDraftVersion !== null || assessment.latestDraftReadiness !== 'no_draft',
+  );
+  const legacyAssessments = assessments.filter((assessment) => isTestOrLegacyAssessment(assessment));
+
   return (
     <PageFrame>
       <SurfaceCard accent className="overflow-hidden p-5 lg:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-2">
             <h1 className="max-w-3xl text-[2rem] font-semibold tracking-[-0.03em] text-white lg:text-[2.35rem]">
-              Assessments
+              Assessment packages
             </h1>
             <p className="max-w-2xl text-sm leading-7 text-white/66">
-              Manage drafts, published versions, and what needs attention next.
+              Operate ranked-pattern assessment packages, draft imports, publish audits, and explicit release decisions from one active workflow.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href="/admin/assessments/new" variant="primary">
-              Open ranked-pattern workflow
+              Create ranked-pattern assessment
+            </ButtonLink>
+            <ButtonLink href="/admin/assessments/single-domain">
+              Open package workflow
             </ButtonLink>
             <Link
               className={cn(
@@ -243,10 +287,10 @@ export function AdminAssessmentsDashboard({
               )}
               href={showArchived ? '/admin/assessments' : '/admin/assessments?showArchived=1'}
             >
-              {showArchived ? 'Hide archived' : `Show archived${summary.archivedCount > 0 ? ` (${summary.archivedCount})` : ''}`}
+              {showArchived ? 'Hide archived / legacy builders' : `Show archived / legacy builders${summary.archivedCount > 0 ? ` (${summary.archivedCount})` : ''}`}
             </Link>
             <p className="text-sm text-white/52">
-              Start the active package workflow or choose a clearly labelled legacy builder.
+              Old test records and builder-created assessments stay secondary.
             </p>
           </div>
         </div>
@@ -295,25 +339,69 @@ export function AdminAssessmentsDashboard({
 
       <section className="sonartra-section">
         <SectionHeader
-          eyebrow="Assessments"
-          title="Build"
-          description="Open an assessment, review readiness, or create the next draft."
+          eyebrow="Active ranked-pattern packages"
+          title="Package workflow"
+          description="Open the dedicated ranked-pattern workflow for draft creation, import audit, dry-run, apply, publish audit, and explicit publish."
         />
 
-        {assessments.length === 0 ? (
+        {activeRankedPatternAssessments.length === 0 ? (
           <EmptyState
             title={showArchived ? 'No assessments match this filter' : 'No assessments yet'}
-            description={showArchived ? 'No active or archived assessments are available.' : 'Create your first assessment.'}
+            description={showArchived ? 'No active ranked-pattern packages are available.' : 'Create or restore a ranked-pattern package before importing.'}
             action={
               <ButtonLink href="/admin/assessments/new" variant="primary">
-                Open ranked-pattern workflow
+                Create ranked-pattern assessment
               </ButtonLink>
             }
           />
         ) : (
           <div className="space-y-4">
-            {assessments.map((assessment) => (
+            {activeRankedPatternAssessments.map((assessment) => (
               <AssessmentCard assessment={assessment} key={assessment.assessmentId} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="sonartra-section">
+        <SectionHeader
+          eyebrow="Draft/import work"
+          title="Drafts in progress"
+          description="Packages with draft or import work that needs audit, apply, or publish-readiness review."
+        />
+
+        {draftImportAssessments.length === 0 ? (
+          <SurfaceCard muted className="p-5">
+            <p className="text-sm leading-7 text-white/58">
+              No ranked-pattern draft/import work is currently in progress.
+            </p>
+          </SurfaceCard>
+        ) : (
+          <div className="space-y-4">
+            {draftImportAssessments.map((assessment) => (
+              <AssessmentCard assessment={assessment} key={assessment.assessmentId} tone="draft" />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="sonartra-section">
+        <SectionHeader
+          eyebrow="Legacy builders"
+          title="Archived builder paths"
+          description="Historical single-domain, multi-domain, and test records are available for maintenance only. They are not the primary package workflow."
+        />
+
+        {legacyAssessments.length === 0 ? (
+          <SurfaceCard muted className="p-5">
+            <p className="text-sm leading-7 text-white/58">
+              No legacy or test assessment records are visible in this filter.
+            </p>
+          </SurfaceCard>
+        ) : (
+          <div className="space-y-4">
+            {legacyAssessments.map((assessment) => (
+              <AssessmentCard assessment={assessment} key={assessment.assessmentId} tone="legacy" />
             ))}
           </div>
         )}
