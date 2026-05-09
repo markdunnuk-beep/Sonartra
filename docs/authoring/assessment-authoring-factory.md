@@ -161,11 +161,32 @@ cmd /c npx tsx scripts/authoring/export-draft-result-fixture.ts --input content/
 
 Then run preview tests and browser QA. Do not edit `/draft-result` to hide weak source language.
 
+## Package Compiler Gate
+
+After the authoring config, runtime base rows, and generated PSV files are ready, compile a complete ranked-pattern import workbook with the authoring package compiler.
+
+Dry-run first:
+
+```powershell
+cmd /c npm run authoring:compile-package:dry-run -- --assessment-key {{assessment_key}} --domain-key {{domain_key}} --authoring-dir content/authoring/{{assessment_key}} --generated-dir content/authoring/generated --template-workbook content/assessment-packages/_template/sonartra_reader_first_import_schema_TEMPLATE.xlsx --output-workbook tmp/compiled-packages/{{assessment_key}}/sonartra_reader_first_import_schema_{{ASSESSMENT_KEY}}_COMPILED.xlsx
+```
+
+Write mode:
+
+```powershell
+cmd /c npm run authoring:compile-package -- --assessment-key {{assessment_key}} --domain-key {{domain_key}} --authoring-dir content/authoring/{{assessment_key}} --generated-dir content/authoring/generated --template-workbook content/assessment-packages/_template/sonartra_reader_first_import_schema_TEMPLATE.xlsx --output-workbook tmp/compiled-packages/{{assessment_key}}/sonartra_reader_first_import_schema_{{ASSESSMENT_KEY}}_COMPILED.xlsx --write --overwrite
+```
+
+The compiler creates sheets `00_Metadata` through `18_Lookups`, preserves workbook headers, and runs package audit after writing. It validates four scored signals, twenty-four ranked patterns, score-shape coverage, signal-role coverage, duplicate lookup keys, blank required fields, pattern/rank consistency, and import-summary row counts.
+
+Use `tmp/compiled-packages/...` for proof runs. Write under `content/assessment-packages/<assessment-key>/...` only when intentionally adding a package artifact to the repository. The compiler does not silently normalize `assessment_key`, `domain_key`, or signal keys; fix mismatches explicitly in source files.
+
 ## Commit Gate
 
 Before commit:
 
 - run section validators
+- run the package compiler dry-run/write/audit flow when creating or changing a package workbook
 - run focused authoring tests
 - run lint
 - run build
