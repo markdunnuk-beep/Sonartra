@@ -26,6 +26,7 @@ Do not add UI-side recomputation, workbook runtime reads, alternate payload shap
 - `docs/assessment-engine/scoring-and-shape-contract.md`
 - `docs/assessment-engine/publish-audit-contract.md`
 - `docs/assessment-engine/result-payload-contract.md`
+- `docs/assessment-engine/ranked-pattern-result-language-authoring.md`
 - `docs/assessment-engine/ranked-pattern-workbook-upload-storage.md`
 - `content/assessment-packages/_template/sonartra_reader_first_import_schema_TEMPLATE.xlsx`
 - `content/assessment-packages/flow-state/sonartra_reader_first_import_schema_FLOW_STATE_EXAMPLE.xlsx`
@@ -72,6 +73,8 @@ Compiler validation checks:
 - import summary row counts match the generated workbook rows
 
 The compiler does not silently normalize `assessment_key`, `domain_key`, or signal keys. If a key is wrong, fix the source authoring config or generated rows explicitly.
+
+For `06_Orientation` copy, follow `docs/assessment-engine/ranked-pattern-result-language-authoring.md`. The section should use `{Rank 1} first, {Rank 2} next` titles, two-sentence top-two orientation summaries, score-shape-specific interpretation, and rank phrases that frame each signal as part of the reader's leadership style.
 
 ## Package Workbook Workflow
 

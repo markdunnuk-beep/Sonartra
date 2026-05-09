@@ -38,6 +38,7 @@ Before generating any section, read:
 - `docs/authoring/plain-behavioural-intelligence-language-standard.md`
 - `docs/authoring/reader-first-section-purpose-guide.md`
 - `docs/authoring/reader-first-authoring-runbook.md`
+- `docs/assessment-engine/ranked-pattern-result-language-authoring.md`
 - the assessment context seed
 - `content/authoring/reader-first-schema-manifest.ts`
 - the already approved generated sections for the same assessment
@@ -96,6 +97,8 @@ Generate and review sections in this order:
 10. `14_Closing_Integration`
 
 Do not generate later sections without reading earlier approved sections. Later sections should add a new layer rather than repeat earlier language.
+
+For `06_Orientation`, use the ranked-pattern result-language authoring rules. Orientation titles name the first two ranked signals, orientation summaries explain how rank 1 and rank 2 combine, score-shape summaries explain the distribution, and rank phrases connect each signal to the reader's style.
 
 ## Batch Generation Model
 
