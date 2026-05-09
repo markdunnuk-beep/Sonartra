@@ -11,6 +11,10 @@ import { getDbPool } from '@/lib/server/db';
 import { requireAdminUser } from '@/lib/server/admin-access';
 import type { RequestUserContext } from '@/lib/server/request-user';
 import { createDraftVersionFromLatestPublishedAssessmentRecords } from '@/lib/server/admin-assessment-draft-version-service';
+import {
+  isRankedPatternPackageCompatibleAssessment,
+  looksLikeLegacyOrTestAssessmentKey,
+} from '@/lib/ranked-pattern-admin-compatibility';
 
 type QueryResult<T> = {
   readonly rows: readonly T[];
@@ -40,6 +44,22 @@ type RankedPatternAssessmentVersionRow = {
   readonly mode: string | null;
   readonly result_model_key: string | null;
   readonly published_at: string | null;
+};
+
+type RankedPatternAssessmentShellRow = {
+  readonly id: string;
+  readonly assessment_key: string;
+  readonly title: string;
+  readonly mode: string | null;
+  readonly is_active: boolean;
+};
+
+type RankedPatternAssessmentShellVersionRow = {
+  readonly id: string;
+  readonly version: string;
+  readonly lifecycle_status: RankedPatternVersionLifecycleStatus;
+  readonly mode: string | null;
+  readonly result_model_key: string | null;
 };
 
 export type RankedPatternVersionSummary = {
@@ -72,6 +92,17 @@ export type RankedPatternDraftVersionResult =
       readonly mode: typeof rankedPatternAssessmentMode;
       readonly resultModelKey: typeof rankedPatternResultModelKey;
       readonly copied: Readonly<Record<string, number>>;
+      readonly diagnostics: readonly RankedPatternVersionDiagnostic[];
+    }
+  | {
+      readonly status: 'resolved';
+      readonly assessmentId: string;
+      readonly assessmentKey: string;
+      readonly draftVersionId: string;
+      readonly draftVersionTag: string;
+      readonly lifecycleStatus: 'DRAFT';
+      readonly mode: typeof rankedPatternAssessmentMode;
+      readonly resultModelKey: typeof rankedPatternResultModelKey;
       readonly diagnostics: readonly RankedPatternVersionDiagnostic[];
     }
   | {
@@ -154,6 +185,214 @@ function mapVersionSummary(row: RankedPatternAssessmentVersionRow): RankedPatter
     resultModelKey: row.result_model_key,
     publishedAt: row.published_at,
   });
+}
+
+function metadataValue(value: string | null | undefined): string {
+  return value?.trim() ?? '';
+}
+
+function validatePackageMetadataForDraft(
+  metadata: NormalisedMetadataRecord,
+): readonly RankedPatternVersionDiagnostic[] {
+  const diagnostics: RankedPatternVersionDiagnostic[] = [];
+
+  if (!metadataValue(metadata.assessmentKey)) {
+    diagnostics.push(diagnostic({
+      severity: 'error',
+      code: 'PACKAGE_ASSESSMENT_KEY_REQUIRED',
+      message: 'Package metadata must include assessment_key before a ranked-pattern draft can be created.',
+    }));
+  }
+
+  if (!metadataValue(metadata.version)) {
+    diagnostics.push(diagnostic({
+      severity: 'error',
+      code: 'PACKAGE_VERSION_REQUIRED',
+      message: 'Package metadata must include version before a ranked-pattern draft can be created.',
+    }));
+  }
+
+  if (!metadataValue(metadata.assessmentTitle)) {
+    diagnostics.push(diagnostic({
+      severity: 'error',
+      code: 'PACKAGE_TITLE_REQUIRED',
+      message: 'Package metadata must include assessment title before a ranked-pattern draft can be created.',
+    }));
+  }
+
+  if (metadata.mode && metadata.mode !== rankedPatternAssessmentMode) {
+    diagnostics.push(diagnostic({
+      severity: 'error',
+      code: 'PACKAGE_MODE_NOT_RANKED_PATTERN',
+      message: 'Package metadata must declare single-domain mode for ranked-pattern import.',
+    }));
+  }
+
+  if (metadata.resultModelKey && metadata.resultModelKey !== rankedPatternResultModelKey) {
+    diagnostics.push(diagnostic({
+      severity: 'error',
+      code: 'PACKAGE_RESULT_MODEL_NOT_RANKED_PATTERN',
+      message: 'Package metadata must declare ranked_pattern as the result model.',
+    }));
+  }
+
+  if (metadata.lifecycleStatus && metadata.lifecycleStatus.toUpperCase() !== 'DRAFT') {
+    diagnostics.push(diagnostic({
+      severity: 'error',
+      code: 'PACKAGE_LIFECYCLE_NOT_DRAFT',
+      message: 'Package metadata must describe a draft version; import apply and publish remain separate actions.',
+    }));
+  }
+
+  return Object.freeze(diagnostics);
+}
+
+function packageCompatibilityDiagnostics(params: {
+  readonly assessment: RankedPatternAssessmentShellRow;
+  readonly versions: readonly RankedPatternAssessmentShellVersionRow[];
+}): readonly RankedPatternVersionDiagnostic[] {
+  const diagnostics: RankedPatternVersionDiagnostic[] = [];
+
+  if (!isRankedPatternPackageCompatibleAssessment({
+    assessmentKey: params.assessment.assessment_key,
+    title: params.assessment.title,
+    mode: params.assessment.mode,
+    isActive: params.assessment.is_active,
+  })) {
+    diagnostics.push(diagnostic({
+      severity: 'error',
+      code: looksLikeLegacyOrTestAssessmentKey(params.assessment.assessment_key)
+        ? 'PACKAGE_ASSESSMENT_KEY_LEGACY_RESERVED'
+        : 'PACKAGE_ASSESSMENT_KEY_CONFLICT',
+      message:
+        'An assessment record already exists for this key, but it is not compatible with ranked-pattern package import. Archive the legacy record or use a compatible ranked-pattern package key.',
+    }));
+  }
+
+  if (
+    params.versions.some(
+      (version) => version.mode !== rankedPatternAssessmentMode || version.result_model_key !== rankedPatternResultModelKey,
+    )
+  ) {
+    diagnostics.push(diagnostic({
+      severity: 'error',
+      code: 'PACKAGE_ASSESSMENT_VERSION_CONFLICT',
+      message:
+        'Existing versions for this assessment key are not ranked-pattern package versions. The package will not be attached silently.',
+    }));
+  }
+
+  return Object.freeze(diagnostics);
+}
+
+async function loadAssessmentShellByKey(
+  db: Queryable,
+  assessmentKey: string,
+): Promise<RankedPatternAssessmentShellRow | null> {
+  const result = await db.query<RankedPatternAssessmentShellRow>(
+    `
+    SELECT
+      id,
+      assessment_key,
+      title,
+      mode,
+      is_active
+    FROM assessments
+    WHERE assessment_key = $1
+    `,
+    [assessmentKey],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function loadAssessmentShellVersions(
+  db: Queryable,
+  assessmentId: string,
+): Promise<readonly RankedPatternAssessmentShellVersionRow[]> {
+  const result = await db.query<RankedPatternAssessmentShellVersionRow>(
+    `
+    SELECT
+      id,
+      version,
+      lifecycle_status,
+      mode,
+      result_model_key
+    FROM assessment_versions
+    WHERE assessment_id = $1
+    ORDER BY updated_at DESC, created_at DESC
+    `,
+    [assessmentId],
+  );
+
+  return Object.freeze([...result.rows]);
+}
+
+async function insertRankedPatternAssessmentShell(
+  db: Queryable,
+  metadata: NormalisedMetadataRecord,
+): Promise<string> {
+  const result = await db.query<{ readonly id: string }>(
+    `
+    INSERT INTO assessments (
+      assessment_key,
+      mode,
+      title,
+      description,
+      is_active
+    )
+    VALUES ($1, $2, $3, $4, TRUE)
+    RETURNING id
+    `,
+    [
+      metadata.assessmentKey,
+      rankedPatternAssessmentMode,
+      metadata.assessmentTitle,
+      metadata.assessmentDescription,
+    ],
+  );
+
+  const id = result.rows[0]?.id;
+  if (!id) {
+    throw new Error('RANKED_PATTERN_PACKAGE_ASSESSMENT_CREATE_FAILED');
+  }
+
+  return id;
+}
+
+async function insertRankedPatternDraftVersionShell(params: {
+  readonly db: Queryable;
+  readonly assessmentId: string;
+  readonly versionTag: string;
+}): Promise<string> {
+  const result = await params.db.query<{ readonly id: string }>(
+    `
+    INSERT INTO assessment_versions (
+      assessment_id,
+      version,
+      lifecycle_status,
+      mode,
+      result_model_key,
+      title_override,
+      description_override
+    )
+    VALUES ($1, $2, 'DRAFT', $3, $4, NULL, NULL)
+    RETURNING id
+    `,
+    [
+      params.assessmentId,
+      params.versionTag,
+      rankedPatternAssessmentMode,
+      rankedPatternResultModelKey,
+    ],
+  );
+
+  const id = result.rows[0]?.id;
+  if (!id) {
+    throw new Error('RANKED_PATTERN_PACKAGE_DRAFT_CREATE_FAILED');
+  }
+
+  return id;
 }
 
 export async function loadRankedPatternVersionSummary(
@@ -385,6 +624,152 @@ export async function createRankedPatternDraftVersion(
       mode: rankedPatternAssessmentMode,
       resultModelKey: rankedPatternResultModelKey,
       copied: Object.freeze({ ...created.copied }),
+      diagnostics: Object.freeze([]),
+    });
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+    throw error;
+  } finally {
+    client.release?.();
+  }
+}
+
+export async function createOrResolveRankedPatternPackageDraftVersion(
+  input: { readonly metadata: NormalisedMetadataRecord },
+  dependencies: Partial<RankedPatternAdminVersioningDependencies> = {},
+): Promise<RankedPatternDraftVersionResult> {
+  const deps = { ...defaultDependencies, ...dependencies };
+  await deps.requireAdminUser();
+
+  const metadataDiagnostics = validatePackageMetadataForDraft(input.metadata);
+  if (metadataDiagnostics.some((item) => item.severity === 'error')) {
+    return Object.freeze({
+      status: 'blocked',
+      assessmentKey: input.metadata.assessmentKey ?? undefined,
+      diagnostics: metadataDiagnostics,
+    });
+  }
+
+  const assessmentKey = input.metadata.assessmentKey?.trim() ?? '';
+  const versionTag = input.metadata.version?.trim() ?? '';
+  const db = deps.getDbPool();
+  const client = await db.connect();
+
+  try {
+    await client.query('BEGIN');
+    const existingAssessment = await loadAssessmentShellByKey(client, assessmentKey);
+
+    if (existingAssessment) {
+      const versions = await loadAssessmentShellVersions(client, existingAssessment.id);
+      const compatibilityDiagnostics = packageCompatibilityDiagnostics({
+        assessment: existingAssessment,
+        versions,
+      });
+
+      if (compatibilityDiagnostics.some((item) => item.severity === 'error')) {
+        await client.query('ROLLBACK');
+        return Object.freeze({
+          status: 'blocked',
+          assessmentId: existingAssessment.id,
+          assessmentKey,
+          diagnostics: compatibilityDiagnostics,
+        });
+      }
+
+      const targetVersion = versions.find((version) => version.version === versionTag);
+      if (targetVersion) {
+        if (targetVersion.lifecycle_status !== 'DRAFT') {
+          await client.query('ROLLBACK');
+          return Object.freeze({
+            status: 'blocked',
+            assessmentId: existingAssessment.id,
+            assessmentKey,
+            draftVersionId: targetVersion.id,
+            draftVersionTag: targetVersion.version,
+            diagnostics: Object.freeze([
+              diagnostic({
+                severity: 'error',
+                code: 'PACKAGE_VERSION_NOT_DRAFT',
+                message: 'The package version already exists but is not an editable draft. Import apply will not write to non-draft versions.',
+              }),
+            ]),
+          });
+        }
+
+        await client.query('COMMIT');
+        return Object.freeze({
+          status: 'resolved',
+          assessmentId: existingAssessment.id,
+          assessmentKey,
+          draftVersionId: targetVersion.id,
+          draftVersionTag: targetVersion.version,
+          lifecycleStatus: 'DRAFT',
+          mode: rankedPatternAssessmentMode,
+          resultModelKey: rankedPatternResultModelKey,
+          diagnostics: Object.freeze([]),
+        });
+      }
+
+      const existingDraft = versions.find((version) => version.lifecycle_status === 'DRAFT');
+      if (existingDraft) {
+        await client.query('ROLLBACK');
+        return Object.freeze({
+          status: 'blocked',
+          assessmentId: existingAssessment.id,
+          assessmentKey,
+          draftVersionId: existingDraft.id,
+          draftVersionTag: existingDraft.version,
+          diagnostics: Object.freeze([
+            diagnostic({
+              severity: 'error',
+              code: 'DRAFT_VERSION_ALREADY_EXISTS',
+              message:
+                'A different draft version already exists for this package. Continue with that draft or archive it before creating another one.',
+            }),
+          ]),
+        });
+      }
+
+      const draftVersionId = await insertRankedPatternDraftVersionShell({
+        db: client,
+        assessmentId: existingAssessment.id,
+        versionTag,
+      });
+      await client.query('COMMIT');
+      return Object.freeze({
+        status: 'created',
+        assessmentId: existingAssessment.id,
+        assessmentKey,
+        draftVersionId,
+        draftVersionTag: versionTag,
+        sourceVersionTag: 'package metadata',
+        lifecycleStatus: 'DRAFT',
+        mode: rankedPatternAssessmentMode,
+        resultModelKey: rankedPatternResultModelKey,
+        copied: Object.freeze({}),
+        diagnostics: Object.freeze([]),
+      });
+    }
+
+    const assessmentId = await insertRankedPatternAssessmentShell(client, input.metadata);
+    const draftVersionId = await insertRankedPatternDraftVersionShell({
+      db: client,
+      assessmentId,
+      versionTag,
+    });
+    await client.query('COMMIT');
+
+    return Object.freeze({
+      status: 'created',
+      assessmentId,
+      assessmentKey,
+      draftVersionId,
+      draftVersionTag: versionTag,
+      sourceVersionTag: 'package metadata',
+      lifecycleStatus: 'DRAFT',
+      mode: rankedPatternAssessmentMode,
+      resultModelKey: rankedPatternResultModelKey,
+      copied: Object.freeze({}),
       diagnostics: Object.freeze([]),
     });
   } catch (error) {

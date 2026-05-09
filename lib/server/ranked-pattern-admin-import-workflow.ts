@@ -28,6 +28,7 @@ import { getDbPool } from '@/lib/server/db';
 import { requireAdminUser } from '@/lib/server/admin-access';
 import type { RequestUserContext } from '@/lib/server/request-user';
 import {
+  createOrResolveRankedPatternPackageDraftVersion,
   validateRankedPatternDraftImportTarget,
   type RankedPatternVersionDiagnostic,
 } from '@/lib/server/ranked-pattern-admin-versioning';
@@ -87,6 +88,12 @@ export type RankedPatternAdminWorkflowCounts = {
 export type RankedPatternAdminImportWorkflowResult = {
   readonly status: AdminImportStatus;
   readonly source: RankedPatternAdminWorkflowSourceMetadata;
+  readonly packageMetadata: {
+    readonly assessmentKey: string | null;
+    readonly assessmentTitle: string | null;
+    readonly version: string | null;
+    readonly domainKey: string | null;
+  } | null;
   readonly workbookAuditSummary: {
     readonly pass: boolean;
     readonly detectedSheets: readonly string[];
@@ -118,6 +125,7 @@ type WorkflowDependencies = {
   readonly persistResultLanguage: typeof persistRankedPatternResultLanguage;
   readonly auditAssessmentVersion: typeof auditRankedPatternAssessmentVersion;
   readonly validateImportTarget: typeof validateRankedPatternDraftImportTarget;
+  readonly createOrResolvePackageDraftVersion: typeof createOrResolveRankedPatternPackageDraftVersion;
   readonly nowIso: () => string;
 };
 
@@ -130,6 +138,7 @@ const defaultDependencies: WorkflowDependencies = {
   persistResultLanguage: persistRankedPatternResultLanguage,
   auditAssessmentVersion: auditRankedPatternAssessmentVersion,
   validateImportTarget: validateRankedPatternDraftImportTarget,
+  createOrResolvePackageDraftVersion: createOrResolveRankedPatternPackageDraftVersion,
   nowIso: () => new Date().toISOString(),
 };
 
@@ -202,6 +211,14 @@ function baseResult(params: {
   return Object.freeze({
     status: params.status,
     source: params.source,
+    packageMetadata: params.audit.normalisedPackage.metadata[0]
+      ? Object.freeze({
+          assessmentKey: params.audit.normalisedPackage.metadata[0].assessmentKey,
+          assessmentTitle: params.audit.normalisedPackage.metadata[0].assessmentTitle,
+          version: params.audit.normalisedPackage.metadata[0].version,
+          domainKey: params.audit.normalisedPackage.metadata[0].domainKey,
+        })
+      : null,
     workbookAuditSummary: auditSummary(params.audit),
     normalisationDiagnostics: params.audit.normalisationDiagnostics,
     runtimeDefinitionPlanSummary: params.runtimeResult?.plan,
@@ -253,6 +270,47 @@ export async function auditRankedPatternWorkbookForAdmin(
     source: sourceMetadata(input, parsedWorkbook),
     diagnostics,
   });
+}
+
+export async function createOrResolveRankedPatternPackageDraftForAdmin(
+  input: RankedPatternAdminWorkflowBaseInput,
+  dependencies: Partial<WorkflowDependencies> = {},
+) {
+  const deps = { ...defaultDependencies, ...dependencies };
+  const adminUser = await deps.requireAdminUser();
+  const parsedWorkbook = workbookFromInput(input, deps);
+  const audit = deps.auditParsedWorkbook(parsedWorkbook);
+  const diagnostics = workbookDiagnostics(audit);
+  const blocking = splitDiagnostics(diagnostics).blockingDiagnostics;
+
+  if (blocking.length > 0) {
+    return Object.freeze({
+      status: 'blocked' as const,
+      diagnostics: blocking,
+    });
+  }
+
+  const metadata = audit.normalisedPackage.metadata[0] ?? null;
+  if (!metadata) {
+    return Object.freeze({
+      status: 'blocked' as const,
+      diagnostics: Object.freeze([
+        {
+          severity: 'error' as const,
+          code: 'PACKAGE_METADATA_REQUIRED',
+          message: 'Package metadata could not be read from the workbook.',
+        },
+      ]),
+    });
+  }
+
+  return deps.createOrResolvePackageDraftVersion(
+    { metadata },
+    {
+      requireAdminUser: async () => adminUser,
+      getDbPool: deps.getDbPool,
+    },
+  );
 }
 
 export async function dryRunRankedPatternImportForAdmin(

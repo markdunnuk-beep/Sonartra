@@ -28,6 +28,20 @@ const dedicatedWorkflowRouteSource = readFileSync(
   'utf8',
 );
 
+const packageFirstWorkflowRouteSource = readFileSync(
+  path.join(
+    process.cwd(),
+    'app',
+    '(admin)',
+    'admin',
+    'assessments',
+    'ranked-pattern',
+    'workflow',
+    'page.tsx',
+  ),
+  'utf8',
+);
+
 const genericReviewSource = readFileSync(
   path.join(
     process.cwd(),
@@ -42,21 +56,23 @@ const genericReviewSource = readFileSync(
   'utf8',
 );
 
-test('ranked-pattern import panel exposes draft creation, publish audit, and explicit publish controls', () => {
-  assert.match(panelSource, /createRankedPatternDraftVersionAction/);
+test('ranked-pattern import panel exposes package draft resolution, publish audit, and explicit publish controls', () => {
+  assert.match(panelSource, /createRankedPatternPackageDraftVersionAction/);
   assert.match(panelSource, /auditRankedPatternPublishReadinessAction/);
   assert.match(panelSource, /publishRankedPatternVersionAction/);
   assert.match(panelSource, /Workbook file path or package reference/);
   assert.match(panelSource, /Audit package/);
   assert.match(panelSource, /Dry-run import/);
   assert.match(panelSource, /Apply import/);
-  assert.match(panelSource, /Create draft version/);
+  assert.match(panelSource, /Create or resolve package draft/);
   assert.match(panelSource, /Run publish audit/);
   assert.match(panelSource, /Publish audited draft/);
   assert.match(panelSource, /auditRankedPatternPackageAction\.bind/);
   assert.match(panelSource, /dryRunRankedPatternImportAction\.bind/);
   assert.match(panelSource, /applyRankedPatternImportAction\.bind/);
   assert.match(panelSource, /auditRankedPatternPublishReadinessAction\.bind/);
+  assert.match(panelSource, /targetAssessmentId/);
+  assert.match(panelSource, /targetAssessmentVersionId/);
 });
 
 test('ranked-pattern publish control stays disabled until publish audit can publish', () => {
@@ -71,8 +87,8 @@ test('existing draft state is passive and does not render create draft as loadin
   assert.match(panelSource, /Using draft \{latestDraftVersion\.versionTag\}/);
   assert.match(panelSource, /Draft version already exists/);
   assert.match(panelSource, /This workflow will continue with/);
-  assert.match(panelSource, /latestDraftVersion \? \(/);
-  assert.match(panelSource, /<PassiveDraftStatus latestDraftVersion=\{latestDraftVersion\} \/>/);
+  assert.match(panelSource, /resolvedDraft \? \(/);
+  assert.match(panelSource, /<PassiveDraftStatus latestDraftVersion=\{resolvedDraft\} \/>/);
   assert.match(panelSource, /cursor-not-allowed/);
   assert.match(panelSource, /pending\s+\?\s+'cursor-wait/);
   assert.doesNotMatch(panelSource, /disabled=\{hasDraft\}/);
@@ -93,11 +109,15 @@ test('admin copy keeps versioning and persisted-result boundaries explicit', () 
   assert.match(panelSource, /Apply import writes package data but does\s+not publish/);
   assert.match(panelSource, /Publish audit is read-only/);
   assert.match(panelSource, /publishing remains a separate explicit action/);
-  assert.match(panelSource, /Create or open the next draft version/);
+  assert.match(panelSource, /Create or resolve the compatible draft version from package metadata/);
   assert.match(panelSource, /Completed results continue to render from their persisted payload/);
 });
 
 test('ranked-pattern import panel displays counts and diagnostics without workbook contents', () => {
+  assert.match(panelSource, /Assessment key/);
+  assert.match(panelSource, /Package version/);
+  assert.match(panelSource, /Domain key/);
+  assert.match(panelSource, /Assessment title/);
   assert.match(panelSource, /Runtime definition planned counts/);
   assert.match(panelSource, /Result-language planned counts/);
   assert.match(panelSource, /Runtime definition applied counts/);
@@ -111,11 +131,16 @@ test('ranked-pattern import panel displays counts and diagnostics without workbo
 });
 
 test('ranked-pattern import panel is wired into the dedicated workflow route only', () => {
+  assert.match(packageFirstWorkflowRouteSource, /<RankedPatternImportPanel latestDraftVersion=\{null\} \/>/);
+  assert.match(packageFirstWorkflowRouteSource, /Package-first ranked-pattern workflow/);
+  assert.match(packageFirstWorkflowRouteSource, /No assessment record required/);
   assert.match(dedicatedWorkflowRouteSource, /<RankedPatternImportPanel/);
   assert.match(dedicatedWorkflowRouteSource, /assessmentId=\{assessment\.assessmentId\}/);
   assert.match(dedicatedWorkflowRouteSource, /latestDraftVersion=\{assessment\.latestDraftVersion\}/);
   assert.match(dedicatedWorkflowRouteSource, /Ranked-pattern package workflow/);
   assert.match(dedicatedWorkflowRouteSource, /Active ranked-pattern workflow/);
+  assert.match(dedicatedWorkflowRouteSource, /Legacy assessment record/);
+  assert.match(dedicatedWorkflowRouteSource, /Start package-first workflow/);
   assert.match(dedicatedWorkflowRouteSource, /does not include the\s+legacy single-domain builder stages/);
   assert.doesNotMatch(reviewSource, /<RankedPatternImportPanel/);
   assert.match(reviewSource, /Open ranked-pattern workflow/);

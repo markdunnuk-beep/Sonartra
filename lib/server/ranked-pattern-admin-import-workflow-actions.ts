@@ -6,6 +6,7 @@ import {
   applyRankedPatternImportForAdmin,
   auditRankedPatternPublishReadinessForAdmin,
   auditRankedPatternWorkbookForAdmin,
+  createOrResolveRankedPatternPackageDraftForAdmin,
   dryRunRankedPatternImportForAdmin,
 } from '@/lib/server/ranked-pattern-admin-import-workflow';
 import {
@@ -35,6 +36,7 @@ type RankedPatternAdminImportActionDependencies = {
   readonly applyImport: typeof applyRankedPatternImportForAdmin;
   readonly auditPublishReadiness: typeof auditRankedPatternPublishReadinessForAdmin;
   readonly createDraftVersion?: typeof createRankedPatternDraftVersion;
+  readonly createPackageDraftVersion?: typeof createOrResolveRankedPatternPackageDraftForAdmin;
   readonly publishVersion?: typeof publishRankedPatternAssessmentVersion;
   readonly revalidatePath?: typeof revalidatePath;
 };
@@ -45,6 +47,7 @@ const defaultDependencies: RankedPatternAdminImportActionDependencies = {
   applyImport: applyRankedPatternImportForAdmin,
   auditPublishReadiness: auditRankedPatternPublishReadinessForAdmin,
   createDraftVersion: createRankedPatternDraftVersion,
+  createPackageDraftVersion: createOrResolveRankedPatternPackageDraftForAdmin,
   publishVersion: publishRankedPatternAssessmentVersion,
   revalidatePath,
 };
@@ -61,8 +64,9 @@ function actionInputFromFormData(
     sourcePath,
     sourceName: sourceName || undefined,
     sourceHash: sourceHash || undefined,
-    targetAssessmentId: context.targetAssessmentId,
-    targetAssessmentVersionId: context.targetAssessmentVersionId,
+    targetAssessmentId: String(formData.get('targetAssessmentId') ?? '').trim() || context.targetAssessmentId,
+    targetAssessmentVersionId:
+      String(formData.get('targetAssessmentVersionId') ?? '').trim() || context.targetAssessmentVersionId,
   };
 }
 
@@ -137,6 +141,14 @@ export async function createRankedPatternDraftVersionAction(
   _formData: FormData,
 ): Promise<RankedPatternDraftVersionActionState> {
   return createRankedPatternDraftVersionActionWithDependencies(context, defaultDependencies);
+}
+
+export async function createRankedPatternPackageDraftVersionAction(
+  context: RankedPatternVersionActionContext,
+  _previousState: RankedPatternDraftVersionActionState,
+  formData: FormData,
+): Promise<RankedPatternDraftVersionActionState> {
+  return createRankedPatternPackageDraftVersionActionWithDependencies(context, formData, defaultDependencies);
 }
 
 export async function publishRankedPatternVersionAction(
@@ -302,6 +314,72 @@ export async function createRankedPatternDraftVersionActionWithDependencies(
     };
   } catch {
     const message = 'A ranked-pattern draft version could not be created. Try again after refreshing the page.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      formSuccess: null,
+      fieldErrors: {},
+      result: null,
+    };
+  }
+}
+
+export async function createRankedPatternPackageDraftVersionActionWithDependencies(
+  context: RankedPatternVersionActionContext,
+  formData: FormData,
+  dependencies: RankedPatternAdminImportActionDependencies,
+): Promise<RankedPatternDraftVersionActionState> {
+  const input = actionInputFromFormData({}, formData);
+  if (!input.sourcePath) {
+    const sourceState = missingSourcePathState();
+    return {
+      ok: false,
+      message: sourceState.message,
+      formError: sourceState.formError,
+      formSuccess: null,
+      fieldErrors: sourceState.fieldErrors,
+      result: null,
+    };
+  }
+
+  try {
+    const createPackageDraftVersionDependency =
+      dependencies.createPackageDraftVersion ?? createOrResolveRankedPatternPackageDraftForAdmin;
+    const result = await createPackageDraftVersionDependency(input);
+
+    if (result.status === 'created' || result.status === 'resolved') {
+      const assessmentKey = result.assessmentKey || context.assessmentKey;
+      if (assessmentKey) {
+        revalidateAssessmentAdminPaths(assessmentKey, dependencies);
+        dependencies.revalidatePath?.(`/admin/assessments/ranked-pattern/${assessmentKey}/workflow`);
+      }
+      dependencies.revalidatePath?.('/admin/assessments/ranked-pattern/workflow');
+
+      const verb = result.status === 'created' ? 'created' : 'resolved';
+      return {
+        ok: true,
+        message: `Draft ${result.draftVersionTag} was ${verb} from package metadata.`,
+        formError: null,
+        formSuccess: `Draft ${result.draftVersionTag} was ${verb} from package metadata.`,
+        fieldErrors: {},
+        result,
+      };
+    }
+
+    const message =
+      result.diagnostics[0]?.message ?? 'A ranked-pattern draft could not be resolved from package metadata.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      formSuccess: null,
+      fieldErrors: {},
+      result,
+    };
+  } catch {
+    const message =
+      'A ranked-pattern draft could not be resolved from package metadata. Check the workbook path and try again.';
     return {
       ok: false,
       message,

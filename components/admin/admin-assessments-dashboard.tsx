@@ -17,6 +17,7 @@ import type {
   AdminAssessmentDraftReadiness,
   AdminAssessmentOverallStatus,
 } from '@/lib/server/admin-assessment-dashboard';
+import { isRankedPatternPackageCompatibleAssessment } from '@/lib/ranked-pattern-admin-compatibility';
 
 function formatDate(value: string | null): string {
   if (!value) {
@@ -94,8 +95,7 @@ function formatAssessmentStatusSummary(assessment: AdminAssessmentDashboardItem)
 function isTestOrLegacyAssessment(assessment: AdminAssessmentDashboardItem): boolean {
   const haystack = `${assessment.assessmentKey} ${assessment.title}`.toLowerCase();
   return (
-    assessment.mode !== 'single_domain' ||
-    !assessment.isActive ||
+    !isRankedPatternPackageCompatibleAssessment(assessment) ||
     haystack.includes('test') ||
     haystack.includes('legacy')
   );
@@ -127,18 +127,19 @@ function AssessmentCard({
   tone?: 'active' | 'draft' | 'legacy';
 }) {
   const isSingleDomain = assessment.mode === 'single_domain';
+  const isCompatibleRankedPattern = !isTestOrLegacyAssessment(assessment);
   const rankedPatternWorkflowHref = `/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`;
-  const primaryHref = isSingleDomain ? rankedPatternWorkflowHref : assessment.actionHref;
+  const primaryHref = isCompatibleRankedPattern ? rankedPatternWorkflowHref : assessment.actionHref;
   const reviewHref =
-    isSingleDomain || assessment.latestDraftVersion
-      ? isSingleDomain
+    isCompatibleRankedPattern || assessment.latestDraftVersion
+      ? isCompatibleRankedPattern
         ? rankedPatternWorkflowHref
         : `${assessment.actionHref}/review`
       : null;
-  const createVersionHref = isSingleDomain
+  const createVersionHref = isCompatibleRankedPattern
     ? rankedPatternWorkflowHref
     : `${assessment.actionHref}/versions/new`;
-  const reviewLabel = isSingleDomain
+  const reviewLabel = isCompatibleRankedPattern
     ? 'Open import panel'
     : assessment.latestDraftReadiness === 'ready'
       ? 'Review and publish'
@@ -148,10 +149,10 @@ function AssessmentCard({
       ? isSingleDomain
         ? 'Open archived builder path'
         : 'Open legacy builder'
-      : isSingleDomain
+      : isCompatibleRankedPattern
         ? 'Open workflow'
         : 'Open legacy builder';
-  const createVersionLabel = isSingleDomain ? 'Create ranked-pattern draft' : 'Create draft version';
+  const createVersionLabel = isCompatibleRankedPattern ? 'Create ranked-pattern draft' : 'Create draft version';
 
   return (
     <SurfaceCard className={cn('p-5 lg:p-6', tone === 'legacy' ? 'border-white/8 bg-white/[0.025]' : '')}>
@@ -200,7 +201,7 @@ function AssessmentCard({
             <ButtonLink href={primaryHref} variant={tone === 'legacy' ? 'secondary' : 'primary'}>
               {builderLabel}
             </ButtonLink>
-            {tone !== 'legacy' ? (
+            {tone !== 'legacy' && isCompatibleRankedPattern ? (
               <Link
                 className={cn(
                   'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/72 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
@@ -210,7 +211,7 @@ function AssessmentCard({
                 {createVersionLabel}
               </Link>
             ) : null}
-            {reviewHref && tone !== 'legacy' ? (
+            {reviewHref && tone !== 'legacy' && isCompatibleRankedPattern ? (
               <Link
                 className={cn(
                   'sonartra-focus-ring inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/72 transition duration-200 hover:border-white/14 hover:bg-white/[0.06] hover:text-white',
@@ -272,10 +273,10 @@ export function AdminAssessmentsDashboard({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <ButtonLink href="/admin/assessments/new" variant="primary">
-              Create ranked-pattern assessment
+            <ButtonLink href="/admin/assessments/ranked-pattern/workflow" variant="primary">
+              Start ranked-pattern package workflow
             </ButtonLink>
-            <ButtonLink href="/admin/assessments/single-domain">
+            <ButtonLink href="/admin/assessments/ranked-pattern/workflow">
               Open package workflow
             </ButtonLink>
             <Link
@@ -349,8 +350,8 @@ export function AdminAssessmentsDashboard({
             title={showArchived ? 'No assessments match this filter' : 'No assessments yet'}
             description={showArchived ? 'No active ranked-pattern packages are available.' : 'Create or restore a ranked-pattern package before importing.'}
             action={
-              <ButtonLink href="/admin/assessments/new" variant="primary">
-                Create ranked-pattern assessment
+              <ButtonLink href="/admin/assessments/ranked-pattern/workflow" variant="primary">
+                Start ranked-pattern package workflow
               </ButtonLink>
             }
           />

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  createOrResolveRankedPatternPackageDraftVersion,
   createRankedPatternDraftVersion,
   publishRankedPatternAssessmentVersion,
   validateRankedPatternDraftImportTarget,
@@ -155,6 +156,59 @@ function createFakeDb(seed = buildSeed()) {
         return { rows: [] as T[] };
       }
 
+      if (sql.includes('FROM assessments') && sql.includes('WHERE assessment_key = $1')) {
+        const assessmentKey = params?.[0] as string;
+        const assessment = seed.assessments.find((row) => row.assessmentKey === assessmentKey);
+        return {
+          rows: (assessment
+            ? [{
+                id: assessment.id,
+                assessment_key: assessment.assessmentKey,
+                title: assessment.title,
+                mode: 'single_domain',
+                is_active: true,
+              }]
+            : []) as T[],
+        };
+      }
+
+      if (sql.includes('FROM assessment_versions') && sql.includes('WHERE assessment_id = $1')) {
+        const assessmentId = params?.[0] as string;
+        return {
+          rows: seed.versions
+            .filter((row) => row.assessmentId === assessmentId)
+            .map((row) => ({
+              id: row.id,
+              version: row.version,
+              lifecycle_status: row.lifecycleStatus,
+              mode: row.mode,
+              result_model_key: row.resultModelKey,
+            })) as T[],
+        };
+      }
+
+      if (sql.startsWith('INSERT INTO assessments')) {
+        const [assessmentKey, , title] = params as [string, string, string];
+        const id = `assessment-${seed.assessments.length + 1}`;
+        seed.assessments.push({ id, assessmentKey, title });
+        return { rows: [{ id }] as T[] };
+      }
+
+      if (sql.startsWith('INSERT INTO assessment_versions')) {
+        const [assessmentId, version, mode, resultModelKey] = params as [string, string, string, string];
+        const id = `version-${seed.versions.length + 1}`;
+        seed.versions.push({
+          id,
+          assessmentId,
+          version,
+          lifecycleStatus: 'DRAFT',
+          mode,
+          resultModelKey,
+          publishedAt: null,
+        });
+        return { rows: [{ id }] as T[] };
+      }
+
       throw new Error(`Unhandled SQL in ranked-pattern versioning fake DB: ${sql}`);
     },
     release() {
@@ -247,6 +301,102 @@ test('create draft version returns existing-draft blocker without creating a sec
   assert.equal(result.diagnostics[0]?.code, 'DRAFT_VERSION_ALREADY_EXISTS');
   assert.deepEqual(fake.state.versions, versionsBefore);
   assert.deepEqual(fake.state.transactions, ['BEGIN', 'ROLLBACK', 'RELEASE']);
+});
+
+test('package metadata creates compatible ranked-pattern shell and draft when none exists', async () => {
+  const fake = createFakeDb();
+  const result = await createOrResolveRankedPatternPackageDraftVersion(
+    {
+      metadata: {
+        sourceSheetKey: '00_Metadata',
+        sourceRowNumber: 2,
+        sourceValues: {},
+        status: 'active',
+        lookupKey: 'assessment::leadership-approach',
+        assessmentKey: 'leadership-approach',
+        version: '1.00-test',
+        assessmentTitle: 'Leadership Approach',
+        assessmentDescription: null,
+        model: 'single_domain_ranked_pattern',
+        mode: 'single_domain',
+        resultModelKey: 'ranked_pattern',
+        domainKey: 'leadership_approach',
+        domainTitle: 'Leadership Approach',
+        lifecycleStatus: 'draft',
+      },
+    },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      getDbPool() {
+        return fake.pool;
+      },
+    },
+  );
+
+  assert.equal(result.status, 'created');
+  assert.equal(result.assessmentKey, 'leadership-approach');
+  assert.equal(result.draftVersionTag, '1.00-test');
+  assert.equal(fake.state.assessments.some((row) => row.assessmentKey === 'leadership-approach'), true);
+});
+
+test('package metadata rejects legacy assessment key conflicts with structured diagnostics', async () => {
+  const fake = createFakeDb({
+    ...buildSeed(),
+    assessments: [
+      {
+        id: 'assessment-legacy',
+        assessmentKey: 'sonartra-leadership-approach',
+        title: 'Sonartra Leadership Approach',
+      },
+    ],
+    versions: [
+      {
+        id: 'version-legacy',
+        assessmentId: 'assessment-legacy',
+        version: '1.00-test',
+        lifecycleStatus: 'DRAFT',
+        mode: 'single_domain',
+        resultModelKey: 'ranked_pattern',
+        publishedAt: null,
+      },
+    ],
+  });
+
+  const result = await createOrResolveRankedPatternPackageDraftVersion(
+    {
+      metadata: {
+        sourceSheetKey: '00_Metadata',
+        sourceRowNumber: 2,
+        sourceValues: {},
+        status: 'active',
+        lookupKey: 'assessment::sonartra-leadership-approach',
+        assessmentKey: 'sonartra-leadership-approach',
+        version: '1.00-test',
+        assessmentTitle: 'Sonartra Leadership Approach',
+        assessmentDescription: null,
+        model: 'single_domain_ranked_pattern',
+        mode: 'single_domain',
+        resultModelKey: 'ranked_pattern',
+        domainKey: 'leadership_approach',
+        domainTitle: 'Leadership Approach',
+        lifecycleStatus: 'draft',
+      },
+    },
+    {
+      async requireAdminUser() {
+        return adminUser() as never;
+      },
+      getDbPool() {
+        return fake.pool;
+      },
+    },
+  );
+
+  assert.equal(result.status, 'blocked');
+  assert.equal(result.diagnostics[0]?.code, 'PACKAGE_ASSESSMENT_KEY_LEGACY_RESERVED');
+  assert.match(result.diagnostics[0]?.message ?? '', /not compatible with ranked-pattern package import/);
 });
 
 test('draft import target validation rejects published or non-ranked-pattern versions', async () => {

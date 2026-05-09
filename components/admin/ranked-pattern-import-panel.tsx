@@ -11,7 +11,7 @@ import {
   applyRankedPatternImportAction,
   auditRankedPatternPackageAction,
   auditRankedPatternPublishReadinessAction,
-  createRankedPatternDraftVersionAction,
+  createRankedPatternPackageDraftVersionAction,
   dryRunRankedPatternImportAction,
   publishRankedPatternVersionAction,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
@@ -152,16 +152,22 @@ function HiddenWorkflowFields({
   sourcePath,
   sourceName,
   sourceHash,
+  targetAssessmentId,
+  targetAssessmentVersionId,
 }: Readonly<{
   sourcePath: string;
   sourceName: string;
   sourceHash: string;
+  targetAssessmentId?: string;
+  targetAssessmentVersionId?: string;
 }>) {
   return (
     <>
       <input name="sourcePath" type="hidden" value={sourcePath} />
       <input name="sourceName" type="hidden" value={sourceName} />
       <input name="sourceHash" type="hidden" value={sourceHash} />
+      <input name="targetAssessmentId" type="hidden" value={targetAssessmentId ?? ''} />
+      <input name="targetAssessmentVersionId" type="hidden" value={targetAssessmentVersionId ?? ''} />
     </>
   );
 }
@@ -171,6 +177,8 @@ function WorkflowForm({
   sourcePath,
   sourceName,
   sourceHash,
+  targetAssessmentId,
+  targetAssessmentVersionId,
   idleLabel,
   pendingLabel,
   tone,
@@ -180,6 +188,8 @@ function WorkflowForm({
   sourcePath: string;
   sourceName: string;
   sourceHash: string;
+  targetAssessmentId?: string;
+  targetAssessmentVersionId?: string;
   idleLabel: string;
   pendingLabel: string;
   tone?: 'primary' | 'secondary' | 'apply';
@@ -187,8 +197,37 @@ function WorkflowForm({
 }>) {
   return (
     <form action={action}>
-      <HiddenWorkflowFields sourceHash={sourceHash} sourceName={sourceName} sourcePath={sourcePath} />
+      <HiddenWorkflowFields
+        sourceHash={sourceHash}
+        sourceName={sourceName}
+        sourcePath={sourcePath}
+        targetAssessmentId={targetAssessmentId}
+        targetAssessmentVersionId={targetAssessmentVersionId}
+      />
       <SubmitButton disabled={disabled} idleLabel={idleLabel} pendingLabel={pendingLabel} tone={tone} />
+    </form>
+  );
+}
+
+function PackageDraftForm({
+  action,
+  sourcePath,
+  sourceName,
+  sourceHash,
+}: Readonly<{
+  action: (payload: FormData) => void;
+  sourcePath: string;
+  sourceName: string;
+  sourceHash: string;
+}>) {
+  return (
+    <form action={action}>
+      <HiddenWorkflowFields sourceHash={sourceHash} sourceName={sourceName} sourcePath={sourcePath} />
+      <SubmitButton
+        idleLabel="Create or resolve package draft"
+        pendingLabel="Resolving package draft..."
+        tone="secondary"
+      />
     </form>
   );
 }
@@ -502,6 +541,25 @@ function WorkflowResultBlock({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <AdminFeedbackStat
+          label="Assessment key"
+          value={result.packageMetadata?.assessmentKey ?? 'Not detected'}
+        />
+        <AdminFeedbackStat
+          label="Package version"
+          value={result.packageMetadata?.version ?? 'Not detected'}
+        />
+        <AdminFeedbackStat
+          label="Domain key"
+          value={result.packageMetadata?.domainKey ?? 'Not detected'}
+        />
+        <AdminFeedbackStat
+          label="Assessment title"
+          value={result.packageMetadata?.assessmentTitle ?? 'Not detected'}
+        />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <AdminFeedbackStat label="Blocking" value={String(result.blockingDiagnostics.length)} />
         <AdminFeedbackStat label="Warnings" value={String(result.warningDiagnostics.length)} />
         <AdminFeedbackStat
@@ -542,8 +600,8 @@ export function RankedPatternImportPanel({
   assessmentKey,
   latestDraftVersion,
 }: Readonly<{
-  assessmentId: string;
-  assessmentKey: string;
+  assessmentId?: string;
+  assessmentKey?: string;
   latestDraftVersion: AdminAssessmentDetailVersion | null;
 }>) {
   const [sourcePath, setSourcePath] = useState('');
@@ -553,11 +611,8 @@ export function RankedPatternImportPanel({
     targetAssessmentId: assessmentId,
     targetAssessmentVersionId: latestDraftVersion?.assessmentVersionId,
   };
-  const publishAuditContext = {
-    targetAssessmentVersionId: latestDraftVersion?.assessmentVersionId ?? '',
-  };
   const versionContext = {
-    assessmentKey,
+    assessmentKey: assessmentKey ?? '',
     targetAssessmentVersionId: latestDraftVersion?.assessmentVersionId ?? '',
   };
   const [auditState, auditAction] = useActionState(
@@ -572,23 +627,52 @@ export function RankedPatternImportPanel({
     applyRankedPatternImportAction.bind(null, actionContext),
     initialRankedPatternAdminImportActionState,
   );
-  const [publishAuditState, publishAuditAction] = useActionState(
-    auditRankedPatternPublishReadinessAction.bind(null, publishAuditContext),
-    initialRankedPatternPublishAuditActionState,
-  );
   const [draftVersionState, draftVersionAction] = useActionState(
-    createRankedPatternDraftVersionAction.bind(null, versionContext),
+    createRankedPatternPackageDraftVersionAction.bind(null, versionContext),
     initialRankedPatternDraftVersionActionState,
   );
+  const resolvedDraft =
+    latestDraftVersion ??
+    (draftVersionState.result?.status === 'created' || draftVersionState.result?.status === 'resolved'
+      ? {
+          assessmentVersionId: draftVersionState.result.draftVersionId,
+          versionTag: draftVersionState.result.draftVersionTag,
+          status: 'draft' as const,
+          titleOverride: null,
+          descriptionOverride: null,
+          publishedAt: null,
+          questionCount: 0,
+          createdAt: '',
+          updatedAt: '',
+        }
+      : null);
+  const resolvedAssessmentId =
+    assessmentId ??
+    (draftVersionState.result?.status === 'created' || draftVersionState.result?.status === 'resolved'
+      ? draftVersionState.result.assessmentId
+      : undefined);
+  const resolvedAssessmentKey =
+    assessmentKey ??
+    (draftVersionState.result?.status === 'created' || draftVersionState.result?.status === 'resolved'
+      ? draftVersionState.result.assessmentKey
+      : undefined);
+  const publishVersionContext = {
+    assessmentKey: resolvedAssessmentKey ?? '',
+    targetAssessmentVersionId: resolvedDraft?.assessmentVersionId ?? '',
+  };
+  const [publishAuditState, publishAuditAction] = useActionState(
+    auditRankedPatternPublishReadinessAction.bind(null, {
+      targetAssessmentVersionId: resolvedDraft?.assessmentVersionId ?? '',
+    }),
+    initialRankedPatternPublishAuditActionState,
+  );
   const [publishVersionState, publishVersionAction] = useActionState(
-    publishRankedPatternVersionAction.bind(null, versionContext),
+    publishRankedPatternVersionAction.bind(null, publishVersionContext),
     initialRankedPatternPublishVersionActionState,
   );
-  const hasDraft = latestDraftVersion !== null;
+  const hasDraft = resolvedDraft !== null;
   const canPublishFromAudit = publishAuditState.result?.canPublish === true;
-  const nextDraftLabel = latestDraftVersion
-    ? latestDraftVersion.versionTag
-    : 'the next version after the latest published version';
+  const packageTargetLabel = resolvedAssessmentKey ?? 'package metadata';
 
   return (
     <SurfaceCard className="space-y-6 p-5 lg:p-6" data-ranked-pattern-import-panel="true">
@@ -597,9 +681,9 @@ export function RankedPatternImportPanel({
           <div className="flex flex-wrap items-center gap-2">
             <p className="sonartra-page-eyebrow">Ranked-pattern import</p>
             <LabelPill>Admin package workflow</LabelPill>
-            {latestDraftVersion ? (
+            {resolvedDraft ? (
               <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
-                Draft {latestDraftVersion.versionTag}
+                Draft {resolvedDraft.versionTag}
               </LabelPill>
             ) : (
               <LabelPill className="border-white/10 bg-white/[0.04] text-white/64">No draft</LabelPill>
@@ -610,27 +694,28 @@ export function RankedPatternImportPanel({
           </h2>
           <p className="max-w-3xl text-sm leading-7 text-white/62">
             Use this interim admin/developer workflow to audit a workbook package, dry-run the
-            database plans, explicitly apply package data to a draft, and run publish readiness.
+            database plans, resolve a compatible package draft from workbook metadata, explicitly
+            apply package data to that draft, and run publish readiness.
           </p>
         </div>
 
         <div className="sonartra-admin-feedback-card rounded-[1.2rem] border p-4">
-          <p className="sonartra-page-eyebrow">Target</p>
-          <div className="mt-3 space-y-2 text-sm leading-6 text-white/62">
-            <p className="break-all">Assessment: {assessmentKey}</p>
-            <p className="break-all">Assessment id: {assessmentId}</p>
+            <p className="sonartra-page-eyebrow">Target</p>
+            <div className="mt-3 space-y-2 text-sm leading-6 text-white/62">
+            <p className="break-all">Assessment: {resolvedAssessmentKey ?? 'Read from workbook metadata'}</p>
+            <p className="break-all">Assessment id: {resolvedAssessmentId ?? 'Resolve package draft first'}</p>
             <p className="break-all">
-              Draft version id: {latestDraftVersion?.assessmentVersionId ?? 'Create a draft first'}
+              Draft version id: {resolvedDraft?.assessmentVersionId ?? 'Resolve package draft first'}
             </p>
-            <p>Status: {latestDraftVersion?.status ?? 'No editable draft'}</p>
+            <p>Status: {resolvedDraft?.status ?? 'No editable draft'}</p>
           </div>
         </div>
       </div>
 
       <AdminFeedbackNotice tone="neutral" title="Draft version requirements">
-        {latestDraftVersion
-          ? `Draft ${latestDraftVersion.versionTag} already exists for ${assessmentKey}. Continue with that draft; this workflow will not create a second concurrent draft.`
-          : `Create draft version will create ${nextDraftLabel} for ${assessmentKey} from the latest published version. If no published source exists, the action returns an inline blocking message.`}
+        {resolvedDraft
+          ? `Draft ${resolvedDraft.versionTag} already exists for ${packageTargetLabel}. Continue with that draft; this workflow will not create a second concurrent draft.`
+          : 'Audit the workbook, then create or resolve the compatible ranked-pattern draft from package metadata. The workflow will not attach a package to legacy or incompatible assessment records.'}
       </AdminFeedbackNotice>
 
       <AdminFeedbackNotice tone="neutral" title="Workflow safety">
@@ -686,15 +771,14 @@ export function RankedPatternImportPanel({
         </div>
 
         <div className="sonartra-admin-feedback-card space-y-3 rounded-[1.2rem] border p-4">
-          {latestDraftVersion ? (
-            <PassiveDraftStatus latestDraftVersion={latestDraftVersion} />
+          {resolvedDraft ? (
+            <PassiveDraftStatus latestDraftVersion={resolvedDraft} />
           ) : (
-            <VersionMutationForm
+            <PackageDraftForm
               action={draftVersionAction}
-              disabled={false}
-              idleLabel="Create draft version"
-              pendingLabel="Creating draft..."
-              tone="secondary"
+              sourceHash={sourceHash}
+              sourceName={sourceName}
+              sourcePath={sourcePath}
             />
           )}
           <WorkflowForm
@@ -704,6 +788,8 @@ export function RankedPatternImportPanel({
             sourceHash={sourceHash}
             sourceName={sourceName}
             sourcePath={sourcePath}
+            targetAssessmentId={resolvedAssessmentId}
+            targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
             tone="secondary"
           />
           <WorkflowForm
@@ -713,6 +799,8 @@ export function RankedPatternImportPanel({
             sourceHash={sourceHash}
             sourceName={sourceName}
             sourcePath={sourcePath}
+            targetAssessmentId={resolvedAssessmentId}
+            targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
             tone="primary"
           />
           <WorkflowForm
@@ -723,6 +811,8 @@ export function RankedPatternImportPanel({
             sourceHash={sourceHash}
             sourceName={sourceName}
             sourcePath={sourcePath}
+            targetAssessmentId={resolvedAssessmentId}
+            targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
             tone="apply"
           />
           <PublishAuditForm action={publishAuditAction} disabled={!hasDraft} />
@@ -735,7 +825,8 @@ export function RankedPatternImportPanel({
           />
           {!hasDraft ? (
             <p className="text-xs leading-5 text-white/46">
-              Create a draft version before applying package data, running publish audit, or publishing.
+              Create or resolve a package draft before applying package data, running publish audit,
+              or publishing.
             </p>
           ) : !canPublishFromAudit ? (
             <p className="text-xs leading-5 text-white/46">
@@ -748,8 +839,10 @@ export function RankedPatternImportPanel({
       <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
         <p className="text-sm font-medium text-white">Draft/version workflow</p>
         <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-white/60">
-          <li>Create or open the next draft version for the assessment.</li>
-          <li>Audit and dry-run the ranked-pattern package against that draft.</li>
+          <li>Enter the workbook path or package reference.</li>
+          <li>Audit the package and review workbook metadata before a target exists.</li>
+          <li>Create or resolve the compatible draft version from package metadata.</li>
+          <li>Dry-run and apply the ranked-pattern package against that draft.</li>
           <li>Apply the package only after blocking diagnostics are clear.</li>
           <li>Run publish audit and publish separately when all blocking findings are resolved.</li>
           <li>Completed results continue to render from their persisted payload.</li>

@@ -13,6 +13,7 @@ import {
 } from '@/components/shared/user-app-ui';
 import { getSingleDomainBuilderAssessment } from '@/lib/server/admin-single-domain-builder';
 import { getDbPool } from '@/lib/server/db';
+import { isRankedPatternPackageCompatibleAssessment } from '@/lib/ranked-pattern-admin-compatibility';
 
 export default async function RankedPatternWorkflowPage({
   params,
@@ -28,6 +29,53 @@ export default async function RankedPatternWorkflowPage({
 
   if (!assessment) {
     notFound();
+  }
+
+  if (
+    !isRankedPatternPackageCompatibleAssessment({
+      assessmentKey: assessment.assessmentKey,
+      title: assessment.title,
+      mode: 'single_domain',
+      isActive: true,
+    })
+  ) {
+    return (
+      <PageFrame className="space-y-8">
+        <PageHeader
+          eyebrow="Ranked-pattern admin"
+          title="Legacy assessment record"
+          description="This keyed workflow is available only for compatible ranked-pattern package assessments."
+        />
+
+        <SurfaceCard accent className="space-y-5 p-5 lg:p-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <LabelPill>{assessment.assessmentKey}</LabelPill>
+            <LabelPill className="border-[rgba(255,210,143,0.22)] bg-[rgba(78,48,6,0.24)] text-[rgba(255,234,196,0.94)]">
+              Legacy / incompatible
+            </LabelPill>
+          </div>
+          <div className="space-y-2">
+            <CardTitle>{assessment.title}</CardTitle>
+            <SecondaryText>
+              This assessment key belongs to a legacy or test builder record. Ranked-pattern package
+              import will not attach workbook metadata to it silently.
+            </SecondaryText>
+            <SecondaryText>
+              Start from the package-first workflow and use the assessment_key declared in the
+              workbook metadata, or archive the legacy record before reusing the key.
+            </SecondaryText>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <ButtonLink href="/admin/assessments/ranked-pattern/workflow" variant="primary">
+              Start package-first workflow
+            </ButtonLink>
+            <ButtonLink href="/admin/assessments">
+              Back to assessments
+            </ButtonLink>
+          </div>
+        </SurfaceCard>
+      </PageFrame>
+    );
   }
 
   return (
@@ -84,6 +132,9 @@ export default async function RankedPatternWorkflowPage({
         <div className="flex flex-wrap gap-3">
           <ButtonLink href="/admin/assessments/single-domain">
             Back to workflow selector
+          </ButtonLink>
+          <ButtonLink href="/admin/assessments/ranked-pattern/workflow">
+            Start package-first workflow
           </ButtonLink>
           <ButtonLink href={`/admin/assessments/single-domain/${assessment.assessmentKey}/review`}>
             Open legacy builder review

@@ -48,11 +48,11 @@ export default function AdminAssessmentTypeSelectionPage() {
           title="Ranked-Pattern Package Workflow"
           description="The active Sonartra build path: one domain, four scored signals, twenty-four ranked patterns, import audit, draft apply, publish audit, and explicit publish."
           points={[
-            'Create or select a draft single-domain ranked-pattern version.',
+            'Start from workbook metadata, then create or resolve the compatible draft.',
             'Import a reader-first package into draft only, then run publish audit.',
             'Publishing affects new attempts; completed results stay tied to their persisted payload.',
           ]}
-          href="/admin/assessments/single-domain"
+          href="/admin/assessments/ranked-pattern/workflow"
           cta="Open ranked-pattern workflow"
           variant="primary"
         />

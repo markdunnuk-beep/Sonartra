@@ -13,7 +13,8 @@ test('assessment type selection page presents ranked-pattern workflow as active 
   assert.match(source, /Ranked-Pattern Package Workflow/);
   assert.match(source, /Legacy Builders/);
   assert.match(source, /new active builds/i);
-  assert.match(source, /href="\/admin\/assessments\/single-domain"/);
+  assert.match(source, /href="\/admin\/assessments\/ranked-pattern\/workflow"/);
+  assert.match(source, /Start from workbook metadata/);
   assert.match(source, /href="\/admin\/assessments\/create"/);
   assert.doesNotMatch(source, /Continue to multi-domain builder/);
   assert.doesNotMatch(source, /Continue to single-domain builder/);
@@ -39,15 +40,16 @@ test('single-domain entry page points operators to ranked-pattern package workfl
 test('assessment dashboard create actions route through the ranked-pattern workflow entry and show mode labels', () => {
   const source = readSource('components', 'admin', 'admin-assessments-dashboard.tsx');
 
-  assert.match(source, /href="\/admin\/assessments\/new"/);
+  assert.match(source, /href="\/admin\/assessments\/ranked-pattern\/workflow"/);
   assert.match(source, /assessment\.modeLabel/);
   assert.match(source, /rankedPatternWorkflowHref/);
   assert.match(source, /\/admin\/assessments\/ranked-pattern\/\$\{assessment\.assessmentKey\}\/workflow/);
-  assert.match(source, /Create ranked-pattern assessment/);
+  assert.match(source, /Start ranked-pattern package workflow/);
   assert.match(source, /Open package workflow/);
   assert.match(source, /Active ranked-pattern packages/);
   assert.match(source, /Open import panel/);
   assert.match(source, /Create ranked-pattern draft/);
+  assert.match(source, /isRankedPatternPackageCompatibleAssessment/);
   assert.doesNotMatch(source, /Creates a new assessment with its first editable draft/);
 });
 

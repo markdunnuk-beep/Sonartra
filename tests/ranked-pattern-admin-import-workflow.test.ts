@@ -11,6 +11,7 @@ import {
 import {
   auditRankedPatternPackageActionWithDependencies,
   auditRankedPatternPublishReadinessActionWithDependencies,
+  createRankedPatternPackageDraftVersionActionWithDependencies,
   createRankedPatternDraftVersionActionWithDependencies,
   dryRunRankedPatternImportActionWithDependencies,
   applyRankedPatternImportActionWithDependencies,
@@ -684,6 +685,48 @@ test('create draft server action returns structured existing-draft blocker', asy
   assert.match(result.formError ?? '', /draft version already exists/i);
   assert.equal(result.result?.status, 'blocked');
   assert.equal(result.result?.draftVersionId, 'version-2');
+});
+
+test('package-first draft server action validates missing workbook source inline', async () => {
+  const result = await createRankedPatternPackageDraftVersionActionWithDependencies(
+    { assessmentKey: '' },
+    new FormData(),
+    actionDependencies(),
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.fieldErrors.sourcePath, 'Workbook file path or package reference is required.');
+  assert.match(result.formError ?? '', /Provide a ranked-pattern workbook file path/);
+});
+
+test('package-first draft server action returns resolved draft target from metadata workflow', async () => {
+  const formData = new FormData();
+  formData.set('sourcePath', 'leadership-approach.xlsx');
+  const result = await createRankedPatternPackageDraftVersionActionWithDependencies(
+    { assessmentKey: '' },
+    formData,
+    actionDependencies({
+      async createPackageDraftVersion(input: { sourcePath: string }) {
+        assert.equal(input.sourcePath, 'leadership-approach.xlsx');
+        return {
+          status: 'resolved',
+          assessmentId: 'assessment-1',
+          assessmentKey: 'leadership-approach',
+          draftVersionId: 'version-2',
+          draftVersionTag: '1.00-test',
+          lifecycleStatus: 'DRAFT',
+          mode: 'single_domain',
+          resultModelKey: 'ranked_pattern',
+          diagnostics: [],
+        };
+      },
+    }),
+  );
+
+  assert.equal(result.ok, true);
+  assert.match(result.formSuccess ?? '', /Draft 1\.00-test was resolved from package metadata/);
+  assert.equal(result.result?.status, 'resolved');
+  assert.equal(result.result?.assessmentKey, 'leadership-approach');
 });
 
 test('publish audit server action returns structured draft-version validation errors', async () => {
