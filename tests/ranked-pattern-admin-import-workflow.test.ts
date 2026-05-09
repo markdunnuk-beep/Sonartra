@@ -24,7 +24,9 @@ import { resolveRankedPatternPackageSource } from '@/lib/server/ranked-pattern-p
 import {
   buildRankedPatternWorkbookStorageObjectPath,
   readRankedPatternWorkbookPackage,
+  signRankedPatternWorkbookStorageReference,
   uploadRankedPatternWorkbookPackage,
+  verifyRankedPatternWorkbookStorageReferenceToken,
   type RankedPatternWorkbookStorageAdapter,
   type RankedPatternWorkbookStorageReference,
 } from '@/lib/server/ranked-pattern-workbook-storage';
@@ -247,6 +249,31 @@ test('private storage reads validate hash and missing config with structured dia
   assert.equal(missingConfig.diagnostics[0]?.code, 'WORKBOOK_STORAGE_CONFIG_MISSING');
   assert.equal(mismatchedHash.ok, false);
   assert.equal(mismatchedHash.diagnostics[0]?.code, 'WORKBOOK_SOURCE_HASH_MISMATCH');
+});
+
+test('signed workbook storage tokens verify, reject tampering, and expire', () => {
+  const reference = uploadedReference();
+  const env = {
+    SUPABASE_SERVICE_ROLE_KEY: 'storage-signing-secret',
+    RANKED_PATTERN_WORKBOOK_STORAGE_TOKEN_TTL_MS: '60000',
+  };
+  const signed = signRankedPatternWorkbookStorageReference(reference, env);
+
+  assert.notEqual(signed, null);
+  assert.equal(verifyRankedPatternWorkbookStorageReferenceToken(signed?.token ?? '', env)?.objectPath, reference.objectPath);
+  assert.equal(verifyRankedPatternWorkbookStorageReferenceToken(`${signed?.token ?? ''}tampered`, env), null);
+
+  const expired = signRankedPatternWorkbookStorageReference(reference, {
+    SUPABASE_SERVICE_ROLE_KEY: 'storage-signing-secret',
+    RANKED_PATTERN_WORKBOOK_STORAGE_TOKEN_TTL_MS: '1',
+  });
+  const now = Date.now;
+  Date.now = () => now() + 10_000;
+  try {
+    assert.equal(verifyRankedPatternWorkbookStorageReferenceToken(expired?.token ?? '', env), null);
+  } finally {
+    Date.now = now;
+  }
 });
 
 const blockingDiagnostic: RankedPatternImportDiagnostic = Object.freeze({
@@ -973,6 +1000,8 @@ test('workbook upload server action rejects missing file and upload validation f
 test('workflow server action audits uploaded storage reference after token verification', async () => {
   const formData = new FormData();
   formData.set('storageReferenceToken', 'signed-storage-reference');
+  formData.set('sourceName', 'client-supplied-name.xlsx');
+  formData.set('sourceHash', '0'.repeat(64));
   const result = await auditRankedPatternPackageActionWithDependencies(
     {},
     formData,
@@ -981,8 +1010,14 @@ test('workflow server action audits uploaded storage reference after token verif
         assert.equal(token, 'signed-storage-reference');
         return uploadedReference();
       },
-      async auditWorkbook(input: { storageReference?: RankedPatternWorkbookStorageReference }) {
+      async auditWorkbook(input: {
+        sourceName?: string;
+        sourceHash?: string;
+        storageReference?: RankedPatternWorkbookStorageReference;
+      }) {
         assert.equal(input.storageReference?.sourceKind, 'storage_object');
+        assert.equal(input.sourceName, 'client-supplied-name.xlsx');
+        assert.equal(input.sourceHash, '0'.repeat(64));
         return {
           status: 'ready',
           source: {
@@ -1032,7 +1067,8 @@ test('workflow server action rejects tampered uploaded storage reference token i
   );
 
   assert.equal(result.ok, false);
-  assert.equal(result.fieldErrors.storageReferenceToken, 'Uploaded workbook reference is invalid or expired.');
+  assert.match(result.fieldErrors.storageReferenceToken, /invalid or expired/);
+  assert.match(result.formError ?? '', /no longer valid/);
 });
 
 test('create draft server action returns structured success', async () => {

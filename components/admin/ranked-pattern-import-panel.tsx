@@ -294,11 +294,15 @@ function StorageReferenceDisplay({ value }: Readonly<{ value: string }>) {
 function WorkbookUploadResultBlock({
   state,
   selected,
+  cleared,
   onSelect,
+  onClear,
 }: Readonly<{
   state: RankedPatternWorkbookUploadActionState;
   selected: boolean;
+  cleared: boolean;
   onSelect: () => void;
+  onClear: () => void;
 }>) {
   if (state.formError) {
     return (
@@ -311,10 +315,16 @@ function WorkbookUploadResultBlock({
     );
   }
 
-  if (!state.result) {
+  if (!state.result || cleared) {
     return (
-      <div className="rounded-[0.9rem] border border-white/8 bg-black/10 px-4 py-3 text-sm leading-6 text-white/52">
-        Upload a private .xlsx package to use the production-safe source path. No public URL is generated.
+      <div className="space-y-2 rounded-[0.9rem] border border-white/8 bg-black/10 px-4 py-3 text-sm leading-6 text-white/52">
+        <p>Upload a private .xlsx package to use the production-safe source path. No public URL is generated.</p>
+        {cleared ? (
+          <p>
+            The uploaded workbook was cleared from this form. Choose another .xlsx file and upload it to replace
+            the source.
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -337,13 +347,62 @@ function WorkbookUploadResultBlock({
         <AdminFeedbackStat label="Hash" value={state.result.shortSourceHash} />
       </div>
       <StorageReferenceDisplay value={state.result.safeObjectPath} />
-      <button
-        className="sonartra-button sonartra-button-secondary sonartra-focus-ring w-full justify-center sm:w-auto"
-        onClick={onSelect}
-        type="button"
-      >
-        Use uploaded workbook
-      </button>
+      <p className="text-sm leading-6 text-white/58">
+        This workbook is stored privately for admin import only. The runtime reads database rows after import,
+        not workbook files.
+      </p>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <button
+          className="sonartra-button sonartra-button-secondary sonartra-focus-ring w-full justify-center sm:w-auto"
+          onClick={onSelect}
+          type="button"
+        >
+          Use uploaded workbook
+        </button>
+        <button
+          className="sonartra-button sonartra-focus-ring w-full justify-center border-white/10 bg-white/[0.03] text-white/58 hover:bg-white/[0.06] sm:w-auto"
+          onClick={onClear}
+          type="button"
+        >
+          Clear uploaded workbook
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ActiveSourceSummary({
+  mode,
+  uploadedFileName,
+  uploadedHash,
+  manualReference,
+}: Readonly<{
+  mode: 'upload' | 'manual';
+  uploadedFileName: string | null;
+  uploadedHash: string | null;
+  manualReference: string;
+}>) {
+  const hasManualReference = manualReference.trim().length > 0;
+  const label =
+    mode === 'upload' && uploadedFileName
+      ? 'Uploaded workbook'
+      : hasManualReference
+        ? 'Manual reference'
+        : 'No source selected';
+  const detail =
+    mode === 'upload' && uploadedFileName
+      ? `${uploadedFileName}${uploadedHash ? ` | ${uploadedHash.slice(0, 12)}` : ''}`
+      : hasManualReference
+        ? manualReference.trim()
+        : 'Upload a workbook or select the local/admin fallback.';
+
+  return (
+    <div className="rounded-[0.9rem] border border-[rgba(126,179,255,0.16)] bg-[rgba(126,179,255,0.07)] px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgba(214,232,255,0.62)]">
+        Active source
+      </p>
+      <p className="mt-1 text-sm font-medium text-[rgba(231,240,255,0.9)]">{label}</p>
+      <p className="mt-1 break-all text-xs leading-5 text-white/52">{detail}</p>
     </div>
   );
 }
@@ -724,6 +783,7 @@ export function RankedPatternImportPanel({
   const [sourceName, setSourceName] = useState('');
   const [sourceHash, setSourceHash] = useState('');
   const [sourceMode, setSourceMode] = useState<'upload' | 'manual'>('upload');
+  const [clearedUploadToken, setClearedUploadToken] = useState<string | null>(null);
   const actionContext = {
     targetAssessmentId: assessmentId,
     targetAssessmentVersionId: latestDraftVersion?.assessmentVersionId,
@@ -794,7 +854,10 @@ export function RankedPatternImportPanel({
   const hasDraft = resolvedDraft !== null;
   const canPublishFromAudit = publishAuditState.result?.canPublish === true;
   const packageTargetLabel = resolvedAssessmentKey ?? 'package metadata';
-  const uploadedSourceSelected = sourceMode === 'upload' && uploadState.result !== null;
+  const uploadedSourceAvailable =
+    uploadState.result !== null && uploadState.result.storageReferenceToken !== clearedUploadToken;
+  const uploadedSourceSelected = sourceMode === 'upload' && uploadedSourceAvailable;
+  const manualSourceSelected = sourceMode === 'manual' && sourcePath.trim().length > 0;
   const workflowSourcePath = uploadedSourceSelected ? '' : sourcePath;
   const workflowSourceName = uploadedSourceSelected ? uploadState.result?.fileName ?? '' : sourceName;
   const workflowSourceHash = uploadedSourceSelected ? uploadState.result?.sourceHash ?? '' : sourceHash;
@@ -856,8 +919,20 @@ export function RankedPatternImportPanel({
           <div className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <p className="sonartra-page-eyebrow">Package source</p>
-              <LabelPill>{uploadedSourceSelected ? 'Uploaded workbook selected' : 'Awaiting source'}</LabelPill>
+              <LabelPill>
+                {uploadedSourceSelected
+                  ? 'Uploaded workbook selected'
+                  : manualSourceSelected
+                    ? 'Manual reference selected'
+                    : 'Awaiting source'}
+              </LabelPill>
             </div>
+            <ActiveSourceSummary
+              manualReference={sourcePath}
+              mode={uploadedSourceSelected ? 'upload' : 'manual'}
+              uploadedFileName={uploadedSourceAvailable ? uploadState.result?.fileName ?? null : null}
+              uploadedHash={uploadedSourceAvailable ? uploadState.result?.sourceHash ?? null : null}
+            />
             <form action={uploadAction} className="space-y-3" encType="multipart/form-data">
               <label className="block space-y-2" htmlFor="ranked-pattern-workbook-upload">
                 <span className="text-sm font-medium text-white">Upload ranked-pattern workbook</span>
@@ -871,7 +946,16 @@ export function RankedPatternImportPanel({
               </label>
               <UploadSubmitButton />
             </form>
+            <p className="text-xs leading-5 text-white/46">
+              To replace the selected source, choose another .xlsx workbook and upload it. Uploads are private
+              admin/import artifacts; runtime result pages never read workbook files.
+            </p>
             <WorkbookUploadResultBlock
+              cleared={uploadState.result !== null && !uploadedSourceAvailable}
+              onClear={() => {
+                setClearedUploadToken(uploadState.result?.storageReferenceToken ?? null);
+                setSourceMode('manual');
+              }}
               onSelect={() => setSourceMode('upload')}
               selected={uploadedSourceSelected}
               state={uploadState}
@@ -882,6 +966,11 @@ export function RankedPatternImportPanel({
             <div className="flex flex-wrap items-center gap-2">
               <p className="sonartra-page-eyebrow">Advanced fallback</p>
               <LabelPill className="border-white/10 bg-white/[0.04] text-white/64">Local/admin only</LabelPill>
+              {manualSourceSelected ? (
+                <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
+                  Manual reference selected
+                </LabelPill>
+              ) : null}
             </div>
             <label className="block space-y-2" htmlFor="ranked-pattern-workbook-path">
               <span className="text-sm font-medium text-white">Workbook file path or package reference</span>
@@ -927,10 +1016,14 @@ export function RankedPatternImportPanel({
               Manual package references remain available for local/admin testing. Production upload
               uses private storage and never exposes a public workbook URL.
             </p>
-            {sourceMode === 'manual' && sourcePath.trim() ? (
-              <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
-                Manual fallback selected
-              </LabelPill>
+            {sourcePath.trim() ? (
+              <button
+                className="sonartra-button sonartra-button-secondary sonartra-focus-ring w-full justify-center sm:w-auto"
+                onClick={() => setSourceMode('manual')}
+                type="button"
+              >
+                Use manual reference
+              </button>
             ) : null}
           </div>
         </div>

@@ -4,6 +4,7 @@ import path from 'node:path';
 export const DEFAULT_RANKED_PATTERN_WORKBOOK_STORAGE_BUCKET = 'assessment-import-packages';
 export const DEFAULT_RANKED_PATTERN_WORKBOOK_MAX_BYTES = 10 * 1024 * 1024;
 export const DEFAULT_RANKED_PATTERN_WORKBOOK_STORAGE_TIMEOUT_MS = 15_000;
+export const DEFAULT_RANKED_PATTERN_WORKBOOK_STORAGE_TOKEN_TTL_MS = 60 * 60 * 1000;
 
 export type RankedPatternWorkbookStorageDiagnostic = {
   readonly severity: 'error' | 'warning';
@@ -81,6 +82,11 @@ export type RankedPatternWorkbookStorageAdapter = {
 type SupabaseStorageConfig = {
   readonly supabaseUrl: string;
   readonly serviceRoleKey: string;
+};
+
+type SignedStorageReferencePayload = {
+  readonly storageReference: RankedPatternWorkbookStorageReference;
+  readonly expiresAt: string;
 };
 
 function diagnostic(
@@ -215,6 +221,15 @@ function isStorageReference(value: unknown): value is RankedPatternWorkbookStora
   );
 }
 
+function isSignedStorageReferencePayload(value: unknown): value is SignedStorageReferencePayload {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return isStorageReference(record.storageReference) && typeof record.expiresAt === 'string';
+}
+
 export function signRankedPatternWorkbookStorageReference(
   storageReference: RankedPatternWorkbookStorageReference,
   env: NodeJS.ProcessEnv = process.env,
@@ -224,7 +239,16 @@ export function signRankedPatternWorkbookStorageReference(
     return null;
   }
 
-  const payload = base64UrlEncode(JSON.stringify(storageReference));
+  const ttlMs = Number(
+    env.RANKED_PATTERN_WORKBOOK_STORAGE_TOKEN_TTL_MS ??
+      DEFAULT_RANKED_PATTERN_WORKBOOK_STORAGE_TOKEN_TTL_MS,
+  );
+  const tokenLifetimeMs =
+    Number.isFinite(ttlMs) && ttlMs > 0
+      ? ttlMs
+      : DEFAULT_RANKED_PATTERN_WORKBOOK_STORAGE_TOKEN_TTL_MS;
+  const expiresAt = new Date(Date.now() + tokenLifetimeMs).toISOString();
+  const payload = base64UrlEncode(JSON.stringify({ storageReference, expiresAt }));
   const signature = signatureForPayload(payload, secret);
   return Object.freeze({
     storageReference,
@@ -255,15 +279,25 @@ export function verifyRankedPatternWorkbookStorageReferenceToken(
 
   try {
     const parsed: unknown = JSON.parse(base64UrlDecode(payload));
-    if (!isStorageReference(parsed)) {
+    const storageReference = isSignedStorageReferencePayload(parsed)
+      ? parsed.storageReference
+      : isStorageReference(parsed)
+        ? parsed
+        : null;
+    const expiresAt = isSignedStorageReferencePayload(parsed) ? Date.parse(parsed.expiresAt) : null;
+    if (!storageReference) {
       return null;
     }
 
-    if (validateStorageReference(parsed).length > 0) {
+    if (expiresAt !== null && (!Number.isFinite(expiresAt) || expiresAt < Date.now())) {
       return null;
     }
 
-    return Object.freeze(parsed);
+    if (validateStorageReference(storageReference).length > 0) {
+      return null;
+    }
+
+    return Object.freeze(storageReference);
   } catch {
     return null;
   }
@@ -342,7 +376,9 @@ export async function uploadRankedPatternWorkbookPackage(
     return Object.freeze({
       ok: false as const,
       storageReference: null,
-      diagnostics: Object.freeze([diagnostic('WORKBOOK_FILE_REQUIRED', 'Choose a ranked-pattern workbook file to upload.')]),
+      diagnostics: Object.freeze([
+        diagnostic('WORKBOOK_FILE_REQUIRED', 'Choose a ranked-pattern workbook file to upload.'),
+      ]),
     });
   }
 
@@ -351,7 +387,12 @@ export async function uploadRankedPatternWorkbookPackage(
     return Object.freeze({
       ok: false as const,
       storageReference: null,
-      diagnostics: Object.freeze([diagnostic('UNSUPPORTED_WORKBOOK_EXTENSION', 'Ranked-pattern workbook uploads must be .xlsx files.')]),
+      diagnostics: Object.freeze([
+        diagnostic(
+          'UNSUPPORTED_WORKBOOK_EXTENSION',
+          'Upload a .xlsx ranked-pattern workbook. Other file types cannot be read by the importer.',
+        ),
+      ]),
     });
   }
 
@@ -369,7 +410,12 @@ export async function uploadRankedPatternWorkbookPackage(
     return Object.freeze({
       ok: false as const,
       storageReference: null,
-      diagnostics: Object.freeze([diagnostic('WORKBOOK_FILE_TOO_LARGE', 'Ranked-pattern workbook upload exceeds the configured size limit.')]),
+      diagnostics: Object.freeze([
+        diagnostic(
+          'WORKBOOK_FILE_TOO_LARGE',
+          `This workbook is larger than the configured upload limit of ${Math.round(maxBytes / (1024 * 1024))} MB.`,
+        ),
+      ]),
     });
   }
 
@@ -382,7 +428,7 @@ export async function uploadRankedPatternWorkbookPackage(
       diagnostics: Object.freeze([
         diagnostic(
           'WORKBOOK_STORAGE_CONFIG_MISSING',
-          'Private workbook storage is not configured for this environment.',
+          'Private workbook storage is not configured for this environment. Ask an administrator to check the Supabase URL, service-role key, and private storage bucket.',
           'storageConfig',
         ),
       ]),
@@ -445,7 +491,7 @@ export async function readRankedPatternWorkbookPackage(
       diagnostics: Object.freeze([
         diagnostic(
           'WORKBOOK_STORAGE_CONFIG_MISSING',
-          'Private workbook storage is not configured for this environment.',
+          'Private workbook storage is not configured for this environment. Ask an administrator to check the Supabase URL, service-role key, and private storage bucket.',
           'storageConfig',
         ),
       ]),

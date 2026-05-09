@@ -102,18 +102,33 @@ test('workbook source field exposes upload metadata and local fallback affordanc
   assert.match(panelSource, /function WorkbookUploadResultBlock/);
   assert.match(panelSource, /Uploaded/);
   assert.match(panelSource, /Selected source/);
+  assert.match(panelSource, /Active source/);
   assert.match(panelSource, /formatFileSize/);
   assert.match(panelSource, /shortSourceHash/);
   assert.match(panelSource, /Storage object:/);
+  assert.match(panelSource, /This workbook is stored privately for admin import only/);
+  assert.match(panelSource, /runtime reads database rows after import/);
   assert.match(panelSource, /function SourcePathPreview/);
   assert.match(panelSource, /sourcePathFileName/);
   assert.match(panelSource, /title=\{sourcePath\}/);
   assert.match(panelSource, /Selected package:/);
   assert.match(panelSource, /Advanced fallback/);
   assert.match(panelSource, /Local\/admin only/);
-  assert.match(panelSource, /Manual fallback selected/);
+  assert.match(panelSource, /Use manual reference/);
+  assert.match(panelSource, /Manual reference selected/);
   assert.match(panelSource, /private storage and never exposes a public workbook URL/);
   assert.doesNotMatch(panelSource, /publicUrl/);
+});
+
+test('ranked-pattern upload source can be cleared or replaced without ambiguous active source state', () => {
+  assert.match(panelSource, /clearedUploadToken/);
+  assert.match(panelSource, /Clear uploaded workbook/);
+  assert.match(panelSource, /The uploaded workbook was cleared from this form/);
+  assert.match(panelSource, /To replace the selected source, choose another \.xlsx workbook and upload it/);
+  assert.match(panelSource, /uploadedSourceAvailable/);
+  assert.match(panelSource, /uploadedSourceSelected/);
+  assert.match(panelSource, /manualSourceSelected/);
+  assert.match(panelSource, /workflowStorageReferenceToken/);
 });
 
 test('admin copy keeps versioning and persisted-result boundaries explicit', () => {

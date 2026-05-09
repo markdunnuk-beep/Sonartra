@@ -107,20 +107,22 @@ function missingSourcePathState(): RankedPatternAdminImportActionState {
 }
 
 function invalidStorageReferenceState(): RankedPatternAdminImportActionState {
-  const message = 'The uploaded workbook reference could not be verified. Upload the workbook again.';
+  const message =
+    'The uploaded workbook reference is no longer valid. Upload the workbook again before running this action.';
   return {
     ok: false,
     message,
     formError: message,
     fieldErrors: {
-      storageReferenceToken: 'Uploaded workbook reference is invalid or expired.',
+      storageReferenceToken: 'Uploaded workbook reference is invalid or expired. The token contents were not accepted.',
     },
     result: null,
   };
 }
 
 function safeImportErrorState(): RankedPatternAdminImportActionState {
-  const message = 'The ranked-pattern package workflow could not run. Check the file path and try again.';
+  const message =
+    'The ranked-pattern package workflow could not run. Check the selected package source and try again.';
   return {
     ok: false,
     message,
@@ -221,7 +223,7 @@ export async function uploadRankedPatternWorkbookPackageActionWithDependencies(
 
   const file = formData.get('workbookFile');
   if (!(file instanceof File)) {
-    const message = 'Choose a ranked-pattern .xlsx workbook to upload.';
+    const message = 'Choose a .xlsx ranked-pattern workbook before uploading.';
     return {
       ok: false,
       message,
@@ -242,7 +244,9 @@ export async function uploadRankedPatternWorkbookPackageActionWithDependencies(
     });
 
     if (!upload.ok) {
-      const message = upload.diagnostics[0]?.message ?? 'Workbook upload failed.';
+      const message =
+        upload.diagnostics[0]?.message ??
+        'Workbook upload failed. Check the selected file and storage configuration.';
       return {
         ok: false,
         message,
@@ -259,7 +263,8 @@ export async function uploadRankedPatternWorkbookPackageActionWithDependencies(
     const signStorageReference = dependencies.signStorageReference ?? signRankedPatternWorkbookStorageReference;
     const signed = signStorageReference(upload.storageReference);
     if (!signed) {
-      const message = 'Workbook upload succeeded, but the private storage reference could not be signed.';
+      const message =
+        'Workbook upload succeeded, but the private storage reference could not be signed. Ask an administrator to check the signing configuration.';
       return {
         ok: false,
         message,
@@ -287,7 +292,8 @@ export async function uploadRankedPatternWorkbookPackageActionWithDependencies(
       },
     };
   } catch {
-    const message = 'Workbook upload could not run. Try again or contact an administrator.';
+    const message =
+      'Workbook upload could not run. Try again, or ask an administrator to check private workbook storage.';
     return {
       ok: false,
       message,
@@ -480,14 +486,15 @@ export async function createRankedPatternPackageDraftVersionActionWithDependenci
 ): Promise<RankedPatternDraftVersionActionState> {
   const input = actionInputFromFormData({}, formData, dependencies);
   if (input.storageReferenceToken && !input.storageReference) {
-    const message = 'The uploaded workbook reference could not be verified. Upload the workbook again.';
+    const message =
+      'The uploaded workbook reference is no longer valid. Upload the workbook again before resolving a draft.';
     return {
       ok: false,
       message,
       formError: message,
       formSuccess: null,
       fieldErrors: {
-        storageReferenceToken: 'Uploaded workbook reference is invalid or expired.',
+        storageReferenceToken: 'Uploaded workbook reference is invalid or expired. The token contents were not accepted.',
       },
       result: null,
     };
