@@ -49,6 +49,26 @@ type RequiredSheet = (typeof REQUIRED_PACKAGE_SHEETS)[number];
 type GeneratedSheet = (typeof GENERATED_SECTIONS)[number]['sheet'];
 type Severity = 'warning' | 'error';
 
+const SUPPORTED_SCORE_SHAPES = Object.freeze(['concentrated', 'paired', 'graduated', 'balanced'] as const);
+const SCORE_SHAPE_SPECIFIC_SECTIONS = Object.freeze([
+  '06_Orientation',
+  '07_Recognition',
+  '09_Pattern_Mechanics',
+  '10_Pattern_Synthesis',
+  '14_Closing_Integration',
+] as const satisfies readonly RequiredSheet[]);
+const PATTERN_ONLY_SECTIONS = Object.freeze([
+  '11_Strengths',
+  '12_Narrowing',
+  '13_Application',
+] as const satisfies readonly RequiredSheet[]);
+const RANK_FIELD_KEYS = Object.freeze([
+  'rank_1_signal_key',
+  'rank_2_signal_key',
+  'rank_3_signal_key',
+  'rank_4_signal_key',
+] as const);
+
 export type AuthoringPackageCompilerArgs = {
   readonly assessmentKey: string;
   readonly domainKey: string;
@@ -68,6 +88,17 @@ export type AuthoringCompilerDiagnostic = {
   readonly filePath?: string;
   readonly sheet?: string;
 };
+
+class AuthoringCompilerValidationError extends Error {
+  constructor(readonly diagnostics: readonly AuthoringCompilerDiagnostic[]) {
+    super(
+      `Authoring package validation failed: ${diagnostics
+        .slice(0, 8)
+        .map((diagnostic) => `${diagnostic.code}: ${diagnostic.message}`)
+        .join('; ')}${diagnostics.length > 8 ? `; and ${diagnostics.length - 8} more issue(s)` : ''}`,
+    );
+  }
+}
 
 export type AuthoringAssessmentConfig = {
   readonly assessmentKey?: string;
@@ -362,6 +393,49 @@ function rowsToWorksheet(headers: readonly string[], rows: readonly Record<strin
   ]);
 }
 
+function rowValue(row: Record<string, unknown>, key: string): string {
+  return String(row[key] ?? '').trim();
+}
+
+function isActiveRow(row: Record<string, unknown>): boolean {
+  const status = rowValue(row, 'status').toLowerCase();
+  return status === '' || status === 'active';
+}
+
+function expectedPatternKey(row: Record<string, unknown>): string {
+  return RANK_FIELD_KEYS.map((key) => rowValue(row, key)).join('_');
+}
+
+function permutations(values: readonly string[]): readonly string[] {
+  if (values.length <= 1) {
+    return values.length === 1 ? [values[0]!] : [];
+  }
+
+  return values.flatMap((value, index) =>
+    permutations([...values.slice(0, index), ...values.slice(index + 1)]).map((rest) => `${value}_${rest}`),
+  );
+}
+
+function emptyRowsBySheet(): Record<RequiredSheet, Record<string, unknown>[]> {
+  return REQUIRED_PACKAGE_SHEETS.reduce(
+    (accumulator, sheet) => ({
+      ...accumulator,
+      [sheet]: [],
+    }),
+    {} as Record<RequiredSheet, Record<string, unknown>[]>,
+  );
+}
+
+function headersBySheetFromWorkbook(workbook: XLSX.WorkBook): Record<RequiredSheet, readonly string[]> {
+  return REQUIRED_PACKAGE_SHEETS.reduce(
+    (accumulator, sheet) => ({
+      ...accumulator,
+      [sheet]: sheetHeader(workbook, sheet),
+    }),
+    {} as Record<RequiredSheet, readonly string[]>,
+  );
+}
+
 function replaceWorkbookSheet(
   workbook: XLSX.WorkBook,
   sheet: RequiredSheet,
@@ -376,11 +450,16 @@ function replaceWorkbookSheet(
 
 function rewriteDomainValues(row: Record<string, unknown>, domainKey: string): Record<string, unknown> {
   const next = { ...row };
+  const existingDomainKey = typeof next.domain_key === 'string' ? next.domain_key : '';
   if ('domain_key' in next) {
     next.domain_key = domainKey;
   }
   if (typeof next.lookup_key === 'string') {
-    next.lookup_key = next.lookup_key.replace(/^.*?::/, `${domainKey}::`);
+    if (existingDomainKey && next.lookup_key.startsWith(`${existingDomainKey}::`)) {
+      next.lookup_key = `${domainKey}::${next.lookup_key.slice(`${existingDomainKey}::`.length)}`;
+    } else if (existingDomainKey && next.lookup_key.startsWith(`${existingDomainKey}_`)) {
+      next.lookup_key = `${domainKey}_${next.lookup_key.slice(`${existingDomainKey}_`.length)}`;
+    }
   }
   return next;
 }
@@ -810,6 +889,281 @@ function compileRowsForSheet(
   throw new Error(`Unsupported sheet source ${sheetPlan.source} for ${sheetPlan.sheet}.`);
 }
 
+function validateCompiledWorkbookRows(
+  rowsBySheet: Readonly<Record<RequiredSheet, readonly Record<string, unknown>[]>>,
+  headersBySheet: Readonly<Record<RequiredSheet, readonly string[]>>,
+  templateHeadersBySheet: Readonly<Record<RequiredSheet, readonly string[]>>,
+  args: AuthoringPackageCompilerArgs,
+): void {
+  const diagnostics: AuthoringCompilerDiagnostic[] = [];
+  const activeRowsBySheet = Object.fromEntries(
+    REQUIRED_PACKAGE_SHEETS.map((sheet) => [sheet, rowsBySheet[sheet].filter(isActiveRow)]),
+  ) as Record<RequiredSheet, Record<string, unknown>[]>;
+
+  for (const sheet of REQUIRED_PACKAGE_SHEETS) {
+    if (!rowsBySheet[sheet]) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'OUTPUT_SHEET_MISSING',
+        message: `Generated workbook is missing required sheet ${sheet}.`,
+        sheet,
+      });
+      continue;
+    }
+
+    if (!sameHeaders(headersBySheet[sheet], templateHeadersBySheet[sheet])) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'OUTPUT_HEADER_MISMATCH',
+        message: `${sheet} headers do not match the template/import contract exactly.`,
+        sheet,
+      });
+    }
+
+    const seenLookupKeys = new Set<string>();
+    for (const [rowIndex, row] of rowsBySheet[sheet].entries()) {
+      const rowNumber = rowIndex + 2;
+      const lookupKey = rowValue(row, 'lookup_key');
+      if (lookupKey) {
+        const duplicateKey = `${sheet}::${lookupKey}`;
+        if (seenLookupKeys.has(duplicateKey)) {
+          diagnostics.push({
+            severity: 'error',
+            code: 'DUPLICATE_LOOKUP_KEY',
+            message: `${sheet} has duplicate lookup_key ${lookupKey} at row ${rowNumber}.`,
+            sheet,
+          });
+        }
+        seenLookupKeys.add(duplicateKey);
+      }
+
+      for (const header of headersBySheet[sheet]) {
+        if (rowValue(row, header) === '') {
+          diagnostics.push({
+            severity: 'error',
+            code: 'BLANK_REQUIRED_FIELD',
+            message: `${sheet} row ${rowNumber} has a blank required field: ${header}.`,
+            sheet,
+          });
+        }
+      }
+    }
+  }
+
+  const metadataRows = activeRowsBySheet['00_Metadata'];
+  if (metadataRows.length !== 1) {
+    diagnostics.push({
+      severity: 'error',
+      code: 'METADATA_ROW_COUNT_INVALID',
+      message: `00_Metadata must contain exactly one active row; found ${metadataRows.length}.`,
+      sheet: '00_Metadata',
+    });
+  }
+
+  const signals = activeRowsBySheet['01_Signals'].filter((row) => rowValue(row, 'scored').toLowerCase() === 'true');
+  const signalKeys = signals.map((row) => rowValue(row, 'signal_key')).filter(Boolean);
+  const signalKeySet = new Set(signalKeys);
+  if (signals.length !== 4 || signalKeySet.size !== 4) {
+    diagnostics.push({
+      severity: 'error',
+      code: 'SCORED_SIGNAL_COUNT_INVALID',
+      message: `01_Signals must contain exactly four distinct active scored signals; found ${signals.length}.`,
+      sheet: '01_Signals',
+    });
+  }
+
+  const expectedPatternKeys = new Set(permutations(signalKeys));
+  if (expectedPatternKeys.size !== 24) {
+    diagnostics.push({
+      severity: 'error',
+      code: 'PATTERN_SET_INVALID',
+      message: `Expected 24 ranked patterns from the four scored signals; found ${expectedPatternKeys.size}.`,
+      sheet: '01_Signals',
+    });
+  }
+
+  const questionKeys = new Set(activeRowsBySheet['02_Questions'].map((row) => rowValue(row, 'question_key')));
+  const options = activeRowsBySheet['03_Options'];
+  const optionKeysByQuestion = new Map<string, Set<string>>();
+  for (const option of options) {
+    const questionKey = rowValue(option, 'question_key');
+    const optionKey = rowValue(option, 'option_key');
+    if (!questionKeys.has(questionKey)) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'OPTION_QUESTION_NOT_FOUND',
+        message: `03_Options references missing question_key ${questionKey}.`,
+        sheet: '03_Options',
+      });
+    }
+    const optionKeys = optionKeysByQuestion.get(questionKey) ?? new Set<string>();
+    optionKeys.add(optionKey);
+    optionKeysByQuestion.set(questionKey, optionKeys);
+  }
+
+  const weightedOptions = new Set<string>();
+  for (const weight of activeRowsBySheet['04_Option_Weights']) {
+    const questionKey = rowValue(weight, 'question_key');
+    const optionKey = rowValue(weight, 'option_key');
+    const signalKey = rowValue(weight, 'signal_key');
+    if (!questionKeys.has(questionKey)) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'WEIGHT_QUESTION_NOT_FOUND',
+        message: `04_Option_Weights references missing question_key ${questionKey}.`,
+        sheet: '04_Option_Weights',
+      });
+    }
+    if (!optionKeysByQuestion.get(questionKey)?.has(optionKey)) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'WEIGHT_OPTION_NOT_FOUND',
+        message: `04_Option_Weights references missing option ${questionKey}/${optionKey}.`,
+        sheet: '04_Option_Weights',
+      });
+    }
+    if (!signalKeySet.has(signalKey)) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'WEIGHT_SIGNAL_NOT_FOUND',
+        message: `04_Option_Weights references missing signal_key ${signalKey}.`,
+        sheet: '04_Option_Weights',
+      });
+    }
+    weightedOptions.add(`${questionKey}::${optionKey}`);
+  }
+
+  for (const option of options.filter((row) => rowValue(row, 'is_scored').toLowerCase() === 'true')) {
+    const optionKey = `${rowValue(option, 'question_key')}::${rowValue(option, 'option_key')}`;
+    if (!weightedOptions.has(optionKey)) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'SCORED_OPTION_WEIGHT_MISSING',
+        message: `Scored option ${optionKey} has no option_signal_weights row.`,
+        sheet: '04_Option_Weights',
+      });
+    }
+  }
+
+  for (const sheet of SCORE_SHAPE_SPECIFIC_SECTIONS) {
+    const coverage = new Set<string>();
+    for (const row of activeRowsBySheet[sheet]) {
+      const scoreShape = rowValue(row, 'score_shape');
+      const patternKey = rowValue(row, 'pattern_key');
+      if (!SUPPORTED_SCORE_SHAPES.includes(scoreShape as (typeof SUPPORTED_SCORE_SHAPES)[number])) {
+        diagnostics.push({
+          severity: 'error',
+          code: 'UNSUPPORTED_SCORE_SHAPE',
+          message: `${sheet} has unsupported score_shape ${scoreShape}.`,
+          sheet,
+        });
+      }
+      if (!expectedPatternKeys.has(patternKey)) {
+        diagnostics.push({
+          severity: 'error',
+          code: 'UNKNOWN_PATTERN_KEY',
+          message: `${sheet} has pattern_key ${patternKey}, which is not one of the 24 signal permutations.`,
+          sheet,
+        });
+      }
+      if (RANK_FIELD_KEYS.every((key) => key in row) && patternKey !== expectedPatternKey(row)) {
+        diagnostics.push({
+          severity: 'error',
+          code: 'PATTERN_RANK_MISMATCH',
+          message: `${sheet} pattern_key ${patternKey} does not match rank_1 through rank_4 (${expectedPatternKey(row)}).`,
+          sheet,
+        });
+      }
+      coverage.add(`${patternKey}::${scoreShape}`);
+    }
+
+    for (const patternKey of expectedPatternKeys) {
+      for (const scoreShape of SUPPORTED_SCORE_SHAPES) {
+        if (!coverage.has(`${patternKey}::${scoreShape}`)) {
+          diagnostics.push({
+            severity: 'error',
+            code: 'SCORE_SHAPE_COVERAGE_MISSING',
+            message: `${sheet} is missing coverage for pattern_key ${patternKey} and score_shape ${scoreShape}.`,
+            sheet,
+          });
+        }
+      }
+    }
+  }
+
+  const signalRoleCoverage = new Set(
+    activeRowsBySheet['08_Signal_Roles'].map((row) => `${rowValue(row, 'signal_key')}::${rowValue(row, 'rank_position')}`),
+  );
+  for (const signalKey of signalKeys) {
+    for (const rankPosition of ['1', '2', '3', '4']) {
+      if (!signalRoleCoverage.has(`${signalKey}::${rankPosition}`)) {
+        diagnostics.push({
+          severity: 'error',
+          code: 'SIGNAL_ROLE_COVERAGE_MISSING',
+          message: `08_Signal_Roles is missing signal_key ${signalKey} at rank_position ${rankPosition}.`,
+          sheet: '08_Signal_Roles',
+        });
+      }
+    }
+  }
+
+  for (const sheet of PATTERN_ONLY_SECTIONS) {
+    const coverage = new Set(activeRowsBySheet[sheet].map((row) => rowValue(row, 'pattern_key')));
+    for (const patternKey of expectedPatternKeys) {
+      if (!coverage.has(patternKey)) {
+        diagnostics.push({
+          severity: 'error',
+          code: 'PATTERN_COVERAGE_MISSING',
+          message: `${sheet} is missing coverage for pattern_key ${patternKey}.`,
+          sheet,
+        });
+      }
+    }
+  }
+
+  const importSummary = activeRowsBySheet['16_Import_Summary'][0];
+  if (importSummary) {
+    const runtimeDefinitionRowCount =
+      rowsBySheet['00_Metadata'].length +
+      rowsBySheet['01_Signals'].length +
+      rowsBySheet['02_Questions'].length +
+      rowsBySheet['03_Options'].length +
+      rowsBySheet['04_Option_Weights'].length;
+    const runtimeResultContentRowCount =
+      rowsBySheet['05_Context'].length +
+      rowsBySheet['06_Orientation'].length +
+      rowsBySheet['07_Recognition'].length +
+      rowsBySheet['08_Signal_Roles'].length +
+      rowsBySheet['09_Pattern_Mechanics'].length +
+      rowsBySheet['10_Pattern_Synthesis'].length +
+      rowsBySheet['11_Strengths'].length +
+      rowsBySheet['12_Narrowing'].length +
+      rowsBySheet['13_Application'].length +
+      rowsBySheet['14_Closing_Integration'].length;
+    const expectedCounts = {
+      runtime_definition_row_count: runtimeDefinitionRowCount,
+      runtime_result_content_row_count: runtimeResultContentRowCount,
+      preview_row_count: rowsBySheet['15_Report_Preview'].length,
+    };
+
+    for (const [field, expected] of Object.entries(expectedCounts)) {
+      const actual = Number(rowValue(importSummary, field));
+      if (actual !== expected) {
+        diagnostics.push({
+          severity: 'error',
+          code: 'IMPORT_SUMMARY_ROW_COUNT_MISMATCH',
+          message: `16_Import_Summary ${field} must be ${expected}; found ${rowValue(importSummary, field)}.`,
+          sheet: '16_Import_Summary',
+        });
+      }
+    }
+  }
+
+  if (diagnostics.length > 0) {
+    throw new AuthoringCompilerValidationError(diagnostics);
+  }
+}
+
 export function compileAuthoringPackageWorkbook(args: AuthoringPackageCompilerArgs): AuthoringPackageWriteResult {
   const templatePath = resolveProjectPath(args.templateWorkbook);
   const outputPath = resolveProjectPath(args.outputWorkbook);
@@ -828,6 +1182,8 @@ export function compileAuthoringPackageWorkbook(args: AuthoringPackageCompilerAr
 
   const workbook = XLSX.readFile(templatePath, { cellDates: false });
   const rowCounts = Object.fromEntries(REQUIRED_PACKAGE_SHEETS.map((sheet) => [sheet, 0])) as Record<RequiredSheet, number>;
+  const rowsBySheet = emptyRowsBySheet();
+  const headersBySheet = headersBySheetFromWorkbook(templateWorkbook);
   const deferredImportSummary = plan.plannedSheets.find((sheet) => sheet.sheet === '16_Import_Summary');
 
   for (const sheetPlan of plan.plannedSheets) {
@@ -837,6 +1193,7 @@ export function compileAuthoringPackageWorkbook(args: AuthoringPackageCompilerAr
 
     const headers = sheetHeader(templateWorkbook, sheetPlan.sheet);
     const rows = compileRowsForSheet(sheetPlan, templateWorkbook, config, args, rowCounts);
+    rowsBySheet[sheetPlan.sheet] = [...rows];
     replaceWorkbookSheet(workbook, sheetPlan.sheet, headers, rows);
     rowCounts[sheetPlan.sheet] = rows.length;
   }
@@ -846,10 +1203,12 @@ export function compileAuthoringPackageWorkbook(args: AuthoringPackageCompilerAr
   }
   const importSummaryHeaders = sheetHeader(templateWorkbook, deferredImportSummary.sheet);
   const importSummaryRows = compileRowsForSheet(deferredImportSummary, templateWorkbook, config, args, rowCounts);
+  rowsBySheet[deferredImportSummary.sheet] = [...importSummaryRows];
   replaceWorkbookSheet(workbook, deferredImportSummary.sheet, importSummaryHeaders, importSummaryRows);
   rowCounts[deferredImportSummary.sheet] = importSummaryRows.length;
 
   workbook.SheetNames = REQUIRED_PACKAGE_SHEETS.filter((sheet) => workbook.SheetNames.includes(sheet));
+  validateCompiledWorkbookRows(rowsBySheet, headersBySheet, headersBySheet, args);
   mkdirSync(path.dirname(outputPath), { recursive: true });
   XLSX.writeFile(workbook, outputPath, { bookType: 'xlsx' });
   const audit = auditRankedPatternWorkbookFile(outputPath);

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import XLSX from 'xlsx';
@@ -27,6 +27,28 @@ const leadershipArgs: AuthoringPackageCompilerArgs = {
   write: false,
   overwrite: false,
 };
+
+function copyGeneratedDir(tempRoot: string): string {
+  const generatedDir = path.join(tempRoot, 'generated');
+  cpSync('content/authoring/generated', generatedDir, { recursive: true });
+  return generatedDir;
+}
+
+function mutatePsv(generatedDir: string, fileName: string, mutate: (lines: string[]) => string[]): void {
+  const filePath = path.join(generatedDir, fileName);
+  const lines = readFileSync(filePath, 'utf8').split(/\r?\n/);
+  writeFileSync(filePath, mutate(lines).join('\n'));
+}
+
+function writeWithGeneratedDir(generatedDir: string, tempRoot: string): void {
+  compileAuthoringPackageWorkbook({
+    ...leadershipArgs,
+    generatedDir,
+    outputWorkbook: path.join(tempRoot, 'compiled.xlsx'),
+    write: true,
+    overwrite: false,
+  });
+}
 
 test('dry-run discovers Leadership Approach authoring config metadata', () => {
   const plan = planAuthoringPackageCompile(leadershipArgs);
@@ -196,6 +218,140 @@ test('output workbook passes package audit for Leadership Approach', () => {
     assert.equal(audit.pass, true);
     assert.equal(audit.diagnosticCounts.error, 0);
     assert.equal(audit.normalisationDiagnosticCounts.error, 0);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write fails when generated rows contain duplicate lookup keys', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-duplicate-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePsv(generatedDir, '06-orientation-leadership-approach.psv', (lines) => {
+      const firstDataCells = lines[1]!.split('|');
+      const duplicateLookupKey = firstDataCells[firstDataCells.length - 1]!;
+      const secondDataCells = lines[2]!.split('|');
+      secondDataCells[secondDataCells.length - 1] = duplicateLookupKey;
+      return [lines[0]!, lines[1]!, secondDataCells.join('|'), ...lines.slice(3)];
+    });
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /DUPLICATE_LOOKUP_KEY/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write fails when a generated section source is missing', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-missing-section-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    for (const fileName of readdirSync(generatedDir)) {
+      if (fileName.startsWith('14-closing-integration-leadership-approach')) {
+        rmSync(path.join(generatedDir, fileName), { force: true });
+      }
+    }
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /Generated result-language source is missing for 14_Closing_Integration/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write fails when generated score-shape coverage is missing', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-score-shape-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePsv(generatedDir, '06-orientation-leadership-approach.psv', (lines) => [lines[0]!, ...lines.slice(2)]);
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /SCORE_SHAPE_COVERAGE_MISSING/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write fails when a signal role rank is missing', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-signal-role-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePsv(generatedDir, '08-signal-roles-leadership-approach.psv', (lines) => [lines[0]!, ...lines.slice(2)]);
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /SIGNAL_ROLE_COVERAGE_MISSING/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write fails when pattern_key does not match ranked signals', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-rank-mismatch-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePsv(generatedDir, '07-recognition-leadership-approach.psv', (lines) => {
+      const cells = lines[1]!.split('|');
+      cells[1] = 'results_process_people_vision';
+      return [lines[0]!, cells.join('|'), ...lines.slice(2)];
+    });
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /PATTERN_RANK_MISMATCH/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write fails when generated text fields are blank', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-blank-field-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePsv(generatedDir, '06-orientation-leadership-approach.psv', (lines) => {
+      const headers = lines[0]!.split('|');
+      const titleIndex = headers.indexOf('orientation_title');
+      const cells = lines[1]!.split('|');
+      cells[titleIndex] = '';
+      return [lines[0]!, cells.join('|'), ...lines.slice(2)];
+    });
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /BLANK_REQUIRED_FIELD/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write fails when generated score shape is unsupported', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-unsupported-shape-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePsv(generatedDir, '09-pattern-mechanics-leadership-approach.psv', (lines) => {
+      const headers = lines[0]!.split('|');
+      const shapeIndex = headers.indexOf('score_shape');
+      const cells = lines[1]!.split('|');
+      cells[shapeIndex] = 'unsupported_shape';
+      return [lines[0]!, cells.join('|'), ...lines.slice(2)];
+    });
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /UNSUPPORTED_SCORE_SHAPE/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write regenerates import summary row counts from compiled workbook rows', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-summary-'));
+  const outputWorkbook = path.join(tempRoot, 'compiled.xlsx');
+  try {
+    compileAuthoringPackageWorkbook({
+      ...leadershipArgs,
+      outputWorkbook,
+      write: true,
+      overwrite: false,
+    });
+    const workbook = XLSX.readFile(outputWorkbook);
+    const summaryRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets['16_Import_Summary']!, {
+      defval: '',
+      raw: true,
+    });
+
+    assert.equal(String(summaryRows[0]?.runtime_definition_row_count), '149');
+    assert.equal(String(summaryRows[0]?.runtime_result_content_row_count), '713');
+    assert.equal(String(summaryRows[0]?.preview_row_count), '4');
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
