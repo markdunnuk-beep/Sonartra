@@ -12,13 +12,13 @@ export default async function RankedPatternPackageWorkflowPage() {
     <PageFrame className="space-y-8">
       <PageHeader
         eyebrow="Ranked-pattern admin"
-        title="Package-first ranked-pattern workflow"
-        description="Start from a workbook package, audit it, resolve the compatible assessment draft from metadata, apply package data to draft only, run publish audit, and publish explicitly."
+        title="Import ranked-pattern assessment"
+        description="Upload a completed assessment workbook, check it, import it into a draft, then publish when ready."
       />
 
       <SurfaceCard accent className="space-y-4 p-5 lg:p-6">
         <div className="flex flex-wrap items-center gap-2">
-          <LabelPill>Package-first workflow</LabelPill>
+          <LabelPill>Workbook-first workflow</LabelPill>
           <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
             No assessment record required
           </LabelPill>
@@ -26,7 +26,7 @@ export default async function RankedPatternPackageWorkflowPage() {
         <SecondaryText>
           The workbook metadata supplies the assessment key, title, package version, and domain key.
           The workflow will create or resolve a compatible ranked-pattern shell and draft from that
-          metadata before apply or publish actions are enabled.
+          metadata before import or publish actions are enabled.
         </SecondaryText>
         <SecondaryText>
           If the package key already belongs to a legacy or incompatible builder record, the action
@@ -38,4 +38,3 @@ export default async function RankedPatternPackageWorkflowPage() {
     </PageFrame>
   );
 }
-

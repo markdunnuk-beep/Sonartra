@@ -44,11 +44,11 @@ test('assessment dashboard create actions route through the ranked-pattern workf
   assert.match(source, /assessment\.modeLabel/);
   assert.match(source, /rankedPatternWorkflowHref/);
   assert.match(source, /\/admin\/assessments\/ranked-pattern\/\$\{assessment\.assessmentKey\}\/workflow/);
-  assert.match(source, /Start ranked-pattern package workflow/);
-  assert.match(source, /Open package workflow/);
-  assert.match(source, /Active ranked-pattern packages/);
-  assert.match(source, /Open import panel/);
-  assert.match(source, /Create ranked-pattern draft/);
+  assert.match(source, /Import new assessment/);
+  assert.match(source, /Open import workflow/);
+  assert.match(source, /Published assessments/);
+  assert.match(source, /Open workflow/);
+  assert.match(source, /Create draft/);
   assert.match(source, /isRankedPatternPackageCompatibleAssessment/);
   assert.doesNotMatch(source, /Creates a new assessment with its first editable draft/);
 });

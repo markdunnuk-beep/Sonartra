@@ -140,7 +140,7 @@ function AssessmentCard({
     ? rankedPatternWorkflowHref
     : `${assessment.actionHref}/versions/new`;
   const reviewLabel = isCompatibleRankedPattern
-    ? 'Open import panel'
+    ? 'Open workflow'
     : assessment.latestDraftReadiness === 'ready'
       ? 'Review and publish'
       : 'Review draft';
@@ -152,7 +152,7 @@ function AssessmentCard({
       : isCompatibleRankedPattern
         ? 'Open workflow'
         : 'Open legacy builder';
-  const createVersionLabel = isCompatibleRankedPattern ? 'Create ranked-pattern draft' : 'Create draft version';
+  const createVersionLabel = isCompatibleRankedPattern ? 'Create draft' : 'Create draft version';
 
   return (
     <SurfaceCard className={cn('p-5 lg:p-6', tone === 'legacy' ? 'border-white/8 bg-white/[0.025]' : '')}>
@@ -172,7 +172,7 @@ function AssessmentCard({
               </LabelPill>
               {tone === 'active' ? (
                 <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
-                  Active package workflow
+                  Published assessment
                 </LabelPill>
               ) : null}
               {tone === 'legacy' ? (
@@ -268,16 +268,16 @@ export function AdminAssessmentsDashboard({
               Assessment packages
             </h1>
             <p className="max-w-2xl text-sm leading-7 text-white/66">
-              Operate ranked-pattern assessment packages, draft imports, publish audits, and explicit release decisions from one active workflow.
+              Import ranked-pattern assessment workbooks, manage drafts, and publish only when the package is ready.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href="/admin/assessments/ranked-pattern/workflow" variant="primary">
-              Start ranked-pattern package workflow
+              Import new assessment
             </ButtonLink>
             <ButtonLink href="/admin/assessments/ranked-pattern/workflow">
-              Open package workflow
+              Open import workflow
             </ButtonLink>
             <Link
               className={cn(
@@ -288,10 +288,10 @@ export function AdminAssessmentsDashboard({
               )}
               href={showArchived ? '/admin/assessments' : '/admin/assessments?showArchived=1'}
             >
-              {showArchived ? 'Hide archived / legacy builders' : `Show archived / legacy builders${summary.archivedCount > 0 ? ` (${summary.archivedCount})` : ''}`}
+              {showArchived ? 'Hide archived or test records' : `Show archived or test records${summary.archivedCount > 0 ? ` (${summary.archivedCount})` : ''}`}
             </Link>
             <p className="text-sm text-white/52">
-              Old test records and builder-created assessments stay secondary.
+              Test and older builder-created records stay secondary.
             </p>
           </div>
         </div>
@@ -340,9 +340,9 @@ export function AdminAssessmentsDashboard({
 
       <section className="sonartra-section">
         <SectionHeader
-          eyebrow="Active ranked-pattern packages"
-          title="Package workflow"
-          description="Open the dedicated ranked-pattern workflow for draft creation, import audit, dry-run, apply, publish audit, and explicit publish."
+          eyebrow="Published assessments"
+          title="Ranked-pattern assessment packages"
+          description="Open the guided workflow for draft creation, workbook checks, import preview, import to draft, readiness checks, and publish."
         />
 
         {activeRankedPatternAssessments.length === 0 ? (
@@ -351,7 +351,7 @@ export function AdminAssessmentsDashboard({
             description={showArchived ? 'No active ranked-pattern packages are available.' : 'Create or restore a ranked-pattern package before importing.'}
             action={
               <ButtonLink href="/admin/assessments/ranked-pattern/workflow" variant="primary">
-                Start ranked-pattern package workflow
+                Import new assessment
               </ButtonLink>
             }
           />
@@ -366,9 +366,9 @@ export function AdminAssessmentsDashboard({
 
       <section className="sonartra-section">
         <SectionHeader
-          eyebrow="Draft/import work"
+          eyebrow="Drafts and imports"
           title="Drafts in progress"
-          description="Packages with draft or import work that needs audit, apply, or publish-readiness review."
+          description="Packages with draft or import work that needs workbook checks, import, or publish-readiness review."
         />
 
         {draftImportAssessments.length === 0 ? (
@@ -388,7 +388,7 @@ export function AdminAssessmentsDashboard({
 
       <section className="sonartra-section">
         <SectionHeader
-          eyebrow="Legacy builders"
+          eyebrow="Archived or test records"
           title="Archived builder paths"
           description="Historical single-domain, multi-domain, and test records are available for maintenance only. They are not the primary package workflow."
         />
