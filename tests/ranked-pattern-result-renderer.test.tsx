@@ -161,6 +161,85 @@ test('ranked-pattern result renderer displays persisted reader-first sections in
   assert.match(markup, /Take the whole pattern forward/);
 });
 
+test('ranked-pattern signal profile maps persisted 08_Signal_Roles fields explicitly', () => {
+  const payload = rankedPayload({
+    signalRoles: [
+      {
+        lookupKey: 'role_alpha_1',
+        signalKey: 'alpha',
+        rankPosition: 1,
+        fieldValues: {
+          rank_position: '1',
+          rank_role: 'dominant',
+          title: 'Alpha role title',
+          description: 'Alpha role meaning belongs in the intro.',
+          productive_expression: 'Alpha productive expression belongs under what this helps.',
+          risk_pattern: 'Alpha risk pattern belongs under watch for.',
+          development_note: 'Alpha development note belongs under try this.',
+        },
+      },
+      {
+        lookupKey: 'role_beta_2',
+        signalKey: 'beta',
+        rankPosition: 2,
+        fieldValues: {
+          rank_position: '2',
+          rank_role: 'secondary',
+          title: 'Beta role title',
+          description: 'Beta role meaning belongs in the intro.',
+          productive_expression: 'Beta productive expression belongs under what this helps.',
+          risk_pattern: 'Beta risk pattern belongs under watch for.',
+          development_note: 'Beta development note belongs under try this.',
+        },
+      },
+      {
+        lookupKey: 'role_gamma_3',
+        signalKey: 'gamma',
+        rankPosition: 3,
+        fieldValues: {
+          rank_position: '3',
+          rank_role: 'tertiary',
+          title: 'Gamma role title',
+          description: 'Gamma role meaning belongs in the intro.',
+          productive_expression: 'Gamma productive expression belongs under what this helps.',
+          risk_pattern: 'Gamma risk pattern belongs under watch for.',
+          development_note: 'Gamma development note belongs under try this.',
+        },
+      },
+      {
+        lookupKey: 'role_delta_4',
+        signalKey: 'delta',
+        rankPosition: 4,
+        fieldValues: {
+          rank_position: '4',
+          rank_role: 'least_expressed',
+          title: 'Delta role title',
+          description: 'Delta role meaning belongs in the intro.',
+          productive_expression: 'Delta productive expression belongs under what this helps.',
+          risk_pattern: 'Delta risk pattern belongs under watch for.',
+          development_note: 'Delta development note belongs under try this.',
+        },
+      },
+    ],
+  });
+  const markup = renderToStaticMarkup(<RankedPatternResultReport payload={payload} />);
+
+  assert.match(markup, /Alpha role title/);
+  assert.match(markup, /Alpha role meaning belongs in the intro/);
+  assert.match(markup, /What this helps[\s\S]*Alpha productive expression belongs under what this helps/);
+  assert.match(markup, /Watch for[\s\S]*Alpha risk pattern belongs under watch for/);
+  assert.match(markup, /Try this[\s\S]*Alpha development note belongs under try this/);
+  assert.match(markup, /Main route/);
+  assert.match(markup, /Supporting route/);
+  assert.match(markup, /Extending range/);
+  assert.match(markup, /Deliberate range/);
+  assert.doesNotMatch(markup, />dominant</);
+  assert.doesNotMatch(markup, />secondary</);
+  assert.doesNotMatch(markup, />tertiary</);
+  assert.doesNotMatch(markup, />least_expressed</);
+  assert.doesNotMatch(markup, /undefined|null/);
+});
+
 test('ranked-pattern result renderer reads persisted ranks, percentages, score shape, and pattern key', () => {
   const markup = renderToStaticMarkup(<RankedPatternResultReport payload={rankedPayload()} />);
 

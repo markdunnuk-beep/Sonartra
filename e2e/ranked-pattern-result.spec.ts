@@ -6,7 +6,7 @@ const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 
 const viewports = [
   { name: 'desktop', width: 1440, height: 1000 },
-  { name: 'tablet', width: 768, height: 1024 },
+  { name: 'tablet', width: 1024, height: 900 },
   { name: 'mobile', width: 390, height: 844 },
 ] as const;
 
@@ -21,7 +21,7 @@ for (const viewport of viewports) {
     });
 
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.goto(`${baseUrl}/draft-ranked-pattern-result`);
+    await page.goto(`${baseUrl}/draft-ranked-pattern-result`, { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('[data-ranked-pattern-result="true"]')).toBeVisible();
     await expect(page.getByRole('heading', { level: 1, name: /clear first-route pattern/i })).toBeVisible();
@@ -76,6 +76,7 @@ for (const viewport of viewports) {
     await expect(page.getByText('What this helps')).toHaveCount(4);
     await expect(page.getByText('Watch for')).toHaveCount(4);
     await expect(page.getByText('Try this')).toHaveCount(4);
+    await expect(page.getByText('Use this role as one part of the whole pattern')).toHaveCount(4);
 
     const signalRoleLayout = await page.evaluate(() => {
       const groups = [...document.querySelectorAll('[data-ranked-pattern-signal-role-group="true"]')];

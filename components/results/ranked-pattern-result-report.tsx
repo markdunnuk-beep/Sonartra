@@ -55,6 +55,7 @@ const rankedPatternSections = [
 
 const signatureRoleLabelsByRank = ['Main route', 'Adds energy', 'Support', 'Use deliberately'] as const;
 const signatureTonesByRank = ['primary', 'secondary', 'support', 'stretch'] as const;
+const signalRoleLabelsByRank = ['Main route', 'Supporting route', 'Extending range', 'Deliberate range'] as const;
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
@@ -69,6 +70,23 @@ function readText(record: RecordValue, ...keys: readonly string[]): string | nul
     const value = record[key];
     if (typeof value === 'string' && value.trim().length > 0) {
       return value.trim();
+    }
+  }
+
+  return null;
+}
+
+function readNumber(record: RecordValue, ...keys: readonly string[]): number | null {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string' && value.trim().length > 0) {
+      const numericValue = Number(value);
+      if (Number.isFinite(numericValue)) {
+        return numericValue;
+      }
     }
   }
 
@@ -372,18 +390,37 @@ function RecognitionSection({ section }: { section: PayloadSection }) {
 
 function SignalRolesSection({ items }: { items: readonly PayloadListItem[] }) {
   const orderedItems = [...items].sort(
-    (left, right) => (left.rankPosition ?? 0) - (right.rankPosition ?? 0),
+    (left, right) => {
+      const leftRank = left.rankPosition ?? readNumber(left.fieldValues, 'rankPosition', 'rank_position') ?? 0;
+      const rightRank = right.rankPosition ?? readNumber(right.fieldValues, 'rankPosition', 'rank_position') ?? 0;
+      return leftRank - rightRank;
+    },
   );
 
   return (
     <SchemaSection id="signal-roles" label="Signal Profile">
       <div className="space-y-4">
         {orderedItems.map((item, index) => {
-          const { title, bodyEntries } = sectionTextGrid(item);
+          const title = readText(item.fieldValues, 'title');
+          const description = readText(item.fieldValues, 'description');
+          const productiveExpression = readText(
+            item.fieldValues,
+            'productiveExpression',
+            'productive_expression',
+          );
+          const riskPattern = readText(item.fieldValues, 'riskPattern', 'risk_pattern');
+          const developmentNote = readText(item.fieldValues, 'developmentNote', 'development_note');
+          const rankPosition = item.rankPosition
+            ?? readNumber(item.fieldValues, 'rankPosition', 'rank_position')
+            ?? index + 1;
+          const fieldGroups = [
+            productiveExpression ? ['What this helps', productiveExpression] : null,
+            riskPattern ? ['Watch for', riskPattern] : null,
+            developmentNote ? ['Try this', developmentNote] : null,
+          ].filter((entry): entry is [string, string] => entry !== null);
           const isPrimaryRole = index === 0 || index === 1;
           const isDominantRole = index === 0;
           const isStretchRole = index === 3;
-          const fieldGroups = bodyEntries.slice(0, 3);
 
           return (
             <article
@@ -399,10 +436,10 @@ function SignalRolesSection({ items }: { items: readonly PayloadListItem[] }) {
             >
               <div>
                 <span className="draft-rank-token flex h-12 w-12 items-center justify-center rounded-full border border-[#F3F1EA]/12 bg-[#101312]/62 font-mono text-lg text-[#F3F1EA]">
-                  {item.rankPosition ?? index + 1}
+                  {rankPosition}
                 </span>
                 <FieldLabel tone={isStretchRole ? 'warm' : isPrimaryRole ? 'teal' : 'neutral'}>
-                  {signatureRoleLabelsByRank[index] ?? 'Support'}
+                  {signalRoleLabelsByRank[rankPosition - 1] ?? signalRoleLabelsByRank[index] ?? 'Supporting route'}
                 </FieldLabel>
                 {item.signalKey ? (
                   <h3 className="mt-3 text-xl font-semibold text-[#F3F1EA]">{toLabel(item.signalKey)}</h3>
@@ -414,15 +451,18 @@ function SignalRolesSection({ items }: { items: readonly PayloadListItem[] }) {
                     {title}
                   </h4>
                 ) : null}
+                {description ? (
+                  <p className="mt-3 max-w-3xl text-sm leading-6 text-[#B8BDB7]/90">{description}</p>
+                ) : null}
                 <div className="mt-5 grid auto-rows-fr items-stretch gap-3 lg:grid-cols-3">
-                  {fieldGroups.map(([key, value], fieldIndex) => (
+                  {fieldGroups.map(([label, value], fieldIndex) => (
                     <Panel
                       className="flex h-full min-h-[7.5rem] flex-col bg-[#151A18]/78 p-4"
                       data-ranked-pattern-signal-role-card="true"
-                      key={key}
+                      key={label}
                     >
                       <FieldLabel tone={fieldIndex === 1 && isStretchRole ? 'warm' : 'neutral'}>
-                        {fieldIndex === 0 ? 'What this helps' : fieldIndex === 1 ? 'Watch for' : 'Try this'}
+                        {label}
                       </FieldLabel>
                       <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/88">{value}</p>
                     </Panel>
