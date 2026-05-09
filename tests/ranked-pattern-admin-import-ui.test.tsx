@@ -99,7 +99,8 @@ test('workbook path field exposes long path affordances without upload storage',
   assert.match(panelSource, /sourcePathFileName/);
   assert.match(panelSource, /title=\{sourcePath\}/);
   assert.match(panelSource, /Selected package:/);
-  assert.match(panelSource, /Upload storage is not wired yet/);
+  assert.match(panelSource, /Upload UI is not wired yet/);
+  assert.match(panelSource, /private storage references are resolved server-side/);
 });
 
 test('admin copy keeps versioning and persisted-result boundaries explicit', () => {
