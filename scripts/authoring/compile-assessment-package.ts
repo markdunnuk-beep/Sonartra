@@ -68,6 +68,38 @@ const RANK_FIELD_KEYS = Object.freeze([
   'rank_3_signal_key',
   'rank_4_signal_key',
 ] as const);
+const PATTERN_LIST_LINKAGE_POLICIES = Object.freeze({
+  '11_Strengths': {
+    linkField: 'linked_signal_key',
+    expectedRanksByPriority: Object.freeze({ 1: 1, 2: 2, 3: 3 }),
+    mismatchCode: '11_STRENGTH_LINKED_SIGNAL_MISMATCH',
+    duplicateCode: '11_STRENGTH_LINKED_SIGNAL_DUPLICATE',
+    unknownCode: '11_STRENGTH_LINKED_SIGNAL_UNKNOWN',
+  },
+  '12_Narrowing': {
+    linkField: 'missing_range_signal_key',
+    expectedRanksByPriority: Object.freeze({ 1: 2, 2: 3, 3: 4 }),
+    mismatchCode: '12_NARROWING_MISSING_RANGE_MISMATCH',
+    duplicateCode: '12_NARROWING_MISSING_RANGE_DUPLICATE',
+    unknownCode: '12_NARROWING_MISSING_RANGE_UNKNOWN',
+  },
+  '13_Application': {
+    linkField: 'linked_signal_key',
+    expectedRanksByPriority: Object.freeze({ 1: 1, 2: 2, 3: 4 }),
+    mismatchCode: '13_APPLICATION_LINKED_SIGNAL_POLICY_MISMATCH',
+    duplicateCode: '13_APPLICATION_LINKED_SIGNAL_DUPLICATE',
+    unknownCode: '13_APPLICATION_LINKED_SIGNAL_UNKNOWN',
+  },
+} as const satisfies Record<
+  (typeof PATTERN_ONLY_SECTIONS)[number],
+  {
+    readonly linkField: string;
+    readonly expectedRanksByPriority: Readonly<Record<1 | 2 | 3, 1 | 2 | 3 | 4>>;
+    readonly mismatchCode: string;
+    readonly duplicateCode: string;
+    readonly unknownCode: string;
+  }
+>);
 
 export type AuthoringPackageCompilerArgs = {
   readonly assessmentKey: string;
@@ -414,6 +446,95 @@ function permutations(values: readonly string[]): readonly string[] {
   return values.flatMap((value, index) =>
     permutations([...values.slice(0, index), ...values.slice(index + 1)]).map((rest) => `${value}_${rest}`),
   );
+}
+
+function rankedSignalsFromPatternKey(patternKey: string): readonly string[] {
+  return patternKey.split('_').map((signalKey) => signalKey.trim()).filter(Boolean);
+}
+
+function validatePatternListLinkage(input: {
+  readonly rows: readonly Record<string, unknown>[];
+  readonly sheet: (typeof PATTERN_ONLY_SECTIONS)[number];
+  readonly expectedPatternKeys: ReadonlySet<string>;
+  readonly diagnostics: AuthoringCompilerDiagnostic[];
+}): void {
+  const policy = PATTERN_LIST_LINKAGE_POLICIES[input.sheet];
+  const rowsByPattern = new Map<string, Record<string, unknown>[]>();
+  for (const row of input.rows) {
+    const patternKey = rowValue(row, 'pattern_key');
+    rowsByPattern.set(patternKey, [...(rowsByPattern.get(patternKey) ?? []), row]);
+  }
+
+  for (const patternKey of input.expectedPatternKeys) {
+    const patternRows = rowsByPattern.get(patternKey) ?? [];
+    if (patternRows.length !== 3) {
+      input.diagnostics.push({
+        severity: 'error',
+        code: 'PATTERN_LIST_ROW_COUNT_INVALID',
+        message: `${input.sheet} pattern_key ${patternKey} must have exactly 3 active rows; found ${patternRows.length}.`,
+        sheet: input.sheet,
+      });
+    }
+
+    const rowsByPriority = new Map<string, Record<string, unknown>[]>();
+    for (const row of patternRows) {
+      const priority = rowValue(row, 'priority');
+      rowsByPriority.set(priority, [...(rowsByPriority.get(priority) ?? []), row]);
+    }
+
+    for (const priority of ['1', '2', '3'] as const) {
+      const rowsForPriority = rowsByPriority.get(priority) ?? [];
+      if (rowsForPriority.length !== 1) {
+        input.diagnostics.push({
+          severity: 'error',
+          code: 'PATTERN_LIST_PRIORITY_COVERAGE_INVALID',
+          message: `${input.sheet} pattern_key ${patternKey} must have priority ${priority} exactly once; found ${rowsForPriority.length}.`,
+          sheet: input.sheet,
+        });
+      }
+    }
+
+    const patternSignals = rankedSignalsFromPatternKey(patternKey);
+    const seenLinkedSignals = new Set<string>();
+    for (const row of patternRows) {
+      const priority = Number(rowValue(row, 'priority')) as 1 | 2 | 3;
+      const linkedSignal = rowValue(row, policy.linkField);
+
+      if (seenLinkedSignals.has(linkedSignal)) {
+        input.diagnostics.push({
+          severity: 'error',
+          code: policy.duplicateCode,
+          message: `${input.sheet} pattern_key ${patternKey} repeats ${policy.linkField} ${linkedSignal}.`,
+          sheet: input.sheet,
+        });
+      }
+      seenLinkedSignals.add(linkedSignal);
+
+      if (!patternSignals.includes(linkedSignal)) {
+        input.diagnostics.push({
+          severity: 'error',
+          code: policy.unknownCode,
+          message: `${input.sheet} pattern_key ${patternKey} ${policy.linkField} ${linkedSignal} is not one of the ranked signals.`,
+          sheet: input.sheet,
+        });
+        continue;
+      }
+
+      const expectedRank = policy.expectedRanksByPriority[priority];
+      if (!expectedRank) {
+        continue;
+      }
+      const expectedSignal = patternSignals[expectedRank - 1];
+      if (linkedSignal !== expectedSignal) {
+        input.diagnostics.push({
+          severity: 'error',
+          code: policy.mismatchCode,
+          message: `${input.sheet} pattern_key ${patternKey} priority ${priority} expected ${expectedSignal} but found ${linkedSignal}.`,
+          sheet: input.sheet,
+        });
+      }
+    }
+  }
 }
 
 function emptyRowsBySheet(): Record<RequiredSheet, Record<string, unknown>[]> {
@@ -1119,6 +1240,12 @@ function validateCompiledWorkbookRows(
         });
       }
     }
+    validatePatternListLinkage({
+      rows: activeRowsBySheet[sheet],
+      sheet,
+      expectedPatternKeys,
+      diagnostics,
+    });
   }
 
   const importSummary = activeRowsBySheet['16_Import_Summary'][0];

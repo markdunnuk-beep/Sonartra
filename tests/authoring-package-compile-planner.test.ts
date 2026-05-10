@@ -40,6 +40,37 @@ function mutatePsv(generatedDir: string, fileName: string, mutate: (lines: strin
   writeFileSync(filePath, mutate(lines).join('\n'));
 }
 
+function mutatePatternPriorityField(
+  generatedDir: string,
+  fileName: string,
+  patternKey: string,
+  priority: string,
+  fieldName: string,
+  value: string,
+): void {
+  mutatePsv(generatedDir, fileName, (lines) => {
+    const headers = lines[0]!.split('|');
+    const patternIndex = headers.indexOf('pattern_key');
+    const priorityIndex = headers.indexOf('priority');
+    const fieldIndex = headers.indexOf(fieldName);
+    assert.notEqual(patternIndex, -1);
+    assert.notEqual(priorityIndex, -1);
+    assert.notEqual(fieldIndex, -1);
+
+    return lines.map((line, index) => {
+      if (index === 0 || line.trim().length === 0) {
+        return line;
+      }
+      const cells = line.split('|');
+      if (cells[patternIndex] === patternKey && cells[priorityIndex] === priority) {
+        cells[fieldIndex] = value;
+        return cells.join('|');
+      }
+      return line;
+    });
+  });
+}
+
 function writeWithGeneratedDir(generatedDir: string, tempRoot: string): void {
   compileAuthoringPackageWorkbook({
     ...leadershipArgs,
@@ -328,6 +359,123 @@ test('write fails when generated score shape is unsupported', () => {
     });
 
     assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /UNSUPPORTED_SCORE_SHAPE/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+for (const [priority, wrongSignal] of [
+  ['1', 'process'],
+  ['2', 'results'],
+  ['3', 'people'],
+] as const) {
+  test(`write fails when 11_Strengths priority ${priority} points to the wrong ranked signal`, () => {
+    const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-strength-link-'));
+    try {
+      const generatedDir = copyGeneratedDir(tempRoot);
+      mutatePatternPriorityField(
+        generatedDir,
+        '11-strengths-leadership-approach.psv',
+        'results_process_vision_people',
+        priority,
+        'linked_signal_key',
+        wrongSignal,
+      );
+
+      assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /11_STRENGTH_LINKED_SIGNAL_MISMATCH/);
+    } finally {
+      rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+}
+
+test('write fails when 11_Strengths repeats linked_signal_key within one pattern', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-strength-duplicate-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePatternPriorityField(
+      generatedDir,
+      '11-strengths-leadership-approach.psv',
+      'results_process_vision_people',
+      '3',
+      'linked_signal_key',
+      'process',
+    );
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /11_STRENGTH_LINKED_SIGNAL_DUPLICATE/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+for (const [priority, wrongSignal] of [
+  ['1', 'people'],
+  ['2', 'process'],
+  ['3', 'vision'],
+] as const) {
+  test(`write fails when 12_Narrowing priority ${priority} points to the wrong missing range signal`, () => {
+    const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-narrowing-link-'));
+    try {
+      const generatedDir = copyGeneratedDir(tempRoot);
+      mutatePatternPriorityField(
+        generatedDir,
+        '12-narrowing-leadership-approach.psv',
+        'results_process_vision_people',
+        priority,
+        'missing_range_signal_key',
+        wrongSignal,
+      );
+
+      assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /12_NARROWING_MISSING_RANGE_MISMATCH/);
+    } finally {
+      rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+}
+
+test('write fails when 12_Narrowing repeats missing_range_signal_key within one pattern', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-narrowing-duplicate-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePatternPriorityField(
+      generatedDir,
+      '12-narrowing-leadership-approach.psv',
+      'results_process_vision_people',
+      '3',
+      'missing_range_signal_key',
+      'vision',
+    );
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /12_NARROWING_MISSING_RANGE_DUPLICATE/);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('13_Application Policy B passes for valid Leadership Approach data', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-application-policy-b-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    assert.doesNotThrow(() => writeWithGeneratedDir(generatedDir, tempRoot));
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('write fails when 13_Application does not follow selected Policy B linkage', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'authoring-package-application-link-'));
+  try {
+    const generatedDir = copyGeneratedDir(tempRoot);
+    mutatePatternPriorityField(
+      generatedDir,
+      '13-application-leadership-approach.psv',
+      'results_process_vision_people',
+      '3',
+      'linked_signal_key',
+      'vision',
+    );
+
+    assert.throws(() => writeWithGeneratedDir(generatedDir, tempRoot), /13_APPLICATION_LINKED_SIGNAL_POLICY_MISMATCH/);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
