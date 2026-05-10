@@ -358,7 +358,7 @@ test('runner client keeps tablet and mobile navigation controls reachable withou
   assert.match(runnerSource, /aria-label="Question navigation actions"/);
   assert.match(globalsSource, /@media \(max-width: 1279px\) \{/);
   assert.match(globalsSource, /\.sonartra-runner-stage \{/);
-  assert.match(globalsSource, /padding-bottom: calc\(8\.5rem \+ env\(safe-area-inset-bottom\)\) !important;/);
+  assert.match(globalsSource, /padding-bottom: calc\(10rem \+ env\(safe-area-inset-bottom\)\) !important;/);
   assert.match(globalsSource, /\.sonartra-runner-action-row \{/);
   assert.match(globalsSource, /display: none !important;/);
   assert.match(globalsSource, /\.sonartra-runner-fixed-action-row \{/);

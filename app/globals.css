@@ -2018,7 +2018,7 @@ main {
 
   @media (max-width: 1279px) {
     .sonartra-runner-stage {
-      padding-bottom: calc(8.5rem + env(safe-area-inset-bottom)) !important;
+      padding-bottom: calc(10rem + env(safe-area-inset-bottom)) !important;
     }
 
     .sonartra-runner-action-row {
