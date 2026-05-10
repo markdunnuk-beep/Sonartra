@@ -435,6 +435,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
           <button
             type="button"
             aria-pressed={focusMode}
+            aria-label={focusMode ? 'Turn focus mode off' : 'Turn focus mode on'}
             onClick={() => setFocusMode((current) => !current)}
             className={cn(
               'sonartra-focus-ring sonartra-motion-button inline-flex h-10 shrink-0 items-center justify-center rounded-[1rem] border px-3 text-sm font-medium tracking-[-0.01em] transition',
@@ -576,14 +577,19 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                       >
                         {modeCopy.modeLabel}
                       </span>
-                      <p className="sonartra-type-nav text-white/78">
+                      <p
+                        className="sonartra-type-nav text-white/78"
+                        id="runner-progress-summary"
+                      >
                         {modeCopy.navigationLabel} {currentQuestionNumber} of {totalQuestions}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 self-start sm:self-center">
                     <span
+                      id="runner-save-state"
                       aria-live="polite"
+                      aria-atomic="true"
                       className={cn(
                         'sonartra-type-caption inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-white/60',
                         saveError
@@ -611,6 +617,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={completionPercentage}
+                  aria-valuetext={`${answeredQuestions} of ${totalQuestions} questions answered`}
                 >
                   <div
                     className="sonartra-motion-progress h-full rounded-full bg-[#32D6B0]"
@@ -667,7 +674,11 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 </h2>
               </div>
 
-              <fieldset className="grid gap-2.5">
+              <fieldset
+                className="grid gap-2.5"
+                aria-labelledby="runner-question-title"
+                aria-describedby="runner-progress-summary runner-save-state"
+              >
                 <legend className="sr-only">Response options</legend>
                 {currentQuestion.options.map((option, index) => {
                   const selected =

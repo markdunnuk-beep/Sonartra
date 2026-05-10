@@ -181,6 +181,7 @@ test('runner client adds lightweight local focus mode without touching runner ac
 
   assert.match(source, /const \[focusMode, setFocusMode\] = useState\(false\);/);
   assert.match(source, /aria-pressed=\{focusMode\}/);
+  assert.match(source, /aria-label=\{focusMode \? 'Turn focus mode off' : 'Turn focus mode on'\}/);
   assert.match(source, /onClick=\{\(\) => setFocusMode\(\(current\) => !current\)\}/);
   assert.match(source, />\s*Focus mode\s*<\/button>/);
   assert.match(source, /data-runner-focus-mode=\{focusMode \? 'active' : 'inactive'\}/);
@@ -276,7 +277,7 @@ test('runner client hardens semantic structure and navigator accessibility label
 
   assert.match(source, /aria-labelledby="runner-question-title"/);
   assert.match(source, /id="runner-question-title"/);
-  assert.match(source, /<fieldset className="grid gap-2\.5">/);
+  assert.match(source, /<fieldset\s+className="grid gap-2\.5"\s+aria-labelledby="runner-question-title"\s+aria-describedby="runner-progress-summary runner-save-state"\s+>/);
   assert.match(source, /<legend className="sr-only">Response options<\/legend>/);
   assert.doesNotMatch(source, /<legend className="sr-only">\{currentQuestion\.prompt\}<\/legend>/);
   assert.match(source, /type="radio"/);
@@ -295,9 +296,17 @@ test('runner client hardens semantic structure and navigator accessibility label
   assert.match(source, /return `Question \$\{params\.questionNumber\}, \$\{responseState\}`;/);
   assert.match(source, /aria-current=\{active \? 'step' : undefined\}/);
   assert.match(source, /aria-live="polite"/);
+  assert.match(source, /id="runner-save-state"/);
+  assert.match(source, /aria-atomic="true"/);
   assert.match(source, /role="progressbar"/);
   assert.match(source, /aria-label="Assessment completion progress"/);
   assert.match(source, /aria-valuenow=\{completionPercentage\}/);
+  assert.match(
+    source,
+    /aria-valuetext=\{`\$\{answeredQuestions\} of \$\{totalQuestions\} questions answered`\}/,
+  );
+  assert.match(source, /id="runner-progress-summary"/);
+  assert.match(source, /aria-describedby="runner-progress-summary runner-save-state"/);
 });
 
 test('runner client preserves premium answer-card treatment around hidden native radios', () => {
