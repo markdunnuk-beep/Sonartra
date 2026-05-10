@@ -142,6 +142,7 @@ test('ranked-pattern workflow presents a guided stepper and recommended next act
   assert.match(panelSource, /function WorkflowStepper/);
   assert.match(panelSource, /getRankedPatternWorkflowNextAction/);
   assert.match(panelSource, /function WorkflowActionSlot/);
+  assert.match(panelSource, /function LockedWorkflowActionSummary/);
   assert.match(panelSource, /Import workflow steps/);
   assert.match(panelSource, /Upload workbook/);
   assert.match(panelSource, /Check workbook/);
@@ -151,6 +152,7 @@ test('ranked-pattern workflow presents a guided stepper and recommended next act
   assert.match(panelSource, /Check readiness/);
   assert.match(panelSource, /Publish/);
   assert.match(panelSource, /Recommended next step/);
+  assert.match(panelSource, /Later actions/);
   assert.match(panelSource, /Upload ranked-pattern workbook/);
   assert.match(panelSource, /Accepted: \.xlsx up to 10 MB/);
   assert.match(panelSource, /data-ranked-pattern-action-current/);

@@ -44,10 +44,21 @@ import {
 } from '@/components/shared/user-app-ui';
 import {
   getRankedPatternWorkflowNextAction,
+  type RankedPatternWorkflowActionId,
   type RankedPatternWorkflowActionState,
 } from '@/lib/admin/ranked-pattern-workflow-next-action';
 
 type CountMap = Readonly<Record<string, number>> | undefined;
+type WorkflowPanelActionId = Exclude<RankedPatternWorkflowActionId, 'complete' | 'uploadWorkbook'>;
+
+const WORKFLOW_PANEL_ACTION_ORDER: readonly WorkflowPanelActionId[] = [
+  'checkWorkbook',
+  'createDraft',
+  'previewImport',
+  'importToDraft',
+  'checkPublishReadiness',
+  'publishAssessment',
+];
 
 function SubmitButton({
   idleLabel,
@@ -851,6 +862,28 @@ function RecommendedNextAction({
   );
 }
 
+function LockedWorkflowActionSummary({
+  state,
+}: Readonly<{
+  state: RankedPatternWorkflowActionState;
+}>) {
+  return (
+    <div
+      className="rounded-[0.8rem] border border-white/6 bg-black/10 px-3 py-2"
+      data-ranked-pattern-action={state.actionId}
+      data-ranked-pattern-action-current="false"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-medium text-white/58">{state.label}</p>
+        <LabelPill className="border-white/8 bg-white/[0.03] text-white/40">Locked</LabelPill>
+      </div>
+      {state.prerequisite ? (
+        <p className="mt-1 text-xs leading-5 text-white/42">{state.prerequisite}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function WorkflowActionSlot({
   state,
   children,
@@ -1028,6 +1061,12 @@ export function RankedPatternImportPanel({
       status: published ? 'complete' : canPublishFromAudit ? 'current' : 'pending',
     },
   ];
+  const lockedPanelActionIds = WORKFLOW_PANEL_ACTION_ORDER.filter(
+    (actionId) =>
+      !nextActionState.actions[actionId].enabled &&
+      !nextActionState.actions[actionId].highlighted &&
+      !(actionId === 'createDraft' && resolvedDraft),
+  );
 
   return (
     <SurfaceCard className="space-y-6 p-5 lg:p-6" data-ranked-pattern-import-panel="true">
@@ -1215,9 +1254,26 @@ export function RankedPatternImportPanel({
               </p>
             </WorkflowActionSlot>
           ) : null}
+          {nextActionState.actions.checkWorkbook.enabled || nextActionState.actions.checkWorkbook.highlighted ? (
+            <WorkflowActionSlot state={nextActionState.actions.checkWorkbook}>
+              <WorkflowForm
+                action={auditAction}
+                disabled={!nextActionState.actions.checkWorkbook.enabled}
+                idleLabel="Check workbook"
+                pendingLabel="Checking..."
+                sourceHash={workflowSourceHash}
+                sourceName={workflowSourceName}
+                sourcePath={workflowSourcePath}
+                storageReferenceToken={workflowStorageReferenceToken}
+                targetAssessmentId={resolvedAssessmentId}
+                targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
+                tone={nextActionState.actions.checkWorkbook.highlighted ? 'primary' : 'secondary'}
+              />
+            </WorkflowActionSlot>
+          ) : null}
           {resolvedDraft ? (
             <PassiveDraftStatus latestDraftVersion={resolvedDraft} />
-          ) : (
+          ) : nextActionState.actions.createDraft.enabled || nextActionState.actions.createDraft.highlighted ? (
             <WorkflowActionSlot state={nextActionState.actions.createDraft}>
               <PackageDraftForm
                 action={draftVersionAction}
@@ -1229,68 +1285,77 @@ export function RankedPatternImportPanel({
                 tone={nextActionState.actions.createDraft.highlighted ? 'primary' : 'secondary'}
               />
             </WorkflowActionSlot>
-          )}
-          <WorkflowActionSlot state={nextActionState.actions.checkWorkbook}>
-            <WorkflowForm
-              action={auditAction}
-              disabled={!nextActionState.actions.checkWorkbook.enabled}
-              idleLabel="Check workbook"
-              pendingLabel="Checking..."
-              sourceHash={workflowSourceHash}
-              sourceName={workflowSourceName}
-              sourcePath={workflowSourcePath}
-              storageReferenceToken={workflowStorageReferenceToken}
-              targetAssessmentId={resolvedAssessmentId}
-              targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
-              tone={nextActionState.actions.checkWorkbook.highlighted ? 'primary' : 'secondary'}
-            />
-          </WorkflowActionSlot>
-          <WorkflowActionSlot state={nextActionState.actions.previewImport}>
-            <WorkflowForm
-              action={dryRunAction}
-              disabled={!nextActionState.actions.previewImport.enabled}
-              idleLabel="Preview import"
-              pendingLabel="Previewing..."
-              sourceHash={workflowSourceHash}
-              sourceName={workflowSourceName}
-              sourcePath={workflowSourcePath}
-              storageReferenceToken={workflowStorageReferenceToken}
-              targetAssessmentId={resolvedAssessmentId}
-              targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
-              tone={nextActionState.actions.previewImport.highlighted ? 'primary' : 'secondary'}
-            />
-          </WorkflowActionSlot>
-          <WorkflowActionSlot state={nextActionState.actions.importToDraft}>
-            <WorkflowForm
-              action={applyAction}
-              disabled={!nextActionState.actions.importToDraft.enabled}
-              idleLabel="Import to draft"
-              pendingLabel="Importing..."
-              sourceHash={workflowSourceHash}
-              sourceName={workflowSourceName}
-              sourcePath={workflowSourcePath}
-              storageReferenceToken={workflowStorageReferenceToken}
-              targetAssessmentId={resolvedAssessmentId}
-              targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
-              tone="apply"
-            />
-          </WorkflowActionSlot>
-          <WorkflowActionSlot state={nextActionState.actions.checkPublishReadiness}>
-            <PublishAuditForm
-              action={publishAuditAction}
-              disabled={!nextActionState.actions.checkPublishReadiness.enabled}
-              tone={nextActionState.actions.checkPublishReadiness.highlighted ? 'primary' : 'secondary'}
-            />
-          </WorkflowActionSlot>
-          <WorkflowActionSlot state={nextActionState.actions.publishAssessment}>
-            <VersionMutationForm
-              action={publishVersionAction}
-              disabled={!nextActionState.actions.publishAssessment.enabled}
-              idleLabel="Publish assessment"
-              pendingLabel="Publishing..."
-              tone={nextActionState.actions.publishAssessment.highlighted ? 'apply' : 'secondary'}
-            />
-          </WorkflowActionSlot>
+          ) : null}
+          {nextActionState.actions.previewImport.enabled || nextActionState.actions.previewImport.highlighted ? (
+            <WorkflowActionSlot state={nextActionState.actions.previewImport}>
+              <WorkflowForm
+                action={dryRunAction}
+                disabled={!nextActionState.actions.previewImport.enabled}
+                idleLabel="Preview import"
+                pendingLabel="Previewing..."
+                sourceHash={workflowSourceHash}
+                sourceName={workflowSourceName}
+                sourcePath={workflowSourcePath}
+                storageReferenceToken={workflowStorageReferenceToken}
+                targetAssessmentId={resolvedAssessmentId}
+                targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
+                tone={nextActionState.actions.previewImport.highlighted ? 'primary' : 'secondary'}
+              />
+            </WorkflowActionSlot>
+          ) : null}
+          {nextActionState.actions.importToDraft.enabled || nextActionState.actions.importToDraft.highlighted ? (
+            <WorkflowActionSlot state={nextActionState.actions.importToDraft}>
+              <WorkflowForm
+                action={applyAction}
+                disabled={!nextActionState.actions.importToDraft.enabled}
+                idleLabel="Import to draft"
+                pendingLabel="Importing..."
+                sourceHash={workflowSourceHash}
+                sourceName={workflowSourceName}
+                sourcePath={workflowSourcePath}
+                storageReferenceToken={workflowStorageReferenceToken}
+                targetAssessmentId={resolvedAssessmentId}
+                targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
+                tone="apply"
+              />
+            </WorkflowActionSlot>
+          ) : null}
+          {nextActionState.actions.checkPublishReadiness.enabled ||
+          nextActionState.actions.checkPublishReadiness.highlighted ? (
+            <WorkflowActionSlot state={nextActionState.actions.checkPublishReadiness}>
+              <PublishAuditForm
+                action={publishAuditAction}
+                disabled={!nextActionState.actions.checkPublishReadiness.enabled}
+                tone={nextActionState.actions.checkPublishReadiness.highlighted ? 'primary' : 'secondary'}
+              />
+            </WorkflowActionSlot>
+          ) : null}
+          {nextActionState.actions.publishAssessment.enabled || nextActionState.actions.publishAssessment.highlighted ? (
+            <WorkflowActionSlot state={nextActionState.actions.publishAssessment}>
+              <VersionMutationForm
+                action={publishVersionAction}
+                disabled={!nextActionState.actions.publishAssessment.enabled}
+                idleLabel="Publish assessment"
+                pendingLabel="Publishing..."
+                tone={nextActionState.actions.publishAssessment.highlighted ? 'apply' : 'secondary'}
+              />
+            </WorkflowActionSlot>
+          ) : null}
+          {lockedPanelActionIds.length > 0 ? (
+            <details className="rounded-[1rem] border border-white/8 bg-black/10 p-3">
+              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-white/44">
+                Later actions
+              </summary>
+              <div className="mt-3 space-y-2">
+                {lockedPanelActionIds.map((actionId) => (
+                  <LockedWorkflowActionSummary
+                    key={actionId}
+                    state={nextActionState.actions[actionId]}
+                  />
+                ))}
+              </div>
+            </details>
+          ) : null}
           {nextActionState.complete ? (
             <p className="rounded-[0.9rem] border border-[rgba(116,209,177,0.2)] bg-[rgba(116,209,177,0.08)] px-4 py-3 text-sm leading-6 text-[rgba(214,246,233,0.82)]">
               Published / complete. No primary publish action is available from this state.
