@@ -333,6 +333,7 @@ export function UserAppShell({
   const mobileDrawerDescriptionId = useId();
   const navSections = getUserAppNavSections({ canAccessAdmin, canAccessVoice });
   const isAssessmentRunnerRoute = /^\/app\/assessments\/[^/]+\/attempts\/[^/]+\/?$/.test(pathname);
+  const isRankedPatternResultRoute = /^\/app\/results\/single-domain\/[^/]+\/?$/.test(pathname);
   const shellDesktopBreakpoint = isAssessmentRunnerRoute ? 'xl' : 'lg';
   const mobileSidebarCollapsed = collapsed && !mobileOpen;
 
@@ -444,6 +445,49 @@ export function UserAppShell({
           <div className="min-h-full min-w-0 overflow-x-clip border-0 bg-transparent shadow-none sm:rounded-[1.6rem] sm:border sm:border-white/6 sm:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] sm:shadow-[0_28px_90px_rgba(0,0,0,0.22)]">
             {children}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isRankedPatternResultRoute) {
+    return (
+      <div
+        className="sonartra-user-app-shell relative isolate min-h-screen overflow-x-clip bg-[radial-gradient(circle_at_18%_0%,rgba(50,214,176,0.10),transparent_30rem),linear-gradient(180deg,#090B0F_0%,#080A0D_46rem,#080A0D_100%)]"
+        data-user-shell-variant="ranked-pattern-result"
+      >
+        <header className="border-white/8 sticky top-0 z-30 border-b bg-[rgba(8,10,13,0.84)] backdrop-blur-xl">
+          <div className="mx-auto flex min-h-[4.25rem] w-full max-w-[1560px] items-center justify-between gap-3 px-4 py-3 sm:px-5 lg:px-7">
+            <Link
+              aria-label="Back to results"
+              className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-white/14 flex min-w-0 items-center gap-3 rounded-[1.15rem] border bg-white/[0.035] px-3 py-2.5 text-white/72 hover:bg-white/[0.055] hover:text-white"
+              href="/app/results"
+            >
+              <SessionAvatar className="h-9 w-9 rounded-[0.95rem]" />
+              <span className="hidden min-w-0 text-sm font-medium tracking-[-0.01em] sm:inline">
+                Results
+              </span>
+            </Link>
+
+            <div className="min-w-0 flex-1 text-center">
+              <p className="sonartra-type-caption text-white/42">Result</p>
+              <p className="truncate text-sm font-medium tracking-[-0.01em] text-white/82 sm:text-[0.95rem]">
+                Report reading
+              </p>
+            </div>
+
+            <Link
+              className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-[#32D6B0]/25 flex h-11 items-center justify-center rounded-[1.1rem] border bg-white/[0.035] px-3 text-sm font-medium tracking-[-0.01em] text-white/74 hover:bg-[#32D6B0]/[0.08] hover:text-white sm:px-4"
+              href="/app/workspace"
+            >
+              <span className="hidden sm:inline">Workspace</span>
+              <span className="sm:hidden">Exit</span>
+            </Link>
+          </div>
+        </header>
+
+        <div className="min-h-[calc(100vh-4.25rem)] min-w-0 overflow-x-clip">
+          {children}
         </div>
       </div>
     );

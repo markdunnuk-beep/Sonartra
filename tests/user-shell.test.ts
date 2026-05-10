@@ -134,6 +134,39 @@ test('user shell uses a dedicated low-chrome shell on assessment attempt routes'
   );
 });
 
+test('user shell uses reduced chrome on ranked-pattern result detail routes', () => {
+  const shellSource = readSource(userShellPath);
+
+  assert.match(
+    shellSource,
+    /const isRankedPatternResultRoute = \/\^\\\/app\\\/results\\\/single-domain\\\/\[\^\/\]\+\\\/\?\$\/\.test\(pathname\);/,
+  );
+  assert.match(shellSource, /if \(isRankedPatternResultRoute\) \{/);
+  assert.match(shellSource, /data-user-shell-variant="ranked-pattern-result"/);
+  assert.match(shellSource, /aria-label="Back to results"/);
+  assert.match(shellSource, /href="\/app\/results"/);
+  assert.match(shellSource, />\s*Report reading\s*<\/p>/);
+  assert.match(shellSource, />\s*Workspace\s*<\/span>/);
+  assert.match(
+    shellSource,
+    /if \(isRankedPatternResultRoute\) \{[\s\S]*?return \([\s\S]*?data-user-shell-variant="ranked-pattern-result"[\s\S]*?\);\s*\}/,
+  );
+});
+
+test('user shell keeps workspace and results list on the normal app shell', () => {
+  const shellSource = readSource(userShellPath);
+
+  assert.doesNotMatch(
+    shellSource,
+    /const isRankedPatternResultRoute = \/\^\\\/app\\\/results\\\/\?\$\/\.test\(pathname\);/,
+  );
+  assert.doesNotMatch(
+    shellSource,
+    /const isRankedPatternResultRoute = pathname\.startsWith\('\/app\/results'\)/,
+  );
+  assert.match(shellSource, /return \(\s*<div className="sonartra-user-app-shell relative isolate min-h-screen overflow-hidden/);
+});
+
 test('user app layout passes a name-first shell label with safe fallbacks', () => {
   const source = readSource(userLayoutPath);
 
