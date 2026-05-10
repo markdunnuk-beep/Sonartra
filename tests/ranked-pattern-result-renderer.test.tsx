@@ -145,9 +145,16 @@ test('ranked-pattern result renderer displays persisted reader-first sections in
 
   assert.deepEqual(headingPositions, [...headingPositions].sort((left, right) => left - right));
   assert.match(markup, /data-ranked-pattern-result="true"/);
+  assert.match(markup, /<main[^>]*data-ranked-pattern-result="true"/);
   assert.match(markup, /You may recognise this as a clear first-route pattern/);
   assert.match(markup, /Concentrated pattern/);
   assert.doesNotMatch(markup, /Version 1\.0\.0 · Pattern alpha_beta_gamma_delta/);
+  assert.doesNotMatch(markup, /Pattern reference:/);
+  assert.doesNotMatch(markup, /alpha_beta_gamma_delta/);
+  assert.doesNotMatch(markup, /draft report/i);
+  assert.match(markup, /aria-label="Result sections"/);
+  assert.match(markup, /aria-label="Open result sections"/);
+  assert.match(markup, /aria-label="Result reading navigation"/);
   assert.match(markup, /How to read this result/);
   assert.match(markup, /You may recognise this as a clear first-route pattern/);
   assert.equal([...markup.matchAll(/data-ranked-pattern-signal-role-group="true"/g)].length, 4);
@@ -487,13 +494,26 @@ test('ranked-pattern result renderer reads persisted ranks, percentages, score s
   assert.doesNotMatch(markup, /Pattern shape/);
   assert.doesNotMatch(markup, /Ranked spread/);
   assert.match(markup, /Concentrated pattern/);
-  assert.match(markup, /Pattern reference: alpha_beta_gamma_delta/);
+  assert.doesNotMatch(markup, /Pattern reference:/);
+  assert.doesNotMatch(markup, />alpha_beta_gamma_delta</);
   assert.doesNotMatch(markup, /Leading pair/);
   assert.doesNotMatch(markup, /Hero pair/);
   assert.doesNotMatch(markup, /Balancing pair/);
   assert.doesNotMatch(markup, />Drivers</);
   assert.doesNotMatch(markup, />Pair</);
   assert.doesNotMatch(markup, />Limitation</);
+});
+
+test('ranked-pattern mobile result section navigation is collapsed by default', () => {
+  const markup = renderToStaticMarkup(<RankedPatternResultReport payload={rankedPayload()} />);
+
+  assert.match(markup, /data-draft-mobile-section-navigator="true"/);
+  assert.match(markup, /aria-expanded="false"/);
+  assert.match(markup, /aria-hidden="true"[^>]*hidden=""/);
+  assert.match(markup, /aria-label="Result sections"/);
+  assert.match(markup, /aria-label="Open result sections"/);
+  assert.doesNotMatch(markup, /Mobile draft report sections/);
+  assert.doesNotMatch(markup, /Draft report reading navigation/);
 });
 
 test('ranked-pattern renderer fails closed for missing required sections', () => {

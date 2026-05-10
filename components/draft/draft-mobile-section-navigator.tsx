@@ -63,14 +63,14 @@ export function DraftMobileSectionNavigator({
 
   return (
     <nav
-      aria-label="Mobile draft report sections"
+      aria-label="Result sections"
       className="draft-mobile-section-nav sticky top-3 z-20 mb-3 mt-4 xl:hidden"
       data-draft-mobile-section-navigator="true"
     >
       <div className="draft-mobile-section-nav-card rounded-[1.15rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/88 p-2.5 shadow-[0_18px_46px_rgba(4,7,6,0.18)] backdrop-blur-[16px] sm:p-3">
         <button
           type="button"
-          aria-label={open ? 'Close report sections' : 'Open report sections'}
+          aria-label={open ? 'Close result sections' : 'Open result sections'}
           aria-controls={panelId}
           aria-expanded={open}
           className="sonartra-focus-ring flex w-full items-center justify-between gap-3 rounded-[0.9rem] px-3.5 py-2.5 text-left outline-none transition hover:bg-[#F3F1EA]/[0.035] focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55"
@@ -106,10 +106,12 @@ export function DraftMobileSectionNavigator({
         </button>
 
         <div
+          aria-hidden={!open}
           className={cx(
             'grid transition-[grid-template-rows,opacity] duration-200',
             open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
           )}
+          hidden={!open}
         >
           <div id={panelId} className="min-h-0 overflow-hidden">
             <ul

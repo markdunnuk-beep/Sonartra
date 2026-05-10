@@ -15,7 +15,9 @@ test('user shell reserves room for selected nav treatment without reintroducing 
   const shellSource = readSource(userShellPath);
   const globalsSource = readSource(globalsPath);
 
-  assert.match(shellSource, /box-border flex w-\[17\.5rem\] flex-col overflow-x-hidden/);
+  assert.match(shellSource, /box-border w-\[17\.5rem\] flex-col overflow-x-hidden/);
+  assert.match(shellSource, /mobileOpen \? 'flex' : 'hidden'/);
+  assert.match(shellSource, /shellDesktopBreakpoint === 'xl' \? 'xl:flex' : 'lg:flex'/);
   assert.match(shellSource, /'xl:w-\[5\.75rem\]'/);
   assert.match(shellSource, /'lg:w-\[5\.75rem\]'/);
   assert.match(shellSource, /overflow-y-auto overflow-x-hidden pb-4/);
@@ -174,6 +176,8 @@ test('user mobile drawer opens as a full accessible drawer without overwriting d
   assert.match(source, /aria-labelledby=\{mobileOpen \? mobileDrawerTitleId : undefined\}/);
   assert.match(source, /aria-describedby=\{mobileOpen \? mobileDrawerDescriptionId : undefined\}/);
   assert.match(source, /data-user-mobile-drawer=\{mobileOpen \? 'open' : 'closed'\}/);
+  assert.match(source, /mobileOpen \? 'flex' : 'hidden'/);
+  assert.match(source, /shellDesktopBreakpoint === 'xl' \? 'xl:flex' : 'lg:flex'/);
   assert.match(source, /data-user-shell-content-state=\{mobileOpen \? 'subordinate' : 'active'\}/);
   assert.match(source, /inert=\{mobileOpen \? true : undefined\}/);
   assert.doesNotMatch(source, /aria-hidden=\{mobileOpen \? true : undefined\}/);

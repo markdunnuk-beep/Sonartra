@@ -95,7 +95,7 @@ export function DraftResultReadingRail({
 
   return (
     <nav
-      aria-label="Draft report reading navigation"
+      aria-label="Result reading navigation"
       className="draft-reading-rail hidden xl:sticky xl:top-[5.7rem] xl:block xl:w-[11.75rem] xl:shrink-0 xl:self-start"
       data-draft-result-reading-rail="true"
       data-result-reading-rail="true"

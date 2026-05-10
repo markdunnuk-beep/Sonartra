@@ -457,7 +457,9 @@ export function UserAppShell({
           aria-labelledby={mobileOpen ? mobileDrawerTitleId : undefined}
           aria-modal={mobileOpen ? true : undefined}
           className={cn(
-            'sonartra-scrollbar fixed inset-y-0 left-0 z-40 box-border flex w-[17.5rem] flex-col overflow-x-hidden border-white/10 bg-[linear-gradient(180deg,rgba(16,19,24,0.9),rgba(8,10,13,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-[width,transform] duration-300',
+            'sonartra-scrollbar fixed inset-y-0 left-0 z-40 box-border w-[17.5rem] flex-col overflow-x-hidden border-white/10 bg-[linear-gradient(180deg,rgba(16,19,24,0.9),rgba(8,10,13,0.96))] px-3 py-4 shadow-[0_26px_72px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-[width,transform] duration-300',
+            mobileOpen ? 'flex' : 'hidden',
+            shellDesktopBreakpoint === 'xl' ? 'xl:flex' : 'lg:flex',
             shellDesktopBreakpoint === 'xl'
               ? 'xl:inset-y-auto xl:left-auto xl:top-5 xl:mx-4 xl:my-5 xl:h-[calc(100vh-2.5rem)] xl:translate-x-0 xl:rounded-[2rem] xl:border'
               : 'lg:inset-y-auto lg:left-auto lg:top-5 lg:mx-4 lg:my-5 lg:h-[calc(100vh-2.5rem)] lg:translate-x-0 lg:rounded-[2rem] lg:border',

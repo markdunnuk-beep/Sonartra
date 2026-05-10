@@ -829,7 +829,7 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
       : null;
 
   return (
-    <div
+    <main
       className="draft-result-shell relative isolate -mx-5 overflow-x-clip bg-[#101312] px-5 pb-16 pt-16 text-[#F3F1EA] sm:-mx-6 sm:px-6 md:pb-24 md:pt-20 lg:-mx-8 lg:px-8"
       data-focus-mode={focusMode ? 'true' : 'false'}
       data-reading-mode={readingMode}
@@ -1154,10 +1154,7 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
           />
         </div>
 
-        <p className="relative z-10 mx-auto mt-10 max-w-7xl text-xs leading-5 text-[#A8B0AA]/38">
-          Pattern reference: {payload.patternKey} · Assessment version {payload.metadata.version}
-        </p>
       </div>
-    </div>
+    </main>
   );
 }
