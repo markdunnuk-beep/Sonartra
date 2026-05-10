@@ -972,7 +972,6 @@ export function RankedPatternImportPanel({
   );
   const hasDraft = resolvedDraft !== null;
   const canPublishFromAudit = publishAuditState.result?.canPublish === true;
-  const packageTargetLabel = resolvedAssessmentKey ?? 'package metadata';
   const uploadedSourceAvailable =
     uploadState.result !== null && uploadState.result.storageReferenceToken !== clearedUploadToken;
   const uploadedSourceSelected = sourceMode === 'upload' && uploadedSourceAvailable;
@@ -1032,31 +1031,23 @@ export function RankedPatternImportPanel({
 
   return (
     <SurfaceCard className="space-y-6 p-5 lg:p-6" data-ranked-pattern-import-panel="true">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(280px,0.75fr)]">
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="sonartra-page-eyebrow">Ranked-pattern import</p>
-            <LabelPill>Guided workflow</LabelPill>
-            {resolvedDraft ? (
-              <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
-                Draft {resolvedDraft.versionTag}
-              </LabelPill>
-            ) : (
-              <LabelPill className="border-white/10 bg-white/[0.04] text-white/64">No draft</LabelPill>
-            )}
-          </div>
-          <h2 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-white">
-            Import ranked-pattern assessment
-          </h2>
-          <p className="max-w-3xl text-sm leading-7 text-white/62">
-            Upload a completed assessment workbook, check it, import it into a draft, then publish
-            when the draft is ready.
-          </p>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.42fr)]">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="sonartra-page-eyebrow">Package-first workflow</p>
+          <LabelPill>Workbook upload first</LabelPill>
+          {resolvedDraft ? (
+            <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
+              Draft {resolvedDraft.versionTag}
+            </LabelPill>
+          ) : (
+            <LabelPill className="border-white/10 bg-white/[0.04] text-white/64">No draft yet</LabelPill>
+          )}
         </div>
-
-        <div className="sonartra-admin-feedback-card rounded-[1.2rem] border p-4">
-            <p className="sonartra-page-eyebrow">Target</p>
-            <div className="mt-3 space-y-2 text-sm leading-6 text-white/62">
+        <details className="rounded-[1rem] border border-white/8 bg-black/10 px-4 py-3">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-white/46">
+            Target details
+          </summary>
+          <div className="mt-3 space-y-2 text-sm leading-6 text-white/58">
             <p className="break-all">Assessment: {resolvedAssessmentKey ?? 'Read from workbook metadata'}</p>
             <p className="break-all">Assessment id: {resolvedAssessmentId ?? 'Create draft first'}</p>
             <p className="break-all">
@@ -1064,30 +1055,14 @@ export function RankedPatternImportPanel({
             </p>
             <p>Status: {resolvedDraft?.status ?? 'No editable draft'}</p>
           </div>
-        </div>
+        </details>
       </div>
 
       <WorkflowStepper steps={workflowSteps} />
 
-      <AdminFeedbackNotice tone="neutral" title="Draft status">
-        {resolvedDraft
-          ? `Draft ${resolvedDraft.versionTag} already exists for ${packageTargetLabel}. Continue with that draft; this workflow will not create a second concurrent draft.`
-          : 'Check the workbook, then create the compatible ranked-pattern draft from workbook metadata. The workflow will not attach a workbook to legacy or incompatible assessment records.'}
-      </AdminFeedbackNotice>
-
-      <AdminFeedbackNotice tone="neutral" title="Publishing safety">
-        Nothing is published until you choose Publish assessment. Checking and previewing the
-        workbook do not change live assessments.
-        <details className="mt-3 rounded-[0.8rem] border border-white/8 bg-black/10 px-3 py-2">
-          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-white/46">
-            Technical safety details
-          </summary>
-          <p className="mt-3 text-sm leading-6 text-white/58">
-            Preview does not write rows. Import writes to draft only. Publishing affects new
-            attempts only, and completed results remain tied to their original assessment version
-            and persisted payload.
-          </p>
-        </details>
+      <AdminFeedbackNotice tone="neutral" title="Safe by default">
+        Upload and Check workbook do not change live assessments. Import writes to draft only, and
+        publishing is a separate final action.
       </AdminFeedbackNotice>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.45fr)]">
@@ -1105,7 +1080,7 @@ export function RankedPatternImportPanel({
             }
           >
             <div className="flex flex-wrap items-center gap-2">
-              <p className="sonartra-page-eyebrow">Assessment workbook</p>
+              <p className="sonartra-page-eyebrow">Start here</p>
               <LabelPill>
                 {uploadedSourceSelected
                   ? 'Uploaded workbook selected'
@@ -1122,10 +1097,10 @@ export function RankedPatternImportPanel({
             />
             <form action={uploadAction} className="space-y-3">
               <label className="block space-y-2" htmlFor="ranked-pattern-workbook-upload">
-                <span className="text-sm font-medium text-white">Upload assessment workbook</span>
+                <span className="text-base font-semibold text-white">Upload ranked-pattern workbook</span>
                 <span className="block text-sm leading-6 text-white/56">
-                  Upload the completed .xlsx workbook for this assessment. The file is stored
-                  privately and used only for import.
+                  Choose the completed ranked-pattern `.xlsx` package. Uploading stores the file
+                  privately; it does not import or publish anything.
                 </span>
                 <input
                   accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -1138,8 +1113,8 @@ export function RankedPatternImportPanel({
               <UploadSubmitButton />
             </form>
             <p className="text-xs leading-5 text-white/46">
-              Accepted: .xlsx up to 10 MB. To replace the workbook, choose another .xlsx file and
-              upload it.
+              Accepted: ranked-pattern workbook .xlsx, up to 10 MB. After upload, use Check
+              workbook to validate the package before draft or import actions are available.
             </p>
             <WorkbookUploadResultBlock
               cleared={uploadState.result !== null && !uploadedSourceAvailable}
@@ -1153,70 +1128,77 @@ export function RankedPatternImportPanel({
             />
           </div>
 
-          <div className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="sonartra-page-eyebrow">Advanced: use existing package reference</p>
-              <LabelPill className="border-white/10 bg-white/[0.04] text-white/64">Advanced / development only</LabelPill>
-              {manualSourceSelected ? (
-                <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
-                  Existing reference selected
+          <details className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
+            <summary className="cursor-pointer text-sm font-medium text-white/72">
+              Advanced package reference
+            </summary>
+            <div className="mt-4 space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="sonartra-page-eyebrow">Local/admin source</p>
+                <LabelPill className="border-white/10 bg-white/[0.04] text-white/64">
+                  Advanced / development only
                 </LabelPill>
+                {manualSourceSelected ? (
+                  <LabelPill className="border-[rgba(126,179,255,0.22)] bg-[rgba(126,179,255,0.1)] text-[rgba(214,232,255,0.84)]">
+                    Existing reference selected
+                  </LabelPill>
+                ) : null}
+              </div>
+              <label className="block space-y-2" htmlFor="ranked-pattern-workbook-path">
+                <span className="text-sm font-medium text-white">Existing package reference or local path</span>
+                <input
+                  className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
+                  id="ranked-pattern-workbook-path"
+                  onChange={(event) => {
+                    setSourcePath(event.currentTarget.value);
+                    setSourceMode('manual');
+                  }}
+                  placeholder="leadership-approach"
+                  title={sourcePath}
+                  type="text"
+                  value={sourcePath}
+                />
+              </label>
+              <SourcePathPreview sourcePath={sourcePath} />
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block space-y-2" htmlFor="ranked-pattern-source-name">
+                  <span className="text-sm font-medium text-white">Technical source name</span>
+                  <input
+                    className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
+                    id="ranked-pattern-source-name"
+                    onChange={(event) => setSourceName(event.currentTarget.value)}
+                    placeholder="Optional"
+                    type="text"
+                    value={sourceName}
+                  />
+                </label>
+                <label className="block space-y-2" htmlFor="ranked-pattern-source-hash">
+                  <span className="text-sm font-medium text-white">File fingerprint</span>
+                  <input
+                    className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
+                    id="ranked-pattern-source-hash"
+                    onChange={(event) => setSourceHash(event.currentTarget.value)}
+                    placeholder="Optional"
+                    type="text"
+                    value={sourceHash}
+                  />
+                </label>
+              </div>
+              <p className="text-sm leading-6 text-white/48">
+                Use this only when testing an existing local/admin package reference instead of an
+                uploaded workbook.
+              </p>
+              {sourcePath.trim() ? (
+                <button
+                  className="sonartra-button sonartra-button-secondary sonartra-focus-ring w-full justify-center sm:w-auto"
+                  onClick={() => setSourceMode('manual')}
+                  type="button"
+                >
+                  Use existing reference
+                </button>
               ) : null}
             </div>
-            <label className="block space-y-2" htmlFor="ranked-pattern-workbook-path">
-              <span className="text-sm font-medium text-white">Existing package reference or local path</span>
-              <input
-                className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
-                id="ranked-pattern-workbook-path"
-                onChange={(event) => {
-                  setSourcePath(event.currentTarget.value);
-                  setSourceMode('manual');
-                }}
-                placeholder="leadership-approach"
-                title={sourcePath}
-                type="text"
-                value={sourcePath}
-              />
-            </label>
-            <SourcePathPreview sourcePath={sourcePath} />
-            <div className="grid gap-3 md:grid-cols-2">
-              <label className="block space-y-2" htmlFor="ranked-pattern-source-name">
-                <span className="text-sm font-medium text-white">Technical source name</span>
-                <input
-                  className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
-                  id="ranked-pattern-source-name"
-                  onChange={(event) => setSourceName(event.currentTarget.value)}
-                  placeholder="Optional"
-                  type="text"
-                  value={sourceName}
-                />
-              </label>
-              <label className="block space-y-2" htmlFor="ranked-pattern-source-hash">
-                <span className="text-sm font-medium text-white">File fingerprint</span>
-                <input
-                  className="sonartra-focus-ring w-full rounded-[0.9rem] border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/28"
-                  id="ranked-pattern-source-hash"
-                  onChange={(event) => setSourceHash(event.currentTarget.value)}
-                  placeholder="Optional"
-                  type="text"
-                  value={sourceHash}
-                />
-              </label>
-            </div>
-            <p className="text-sm leading-6 text-white/48">
-              Existing package references remain available for advanced testing. Production upload
-              uses private storage and never exposes a public workbook URL.
-            </p>
-            {sourcePath.trim() ? (
-              <button
-                className="sonartra-button sonartra-button-secondary sonartra-focus-ring w-full justify-center sm:w-auto"
-                onClick={() => setSourceMode('manual')}
-                type="button"
-              >
-                Use existing reference
-              </button>
-            ) : null}
-          </div>
+          </details>
         </div>
 
         <div className="sonartra-admin-feedback-card space-y-3 rounded-[1.2rem] border p-4">
@@ -1314,29 +1296,7 @@ export function RankedPatternImportPanel({
               Published / complete. No primary publish action is available from this state.
             </p>
           ) : null}
-          {!hasDraft ? (
-            <p className="text-xs leading-5 text-white/46">
-              Create a draft before importing, checking publish readiness, or publishing.
-            </p>
-          ) : !canPublishFromAudit ? (
-            <p className="text-xs leading-5 text-white/46">
-              Check publish readiness and resolve all blocking findings before publishing is enabled.
-            </p>
-          ) : null}
         </div>
-      </div>
-
-      <div className="rounded-[1rem] border border-white/8 bg-black/10 p-4">
-        <p className="text-sm font-medium text-white">Workflow steps</p>
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-white/60">
-          <li>Upload a private .xlsx workbook, or choose an advanced existing reference.</li>
-          <li>Check the workbook and review workbook metadata before a target exists.</li>
-          <li>Create the compatible draft version from workbook metadata.</li>
-          <li>Preview and import the ranked-pattern package against that draft.</li>
-          <li>Import the package only after blocking diagnostics are clear.</li>
-          <li>Check publish readiness and publish separately when all blocking findings are resolved.</li>
-          <li>Completed results continue to render from their persisted payload.</li>
-        </ol>
       </div>
 
       <div className="space-y-4">

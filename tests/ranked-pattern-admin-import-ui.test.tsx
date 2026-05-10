@@ -69,7 +69,7 @@ test('ranked-pattern import panel exposes package draft resolution, publish audi
   assert.match(panelSource, /auditRankedPatternPublishReadinessAction/);
   assert.match(panelSource, /publishRankedPatternVersionAction/);
   assert.match(panelSource, /Existing package reference or local path/);
-  assert.match(panelSource, /Upload assessment workbook/);
+  assert.match(panelSource, /Upload ranked-pattern workbook/);
   assert.match(panelSource, /Upload workbook/);
   assert.match(panelSource, /Use uploaded workbook/);
   assert.match(panelSource, /Check workbook/);
@@ -89,7 +89,7 @@ test('ranked-pattern import panel exposes package draft resolution, publish audi
 test('ranked-pattern publish control stays disabled until publish audit can publish', () => {
   assert.match(panelSource, /const canPublishFromAudit = publishAuditState\.result\?\.canPublish === true;/);
   assert.match(panelSource, /disabled=\{!nextActionState\.actions\.publishAssessment\.enabled\}/);
-  assert.match(panelSource, /Check publish readiness and resolve all blocking findings/);
+  assert.match(nextActionSource, /Check publish readiness and resolve all blocking findings/);
 });
 
 test('existing draft state is passive and does not render create draft as loading control', () => {
@@ -119,11 +119,11 @@ test('workbook source field exposes upload metadata and local fallback affordanc
   assert.match(panelSource, /sourcePathFileName/);
   assert.match(panelSource, /title=\{sourcePath\}/);
   assert.match(panelSource, /Selected package:/);
-  assert.match(panelSource, /Advanced: use existing package reference/);
+  assert.match(panelSource, /Advanced package reference/);
   assert.match(panelSource, /Advanced \/ development only/);
   assert.match(panelSource, /Use existing reference/);
   assert.match(panelSource, /Existing reference selected/);
-  assert.match(panelSource, /private storage and never exposes a public workbook URL/);
+  assert.match(panelSource, /Use this only when testing an existing local\/admin package reference/);
   assert.doesNotMatch(panelSource, /publicUrl/);
 });
 
@@ -131,7 +131,7 @@ test('ranked-pattern upload source can be cleared or replaced without ambiguous 
   assert.match(panelSource, /clearedUploadToken/);
   assert.match(panelSource, /Remove workbook/);
   assert.match(panelSource, /The uploaded workbook was removed from this form/);
-  assert.match(panelSource, /To replace the workbook, choose another \.xlsx file/);
+  assert.match(panelSource, /Choose another \.xlsx file and upload it/);
   assert.match(panelSource, /uploadedSourceAvailable/);
   assert.match(panelSource, /uploadedSourceSelected/);
   assert.match(panelSource, /manualSourceSelected/);
@@ -151,7 +151,7 @@ test('ranked-pattern workflow presents a guided stepper and recommended next act
   assert.match(panelSource, /Check readiness/);
   assert.match(panelSource, /Publish/);
   assert.match(panelSource, /Recommended next step/);
-  assert.match(panelSource, /Upload a completed assessment workbook/);
+  assert.match(panelSource, /Upload ranked-pattern workbook/);
   assert.match(panelSource, /Accepted: \.xlsx up to 10 MB/);
   assert.match(panelSource, /data-ranked-pattern-action-current/);
   assert.doesNotMatch(panelSource, /storage_object/);
@@ -240,13 +240,10 @@ test('ranked-pattern workflow shows upload-specific expired reference copy', () 
 });
 
 test('admin copy keeps versioning and persisted-result boundaries explicit', () => {
-  assert.match(panelSource, /Checking and previewing the\s+workbook do not change live assessments/);
-  assert.match(panelSource, /Publishing affects new\s+attempts only/);
-  assert.match(panelSource, /completed results remain tied to their original assessment version\s+and persisted payload/);
+  assert.match(panelSource, /Upload and Check workbook do not change live assessments/);
   assert.match(panelSource, /Import writes to draft only/);
-  assert.match(panelSource, /Nothing is published until you choose Publish assessment/);
-  assert.match(panelSource, /Create the compatible draft version from workbook metadata/);
-  assert.match(panelSource, /Completed results continue to render from their persisted payload/);
+  assert.match(panelSource, /publishing is a separate final action/);
+  assert.match(packageFirstWorkflowRouteSource, /Nothing is imported or published until you choose those later steps/);
 });
 
 test('ranked-pattern import panel displays counts and diagnostics without workbook contents', () => {
@@ -269,7 +266,7 @@ test('ranked-pattern import panel displays counts and diagnostics without workbo
 test('ranked-pattern import panel is wired into the dedicated workflow route only', () => {
   assert.match(packageFirstWorkflowRouteSource, /<RankedPatternImportPanel latestDraftVersion=\{null\} \/>/);
   assert.match(packageFirstWorkflowRouteSource, /Import ranked-pattern assessment/);
-  assert.match(packageFirstWorkflowRouteSource, /No assessment record required/);
+  assert.match(packageFirstWorkflowRouteSource, /follow the recommended action panel/);
   assert.match(dedicatedWorkflowRouteSource, /<RankedPatternImportPanel/);
   assert.match(dedicatedWorkflowRouteSource, /assessmentId=\{assessment\.assessmentId\}/);
   assert.match(dedicatedWorkflowRouteSource, /latestDraftVersion=\{assessment\.latestDraftVersion\}/);
