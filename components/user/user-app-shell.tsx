@@ -441,7 +441,7 @@ export function UserAppShell({
         </header>
 
         <div className="mx-auto min-h-[calc(100vh-4.25rem)] w-full max-w-[1320px] px-0 py-0 sm:px-3 sm:py-3 lg:px-5 lg:py-5">
-          <div className="min-h-full min-w-0 overflow-x-clip border-0 bg-transparent shadow-none sm:rounded-[1.6rem] sm:border sm:border-white/6 sm:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] sm:shadow-[0_28px_90px_rgba(0,0,0,0.22)] sm:backdrop-blur-xl">
+          <div className="min-h-full min-w-0 overflow-x-clip border-0 bg-transparent shadow-none sm:rounded-[1.6rem] sm:border sm:border-white/6 sm:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.016))] sm:shadow-[0_28px_90px_rgba(0,0,0,0.22)]">
             {children}
           </div>
         </div>

@@ -67,7 +67,8 @@ test('runner client keeps the question and completion phases within the same she
   assert.match(source, /xl:whitespace-nowrap/);
   assert.match(source, /\{runner\.assessmentTitle\}/);
   assert.doesNotMatch(source, /<p className="sonartra-type-eyebrow text-white\/42">Assessment runner<\/p>/);
-  assert.match(source, /sonartra-runner-stage min-h-\[34rem\]/);
+  assert.match(source, /sonartra-runner-stage space-y-4 p-4 sm:p-5 lg:p-5/);
+  assert.doesNotMatch(source, /sonartra-runner-stage min-h-\[34rem\]/);
   assert.match(source, /sonartra-runner-support-card/);
   assert.match(
     source,
@@ -86,9 +87,10 @@ test('runner client gives question changes and completion feedback a calmer stag
   assert.match(source, /key=\{currentQuestion\.questionId\}/);
   assert.match(
     source,
-    /sonartra-motion-reveal-soft flex min-h-\[30rem\] flex-col justify-between space-y-5/,
+    /sonartra-motion-reveal-soft flex flex-col justify-between space-y-4/,
   );
-  assert.match(source, /text-\[2rem\] leading-\[1\.02\] sm:text-\[2\.25rem\] lg:text-\[2\.7rem\]/);
+  assert.doesNotMatch(source, /min-h-\[30rem\]/);
+  assert.match(source, /text-\[1\.85rem\] leading-\[1\.04\] sm:text-\[2\.1rem\] lg:text-\[2\.35rem\]/);
   assert.match(source, /sonartra-runner-completion-card/);
   assert.match(source, /Completion status/);
   assert.match(source, /sonartra-runner-map-item/);
@@ -118,7 +120,11 @@ test('runner client uses canonical autosave and completion status messaging', ()
   assert.match(source, /return 'Submitting responses';/);
   assert.match(source, /return 'Needs attention';/);
   assert.match(source, /return 'Saving response';/);
+  assert.match(source, /return 'Response saved';/);
   assert.match(source, /return 'Responses saved';/);
+  assert.match(source, /return 'Select a response to continue';/);
+  assert.match(source, /hasAnySavedResponse: answeredQuestions > 0/);
+  assert.match(source, /hasCurrentResponse: currentSelectedOptionId !== null/);
   assert.match(source, /Completion status/);
   assert.doesNotMatch(source, /return 'Locked';/);
   assert.doesNotMatch(source, /return 'Save issue';/);
@@ -253,7 +259,7 @@ test('runner client hardens semantic structure and navigator accessibility label
 
   assert.match(source, /aria-labelledby="runner-question-title"/);
   assert.match(source, /id="runner-question-title"/);
-  assert.match(source, /<fieldset className="grid gap-3">/);
+  assert.match(source, /<fieldset className="grid gap-2\.5">/);
   assert.match(source, /<legend className="sr-only">Response options<\/legend>/);
   assert.doesNotMatch(source, /<legend className="sr-only">\{currentQuestion\.prompt\}<\/legend>/);
   assert.match(source, /type="radio"/);
@@ -272,6 +278,9 @@ test('runner client hardens semantic structure and navigator accessibility label
   assert.match(source, /return `Question \$\{params\.questionNumber\}, \$\{responseState\}`;/);
   assert.match(source, /aria-current=\{active \? 'step' : undefined\}/);
   assert.match(source, /aria-live="polite"/);
+  assert.match(source, /role="progressbar"/);
+  assert.match(source, /aria-label="Assessment completion progress"/);
+  assert.match(source, /aria-valuenow=\{completionPercentage\}/);
 });
 
 test('runner client preserves premium answer-card treatment around hidden native radios', () => {
@@ -280,13 +289,13 @@ test('runner client preserves premium answer-card treatment around hidden native
   assert.match(source, /<label key=\{option\.optionId\} htmlFor=\{optionInputId\} className="block">/);
   assert.match(
     source,
-    /sonartra-motion-choice sonartra-runner-option block rounded-\[1\.15rem\] border px-5 py-4 text-left transition peer-focus-visible:ring-2 peer-focus-visible:ring-\[#32D6B0\]\/55 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950/,
+    /sonartra-motion-choice sonartra-runner-option block rounded-\[1\.05rem\] border px-4 py-3\.5 text-left transition peer-focus-visible:ring-2 peer-focus-visible:ring-\[#32D6B0\]\/55 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950 sm:px-5/,
   );
   assert.match(
     source,
-    /border-\[#32D6B0\]\/70 bg-\[linear-gradient\(180deg,rgba\(50,214,176,0\.16\),rgba\(50,214,176,0\.075\)\)\] text-white shadow-\[0_18px_38px_rgba\(50,214,176,0\.08\)\] ring-1 ring-\[#32D6B0\]\/22/,
+    /border-\[#32D6B0\]\/75 bg-\[linear-gradient\(180deg,rgba\(50,214,176,0\.16\),rgba\(50,214,176,0\.07\)\)\] text-white shadow-\[0_16px_34px_rgba\(50,214,176,0\.075\)\] ring-1 ring-\[#32D6B0\]\/24/,
   );
-  assert.match(source, /hover:border-white\/24 border-white\/10 bg-white\/\[0\.03\] text-white hover:bg-white\/\[0\.055\]/);
+  assert.match(source, /hover:border-white\/24 border-white\/10 bg-white\/\[0\.026\] text-white hover:bg-white\/\[0\.05\]/);
   assert.match(source, /interactionLocked && 'cursor-not-allowed opacity-70'/);
 });
 
@@ -306,11 +315,33 @@ test('runner client adds compact orientation controls for tablet and mobile layo
   assert.match(source, /Hide question navigator/);
   assert.match(source, /Move between questions without losing your saved progress\./);
   assert.match(source, /sm:grid-cols-6 md:grid-cols-8/);
-  assert.match(source, /rounded-\[1\.15rem\] border border-white\/8 bg-neutral-950\/72/);
+  assert.match(source, /rounded-\[1\.05rem\] border border-white\/8 bg-neutral-950\/72/);
   assert.match(source, /rounded-md border px-2 py-1\.5 text-center text-\[0\.72rem\]/);
   assert.match(source, /setCompactNavigatorOpen\(false\);/);
   assert.match(source, /hidden xl:sticky xl:top-6 xl:block/);
-  assert.match(source, /<nav className="grid grid-cols-6 gap-1\.5" aria-label="Question navigator">/);
+  assert.match(source, /<nav className="grid grid-cols-4 gap-1\.5" aria-label="Question navigator">/);
+  assert.match(source, /xl:grid-cols-\[minmax\(0,1fr\)_15\.5rem\]/);
+});
+
+test('runner client keeps tablet and mobile navigation controls reachable without changing actions', () => {
+  const runnerSource = readFileSync(runnerClientPath, 'utf8');
+  const globalsSource = readFileSync(join(process.cwd(), 'app', 'globals.css'), 'utf8');
+
+  assert.match(runnerSource, /sonartra-runner-action-row/);
+  assert.match(runnerSource, /sonartra-runner-fixed-action-row xl:hidden/);
+  assert.match(runnerSource, /aria-label="Question navigation actions"/);
+  assert.match(globalsSource, /@media \(max-width: 1279px\) \{/);
+  assert.match(globalsSource, /\.sonartra-runner-stage \{/);
+  assert.match(globalsSource, /padding-bottom: 6\.25rem;/);
+  assert.match(globalsSource, /\.sonartra-runner-action-row \{/);
+  assert.match(globalsSource, /display: none !important;/);
+  assert.match(globalsSource, /\.sonartra-runner-fixed-action-row \{/);
+  assert.match(globalsSource, /position: fixed;/);
+  assert.match(globalsSource, /left: clamp\(1rem, 4vw, 2rem\);/);
+  assert.match(globalsSource, /right: clamp\(1rem, 4vw, 2rem\);/);
+  assert.match(globalsSource, /bottom: 0\.75rem;/);
+  assert.match(runnerSource, /onClick=\{\(\) => goToQuestion\(currentQuestionIndex \+ 1\)\}/);
+  assert.match(runnerSource, /onClick=\{handleSubmit\}/);
 });
 
 test('runner client keeps review completion accessible on smaller screens', () => {
