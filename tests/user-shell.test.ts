@@ -112,6 +112,26 @@ test('user shell reprioritises chrome for assessment runner routes on smaller sc
   );
 });
 
+test('user shell uses a dedicated low-chrome shell on assessment attempt routes', () => {
+  const shellSource = readSource(userShellPath);
+
+  assert.match(shellSource, /if \(isAssessmentRunnerRoute\) \{/);
+  assert.match(shellSource, /data-user-shell-variant="assessment-runner"/);
+  assert.match(shellSource, /max-w-\[1320px\]/);
+  assert.match(shellSource, /aria-label="Back to workspace"/);
+  assert.match(shellSource, /href="\/app\/workspace"/);
+  assert.match(shellSource, />\s*Exit to workspace\s*<\/span>/);
+  assert.match(shellSource, />\s*Assessment focus\s*<\/p>/);
+  assert.match(
+    shellSource,
+    /min-h-\[calc\(100vh-4\.25rem\)\] w-full max-w-\[1320px\]/,
+  );
+  assert.match(
+    shellSource,
+    /if \(isAssessmentRunnerRoute\) \{[\s\S]*?return \([\s\S]*?data-user-shell-variant="assessment-runner"[\s\S]*?\);\s*\}/,
+  );
+});
+
 test('user app layout passes a name-first shell label with safe fallbacks', () => {
   const source = readSource(userLayoutPath);
 
