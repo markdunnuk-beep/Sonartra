@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, type ReactNode } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import {
@@ -42,6 +42,10 @@ import {
   SurfaceCard,
   cn,
 } from '@/components/shared/user-app-ui';
+import {
+  getRankedPatternWorkflowNextAction,
+  type RankedPatternWorkflowActionState,
+} from '@/lib/admin/ranked-pattern-workflow-next-action';
 
 type CountMap = Readonly<Record<string, number>> | undefined;
 
@@ -241,12 +245,16 @@ function PackageDraftForm({
   sourceName,
   sourceHash,
   storageReferenceToken,
+  disabled = false,
+  tone = 'secondary',
 }: Readonly<{
   action: (payload: FormData) => void;
   sourcePath: string;
   sourceName: string;
   sourceHash: string;
   storageReferenceToken: string;
+  disabled?: boolean;
+  tone?: 'primary' | 'secondary';
 }>) {
   return (
     <form action={action}>
@@ -257,9 +265,10 @@ function PackageDraftForm({
         storageReferenceToken={storageReferenceToken}
       />
       <SubmitButton
+        disabled={disabled}
         idleLabel="Create draft"
         pendingLabel="Creating draft..."
-        tone="secondary"
+        tone={tone}
       />
     </form>
   );
@@ -421,9 +430,11 @@ function ActiveSourceSummary({
 function PublishAuditForm({
   action,
   disabled,
+  tone = 'secondary',
 }: Readonly<{
   action: (payload: FormData) => void;
   disabled: boolean;
+  tone?: 'primary' | 'secondary';
 }>) {
   return (
     <form action={action}>
@@ -431,7 +442,7 @@ function PublishAuditForm({
         disabled={disabled}
         idleLabel="Check publish readiness"
         pendingLabel="Checking readiness..."
-        tone="secondary"
+        tone={tone}
       />
     </form>
   );
@@ -704,11 +715,17 @@ function WorkflowResultBlock({
   state: RankedPatternAdminImportActionState;
 }>) {
   if (state.formError) {
+    const uploadReferenceError = state.fieldErrors.storageReferenceToken
+      ? 'The uploaded workbook reference has expired. Upload the workbook again.'
+      : null;
+
     return (
       <AdminFeedbackNotice tone="danger" title="Workflow action blocked">
-        <span>{state.formError}</span>
+        <span>{uploadReferenceError ?? state.formError}</span>
         {Object.values(state.fieldErrors).length > 0 ? (
-          <span className="mt-3 block">{Object.values(state.fieldErrors).join(' ')}</span>
+          <span className="mt-3 block">
+            {uploadReferenceError ?? Object.values(state.fieldErrors).join(' ')}
+          </span>
         ) : null}
       </AdminFeedbackNotice>
     );
@@ -788,7 +805,7 @@ type WorkflowStep = {
 
 function WorkflowStepper({ steps }: Readonly<{ steps: readonly WorkflowStep[] }>) {
   return (
-    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6" aria-label="Import workflow steps">
+    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-7" aria-label="Import workflow steps">
       {steps.map((step, index) => (
         <div
           className={cn(
@@ -830,6 +847,44 @@ function RecommendedNextAction({
       <p className="sonartra-page-eyebrow">Recommended next step</p>
       <p className="mt-2 text-lg font-semibold tracking-[-0.02em] text-white">{label}</p>
       <p className="mt-2 text-sm leading-6 text-white/60">{description}</p>
+    </div>
+  );
+}
+
+function WorkflowActionSlot({
+  state,
+  children,
+}: Readonly<{
+  state: RankedPatternWorkflowActionState;
+  children: ReactNode;
+}>) {
+  return (
+    <div
+      className={cn(
+        'space-y-2 rounded-[1rem] border p-3 transition',
+        state.highlighted
+          ? 'border-[rgba(126,179,255,0.34)] bg-[rgba(126,179,255,0.12)] shadow-[0_0_0_1px_rgba(126,179,255,0.08)]'
+          : state.enabled
+            ? 'border-white/10 bg-black/10'
+            : 'border-white/6 bg-black/5 opacity-70',
+      )}
+      data-ranked-pattern-action={state.actionId}
+      data-ranked-pattern-action-current={state.highlighted ? 'true' : 'false'}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        {state.highlighted ? (
+          <LabelPill className="border-[rgba(126,179,255,0.24)] bg-[rgba(126,179,255,0.12)] text-[rgba(222,236,255,0.92)]">
+            Next
+          </LabelPill>
+        ) : null}
+        {!state.enabled ? (
+          <LabelPill className="border-white/8 bg-white/[0.03] text-white/44">Locked</LabelPill>
+        ) : null}
+      </div>
+      {children}
+      {!state.enabled && state.prerequisite ? (
+        <p className="text-xs leading-5 text-white/44">{state.prerequisite}</p>
+      ) : null}
     </div>
   );
 }
@@ -935,6 +990,15 @@ export function RankedPatternImportPanel({
     dryRunState.result.blockingDiagnostics.length === 0;
   const importApplied = applyState.result?.status === 'applied';
   const published = publishVersionState.result?.status === 'published';
+  const nextActionState = getRankedPatternWorkflowNextAction({
+    hasSelectedSource,
+    workbookChecked,
+    hasDraft,
+    importPreviewReady,
+    importApplied,
+    publishReadinessPassed: canPublishFromAudit,
+    published,
+  });
   const workflowSteps: readonly WorkflowStep[] = [
     {
       label: 'Upload workbook',
@@ -957,49 +1021,14 @@ export function RankedPatternImportPanel({
       status: importApplied ? 'complete' : importPreviewReady ? 'current' : 'pending',
     },
     {
+      label: 'Check readiness',
+      status: canPublishFromAudit ? 'complete' : importApplied ? 'current' : 'pending',
+    },
+    {
       label: 'Publish',
-      status: published ? 'complete' : importApplied || canPublishFromAudit ? 'current' : 'pending',
+      status: published ? 'complete' : canPublishFromAudit ? 'current' : 'pending',
     },
   ];
-  const recommendedNextAction = !hasSelectedSource
-    ? {
-        label: 'Upload workbook',
-        description: 'Choose the completed .xlsx assessment workbook before running checks.',
-      }
-    : !workbookChecked
-      ? {
-          label: 'Check workbook',
-          description: 'Read the workbook metadata and confirm there are no blocking workbook issues.',
-        }
-      : !hasDraft
-        ? {
-            label: 'Create draft',
-            description: 'Create or reuse the compatible draft version from the workbook metadata.',
-          }
-        : !importPreviewReady
-          ? {
-              label: 'Preview import',
-              description: 'Review the planned database changes before importing anything to the draft.',
-            }
-          : !importApplied
-            ? {
-                label: 'Import to draft',
-                description: 'Write the checked workbook data to the draft version only.',
-              }
-            : !canPublishFromAudit
-              ? {
-                  label: 'Check publish readiness',
-                  description: 'Confirm the imported draft is ready before publishing it.',
-                }
-              : !published
-                ? {
-                    label: 'Publish assessment',
-                    description: 'Make the audited draft available for new assessment attempts.',
-                  }
-                : {
-                    label: 'Published',
-                    description: 'The assessment has been published from this workflow.',
-                  };
 
   return (
     <SurfaceCard className="space-y-6 p-5 lg:p-6" data-ranked-pattern-import-panel="true">
@@ -1063,7 +1092,18 @@ export function RankedPatternImportPanel({
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.45fr)]">
         <div className="space-y-4">
-          <div className="space-y-4 rounded-[1rem] border border-white/8 bg-black/10 p-4">
+          <div
+            className={cn(
+              'space-y-4 rounded-[1rem] border p-4',
+              nextActionState.actions.uploadWorkbook.highlighted
+                ? 'border-[rgba(126,179,255,0.34)] bg-[rgba(126,179,255,0.1)]'
+                : 'border-white/8 bg-black/10',
+            )}
+            data-ranked-pattern-action="uploadWorkbook"
+            data-ranked-pattern-action-current={
+              nextActionState.actions.uploadWorkbook.highlighted ? 'true' : 'false'
+            }
+          >
             <div className="flex flex-wrap items-center gap-2">
               <p className="sonartra-page-eyebrow">Assessment workbook</p>
               <LabelPill>
@@ -1181,65 +1221,99 @@ export function RankedPatternImportPanel({
 
         <div className="sonartra-admin-feedback-card space-y-3 rounded-[1.2rem] border p-4">
           <RecommendedNextAction
-            description={recommendedNextAction.description}
-            label={recommendedNextAction.label}
+            description={nextActionState.description}
+            label={nextActionState.label}
           />
+          {nextActionState.actions.uploadWorkbook.highlighted ? (
+            <WorkflowActionSlot state={nextActionState.actions.uploadWorkbook}>
+              <p className="text-sm font-medium text-white">Upload workbook</p>
+              <p className="text-sm leading-6 text-white/56">
+                Use the workbook upload control on the left to select and upload the completed .xlsx
+                package.
+              </p>
+            </WorkflowActionSlot>
+          ) : null}
           {resolvedDraft ? (
             <PassiveDraftStatus latestDraftVersion={resolvedDraft} />
           ) : (
-            <PackageDraftForm
-              action={draftVersionAction}
+            <WorkflowActionSlot state={nextActionState.actions.createDraft}>
+              <PackageDraftForm
+                action={draftVersionAction}
+                disabled={!nextActionState.actions.createDraft.enabled}
+                sourceHash={workflowSourceHash}
+                sourceName={workflowSourceName}
+                sourcePath={workflowSourcePath}
+                storageReferenceToken={workflowStorageReferenceToken}
+                tone={nextActionState.actions.createDraft.highlighted ? 'primary' : 'secondary'}
+              />
+            </WorkflowActionSlot>
+          )}
+          <WorkflowActionSlot state={nextActionState.actions.checkWorkbook}>
+            <WorkflowForm
+              action={auditAction}
+              disabled={!nextActionState.actions.checkWorkbook.enabled}
+              idleLabel="Check workbook"
+              pendingLabel="Checking..."
               sourceHash={workflowSourceHash}
               sourceName={workflowSourceName}
               sourcePath={workflowSourcePath}
               storageReferenceToken={workflowStorageReferenceToken}
+              targetAssessmentId={resolvedAssessmentId}
+              targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
+              tone={nextActionState.actions.checkWorkbook.highlighted ? 'primary' : 'secondary'}
             />
-          )}
-          <WorkflowForm
-            action={auditAction}
-            idleLabel="Check workbook"
-            pendingLabel="Checking..."
-            sourceHash={workflowSourceHash}
-            sourceName={workflowSourceName}
-            sourcePath={workflowSourcePath}
-            storageReferenceToken={workflowStorageReferenceToken}
-            targetAssessmentId={resolvedAssessmentId}
-            targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
-            tone="secondary"
-          />
-          <WorkflowForm
-            action={dryRunAction}
-            idleLabel="Preview import"
-            pendingLabel="Previewing..."
-            sourceHash={workflowSourceHash}
-            sourceName={workflowSourceName}
-            sourcePath={workflowSourcePath}
-            storageReferenceToken={workflowStorageReferenceToken}
-            targetAssessmentId={resolvedAssessmentId}
-            targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
-            tone="primary"
-          />
-          <WorkflowForm
-            action={applyAction}
-            disabled={!hasDraft}
-            idleLabel="Import to draft"
-            pendingLabel="Importing..."
-            sourceHash={workflowSourceHash}
-            sourceName={workflowSourceName}
-            sourcePath={workflowSourcePath}
-            storageReferenceToken={workflowStorageReferenceToken}
-            targetAssessmentId={resolvedAssessmentId}
-            targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
-            tone="apply"
-          />
-          <PublishAuditForm action={publishAuditAction} disabled={!hasDraft} />
-          <VersionMutationForm
-            action={publishVersionAction}
-            disabled={!hasDraft || !canPublishFromAudit}
-            idleLabel="Publish assessment"
-            pendingLabel="Publishing..."
-            tone="apply"
-          />
+          </WorkflowActionSlot>
+          <WorkflowActionSlot state={nextActionState.actions.previewImport}>
+            <WorkflowForm
+              action={dryRunAction}
+              disabled={!nextActionState.actions.previewImport.enabled}
+              idleLabel="Preview import"
+              pendingLabel="Previewing..."
+              sourceHash={workflowSourceHash}
+              sourceName={workflowSourceName}
+              sourcePath={workflowSourcePath}
+              storageReferenceToken={workflowStorageReferenceToken}
+              targetAssessmentId={resolvedAssessmentId}
+              targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
+              tone={nextActionState.actions.previewImport.highlighted ? 'primary' : 'secondary'}
+            />
+          </WorkflowActionSlot>
+          <WorkflowActionSlot state={nextActionState.actions.importToDraft}>
+            <WorkflowForm
+              action={applyAction}
+              disabled={!nextActionState.actions.importToDraft.enabled}
+              idleLabel="Import to draft"
+              pendingLabel="Importing..."
+              sourceHash={workflowSourceHash}
+              sourceName={workflowSourceName}
+              sourcePath={workflowSourcePath}
+              storageReferenceToken={workflowStorageReferenceToken}
+              targetAssessmentId={resolvedAssessmentId}
+              targetAssessmentVersionId={resolvedDraft?.assessmentVersionId}
+              tone="apply"
+            />
+          </WorkflowActionSlot>
+          <WorkflowActionSlot state={nextActionState.actions.checkPublishReadiness}>
+            <PublishAuditForm
+              action={publishAuditAction}
+              disabled={!nextActionState.actions.checkPublishReadiness.enabled}
+              tone={nextActionState.actions.checkPublishReadiness.highlighted ? 'primary' : 'secondary'}
+            />
+          </WorkflowActionSlot>
+          <WorkflowActionSlot state={nextActionState.actions.publishAssessment}>
+            <VersionMutationForm
+              action={publishVersionAction}
+              disabled={!nextActionState.actions.publishAssessment.enabled}
+              idleLabel="Publish assessment"
+              pendingLabel="Publishing..."
+              tone={nextActionState.actions.publishAssessment.highlighted ? 'apply' : 'secondary'}
+            />
+          </WorkflowActionSlot>
+          {nextActionState.complete ? (
+            <p className="rounded-[0.9rem] border border-[rgba(116,209,177,0.2)] bg-[rgba(116,209,177,0.08)] px-4 py-3 text-sm leading-6 text-[rgba(214,246,233,0.82)]">
+              Published / complete. No primary publish action is available from this state.
+            </p>
+          ) : null}
           {!hasDraft ? (
             <p className="text-xs leading-5 text-white/46">
               Create a draft before importing, checking publish readiness, or publishing.

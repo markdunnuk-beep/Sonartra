@@ -3,8 +3,15 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { getRankedPatternWorkflowNextAction } from '@/lib/admin/ranked-pattern-workflow-next-action';
+
 const panelSource = readFileSync(
   path.join(process.cwd(), 'components/admin/ranked-pattern-import-panel.tsx'),
+  'utf8',
+);
+
+const nextActionSource = readFileSync(
+  path.join(process.cwd(), 'lib', 'admin', 'ranked-pattern-workflow-next-action.ts'),
   'utf8',
 );
 
@@ -81,7 +88,7 @@ test('ranked-pattern import panel exposes package draft resolution, publish audi
 
 test('ranked-pattern publish control stays disabled until publish audit can publish', () => {
   assert.match(panelSource, /const canPublishFromAudit = publishAuditState\.result\?\.canPublish === true;/);
-  assert.match(panelSource, /disabled=\{!hasDraft \|\| !canPublishFromAudit\}/);
+  assert.match(panelSource, /disabled=\{!nextActionState\.actions\.publishAssessment\.enabled\}/);
   assert.match(panelSource, /Check publish readiness and resolve all blocking findings/);
 });
 
@@ -133,17 +140,103 @@ test('ranked-pattern upload source can be cleared or replaced without ambiguous 
 
 test('ranked-pattern workflow presents a guided stepper and recommended next action', () => {
   assert.match(panelSource, /function WorkflowStepper/);
+  assert.match(panelSource, /getRankedPatternWorkflowNextAction/);
+  assert.match(panelSource, /function WorkflowActionSlot/);
   assert.match(panelSource, /Import workflow steps/);
   assert.match(panelSource, /Upload workbook/);
   assert.match(panelSource, /Check workbook/);
   assert.match(panelSource, /Create draft/);
   assert.match(panelSource, /Preview import/);
   assert.match(panelSource, /Import/);
+  assert.match(panelSource, /Check readiness/);
   assert.match(panelSource, /Publish/);
   assert.match(panelSource, /Recommended next step/);
   assert.match(panelSource, /Upload a completed assessment workbook/);
   assert.match(panelSource, /Accepted: \.xlsx up to 10 MB/);
+  assert.match(panelSource, /data-ranked-pattern-action-current/);
   assert.doesNotMatch(panelSource, /storage_object/);
+});
+
+test('ranked-pattern workflow next action helper follows the package-first sequence', () => {
+  const base = {
+    hasSelectedSource: false,
+    workbookChecked: false,
+    hasDraft: false,
+    importPreviewReady: false,
+    importApplied: false,
+    publishReadinessPassed: false,
+    published: false,
+  };
+
+  assert.equal(getRankedPatternWorkflowNextAction(base).actionId, 'uploadWorkbook');
+  assert.equal(getRankedPatternWorkflowNextAction(base).actions.checkWorkbook.enabled, false);
+
+  const uploaded = { ...base, hasSelectedSource: true };
+  assert.equal(getRankedPatternWorkflowNextAction(uploaded).actionId, 'checkWorkbook');
+  assert.equal(getRankedPatternWorkflowNextAction(uploaded).actions.checkWorkbook.enabled, true);
+
+  const checked = { ...uploaded, workbookChecked: true };
+  assert.equal(getRankedPatternWorkflowNextAction(checked).actionId, 'createDraft');
+  assert.equal(getRankedPatternWorkflowNextAction(checked).actions.createDraft.enabled, true);
+
+  const draft = { ...checked, hasDraft: true };
+  assert.equal(getRankedPatternWorkflowNextAction(draft).actionId, 'previewImport');
+  assert.equal(getRankedPatternWorkflowNextAction(draft).actions.previewImport.enabled, true);
+
+  const previewed = { ...draft, importPreviewReady: true };
+  assert.equal(getRankedPatternWorkflowNextAction(previewed).actionId, 'importToDraft');
+  assert.equal(getRankedPatternWorkflowNextAction(previewed).actions.importToDraft.enabled, true);
+
+  const imported = { ...previewed, importApplied: true };
+  assert.equal(getRankedPatternWorkflowNextAction(imported).actionId, 'checkPublishReadiness');
+  assert.equal(getRankedPatternWorkflowNextAction(imported).actions.checkPublishReadiness.enabled, true);
+
+  const publishable = { ...imported, publishReadinessPassed: true };
+  assert.equal(getRankedPatternWorkflowNextAction(publishable).actionId, 'publishAssessment');
+  assert.equal(getRankedPatternWorkflowNextAction(publishable).actions.publishAssessment.enabled, true);
+
+  const published = { ...publishable, published: true };
+  assert.equal(getRankedPatternWorkflowNextAction(published).actionId, 'complete');
+  assert.equal(getRankedPatternWorkflowNextAction(published).complete, true);
+  assert.equal(getRankedPatternWorkflowNextAction(published).actions.publishAssessment.enabled, false);
+});
+
+test('ranked-pattern workflow action panel gates impossible actions with prerequisite copy', () => {
+  const noSource = getRankedPatternWorkflowNextAction({
+    hasSelectedSource: false,
+    workbookChecked: false,
+    hasDraft: false,
+    importPreviewReady: false,
+    importApplied: false,
+    publishReadinessPassed: false,
+    published: false,
+  });
+
+  assert.equal(noSource.actions.checkWorkbook.prerequisite, 'Upload a workbook or choose an existing package reference first.');
+  assert.equal(noSource.actions.createDraft.prerequisite, 'Select and check a workbook before creating a draft.');
+  assert.equal(noSource.actions.previewImport.prerequisite, 'Select a workbook before previewing import.');
+  assert.equal(noSource.actions.importToDraft.prerequisite, 'Create or select the compatible draft before importing.');
+  assert.equal(noSource.actions.checkPublishReadiness.prerequisite, 'Import to the draft before checking publish readiness.');
+  assert.equal(
+    noSource.actions.publishAssessment.prerequisite,
+    'Check publish readiness and resolve all blocking findings before publishing.',
+  );
+});
+
+test('ranked-pattern workflow preserves uploaded and manual workbook source routing', () => {
+  assert.match(panelSource, /const uploadedSourceAvailable =/);
+  assert.match(panelSource, /const uploadedSourceSelected = sourceMode === 'upload' && uploadedSourceAvailable;/);
+  assert.match(panelSource, /const manualSourceSelected = sourceMode === 'manual' && sourcePath\.trim\(\)\.length > 0;/);
+  assert.match(panelSource, /const workflowSourcePath = uploadedSourceSelected \? '' : sourcePath;/);
+  assert.match(panelSource, /const workflowStorageReferenceToken = uploadedSourceSelected \? uploadState\.result\?\.storageReferenceToken \?\? '' : '';/);
+  assert.match(panelSource, /Use existing reference/);
+  assert.match(panelSource, /Use uploaded workbook/);
+});
+
+test('ranked-pattern workflow shows upload-specific expired reference copy', () => {
+  assert.match(panelSource, /The uploaded workbook reference has expired\. Upload the workbook again\./);
+  assert.match(panelSource, /state\.fieldErrors\.storageReferenceToken/);
+  assert.match(nextActionSource, /Upload a workbook or choose an existing package reference first\./);
 });
 
 test('admin copy keeps versioning and persisted-result boundaries explicit', () => {
