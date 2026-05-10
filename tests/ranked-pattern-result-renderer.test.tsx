@@ -146,6 +146,12 @@ test('ranked-pattern result renderer displays persisted reader-first sections in
   assert.deepEqual(headingPositions, [...headingPositions].sort((left, right) => left - right));
   assert.match(markup, /data-ranked-pattern-result="true"/);
   assert.match(markup, /<main[^>]*data-ranked-pattern-result="true"/);
+  assert.match(markup, /data-ranked-pattern-report-stage="true"/);
+  assert.match(markup, /max-w-\[1560px\]/);
+  assert.match(markup, /xl:grid-cols-\[minmax\(0,74rem\)_10rem\]/);
+  assert.doesNotMatch(markup, /-mx-5/);
+  assert.doesNotMatch(markup, /sm:-mx-6/);
+  assert.doesNotMatch(markup, /lg:-mx-8/);
   assert.match(markup, /You may recognise this as a clear first-route pattern/);
   assert.match(markup, /Concentrated pattern/);
   assert.doesNotMatch(markup, /Version 1\.0\.0 · Pattern alpha_beta_gamma_delta/);

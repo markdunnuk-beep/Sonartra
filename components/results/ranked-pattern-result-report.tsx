@@ -830,7 +830,7 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
 
   return (
     <main
-      className="draft-result-shell relative isolate -mx-5 overflow-x-clip bg-[#101312] px-5 pb-16 pt-16 text-[#F3F1EA] sm:-mx-6 sm:px-6 md:pb-24 md:pt-20 lg:-mx-8 lg:px-8"
+      className="draft-result-shell relative isolate mx-0 min-h-[calc(100vh-4.25rem)] w-full max-w-none overflow-x-clip bg-[#101312] px-0 py-0 text-[#F3F1EA]"
       data-focus-mode={focusMode ? 'true' : 'false'}
       data-reading-mode={readingMode}
       data-ranked-pattern-result="true"
@@ -1008,6 +1008,10 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
             border-color: rgba(38, 148, 128, 0.22) !important;
           }
 
+          .draft-result-shell[data-ranked-pattern-result='true'] .draft-reading-rail {
+            width: 10rem !important;
+          }
+
           @media (min-width: 1280px) {
             .draft-result-shell[data-focus-mode='true'] {
               padding-top: 2rem !important;
@@ -1022,10 +1026,11 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
             }
 
             .draft-result-shell[data-focus-mode='true'] .draft-result-article-grid {
-              grid-template-columns: minmax(0, 1fr) 11.75rem !important;
-              max-width: 76rem;
+              grid-template-columns: minmax(0, 74rem) 10rem !important;
+              max-width: 88rem;
               margin-left: auto;
               margin-right: auto;
+              justify-content: center;
             }
           }
         `}
@@ -1040,7 +1045,10 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
         <div className="draft-backdrop-vignette absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_58%,rgba(7,9,8,0.16)_100%)]" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl">
+      <div
+        className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-16 pt-14 sm:px-6 md:pb-24 md:pt-20 lg:px-7 xl:px-8"
+        data-ranked-pattern-report-stage="true"
+      >
         <DraftMobileSectionNavigator sections={rankedPatternSections} />
 
         <header className="draft-result-header grid gap-8 py-8 md:py-12 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-end">
@@ -1131,7 +1139,7 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
           </aside>
         </header>
 
-        <div className="draft-result-article-grid grid gap-10 xl:grid-cols-[minmax(0,1fr)_11.75rem] xl:items-start">
+        <div className="draft-result-article-grid grid gap-10 xl:grid-cols-[minmax(0,74rem)_10rem] xl:items-start xl:justify-center xl:gap-12 2xl:gap-16">
           <article className="min-w-0">
             <ContextSection domainLabel={domainLabel} section={payload.context as PayloadSection} />
             <OrientationSection scoreShape={scoreShape} section={orientation} signals={rankedSignals} />
