@@ -15,6 +15,7 @@
     "db:local:ranked-pattern:down": "docker compose -f docker-compose.ranked-pattern-local.yml down",
     "audit:result-payloads": "tsx scripts/audit-legacy-result-payloads.ts",
     "audit:ranked-pattern-package": "tsx scripts/assessment-packages/audit-ranked-pattern-workbook.ts",
+    "admin:reset-assessment-result": "tsx scripts/admin/reset-assessment-result.ts",
     "authoring:compile-package": "tsx scripts/authoring/compile-assessment-package.ts",
     "authoring:compile-package:dry-run": "tsx scripts/authoring/compile-assessment-package.ts --dry-run",
     "prove:flow-state-ranked-pattern": "tsx scripts/assessment-packages/prove-flow-state-ranked-pattern-fixture.ts",
