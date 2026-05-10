@@ -159,6 +159,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
   const [completionState, setCompletionState] = useState<CompletionUiState>('idle');
   const [completionReadyHref, setCompletionReadyHref] = useState<string | null>(null);
   const [compactNavigatorOpen, setCompactNavigatorOpen] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const submitLockedRef = useRef(false);
 
@@ -224,6 +225,12 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
     runnerState,
     totalQuestions,
   ]);
+
+  useEffect(() => {
+    if (focusMode) {
+      setCompactNavigatorOpen(false);
+    }
+  }, [focusMode]);
 
   function goToQuestion(index: number) {
     setCurrentQuestionIndex(Math.max(0, Math.min(index, runner.questions.length - 1)));
@@ -400,24 +407,48 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
 
   return (
     <div
-      className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_15.5rem] xl:items-start"
+      className={cn(
+        'grid gap-4 xl:items-start',
+        focusMode
+          ? 'mx-auto max-w-[58rem] xl:grid-cols-1'
+          : 'xl:grid-cols-[minmax(0,1fr)_15.5rem]',
+      )}
       data-runner-phase={completionState !== 'idle' ? 'completion' : 'question'}
       data-runner-state={runnerState}
+      data-runner-focus-mode={focusMode ? 'active' : 'inactive'}
     >
       <div className="space-y-2.5">
-        <header className="px-1">
-          <h1 className="sonartra-type-section-title max-w-[34rem] text-[1.8rem] leading-[1.04] text-white sm:text-[2.05rem] lg:max-w-none lg:text-[2.2rem] xl:whitespace-nowrap">
-            {runner.assessmentTitle}
-          </h1>
-          <p className="sonartra-type-body-secondary mt-1.5 max-w-[46rem] text-white/60">
-            {showReviewHandoff
-              ? 'All responses are saved. Review anything you want to change, then complete the assessment when ready.'
-              : RUNNER_GUIDANCE_COPY}
-          </p>
+        <header className="flex flex-col gap-3 px-1 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="sonartra-type-section-title max-w-[34rem] text-[1.8rem] leading-[1.04] text-white sm:text-[2.05rem] lg:max-w-none lg:text-[2.2rem] xl:whitespace-nowrap">
+              {runner.assessmentTitle}
+            </h1>
+            {!focusMode ? (
+              <p className="sonartra-type-body-secondary mt-1.5 max-w-[46rem] text-white/60">
+                {showReviewHandoff
+                  ? 'All responses are saved. Review anything you want to change, then complete the assessment when ready.'
+                  : RUNNER_GUIDANCE_COPY}
+              </p>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            aria-pressed={focusMode}
+            onClick={() => setFocusMode((current) => !current)}
+            className={cn(
+              'sonartra-focus-ring sonartra-motion-button inline-flex h-10 shrink-0 items-center justify-center rounded-[1rem] border px-3 text-sm font-medium tracking-[-0.01em] transition',
+              focusMode
+                ? 'border-[#32D6B0]/36 bg-[#32D6B0]/12 text-[#EFFFFA]'
+                : 'border-white/10 bg-white/[0.03] text-white/68 hover:border-white/16 hover:bg-white/[0.055] hover:text-white',
+            )}
+          >
+            Focus mode
+          </button>
         </header>
 
         <nav
-          className="sticky top-3 z-20 xl:hidden"
+          className={cn('sticky top-3 z-20 xl:hidden', focusMode && 'top-2')}
           data-runner-mobile-nav
           aria-label="Question navigator"
         >
@@ -435,24 +466,30 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
                 </div>
               </div>
 
-              <button
-                type="button"
-                aria-controls="runner-compact-navigator"
-                aria-expanded={compactNavigatorOpen}
-                aria-label={
-                  compactNavigatorOpen ? 'Hide question navigator' : 'Open question navigator'
-                }
-                onClick={() => setCompactNavigatorOpen((current) => !current)}
-                className={getRunnerButtonClass({
-                  variant: 'secondary',
-                  minWidthClassName: 'min-w-[8.75rem]',
-                })}
-              >
-                {compactNavigatorOpen ? 'Hide Navigator' : 'Question Navigator'}
-              </button>
+              {!focusMode ? (
+                <button
+                  type="button"
+                  aria-controls="runner-compact-navigator"
+                  aria-expanded={compactNavigatorOpen}
+                  aria-label={
+                    compactNavigatorOpen ? 'Hide question navigator' : 'Open question navigator'
+                  }
+                  onClick={() => setCompactNavigatorOpen((current) => !current)}
+                  className={getRunnerButtonClass({
+                    variant: 'secondary',
+                    minWidthClassName: 'min-w-[8.75rem]',
+                  })}
+                >
+                  {compactNavigatorOpen ? 'Hide Navigator' : 'Question Navigator'}
+                </button>
+              ) : (
+                <span className="sonartra-type-caption rounded-full border border-[#32D6B0]/20 bg-[#32D6B0]/10 px-3 py-1.5 text-[#CFFDF1]">
+                  Focus
+                </span>
+              )}
             </div>
 
-            {compactNavigatorOpen ? (
+            {compactNavigatorOpen && !focusMode ? (
               <div
                 id="runner-compact-navigator"
                 className="sonartra-motion-reveal-soft border-white/6 mt-3 space-y-3 border-t pt-3"
@@ -915,6 +952,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
         ) : null}
       </div>
 
+      {!focusMode ? (
       <aside className="hidden xl:sticky xl:top-6 xl:block">
         <section
           className="sonartra-motion-reveal sonartra-motion-stage-3 sonartra-runner-support-card space-y-2.5 rounded-[1.15rem] border border-white/7 bg-white/[0.014] p-3 shadow-[0_14px_34px_rgba(0,0,0,0.12)]"
@@ -999,6 +1037,7 @@ export function AssessmentRunnerClient({ userId, runner }: AssessmentRunnerClien
           </nav>
         </section>
       </aside>
+      ) : null}
     </div>
   );
 }

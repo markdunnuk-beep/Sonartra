@@ -176,6 +176,23 @@ test('runner client keeps the question area focused without hiding options or st
   assert.match(source, /completionPercentage/);
 });
 
+test('runner client adds lightweight local focus mode without touching runner actions', () => {
+  const source = readFileSync(runnerClientPath, 'utf8');
+
+  assert.match(source, /const \[focusMode, setFocusMode\] = useState\(false\);/);
+  assert.match(source, /aria-pressed=\{focusMode\}/);
+  assert.match(source, /onClick=\{\(\) => setFocusMode\(\(current\) => !current\)\}/);
+  assert.match(source, />\s*Focus mode\s*<\/button>/);
+  assert.match(source, /data-runner-focus-mode=\{focusMode \? 'active' : 'inactive'\}/);
+  assert.match(source, /focusMode[\s\S]*setCompactNavigatorOpen\(false\);/);
+  assert.match(source, /focusMode[\s\S]*'mx-auto max-w-\[58rem\] xl:grid-cols-1'/);
+  assert.match(source, /!focusMode \? \(/);
+  assert.match(source, /compactNavigatorOpen && !focusMode \? \(/);
+  assert.match(source, /\{!focusMode \? \(\s*<aside className="hidden xl:sticky xl:top-6 xl:block">/);
+  assert.match(source, /onClick=\{\(\) => goToQuestion\(currentQuestionIndex \+ 1\)\}/);
+  assert.match(source, /onClick=\{handleSubmit\}/);
+});
+
 test('runner client renders explicit in-progress and review mode messaging from canonical runner state', () => {
   const source = readFileSync(runnerClientPath, 'utf8');
 
