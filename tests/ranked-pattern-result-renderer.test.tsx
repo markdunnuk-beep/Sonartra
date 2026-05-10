@@ -347,6 +347,61 @@ test('ranked-pattern narrowing cards render persisted 12_Narrowing fields explic
   assert.ok(titlePosition < bodyPosition, 'narrowing title should render before narrowing text');
 });
 
+test('ranked-pattern application cards render persisted 13_Application fields explicitly', () => {
+  const payload = rankedPayload({
+    application: [
+      {
+        lookupKey: 'application_alpha_1',
+        itemKey: 'application_1',
+        priority: 1,
+        fieldValues: {
+          application_title: 'Name the decision point',
+          application_text: 'Use your leadership to turn pressure into a clear outcome and next step.',
+          linked_signal_key: 'results',
+        },
+      },
+      {
+        lookupKey: 'application_beta_2',
+        itemKey: 'application_2',
+        priority: 2,
+        fieldValues: {
+          application_title: 'Build the working route',
+          application_text: 'Give the group enough sequence, standards, and handover to carry the work.',
+          linked_signal_key: 'process',
+        },
+      },
+      {
+        lookupKey: 'application_gamma_3',
+        itemKey: 'application_3',
+        priority: 3,
+        fieldValues: {
+          application_title: 'Bring in deliberate trust',
+          application_text: 'Check where communication and shared confidence need more attention.',
+          linked_signal_key: 'people',
+        },
+      },
+    ],
+  });
+  const markup = renderToStaticMarkup(<RankedPatternResultReport payload={payload} />);
+
+  assert.match(markup, /Priority 1/);
+  assert.match(markup, /<h3[^>]*>Name the decision point<\/h3>/);
+  assert.match(markup, /<p[^>]*>Use your leadership to turn pressure into a clear outcome and next step\.<\/p>/);
+  assert.match(markup, /Results/);
+  assert.doesNotMatch(markup, />results</);
+  assert.doesNotMatch(markup, /results<\/p>/);
+  assert.doesNotMatch(markup, /linked_signal_key/);
+  assert.doesNotMatch(markup, /undefined|null/);
+
+  const priorityPosition = markup.indexOf('Priority 1');
+  const signalPosition = markup.indexOf('Results');
+  const titlePosition = markup.indexOf('Name the decision point');
+  const bodyPosition = markup.indexOf('Use your leadership to turn pressure into a clear outcome and next step.');
+  assert.ok(priorityPosition < titlePosition, 'priority label should render before the application title');
+  assert.ok(signalPosition < titlePosition, 'signal tag should render before the application title');
+  assert.ok(titlePosition < bodyPosition, 'application title should render before application text');
+});
+
 test('ranked-pattern result renderer reads persisted ranks, percentages, score shape, and pattern key', () => {
   const markup = renderToStaticMarkup(<RankedPatternResultReport payload={rankedPayload()} />);
 

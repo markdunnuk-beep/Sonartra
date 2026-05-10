@@ -381,6 +381,39 @@ function NarrowingListSection({ items }: { items: readonly PayloadListItem[] }) 
   );
 }
 
+function ApplicationListSection({ items }: { items: readonly PayloadListItem[] }) {
+  return (
+    <SchemaSection id="application" label="How to Use It">
+      <div className="grid gap-4 lg:grid-cols-3">
+        {items.map((item, index) => {
+          const title = readText(item.fieldValues, 'application_title', 'applicationTitle', 'title');
+          const body = readText(item.fieldValues, 'application_text', 'applicationText', 'text');
+          const linkedSignalKey = readText(item.fieldValues, 'linked_signal_key', 'linkedSignalKey');
+          const signalLabel = linkedSignalKey ? toTitleLabel(linkedSignalKey) : null;
+
+          return (
+            <Panel
+              key={item.itemKey ?? item.lookupKey ?? `application-${index}`}
+              className="draft-teal-surface flex min-h-[17rem] flex-col border-[#32D6B0]/18 bg-[#32D6B0]/[0.05]"
+            >
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <FieldLabel tone="teal">{item.priority ? `Priority ${item.priority}` : 'Application'}</FieldLabel>
+                {signalLabel ? (
+                  <span className="rounded-full border border-[#32D6B0]/18 bg-[#32D6B0]/[0.075] px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#8BE7D0]">
+                    {signalLabel}
+                  </span>
+                ) : null}
+              </div>
+              {title ? <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{title}</h3> : null}
+              {body ? <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{body}</p> : null}
+            </Panel>
+          );
+        })}
+      </div>
+    </SchemaSection>
+  );
+}
+
 function ContextSection({ section, domainLabel }: { section: PayloadSection; domainLabel: string }) {
   const { title, bodyEntries } = sectionTextGrid(section);
 
@@ -631,6 +664,9 @@ function ListSection({
   }
   if (id === 'narrowing') {
     return <NarrowingListSection items={items} />;
+  }
+  if (id === 'application') {
+    return <ApplicationListSection items={items} />;
   }
 
   return (
