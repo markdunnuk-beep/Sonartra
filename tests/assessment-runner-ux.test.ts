@@ -358,14 +358,16 @@ test('runner client keeps tablet and mobile navigation controls reachable withou
   assert.match(runnerSource, /aria-label="Question navigation actions"/);
   assert.match(globalsSource, /@media \(max-width: 1279px\) \{/);
   assert.match(globalsSource, /\.sonartra-runner-stage \{/);
-  assert.match(globalsSource, /padding-bottom: 6\.25rem;/);
+  assert.match(globalsSource, /padding-bottom: calc\(8\.5rem \+ env\(safe-area-inset-bottom\)\) !important;/);
   assert.match(globalsSource, /\.sonartra-runner-action-row \{/);
   assert.match(globalsSource, /display: none !important;/);
   assert.match(globalsSource, /\.sonartra-runner-fixed-action-row \{/);
   assert.match(globalsSource, /position: fixed;/);
   assert.match(globalsSource, /left: clamp\(1rem, 4vw, 2rem\);/);
   assert.match(globalsSource, /right: clamp\(1rem, 4vw, 2rem\);/);
-  assert.match(globalsSource, /bottom: 0\.75rem;/);
+  assert.match(globalsSource, /bottom: calc\(0\.75rem \+ env\(safe-area-inset-bottom\)\);/);
+  assert.match(globalsSource, /@media \(max-width: 640px\) \{/);
+  assert.match(globalsSource, /padding-bottom: calc\(14rem \+ env\(safe-area-inset-bottom\)\) !important;/);
   assert.match(runnerSource, /onClick=\{\(\) => goToQuestion\(currentQuestionIndex \+ 1\)\}/);
   assert.match(runnerSource, /onClick=\{handleSubmit\}/);
 });
