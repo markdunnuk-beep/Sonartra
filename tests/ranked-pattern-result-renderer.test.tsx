@@ -402,6 +402,72 @@ test('ranked-pattern application cards render persisted 13_Application fields ex
   assert.ok(titlePosition < bodyPosition, 'application title should render before application text');
 });
 
+test('ranked-pattern fixture carries persisted closing integration development edge', () => {
+  const payload = rankedPayload();
+  assert.equal(
+    (payload.closingIntegration as { fieldValues?: Record<string, unknown> }).fieldValues?.developmentEdge,
+    'The useful edge is to let the lead signal begin the interpretation, then deliberately widen the reading.',
+  );
+});
+
+test('ranked-pattern closing integration renders all persisted 14_Closing_Integration fields explicitly', () => {
+  const payload = rankedPayload({
+    closingIntegration: {
+      lookupKey: 'closing_alpha_beta_gamma_delta_concentrated',
+      fieldValues: {
+        closing_summary: 'Use the full pattern as a practical leadership guide.',
+        core_gift: 'The core gift is a clear first route into action.',
+        core_trap: 'The core trap is treating the first route as the whole answer.',
+        development_edge: 'The development edge is to bring deliberate range before the pattern narrows.',
+        memorable_line: 'Start clearly. Widen deliberately.',
+      },
+    },
+  });
+  const markup = renderToStaticMarkup(<RankedPatternResultReport payload={payload} />);
+
+  assert.match(markup, /Core gift/);
+  assert.match(markup, /Core trap/);
+  assert.match(markup, /Closing summary/);
+  assert.match(markup, /Development edge/);
+  assert.match(markup, /<p[^>]*>The core gift is a clear first route into action\.<\/p>/);
+  assert.match(markup, /<p[^>]*>The core trap is treating the first route as the whole answer\.<\/p>/);
+  assert.match(markup, /<p[^>]*>Use the full pattern as a practical leadership guide\.<\/p>/);
+  assert.match(markup, /<p[^>]*>The development edge is to bring deliberate range before the pattern narrows\.<\/p>/);
+  assert.match(markup, /Start clearly\. Widen deliberately\./);
+  assert.doesNotMatch(markup, /undefined|null/);
+
+  const giftPosition = markup.indexOf('Core gift');
+  const trapPosition = markup.indexOf('Core trap');
+  const summaryPosition = markup.indexOf('Closing summary');
+  const edgePosition = markup.indexOf('Development edge');
+  const memorablePosition = markup.indexOf('Start clearly. Widen deliberately.');
+  assert.ok(giftPosition < trapPosition, 'core gift should render before core trap');
+  assert.ok(trapPosition < summaryPosition, 'core trap should render before closing summary');
+  assert.ok(summaryPosition < edgePosition, 'closing summary should render before development edge');
+  assert.ok(edgePosition < memorablePosition, 'development edge should render before memorable line');
+});
+
+test('ranked-pattern closing integration omits missing development edge without placeholder text', () => {
+  const payload = rankedPayload({
+    closingIntegration: {
+      lookupKey: 'closing_alpha_beta_gamma_delta_concentrated',
+      fieldValues: {
+        closing_summary: 'Use the full pattern.',
+        core_gift: 'A clear first route.',
+        core_trap: 'Overusing the first route.',
+        memorable_line: 'Keep the whole pattern in view.',
+      },
+    },
+  });
+  const markup = renderToStaticMarkup(<RankedPatternResultReport payload={payload} />);
+
+  assert.match(markup, /Core gift/);
+  assert.match(markup, /Core trap/);
+  assert.match(markup, /Closing summary/);
+  assert.doesNotMatch(markup, /Development edge/);
+  assert.doesNotMatch(markup, /undefined|null/);
+});
+
 test('ranked-pattern result renderer reads persisted ranks, percentages, score shape, and pattern key', () => {
   const markup = renderToStaticMarkup(<RankedPatternResultReport payload={rankedPayload()} />);
 

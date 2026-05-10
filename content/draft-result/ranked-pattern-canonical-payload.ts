@@ -145,7 +145,7 @@ export function buildRankedPatternResultPayload(params?: {
     closingIntegration: {
       lookupKey: 'closing_alpha_beta_gamma_delta_concentrated',
       fieldValues: {
-        title: 'Take the whole pattern forward',
+        closingSummary: 'Take the whole pattern forward',
         coreGift: 'The strongest signal gives you a clear first route.',
         coreTrap: 'The result can become too narrow if the supporting signals are treated as irrelevant.',
         developmentEdge: 'The useful edge is to let the lead signal begin the interpretation, then deliberately widen the reading.',

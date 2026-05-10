@@ -697,34 +697,35 @@ function ListSection({
 }
 
 function ClosingSection({ section }: { section: PayloadSection }) {
-  const { title, bodyEntries } = sectionTextGrid(section);
-  const memorableLine = readText(section.fieldValues, 'memorableLine', 'memorable_line');
-  const supportingEntries = bodyEntries.filter(([, value]) => value !== memorableLine);
+  const closingSummary = readText(section.fieldValues, 'closing_summary', 'closingSummary', 'title');
+  const coreGift = readText(section.fieldValues, 'core_gift', 'coreGift');
+  const coreTrap = readText(section.fieldValues, 'core_trap', 'coreTrap');
+  const developmentEdge = readText(section.fieldValues, 'development_edge', 'developmentEdge');
+  const memorableLine = readText(section.fieldValues, 'memorable_line', 'memorableLine');
+  const cards = [
+    ['core_gift', coreGift, 'teal'],
+    ['core_trap', coreTrap, 'warm'],
+    ['closing_summary', closingSummary, 'neutral'],
+    ['development_edge', developmentEdge, 'teal'],
+  ] as const;
 
   return (
     <SchemaSection id="closing-integration" label="Take Forward">
       <div className="draft-teal-surface rounded-[1.85rem] border border-[#32D6B0]/22 bg-[linear-gradient(135deg,rgba(50,214,176,0.09),rgba(243,241,234,0.035))] p-6 md:p-8">
-        {title ? (
-          <p className="max-w-4xl text-2xl font-semibold leading-9 text-[#F3F1EA]">
-            {title}
-          </p>
-        ) : null}
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {supportingEntries.slice(0, 3).map(([key, value], index) => (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {cards.map(([key, value, tone]) => value ? (
             <Panel
               className={cx(
                 'bg-[#151A18]/70',
-                index === 0 && 'draft-teal-surface border-[#32D6B0]/18',
-                index === 1 && 'draft-warm-surface border-[#C98E68]/18',
+                tone === 'teal' && 'draft-teal-surface border-[#32D6B0]/18',
+                tone === 'warm' && 'draft-warm-surface border-[#C98E68]/18',
               )}
               key={key}
             >
-              <FieldLabel tone={index === 0 ? 'teal' : index === 1 ? 'warm' : 'neutral'}>
-                {toLabel(key)}
-              </FieldLabel>
+              <FieldLabel tone={tone}>{toLabel(key)}</FieldLabel>
               <p className="mt-3 text-sm leading-6 text-[#B8BDB7]/90">{value}</p>
             </Panel>
-          ))}
+          ) : null)}
         </div>
         {memorableLine ? (
           <p className="mt-8 border-t border-[#F3F1EA]/[0.085] pt-6 text-3xl font-semibold leading-tight text-[#F3F1EA] md:text-4xl">
