@@ -240,6 +240,58 @@ test('ranked-pattern signal profile maps persisted 08_Signal_Roles fields explic
   assert.doesNotMatch(markup, /undefined|null/);
 });
 
+test('ranked-pattern strengths cards render persisted 11_Strengths fields explicitly', () => {
+  const payload = rankedPayload({
+    strengths: [
+      {
+        lookupKey: 'strength_alpha_1',
+        itemKey: 'strength_1',
+        priority: 1,
+        fieldValues: {
+          strength_title: 'Clear outcomes people can act on',
+          strength_text: 'At your best, this leadership pattern names the outcome and the next step.',
+          linked_signal_key: 'alpha_signal',
+        },
+      },
+      {
+        lookupKey: 'strength_beta_2',
+        itemKey: 'strength_2',
+        priority: 2,
+        fieldValues: {
+          strength_title: 'Momentum with a usable path',
+          strength_text: 'Others benefit because the work has a clearer route and handover.',
+          linked_signal_key: 'beta_signal',
+        },
+      },
+      {
+        lookupKey: 'strength_gamma_3',
+        itemKey: 'strength_3',
+        priority: 3,
+        fieldValues: {
+          strength_title: 'Progress people can understand and sustain',
+          strength_text: 'This strengthens your leadership because the main route becomes easier to carry.',
+          linked_signal_key: 'gamma_signal',
+        },
+      },
+    ],
+  });
+  const markup = renderToStaticMarkup(<RankedPatternResultReport payload={payload} />);
+
+  assert.match(markup, /Priority 1/);
+  assert.match(markup, /<h3[^>]*>Clear outcomes people can act on<\/h3>/);
+  assert.match(markup, /<p[^>]*>At your best, this leadership pattern names the outcome and the next step\.<\/p>/);
+  assert.match(markup, /Alpha Signal/);
+  assert.doesNotMatch(markup, />alpha_signal</);
+  assert.doesNotMatch(markup, /alpha_signal<\/p>/);
+  assert.doesNotMatch(markup, /undefined|null/);
+
+  const priorityPosition = markup.indexOf('Priority 1');
+  const titlePosition = markup.indexOf('Clear outcomes people can act on');
+  const bodyPosition = markup.indexOf('At your best, this leadership pattern names the outcome and the next step.');
+  assert.ok(priorityPosition < titlePosition, 'priority label should render before the strength title');
+  assert.ok(titlePosition < bodyPosition, 'strength title should render before strength text');
+});
+
 test('ranked-pattern result renderer reads persisted ranks, percentages, score shape, and pattern key', () => {
   const markup = renderToStaticMarkup(<RankedPatternResultReport payload={rankedPayload()} />);
 
