@@ -292,6 +292,61 @@ test('ranked-pattern strengths cards render persisted 11_Strengths fields explic
   assert.ok(titlePosition < bodyPosition, 'strength title should render before strength text');
 });
 
+test('ranked-pattern narrowing cards render persisted 12_Narrowing fields explicitly', () => {
+  const payload = rankedPayload({
+    narrowing: [
+      {
+        lookupKey: 'narrowing_alpha_1',
+        itemKey: 'narrowing_1',
+        priority: 1,
+        fieldValues: {
+          narrowing_title: 'Moving before trust has caught up',
+          narrowing_text: 'The leadership risk is increasing pace before confidence is strong enough.',
+          missing_range_signal_key: 'people',
+        },
+      },
+      {
+        lookupKey: 'narrowing_beta_2',
+        itemKey: 'narrowing_2',
+        priority: 2,
+        fieldValues: {
+          narrowing_title: 'Structure without enough direction',
+          narrowing_text: 'The work can become orderly without being clear about where it is heading.',
+          missing_range_signal_key: 'vision',
+        },
+      },
+      {
+        lookupKey: 'narrowing_gamma_3',
+        itemKey: 'narrowing_3',
+        priority: 3,
+        fieldValues: {
+          narrowing_title: 'Decisions without enough handover',
+          narrowing_text: 'The next step can be named before the route is easy for others to follow.',
+          missing_range_signal_key: 'process',
+        },
+      },
+    ],
+  });
+  const markup = renderToStaticMarkup(<RankedPatternResultReport payload={payload} />);
+
+  assert.match(markup, /Priority 1/);
+  assert.match(markup, /<h3[^>]*>Moving before trust has caught up<\/h3>/);
+  assert.match(markup, /<p[^>]*>The leadership risk is increasing pace before confidence is strong enough\.<\/p>/);
+  assert.match(markup, /People/);
+  assert.doesNotMatch(markup, />people</);
+  assert.doesNotMatch(markup, /people<\/p>/);
+  assert.doesNotMatch(markup, /missing_range_signal_key/);
+  assert.doesNotMatch(markup, /undefined|null/);
+
+  const priorityPosition = markup.indexOf('Priority 1');
+  const signalPosition = markup.indexOf('People');
+  const titlePosition = markup.indexOf('Moving before trust has caught up');
+  const bodyPosition = markup.indexOf('The leadership risk is increasing pace before confidence is strong enough.');
+  assert.ok(priorityPosition < titlePosition, 'priority label should render before the narrowing title');
+  assert.ok(signalPosition < titlePosition, 'signal tag should render before the narrowing title');
+  assert.ok(titlePosition < bodyPosition, 'narrowing title should render before narrowing text');
+});
+
 test('ranked-pattern result renderer reads persisted ranks, percentages, score shape, and pattern key', () => {
   const markup = renderToStaticMarkup(<RankedPatternResultReport payload={rankedPayload()} />);
 

@@ -344,6 +344,43 @@ function StrengthsListSection({ items }: { items: readonly PayloadListItem[] }) 
   );
 }
 
+function NarrowingListSection({ items }: { items: readonly PayloadListItem[] }) {
+  return (
+    <SchemaSection id="narrowing" label="Where It Can Narrow">
+      <div className="grid gap-4 lg:grid-cols-3">
+        {items.map((item, index) => {
+          const title = readText(item.fieldValues, 'narrowing_title', 'narrowingTitle', 'title');
+          const body = readText(item.fieldValues, 'narrowing_text', 'narrowingText', 'text');
+          const missingRangeSignalKey = readText(
+            item.fieldValues,
+            'missing_range_signal_key',
+            'missingRangeSignalKey',
+          );
+          const signalLabel = missingRangeSignalKey ? toTitleLabel(missingRangeSignalKey) : null;
+
+          return (
+            <Panel
+              key={item.itemKey ?? item.lookupKey ?? `narrowing-${index}`}
+              className="draft-warm-surface border-[#C98E68]/18 bg-[#C98E68]/[0.045]"
+            >
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <FieldLabel tone="warm">{item.priority ? `Priority ${item.priority}` : 'Narrowing'}</FieldLabel>
+                {signalLabel ? (
+                  <span className="rounded-full border border-[#C98E68]/20 bg-[#C98E68]/[0.08] px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#E3AF8C]">
+                    {signalLabel}
+                  </span>
+                ) : null}
+              </div>
+              {title ? <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{title}</h3> : null}
+              {body ? <p className="mt-3 text-sm leading-7 text-[#B8BDB7]/90">{body}</p> : null}
+            </Panel>
+          );
+        })}
+      </div>
+    </SchemaSection>
+  );
+}
+
 function ContextSection({ section, domainLabel }: { section: PayloadSection; domainLabel: string }) {
   const { title, bodyEntries } = sectionTextGrid(section);
 
@@ -591,6 +628,9 @@ function ListSection({
 }) {
   if (id === 'strengths') {
     return <StrengthsListSection items={items} />;
+  }
+  if (id === 'narrowing') {
+    return <NarrowingListSection items={items} />;
   }
 
   return (
