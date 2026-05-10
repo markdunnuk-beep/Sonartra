@@ -154,6 +154,10 @@ test('ranked-pattern result renderer displays persisted reader-first sections in
   assert.doesNotMatch(markup, /lg:-mx-8/);
   assert.match(markup, /You may recognise this as a clear first-route pattern/);
   assert.match(markup, /Concentrated pattern/);
+  const heroPosition = markup.indexOf('You may recognise this as a clear first-route pattern');
+  const evidencePosition = markup.indexOf('Why this result was generated');
+  assert.ok(heroPosition >= 0, 'Expected hero summary to render.');
+  assert.ok(evidencePosition > heroPosition, 'Expected result evidence to render after the hero summary.');
   assert.match(markup, /Result evidence/);
   assert.match(markup, /Why this result was generated/);
   assert.match(markup, /relative spread across the four ranked signals/);

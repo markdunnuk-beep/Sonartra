@@ -1050,12 +1050,12 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
       </div>
 
       <div
-        className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-16 pt-14 sm:px-6 md:pb-24 md:pt-20 lg:px-7 xl:px-8"
+        className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-16 pt-8 sm:px-6 md:pb-24 md:pt-10 lg:px-7 xl:px-8"
         data-ranked-pattern-report-stage="true"
       >
         <DraftMobileSectionNavigator sections={rankedPatternSections} />
 
-        <header className="draft-result-header grid gap-8 py-8 md:py-12 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
+        <header className="draft-result-header grid gap-7 py-5 md:gap-8 md:py-8">
           <div className="max-w-5xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
@@ -1080,74 +1080,79 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
           </div>
 
           <aside
-            className="draft-surface rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-4 shadow-[0_24px_80px_rgba(4,7,6,0.2)] sm:p-5"
+            className="draft-surface rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-4 shadow-[0_24px_80px_rgba(4,7,6,0.2)] sm:p-5 lg:p-6"
             data-ranked-pattern-snapshot="true"
           >
-            <FieldLabel tone="teal">Result evidence</FieldLabel>
-            <h2 className="mt-3 text-xl font-semibold leading-6 text-[#F3F1EA] sm:text-2xl sm:leading-7">
-              Why this result was generated
-            </h2>
-            <p className="mt-3 text-[0.82rem] leading-5 text-[#B8BDB7]/88 sm:text-sm sm:leading-6">
-              This result was read from the relative spread across the four ranked signals. {evidenceLead}
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3">
-              {rankedSignals.slice(0, 4).map((signal, index) => (
-                <div
-                  className={cx(
-                    'min-w-0 rounded-[1rem] border p-3 sm:p-4',
-                    index === 0
-                      ? 'draft-teal-surface border-[#32D6B0]/22 bg-[#32D6B0]/[0.075]'
-                      : index === 1
-                        ? 'draft-teal-surface border-[#32D6B0]/16 bg-[#32D6B0]/[0.045]'
-                        : index === 3
-                          ? 'draft-warm-surface border-[#C98E68]/16 bg-[#C98E68]/[0.042]'
-                          : 'draft-panel border-[#F3F1EA]/[0.085] bg-[#202622]/58',
-                  )}
-                  data-ranked-pattern-snapshot-card="true"
-                  key={signal.signalKey}
-                >
-                  <p
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start lg:gap-6">
+              <div className="min-w-0">
+                <FieldLabel tone="teal">Result evidence</FieldLabel>
+                <h2 className="mt-3 text-xl font-semibold leading-6 text-[#F3F1EA] sm:text-2xl sm:leading-7">
+                  Why this result was generated
+                </h2>
+                <p className="mt-3 max-w-2xl text-[0.82rem] leading-5 text-[#B8BDB7]/88 sm:text-sm sm:leading-6">
+                  This result was read from the relative spread across the four ranked signals. {evidenceLead}
+                </p>
+                <dl className="mt-4 space-y-2.5 border-t border-[#F3F1EA]/[0.085] pt-3.5 sm:space-y-3 sm:pt-4">
+                  <div className="grid gap-1.5">
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-sm text-[#A8B0AA]">Signal shape</dt>
+                      <dd className="font-mono text-sm text-[#F3F1EA]/88">{formatScoreShape(scoreShape)}</dd>
+                    </div>
+                    <dd className="draft-shape-description text-sm leading-6 text-[#A8B0AA]/84">
+                      {scoreShapeDescription(scoreShape)}
+                    </dd>
+                  </div>
+                  {answeredCount !== null && totalCount !== null ? (
+                    <div className="grid gap-1.5">
+                      <dt className="text-sm text-[#A8B0AA]">Completed responses</dt>
+                      <dd className="text-sm leading-6 text-[#F3F1EA]/88">
+                        Based on {answeredCount} of {totalCount} completed responses.
+                      </dd>
+                    </div>
+                  ) : null}
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-sm text-[#A8B0AA]">Completed</dt>
+                    <dd className="font-mono text-sm text-[#F3F1EA]/88">
+                      {formatResultDate(payload.metadata.completedAt ?? payload.metadata.generatedAt)}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
+                {rankedSignals.slice(0, 4).map((signal, index) => (
+                  <div
                     className={cx(
-                      'draft-percent font-semibold text-[#F3F1EA]',
-                      index === 0 ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl',
+                      'min-w-0 rounded-[1rem] border p-3 sm:p-4',
+                      index === 0
+                        ? 'draft-teal-surface border-[#32D6B0]/22 bg-[#32D6B0]/[0.075]'
+                        : index === 1
+                          ? 'draft-teal-surface border-[#32D6B0]/16 bg-[#32D6B0]/[0.045]'
+                          : index === 3
+                            ? 'draft-warm-surface border-[#C98E68]/16 bg-[#C98E68]/[0.042]'
+                            : 'draft-panel border-[#F3F1EA]/[0.085] bg-[#202622]/58',
                     )}
+                    data-ranked-pattern-snapshot-card="true"
+                    key={signal.signalKey}
                   >
-                    {signal.normalizedPercentage}%
-                  </p>
-                  <p className="mt-2 truncate text-sm font-semibold leading-5 text-[#F3F1EA]/90">
-                    {signal.signalLabel}
-                  </p>
-                  <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[#A8B0AA]/76">
-                    Rank {signal.rank}
-                  </p>
-                </div>
-              ))}
+                    <p
+                      className={cx(
+                        'draft-percent font-semibold text-[#F3F1EA]',
+                        index === 0 ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl',
+                      )}
+                    >
+                      {signal.normalizedPercentage}%
+                    </p>
+                    <p className="mt-2 truncate text-sm font-semibold leading-5 text-[#F3F1EA]/90">
+                      {signal.signalLabel}
+                    </p>
+                    <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-[#A8B0AA]/76">
+                      Rank {signal.rank}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <dl className="mt-3.5 space-y-2.5 border-t border-[#F3F1EA]/[0.085] pt-3.5 sm:mt-4 sm:space-y-3 sm:pt-4">
-              <div className="grid gap-1.5">
-                <div className="flex items-center justify-between gap-4">
-                  <dt className="text-sm text-[#A8B0AA]">Signal shape</dt>
-                  <dd className="font-mono text-sm text-[#F3F1EA]/88">{formatScoreShape(scoreShape)}</dd>
-                </div>
-                <dd className="draft-shape-description text-sm leading-6 text-[#A8B0AA]/84">
-                  {scoreShapeDescription(scoreShape)}
-                </dd>
-              </div>
-              {answeredCount !== null && totalCount !== null ? (
-                <div className="grid gap-1.5">
-                  <dt className="text-sm text-[#A8B0AA]">Completed responses</dt>
-                  <dd className="text-sm leading-6 text-[#F3F1EA]/88">
-                    Based on {answeredCount} of {totalCount} completed responses.
-                  </dd>
-                </div>
-              ) : null}
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-sm text-[#A8B0AA]">Completed</dt>
-                <dd className="font-mono text-sm text-[#F3F1EA]/88">
-                  {formatResultDate(payload.metadata.completedAt ?? payload.metadata.generatedAt)}
-                </dd>
-              </div>
-            </dl>
           </aside>
         </header>
 
