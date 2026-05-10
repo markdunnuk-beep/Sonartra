@@ -154,6 +154,16 @@ test('ranked-pattern result renderer displays persisted reader-first sections in
   assert.doesNotMatch(markup, /lg:-mx-8/);
   assert.match(markup, /You may recognise this as a clear first-route pattern/);
   assert.match(markup, /Concentrated pattern/);
+  assert.match(markup, /Result evidence/);
+  assert.match(markup, /Why this result was generated/);
+  assert.match(markup, /relative spread across the four ranked signals/);
+  assert.match(markup, /Alpha and Beta shaped this result most strongly/);
+  assert.match(markup, /Signal shape/);
+  assert.match(markup, /Based on 24 of 24 completed responses/);
+  assert.match(markup, /55[\s\S]{0,80}%/);
+  assert.match(markup, /25[\s\S]{0,80}%/);
+  assert.match(markup, /12[\s\S]{0,80}%/);
+  assert.match(markup, /8[\s\S]{0,80}%/);
   assert.doesNotMatch(markup, /Version 1\.0\.0 · Pattern alpha_beta_gamma_delta/);
   assert.doesNotMatch(markup, /Pattern reference:/);
   assert.doesNotMatch(markup, /alpha_beta_gamma_delta/);

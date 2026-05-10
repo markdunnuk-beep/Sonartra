@@ -827,6 +827,10 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
     : typeof diagnostics.totalQuestionCount === 'number'
       ? diagnostics.totalQuestionCount
       : null;
+  const strongestSignals = rankedSignals.slice(0, 2).map((signal) => signal.signalLabel);
+  const evidenceLead = strongestSignals.length >= 2
+    ? `${strongestSignals[0]} and ${strongestSignals[1]} shaped this result most strongly.`
+    : `${topSignal.signalLabel} shaped this result most strongly.`;
 
   return (
     <main
@@ -1051,7 +1055,7 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
       >
         <DraftMobileSectionNavigator sections={rankedPatternSections} />
 
-        <header className="draft-result-header grid gap-8 py-8 md:py-12 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-end">
+        <header className="draft-result-header grid gap-8 py-8 md:py-12 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
           <div className="max-w-5xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
@@ -1076,15 +1080,21 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
           </div>
 
           <aside
-            className="draft-surface rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)]"
+            className="draft-surface rounded-[1.5rem] border border-[#F3F1EA]/[0.085] bg-[#171D1A]/82 p-4 shadow-[0_24px_80px_rgba(4,7,6,0.2)] sm:p-5"
             data-ranked-pattern-snapshot="true"
           >
-            <FieldLabel tone="teal">Pattern snapshot</FieldLabel>
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <FieldLabel tone="teal">Result evidence</FieldLabel>
+            <h2 className="mt-3 text-xl font-semibold leading-6 text-[#F3F1EA] sm:text-2xl sm:leading-7">
+              Why this result was generated
+            </h2>
+            <p className="mt-3 text-[0.82rem] leading-5 text-[#B8BDB7]/88 sm:text-sm sm:leading-6">
+              This result was read from the relative spread across the four ranked signals. {evidenceLead}
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:gap-3">
               {rankedSignals.slice(0, 4).map((signal, index) => (
                 <div
                   className={cx(
-                    'min-w-0 rounded-[1rem] border p-3.5 sm:p-4',
+                    'min-w-0 rounded-[1rem] border p-3 sm:p-4',
                     index === 0
                       ? 'draft-teal-surface border-[#32D6B0]/22 bg-[#32D6B0]/[0.075]'
                       : index === 1
@@ -1099,7 +1109,7 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
                   <p
                     className={cx(
                       'draft-percent font-semibold text-[#F3F1EA]',
-                      index === 0 ? 'text-3xl' : 'text-2xl',
+                      index === 0 ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl',
                     )}
                   >
                     {signal.normalizedPercentage}%
@@ -1113,7 +1123,7 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
                 </div>
               ))}
             </div>
-            <dl className="mt-4 space-y-3 border-t border-[#F3F1EA]/[0.085] pt-4">
+            <dl className="mt-3.5 space-y-2.5 border-t border-[#F3F1EA]/[0.085] pt-3.5 sm:mt-4 sm:space-y-3 sm:pt-4">
               <div className="grid gap-1.5">
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-sm text-[#A8B0AA]">Signal shape</dt>
@@ -1124,9 +1134,11 @@ export function RankedPatternResultReport({ payload }: { payload: SingleDomainRe
                 </dd>
               </div>
               {answeredCount !== null && totalCount !== null ? (
-                <div className="flex items-center justify-between gap-4">
+                <div className="grid gap-1.5">
                   <dt className="text-sm text-[#A8B0AA]">Completed responses</dt>
-                  <dd className="font-mono text-sm text-[#F3F1EA]/88">{answeredCount}/{totalCount}</dd>
+                  <dd className="text-sm leading-6 text-[#F3F1EA]/88">
+                    Based on {answeredCount} of {totalCount} completed responses.
+                  </dd>
                 </div>
               ) : null}
               <div className="flex items-center justify-between gap-4">
