@@ -14,6 +14,8 @@ type InventoryFixture = {
   assessmentVersionId: string;
   versionTag: string;
   publishedAt: string | null;
+  lifecycleStatus?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  isActive?: boolean;
 };
 
 type AttemptFixture = {
@@ -352,24 +354,29 @@ function createFakeDb(params: {
     async query<T>(text: string, queryParams?: unknown[]) {
       if (text.includes('a.title AS assessment_title') && text.includes("WHERE av.lifecycle_status = 'PUBLISHED'")) {
         return {
-          rows: inventory.map((item) => ({
-            assessment_id: item.assessmentId,
-            assessment_key: item.assessmentKey,
-            assessment_title: item.title,
-            assessment_description: item.description,
-            assessment_version_id: item.assessmentVersionId,
-            version_tag: item.versionTag,
-            published_at: item.publishedAt,
-            question_count: questionCountByVersionId[item.assessmentVersionId] ?? 0,
-          })) as T[],
+          rows: inventory
+            .filter((item) => (item.lifecycleStatus ?? 'PUBLISHED') === 'PUBLISHED')
+            .filter((item) => item.isActive !== false)
+            .map((item) => ({
+              assessment_id: item.assessmentId,
+              assessment_key: item.assessmentKey,
+              assessment_title: item.title,
+              assessment_description: item.description,
+              assessment_version_id: item.assessmentVersionId,
+              version_tag: item.versionTag,
+              published_at: item.publishedAt,
+              question_count: questionCountByVersionId[item.assessmentVersionId] ?? 0,
+            })) as T[],
         };
       }
 
       if (text.includes('FROM assessments a') && text.includes('WHERE a.assessment_key = $1')) {
         const assessmentKey = queryParams?.[0] as string;
         const item = inventoryByKey.get(assessmentKey);
+        const isPublished = (item?.lifecycleStatus ?? 'PUBLISHED') === 'PUBLISHED';
+        const isActive = item?.isActive !== false;
         return {
-          rows: (item
+          rows: (item && isPublished && isActive
             ? [{
                 assessment_id: item.assessmentId,
                 assessment_key: item.assessmentKey,
@@ -526,6 +533,28 @@ test('assessment index exposes a safe not-started row', async () => {
   }).getWorkspaceViewModel({ userId: 'user-1' });
 
   const row = workspace.assessments[0];
+  const chapter = workspace.chapters[0];
+  assert.equal(workspace.progress.totalAvailableChapters, 1);
+  assert.equal(workspace.progress.completedAvailableChapters, 0);
+  assert.equal(workspace.progress.notStartedChapters, 1);
+  assert.equal(workspace.progress.progressLabel, '0 of 1 available chapters complete');
+  assert.equal(chapter, row);
+  assert.equal(chapter?.chapterId, 'version-1');
+  assert.equal(chapter?.chapterState, 'not_started');
+  assert.equal(chapter?.chapterTitle, 'Leadership');
+  assert.equal(chapter?.chapterDescription, 'Leadership assessment');
+  assert.deepEqual(chapter?.primaryAction, {
+    label: 'Start assessment',
+    href: '/app/assessments/leadership',
+    disabled: false,
+  });
+  assert.equal(chapter?.completedResult, null);
+  assert.deepEqual(chapter?.incompleteProgress, {
+    attemptId: null,
+    answeredCount: 0,
+    totalQuestionCount: 4,
+    completionPercentage: 0,
+  });
   assert.equal(row?.status, 'not_started');
   assert.equal(row?.attemptId, null);
   assert.equal(row?.resultId, null);
@@ -562,6 +591,16 @@ test('assessment index exposes in-progress lifecycle and no signal scores', asyn
   }).getWorkspaceViewModel({ userId: 'user-1' });
 
   const row = workspace.assessments[0];
+  assert.equal(workspace.progress.inProgressChapters, 1);
+  assert.equal(workspace.recommendedNextChapter.kind, 'continue_chapter');
+  assert.equal(workspace.recommendedNextChapter.href, '/app/assessments/leadership');
+  assert.deepEqual(row?.incompleteProgress, {
+    attemptId: 'attempt-1',
+    answeredCount: 2,
+    totalQuestionCount: 4,
+    completionPercentage: 50,
+  });
+  assert.equal(row?.completedResult, null);
   assert.equal(row?.status, 'in_progress');
   assert.equal(row?.attemptId, 'attempt-1');
   assert.equal(row?.answeredCount, 2);
@@ -671,10 +710,37 @@ test('ready ranked-pattern result exposes persisted compact summary fields', asy
   }).getWorkspaceViewModel({ userId: 'user-1' });
 
   const row = workspace.assessments[0];
+  assert.equal(workspace.progress.totalAvailableChapters, 1);
+  assert.equal(workspace.progress.completedAvailableChapters, 1);
+  assert.equal(workspace.progress.progressLabel, '1 of 1 available chapters complete');
+  assert.equal(workspace.completedReports.length, 1);
+  assert.equal(workspace.recommendedNextChapter.kind, 'view_reports');
+  assert.equal(workspace.recommendedNextChapter.href, '/app/results/single-domain/result-ranked-pattern');
   assert.equal(row?.status, 'results_ready');
   assert.equal(row?.scoreShape, 'concentrated');
   assert.equal(row?.patternKey, 'alpha_beta_gamma_delta');
   assert.equal(row?.resultSummary, 'You may recognise this as a clear first-route pattern.');
+  assert.equal(row?.incompleteProgress, null);
+  assert.deepEqual(row?.completedResult, {
+    assessmentTitle: 'Leadership',
+    assessmentKey: 'leadership',
+    assessmentVersionId: 'version-1',
+    resultId: 'result-ranked-pattern',
+    reportHref: '/app/results/single-domain/result-ranked-pattern',
+    topSignal: {
+      signalKey: 'alpha',
+      signalLabel: 'Alpha',
+      normalizedPercentage: 55,
+    },
+    rankedSignalStack: [
+      { signalKey: 'alpha', signalLabel: 'Alpha', normalizedPercentage: 55, rank: 1, displayRole: 'Primary' },
+      { signalKey: 'beta', signalLabel: 'Beta', normalizedPercentage: 25, rank: 2, displayRole: 'Secondary' },
+      { signalKey: 'gamma', signalLabel: 'Gamma', normalizedPercentage: 12, rank: 3, displayRole: 'Third' },
+      { signalKey: 'delta', signalLabel: 'Delta', normalizedPercentage: 8, rank: 4, displayRole: 'Fourth' },
+    ],
+    scoreShape: 'concentrated',
+    conciseTakeaway: 'You may recognise this as a clear first-route pattern.',
+  });
   assert.deepEqual(row?.signalsForIndex, [
     { signalKey: 'alpha', signalLabel: 'Alpha', normalizedPercentage: 55, rank: 1, displayRole: 'Primary' },
     { signalKey: 'beta', signalLabel: 'Beta', normalizedPercentage: 25, rank: 2, displayRole: 'Secondary' },
@@ -876,4 +942,158 @@ test('multi-domain results do not force a four-signal index', async () => {
   assert.equal(row?.assessmentMode, 'multi_domain');
   assert.equal(row?.resultHref, '/app/results/result-multi');
   assert.equal(row?.signalsForIndex, null);
+});
+
+test('publication-driven model returns only published active chapters with a dynamic denominator', async () => {
+  const workspace = await createWorkspaceService({
+    db: createFakeDb({
+      inventory: [
+        baseInventory,
+        {
+          assessmentId: 'assessment-2',
+          assessmentKey: 'flow-state',
+          title: 'Flow State',
+          description: 'Flow assessment',
+          assessmentVersionId: 'version-2',
+          versionTag: '1.0.0',
+          publishedAt: '2026-05-01T09:00:00.000Z',
+        },
+        {
+          assessmentId: 'assessment-draft',
+          assessmentKey: 'future-chapter',
+          title: 'Future Chapter',
+          description: 'Draft only',
+          assessmentVersionId: 'version-draft',
+          versionTag: '0.1.0',
+          publishedAt: null,
+          lifecycleStatus: 'DRAFT',
+        },
+        {
+          assessmentId: 'assessment-archived',
+          assessmentKey: 'archived-chapter',
+          title: 'Archived Chapter',
+          description: 'Archived only',
+          assessmentVersionId: 'version-archived',
+          versionTag: '1.0.0',
+          publishedAt: '2026-05-02T09:00:00.000Z',
+          isActive: false,
+        },
+      ],
+      questionCountByVersionId: {
+        'version-1': 4,
+        'version-2': 8,
+      },
+    }),
+  }).getWorkspaceViewModel({ userId: 'user-1' });
+
+  assert.deepEqual(
+    workspace.chapters.map((chapter) => chapter.assessmentKey),
+    ['leadership', 'flow-state'],
+  );
+  assert.equal(workspace.assessments, workspace.chapters);
+  assert.equal(workspace.progress.totalAvailableChapters, 2);
+  assert.equal(workspace.progress.completedAvailableChapters, 0);
+  assert.equal(workspace.progress.inProgressChapters, 0);
+  assert.equal(workspace.progress.notStartedChapters, 2);
+  assert.equal(workspace.progress.progressLabel, '0 of 2 available chapters complete');
+  assert.notEqual(workspace.progress.progressLabel, '0 of 6 available chapters complete');
+});
+
+test('recommended next chapter prioritises in-progress before not-started chapters', async () => {
+  const workspace = await createWorkspaceService({
+    db: createFakeDb({
+      inventory: [
+        baseInventory,
+        {
+          assessmentId: 'assessment-2',
+          assessmentKey: 'flow-state',
+          title: 'Flow State',
+          description: 'Flow assessment',
+          assessmentVersionId: 'version-2',
+          versionTag: '1.0.0',
+          publishedAt: '2026-05-01T09:00:00.000Z',
+        },
+      ],
+      attempts: [createAttempt({
+        attemptId: 'attempt-1',
+        assessmentId: 'assessment-1',
+        assessmentVersionId: 'version-1',
+        lifecycleStatus: 'IN_PROGRESS',
+      })],
+      responses: [{ attemptId: 'attempt-1', questionId: 'question-1' }],
+    }),
+  }).getWorkspaceViewModel({ userId: 'user-1' });
+
+  assert.equal(workspace.recommendedNextChapter.kind, 'continue_chapter');
+  assert.equal(workspace.recommendedNextChapter.assessmentKey, 'leadership');
+  assert.equal(workspace.recommendedNextChapter.href, '/app/assessments/leadership');
+});
+
+test('all-complete recommendation points to an existing ready report', async () => {
+  const leadershipPayload = buildRankedPatternResultPayload();
+  const flowPayload = buildRankedPatternResultPayload({
+    attemptId: 'attempt-flow-ready',
+  });
+  const workspace = await createWorkspaceService({
+    db: createFakeDb({
+      inventory: [
+        baseInventory,
+        {
+          assessmentId: 'assessment-2',
+          assessmentKey: 'flow-state',
+          title: 'Flow State',
+          description: 'Flow assessment',
+          assessmentVersionId: 'version-2',
+          versionTag: '1.0.0',
+          publishedAt: '2026-05-01T09:00:00.000Z',
+        },
+      ],
+      attempts: [
+        createAttempt({
+          attemptId: 'attempt-leadership-ready',
+          assessmentId: 'assessment-1',
+          assessmentVersionId: 'version-1',
+          lifecycleStatus: 'RESULT_READY',
+        }),
+        createAttempt({
+          attemptId: 'attempt-flow-ready',
+          assessmentId: 'assessment-2',
+          assessmentVersionId: 'version-2',
+          lifecycleStatus: 'RESULT_READY',
+        }),
+      ],
+      results: [
+        createResult({
+          resultId: 'result-leadership-ready',
+          attemptId: 'attempt-leadership-ready',
+          assessmentId: 'assessment-1',
+          assessmentVersionId: 'version-1',
+          assessmentKey: 'leadership',
+          assessmentTitle: 'Leadership',
+          canonicalResultPayload: leadershipPayload,
+          generatedAt: '2026-05-01T10:00:00.000Z',
+          createdAt: '2026-05-01T10:00:00.000Z',
+        }),
+        createResult({
+          resultId: 'result-flow-ready',
+          attemptId: 'attempt-flow-ready',
+          assessmentId: 'assessment-2',
+          assessmentVersionId: 'version-2',
+          assessmentKey: 'flow-state',
+          assessmentTitle: 'Flow State',
+          canonicalResultPayload: flowPayload,
+          generatedAt: '2026-05-02T10:00:00.000Z',
+          createdAt: '2026-05-02T10:00:00.000Z',
+        }),
+      ],
+    }),
+  }).getWorkspaceViewModel({ userId: 'user-1' });
+
+  assert.equal(workspace.progress.totalAvailableChapters, 2);
+  assert.equal(workspace.progress.completedAvailableChapters, 2);
+  assert.equal(workspace.progress.progressLabel, '2 of 2 available chapters complete');
+  assert.equal(workspace.completedReports.length, 2);
+  assert.equal(workspace.recommendedNextChapter.kind, 'view_reports');
+  assert.equal(workspace.recommendedNextChapter.href, '/app/results/single-domain/result-flow-ready');
+  assert.notEqual(workspace.recommendedNextChapter.href, '/app/assessments/nonexistent');
 });

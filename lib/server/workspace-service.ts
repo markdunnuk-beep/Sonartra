@@ -44,6 +44,45 @@ export type WorkspaceRecommendedAction = {
   ctaLabel: string;
 };
 
+export type WorkspaceChapterProgress = {
+  totalAvailableChapters: number;
+  completedAvailableChapters: number;
+  inProgressChapters: number;
+  notStartedChapters: number;
+  progressLabel: string;
+};
+
+export type WorkspaceChapterAction = {
+  label: string;
+  href: string | null;
+  disabled: boolean;
+};
+
+export type WorkspaceChapterTopSignal = {
+  signalKey: string;
+  signalLabel: string;
+  normalizedPercentage: number;
+};
+
+export type WorkspaceCompletedChapterResult = {
+  assessmentTitle: string;
+  assessmentKey: string;
+  assessmentVersionId: string;
+  resultId: string;
+  reportHref: string;
+  topSignal: WorkspaceChapterTopSignal | null;
+  rankedSignalStack: readonly WorkspaceSignalIndexItem[];
+  scoreShape: string | null;
+  conciseTakeaway: string | null;
+};
+
+export type WorkspaceIncompleteChapterProgress = {
+  attemptId: string | null;
+  answeredCount: number | null;
+  totalQuestionCount: number | null;
+  completionPercentage: number | null;
+};
+
 export type WorkspaceAssessmentItem = {
   assessmentId: string;
   assessmentKey: string;
@@ -79,6 +118,13 @@ export type WorkspaceAssessmentItem = {
   patternKey: string | null;
   resultSummary: string | null;
   recommendedReading: AssessmentReadingViewModel | null;
+  chapterId: string;
+  chapterTitle: string;
+  chapterDescription: string | null;
+  chapterState: WorkspaceAssessmentStatus;
+  primaryAction: WorkspaceChapterAction;
+  completedResult: WorkspaceCompletedChapterResult | null;
+  incompleteProgress: WorkspaceIncompleteChapterProgress | null;
 };
 
 export type WorkspaceLatestResult = {
@@ -88,7 +134,21 @@ export type WorkspaceLatestResult = {
   href: string;
 };
 
+export type WorkspaceRecommendedNextChapter = {
+  kind: 'continue_chapter' | 'start_chapter' | 'view_reports' | 'profile_complete' | 'none';
+  title: string;
+  description: string;
+  ctaLabel: string;
+  href: string | null;
+  chapterId: string | null;
+  assessmentKey: string | null;
+};
+
 export type WorkspaceViewModel = {
+  progress: WorkspaceChapterProgress;
+  chapters: readonly WorkspaceAssessmentItem[];
+  recommendedNextChapter: WorkspaceRecommendedNextChapter;
+  completedReports: readonly WorkspaceCompletedChapterResult[];
   recommendedAction: WorkspaceRecommendedAction | null;
   assessments: readonly WorkspaceAssessmentItem[];
   latestResult: WorkspaceLatestResult | null;
@@ -120,49 +180,6 @@ function resolveAssessmentStatus(params: {
       return 'in_progress';
     case 'not_started':
       return 'not_started';
-  }
-}
-
-function getRecommendedActionCopy(params: {
-  type: WorkspaceActionType;
-  assessmentTitle: string;
-}): Omit<WorkspaceRecommendedAction, 'href'> {
-  switch (params.type) {
-    case 'resume':
-      return {
-        type: 'resume',
-        title: 'Continue your assessment',
-        description: `You are part way through ${params.assessmentTitle}. Pick up where you left off.`,
-        ctaLabel: 'Resume Assessment',
-      };
-    case 'view_result':
-      return {
-        type: 'view_result',
-        title: 'Your results are ready',
-        description: `Review your latest completed result for ${params.assessmentTitle}.`,
-        ctaLabel: 'View Your Results',
-      };
-    case 'start':
-      return {
-        type: 'start',
-        title: 'Start your first assessment',
-        description: `Begin ${params.assessmentTitle} to understand how you operate across key domains.`,
-        ctaLabel: 'Start Assessment',
-      };
-    case 'processing':
-      return {
-        type: 'processing',
-        title: 'Your result is processing',
-        description: `${params.assessmentTitle} has been submitted and the result is not ready yet.`,
-        ctaLabel: 'Processing',
-      };
-    case 'review_issue':
-      return {
-        type: 'review_issue',
-        title: 'Review assessment issue',
-        description: `${params.assessmentTitle} needs review before a ready result can be shown.`,
-        ctaLabel: 'Review Issue',
-      };
   }
 }
 
@@ -332,6 +349,140 @@ function buildLatestResult(result: AssessmentResultListItem | null): WorkspaceLa
   };
 }
 
+function buildChapterProgress(
+  chapters: readonly WorkspaceAssessmentItem[],
+): WorkspaceChapterProgress {
+  const totalAvailableChapters = chapters.length;
+  const completedAvailableChapters = chapters.filter(
+    (chapter) => chapter.status === 'results_ready',
+  ).length;
+  const inProgressChapters = chapters.filter((chapter) => chapter.status === 'in_progress').length;
+  const notStartedChapters = chapters.filter((chapter) => chapter.status === 'not_started').length;
+
+  return {
+    totalAvailableChapters,
+    completedAvailableChapters,
+    inProgressChapters,
+    notStartedChapters,
+    progressLabel: `${completedAvailableChapters} of ${totalAvailableChapters} available chapters complete`,
+  };
+}
+
+function buildCompletedChapterResult(params: {
+  assessmentTitle: string;
+  assessmentKey: string;
+  assessmentVersionId: string;
+  latestReadyResult: AssessmentResultListItem | null;
+  detail: AssessmentResultDetailViewModel | null;
+  reportHref: string | null;
+  rankedSignalStack: readonly WorkspaceSignalIndexItem[] | null;
+}): WorkspaceCompletedChapterResult | null {
+  if (!params.latestReadyResult || !params.reportHref) {
+    return null;
+  }
+
+  const topSignal = params.latestReadyResult.topSignal
+    ? {
+        signalKey: params.latestReadyResult.topSignal.signalKey,
+        signalLabel: params.latestReadyResult.topSignal.title,
+        normalizedPercentage: params.latestReadyResult.topSignal.percentage,
+      }
+    : null;
+
+  return {
+    assessmentTitle: params.assessmentTitle,
+    assessmentKey: params.assessmentKey,
+    assessmentVersionId: params.assessmentVersionId,
+    resultId: params.latestReadyResult.resultId,
+    reportHref: params.reportHref,
+    topSignal,
+    rankedSignalStack: Object.freeze([...(params.rankedSignalStack ?? [])]),
+    scoreShape: params.latestReadyResult.scoreShape ?? params.detail?.scoreShape ?? null,
+    conciseTakeaway:
+      params.latestReadyResult.summaryLine ?? params.detail?.summaryLine ?? null,
+  };
+}
+
+function buildRecommendedNextChapter(params: {
+  chapters: readonly WorkspaceAssessmentItem[];
+  latestResult: WorkspaceLatestResult | null;
+}): WorkspaceRecommendedNextChapter {
+  const inProgress = params.chapters.find((chapter) => chapter.status === 'in_progress');
+  if (inProgress) {
+    return {
+      kind: 'continue_chapter',
+      title: `Continue ${inProgress.chapterTitle}`,
+      description: 'Pick up from your saved progress.',
+      ctaLabel: 'Continue chapter',
+      href: inProgress.primaryAction.href,
+      chapterId: inProgress.chapterId,
+      assessmentKey: inProgress.assessmentKey,
+    };
+  }
+
+  const notStarted = params.chapters.find((chapter) => chapter.status === 'not_started');
+  if (notStarted) {
+    return {
+      kind: 'start_chapter',
+      title: `Start ${notStarted.chapterTitle}`,
+      description: 'Begin the next available chapter in your Personal Operating Profile.',
+      ctaLabel: 'Start chapter',
+      href: notStarted.primaryAction.href,
+      chapterId: notStarted.chapterId,
+      assessmentKey: notStarted.assessmentKey,
+    };
+  }
+
+  if (params.chapters.length > 0 && params.chapters.every((chapter) => chapter.status === 'results_ready')) {
+    return {
+      kind: params.latestResult ? 'view_reports' : 'profile_complete',
+      title: 'Your available chapters are complete',
+      description: params.latestResult
+        ? 'Review your completed reports from the available chapters.'
+        : 'All available chapters are complete.',
+      ctaLabel: params.latestResult ? 'View reports' : 'Profile complete',
+      href: params.latestResult?.href ?? null,
+      chapterId: null,
+      assessmentKey: null,
+    };
+  }
+
+  return {
+    kind: 'none',
+    title: 'No chapters are available yet',
+    description: 'Published chapters will appear when they are available for your workspace.',
+    ctaLabel: 'No chapter available',
+    href: null,
+    chapterId: null,
+    assessmentKey: null,
+  };
+}
+
+function toLegacyRecommendedAction(
+  recommendation: WorkspaceRecommendedNextChapter,
+): WorkspaceRecommendedAction | null {
+  if (!recommendation.href) {
+    return null;
+  }
+
+  const type: WorkspaceActionType =
+    recommendation.kind === 'continue_chapter'
+      ? 'resume'
+      : recommendation.kind === 'start_chapter'
+        ? 'start'
+        : recommendation.kind === 'view_reports'
+          ? 'view_result'
+          : 'processing';
+
+  return {
+    type,
+    title: recommendation.title,
+    description: recommendation.description,
+    href: recommendation.href,
+    ctaLabel: recommendation.ctaLabel,
+  };
+}
+
 export function createWorkspaceService(deps: WorkspaceServiceDeps) {
   return {
     async getWorkspaceViewModel(params: {
@@ -401,6 +552,27 @@ export function createWorkspaceService(deps: WorkspaceServiceDeps) {
         });
         const actionDisabled = isActionDisabled(status);
         const fallbackHref = actionHref ?? getAssessmentEntryHref(assessment.assessmentKey);
+        const detail = latestReadyResult
+          ? (readyDetailsByResultId.get(latestReadyResult.resultId) ?? null)
+          : null;
+        const rankedSignalStack =
+          status === 'results_ready' && latestReadyResult
+            ? buildSignalsForIndex(detail)
+            : null;
+        const completedResult = buildCompletedChapterResult({
+          assessmentTitle: assessment.title,
+          assessmentKey: assessment.assessmentKey,
+          assessmentVersionId: assessment.assessmentVersionId,
+          latestReadyResult,
+          detail,
+          reportHref: resultHref,
+          rankedSignalStack,
+        });
+        const primaryAction = {
+          label: mapActionLabel(status),
+          href: actionHref,
+          disabled: actionDisabled,
+        };
 
         return {
           assessmentId: assessment.assessmentId,
@@ -436,72 +608,45 @@ export function createWorkspaceService(deps: WorkspaceServiceDeps) {
           patternKey: latestReadyResult?.patternKey ?? null,
           resultSummary: latestReadyResult?.summaryLine ?? null,
           recommendedReading: resolveAssessmentReadingViewModel(assessment.assessmentKey, status),
-          signalsForIndex:
-            status === 'results_ready' && latestReadyResult
-              ? buildSignalsForIndex(readyDetailsByResultId.get(latestReadyResult.resultId) ?? null)
+          signalsForIndex: rankedSignalStack,
+          chapterId: assessment.assessmentVersionId,
+          chapterTitle: assessment.title,
+          chapterDescription: assessment.description,
+          chapterState: status,
+          primaryAction,
+          completedResult,
+          incompleteProgress:
+            status === 'not_started' || status === 'in_progress'
+              ? {
+                  attemptId: lifecycle.attemptId,
+                  answeredCount: lifecycle.answeredQuestions,
+                  totalQuestionCount: lifecycle.totalQuestions,
+                  completionPercentage: lifecycle.completionPercentage,
+                }
               : null,
         } satisfies WorkspaceAssessmentItem;
       });
 
-      const inProgressAssessment = assessments.find((assessment) => assessment.status === 'in_progress');
       const latestReadyResult = readyResults[0] ?? null;
-      const notStartedAssessment = assessments.find((assessment) => assessment.status === 'not_started');
-      const processingAssessment = assessments.find((assessment) => assessment.status === 'completed_processing');
-      const errorAssessment = assessments.find((assessment) => assessment.status === 'error');
-
-      let recommendedAction: WorkspaceRecommendedAction | null = null;
-
-      if (inProgressAssessment) {
-        const copy = getRecommendedActionCopy({
-          type: 'resume',
-          assessmentTitle: inProgressAssessment.title,
-        });
-        recommendedAction = {
-          ...copy,
-          href: inProgressAssessment.href,
-        };
-      } else if (latestReadyResult) {
-        const copy = getRecommendedActionCopy({
-          type: 'view_result',
-          assessmentTitle: latestReadyResult.assessmentTitle,
-        });
-        recommendedAction = {
-          ...copy,
-          href: getAssessmentResultHref(latestReadyResult.resultId, latestReadyResult.mode),
-        };
-      } else if (notStartedAssessment) {
-        const copy = getRecommendedActionCopy({
-          type: 'start',
-          assessmentTitle: notStartedAssessment.title,
-        });
-        recommendedAction = {
-          ...copy,
-          href: notStartedAssessment.href,
-        };
-      } else if (processingAssessment) {
-        const copy = getRecommendedActionCopy({
-          type: 'processing',
-          assessmentTitle: processingAssessment.title,
-        });
-        recommendedAction = {
-          ...copy,
-          href: processingAssessment.href,
-        };
-      } else if (errorAssessment) {
-        const copy = getRecommendedActionCopy({
-          type: 'review_issue',
-          assessmentTitle: errorAssessment.title,
-        });
-        recommendedAction = {
-          ...copy,
-          href: errorAssessment.href,
-        };
-      }
+      const latestResult = buildLatestResult(latestReadyResult);
+      const progress = buildChapterProgress(assessments);
+      const recommendedNextChapter = buildRecommendedNextChapter({
+        chapters: assessments,
+        latestResult,
+      });
 
       return {
-        recommendedAction,
+        progress,
+        chapters: Object.freeze(assessments),
+        recommendedNextChapter,
+        completedReports: Object.freeze(
+          assessments
+            .map((assessment) => assessment.completedResult)
+            .filter((result): result is WorkspaceCompletedChapterResult => result !== null),
+        ),
+        recommendedAction: toLegacyRecommendedAction(recommendedNextChapter),
         assessments: Object.freeze(assessments),
-        latestResult: buildLatestResult(latestReadyResult),
+        latestResult,
       };
     },
   };

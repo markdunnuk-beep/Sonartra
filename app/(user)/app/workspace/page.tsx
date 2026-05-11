@@ -9,6 +9,7 @@ import {
 import { AssessmentReadingCard } from '@/components/user/assessment-reading-card';
 import type {
   WorkspaceAssessmentItem,
+  WorkspaceRecommendedNextChapter,
   WorkspaceSignalIndexItem,
 } from '@/lib/server/workspace-service';
 import { getDbPool } from '@/lib/server/db';
@@ -16,115 +17,12 @@ import { getRequestUserId } from '@/lib/server/request-user';
 import { createWorkspaceService } from '@/lib/server/workspace-service';
 import { formatAssessmentEstimatedDuration } from '@/lib/ui/assessment-duration';
 
-type WorkspaceNextAction = {
-  headline: string;
-  description: string;
-  label: string;
-  href: string | null;
-  disabled: boolean;
-  accessibleLabel: string;
-};
-
 function formatPercentage(value: number): string {
   return `${Math.round(value)}%`;
 }
 
 function formatScoreShapeLabel(value: string): string {
   return `${value.replace(/_/g, ' ')} pattern`;
-}
-
-function getShortAssessmentTitle(title: string): string {
-  return title.replace(/^Sonartra\s+/i, '');
-}
-
-function getProgressCopy(assessment: WorkspaceAssessmentItem): string | null {
-  if (
-    assessment.answeredCount === null ||
-    assessment.totalQuestionCount === null ||
-    assessment.totalQuestionCount <= 0
-  ) {
-    return null;
-  }
-
-  return `${assessment.answeredCount} of ${assessment.totalQuestionCount} questions are saved.`;
-}
-
-function getNextAction(
-  assessments: readonly WorkspaceAssessmentItem[],
-): WorkspaceNextAction | null {
-  const inProgress = assessments.find((assessment) => assessment.status === 'in_progress');
-  if (inProgress) {
-    const progressCopy = getProgressCopy(inProgress);
-    const title = getShortAssessmentTitle(inProgress.assessmentTitle);
-    return {
-      headline: `Continue ${title}`,
-      description: progressCopy ? progressCopy : 'Pick up from your saved progress.',
-      label: 'Resume assessment',
-      href: inProgress.actionHref,
-      disabled: inProgress.actionDisabled,
-      accessibleLabel: `Resume ${inProgress.assessmentTitle}`,
-    };
-  }
-
-  const ready = assessments.find((assessment) => assessment.status === 'results_ready');
-  if (ready) {
-    const title = getShortAssessmentTitle(ready.assessmentTitle);
-    return {
-      headline: `Your ${title} result is ready`,
-      description: 'Review your completed signal profile.',
-      label: 'View result',
-      href: ready.resultHref ?? ready.actionHref,
-      disabled: ready.actionDisabled,
-      accessibleLabel: `View result for ${ready.assessmentTitle}`,
-    };
-  }
-
-  const notStarted = assessments.find((assessment) => assessment.status === 'not_started');
-  if (notStarted) {
-    const title = getShortAssessmentTitle(notStarted.assessmentTitle);
-    return {
-      headline: `Start ${title}`,
-      description: 'Complete your first assessment to generate your signal profile.',
-      label: 'Start assessment',
-      href: notStarted.actionHref,
-      disabled: notStarted.actionDisabled,
-      accessibleLabel: `Start ${notStarted.assessmentTitle}`,
-    };
-  }
-
-  const processing = assessments.find((assessment) => assessment.status === 'completed_processing');
-  if (processing) {
-    return {
-      headline: 'Your result is being prepared',
-      description: `${processing.assessmentTitle} has been submitted. The result will appear here when it is ready.`,
-      label: 'Processing',
-      href: null,
-      disabled: true,
-      accessibleLabel: `${processing.assessmentTitle} result is being prepared`,
-    };
-  }
-
-  const error = assessments.find((assessment) => assessment.status === 'error');
-  if (error) {
-    return {
-      headline: 'We could not prepare your result',
-      description: `${error.assessmentTitle} needs review before a result can be shown.`,
-      label: error.actionLabel,
-      href: error.actionHref,
-      disabled: error.actionDisabled,
-      accessibleLabel: `${error.actionLabel} for ${error.assessmentTitle}`,
-    };
-  }
-
-  return {
-    headline: 'No assessments are available yet',
-    description:
-      'Published assessments will appear here when they are available for your workspace.',
-    label: 'No assessment available',
-    href: null,
-    disabled: true,
-    accessibleLabel: 'No assessment available',
-  };
 }
 
 function getDominantSignalDescription(signals: readonly WorkspaceSignalIndexItem[]): string {
@@ -161,6 +59,16 @@ function getLatestSignalAssessment(
         assessment.signalsForIndex.length > 0,
     ) ?? null
   );
+}
+
+function getRecommendationAccessibleLabel(
+  recommendation: WorkspaceRecommendedNextChapter,
+): string {
+  if (recommendation.assessmentKey) {
+    return `${recommendation.ctaLabel} for ${recommendation.title}`;
+  }
+
+  return recommendation.ctaLabel;
 }
 
 function DisabledAction({
@@ -390,7 +298,7 @@ export default async function UserWorkspacePage() {
   const viewModel = await createWorkspaceService({
     db: getDbPool(),
   }).getWorkspaceViewModel({ userId });
-  const nextAction = getNextAction(viewModel.assessments);
+  const nextAction = viewModel.recommendedNextChapter;
   const latestSignalAssessment = getLatestSignalAssessment(viewModel.assessments);
   const latestSignals = latestSignalAssessment?.signalsForIndex ?? null;
 
@@ -417,7 +325,7 @@ export default async function UserWorkspacePage() {
               </div>
               <div className="space-y-3">
                 <h2 className="max-w-3xl text-3xl font-semibold leading-tight text-[#F5F1EA] lg:text-[2.55rem]">
-                  {nextAction.headline}
+                  {nextAction.title}
                 </h2>
                 <p className="text-[#D8D0C3]/76 max-w-2xl text-sm leading-7">
                   {nextAction.description}
@@ -427,10 +335,10 @@ export default async function UserWorkspacePage() {
 
             <div className="bg-black/16 flex items-start border-t border-white/10 p-6 lg:items-end lg:border-l lg:border-t-0 lg:p-8">
               <ActionControl
-                label={nextAction.label}
+                label={nextAction.ctaLabel}
                 href={nextAction.href}
-                disabled={nextAction.disabled}
-                accessibleLabel={nextAction.accessibleLabel}
+                disabled={!nextAction.href}
+                accessibleLabel={getRecommendationAccessibleLabel(nextAction)}
                 variant="primary"
               />
             </div>
