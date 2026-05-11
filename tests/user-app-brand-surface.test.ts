@@ -6,6 +6,7 @@ import { join } from 'node:path';
 const userRouteFiles = [
   'app/(user)/app/workspace/page.tsx',
   'app/(user)/app/library/page.tsx',
+  'app/(user)/app/support/page.tsx',
   'app/(user)/app/assessments/page.tsx',
   'app/(user)/app/results/page.tsx',
   'app/(user)/app/settings/page.tsx',
@@ -96,4 +97,27 @@ test('authenticated library route shell stays content-only', () => {
   assert.doesNotMatch(librarySource, /createWorkspaceService|getDbPool|db:/);
   assert.doesNotMatch(librarySource, /scoreAssessment|normalizeScores|optionSignalWeights/);
   assert.doesNotMatch(librarySource, /TODO|lorem ipsum|dummy|test content/i);
+});
+
+test('authenticated support route shell stays support-only', () => {
+  const supportSource = readSource('app/(user)/app/support/page.tsx');
+
+  assert.match(supportSource, /Support/);
+  assert.match(
+    supportSource,
+    /Get help with technical issues, account questions, billing, or general/,
+  );
+  assert.match(supportSource, /Technical issue/);
+  assert.match(supportSource, /Account support/);
+  assert.match(supportSource, /Billing or access/);
+  assert.match(supportSource, /General question/);
+  assert.match(supportSource, /Support desk being prepared/);
+  assert.match(supportSource, /PageFrame/);
+  assert.match(supportSource, /SurfaceCard/);
+
+  assert.doesNotMatch(supportSource, /canonical_result_payload|canonicalResultPayload/);
+  assert.doesNotMatch(supportSource, /createWorkspaceService|getDbPool|db:/);
+  assert.doesNotMatch(supportSource, /scoreAssessment|normalizeScores|optionSignalWeights/);
+  assert.doesNotMatch(supportSource, /ticket|supportTicket|sendEmail|SLA|third-party/i);
+  assert.doesNotMatch(supportSource, /TODO|lorem ipsum|dummy|test content/i);
 });
