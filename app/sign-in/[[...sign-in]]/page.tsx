@@ -16,8 +16,13 @@ export default function SignInPage() {
       alternateCta="Create an account"
       alternateHref="/sign-up"
       alternateLabel="New to Sonartra?"
-      description="Continue to your assessments, results, and development insights."
+      description="Continue to your private behavioural intelligence workspace."
+      eyebrow="Private workspace access"
+      formDescription="Sign in to continue."
+      formTitle="Secure access"
       title="Access your Sonartra workspace"
+      trustTitle="Your workspace, reports, and progress remain protected."
+      variant="brandAccess"
     >
       <SignIn
         appearance={{
@@ -28,25 +33,25 @@ export default function SignInPage() {
             footer: 'hidden',
             footerAction: 'hidden',
             formButtonPrimary:
-              'h-11 rounded-xl bg-white text-slate-950 hover:bg-white/90 shadow-none font-semibold',
+              'h-11 rounded-full bg-[#32D6B0] text-[#07100f] hover:bg-[#52E1C0] shadow-none font-semibold',
             formFieldInput:
-              'h-11 rounded-xl bg-white/[0.045] border-white/12 text-white placeholder:text-white/38 focus:border-[#85d8c8]/70 focus:ring-[#85d8c8]/20',
-            formFieldLabel: 'text-white/74 text-sm',
+              'h-11 rounded-xl bg-[#F5F1EA]/[0.045] border-[#F5F1EA]/12 text-[#F5F1EA] placeholder:text-[#D8D0C3]/38 focus:border-[#32D6B0]/70 focus:ring-[#32D6B0]/20',
+            formFieldLabel: 'text-[#D8D0C3]/78 text-sm',
             headerTitle: 'hidden',
             headerSubtitle: 'hidden',
             socialButtonsBlockButton:
-              'h-11 rounded-xl border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.07]',
-            socialButtonsBlockButtonText: 'text-white',
-            dividerLine: 'bg-white/10',
-            dividerText: 'text-white/38',
-            identityPreviewText: 'text-white/68',
-            formResendCodeLink: 'text-white',
+              'h-11 rounded-full border-[#F5F1EA]/10 bg-[#F5F1EA]/[0.04] text-[#F5F1EA] hover:bg-[#F5F1EA]/[0.07]',
+            socialButtonsBlockButtonText: 'text-[#F5F1EA]',
+            dividerLine: 'bg-[#F5F1EA]/10',
+            dividerText: 'text-[#D8D0C3]/42',
+            identityPreviewText: 'text-[#D8D0C3]/72',
+            formResendCodeLink: 'text-[#F5F1EA]',
             otpCodeFieldInput:
-              'rounded-xl bg-white/[0.045] border-white/12 text-white',
-            alertText: 'text-white',
-            alert: 'rounded-xl bg-white/[0.045] border-white/10',
-            formFieldAction: 'text-white/80 hover:text-white',
-            formFieldSuccessText: 'text-[#85d8c8]',
+              'rounded-xl bg-[#F5F1EA]/[0.045] border-[#F5F1EA]/12 text-[#F5F1EA]',
+            alertText: 'text-[#F5F1EA]',
+            alert: 'rounded-xl bg-[#F5F1EA]/[0.045] border-[#F5F1EA]/10',
+            formFieldAction: 'text-[#F5F1EA]/80 hover:text-[#F5F1EA]',
+            formFieldSuccessText: 'text-[#32D6B0]',
             formFieldErrorText: 'text-red-200',
             formHeader: 'hidden',
             main: 'gap-4',
