@@ -46,7 +46,8 @@ test('workspace UI preserves accessible action and signal-meter contract', () =>
   const sharedUiSource = readWorkspaceFile('components/shared/user-app-ui.tsx');
 
   assert.match(sharedUiSource, /aria-label=\{ariaLabel\}/);
-  assert.match(pageSource, /accessibleLabel=\{`\$\{assessment\.actionLabel\} for \$\{assessment\.assessmentTitle\}`\}/);
+  assert.match(pageSource, /accessibleLabel=\{`\$\{actionLabel\} for \$\{chapter\.chapterTitle\}`\}/);
+  assert.match(pageSource, /accessibleLabel=\{`View report for \$\{chapter\.chapterTitle\}`\}/);
   assert.match(pageSource, /<button\s+[\s\S]*disabled[\s\S]*aria-label=\{accessibleLabel\}/);
   assert.match(pageSource, /role="meter"/);
   assert.match(pageSource, /aria-valuenow=\{percentage\}/);
@@ -60,10 +61,21 @@ test('workspace page does not render the secondary voice assessment block', () =
   assert.doesNotMatch(pageSource, /Guided voice delivery|Open Voice Assessment|Voice unavailable/);
 });
 
-test('workspace page keeps final signal heading and omits duplicate latest-result line', () => {
+test('workspace page renders the published chapter dashboard and removes old signal placeholders', () => {
   const pageSource = readWorkspaceFile('app/(user)/app/workspace/page.tsx');
 
-  assert.match(pageSource, /Your current signal pattern/);
+  assert.match(pageSource, /Your Personal Operating Profile/);
+  assert.match(pageSource, /viewModel\.progress\.progressLabel/);
+  assert.match(pageSource, /Published chapter progress/);
+  assert.match(pageSource, /Available chapter cards/);
+  assert.match(pageSource, /Completed reports/);
+  assert.match(pageSource, /viewModel\.recommendedNextChapter/);
+  assert.doesNotMatch(pageSource, /getNextAction/);
+  assert.doesNotMatch(pageSource, /Assessment index/);
+  assert.doesNotMatch(pageSource, /Your current signal pattern/);
   assert.doesNotMatch(pageSource, /Your dominant signals/);
   assert.doesNotMatch(pageSource, /Latest result:/);
+  assert.doesNotMatch(pageSource, /Not available yet/);
+  assert.doesNotMatch(pageSource, /combined profile summary/i);
+  assert.doesNotMatch(pageSource, /of 6 available chapters complete/);
 });

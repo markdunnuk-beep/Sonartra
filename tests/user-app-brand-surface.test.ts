@@ -56,13 +56,17 @@ test('target user pages remain presentation-only and do not import result comput
   }
 });
 
-test('workspace guard labels stay removed while brand cockpit headings remain', () => {
+test('workspace guard labels stay removed while published chapter dashboard headings remain', () => {
   const workspaceSource = readSource('app/(user)/app/workspace/page.tsx');
 
-  assert.match(workspaceSource, /Recommended next action/);
-  assert.match(workspaceSource, /Your current signal pattern/);
-  assert.match(workspaceSource, /Assessment index/);
+  assert.match(workspaceSource, /Your Personal Operating Profile/);
+  assert.match(workspaceSource, /Recommended next chapter/);
+  assert.match(workspaceSource, /Profile progress/);
+  assert.match(workspaceSource, /Published chapters/);
+  assert.match(workspaceSource, /Completed reports/);
   assert.doesNotMatch(workspaceSource, /Workspace session/);
+  assert.doesNotMatch(workspaceSource, /Assessment index/);
+  assert.doesNotMatch(workspaceSource, /Your current signal pattern/);
   assert.doesNotMatch(workspaceSource, /Latest result:/);
   assert.doesNotMatch(workspaceSource, /Your dominant signals/);
 });
