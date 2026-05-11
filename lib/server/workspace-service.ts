@@ -438,9 +438,9 @@ function buildRecommendedNextChapter(params: {
       kind: params.latestResult ? 'view_reports' : 'profile_complete',
       title: 'Your available chapters are complete',
       description: params.latestResult
-        ? 'Review your completed reports from the available chapters.'
-        : 'All available chapters are complete.',
-      ctaLabel: params.latestResult ? 'View reports' : 'Profile complete',
+        ? 'Revisit your reports to turn your signal pattern into sharper decisions, better routines, and clearer development choices.'
+        : 'Your reports remain available as reference material whenever you want to review how you work, perform, and grow.',
+      ctaLabel: params.latestResult ? 'Review report' : 'Profile complete',
       href: params.latestResult?.href ?? null,
       chapterId: null,
       assessmentKey: null,

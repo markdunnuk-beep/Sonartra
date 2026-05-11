@@ -66,11 +66,18 @@ test('workspace guard labels stay removed while published chapter dashboard head
   assert.match(workspaceSource, /Profile progress/);
   assert.match(workspaceSource, /Published chapters/);
   assert.match(workspaceSource, /Completed reports/);
+  assert.match(workspaceSource, /Review report/);
+  assert.match(workspaceSource, /Pattern takeaway/);
+  assert.match(workspaceSource, /Your profile grows chapter by chapter/);
+  assert.match(workspaceSource, /Use it as reference/);
   assert.doesNotMatch(workspaceSource, /Workspace session/);
   assert.doesNotMatch(workspaceSource, /Assessment index/);
   assert.doesNotMatch(workspaceSource, /Your current signal pattern/);
   assert.doesNotMatch(workspaceSource, /Latest result:/);
   assert.doesNotMatch(workspaceSource, /Your dominant signals/);
+  assert.doesNotMatch(workspaceSource, /combined profile summary/i);
+  assert.doesNotMatch(workspaceSource, /of 6 available chapters complete/);
+  assert.doesNotMatch(workspaceSource, /unpublished future/i);
 });
 
 test('authenticated library route shell stays content-only', () => {

@@ -47,7 +47,7 @@ test('workspace UI preserves accessible action and signal-meter contract', () =>
 
   assert.match(sharedUiSource, /aria-label=\{ariaLabel\}/);
   assert.match(pageSource, /accessibleLabel=\{`\$\{actionLabel\} for \$\{chapter\.chapterTitle\}`\}/);
-  assert.match(pageSource, /accessibleLabel=\{`View report for \$\{chapter\.chapterTitle\}`\}/);
+  assert.match(pageSource, /accessibleLabel=\{`Review report for \$\{chapter\.chapterTitle\}`\}/);
   assert.match(pageSource, /<button\s+[\s\S]*disabled[\s\S]*aria-label=\{accessibleLabel\}/);
   assert.match(pageSource, /role="meter"/);
   assert.match(pageSource, /aria-valuenow=\{percentage\}/);
@@ -70,6 +70,11 @@ test('workspace page renders the published chapter dashboard and removes old sig
   assert.match(pageSource, /Available chapter cards/);
   assert.match(pageSource, /Completed reports/);
   assert.match(pageSource, /viewModel\.recommendedNextChapter/);
+  assert.match(pageSource, /Pattern takeaway/);
+  assert.match(pageSource, /Your profile grows chapter by chapter/);
+  assert.match(pageSource, /Each completed chapter remains a\s+standalone report you can revisit and apply/);
+  assert.match(pageSource, /Review report/);
+  assert.match(pageSource, /reports\.length <= 1/);
   assert.doesNotMatch(pageSource, /getNextAction/);
   assert.doesNotMatch(pageSource, /Assessment index/);
   assert.doesNotMatch(pageSource, /Your current signal pattern/);
@@ -77,5 +82,7 @@ test('workspace page renders the published chapter dashboard and removes old sig
   assert.doesNotMatch(pageSource, /Latest result:/);
   assert.doesNotMatch(pageSource, /Not available yet/);
   assert.doesNotMatch(pageSource, /combined profile summary/i);
+  assert.doesNotMatch(pageSource, /global Sonartra type/i);
+  assert.doesNotMatch(pageSource, /unpublished future/i);
   assert.doesNotMatch(pageSource, /of 6 available chapters complete/);
 });

@@ -40,7 +40,7 @@ function getProgressWidth(progress: WorkspaceChapterProgress): string {
 function getChapterActionLabel(status: WorkspaceAssessmentStatus): string {
   switch (status) {
     case 'results_ready':
-      return 'View report';
+      return 'Review report';
     case 'in_progress':
       return 'Continue chapter';
     case 'not_started':
@@ -229,9 +229,12 @@ function RecommendedNextChapterPanel({
 }: Readonly<{
   recommendation: WorkspaceRecommendedNextChapter;
 }>) {
+  const isCompleteState =
+    recommendation.kind === 'view_reports' || recommendation.kind === 'profile_complete';
+
   return (
     <SurfaceCard accent className="overflow-hidden p-0">
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.34fr)]">
         <div className="space-y-4 p-6 lg:p-8">
           <div className="flex items-center gap-3">
             <span
@@ -247,10 +250,25 @@ function RecommendedNextChapterPanel({
             <p className="max-w-2xl text-sm leading-7 text-[#D8D0C3]/76">
               {recommendation.description}
             </p>
+            {isCompleteState ? (
+              <p className="max-w-2xl text-sm leading-7 text-[#D8D0C3]/64">
+                Your reports remain available as reference material whenever you want to review how
+                you work, perform, and grow.
+              </p>
+            ) : null}
           </div>
         </div>
 
-        <div className="flex items-start border-t border-white/10 bg-black/16 p-6 lg:items-end lg:border-l lg:border-t-0 lg:p-8">
+        <div className="flex flex-col justify-between gap-5 border-t border-white/10 bg-black/16 p-6 lg:border-l lg:border-t-0 lg:p-8">
+          {isCompleteState ? (
+            <div className="space-y-2">
+              <p className="sonartra-page-eyebrow">Use it as reference</p>
+              <p className="text-sm leading-7 text-[#D8D0C3]/70">
+                Return when you are preparing for a decision, resetting routines, or choosing a
+                sharper development focus.
+              </p>
+            </div>
+          ) : null}
           <ActionControl
             label={recommendation.ctaLabel}
             href={recommendation.href}
@@ -259,6 +277,33 @@ function RecommendedNextChapterPanel({
             variant="primary"
           />
         </div>
+      </div>
+    </SurfaceCard>
+  );
+}
+
+function SparseInventoryNote({
+  chapterCount,
+}: Readonly<{
+  chapterCount: number;
+}>) {
+  if (chapterCount === 0 || chapterCount > 2) {
+    return null;
+  }
+
+  return (
+    <SurfaceCard className="p-5">
+      <div className="grid gap-4 md:grid-cols-[minmax(0,0.62fr)_minmax(0,1fr)] md:items-center">
+        <div>
+          <p className="sonartra-page-eyebrow">Profile depth</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-[#F5F1EA]">
+            Your profile grows chapter by chapter
+          </h2>
+        </div>
+        <p className="text-sm leading-7 text-[#D8D0C3]/70">
+          Your profile grows as more chapters become available. Each completed chapter remains a
+          standalone report you can revisit and apply.
+        </p>
       </div>
     </SurfaceCard>
   );
@@ -293,7 +338,12 @@ function ResultReadyChapterCard({
           </p>
         ) : null}
         {result.conciseTakeaway ? (
-          <p className="text-sm leading-7 text-[#D8D0C3]/70">{result.conciseTakeaway}</p>
+          <div className="rounded-2xl border border-[#32D6B0]/16 bg-[#32D6B0]/[0.055] p-4">
+            <p className="sonartra-page-eyebrow">Pattern takeaway</p>
+            <p className="mt-2 text-sm leading-7 text-[#F5F1EA]/86">
+              {result.conciseTakeaway}
+            </p>
+          </div>
         ) : null}
       </div>
 
@@ -314,10 +364,10 @@ function ResultReadyChapterCard({
           })}
         </p>
         <ActionControl
-          label="View report"
+          label="Review report"
           href={result.reportHref}
           disabled={false}
-          accessibleLabel={`View report for ${chapter.chapterTitle}`}
+          accessibleLabel={`Review report for ${chapter.chapterTitle}`}
         />
       </div>
     </SurfaceCard>
@@ -383,7 +433,7 @@ function CompletedReports({
 }: Readonly<{
   reports: readonly WorkspaceCompletedChapterResult[];
 }>) {
-  if (reports.length === 0) {
+  if (reports.length <= 1) {
     return null;
   }
 
@@ -393,7 +443,7 @@ function CompletedReports({
         <p className="sonartra-page-eyebrow">Reports</p>
         <h2 className="sonartra-section-title">Completed reports</h2>
         <p className="sonartra-section-description">
-          Direct access to ready reports from your completed published chapters.
+          A compact report library for returning to completed published chapters.
         </p>
       </div>
 
@@ -412,10 +462,10 @@ function CompletedReports({
               ) : null}
             </div>
             <ActionControl
-              label="View report"
+              label="Review report"
               href={report.reportHref}
               disabled={false}
-              accessibleLabel={`View report for ${report.assessmentTitle}`}
+              accessibleLabel={`Review report for ${report.assessmentTitle}`}
             />
           </SurfaceCard>
         ))}
@@ -479,6 +529,8 @@ export default async function UserWorkspacePage() {
       </section>
 
       <RecommendedNextChapterPanel recommendation={viewModel.recommendedNextChapter} />
+
+      <SparseInventoryNote chapterCount={viewModel.progress.totalAvailableChapters} />
 
       <section className="sonartra-section">
         <div className="sonartra-section-header sonartra-motion-reveal-soft">
