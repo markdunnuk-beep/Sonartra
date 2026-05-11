@@ -2,7 +2,7 @@ export type UserAppNavItem = {
   key: string;
   href: string;
   label: string;
-  icon: 'workspace' | 'assessments' | 'voice' | 'results' | 'settings' | 'admin';
+  icon: 'workspace' | 'library' | 'support' | 'settings' | 'admin';
   match: readonly string[];
 };
 
@@ -20,29 +20,18 @@ const primaryItems: readonly UserAppNavItem[] = [
     match: ['/app/workspace', '/app/dashboard'],
   },
   {
-    key: 'assessments',
-    href: '/app/assessments',
-    label: 'Assessments',
-    icon: 'assessments',
-    match: ['/app/assessments'],
+    key: 'library',
+    href: '/app/library',
+    label: 'Library',
+    icon: 'library',
+    match: ['/app/library'],
   },
-];
-
-const voiceItem: UserAppNavItem = {
-  key: 'voice-assessments',
-  href: '/app/voice-assessments',
-  label: 'Voice Assessment',
-  icon: 'voice',
-  match: ['/app/voice-assessments'],
-};
-
-const trailingPrimaryItems: readonly UserAppNavItem[] = [
   {
-    key: 'results',
-    href: '/app/results',
-    label: 'Results',
-    icon: 'results',
-    match: ['/app/results'],
+    key: 'support',
+    href: '/app/support',
+    label: 'Support',
+    icon: 'support',
+    match: ['/app/support'],
   },
   {
     key: 'settings',
@@ -70,11 +59,7 @@ export function getUserAppNavSections(params: {
   return [
     {
       key: 'primary',
-      items: [
-        ...primaryItems,
-        ...(params.canAccessVoice ? [voiceItem] : []),
-        ...trailingPrimaryItems,
-      ],
+      items: primaryItems,
     },
     ...(params.canAccessAdmin
       ? [

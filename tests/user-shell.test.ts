@@ -4,8 +4,11 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const userShellPath = join(process.cwd(), 'components', 'user', 'user-app-shell.tsx');
+const userAppNavPath = join(process.cwd(), 'components', 'user', 'app-shell-nav.ts');
 const userLayoutPath = join(process.cwd(), 'app', '(user)', 'app', 'layout.tsx');
 const globalsPath = join(process.cwd(), 'app', 'globals.css');
+const assessmentsRoutePath = join(process.cwd(), 'app', '(user)', 'app', 'assessments', 'page.tsx');
+const resultsRoutePath = join(process.cwd(), 'app', '(user)', 'app', 'results', 'page.tsx');
 
 function readSource(path: string): string {
   return readFileSync(path, 'utf8');
@@ -86,6 +89,49 @@ test('user shell uses the Sonartra mark in the session avatar and keeps settings
   assert.match(shellSource, /alt=""/);
   assert.doesNotMatch(shellSource, /userLabel\.charAt/);
   assert.match(shellSource, /m13\.32 3\.9\.5 1\.55/);
+});
+
+test('authenticated app nav reflects the publication-driven workspace model', () => {
+  const navSource = readSource(userAppNavPath);
+  const shellSource = readSource(userShellPath);
+
+  assert.match(navSource, /key: 'workspace'/);
+  assert.match(navSource, /href: '\/app\/workspace'/);
+  assert.match(navSource, /label: 'Workspace'/);
+  assert.match(navSource, /key: 'library'/);
+  assert.match(navSource, /href: '\/app\/library'/);
+  assert.match(navSource, /label: 'Library'/);
+  assert.match(navSource, /key: 'support'/);
+  assert.match(navSource, /href: '\/app\/support'/);
+  assert.match(navSource, /label: 'Support'/);
+  assert.match(navSource, /key: 'settings'/);
+  assert.match(navSource, /href: '\/app\/settings'/);
+  assert.match(navSource, /label: 'Settings'/);
+  assert.match(navSource, /params\.canAccessAdmin/);
+  assert.match(navSource, /key: 'admin'/);
+  assert.match(navSource, /href: '\/admin'/);
+
+  assert.doesNotMatch(navSource, /label: 'Assessments'/);
+  assert.doesNotMatch(navSource, /href: '\/app\/assessments'/);
+  assert.doesNotMatch(navSource, /label: 'Results'/);
+  assert.doesNotMatch(navSource, /href: '\/app\/results'/);
+  assert.doesNotMatch(navSource, /Voice Assessment/);
+  assert.doesNotMatch(navSource, /voice-assessments/);
+  assert.doesNotMatch(navSource, /\.\.\.\(params\.canAccessVoice/);
+
+  assert.match(shellSource, /case 'library':/);
+  assert.match(shellSource, /case 'support':/);
+  assert.doesNotMatch(shellSource, /case 'assessments':/);
+  assert.doesNotMatch(shellSource, /case 'results':/);
+  assert.doesNotMatch(shellSource, /case 'voice':/);
+});
+
+test('direct assessment and result routes remain available after nav simplification', () => {
+  const assessmentsRouteSource = readSource(assessmentsRoutePath);
+  const resultsRouteSource = readSource(resultsRoutePath);
+
+  assert.match(assessmentsRouteSource, /export default async function/);
+  assert.match(resultsRouteSource, /export default async function/);
 });
 
 test('user shell reprioritises chrome for assessment runner routes on smaller screens', () => {

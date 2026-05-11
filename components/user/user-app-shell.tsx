@@ -157,11 +157,18 @@ function NavIcon({ icon, active }: { icon: UserAppNavItem['icon']; active: boole
           />
         </svg>
       );
-    case 'assessments':
+    case 'library':
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
-            d="M7.25 6h9.5M7.25 11.75h9.5M7.25 17.5h6.25M6 4.75h12a1.25 1.25 0 0 1 1.25 1.25v12A1.25 1.25 0 0 1 18 19.25H6A1.25 1.25 0 0 1 4.75 18V6A1.25 1.25 0 0 1 6 4.75Z"
+            d="M6.25 5.25h8.25a3.25 3.25 0 0 1 3.25 3.25v10.25H9.5a3.25 3.25 0 0 0-3.25-3.25V5.25Z"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={strokeWidth}
+          />
+          <path
+            d="M6.25 5.25A3.25 3.25 0 0 0 3 8.5v10.25h6.5M9.5 8.25h4.75M9.5 11.75h4.75"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -169,30 +176,18 @@ function NavIcon({ icon, active }: { icon: UserAppNavItem['icon']; active: boole
           />
         </svg>
       );
-    case 'results':
+    case 'support':
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24">
           <path
-            d="M6 17.5V13m6 4.5V6.5m6 11V10M4.5 19.5h15"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={strokeWidth}
-          />
-        </svg>
-      );
-    case 'voice':
-      return (
-        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
-          <path
-            d="M12 4.75a3 3 0 0 1 3 3v4.5a3 3 0 1 1-6 0v-4.5a3 3 0 0 1 3-3Z"
+            d="M12 4.75a7.25 7.25 0 0 0-7.25 7.25v2.75A2.25 2.25 0 0 0 7 17h1.25v-5.25H4.75M19.25 11.75H15.75V17H17a2.25 2.25 0 0 0 2.25-2.25V12A7.25 7.25 0 0 0 12 4.75Z"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={strokeWidth}
           />
           <path
-            d="M6.75 11.75a5.25 5.25 0 1 0 10.5 0M12 17v2.25M9 19.25h6"
+            d="M15.75 17.5A3.75 3.75 0 0 1 12 20h-1.25"
             stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
