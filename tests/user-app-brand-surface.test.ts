@@ -107,17 +107,36 @@ test('authenticated support route shell stays support-only', () => {
     supportSource,
     /Get help with technical issues, account questions, billing, or general/,
   );
+  assert.match(supportSource, /Create support request/);
+  assert.match(supportSource, /Your support cases/);
+  assert.match(supportSource, /Search support cases\.\.\./);
+  assert.match(supportSource, /All statuses/);
+  assert.match(supportSource, /All priorities/);
+  assert.match(supportSource, /No support cases/);
+  assert.match(supportSource, /Open/);
+  assert.match(supportSource, /Waiting on Sonartra/);
+  assert.match(supportSource, /Waiting on you/);
+  assert.match(supportSource, /Resolved/);
   assert.match(supportSource, /Technical issue/);
   assert.match(supportSource, /Account support/);
   assert.match(supportSource, /Billing or access/);
   assert.match(supportSource, /General question/);
-  assert.match(supportSource, /Support desk being prepared/);
+  assert.match(supportSource, /Request creation is being prepared/);
   assert.match(supportSource, /PageFrame/);
   assert.match(supportSource, /SurfaceCard/);
 
   assert.doesNotMatch(supportSource, /canonical_result_payload|canonicalResultPayload/);
-  assert.doesNotMatch(supportSource, /createWorkspaceService|getDbPool|db:/);
-  assert.doesNotMatch(supportSource, /scoreAssessment|normalizeScores|optionSignalWeights/);
-  assert.doesNotMatch(supportSource, /ticket|supportTicket|sendEmail|SLA|third-party/i);
+  assert.doesNotMatch(
+    supportSource,
+    /createWorkspaceService|getDbPool|db:|support_cases|support_case_messages|support_case_attachments|support_case_events|support_case_status|support_case_category|support_case_priority/,
+  );
+  assert.doesNotMatch(
+    supportSource,
+    /scoreAssessment|normalizeScores|optionSignalWeights|result-builder|assessment-packages|compile-assessment/,
+  );
+  assert.doesNotMatch(
+    supportSource,
+    /'use server'|useActionState|formAction|onSubmit|sendEmail|smtp|resend|postmark|SLA|third-party|helpdesk|zendesk|intercom/i,
+  );
   assert.doesNotMatch(supportSource, /TODO|lorem ipsum|dummy|test content/i);
 });
