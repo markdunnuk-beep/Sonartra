@@ -5,6 +5,7 @@ import { join } from 'node:path';
 
 const userRouteFiles = [
   'app/(user)/app/workspace/page.tsx',
+  'app/(user)/app/library/page.tsx',
   'app/(user)/app/assessments/page.tsx',
   'app/(user)/app/results/page.tsx',
   'app/(user)/app/settings/page.tsx',
@@ -69,4 +70,30 @@ test('workspace guard labels stay removed while published chapter dashboard head
   assert.doesNotMatch(workspaceSource, /Your current signal pattern/);
   assert.doesNotMatch(workspaceSource, /Latest result:/);
   assert.doesNotMatch(workspaceSource, /Your dominant signals/);
+});
+
+test('authenticated library route shell stays content-only', () => {
+  const librarySource = readSource('app/(user)/app/library/page.tsx');
+
+  assert.match(librarySource, /Library/);
+  assert.match(
+    librarySource,
+    /Guides, case studies, and reading material to help you go deeper into the/,
+  );
+  assert.match(librarySource, /Flow State/);
+  assert.match(librarySource, /Leadership/);
+  assert.match(librarySource, /Decision Making/);
+  assert.match(librarySource, /Communication/);
+  assert.match(librarySource, /Work Energy/);
+  assert.match(librarySource, /Conflict/);
+  assert.match(librarySource, /Case Studies/);
+  assert.match(librarySource, /Guides/);
+  assert.match(librarySource, /Content coming soon/);
+  assert.match(librarySource, /PageFrame/);
+  assert.match(librarySource, /SurfaceCard/);
+
+  assert.doesNotMatch(librarySource, /canonical_result_payload|canonicalResultPayload/);
+  assert.doesNotMatch(librarySource, /createWorkspaceService|getDbPool|db:/);
+  assert.doesNotMatch(librarySource, /scoreAssessment|normalizeScores|optionSignalWeights/);
+  assert.doesNotMatch(librarySource, /TODO|lorem ipsum|dummy|test content/i);
 });
