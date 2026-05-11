@@ -1,16 +1,31 @@
-# Flow State Example Assessment Package
+# Flow State Assessment Package
 
-This folder contains the Flow State example package for validating the Sonartra reader-first import contract.
+This folder contains the compiled Flow State ranked-pattern assessment package.
 
-Flow State is the first populated example assessment package. It is not the canonical assessment, and future packages should be copied into their own folders rather than editing the reusable template directly.
+The package follows the active single-domain ranked-pattern import contract. It is an authoring/import artifact only; the runtime engine must not read this workbook directly.
 
-The workbook is an authoring/import artifact. It is not a runtime dependency, and the runtime engine must never read it directly.
+## Files
 
-Current source status:
+- `sonartra_reader_first_import_schema_FLOW_STATE_EXAMPLE.xlsx`
+- `00-assessment-authoring-config.json`
+- `02-questions.psv`
+- `03-options.psv`
+- `04-option-weights.psv`
+- `15-report-preview.psv`
 
-- `00_Metadata` and `01_Signals` are populated for Flow State.
-- `02_Questions`, `03_Options`, and `04_Option_Weights` are structurally complete with a proposed 24-question Flow State runtime definition layer.
-- The `02`-`04` rows are marked `active` so the package can serve as a full importer/audit fixture, but the question, option, and weight content source status is still draft/proposed pending review because no approved Flow State question set was found in the repository.
-- `05_Context` is populated from the Flow State authoring context.
-- `06_Orientation` through `14_Closing_Integration` are populated from the existing Flow State PSV files in `content/authoring/generated` and marked `active` so they can satisfy runtime result-content publish coverage.
-- `15_Report_Preview` contains generic Flow State preview cases for import/audit testing and marks them `active` so publish audit can prove payload assembly without making the sheet runtime result content.
+## Package Identity
+
+- `assessment_key`: `flow-state`
+- `version`: `1`
+- `domain_key`: `flow_state`
+- `domain_title`: `Flow State`
+- model: `single_domain_ranked_pattern`
+- scored signals: `deep_focus`, `creative_movement`, `physical_rhythm`, `social_exchange`
+
+## Coverage
+
+- `00_Metadata` and `01_Signals` are populated from the package authoring config.
+- `02_Questions`, `03_Options`, and `04_Option_Weights` contain 24 active questions, 96 active options, and 96 active one-signal weight rows.
+- `05_Context` is populated from the package authoring config.
+- `06_Orientation` through `14_Closing_Integration` are populated from the Flow State generated PSV files in `content/authoring/generated`.
+- `15_Report_Preview` through `18_Lookups` are admin/import support sheets only and are not runtime result sections.

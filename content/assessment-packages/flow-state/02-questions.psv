@@ -1,0 +1,25 @@
+domain_key|question_key|question_order|question_text|status|lookup_key
+flow_state|q01|1|When you first need to get into meaningful work, what usually helps you begin?|active|flow_state::q01
+flow_state|q02|2|When your concentration starts to build, what do you most want to protect?|active|flow_state::q02
+flow_state|q03|3|Which kind of interruption is most likely to break your flow?|active|flow_state::q03
+flow_state|q04|4|When work becomes difficult, what do you usually do first?|active|flow_state::q04
+flow_state|q05|5|What kind of environment tends to bring out your best attention?|active|flow_state::q05
+flow_state|q06|6|When you have a free hour for meaningful work, how do you usually use it?|active|flow_state::q06
+flow_state|q07|7|What usually tells you that you are properly engaged?|active|flow_state::q07
+flow_state|q08|8|When you are under pressure, what helps you stay effective?|active|flow_state::q08
+flow_state|q09|9|What tends to happen when you have too much unstructured time?|active|flow_state::q09
+flow_state|q10|10|Which task type is most likely to absorb you naturally?|active|flow_state::q10
+flow_state|q11|11|When you need to recover your attention, what do you usually do?|active|flow_state::q11
+flow_state|q12|12|What tends to make work feel satisfying at the end of a session?|active|flow_state::q12
+flow_state|q13|13|What do you usually do when there are too many competing inputs?|active|flow_state::q13
+flow_state|q14|14|How do you usually approach a task that needs careful thinking?|active|flow_state::q14
+flow_state|q15|15|When you lose momentum, what is the most common reason?|active|flow_state::q15
+flow_state|q16|16|What kind of preparation helps you most before important work?|active|flow_state::q16
+flow_state|q17|17|What usually happens when you are left alone with a complex problem?|active|flow_state::q17
+flow_state|q18|18|Which phrase best describes how flow usually starts for you?|active|flow_state::q18
+flow_state|q19|19|When a task feels vague, what helps you make progress?|active|flow_state::q19
+flow_state|q20|20|What do you most often need less of to get into flow?|active|flow_state::q20
+flow_state|q21|21|What do you most often need more of to stay in flow?|active|flow_state::q21
+flow_state|q22|22|When you are working well, what do others most likely notice?|active|flow_state::q22
+flow_state|q23|23|What kind of progress feels most natural to you?|active|flow_state::q23
+flow_state|q24|24|At the end of a strong flow session, what feels most true?|active|flow_state::q24

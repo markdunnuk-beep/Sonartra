@@ -1,0 +1,42 @@
+{
+  "assessmentKey": "flow-state",
+  "version": "1",
+  "title": "Flow State",
+  "description": "Identifies the behavioural conditions under which attention, energy, and progress most naturally organise into productive momentum.",
+  "domainKey": "flow_state",
+  "domainTitle": "Flow State",
+  "lifecycleStatus": "draft",
+  "status": "active",
+  "patternListLinkagePolicy": "relationship_only",
+  "context": {
+    "sectionKey": "context",
+    "domainDefinition": "Flow State describes the conditions under which your attention, energy, and behaviour most naturally organise into productive momentum.",
+    "domainScope": "This assessment identifies the behavioural route that most often helps you enter, sustain, and recover meaningful working flow.",
+    "interpretationGuidance": "Read the result as a current behavioural pattern, not a fixed identity. The ranked signals show which routes you currently rely on most, which routes support them, and which routes may need more deliberate access.",
+    "introNote": "Your result is generated from your response pattern across the assessment. It reflects the relative strength of four flow signals: Deep Focus, Creative Movement, Physical Rhythm, and Social Exchange.",
+    "status": "active",
+    "lookupKey": "flow_state::context"
+  },
+  "signals": [
+    {
+      "key": "deep_focus",
+      "label": "Deep Focus",
+      "shortDefinition": "Sustained attention, depth, and reduced distraction."
+    },
+    {
+      "key": "creative_movement",
+      "label": "Creative Movement",
+      "shortDefinition": "Idea movement, exploration, variation, and generative reframing."
+    },
+    {
+      "key": "physical_rhythm",
+      "label": "Physical Rhythm",
+      "shortDefinition": "Bodily routine, pacing, environment, and practical continuity."
+    },
+    {
+      "key": "social_exchange",
+      "label": "Social Exchange",
+      "shortDefinition": "Interaction, feedback, shared energy, and conversational momentum."
+    }
+  ]
+}

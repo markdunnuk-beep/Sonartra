@@ -310,8 +310,8 @@ test('internal pipe or bad column count fails', () => {
 
 test('lookup_key containing pipe fails through pipe-safe column validation', () => {
   const source = serializeFlowOrientationRows(generateFlowOrientationRows()).replace(
-    'flow-state::deep_focus_creative_movement_physical_rhythm_social_exchange::concentrated',
-    'flow-state|deep_focus_creative_movement_physical_rhythm_social_exchange::concentrated',
+    'flow_state::deep_focus_creative_movement_physical_rhythm_social_exchange::concentrated',
+    'flow_state|deep_focus_creative_movement_physical_rhythm_social_exchange::concentrated',
   );
   const result = validateReaderFirstImportText(source, {
     type: 'section',
@@ -339,7 +339,7 @@ test('missing score shape variant fails for score-shape-specific section', () =>
   const rows = generateFlowOrientationRows().filter(
     (row) =>
       row.lookup_key !==
-      'flow-state::deep_focus_creative_movement_physical_rhythm_social_exchange::balanced',
+      'flow_state::deep_focus_creative_movement_physical_rhythm_social_exchange::balanced',
   );
   const result = validateReaderFirstImportText(serializeFlowOrientationRows(rows), {
     type: 'section',

@@ -104,7 +104,7 @@ test('missing selected 06_Orientation row fails', async () => {
         .filter(
           (line) =>
             !line.startsWith(
-              `flow-state|${patternKey}|${scoreShape}|deep_focus|creative_movement|physical_rhythm|social_exchange|`,
+              `flow_state|${patternKey}|${scoreShape}|deep_focus|creative_movement|physical_rhythm|social_exchange|`,
             ),
         )
         .join('\n'),
@@ -129,7 +129,7 @@ test('missing signal role row fails', async () => {
     (source) =>
       source
         .split('\n')
-        .filter((line) => !line.startsWith('flow-state|deep_focus|deep_focus|1|dominant|'))
+        .filter((line) => !line.startsWith('flow_state|deep_focus|deep_focus|1|dominant|'))
         .join('\n'),
   );
 
@@ -153,7 +153,7 @@ test('duplicate selected row fails', async () => {
       const lines = source.split('\n');
       const targetLine = lines.find((line) =>
         line.startsWith(
-          `flow-state|${patternKey}|${scoreShape}|deep_focus|creative_movement|physical_rhythm|social_exchange|`,
+          `flow_state|${patternKey}|${scoreShape}|deep_focus|creative_movement|physical_rhythm|social_exchange|`,
         ),
       );
 

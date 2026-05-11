@@ -1,0 +1,97 @@
+domain_key|question_key|option_key|option_order|option_text|is_scored|status|lookup_key
+flow_state|q01|q01_A|1|I clear space and stay with one demanding part.|true|active|q01::q01_A
+flow_state|q01|q01_B|2|I try a few angles until one has energy.|true|active|q01::q01_B
+flow_state|q01|q01_C|3|I settle into a physical rhythm or routine.|true|active|q01::q01_C
+flow_state|q01|q01_D|4|I talk it through or connect with someone first.|true|active|q01::q01_D
+flow_state|q02|q02_A|1|A quiet block where I can stay with one thread.|true|active|q02::q02_A
+flow_state|q02|q02_B|2|Freedom to follow an idea as it changes shape.|true|active|q02::q02_B
+flow_state|q02|q02_C|3|A steady pace, familiar setting, or bodily momentum.|true|active|q02::q02_C
+flow_state|q02|q02_D|4|The ability to respond, exchange, and stay socially engaged.|true|active|q02::q02_D
+flow_state|q03|q03_A|1|Being pulled away from a complex thought before it resolves.|true|active|q03::q03_A
+flow_state|q03|q03_B|2|Being forced to stay with one fixed route too early.|true|active|q03::q03_B
+flow_state|q03|q03_C|3|Having your routine, timing, or physical setup disrupted.|true|active|q03::q03_C
+flow_state|q03|q03_D|4|Losing the social thread, feedback, or shared momentum.|true|active|q03::q03_D
+flow_state|q04|q04_A|1|I narrow the problem and stay with it quietly.|true|active|q04::q04_A
+flow_state|q04|q04_B|2|I reframe it, sketch alternatives, or change the angle.|true|active|q04::q04_B
+flow_state|q04|q04_C|3|I keep moving through the next practical step.|true|active|q04::q04_C
+flow_state|q04|q04_D|4|I seek a conversation to test what is happening.|true|active|q04::q04_D
+flow_state|q05|q05_A|1|Quiet, contained, and low on external noise.|true|active|q05::q05_A
+flow_state|q05|q05_B|2|Flexible, stimulating, and open to experimentation.|true|active|q05::q05_B
+flow_state|q05|q05_C|3|Ordered, comfortable, and physically settled.|true|active|q05::q05_C
+flow_state|q05|q05_D|4|Interactive, responsive, and connected to other people.|true|active|q05::q05_D
+flow_state|q06|q06_A|1|I choose one important thing and go deep.|true|active|q06::q06_A
+flow_state|q06|q06_B|2|I explore several ideas until one becomes interesting.|true|active|q06::q06_B
+flow_state|q06|q06_C|3|I build momentum through a repeatable working rhythm.|true|active|q06::q06_C
+flow_state|q06|q06_D|4|I use contact with others to create movement or clarity.|true|active|q06::q06_D
+flow_state|q07|q07_A|1|I stop noticing time because my attention is absorbed.|true|active|q07::q07_A
+flow_state|q07|q07_B|2|Ideas start connecting and changing faster than expected.|true|active|q07::q07_B
+flow_state|q07|q07_C|3|My body and pace feel settled into the work.|true|active|q07::q07_C
+flow_state|q07|q07_D|4|The exchange with people starts to create useful energy.|true|active|q07::q07_D
+flow_state|q08|q08_A|1|Reducing the noise and concentrating on the core issue.|true|active|q08::q08_A
+flow_state|q08|q08_B|2|Finding a different route when the obvious one feels stuck.|true|active|q08::q08_B
+flow_state|q08|q08_C|3|Keeping a steady pace and doing the next concrete thing.|true|active|q08::q08_C
+flow_state|q08|q08_D|4|Using conversation, feedback, or shared focus to keep going.|true|active|q08::q08_D
+flow_state|q09|q09_A|1|I look for one serious thread to concentrate on.|true|active|q09::q09_A
+flow_state|q09|q09_B|2|I jump between possibilities and make new connections.|true|active|q09::q09_B
+flow_state|q09|q09_C|3|I create a routine or sequence to get myself moving.|true|active|q09::q09_C
+flow_state|q09|q09_D|4|I look for interaction to give the time shape.|true|active|q09::q09_D
+flow_state|q10|q10_A|1|A demanding problem that rewards sustained concentration.|true|active|q10::q10_A
+flow_state|q10|q10_B|2|An open brief where ideas can evolve as you work.|true|active|q10::q10_B
+flow_state|q10|q10_C|3|A practical task with rhythm, repetition, or visible progress.|true|active|q10::q10_C
+flow_state|q10|q10_D|4|A collaborative task with live input and response.|true|active|q10::q10_D
+flow_state|q11|q11_A|1|Remove distractions and return to the main thread.|true|active|q11::q11_A
+flow_state|q11|q11_B|2|Change the format, tool, or perspective.|true|active|q11::q11_B
+flow_state|q11|q11_C|3|Reset physically through movement, timing, or environment.|true|active|q11::q11_C
+flow_state|q11|q11_D|4|Reconnect with someone to regain energy or direction.|true|active|q11::q11_D
+flow_state|q12|q12_A|1|I stayed with something difficult long enough to understand it.|true|active|q12::q12_A
+flow_state|q12|q12_B|2|I found a new angle or shaped something original.|true|active|q12::q12_B
+flow_state|q12|q12_C|3|I built steady progress through consistent action.|true|active|q12::q12_C
+flow_state|q12|q12_D|4|The work gained energy through useful interaction.|true|active|q12::q12_D
+flow_state|q13|q13_A|1|I filter them down to the one that matters most.|true|active|q13::q13_A
+flow_state|q13|q13_B|2|I let them combine until a fresh pattern appears.|true|active|q13::q13_B
+flow_state|q13|q13_C|3|I put them into a sequence and work through them steadily.|true|active|q13::q13_C
+flow_state|q13|q13_D|4|I use discussion to sort what is useful from what is noise.|true|active|q13::q13_D
+flow_state|q14|q14_A|1|I make space to work through it without switching too much.|true|active|q14::q14_A
+flow_state|q14|q14_B|2|I explore examples, fragments, and alternative routes first.|true|active|q14::q14_B
+flow_state|q14|q14_C|3|I use a repeatable process and let clarity build through doing.|true|active|q14::q14_C
+flow_state|q14|q14_D|4|I explain it or discuss it to make the thinking sharper.|true|active|q14::q14_D
+flow_state|q15|q15_A|1|My attention has been scattered across too many things.|true|active|q15::q15_A
+flow_state|q15|q15_B|2|The work has become too fixed or predictable.|true|active|q15::q15_B
+flow_state|q15|q15_C|3|My physical rhythm, energy, or routine has been disrupted.|true|active|q15::q15_C
+flow_state|q15|q15_D|4|I feel too isolated from people, feedback, or response.|true|active|q15::q15_D
+flow_state|q16|q16_A|1|Clarifying the main problem and removing distractions.|true|active|q16::q16_A
+flow_state|q16|q16_B|2|Collecting prompts, references, or possibilities to play with.|true|active|q16::q16_B
+flow_state|q16|q16_C|3|Setting up the space, timing, and practical sequence.|true|active|q16::q16_C
+flow_state|q16|q16_D|4|Checking in with others or creating shared expectations.|true|active|q16::q16_D
+flow_state|q17|q17_A|1|I go inward and try to understand it properly.|true|active|q17::q17_A
+flow_state|q17|q17_B|2|I start generating different routes and associations.|true|active|q17::q17_B
+flow_state|q17|q17_C|3|I turn it into steps and work through them physically or practically.|true|active|q17::q17_C
+flow_state|q17|q17_D|4|I notice that I need interaction before it fully comes alive.|true|active|q17::q17_D
+flow_state|q18|q18_A|1|I settle into one clear line of attention.|true|active|q18::q18_A
+flow_state|q18|q18_B|2|I follow movement between ideas until something catches.|true|active|q18::q18_B
+flow_state|q18|q18_C|3|I get into a rhythm and the work begins to carry itself.|true|active|q18::q18_C
+flow_state|q18|q18_D|4|I connect with people and the energy builds from there.|true|active|q18::q18_D
+flow_state|q19|q19_A|1|Finding the central question and concentrating there.|true|active|q19::q19_A
+flow_state|q19|q19_B|2|Experimenting with possible shapes until one becomes clearer.|true|active|q19::q19_B
+flow_state|q19|q19_C|3|Creating a practical starting point and moving step by step.|true|active|q19::q19_C
+flow_state|q19|q19_D|4|Talking it through until the next move becomes visible.|true|active|q19::q19_D
+flow_state|q20|q20_A|1|Noise, switching, and surface-level demands.|true|active|q20::q20_A
+flow_state|q20|q20_B|2|Rigid structure before the work has found its shape.|true|active|q20::q20_B
+flow_state|q20|q20_C|3|Physical friction, poor timing, or broken routine.|true|active|q20::q20_C
+flow_state|q20|q20_D|4|Isolation from response, feedback, or shared energy.|true|active|q20::q20_D
+flow_state|q21|q21_A|1|Depth, privacy, and uninterrupted attention.|true|active|q21::q21_A
+flow_state|q21|q21_B|2|Variation, possibility, and permission to explore.|true|active|q21::q21_B
+flow_state|q21|q21_C|3|Rhythm, movement, and practical continuity.|true|active|q21::q21_C
+flow_state|q21|q21_D|4|Connection, exchange, and live feedback.|true|active|q21::q21_D
+flow_state|q22|q22_A|1|I become quieter, more precise, and less distracted.|true|active|q22::q22_A
+flow_state|q22|q22_B|2|I become more inventive, associative, and exploratory.|true|active|q22::q22_B
+flow_state|q22|q22_C|3|I become steady, practical, and rhythmically productive.|true|active|q22::q22_C
+flow_state|q22|q22_D|4|I become more responsive, expressive, and socially energised.|true|active|q22::q22_D
+flow_state|q23|q23_A|1|Deepening one thing until it becomes clear.|true|active|q23::q23_A
+flow_state|q23|q23_B|2|Moving between ideas until the pattern improves.|true|active|q23::q23_B
+flow_state|q23|q23_C|3|Building through repeated action and visible steps.|true|active|q23::q23_C
+flow_state|q23|q23_D|4|Creating movement through dialogue and shared response.|true|active|q23::q23_D
+flow_state|q24|q24_A|1|I have understood something more deeply.|true|active|q24::q24_A
+flow_state|q24|q24_B|2|I have discovered a new direction or possibility.|true|active|q24::q24_B
+flow_state|q24|q24_C|3|I have moved something forward through steady rhythm.|true|active|q24::q24_C
+flow_state|q24|q24_D|4|I have created useful energy through connection.|true|active|q24::q24_D

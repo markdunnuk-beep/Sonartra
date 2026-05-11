@@ -137,10 +137,30 @@ export type AuthoringAssessmentConfig = {
   readonly assessment_key?: string;
   readonly title?: string;
   readonly assessmentTitle?: string;
+  readonly description?: string;
+  readonly assessmentDescription?: string;
   readonly version?: string;
   readonly domainKey?: string;
   readonly domain_key?: string;
   readonly domainTitle?: string;
+  readonly lifecycleStatus?: string;
+  readonly status?: string;
+  readonly patternListLinkagePolicy?: 'strict_rank_policy' | 'relationship_only';
+  readonly context?: {
+    readonly sectionKey?: string;
+    readonly section_key?: string;
+    readonly domainDefinition?: string;
+    readonly domain_definition?: string;
+    readonly domainScope?: string;
+    readonly domain_scope?: string;
+    readonly interpretationGuidance?: string;
+    readonly interpretation_guidance?: string;
+    readonly introNote?: string;
+    readonly intro_note?: string;
+    readonly status?: string;
+    readonly lookupKey?: string;
+    readonly lookup_key?: string;
+  };
   readonly signals?: readonly {
     readonly key?: string;
     readonly label?: string;
@@ -448,14 +468,26 @@ function permutations(values: readonly string[]): readonly string[] {
   );
 }
 
-function rankedSignalsFromPatternKey(patternKey: string): readonly string[] {
-  return patternKey.split('_').map((signalKey) => signalKey.trim()).filter(Boolean);
+function rankedSignalsFromPatternKey(patternKey: string, signalKeys: readonly string[]): readonly string[] {
+  function signalPermutations(values: readonly string[]): readonly string[][] {
+    if (values.length <= 1) {
+      return values.length === 1 ? [[values[0]!]] : [];
+    }
+
+    return values.flatMap((value, index) =>
+      signalPermutations([...values.slice(0, index), ...values.slice(index + 1)]).map((rest) => [value, ...rest]),
+    );
+  }
+
+  return signalPermutations(signalKeys).find((candidate) => candidate.join('_') === patternKey) ?? [];
 }
 
 function validatePatternListLinkage(input: {
   readonly rows: readonly Record<string, unknown>[];
   readonly sheet: (typeof PATTERN_ONLY_SECTIONS)[number];
   readonly expectedPatternKeys: ReadonlySet<string>;
+  readonly signalKeys: readonly string[];
+  readonly linkagePolicy: 'strict_rank_policy' | 'relationship_only';
   readonly diagnostics: AuthoringCompilerDiagnostic[];
 }): void {
   const policy = PATTERN_LIST_LINKAGE_POLICIES[input.sheet];
@@ -494,13 +526,13 @@ function validatePatternListLinkage(input: {
       }
     }
 
-    const patternSignals = rankedSignalsFromPatternKey(patternKey);
+    const patternSignals = rankedSignalsFromPatternKey(patternKey, input.signalKeys);
     const seenLinkedSignals = new Set<string>();
     for (const row of patternRows) {
       const priority = Number(rowValue(row, 'priority')) as 1 | 2 | 3;
       const linkedSignal = rowValue(row, policy.linkField);
 
-      if (seenLinkedSignals.has(linkedSignal)) {
+      if (input.linkagePolicy === 'strict_rank_policy' && seenLinkedSignals.has(linkedSignal)) {
         input.diagnostics.push({
           severity: 'error',
           code: policy.duplicateCode,
@@ -517,6 +549,10 @@ function validatePatternListLinkage(input: {
           message: `${input.sheet} pattern_key ${patternKey} ${policy.linkField} ${linkedSignal} is not one of the ranked signals.`,
           sheet: input.sheet,
         });
+        continue;
+      }
+
+      if (input.linkagePolicy === 'relationship_only') {
         continue;
       }
 
@@ -599,8 +635,11 @@ function compileMetadataRow(
     assessment_key: args.assessmentKey,
     version,
     assessment_title: title,
+    assessment_description: config?.description ?? config?.assessmentDescription ?? String(base.assessment_description ?? ''),
     domain_key: args.domainKey,
     domain_title: config?.domainTitle ?? String(base.domain_title ?? title),
+    lifecycle_status: config?.lifecycleStatus ?? String(base.lifecycle_status ?? 'draft'),
+    status: config?.status ?? String(base.status ?? 'active'),
     lookup_key: `${args.assessmentKey}::${version}`,
   };
 }
@@ -624,13 +663,20 @@ function compileContextRows(
   args: AuthoringPackageCompilerArgs,
 ): readonly Record<string, unknown>[] {
   const base = sheetRows(templateWorkbook, '05_Context')[0] ?? {};
+  const context = config?.context;
   return [
     {
       ...base,
       domain_key: args.domainKey,
+      section_key: context?.sectionKey ?? context?.section_key ?? base.section_key ?? 'context',
       domain_title: config?.domainTitle ?? base.domain_title ?? '',
-      status: base.status || 'active',
-      lookup_key: `${args.domainKey}::context`,
+      domain_definition: context?.domainDefinition ?? context?.domain_definition ?? base.domain_definition ?? '',
+      domain_scope: context?.domainScope ?? context?.domain_scope ?? base.domain_scope ?? '',
+      interpretation_guidance:
+        context?.interpretationGuidance ?? context?.interpretation_guidance ?? base.interpretation_guidance ?? '',
+      intro_note: context?.introNote ?? context?.intro_note ?? base.intro_note ?? '',
+      status: context?.status ?? base.status ?? 'active',
+      lookup_key: context?.lookupKey ?? context?.lookup_key ?? `${args.domainKey}::context`,
     },
   ];
 }
@@ -1014,6 +1060,7 @@ function validateCompiledWorkbookRows(
   rowsBySheet: Readonly<Record<RequiredSheet, readonly Record<string, unknown>[]>>,
   headersBySheet: Readonly<Record<RequiredSheet, readonly string[]>>,
   templateHeadersBySheet: Readonly<Record<RequiredSheet, readonly string[]>>,
+  config: AuthoringAssessmentConfig | null,
   args: AuthoringPackageCompilerArgs,
 ): void {
   const diagnostics: AuthoringCompilerDiagnostic[] = [];
@@ -1244,6 +1291,8 @@ function validateCompiledWorkbookRows(
       rows: activeRowsBySheet[sheet],
       sheet,
       expectedPatternKeys,
+      signalKeys,
+      linkagePolicy: config?.patternListLinkagePolicy ?? 'strict_rank_policy',
       diagnostics,
     });
   }
@@ -1335,7 +1384,7 @@ export function compileAuthoringPackageWorkbook(args: AuthoringPackageCompilerAr
   rowCounts[deferredImportSummary.sheet] = importSummaryRows.length;
 
   workbook.SheetNames = REQUIRED_PACKAGE_SHEETS.filter((sheet) => workbook.SheetNames.includes(sheet));
-  validateCompiledWorkbookRows(rowsBySheet, headersBySheet, headersBySheet, args);
+  validateCompiledWorkbookRows(rowsBySheet, headersBySheet, headersBySheet, config, args);
   mkdirSync(path.dirname(outputPath), { recursive: true });
   XLSX.writeFile(workbook, outputPath, { bookType: 'xlsx' });
   const audit = auditRankedPatternWorkbookFile(outputPath);

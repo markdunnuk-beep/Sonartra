@@ -16,7 +16,7 @@ export type RankedPatternSectionKey = (typeof rankedPatternSectionOrder)[number]
 export const rankedPatternExample = {
     "05_Context": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "section_key": "05_Context",
         "domain_title": "Flow State",
         "domain_definition": "Draft definition",
@@ -28,7 +28,7 @@ export const rankedPatternExample = {
     ],
     "06_Orientation": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "score_shape": "concentrated",
         "rank_1_signal_key": "deep_focus",
@@ -47,7 +47,7 @@ export const rankedPatternExample = {
     ],
     "07_Recognition": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "score_shape": "concentrated",
         "rank_1_signal_key": "deep_focus",
@@ -62,7 +62,7 @@ export const rankedPatternExample = {
     ],
     "08_Signal_Roles": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "signal_key": "deep_focus",
         "signal_label": "deep_focus",
         "rank_position": "1",
@@ -75,7 +75,7 @@ export const rankedPatternExample = {
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "signal_key": "creative_movement",
         "signal_label": "creative_movement",
         "rank_position": "2",
@@ -88,7 +88,7 @@ export const rankedPatternExample = {
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "signal_key": "physical_rhythm",
         "signal_label": "physical_rhythm",
         "rank_position": "3",
@@ -101,7 +101,7 @@ export const rankedPatternExample = {
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "signal_key": "social_exchange",
         "signal_label": "social_exchange",
         "rank_position": "4",
@@ -116,7 +116,7 @@ export const rankedPatternExample = {
     ],
     "09_Pattern_Mechanics": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "score_shape": "concentrated",
         "rank_1_signal_key": "deep_focus",
@@ -132,7 +132,7 @@ export const rankedPatternExample = {
     ],
     "10_Pattern_Synthesis": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "score_shape": "concentrated",
         "rank_1_signal_key": "deep_focus",
@@ -149,7 +149,7 @@ export const rankedPatternExample = {
     ],
     "11_Strengths": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "strength_key": "strength_1",
         "priority": "1",
@@ -159,7 +159,7 @@ export const rankedPatternExample = {
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "strength_key": "strength_2",
         "priority": "2",
@@ -169,7 +169,7 @@ export const rankedPatternExample = {
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "strength_key": "strength_3",
         "priority": "3",
@@ -181,7 +181,7 @@ export const rankedPatternExample = {
     ],
     "12_Narrowing": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "narrowing_key": "narrowing_1",
         "priority": "1",
@@ -191,7 +191,7 @@ export const rankedPatternExample = {
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "narrowing_key": "narrowing_2",
         "priority": "2",
@@ -201,7 +201,7 @@ export const rankedPatternExample = {
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "narrowing_key": "narrowing_3",
         "priority": "3",
@@ -213,39 +213,39 @@ export const rankedPatternExample = {
     ],
     "13_Application": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
-        "application_area": "use_this_when",
-        "guidance_type": "use_this_when",
+        "application_key": "application_1",
         "priority": "1",
-        "guidance_text": "Draft guidance",
+        "application_title": "Draft application",
+        "application_text": "Draft application guidance",
         "linked_signal_key": "deep_focus",
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
-        "application_area": "watch_for",
-        "guidance_type": "watch_for",
+        "application_key": "application_2",
         "priority": "2",
-        "guidance_text": "Draft guidance",
+        "application_title": "Draft application",
+        "application_text": "Draft application guidance",
         "linked_signal_key": "creative_movement",
         "status": "draft"
       },
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
-        "application_area": "develop_by",
-        "guidance_type": "develop_by",
+        "application_key": "application_3",
         "priority": "3",
-        "guidance_text": "Draft guidance",
+        "application_title": "Draft application",
+        "application_text": "Draft application guidance",
         "linked_signal_key": "physical_rhythm",
         "status": "draft"
       }
     ],
     "14_Closing_Integration": [
       {
-        "domain_key": "flow-state",
+        "domain_key": "flow_state",
         "pattern_key": "deep_focus_creative_movement_physical_rhythm_social_exchange",
         "score_shape": "concentrated",
         "closing_summary": "Draft closing",

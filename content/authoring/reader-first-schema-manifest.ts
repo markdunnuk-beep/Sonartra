@@ -275,7 +275,7 @@ export const readerFirstSectionPolicies: Record<ReaderFirstSectionKey, ReaderFir
 };
 
 export const flowStateAuthoringConstants = {
-  domainKey: 'flow-state',
+  domainKey: 'flow_state',
   signals: [
     'deep_focus',
     'creative_movement',
@@ -298,7 +298,7 @@ export const readerFirstLookupKeyRecommendation = {
   delimiter: '::',
   warning: 'Do not use pipe characters inside lookup_key values if exporting pipe-delimited data.',
   example:
-    'flow-state::deep_focus_creative_movement_physical_rhythm_social_exchange::concentrated',
+    'flow_state::deep_focus_creative_movement_physical_rhythm_social_exchange::concentrated',
 } as const;
 
 export const readerFirstAllowedScoreShapes = flowStateAuthoringConstants.scoreShapes;

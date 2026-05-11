@@ -28,6 +28,20 @@ const leadershipArgs: AuthoringPackageCompilerArgs = {
   overwrite: false,
 };
 
+const flowStateArgs: AuthoringPackageCompilerArgs = {
+  assessmentKey: 'flow-state',
+  domainKey: 'flow_state',
+  authoringDir: 'content/assessment-packages/flow-state',
+  generatedDir: 'content/authoring/generated',
+  templateWorkbook:
+    'content/assessment-packages/flow-state/sonartra_reader_first_import_schema_FLOW_STATE_EXAMPLE.xlsx',
+  outputWorkbook:
+    'tmp/compiled-packages/flow-state/sonartra_reader_first_import_schema_FLOW_STATE_COMPILED.xlsx',
+  dryRun: true,
+  write: false,
+  overwrite: false,
+};
+
 function copyGeneratedDir(tempRoot: string): string {
   const generatedDir = path.join(tempRoot, 'generated');
   cpSync('content/authoring/generated', generatedDir, { recursive: true });
@@ -249,6 +263,32 @@ test('output workbook passes package audit for Leadership Approach', () => {
     assert.equal(audit.pass, true);
     assert.equal(audit.diagnosticCounts.error, 0);
     assert.equal(audit.normalisationDiagnosticCounts.error, 0);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('output workbook compiles Flow State signal keys that contain underscores', () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'flow-state-package-audit-'));
+  const outputWorkbook = path.join(tempRoot, 'compiled.xlsx');
+  try {
+    const result = compileAuthoringPackageWorkbook({
+      ...flowStateArgs,
+      outputWorkbook,
+      write: true,
+      overwrite: false,
+    });
+
+    assert.equal(result.audit.pass, true);
+    assert.equal(result.audit.diagnosticCounts.error, 0);
+    assert.equal(result.audit.normalisationDiagnosticCounts.error, 0);
+    assert.equal(result.rowCountsBySheet['00_Metadata'], 1);
+    assert.equal(result.rowCountsBySheet['01_Signals'], 4);
+    assert.equal(result.rowCountsBySheet['02_Questions'], 24);
+    assert.equal(result.rowCountsBySheet['03_Options'], 96);
+    assert.equal(result.rowCountsBySheet['04_Option_Weights'], 96);
+    assert.equal(result.rowCountsBySheet['06_Orientation'], 96);
+    assert.equal(result.rowCountsBySheet['14_Closing_Integration'], 96);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
