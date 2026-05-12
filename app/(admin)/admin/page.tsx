@@ -26,6 +26,10 @@ const adminDashboardCopy = {
     description: 'Review users, roles, access, and workspace assignment.',
     action: 'Review users',
   },
+  support: {
+    description: 'Review native support cases and customer request status.',
+    action: 'Review support',
+  },
 } as const;
 
 export default function AdminLandingPage() {

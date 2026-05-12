@@ -123,6 +123,18 @@ function NavIcon({ itemKey, active }: { itemKey: AdminNavItem['key']; active: bo
           />
         </svg>
       );
+    case 'support':
+      return (
+        <svg className={iconClass} fill="none" viewBox="0 0 24 24">
+          <path
+            d="M5.25 6.25h13.5v8.5H11.5l-4.25 3.5v-3.5h-2zM8 9.25h8M8 12h5.5"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={strokeWidth}
+          />
+        </svg>
+      );
   }
 }
 

@@ -1,5 +1,5 @@
 export type AdminNavItem = {
-  key: 'dashboard' | 'assessments' | 'organisations' | 'users';
+  key: 'dashboard' | 'assessments' | 'organisations' | 'users' | 'support';
   href: string;
   label: string;
   description: string;
@@ -34,6 +34,13 @@ export const adminNavItems: readonly AdminNavItem[] = [
     label: 'Users',
     description: 'User access, roles, and workspace administration.',
     match: ['/admin/users'],
+  },
+  {
+    key: 'support',
+    href: '/admin/support',
+    label: 'Support',
+    description: 'Customer support cases and queue triage.',
+    match: ['/admin/support'],
   },
 ];
 

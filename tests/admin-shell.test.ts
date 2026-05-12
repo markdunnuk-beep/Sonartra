@@ -16,15 +16,20 @@ function readSource(path: string): string {
 test('admin dashboard nav item is active only on dashboard routes', () => {
   const dashboardItem = adminNavItems.find((item) => item.key === 'dashboard');
   const usersItem = adminNavItems.find((item) => item.key === 'users');
+  const supportItem = adminNavItems.find((item) => item.key === 'support');
 
   assert.ok(dashboardItem);
   assert.ok(usersItem);
+  assert.ok(supportItem);
 
   assert.equal(isAdminNavItemActive('/admin', dashboardItem), true);
   assert.equal(isAdminNavItemActive('/admin/dashboard', dashboardItem), true);
   assert.equal(isAdminNavItemActive('/admin/users', dashboardItem), false);
   assert.equal(isAdminNavItemActive('/admin/assessments', dashboardItem), false);
   assert.equal(isAdminNavItemActive('/admin/users', usersItem), true);
+  assert.equal(isAdminNavItemActive('/admin/support', supportItem), true);
+  assert.equal(isAdminNavItemActive('/admin/support/SUP-000001', supportItem), true);
+  assert.equal(isAdminNavItemActive('/admin/users', supportItem), false);
 });
 
 test('admin shell sidebar constrains horizontal overflow at the container', () => {
