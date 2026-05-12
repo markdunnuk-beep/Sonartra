@@ -3,7 +3,6 @@ import Link from 'next/link';
 import {
   LabelPill,
   PageFrame,
-  SectionHeader,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
 import { SupportRequestForm } from '@/components/user/support-request-form';
@@ -18,7 +17,6 @@ import {
   parseSupportPriorityFilter,
   parseSupportStatusFilter,
 } from '@/lib/support/support-display';
-import { SUPPORT_REQUEST_CATEGORY_OPTIONS } from '@/lib/support/support-request-action-state';
 
 type SupportPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -123,14 +121,14 @@ function CaseList({ cases }: Readonly<{ cases: readonly SupportCaseSummary[] }>)
 
 function EmptyCases() {
   return (
-    <div className="p-5 sm:p-8">
+    <div className="p-5 sm:p-6">
       <div
-        className="flex min-h-[18rem] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-white/12 bg-black/12 px-5 py-10 text-center"
+        className="flex min-h-[15rem] flex-col items-center justify-center rounded-[1.25rem] border border-dashed border-white/12 bg-black/12 px-5 py-8 text-center"
         role="status"
       >
         <span
           aria-hidden="true"
-          className="mb-5 flex h-12 w-12 items-center justify-center rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.08] text-[#32D6B0]"
+          className="mb-4 flex h-11 w-11 items-center justify-center rounded-[0.9rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.08] text-[#32D6B0]"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24">
             <path
@@ -143,11 +141,11 @@ function EmptyCases() {
           </svg>
         </span>
         <h2 className="text-2xl font-semibold tracking-[-0.02em] text-[#F5F1EA]">
-          No support cases
+          No support cases yet
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-7 text-[#D8D0C3]/72">
-          Create a support request when you need help with a technical issue, account
-          question, billing, or general support.
+          Create a request when you need help with your account, access, billing, or a technical
+          issue.
         </p>
         <div className="mt-6">
           <SupportRequestForm triggerVariant="secondary" />
@@ -159,15 +157,15 @@ function EmptyCases() {
 
 function CasesUnavailable() {
   return (
-    <div className="p-5 sm:p-8">
+    <div className="p-5 sm:p-6">
       <div
-        className="rounded-[1.5rem] border border-[rgba(255,157,157,0.22)] bg-[rgba(255,157,157,0.07)] px-5 py-6"
+        className="rounded-[1.25rem] border border-[rgba(255,157,157,0.22)] bg-[rgba(255,157,157,0.07)] px-5 py-5"
         role="alert"
       >
         <h2 className="text-xl font-semibold text-[#FFE1E1]">Support cases could not be loaded</h2>
         <p className="mt-2 max-w-2xl text-sm leading-7 text-[#FFD5D5]/78">
-          Try refreshing this page. If the problem continues, create a new request or contact
-          Sonartra directly.
+          Refresh the page and try again. If the problem continues, create a new request or
+          contact Sonartra directly.
         </p>
       </div>
     </div>
@@ -178,6 +176,7 @@ export default async function UserSupportPage({ searchParams }: SupportPageProps
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const statusFilter = parseSupportStatusFilter(resolvedSearchParams.status);
   const priorityFilter = parseSupportPriorityFilter(resolvedSearchParams.priority);
+  const hasActiveFilters = Boolean(statusFilter || priorityFilter);
 
   let cases: readonly SupportCaseSummary[] = [];
   let casesLoadFailed = false;
@@ -193,141 +192,64 @@ export default async function UserSupportPage({ searchParams }: SupportPageProps
 
   return (
     <PageFrame>
-      <SurfaceCard accent className="overflow-hidden p-0">
-        <header className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.36fr)]">
-          <div className="space-y-5 p-6 sm:p-8 lg:p-10">
-            <p className="sonartra-page-eyebrow">Support cases</p>
-            <div className="space-y-4">
-              <h1 className="sonartra-page-title">Support</h1>
-              <p className="max-w-3xl text-base leading-8 text-[#D8D0C3]/76">
-                Get help with technical issues, account questions, billing, or general Sonartra
-                support. This area collects support requests and case updates in one place.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-between gap-6 border-t border-white/10 bg-black/16 p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-10">
-            <div className="space-y-4">
-              <p className="sonartra-page-eyebrow">Request support</p>
-              <p className="text-2xl font-semibold leading-tight text-[#F5F1EA]">
-                Create a request, track the case, and keep support context organised.
-              </p>
-            </div>
+      <SurfaceCard accent className="p-6 sm:p-8">
+        <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl space-y-4">
+            <p className="sonartra-page-eyebrow">Support</p>
             <div className="space-y-3">
-              <SupportRequestForm />
-              <p className="text-xs font-medium leading-6 text-[#9A9185]/84">
-                Create a support case for a technical issue, account question, billing access,
-                product feedback, or general question.
+              <h1 className="sonartra-page-title">Support</h1>
+              <p className="text-base leading-8 text-[#D8D0C3]/76">
+                Create and track support requests for your Sonartra account.
               </p>
             </div>
           </div>
+          <SupportRequestForm />
         </header>
       </SurfaceCard>
 
-      <section className="sonartra-section">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <SectionHeader
-            eyebrow="Cases"
-            title="Your support cases"
-            description="Review your support requests and open a case to read the public message thread."
-          />
-          <div className="shrink-0">
-            <SupportRequestForm triggerVariant="secondary" />
-          </div>
-        </div>
-
+      <section className="sonartra-section !mt-6">
         <SurfaceCard className="overflow-hidden p-0">
-          <form
-            action="/app/support"
-            className="grid gap-3 border-b border-white/10 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto]"
-          >
-            <div className="min-w-0">
-              <label className="sr-only" htmlFor="support-case-search">
-                Search support cases
-              </label>
-              <input
-                aria-label="Search support cases. Search will be added in a later support task."
-                className="h-12 w-full rounded-[1rem] border border-white/10 bg-black/16 px-4 text-sm text-[#F5F1EA] outline-none placeholder:text-[#9A9185]/70 disabled:cursor-not-allowed disabled:opacity-80"
-                disabled
-                id="support-case-search"
-                placeholder="Search support cases..."
-                type="search"
-              />
+          <div className="border-b border-white/10 p-5 sm:p-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-2">
+                <p className="sonartra-page-eyebrow">Cases</p>
+                <h2 className="text-2xl font-semibold tracking-[-0.02em] text-[#F5F1EA]">
+                  Your support cases
+                </h2>
+                <p className="max-w-2xl text-sm leading-7 text-[#D8D0C3]/72">
+                  Track open requests and read support replies.
+                </p>
+              </div>
+              {cases.length > 0 || hasActiveFilters ? (
+                <form
+                  action="/app/support"
+                  className="grid gap-3 sm:grid-cols-[minmax(11rem,1fr)_minmax(11rem,1fr)_auto]"
+                >
+                  <FilterSelect
+                    label="All statuses"
+                    name="status"
+                    options={SUPPORT_STATUS_OPTIONS}
+                    value={statusFilter}
+                  />
+                  <FilterSelect
+                    label="All priorities"
+                    name="priority"
+                    options={SUPPORT_PRIORITY_OPTIONS}
+                    value={priorityFilter}
+                  />
+                  <button
+                    className="sonartra-button sonartra-button-secondary sonartra-focus-ring h-12"
+                    type="submit"
+                  >
+                    Apply filters
+                  </button>
+                </form>
+              ) : null}
             </div>
-            <FilterSelect
-              label="All statuses"
-              name="status"
-              options={SUPPORT_STATUS_OPTIONS}
-              value={statusFilter}
-            />
-            <FilterSelect
-              label="All priorities"
-              name="priority"
-              options={SUPPORT_PRIORITY_OPTIONS}
-              value={priorityFilter}
-            />
-            <button
-              className="sonartra-button sonartra-button-secondary sonartra-focus-ring h-12"
-              type="submit"
-            >
-              Apply filters
-            </button>
-          </form>
+          </div>
 
           {casesLoadFailed ? <CasesUnavailable /> : cases.length > 0 ? <CaseList cases={cases} /> : <EmptyCases />}
         </SurfaceCard>
-      </section>
-
-      <section className="sonartra-section">
-        <SectionHeader
-          eyebrow="Lifecycle"
-          title="Status model"
-          description="These labels describe the support case lifecycle."
-        />
-        <div aria-label="Support case status model" className="flex flex-wrap gap-2">
-          {SUPPORT_STATUS_OPTIONS.map((status) => (
-            <LabelPill key={status.value}>{status.label}</LabelPill>
-          ))}
-        </div>
-      </section>
-
-      <section className="sonartra-section">
-        <SectionHeader
-          eyebrow="Request categories"
-          title="Start with the right context"
-          description="Choose the closest category when creating a support request."
-        />
-
-        <div aria-label="Support category cards" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {SUPPORT_REQUEST_CATEGORY_OPTIONS.map((category) => (
-            <SurfaceCard
-              key={category.value}
-              className="flex min-h-full flex-col gap-5 p-5"
-              data-support-option={category.label}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <LabelPill>Category</LabelPill>
-                <span
-                  aria-hidden="true"
-                  className="h-2 w-2 rounded-full bg-[#32D6B0]/70 shadow-[0_0_18px_rgba(50,214,176,0.2)]"
-                />
-              </div>
-              <div className="space-y-3">
-                <h2 className="text-[1.25rem] font-semibold leading-tight text-[#F5F1EA]">
-                  {category.label}
-                </h2>
-                <p className="text-sm leading-7 text-[#D8D0C3]/70">{category.helper}</p>
-              </div>
-              <div className="mt-auto border-t border-white/10 pt-4">
-                <SupportRequestForm
-                  initialCategory={category.value}
-                  triggerLabel={`Prepare ${category.label.toLowerCase()}`}
-                  triggerVariant="secondary"
-                />
-              </div>
-            </SurfaceCard>
-          ))}
-        </div>
       </section>
     </PageFrame>
   );

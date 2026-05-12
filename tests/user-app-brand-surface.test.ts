@@ -115,14 +115,13 @@ test('authenticated support route shell stays support-only', () => {
   assert.match(supportSource, /Support/);
   assert.match(
     supportSource,
-    /Get help with technical issues, account questions, billing, or general/,
+    /Create and track support requests for your Sonartra account/,
   );
-  assert.match(supportSource, /Create a support case for a technical issue/);
   assert.match(supportSource, /Your support cases/);
-  assert.match(supportSource, /Search support cases\.\.\./);
+  assert.match(supportSource, /Track open requests and read support replies/);
   assert.match(supportSource, /All statuses/);
   assert.match(supportSource, /All priorities/);
-  assert.match(supportSource, /No support cases/);
+  assert.match(supportSource, /No support cases yet/);
   assert.match(combinedSupportSource, /Open/);
   assert.match(combinedSupportSource, /Waiting on Sonartra/);
   assert.match(combinedSupportSource, /Waiting on you/);
@@ -132,10 +131,11 @@ test('authenticated support route shell stays support-only', () => {
   assert.match(combinedSupportSource, /Billing or access/);
   assert.match(combinedSupportSource, /Product feedback/);
   assert.match(combinedSupportSource, /General question/);
-  assert.match(supportSource, /Choose the closest category when creating a support request/);
   assert.match(supportSource, /PageFrame/);
   assert.match(supportSource, /SurfaceCard/);
 
+  assert.doesNotMatch(supportSource, /Status model|Lifecycle|Request categories|Support category cards/);
+  assert.doesNotMatch(supportSource, /Search support cases/);
   assert.doesNotMatch(supportSource, /canonical_result_payload|canonicalResultPayload/);
   assert.doesNotMatch(
     supportSource,

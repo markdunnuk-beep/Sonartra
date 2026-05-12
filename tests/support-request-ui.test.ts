@@ -9,14 +9,23 @@ function readSource(relativePath: string): string {
 
 test('/app/support wires the create support request form without admin support surfaces', () => {
   const pageSource = readSource('app/(user)/app/support/page.tsx');
+  const formSource = readSource('components/user/support-request-form.tsx');
+  const stateSource = readSource('lib/support/support-request-action-state.ts');
 
   assert.match(pageSource, /SupportRequestForm/);
-  assert.match(pageSource, /Create a support case for a technical issue/);
-  assert.match(pageSource, /SUPPORT_REQUEST_CATEGORY_OPTIONS/);
+  assert.match(pageSource, /Create and track support requests for your Sonartra account/);
   assert.match(pageSource, /Your support cases/);
-  assert.match(pageSource, /No support cases/);
-  assert.match(pageSource, /product feedback/i);
+  assert.match(pageSource, /Track open requests and read support replies/);
+  assert.match(pageSource, /No support cases yet/);
+  assert.match(pageSource, /Support cases could not be loaded/);
+  assert.match(formSource, /SUPPORT_REQUEST_CATEGORY_OPTIONS/);
+  assert.match(stateSource, /Product feedback/);
 
+  assert.doesNotMatch(pageSource, /Status model/);
+  assert.doesNotMatch(pageSource, /Lifecycle/);
+  assert.doesNotMatch(pageSource, /Request categories/);
+  assert.doesNotMatch(pageSource, /Support category cards/);
+  assert.doesNotMatch(pageSource, /SUPPORT_REQUEST_CATEGORY_OPTIONS/);
   assert.doesNotMatch(pageSource, /listAdminSupportCases|getAdminSupportCase|addAdminSupportReply|addAdminInternalNote/);
   assert.doesNotMatch(pageSource, /sendEmail|smtp|resend|postmark|zendesk|intercom|freshdesk|MCP|SLA/i);
   assert.doesNotMatch(pageSource, /canonical_result_payload|optionSignalWeights|scoreAssessment|normalizeScores/);

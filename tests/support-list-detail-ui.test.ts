@@ -29,11 +29,13 @@ test('/app/support lists current user cases through the support service', () => 
   assert.match(pageSource, /formatSupportPriority/);
   assert.match(pageSource, /formatSupportDate/);
   assert.match(pageSource, /Apply filters/);
-  assert.match(pageSource, /No support cases/);
+  assert.match(pageSource, /No support cases yet/);
   assert.match(pageSource, /Support cases could not be loaded/);
 
   assert.doesNotMatch(pageSource, /caseId|supportCase\.id|raw database/i);
   assert.doesNotMatch(pageSource, /addCurrentUserSupportMessage|reply composer/i);
+  assert.doesNotMatch(pageSource, /Status model|Lifecycle|Request categories|Support category cards/);
+  assert.doesNotMatch(pageSource, /Search support cases/);
   assert.doesNotMatch(pageSource, /listAdminSupportCases|getAdminSupportCase|addAdminSupportReply|addAdminInternalNote/);
   assert.doesNotMatch(pageSource, /sendEmail|smtp|resend|postmark|zendesk|intercom|freshdesk|MCP|SLA/i);
   assert.doesNotMatch(pageSource, /canonical_result_payload|optionSignalWeights|scoreAssessment|normalizeScores/);
