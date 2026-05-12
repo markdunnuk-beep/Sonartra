@@ -4,49 +4,10 @@ import {
   SectionHeader,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
-
-const supportCategories = [
-  {
-    title: 'Technical issue',
-    description: 'Help for sign-in problems, page errors, assessment access, or unexpected app behaviour.',
-  },
-  {
-    title: 'Account support',
-    description: 'Guidance for profile details, access questions, settings, and authenticated account use.',
-  },
-  {
-    title: 'Billing or access',
-    description: 'Support for plan access, billing questions, payment context, or account-level availability.',
-  },
-  {
-    title: 'General question',
-    description: 'A place for broader Sonartra questions that do not fit a technical or account category.',
-  },
-] as const;
+import { SupportRequestForm } from '@/components/user/support-request-form';
+import { SUPPORT_REQUEST_CATEGORY_OPTIONS } from '@/lib/support/support-request-action-state';
 
 const supportStatuses = ['Open', 'Waiting on Sonartra', 'Waiting on you', 'Resolved'] as const;
-
-function DisabledAction({
-  children,
-  primary = false,
-}: Readonly<{
-  children: string;
-  primary?: boolean;
-}>) {
-  return (
-    <button
-      aria-label={`${children}. Request creation is being prepared.`}
-      className={[
-        'sonartra-button cursor-not-allowed opacity-75',
-        primary ? 'sonartra-button-primary' : 'sonartra-button-secondary',
-      ].join(' ')}
-      disabled
-      type="button"
-    >
-      {children}
-    </button>
-  );
-}
 
 export default function UserSupportPage() {
   return (
@@ -72,10 +33,10 @@ export default function UserSupportPage() {
               </p>
             </div>
             <div className="space-y-3">
-              <DisabledAction primary>Create support request</DisabledAction>
+              <SupportRequestForm />
               <p className="text-xs font-medium leading-6 text-[#9A9185]/84">
-                Request creation is being prepared. No support records are created from this
-                shell yet.
+                Create a support case for a technical issue, account question, billing access,
+                product feedback, or general question.
               </p>
             </div>
           </div>
@@ -90,7 +51,7 @@ export default function UserSupportPage() {
             description="Search, filter, and review support requests from this operational cases view once request handling is enabled."
           />
           <div className="shrink-0">
-            <DisabledAction>Create support request</DisabledAction>
+            <SupportRequestForm triggerVariant="secondary" />
           </div>
         </div>
 
@@ -154,7 +115,7 @@ export default function UserSupportPage() {
                 question, billing, or general support.
               </p>
               <div className="mt-6">
-                <DisabledAction>Create support request</DisabledAction>
+                <SupportRequestForm triggerVariant="secondary" />
               </div>
             </div>
           </div>
@@ -165,7 +126,7 @@ export default function UserSupportPage() {
         <SectionHeader
           eyebrow="Future lifecycle"
           title="Status model"
-          description="These labels describe the future support case lifecycle only. They are not connected to saved data yet."
+          description="These labels describe the support case lifecycle. Full case list and detail views follow in the next support task."
         />
         <div aria-label="Support case status model" className="flex flex-wrap gap-2">
           {supportStatuses.map((status) => (
@@ -178,15 +139,15 @@ export default function UserSupportPage() {
         <SectionHeader
           eyebrow="Request categories"
           title="Start with the right context"
-          description="These categories will help route future support requests without starting a live request flow yet."
+          description="Choose the closest category when creating a support request."
         />
 
         <div aria-label="Support category cards" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {supportCategories.map((category) => (
+          {SUPPORT_REQUEST_CATEGORY_OPTIONS.map((category) => (
             <SurfaceCard
-              key={category.title}
+              key={category.value}
               className="flex min-h-full flex-col gap-5 p-5"
-              data-support-option={category.title}
+              data-support-option={category.label}
             >
               <div className="flex items-center justify-between gap-3">
                 <LabelPill>Category</LabelPill>
@@ -197,19 +158,16 @@ export default function UserSupportPage() {
               </div>
               <div className="space-y-3">
                 <h2 className="text-[1.25rem] font-semibold leading-tight text-[#F5F1EA]">
-                  {category.title}
+                  {category.label}
                 </h2>
-                <p className="text-sm leading-7 text-[#D8D0C3]/70">{category.description}</p>
+                <p className="text-sm leading-7 text-[#D8D0C3]/70">{category.helper}</p>
               </div>
               <div className="mt-auto border-t border-white/10 pt-4">
-                <button
-                  aria-label={`${category.title}. Request category entry is being prepared.`}
-                  className="text-xs font-semibold uppercase tracking-[0.12em] text-[#9A9185]/80 disabled:cursor-not-allowed"
-                  disabled
-                  type="button"
-                >
-                  Prepare request
-                </button>
+                <SupportRequestForm
+                  initialCategory={category.value}
+                  triggerLabel={`Prepare ${category.label.toLowerCase()}`}
+                  triggerVariant="secondary"
+                />
               </div>
             </SurfaceCard>
           ))}

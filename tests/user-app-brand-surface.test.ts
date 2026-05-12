@@ -108,13 +108,15 @@ test('authenticated library route shell stays content-only', () => {
 
 test('authenticated support route shell stays support-only', () => {
   const supportSource = readSource('app/(user)/app/support/page.tsx');
+  const supportRequestStateSource = readSource('lib/support/support-request-action-state.ts');
+  const combinedSupportSource = `${supportSource}\n${supportRequestStateSource}`;
 
   assert.match(supportSource, /Support/);
   assert.match(
     supportSource,
     /Get help with technical issues, account questions, billing, or general/,
   );
-  assert.match(supportSource, /Create support request/);
+  assert.match(supportSource, /Create a support case for a technical issue/);
   assert.match(supportSource, /Your support cases/);
   assert.match(supportSource, /Search support cases\.\.\./);
   assert.match(supportSource, /All statuses/);
@@ -124,11 +126,12 @@ test('authenticated support route shell stays support-only', () => {
   assert.match(supportSource, /Waiting on Sonartra/);
   assert.match(supportSource, /Waiting on you/);
   assert.match(supportSource, /Resolved/);
-  assert.match(supportSource, /Technical issue/);
-  assert.match(supportSource, /Account support/);
-  assert.match(supportSource, /Billing or access/);
-  assert.match(supportSource, /General question/);
-  assert.match(supportSource, /Request creation is being prepared/);
+  assert.match(combinedSupportSource, /Technical issue/);
+  assert.match(combinedSupportSource, /Account support/);
+  assert.match(combinedSupportSource, /Billing or access/);
+  assert.match(combinedSupportSource, /Product feedback/);
+  assert.match(combinedSupportSource, /General question/);
+  assert.match(supportSource, /Choose the closest category when creating a support request/);
   assert.match(supportSource, /PageFrame/);
   assert.match(supportSource, /SurfaceCard/);
 
