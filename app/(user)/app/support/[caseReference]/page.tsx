@@ -24,6 +24,18 @@ type SupportCaseDetailPageProps = {
   }>;
 };
 
+function getCaseIntro(status: string): string {
+  if (status === 'resolved') {
+    return 'This request has been marked resolved. Review the conversation below.';
+  }
+
+  if (status === 'closed') {
+    return 'This request is closed. Review the conversation below or create a new request if you need more help.';
+  }
+
+  return 'Follow the conversation and add updates while this request is open.';
+}
+
 export default async function SupportCaseDetailPage({ params }: SupportCaseDetailPageProps) {
   const { caseReference } = await params;
   let supportCase;
@@ -66,8 +78,7 @@ export default async function SupportCaseDetailPage({ params }: SupportCaseDetai
             <p className="sonartra-page-eyebrow">Support case</p>
             <h1 className="sonartra-page-title">{supportCase.subject}</h1>
             <p className="max-w-3xl text-base leading-8 text-[#D8D0C3]/76">
-              This case detail view shows the public support thread and lets you add updates
-              while the request remains open.
+              {getCaseIntro(supportCase.status)}
             </p>
           </div>
         </header>
@@ -90,9 +101,6 @@ export default async function SupportCaseDetailPage({ params }: SupportCaseDetai
         <div className="sonartra-section-header sonartra-motion-reveal-soft">
           <p className="sonartra-page-eyebrow">Message thread</p>
           <h2 className="sonartra-section-title">Public messages</h2>
-          <p className="sonartra-section-description">
-            Internal notes are not shown in the user support case view.
-          </p>
         </div>
 
         <SurfaceCard className="p-0">

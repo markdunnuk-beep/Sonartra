@@ -294,7 +294,7 @@ export default async function AdminSupportPage({ searchParams }: AdminSupportPag
       <PageHeader
         eyebrow="Support Admin"
         title="Support queue"
-        description="Review native Sonartra support cases across users. Detailed case actions are handled in the next support task."
+        description="Review support requests, check status, and open cases that need a response."
       />
 
       <section className="sonartra-section">
@@ -347,7 +347,7 @@ export default async function AdminSupportPage({ searchParams }: AdminSupportPag
         <SectionHeader
           eyebrow="Queue"
           title="All support cases"
-          description="Scan customer requests without entering the admin reply workflow."
+          description="Scan customer requests and open the cases that need action."
         />
 
         {failed ? (

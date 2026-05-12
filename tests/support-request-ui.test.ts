@@ -38,6 +38,10 @@ test('support request form exposes category options, labels, validation, and suc
 
   assert.match(formSource, /useActionState/);
   assert.match(formSource, /createSupportRequestAction/);
+  assert.match(formSource, /safeState\.ok\s+\?\s+open && dismissedActionKey === actionKey/);
+  assert.match(formSource, /Open request/);
+  assert.match(formSource, /We have sent a confirmation and added it to your support cases/);
+  assert.match(formSource, /href=\{`\/app\/support\/\$\{safeState\.publicReference\}`\}/);
   assert.match(formSource, /htmlFor="support-category"/);
   assert.match(formSource, /htmlFor="support-subject"/);
   assert.match(formSource, /htmlFor="support-description"/);

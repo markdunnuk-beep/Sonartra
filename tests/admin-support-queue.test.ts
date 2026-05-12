@@ -19,6 +19,7 @@ test('admin support queue route uses admin shell protection and support service 
   assert.match(pageSource, /listAdminSupportCases/);
   assert.match(pageSource, /AdminSupportPage/);
   assert.match(pageSource, /Support queue/);
+  assert.match(pageSource, /Review support requests, check status, and open cases that need a response/);
   assert.match(pageSource, /Queue controls/);
   assert.match(pageSource, /All support cases/);
   assert.match(layoutSource, /requireAdminRequestUserContext/);
@@ -51,6 +52,7 @@ test('admin support queue renders case metadata and filters without task 07 cont
   assert.match(pageSource, /Support cases could not be loaded/);
   assert.match(pageSource, /No support cases yet/);
   assert.match(pageSource, /New customer requests will appear here/);
+  assert.match(pageSource, /Scan customer requests and open the cases that need action/);
   assert.match(navSource, /key: 'support'/);
   assert.match(navSource, /href: '\/admin\/support'/);
 
@@ -67,6 +69,7 @@ test('admin support queue renders case metadata and filters without task 07 cont
   }
 
   assert.doesNotMatch(pageSource, /Send reply|Add a reply|internal note|Change status|Change priority/i);
+  assert.doesNotMatch(pageSource, /next support task|without entering the admin reply workflow/i);
   assert.doesNotMatch(pageSource, /sendEmail|smtp|resend|postmark|zendesk|intercom|freshdesk|MCP|SLA/i);
   assert.doesNotMatch(pageSource, /canonical_result_payload|optionSignalWeights|scoreAssessment|normalizeScores/);
 });

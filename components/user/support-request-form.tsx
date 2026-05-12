@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState, useId, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
@@ -72,7 +73,9 @@ export function SupportRequestForm({
     safeState.message || safeState.formError
       ? `${safeState.ok ? 'ok' : 'error'}:${safeState.message ?? safeState.formError}`
       : null;
-  const panelOpen = open || Boolean(actionKey && dismissedActionKey !== actionKey);
+  const panelOpen = safeState.ok
+    ? open && dismissedActionKey === actionKey
+    : open || Boolean(actionKey && dismissedActionKey !== actionKey);
 
   return (
     <div className="space-y-4">
@@ -83,6 +86,12 @@ export function SupportRequestForm({
         )}
         type="button"
         onClick={() => {
+          if (safeState.ok) {
+            setDismissedActionKey(actionKey);
+            setOpen(true);
+            return;
+          }
+
           setDismissedActionKey(null);
           setOpen((current) => !current);
         }}
@@ -97,7 +106,22 @@ export function SupportRequestForm({
           className="rounded-[1rem] border border-[#32D6B0]/20 bg-[#32D6B0]/[0.08] px-4 py-3 text-sm font-medium text-[#DFFCF4]"
           role="status"
         >
-          {safeState.message}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p>{safeState.message}</p>
+              <p className="mt-1 text-xs leading-5 text-[#DFFCF4]/76">
+                We have sent a confirmation and added it to your support cases.
+              </p>
+            </div>
+            {safeState.publicReference ? (
+              <Link
+                className="sonartra-focus-ring rounded-full border border-[#32D6B0]/24 px-4 py-2 text-xs font-semibold text-[#DFFCF4] transition hover:border-[#32D6B0]/40 hover:text-white"
+                href={`/app/support/${safeState.publicReference}`}
+              >
+                Open request
+              </Link>
+            ) : null}
+          </div>
         </div>
       ) : null}
 

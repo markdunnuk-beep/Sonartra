@@ -174,8 +174,17 @@ export default async function AdminSupportCaseDetailPage({
         <SectionHeader
           eyebrow="Actions"
           title="Case controls"
-          description="Update the case lifecycle and priority without adding workflow automation."
+          description="Update status and priority for this support case."
         />
+        {supportCase.status === 'closed' ? (
+          <SurfaceCard muted className="mb-4 p-5 sm:p-6" role="status">
+            <h2 className="text-xl font-semibold text-[#F5F1EA]">This case is closed</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-[#D8D0C3]/72">
+              Reopen it before sending a public reply. Internal notes can still be added for
+              admin context.
+            </p>
+          </SurfaceCard>
+        ) : null}
         <SurfaceCard className="p-5 sm:p-6">
           <div className="grid gap-6 xl:grid-cols-2">
             <AdminSupportStatusForm
@@ -193,10 +202,19 @@ export default async function AdminSupportCaseDetailPage({
       <section className="sonartra-section">
         <SectionHeader
           eyebrow="Public reply"
-          title="Reply to user"
-          description="Send a public support reply that appears in the user's case thread."
+          title="Reply to customer"
+          description="Send a public support reply that appears in the customer's case thread."
         />
-        <AdminSupportReplyForm caseReference={supportCase.publicReference} />
+        {supportCase.status === 'closed' ? (
+          <SurfaceCard muted className="p-5 sm:p-6" role="status">
+            <h2 className="text-xl font-semibold text-[#F5F1EA]">Public replies are paused</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-[#D8D0C3]/72">
+              Change the status from Closed before sending another customer-facing reply.
+            </p>
+          </SurfaceCard>
+        ) : (
+          <AdminSupportReplyForm caseReference={supportCase.publicReference} />
+        )}
       </section>
 
       <section className="sonartra-section">

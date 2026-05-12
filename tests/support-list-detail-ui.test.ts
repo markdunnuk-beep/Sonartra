@@ -56,6 +56,10 @@ test('/app/support/[caseReference] renders detail metadata and public message th
   assert.match(detailSource, /formatSupportPriority/);
   assert.match(detailSource, /supportCase\.resolvedAt/);
   assert.match(detailSource, /supportCase\.closedAt/);
+  assert.match(detailSource, /getCaseIntro\(supportCase\.status\)/);
+  assert.match(detailSource, /Follow the conversation and add updates while this request is open/);
+  assert.match(detailSource, /This request has been marked resolved/);
+  assert.match(detailSource, /This request is closed\. Review the conversation below/);
   assert.match(detailSource, /Support case public message thread/);
   assert.match(detailSource, /formatSupportAuthorType\(message\.authorType\)/);
   assert.match(detailSource, /message\.body/);
@@ -72,6 +76,7 @@ test('/app/support/[caseReference] renders detail metadata and public message th
   assert.match(errorSource, /No technical error details\s+are shown here/);
 
   assert.doesNotMatch(detailSource, /isInternalNote|includeInternalNotes|addCurrentUserSupportMessage/);
+  assert.doesNotMatch(detailSource, /Internal notes are not shown in the user support case view/);
   assert.doesNotMatch(replyFormSource, /isInternalNote|includeInternalNotes|admin/i);
   assert.doesNotMatch(errorSource, /error\.message|error\.stack|digest/);
   assert.doesNotMatch(detailSource, /listAdminSupportCases|getAdminSupportCase|addAdminSupportReply|addAdminInternalNote/);

@@ -113,6 +113,12 @@ test('admin support detail route renders case metadata, controls, and full threa
   assert.match(detailSource, /AdminSupportInternalNoteForm/);
   assert.match(detailSource, /AdminSupportStatusForm/);
   assert.match(detailSource, /AdminSupportPriorityForm/);
+  assert.match(detailSource, /supportCase\.status === 'closed'/);
+  assert.match(detailSource, /This case is closed/);
+  assert.match(detailSource, /Reopen it before sending a public reply/);
+  assert.match(detailSource, /Public replies are paused/);
+  assert.match(detailSource, /Change the status from Closed before sending another customer-facing reply/);
+  assert.match(detailSource, /Reply to customer/);
   assert.match(formSource, /Send public reply/);
   assert.match(formSource, /Save internal note/);
   assert.match(formSource, /Update status/);
