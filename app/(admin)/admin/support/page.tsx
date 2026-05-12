@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import {
   ButtonLink,
   LabelPill,
@@ -45,6 +47,10 @@ function truncatePreview(value: string | null): string {
 
 function buildResetHref(): string {
   return '/admin/support';
+}
+
+function buildAdminCaseHref(publicReference: string): string {
+  return `/admin/support/${publicReference}`;
 }
 
 function FilterSelect({
@@ -124,10 +130,18 @@ function SupportQueueTable({ cases }: Readonly<{ cases: readonly AdminSupportCas
               <tr className="border-t border-white/6" key={supportCase.publicReference}>
                 <td className="max-w-[24rem] px-5 py-4 align-top">
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/38">
+                    <Link
+                      className="sonartra-focus-ring inline-block rounded text-xs font-semibold uppercase tracking-[0.16em] text-white/48 transition hover:text-white"
+                      href={buildAdminCaseHref(supportCase.publicReference)}
+                    >
                       {supportCase.publicReference}
-                    </p>
-                    <p className="text-sm font-medium text-white">{supportCase.subject}</p>
+                    </Link>
+                    <Link
+                      className="sonartra-focus-ring block rounded text-sm font-medium text-white transition hover:text-[#DFFCF4]"
+                      href={buildAdminCaseHref(supportCase.publicReference)}
+                    >
+                      {supportCase.subject}
+                    </Link>
                     <p className="line-clamp-2 text-sm leading-6 text-white/56">
                       {truncatePreview(supportCase.latestMessagePreview)}
                     </p>
@@ -178,7 +192,12 @@ function SupportQueueCards({ cases }: Readonly<{ cases: readonly AdminSupportCas
         <SurfaceCard className="p-5" key={supportCase.publicReference}>
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <QueuePill>{supportCase.publicReference}</QueuePill>
+              <Link
+                className="sonartra-focus-ring rounded-full"
+                href={buildAdminCaseHref(supportCase.publicReference)}
+              >
+                <QueuePill>{supportCase.publicReference}</QueuePill>
+              </Link>
               <QueuePill tone={supportCase.status === 'open' ? 'active' : 'neutral'}>
                 {formatAdminSupportStatus(supportCase.status)}
               </QueuePill>
@@ -187,9 +206,12 @@ function SupportQueueCards({ cases }: Readonly<{ cases: readonly AdminSupportCas
               </QueuePill>
             </div>
             <div>
-              <h2 className="text-xl font-semibold leading-tight text-white">
+              <Link
+                className="sonartra-focus-ring block rounded text-xl font-semibold leading-tight text-white transition hover:text-[#DFFCF4]"
+                href={buildAdminCaseHref(supportCase.publicReference)}
+              >
                 {supportCase.subject}
-              </h2>
+              </Link>
               <p className="mt-2 text-sm leading-7 text-white/58">
                 {truncatePreview(supportCase.latestMessagePreview)}
               </p>

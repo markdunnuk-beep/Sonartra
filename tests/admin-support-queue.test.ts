@@ -43,6 +43,8 @@ test('admin support queue renders case metadata and filters without task 07 cont
   assert.match(pageSource, /formatSupportDate\(supportCase\.createdAt\)/);
   assert.match(pageSource, /formatSupportDate\(supportCase\.updatedAt\)/);
   assert.match(pageSource, /latestMessagePreview/);
+  assert.match(pageSource, /href=\{buildAdminCaseHref\(supportCase\.publicReference\)\}/);
+  assert.match(pageSource, /\/admin\/support\/\$\{publicReference\}/);
   assert.match(pageSource, /name="status"/);
   assert.match(pageSource, /name="category"/);
   assert.match(pageSource, /name="priority"/);
