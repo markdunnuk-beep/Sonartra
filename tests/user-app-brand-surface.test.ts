@@ -109,7 +109,8 @@ test('authenticated library route shell stays content-only', () => {
 test('authenticated support route shell stays support-only', () => {
   const supportSource = readSource('app/(user)/app/support/page.tsx');
   const supportRequestStateSource = readSource('lib/support/support-request-action-state.ts');
-  const combinedSupportSource = `${supportSource}\n${supportRequestStateSource}`;
+  const supportDisplaySource = readSource('lib/support/support-display.ts');
+  const combinedSupportSource = `${supportSource}\n${supportRequestStateSource}\n${supportDisplaySource}`;
 
   assert.match(supportSource, /Support/);
   assert.match(
@@ -122,10 +123,10 @@ test('authenticated support route shell stays support-only', () => {
   assert.match(supportSource, /All statuses/);
   assert.match(supportSource, /All priorities/);
   assert.match(supportSource, /No support cases/);
-  assert.match(supportSource, /Open/);
-  assert.match(supportSource, /Waiting on Sonartra/);
-  assert.match(supportSource, /Waiting on you/);
-  assert.match(supportSource, /Resolved/);
+  assert.match(combinedSupportSource, /Open/);
+  assert.match(combinedSupportSource, /Waiting on Sonartra/);
+  assert.match(combinedSupportSource, /Waiting on you/);
+  assert.match(combinedSupportSource, /Resolved/);
   assert.match(combinedSupportSource, /Technical issue/);
   assert.match(combinedSupportSource, /Account support/);
   assert.match(combinedSupportSource, /Billing or access/);
