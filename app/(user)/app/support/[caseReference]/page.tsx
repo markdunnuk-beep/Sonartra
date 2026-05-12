@@ -7,6 +7,7 @@ import {
   PageFrame,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
+import { SupportReplyForm } from '@/components/user/support-reply-form';
 import { getCurrentUserSupportCase, SupportValidationError } from '@/lib/server/support-service';
 import {
   formatSupportAuthorType,
@@ -65,8 +66,8 @@ export default async function SupportCaseDetailPage({ params }: SupportCaseDetai
             <p className="sonartra-page-eyebrow">Support case</p>
             <h1 className="sonartra-page-title">{supportCase.subject}</h1>
             <p className="max-w-3xl text-base leading-8 text-[#D8D0C3]/76">
-              This case detail view shows the public support thread. Replies will be added in
-              the next support task.
+              This case detail view shows the public support thread and lets you add updates
+              while the request remains open.
             </p>
           </div>
         </header>
@@ -127,6 +128,28 @@ export default async function SupportCaseDetailPage({ params }: SupportCaseDetai
             </div>
           )}
         </SurfaceCard>
+      </section>
+
+      <section className="sonartra-section">
+        {supportCase.status === 'closed' ? (
+          <SurfaceCard muted className="p-5 sm:p-6" role="status">
+            <h2 className="text-xl font-semibold text-[#F5F1EA]">This support request is closed</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-[#D8D0C3]/72">
+              Create a new request if you need more help.
+            </p>
+          </SurfaceCard>
+        ) : (
+          <div className="space-y-4">
+            <div className="sonartra-section-header sonartra-motion-reveal-soft">
+              <p className="sonartra-page-eyebrow">Reply</p>
+              <h2 className="sonartra-section-title">Add to this case</h2>
+              <p className="sonartra-section-description">
+                Send a public update for Sonartra support. This is not live chat.
+              </p>
+            </div>
+            <SupportReplyForm caseReference={supportCase.publicReference} />
+          </div>
+        )}
       </section>
     </PageFrame>
   );

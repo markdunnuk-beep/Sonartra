@@ -42,6 +42,7 @@ test('/app/support lists current user cases through the support service', () => 
 test('/app/support/[caseReference] renders detail metadata and public message thread only', () => {
   const detailSource = readSource('app/(user)/app/support/[caseReference]/page.tsx');
   const errorSource = readSource('app/(user)/app/support/error.tsx');
+  const replyFormSource = readSource('components/user/support-reply-form.tsx');
 
   assert.match(detailSource, /getCurrentUserSupportCase/);
   assert.match(detailSource, /caseReference/);
@@ -57,11 +58,19 @@ test('/app/support/[caseReference] renders detail metadata and public message th
   assert.match(detailSource, /formatSupportAuthorType\(message\.authorType\)/);
   assert.match(detailSource, /message\.body/);
   assert.match(detailSource, /Back to support/);
-  assert.match(detailSource, /Replies will be added in\s+the next support task/);
+  assert.match(detailSource, /SupportReplyForm/);
+  assert.match(detailSource, /supportCase\.status === 'closed'/);
+  assert.match(detailSource, /This support request is closed/);
+  assert.match(detailSource, /Create a new request if you need more help/);
+  assert.match(replyFormSource, /Add a reply/);
+  assert.match(replyFormSource, /Send reply/);
+  assert.match(replyFormSource, /caseReference/);
+  assert.match(replyFormSource, /addSupportReplyAction/);
   assert.match(errorSource, /Support case could not be loaded/);
   assert.match(errorSource, /No technical error details\s+are shown here/);
 
   assert.doesNotMatch(detailSource, /isInternalNote|includeInternalNotes|addCurrentUserSupportMessage/);
+  assert.doesNotMatch(replyFormSource, /isInternalNote|includeInternalNotes|admin/i);
   assert.doesNotMatch(errorSource, /error\.message|error\.stack|digest/);
   assert.doesNotMatch(detailSource, /listAdminSupportCases|getAdminSupportCase|addAdminSupportReply|addAdminInternalNote/);
   assert.doesNotMatch(detailSource, /sendEmail|smtp|resend|postmark|zendesk|intercom|freshdesk|MCP|SLA/i);
