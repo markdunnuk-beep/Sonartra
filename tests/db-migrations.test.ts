@@ -718,3 +718,62 @@ test('question-scoped option key migration removes assessment-version-wide optio
     /CREATE\s+UNIQUE\s+INDEX[\s\S]+ON options \(assessment_version_id, option_key\)/i,
   );
 });
+
+test('support cases migration declares native support schema and RLS policies', async () => {
+  const sql = await readFile(
+    join(process.cwd(), 'db', 'migrations', '202605120001_support_cases.sql'),
+    'utf8',
+  );
+
+  assert.match(sql, /CREATE SEQUENCE support_case_public_reference_seq/i);
+  assert.match(sql, /CREATE OR REPLACE FUNCTION support_next_public_reference\(\)/i);
+  assert.match(sql, /'SUP-' \|\| LPAD\(nextval\('support_case_public_reference_seq'\)::TEXT, 6, '0'\)/i);
+  assert.match(sql, /CREATE TABLE support_cases/i);
+  assert.match(sql, /CREATE TABLE support_messages/i);
+  assert.match(sql, /CREATE TABLE support_case_events/i);
+
+  assert.match(sql, /category IN \(\s*'technical_issue'/is);
+  assert.match(sql, /'account_support'/i);
+  assert.match(sql, /'billing_access'/i);
+  assert.match(sql, /'feedback'/i);
+  assert.match(sql, /'general_question'/i);
+  assert.match(sql, /status TEXT NOT NULL DEFAULT 'open'/i);
+  assert.match(sql, /priority TEXT NOT NULL DEFAULT 'normal'/i);
+  assert.match(sql, /author_type TEXT NOT NULL CHECK \(author_type IN \('user', 'admin', 'system'\)\)/i);
+
+  for (const indexName of [
+    'support_cases_user_idx',
+    'support_cases_public_reference_idx',
+    'support_cases_status_idx',
+    'support_cases_category_idx',
+    'support_cases_priority_idx',
+    'support_cases_updated_at_idx',
+    'support_messages_case_idx',
+    'support_case_events_case_idx',
+  ]) {
+    assert.match(sql, new RegExp(indexName, 'i'));
+  }
+
+  assert.match(sql, /ALTER TABLE support_cases ENABLE ROW LEVEL SECURITY/i);
+  assert.match(sql, /ALTER TABLE support_messages ENABLE ROW LEVEL SECURITY/i);
+  assert.match(sql, /ALTER TABLE support_case_events ENABLE ROW LEVEL SECURITY/i);
+
+  for (const policyName of [
+    'support_cases_user_select_own',
+    'support_cases_user_insert_own',
+    'support_cases_admin_select_all',
+    'support_cases_admin_update_all',
+    'support_messages_user_select_own_public',
+    'support_messages_user_insert_own_public',
+    'support_messages_admin_select_all',
+    'support_messages_admin_insert_all',
+    'support_case_events_admin_select_all',
+    'support_case_events_admin_insert_all',
+  ]) {
+    assert.match(sql, new RegExp(policyName, 'i'));
+  }
+
+  assert.doesNotMatch(sql, /canonical_result_payload/i);
+  assert.doesNotMatch(sql, /assessment_ranked_patterns/i);
+  assert.doesNotMatch(sql, /option_signal_weights/i);
+});
