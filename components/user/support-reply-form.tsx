@@ -101,8 +101,7 @@ export function SupportReplyForm({
 
         <div className="flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-xl text-xs leading-6 text-[#9A9185]/78">
-            Sonartra support will see this reply in the case thread. Email notifications are a
-            later task.
+            Sonartra support will see this reply in the case thread and receive a notification.
           </p>
           <SubmitButton />
         </div>

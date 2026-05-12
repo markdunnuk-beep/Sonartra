@@ -4,6 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import {
+  sendSupportUserReplyAdminEmail,
+  type SupportEmailSendResult,
+} from '@/lib/server/support-email-notifications';
+import {
   addCurrentUserSupportMessage,
   SupportCaseClosedError,
   SupportCaseNotFoundError,
@@ -22,12 +26,17 @@ type SupportReplyActionDependencies = {
     publicReference: string;
     body: string;
   }): Promise<SupportCaseDetail>;
+  sendSupportUserReplyAdminEmail?(input: {
+    supportCase: SupportCaseDetail;
+    messagePreview: string;
+  }): Promise<SupportEmailSendResult>;
   revalidatePath(path: string): void;
   redirect(path: string): never | void;
 };
 
 const defaultDependencies: SupportReplyActionDependencies = {
   addCurrentUserSupportMessage,
+  sendSupportUserReplyAdminEmail,
   revalidatePath,
   redirect,
 };
@@ -72,6 +81,25 @@ function genericFailureState(values: SupportReplyFormValues): SupportReplyAction
   };
 }
 
+async function notifySupportUserReply(params: {
+  updatedCase: SupportCaseDetail;
+  messagePreview: string;
+  dependencies: SupportReplyActionDependencies;
+}) {
+  if (!params.dependencies.sendSupportUserReplyAdminEmail) {
+    return;
+  }
+
+  try {
+    await params.dependencies.sendSupportUserReplyAdminEmail({
+      supportCase: params.updatedCase,
+      messagePreview: params.messagePreview,
+    });
+  } catch (error) {
+    console.error('[support-reply] email notification failed', error);
+  }
+}
+
 export async function addSupportReplyAction(
   _previousState: SupportReplyActionState,
   formData: FormData,
@@ -104,6 +132,11 @@ export async function addSupportReplyActionWithDependencies(
 
     dependencies.revalidatePath('/app/support');
     dependencies.revalidatePath(detailPath);
+    await notifySupportUserReply({
+      updatedCase,
+      messagePreview: values.body,
+      dependencies,
+    });
   } catch (error) {
     if (error instanceof SupportCaseClosedError) {
       return {

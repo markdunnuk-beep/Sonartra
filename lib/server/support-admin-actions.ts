@@ -4,6 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import {
+  sendSupportAdminReplyUserEmail,
+  sendSupportCaseStatusChangedUserEmail,
+  type SupportEmailSendResult,
+} from '@/lib/server/support-email-notifications';
+import {
   addAdminInternalNote,
   addAdminSupportReply,
   SUPPORT_PRIORITIES,
@@ -46,6 +51,14 @@ type AdminSupportActionDependencies = {
     publicReference: string;
     priority: SupportPriority;
   }): Promise<AdminSupportCaseDetail>;
+  sendSupportAdminReplyUserEmail?(input: {
+    supportCase: AdminSupportCaseDetail;
+    messagePreview: string;
+  }): Promise<SupportEmailSendResult>;
+  sendSupportCaseStatusChangedUserEmail?(input: {
+    supportCase: AdminSupportCaseDetail;
+    status: SupportStatus;
+  }): Promise<SupportEmailSendResult>;
   revalidatePath(path: string): void;
   redirect(path: string): never | void;
 };
@@ -55,6 +68,8 @@ const defaultDependencies: AdminSupportActionDependencies = {
   addAdminInternalNote,
   updateAdminSupportCaseStatus,
   updateAdminSupportCasePriority,
+  sendSupportAdminReplyUserEmail,
+  sendSupportCaseStatusChangedUserEmail,
   revalidatePath,
   redirect,
 };
@@ -131,6 +146,47 @@ function isSupportPriority(value: string): value is SupportPriority {
   return SUPPORT_PRIORITIES.includes(value as SupportPriority);
 }
 
+async function notifyAdminReply(params: {
+  updatedCase: AdminSupportCaseDetail;
+  messagePreview: string;
+  dependencies: AdminSupportActionDependencies;
+}) {
+  if (!params.dependencies.sendSupportAdminReplyUserEmail) {
+    return;
+  }
+
+  try {
+    await params.dependencies.sendSupportAdminReplyUserEmail({
+      supportCase: params.updatedCase,
+      messagePreview: params.messagePreview,
+    });
+  } catch (error) {
+    console.error('[admin-support] public reply email notification failed', error);
+  }
+}
+
+async function notifyStatusChanged(params: {
+  updatedCase: AdminSupportCaseDetail;
+  status: SupportStatus;
+  dependencies: AdminSupportActionDependencies;
+}) {
+  if (
+    !params.dependencies.sendSupportCaseStatusChangedUserEmail ||
+    (params.status !== 'resolved' && params.status !== 'closed')
+  ) {
+    return;
+  }
+
+  try {
+    await params.dependencies.sendSupportCaseStatusChangedUserEmail({
+      supportCase: params.updatedCase,
+      status: params.status,
+    });
+  } catch (error) {
+    console.error('[admin-support] status email notification failed', error);
+  }
+}
+
 export async function addAdminSupportReplyAction(
   _previousState: AdminSupportBodyActionState,
   formData: FormData,
@@ -158,6 +214,11 @@ export async function addAdminSupportReplyActionWithDependencies(
     });
     updatedReference = updatedCase.publicReference;
     revalidateAdminSupportCase(dependencies, updatedReference);
+    await notifyAdminReply({
+      updatedCase,
+      messagePreview: values.body,
+      dependencies,
+    });
   } catch (error) {
     if (error instanceof SupportCaseNotFoundError) {
       return {
@@ -274,6 +335,11 @@ export async function updateAdminSupportStatusActionWithDependencies(
     });
     updatedReference = updatedCase.publicReference;
     revalidateAdminSupportCase(dependencies, updatedReference);
+    await notifyStatusChanged({
+      updatedCase,
+      status: values.status,
+      dependencies,
+    });
   } catch (error) {
     if (error instanceof SupportCaseNotFoundError) {
       return {

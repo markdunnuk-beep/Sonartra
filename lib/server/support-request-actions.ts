@@ -2,6 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { requireCurrentUser } from '@/lib/server/request-user';
+import {
+  sendSupportCaseCreatedAdminEmail,
+  sendSupportCaseCreatedUserEmail,
+} from '@/lib/server/support-email-notifications';
 import {
   emptySupportRequestFormValues,
   initialSupportRequestActionState,
@@ -16,6 +21,7 @@ import {
   type SupportCategory,
   type SupportCaseDetail,
 } from '@/lib/server/support-service';
+import type { SupportEmailSendResult } from '@/lib/server/support-email-notifications';
 
 type SupportRequestActionDependencies = {
   createSupportCase(input: {
@@ -23,11 +29,28 @@ type SupportRequestActionDependencies = {
     subject: string;
     body: string;
   }): Promise<SupportCaseDetail>;
+  getCurrentUserEmail?(): Promise<string | null>;
+  sendSupportCaseCreatedUserEmail?(input: {
+    supportCase: SupportCaseDetail;
+    userEmail: string | null;
+    messagePreview: string;
+  }): Promise<SupportEmailSendResult>;
+  sendSupportCaseCreatedAdminEmail?(input: {
+    supportCase: SupportCaseDetail;
+    userEmail: string | null;
+    messagePreview: string;
+  }): Promise<SupportEmailSendResult>;
   revalidatePath(path: string): void;
 };
 
 const defaultDependencies: SupportRequestActionDependencies = {
   createSupportCase,
+  async getCurrentUserEmail() {
+    const user = await requireCurrentUser();
+    return user.userEmail;
+  },
+  sendSupportCaseCreatedUserEmail,
+  sendSupportCaseCreatedAdminEmail,
   revalidatePath,
 };
 
@@ -106,6 +129,38 @@ function genericFailureState(values: SupportRequestFormValues): SupportRequestAc
   };
 }
 
+async function notifySupportCaseCreated(params: {
+  createdCase: SupportCaseDetail;
+  messagePreview: string;
+  dependencies: SupportRequestActionDependencies;
+}) {
+  if (
+    !params.dependencies.getCurrentUserEmail ||
+    !params.dependencies.sendSupportCaseCreatedUserEmail ||
+    !params.dependencies.sendSupportCaseCreatedAdminEmail
+  ) {
+    return;
+  }
+
+  try {
+    const userEmail = await params.dependencies.getCurrentUserEmail();
+    await Promise.all([
+      params.dependencies.sendSupportCaseCreatedUserEmail({
+        supportCase: params.createdCase,
+        userEmail,
+        messagePreview: params.messagePreview,
+      }),
+      params.dependencies.sendSupportCaseCreatedAdminEmail({
+        supportCase: params.createdCase,
+        userEmail,
+        messagePreview: params.messagePreview,
+      }),
+    ]);
+  } catch (error) {
+    console.error('[support-request] email notification failed', error);
+  }
+}
+
 export async function createSupportRequestAction(
   _previousState: SupportRequestActionState,
   formData: FormData,
@@ -132,6 +187,11 @@ export async function createSupportRequestActionWithDependencies(
     });
 
     dependencies.revalidatePath('/app/support');
+    await notifySupportCaseCreated({
+      createdCase,
+      messagePreview: values.description,
+      dependencies,
+    });
 
     return {
       ...initialSupportRequestActionState,

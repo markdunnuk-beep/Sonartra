@@ -254,8 +254,8 @@ export function SupportRequestForm({
 
             <div className="flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
               <p className="max-w-xl text-xs leading-6 text-[#9A9185]/78">
-                This creates a support case in Sonartra. Email notifications and case detail
-                replies are separate follow-up tasks.
+                This creates a support case in Sonartra and sends the relevant support
+                notifications.
               </p>
               <div className="flex gap-3">
                 <button
