@@ -18,6 +18,7 @@
     "admin:reset-assessment-result": "tsx scripts/admin/reset-assessment-result.ts",
     "authoring:compile-package": "tsx scripts/authoring/compile-assessment-package.ts",
     "authoring:compile-package:dry-run": "tsx scripts/authoring/compile-assessment-package.ts --dry-run",
+    "authoring:generate-premium-result-psv": "tsx scripts/authoring/generate-premium-result-psv.ts",
     "authoring:validate-premium-field-map": "tsx scripts/authoring/validate-premium-field-map.ts",
     "prove:flow-state-ranked-pattern": "tsx scripts/assessment-packages/prove-flow-state-ranked-pattern-fixture.ts",
     "archive:wplp80:convert": "tsx scripts/convert-wplp80-excel-to-seeds.ts",
