@@ -11,7 +11,7 @@ preview_status: authoring preview only
 
 ## Your Leadership Result
 
-# A reliable route through the work
+# You lead by turning complexity into structured progress
 
 Your leadership approach is led by Process and strengthened by Results. You tend to create confidence by giving work a clearer route, then making sure that route produces practical movement. People and Vision also matter, but they usually need to be brought in deliberately before the plan becomes too fixed.
 
