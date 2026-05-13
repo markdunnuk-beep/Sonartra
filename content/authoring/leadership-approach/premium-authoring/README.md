@@ -25,6 +25,8 @@ The first approved benchmark dossier is:
 content/authoring/leadership-approach/premium-authoring/pattern-dossiers/process_results_people_vision.md
 ```
 
+Use `pattern-dossier-template.md` as the reusable structure for future premium dossiers. Use `pattern-dossiers/process_results_people_vision.md` as the first approved benchmark dossier.
+
 Do not rewrite that dossier as part of this workflow contract. Use it as the first quality benchmark for future Pattern Dossiers and mapped fields.
 
 ## Field Mapping Matrix
@@ -57,4 +59,3 @@ Runtime behaviour remains unchanged:
 - no UI-side interpretation
 - no schema change
 - no workbook compilation requirement for this documentation task
-
