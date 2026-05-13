@@ -23,7 +23,7 @@ quality_score_target: 8.5+
 
 ## 1. Pattern identity
 
-Your leadership pattern is led by **Process**, strengthened by **Results**, extended by **People**, and expanded further by **Vision**.
+Your leadership approach is led by Process and strengthened by Results. People and Vision also matter, but they are less dominant in the way your leadership first organises and moves work forward.
 
 At its best, this is a leadership style that brings order to complexity and keeps that order connected to practical movement. You are unlikely to lead first through vague inspiration, open-ended exploration, or emotional intensity. Your instinct is to make the work clearer, more structured, more sequenced, and more accountable.
 
