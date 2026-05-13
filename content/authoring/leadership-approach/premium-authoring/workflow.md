@@ -8,6 +8,8 @@ This workflow governs how Leadership Approach Pattern Dossiers become reviewed P
 2. Score Pattern Dossier against the quality rubric.
 3. Create score-shape interpretation notes where relevant.
 4. Create Field Mapping Matrix.
+   - Start from `field-map-template.psv`.
+   - Validate with `npm run authoring:validate-premium-field-map -- <path-to-field-map.psv>`.
 5. Validate every mapped field has:
    - `source_anchor`
    - `source_excerpt`
@@ -44,12 +46,17 @@ Every matrix row must include:
 | `field_key` | PSV field being authored. |
 | `pattern_key` | Ranked signal pattern in rank order. |
 | `score_shape` | Shape variant when the section is score-shape-dependent. |
+| `rank_1_signal_key` | First-ranked signal key. |
+| `rank_2_signal_key` | Second-ranked signal key. |
+| `rank_3_signal_key` | Third-ranked signal key. |
+| `rank_4_signal_key` | Fourth-ranked signal key. |
 | `source_anchor` | Dossier anchor used as the source. |
 | `source_excerpt` | Short excerpt or paraphrased evidence from the dossier. |
 | `transformation_rule` | How the source becomes this field. |
-| `drift_check` | The semantic drift risk checked for this field. |
 | `final_text` | Reviewed field copy. |
-| `status` | Draft, reviewed, approved, rejected, or needs_revision. |
+| `drift_check` | The semantic drift risk checked for this field. |
+| `quality_notes` | Notes from rubric review. |
+| `status` | draft, review, approved, active, rejected, or needs_revision. |
 
 Authoring audit fields are not PSV runtime fields. They must be stripped before workbook compilation or package import.
 
@@ -84,4 +91,3 @@ They become relevant later when:
 - preview output is rendered in the browser
 - package rows are promoted and result pages need visual QA
 - full end-to-end result-page checks are performed after workbook import and publish validation
-
