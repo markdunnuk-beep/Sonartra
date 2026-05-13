@@ -1,6 +1,6 @@
 # Premium Language Drift Audit
 
-Generated: 2026-05-13T21:12:58.169Z
+Generated: 2026-05-13T21:17:26.531Z
 
 Overall result: PASS_WITH_WARNINGS
 
@@ -16,7 +16,7 @@ Overall result: PASS_WITH_WARNINGS
 - Generated preview files checked: 8
 - Generated preview rows checked: 14
 - Errors: 0
-- Warnings: 3
+- Warnings: 1
 
 ## Anchor Usage
 
@@ -49,7 +49,7 @@ Overall result: PASS_WITH_WARNINGS
 
 ## Generic/Modular Language Warnings
 
-- GENERIC_PHRASE_REPETITION: Generic phrase "this pattern" appears in 4 final_text values at rows 10, 14, 20, 26.
+- none
 
 ## Repetition Warnings
 
@@ -57,7 +57,7 @@ Overall result: PASS_WITH_WARNINGS
 
 ## Score-Shape Warnings
 
-- SECTION_PAIRING_ABSENT: 09_Pattern_Mechanics does not clearly carry paired Process-and-Results interpretation.
+- none
 
 ## List-Section Item Identity Warning
 
@@ -69,8 +69,6 @@ Overall result: PASS_WITH_WARNINGS
 
 ## Warnings
 
-- GENERIC_PHRASE_REPETITION: Generic phrase "this pattern" appears in 4 final_text values at rows 10, 14, 20, 26. (content/authoring/leadership-approach/premium-authoring/field-maps/process_results_people_vision.paired.psv)
-- SECTION_PAIRING_ABSENT: 09_Pattern_Mechanics does not clearly carry paired Process-and-Results interpretation. (content/authoring/leadership-approach/premium-authoring/field-maps/process_results_people_vision.paired.psv)
 - LIST_ITEM_IDENTITY_PREVIEW_ONLY: 11/12/13 list item identity currently relies on quality_notes markers for preview generation and must be production-hardened before promotion if required.
 
 ## Recommended Next Actions
