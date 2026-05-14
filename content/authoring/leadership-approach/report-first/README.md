@@ -14,6 +14,10 @@ The first benchmark report is:
 process_results_people_vision
 ```
 
+QA comparison:
+
+- `content/authoring/leadership-approach/report-first/qa/process_results_people_vision-report-first-comparison.md`
+
 No runtime implementation has been changed yet. This track does not add a renderer, schema, import logic, scoring change, admin workflow, result-page behavior, PDF export, workbook compilation, or package PSV change.
 
 The `incoming/` folder is local-only source material for this task. Do not commit `incoming/` or any files under it.
