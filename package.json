@@ -20,6 +20,7 @@
     "authoring:compile-package:dry-run": "tsx scripts/authoring/compile-assessment-package.ts --dry-run",
     "authoring:audit-premium-language-drift": "tsx scripts/authoring/audit-premium-language-drift.ts",
     "authoring:generate-premium-result-psv": "tsx scripts/authoring/generate-premium-result-psv.ts",
+    "authoring:render-report-first-preview": "tsx scripts/authoring/render-report-first-preview.ts",
     "authoring:render-premium-result-preview": "tsx scripts/authoring/render-premium-result-preview.ts",
     "authoring:validate-premium-field-map": "tsx scripts/authoring/validate-premium-field-map.ts",
     "prove:flow-state-ranked-pattern": "tsx scripts/assessment-packages/prove-flow-state-ranked-pattern-fixture.ts",
