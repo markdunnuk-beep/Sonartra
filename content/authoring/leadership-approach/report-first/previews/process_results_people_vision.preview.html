@@ -40,10 +40,19 @@ h1 { font-size: clamp(2.7rem, 6vw, 5rem); line-height: 0.98; margin: 0 0 1.5rem;
 .report-section h2 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 1rem; }
 .report-section h3 { color: var(--accent); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.95rem; letter-spacing: 0.05em; margin: 1.35rem 0 0.4rem; }
 p { margin: 0 0 1rem; }
+ul, ol { padding-left: 1.4rem; margin: 0 0 1rem; }
+li { margin: 0.35rem 0; }
 table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.94rem; }
 th, td { border-bottom: 1px solid var(--line); padding: 0.75rem; text-align: left; vertical-align: top; }
 th { color: var(--accent); font-weight: 600; }
 .signal-line { font-family: ui-sans-serif, system-ui, sans-serif; color: var(--muted); margin: 0.25rem 0; }
+.signal-stack { display: grid; gap: 0.75rem; margin: 1rem 0; }
+.signal-row { background: rgba(255,255,255,0.035); border: 1px solid var(--line); border-radius: 8px; padding: 0.9rem; }
+.signal-row strong { display: block; color: var(--accent); font-family: ui-sans-serif, system-ui, sans-serif; }
+.signal-row span { display: block; color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.92rem; margin-top: 0.15rem; }
+.signal-row p { margin: 0.45rem 0 0; }
+.content-card, .prompt-group { background: rgba(255,255,255,0.035); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+.pull-quote { margin: 0; border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--text); }
 .cta { background: var(--panel-soft); border: 1px solid var(--line); border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
 .appendix { margin-top: 3rem; padding: 1.25rem; border: 1px dashed var(--line); color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.88rem; }
 @media (max-width: 860px) { .shell { display: block; padding: 2rem 1rem; } .rail { position: static; margin-bottom: 2rem; } h1 { font-size: 2.7rem; } }
@@ -233,6 +242,7 @@ th { color: var(--accent); font-weight: 600; }
 </section>
 <aside class="appendix" aria-label="Authoring preview appendix">
 <strong>Authoring-only static preview appendix</strong>
+<p>Source type: markdown</p>
 <p>Source: content/authoring/leadership-approach/report-first/canonical-reports/process_results_people_vision.md</p>
 <p>Editorial QA Notes stripped from reader output: not present</p>
 <p>Detected sections: Editorial introduction, Pattern at a glance, Evidence behind your result, Key insight, Chapter 1 — How your leadership creates value, Chapter 2 — How others experience your leadership, Chapter 3 — Decision behaviour, Chapter 4 — Communication behaviour, Chapter 5 — What happens under pressure, Chapter 6 — The strength of this pattern, Chapter 7 — Where the pattern can tighten, Chapter 8 — How People expands your leadership, Chapter 9 — How Vision expands your leadership, Chapter 10 — Development focus, Closing synthesis, Final line, PDF export CTA</p>

@@ -3,11 +3,54 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export type ReportFirstPreviewFormat = 'html' | 'md';
+export type ReportFirstPreviewInputFormat = 'markdown' | 'payload';
+
+type TableColumn = {
+  readonly key: string;
+  readonly label: string;
+  readonly align?: 'left' | 'right' | 'center';
+};
+
+type TableCell = {
+  readonly text: string;
+};
+
+type ReportFirstBlock =
+  | { readonly type: 'paragraph'; readonly text: string }
+  | { readonly type: 'quote'; readonly text: string; readonly attribution?: string }
+  | { readonly type: 'pull_quote'; readonly text: string; readonly attribution?: string }
+  | { readonly type: 'table'; readonly columns: readonly TableColumn[]; readonly rows: readonly (readonly TableCell[])[] }
+  | { readonly type: 'ordered_list'; readonly items: readonly string[] }
+  | { readonly type: 'unordered_list'; readonly items: readonly string[] }
+  | { readonly type: 'prompt_group'; readonly title?: string; readonly prompts: readonly string[] }
+  | { readonly type: 'insight_card'; readonly title?: string; readonly text: string }
+  | { readonly type: 'strength_card'; readonly title: string; readonly text: string; readonly linkedSignals?: readonly string[] }
+  | {
+      readonly type: 'tightening_card';
+      readonly title: string;
+      readonly text: string;
+      readonly whyItMatters: string;
+      readonly rangeToAdd: string;
+      readonly linkedSignals?: readonly string[];
+    }
+  | {
+      readonly type: 'development_action';
+      readonly title: string;
+      readonly text: string;
+      readonly useCases: readonly string[];
+      readonly whyItMatters: string;
+      readonly linkedSignals?: readonly string[];
+    }
+  | { readonly type: 'evidence_panel'; readonly evidence: ReportFirstPayload['evidence'] }
+  | { readonly type: 'signal_stack'; readonly signals: readonly RankedSignal[] }
+  | { readonly type: 'callout'; readonly title?: string; readonly text: string; readonly tone?: string }
+  | { readonly type: 'divider' };
 
 export type ReportFirstSection = {
   readonly id: string;
   readonly heading: string;
   readonly content: string;
+  readonly blocks?: readonly ReportFirstBlock[];
 };
 
 export type ReportFirstPreviewModel = {
@@ -24,18 +67,118 @@ export type ReportFirstPreviewModel = {
   readonly pdfCta: ReportFirstSection;
   readonly editorialQaNotesDetected: boolean;
   readonly editorialQaNotesLength: number;
+  readonly appendix?: ReportFirstPreviewAppendix;
 };
 
 type RenderReportFirstPreviewOptions = {
   readonly inputPath: string;
   readonly outPath: string;
   readonly format: ReportFirstPreviewFormat;
+  readonly inputFormat: ReportFirstPreviewInputFormat;
 };
 
 type MutableRenderReportFirstPreviewOptions = {
   inputPath?: string;
   outPath?: string;
   format?: ReportFirstPreviewFormat;
+  inputFormat?: ReportFirstPreviewInputFormat;
+};
+
+type ReportFirstPreviewAppendix = {
+  readonly sourceType: ReportFirstPreviewInputFormat;
+  readonly sourcePath: string;
+  readonly contractName?: string;
+  readonly reportKey?: string;
+  readonly patternKey?: string;
+  readonly adminNotesExcluded?: boolean;
+  readonly generatedFrom?: string;
+};
+
+type RankedSignal = {
+  readonly rank: number;
+  readonly signalKey: string;
+  readonly signalLabel: string;
+  readonly roleLabel?: string;
+  readonly roleSummary?: string;
+};
+
+type ScoreRow = {
+  readonly signalKey: string;
+  readonly signalLabel: string;
+  readonly normalizedPercent: number;
+};
+
+type ReportFirstPayload = {
+  readonly metadata: {
+    readonly payloadVersion: 1;
+    readonly contractName: 'report_first_canonical_payload_v1';
+    readonly generatedAt: string;
+    readonly assessmentVersionId: string;
+    readonly mode: 'single_domain_ranked_pattern';
+    readonly reportModel: 'report_first_canonical';
+  };
+  readonly assessment: {
+    readonly key: string;
+    readonly title: string;
+    readonly version: string;
+    readonly description?: string;
+  };
+  readonly attempt: {
+    readonly attemptId: string;
+    readonly completedAt: string;
+    readonly answeredQuestionCount: number;
+    readonly totalQuestionCount: number;
+  };
+  readonly scoring: {
+    readonly patternKey: string;
+    readonly scoreShape?: string;
+    readonly rankedSignals: readonly RankedSignal[];
+    readonly normalizedScores: readonly ScoreRow[];
+    readonly rawScores?: readonly ScoreRow[];
+    readonly scoreShapeCapturedButNotLanguageDriving: boolean;
+    readonly scoringMethod: 'option_signal_weights';
+    readonly normalizationMethod: string;
+  };
+  readonly report: {
+    readonly reportKey: string;
+    readonly patternKey: string;
+    readonly reportTitle: string;
+    readonly hero: { readonly title: string; readonly subtitle?: string; readonly resultStatement?: string };
+    readonly opening: readonly ReportFirstBlock[];
+    readonly keyInsight: ReportFirstBlock;
+    readonly chapters: readonly {
+      readonly chapterKey: string;
+      readonly chapterNumber: number;
+      readonly title: string;
+      readonly railLabel: string;
+      readonly summary?: string;
+      readonly blocks: readonly ReportFirstBlock[];
+      readonly readerFacing: boolean;
+    }[];
+    readonly closing: {
+      readonly synthesis: readonly ReportFirstBlock[];
+      readonly finalLine: string;
+    };
+    readonly pdf: {
+      readonly title: string;
+      readonly body: string;
+      readonly buttonLabel?: string;
+    };
+    readonly readerNavigation?: readonly { readonly id: string; readonly label: string; readonly targetChapterKey?: string }[];
+  };
+  readonly evidence: {
+    readonly title: string;
+    readonly rankedSignalEvidence: readonly RankedSignal[];
+    readonly scoreRows: readonly ScoreRow[];
+    readonly explanatoryNote: string;
+  };
+  readonly diagnostics: {
+    readonly sourceReportKey: string;
+    readonly sourceAssessmentVersionId: string;
+    readonly adminNotesExcluded: boolean;
+    readonly warningList: readonly string[];
+    readonly generatedFrom: string;
+  };
 };
 
 const sectionHeadings = [
@@ -209,6 +352,184 @@ function validateReaderFacingText(model: ReportFirstPreviewModel): void {
   }
 }
 
+function assertPayload(value: unknown): asserts value is ReportFirstPayload {
+  if (!value || typeof value !== 'object') {
+    throw new Error('Payload fixture must be a JSON object.');
+  }
+
+  const payload = value as Partial<ReportFirstPayload>;
+  const missing = ['metadata', 'assessment', 'attempt', 'scoring', 'report', 'evidence', 'diagnostics'].filter(
+    (key) => !(key in payload),
+  );
+  if (missing.length > 0) {
+    throw new Error(`Payload fixture missing required top-level key(s): ${missing.join(', ')}`);
+  }
+
+  if (payload.metadata?.contractName !== 'report_first_canonical_payload_v1') {
+    throw new Error('Payload fixture contractName must be report_first_canonical_payload_v1.');
+  }
+
+  if (!payload.report?.hero?.title) {
+    throw new Error('Payload fixture missing report.hero.title.');
+  }
+
+  if (!payload.evidence?.scoreRows?.length) {
+    throw new Error('Payload fixture missing evidence.scoreRows.');
+  }
+
+  if (!payload.report.chapters || payload.report.chapters.length === 0) {
+    throw new Error('Payload fixture has no report.chapters.');
+  }
+}
+
+function textFromBlocks(blocks: readonly ReportFirstBlock[]): string {
+  return blocks
+    .map((block) => {
+      switch (block.type) {
+        case 'paragraph':
+        case 'quote':
+        case 'pull_quote':
+        case 'insight_card':
+        case 'callout':
+          return block.text;
+        case 'table':
+          return [
+            block.columns.map((column) => column.label).join(' '),
+            ...block.rows.map((row) => row.map((cell) => cell.text).join(' ')),
+          ].join('\n');
+        case 'ordered_list':
+        case 'unordered_list':
+          return block.items.join('\n');
+        case 'prompt_group':
+          return [block.title, ...block.prompts].filter(Boolean).join('\n');
+        case 'strength_card':
+          return `${block.title}\n${block.text}`;
+        case 'tightening_card':
+          return `${block.title}\n${block.text}\n${block.whyItMatters}\n${block.rangeToAdd}`;
+        case 'development_action':
+          return `${block.title}\n${block.text}\n${block.useCases.join(', ')}\n${block.whyItMatters}`;
+        case 'evidence_panel':
+          return block.evidence.explanatoryNote;
+        case 'signal_stack':
+          return block.signals.map((signal) => `${signal.rank}. ${signal.signalLabel}`).join('\n');
+        case 'divider':
+          return '';
+      }
+    })
+    .join('\n')
+    .trim();
+}
+
+function evidenceBlocks(evidence: ReportFirstPayload['evidence']): readonly ReportFirstBlock[] {
+  return [
+    {
+      type: 'signal_stack',
+      signals: evidence.rankedSignalEvidence,
+    },
+    {
+      type: 'table',
+      columns: [
+        { key: 'signal', label: 'Signal' },
+        { key: 'score', label: 'Normalised score', align: 'right' },
+      ],
+      rows: evidence.scoreRows.map((row) => [
+        { text: row.signalLabel },
+        { text: `${row.normalizedPercent}%` },
+      ]),
+    },
+    {
+      type: 'paragraph',
+      text: evidence.explanatoryNote,
+    },
+  ];
+}
+
+export function parseReportFirstPayload(source: string, sourcePath = 'payload.json'): ReportFirstPreviewModel {
+  const parsed = JSON.parse(source) as unknown;
+  assertPayload(parsed);
+
+  const payload = parsed;
+  const evidence = evidenceBlocks(payload.evidence);
+  const chapters = payload.report.chapters
+    .filter((chapter) => chapter.readerFacing)
+    .map((chapter) => ({
+      id: chapter.chapterKey,
+      heading: `Chapter ${chapter.chapterNumber} — ${chapter.title}`,
+      content: textFromBlocks(chapter.blocks),
+      blocks: chapter.blocks,
+    }));
+
+  if (chapters.length === 0) {
+    throw new Error('Payload fixture has no reader-facing chapters.');
+  }
+
+  const model: ReportFirstPreviewModel = {
+    reportTitle: payload.report.reportTitle,
+    heroTitle: payload.report.hero.title,
+    openingSummary: textFromBlocks(payload.report.opening),
+    editorialIntroduction: {
+      id: 'editorial-introduction',
+      heading: 'Editorial introduction',
+      content: '',
+      blocks: payload.report.opening,
+    },
+    patternAtAGlance: {
+      id: 'pattern-at-a-glance',
+      heading: 'Pattern at a glance',
+      content: textFromBlocks([{ type: 'signal_stack', signals: payload.evidence.rankedSignalEvidence }]),
+      blocks: [{ type: 'signal_stack', signals: payload.evidence.rankedSignalEvidence }],
+    },
+    evidence: {
+      id: 'evidence-behind-your-result',
+      heading: payload.evidence.title,
+      content: textFromBlocks(evidence),
+      blocks: evidence,
+    },
+    keyInsight: {
+      id: 'key-insight',
+      heading: 'Key insight',
+      content: textFromBlocks([payload.report.keyInsight]),
+      blocks: [payload.report.keyInsight],
+    },
+    chapters,
+    closingSynthesis: {
+      id: 'closing-synthesis',
+      heading: 'Closing synthesis',
+      content: textFromBlocks(payload.report.closing.synthesis),
+      blocks: payload.report.closing.synthesis,
+    },
+    finalLine: {
+      id: 'final-line',
+      heading: 'Final line',
+      content: payload.report.closing.finalLine,
+      blocks: [{ type: 'paragraph', text: payload.report.closing.finalLine }],
+    },
+    pdfCta: {
+      id: 'pdf-export-cta',
+      heading: 'PDF export CTA',
+      content: [payload.report.pdf.title, payload.report.pdf.body, payload.report.pdf.buttonLabel].filter(Boolean).join('\n\n'),
+      blocks: [
+        { type: 'paragraph', text: payload.report.pdf.title },
+        { type: 'paragraph', text: payload.report.pdf.body },
+      ],
+    },
+    editorialQaNotesDetected: false,
+    editorialQaNotesLength: 0,
+    appendix: {
+      sourceType: 'payload',
+      sourcePath,
+      contractName: payload.metadata.contractName,
+      reportKey: payload.report.reportKey,
+      patternKey: payload.report.patternKey,
+      adminNotesExcluded: payload.diagnostics.adminNotesExcluded,
+      generatedFrom: payload.diagnostics.generatedFrom,
+    },
+  };
+
+  validateReaderFacingText(model);
+  return model;
+}
+
 export function parseReportFirstMarkdown(source: string): ReportFirstPreviewModel {
   const { readerSource, qaNotes } = stripEditorialQaNotes(source);
   const lines = nonEmptyLines(readerSource);
@@ -360,6 +681,75 @@ function renderMarkdownBlock(source: string): string {
   return html.join('\n');
 }
 
+function renderBlock(block: ReportFirstBlock): string {
+  switch (block.type) {
+    case 'paragraph':
+      return `<p>${renderInlineMarkdown(block.text)}</p>`;
+    case 'quote':
+      return `<blockquote><p>${renderInlineMarkdown(block.text)}</p>${block.attribution ? `<cite>${escapeHtml(block.attribution)}</cite>` : ''}</blockquote>`;
+    case 'pull_quote':
+      return `<blockquote class="pull-quote"><p>${renderInlineMarkdown(block.text)}</p>${block.attribution ? `<cite>${escapeHtml(block.attribution)}</cite>` : ''}</blockquote>`;
+    case 'table':
+      return [
+        '<table>',
+        `<thead><tr>${block.columns.map((column) => `<th>${renderInlineMarkdown(column.label)}</th>`).join('')}</tr></thead>`,
+        '<tbody>',
+        ...block.rows.map((row) => `<tr>${row.map((cell) => `<td>${renderInlineMarkdown(cell.text)}</td>`).join('')}</tr>`),
+        '</tbody></table>',
+      ].join('\n');
+    case 'ordered_list':
+      return `<ol>${block.items.map((item) => `<li>${renderInlineMarkdown(item)}</li>`).join('')}</ol>`;
+    case 'unordered_list':
+      return `<ul>${block.items.map((item) => `<li>${renderInlineMarkdown(item)}</li>`).join('')}</ul>`;
+    case 'prompt_group':
+      return [
+        '<div class="prompt-group">',
+        block.title ? `<h3>${escapeHtml(block.title)}</h3>` : '',
+        `<ul>${block.prompts.map((prompt) => `<li>${renderInlineMarkdown(prompt)}</li>`).join('')}</ul>`,
+        '</div>',
+      ].join('\n');
+    case 'insight_card':
+      return `<div class="content-card">${block.title ? `<h3>${escapeHtml(block.title)}</h3>` : ''}<p>${renderInlineMarkdown(block.text)}</p></div>`;
+    case 'strength_card':
+      return `<div class="content-card strength-card"><h3>${escapeHtml(block.title)}</h3><p>${renderInlineMarkdown(block.text)}</p></div>`;
+    case 'tightening_card':
+      return [
+        '<div class="content-card tightening-card">',
+        `<h3>${escapeHtml(block.title)}</h3>`,
+        `<p>${renderInlineMarkdown(block.text)}</p>`,
+        `<p><strong>Why it matters:</strong> ${renderInlineMarkdown(block.whyItMatters)}</p>`,
+        `<p><strong>Range to add:</strong> ${renderInlineMarkdown(block.rangeToAdd)}</p>`,
+        '</div>',
+      ].join('\n');
+    case 'development_action':
+      return [
+        '<div class="content-card development-action">',
+        `<h3>${escapeHtml(block.title)}</h3>`,
+        `<p>${renderInlineMarkdown(block.text)}</p>`,
+        `<p><strong>Use this in:</strong> ${renderInlineMarkdown(block.useCases.join(', '))}</p>`,
+        `<p><strong>Why it matters:</strong> ${renderInlineMarkdown(block.whyItMatters)}</p>`,
+        '</div>',
+      ].join('\n');
+    case 'evidence_panel':
+      return renderBlocks(evidenceBlocks(block.evidence));
+    case 'signal_stack':
+      return `<div class="signal-stack">${block.signals
+        .map(
+          (signal) =>
+            `<div class="signal-row"><strong>${signal.rank}. ${escapeHtml(signal.signalLabel)}</strong>${signal.roleLabel ? `<span>${escapeHtml(signal.roleLabel)}</span>` : ''}${signal.roleSummary ? `<p>${renderInlineMarkdown(signal.roleSummary)}</p>` : ''}</div>`,
+        )
+        .join('')}</div>`;
+    case 'callout':
+      return `<div class="content-card callout">${block.title ? `<h3>${escapeHtml(block.title)}</h3>` : ''}<p>${renderInlineMarkdown(block.text)}</p></div>`;
+    case 'divider':
+      return '<hr />';
+  }
+}
+
+function renderBlocks(blocks: readonly ReportFirstBlock[]): string {
+  return blocks.map((block) => renderBlock(block)).join('\n');
+}
+
 function renderReadingRail(model: ReportFirstPreviewModel): string {
   const railItems = [
     ['Overview', 'overview'],
@@ -379,7 +769,7 @@ function renderSection(section: ReportFirstSection, className = 'report-section'
   return [
     `<section id="${escapeHtml(section.id)}" class="${className}">`,
     `<h2>${escapeHtml(section.heading)}</h2>`,
-    renderMarkdownBlock(section.content),
+    section.blocks ? renderBlocks(section.blocks) : renderMarkdownBlock(section.content),
     '</section>',
   ].join('\n');
 }
@@ -428,10 +818,19 @@ h1 { font-size: clamp(2.7rem, 6vw, 5rem); line-height: 0.98; margin: 0 0 1.5rem;
 .report-section h2 { font-size: 1.75rem; line-height: 1.2; margin: 0 0 1rem; }
 .report-section h3 { color: var(--accent); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.95rem; letter-spacing: 0.05em; margin: 1.35rem 0 0.4rem; }
 p { margin: 0 0 1rem; }
+ul, ol { padding-left: 1.4rem; margin: 0 0 1rem; }
+li { margin: 0.35rem 0; }
 table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.94rem; }
 th, td { border-bottom: 1px solid var(--line); padding: 0.75rem; text-align: left; vertical-align: top; }
 th { color: var(--accent); font-weight: 600; }
 .signal-line { font-family: ui-sans-serif, system-ui, sans-serif; color: var(--muted); margin: 0.25rem 0; }
+.signal-stack { display: grid; gap: 0.75rem; margin: 1rem 0; }
+.signal-row { background: rgba(255,255,255,0.035); border: 1px solid var(--line); border-radius: 8px; padding: 0.9rem; }
+.signal-row strong { display: block; color: var(--accent); font-family: ui-sans-serif, system-ui, sans-serif; }
+.signal-row span { display: block; color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.92rem; margin-top: 0.15rem; }
+.signal-row p { margin: 0.45rem 0 0; }
+.content-card, .prompt-group { background: rgba(255,255,255,0.035); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+.pull-quote { margin: 0; border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--text); }
 .cta { background: var(--panel-soft); border: 1px solid var(--line); border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
 .appendix { margin-top: 3rem; padding: 1.25rem; border: 1px dashed var(--line); color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.88rem; }
 @media (max-width: 860px) { .shell { display: block; padding: 2rem 1rem; } .rail { position: static; margin-bottom: 2rem; } h1 { font-size: 2.7rem; } }`,
@@ -450,7 +849,7 @@ th { color: var(--accent); font-weight: 600; }
     `<div class="subtitle">${renderMarkdownBlock(model.openingSummary)}</div>`,
     '</header>',
     renderSection(model.evidence, 'report-section panel'),
-    `<section id="${escapeHtml(model.keyInsight.id)}" class="insight"><h2>${escapeHtml(model.keyInsight.heading)}</h2>${renderMarkdownBlock(model.keyInsight.content)}</section>`,
+    `<section id="${escapeHtml(model.keyInsight.id)}" class="insight"><h2>${escapeHtml(model.keyInsight.heading)}</h2>${model.keyInsight.blocks ? renderBlocks(model.keyInsight.blocks) : renderMarkdownBlock(model.keyInsight.content)}</section>`,
     renderSection(model.editorialIntroduction),
     renderSection(model.patternAtAGlance),
     ...model.chapters.map((chapter) => renderSection(chapter)),
@@ -459,8 +858,16 @@ th { color: var(--accent); font-weight: 600; }
     renderSection(model.pdfCta, 'cta'),
     '<aside class="appendix" aria-label="Authoring preview appendix">',
     '<strong>Authoring-only static preview appendix</strong>',
-    `<p>Source: ${escapeHtml(sourcePath)}</p>`,
+    `<p>Source type: ${escapeHtml(model.appendix?.sourceType ?? 'markdown')}</p>`,
+    `<p>Source: ${escapeHtml(model.appendix?.sourcePath ?? sourcePath)}</p>`,
+    ...(model.appendix?.contractName ? [`<p>Contract: ${escapeHtml(model.appendix.contractName)}</p>`] : []),
+    ...(model.appendix?.reportKey ? [`<p>Report key: ${escapeHtml(model.appendix.reportKey)}</p>`] : []),
+    ...(model.appendix?.patternKey ? [`<p>Pattern key: ${escapeHtml(model.appendix.patternKey)}</p>`] : []),
+    ...(model.appendix?.generatedFrom ? [`<p>Generated from: ${escapeHtml(model.appendix.generatedFrom)}</p>`] : []),
     `<p>Editorial QA Notes stripped from reader output: ${model.editorialQaNotesDetected ? 'yes' : 'not present'}</p>`,
+    ...(model.appendix?.adminNotesExcluded !== undefined
+      ? [`<p>Admin notes excluded from reader output: ${model.appendix.adminNotesExcluded ? 'yes' : 'no'}</p>`]
+      : []),
     `<p>Detected sections: ${escapeHtml(
       [
         model.editorialIntroduction.heading,
@@ -538,7 +945,10 @@ export function renderReportFirstMarkdownPreview(model: ReportFirstPreviewModel,
 
 export async function renderReportFirstPreview(options: RenderReportFirstPreviewOptions): Promise<string> {
   const source = await readFile(options.inputPath, 'utf8');
-  const model = parseReportFirstMarkdown(source);
+  const model =
+    options.inputFormat === 'payload'
+      ? parseReportFirstPayload(source, options.inputPath)
+      : parseReportFirstMarkdown(source);
   const rendered =
     options.format === 'md'
       ? renderReportFirstMarkdownPreview(model, options.inputPath)
@@ -577,6 +987,15 @@ function parseArgs(argv: readonly string[]): RenderReportFirstPreviewOptions {
       continue;
     }
 
+    if (arg === '--input-format') {
+      if (value !== 'markdown' && value !== 'payload') {
+        throw new Error('--input-format must be markdown or payload.');
+      }
+      options.inputFormat = value;
+      index += 1;
+      continue;
+    }
+
     throw new Error(`Unsupported argument: ${arg}`);
   }
 
@@ -588,6 +1007,7 @@ function parseArgs(argv: readonly string[]): RenderReportFirstPreviewOptions {
     inputPath: options.inputPath,
     outPath: options.outPath,
     format: options.format ?? 'html',
+    inputFormat: options.inputFormat ?? (options.inputPath.endsWith('.json') ? 'payload' : 'markdown'),
   };
 }
 
