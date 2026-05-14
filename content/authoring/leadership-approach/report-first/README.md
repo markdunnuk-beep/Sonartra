@@ -18,6 +18,7 @@ Additional full canonical report drafts:
 
 - `content/authoring/leadership-approach/report-first/canonical-reports/results_process_people_vision.md`
 - `content/authoring/leadership-approach/report-first/canonical-reports/people_process_results_vision.md`
+- `content/authoring/leadership-approach/report-first/canonical-reports/vision_people_process_results.md`
 
 QA comparison:
 

@@ -100,6 +100,8 @@ Update after RF4: `results_process_people_vision` has now been expanded into a f
 
 Update after RF5: `people_process_results_vision` has now been expanded into a full canonical report draft at `content/authoring/leadership-approach/report-first/canonical-reports/people_process_results_vision.md`. Manual editorial QA is required before treating it as benchmark-approved. This remains an authoring proof only and is not production implementation.
 
+Update after RF6: `vision_people_process_results` has now been expanded into a full canonical report draft at `content/authoring/leadership-approach/report-first/canonical-reports/vision_people_process_results.md`. Manual editorial QA is required before treating it as benchmark-approved. This remains an authoring proof only and is not production implementation. The Vision-led report is the strongest test of whether report-first authoring can remain concrete for future-facing patterns.
+
 ## 11. Decision Status
 
 `REPORT_FIRST_AUTHORING_REPEATABILITY_SUPPORTED`
