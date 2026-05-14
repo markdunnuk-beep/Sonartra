@@ -98,6 +98,8 @@ Recommended next step: expand the strongest new brief, `results_process_people_v
 
 Update after RF4: `results_process_people_vision` has now been expanded into a full canonical report draft at `content/authoring/leadership-approach/report-first/canonical-reports/results_process_people_vision.md`. Manual editorial QA is still required before treating it as benchmark-approved. This remains an authoring proof only and is not production implementation.
 
+Update after RF5: `people_process_results_vision` has now been expanded into a full canonical report draft at `content/authoring/leadership-approach/report-first/canonical-reports/people_process_results_vision.md`. Manual editorial QA is required before treating it as benchmark-approved. This remains an authoring proof only and is not production implementation.
+
 ## 11. Decision Status
 
 `REPORT_FIRST_AUTHORING_REPEATABILITY_SUPPORTED`
