@@ -24,6 +24,7 @@ QA comparison:
 
 - `content/authoring/leadership-approach/report-first/qa/process_results_people_vision-report-first-comparison.md`
 - `content/authoring/leadership-approach/report-first/qa/report-first-authoring-repeatability-check.md`
+- `content/authoring/leadership-approach/report-first/qa/report-first-proof-summary-and-decision-gate.md`
 
 Draft canonical report briefs:
 
