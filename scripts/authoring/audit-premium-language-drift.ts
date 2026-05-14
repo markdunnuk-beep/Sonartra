@@ -13,6 +13,13 @@ import {
 
 type FieldMapRow = Record<(typeof premiumFieldMapRequiredColumns)[number], string>;
 type FindingSeverity = 'error' | 'warning';
+type PremiumLanguageDriftOverallResult = 'PASS' | 'PASS_WITH_WARNINGS' | 'FAIL';
+type MutablePremiumLanguageDriftAuditOptions = {
+  dossierPath?: string;
+  fieldMapPath?: string;
+  generatedDir?: string;
+  outPath?: string;
+};
 
 export type PremiumLanguageDriftFinding = {
   readonly severity: FindingSeverity;
@@ -33,7 +40,7 @@ export type PremiumLanguageDriftAuditOptions = {
 };
 
 export type PremiumLanguageDriftAuditResult = {
-  readonly overallResult: 'PASS' | 'PASS_WITH_WARNINGS' | 'FAIL';
+  readonly overallResult: PremiumLanguageDriftOverallResult;
   readonly findings: readonly PremiumLanguageDriftFinding[];
   readonly report: string;
   readonly counts: {
@@ -798,8 +805,9 @@ export async function auditPremiumLanguageDrift(
 
   const errors = findings.filter((finding) => finding.severity === 'error').length;
   const warnings = findings.filter((finding) => finding.severity === 'warning').length;
-  const overallResult = errors > 0 ? 'FAIL' : warnings > 0 ? 'PASS_WITH_WARNINGS' : 'PASS';
-  const resultWithoutReport = {
+  const overallResult: PremiumLanguageDriftOverallResult =
+    errors > 0 ? 'FAIL' : warnings > 0 ? 'PASS_WITH_WARNINGS' : 'PASS';
+  const resultWithoutReport: Omit<PremiumLanguageDriftAuditResult, 'report'> = {
     overallResult,
     findings,
     counts: {
@@ -820,7 +828,7 @@ export async function auditPremiumLanguageDrift(
 }
 
 function parseArgs(argv: readonly string[]): PremiumLanguageDriftAuditOptions {
-  const options: Partial<PremiumLanguageDriftAuditOptions> = {};
+  const options: MutablePremiumLanguageDriftAuditOptions = {};
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];

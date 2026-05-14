@@ -47,6 +47,10 @@ const premiumResultSections = [
 ] as const;
 
 type PremiumResultSectionKey = (typeof premiumResultSections)[number];
+type PremiumResultListSectionKey = Extract<
+  PremiumResultSectionKey,
+  '11_Strengths' | '12_Narrowing' | '13_Application'
+>;
 
 const sectionOrder = new Map<PremiumResultSectionKey, number>(
   premiumResultSections.map((sectionKey, index) => [sectionKey, index]),
@@ -101,7 +105,7 @@ const scoreShapeSections = new Set<PremiumResultSectionKey>([
   '14_Closing_Integration',
 ]);
 
-const listSections = new Set<PremiumResultSectionKey>([
+const listSections = new Set<PremiumResultListSectionKey>([
   '11_Strengths',
   '12_Narrowing',
   '13_Application',
@@ -269,12 +273,17 @@ function buildScoreShapeRows(
   );
 }
 
-function listItemMarker(sectionKey: PremiumResultSectionKey, row: PremiumFieldMapRow): string {
-  const expectedPrefix = {
+function isListSection(sectionKey: PremiumResultSectionKey): sectionKey is PremiumResultListSectionKey {
+  return listSections.has(sectionKey as PremiumResultListSectionKey);
+}
+
+function listItemMarker(sectionKey: PremiumResultListSectionKey, row: PremiumFieldMapRow): string {
+  const expectedPrefixes: Record<PremiumResultListSectionKey, string> = {
     '11_Strengths': 'strength',
     '12_Narrowing': 'narrowing',
     '13_Application': 'application',
-  }[sectionKey];
+  };
+  const expectedPrefix = expectedPrefixes[sectionKey];
   const match = row.quality_notes.match(new RegExp(`^(${expectedPrefix}_[1-3])$`));
 
   if (!match?.[1]) {
@@ -287,7 +296,7 @@ function listItemMarker(sectionKey: PremiumResultSectionKey, row: PremiumFieldMa
 }
 
 function buildListRows(
-  sectionKey: PremiumResultSectionKey,
+  sectionKey: PremiumResultListSectionKey,
   rows: readonly PremiumFieldMapRow[],
   domainKey: string,
 ): OutputRow[] {
@@ -353,7 +362,7 @@ export function generatePremiumResultPsvFromRows(
     const sectionRows = rowsToEmit.filter((row) => row.section_key === sectionKey);
     const outputRows = scoreShapeSections.has(sectionKey)
       ? buildScoreShapeRows(sectionKey, sectionRows, domainKey)
-      : listSections.has(sectionKey)
+      : isListSection(sectionKey)
         ? buildListRows(sectionKey, sectionRows, domainKey)
         : [];
     assertNoPipeValues(outputRows, sectionKey);

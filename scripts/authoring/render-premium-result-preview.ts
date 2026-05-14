@@ -11,6 +11,13 @@ export type RenderPremiumResultPreviewOptions = {
   readonly outPath?: string;
 };
 
+type MutableRenderPremiumResultPreviewOptions = {
+  generatedDir?: string;
+  patternKey?: string;
+  scoreShape?: string;
+  outPath?: string;
+};
+
 export type RenderPremiumResultPreviewResult = {
   readonly markdown: string;
   readonly sectionRowCounts: Record<string, number>;
@@ -353,7 +360,7 @@ export async function renderPremiumResultPreview(
 }
 
 function parseArgs(argv: readonly string[]): RenderPremiumResultPreviewOptions {
-  const options: Partial<RenderPremiumResultPreviewOptions> = {};
+  const options: MutableRenderPremiumResultPreviewOptions = {};
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
