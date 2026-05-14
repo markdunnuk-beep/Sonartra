@@ -10,24 +10,24 @@ Editorial introduction
 
 Your leadership approach is led by Vision and strengthened by People. You are likely to create confidence by lifting attention from the immediate task to the larger direction: what the work is for, what may become possible, what needs to change, and why effort now is worth sustaining.
 
-This is not inspiration for its own sake. Your pattern is future-facing, but it is also concerned with whether people can believe in and carry the direction. People sits close behind Vision, which means you are likely to care whether the horizon is understood, trusted, discussed, and made meaningful for the people who will have to move toward it.
+This is not inspiration for its own sake. Your pattern is future-facing, but it is also concerned with whether people can believe in and carry the direction. People sits close behind Vision, which means you are likely to care whether the future direction is understood, trusted, discussed, and made meaningful for the people who will have to move toward it.
 
 That can make your leadership especially valuable in strategy translation, change leadership, innovation, organisational renewal, culture work, long-range planning, team alignment, and moments where people need confidence in a direction before every step is known. You can help work avoid becoming small, reactive, or trapped in immediate activity.
 
 The development edge is that the future may sometimes become compelling before the route is concrete enough. People may understand why the work matters but still need sharper priorities, clearer ownership, operating rhythm, decision follow-through, and delivery evidence. Process and Results matter because they help the direction become usable and visible in real work.
 
-Your most effective leadership does not reduce the horizon or make the future less ambitious. It makes the horizon more workable. The strongest version of this pattern uses Vision and People to create shared belief, then brings Process and Results in early enough that the future becomes organised, owned, evidence-backed, and capable of visible progress.
+Your most effective leadership does not reduce the future or make the direction less ambitious. It makes the strategic frame more workable. The strongest version of this pattern uses Vision and People to create shared belief, then brings Process and Results in early enough that the future becomes organised, owned, evidence-backed, and capable of visible progress.
 
 Pattern at a glance
 
 | Rank | Role in your pattern | What it means in practice |
 |---|---|---|
-| 1 | Vision — the first horizon | You tend to lead first by naming direction, future context, possibility, meaning, and strategic intent. |
+| 1 | Vision — the first future direction | You tend to lead first by naming direction, future context, possibility, meaning, and strategic intent. |
 | 2 | People — the shared belief route | People helps direction become relatable, trusted, discussed, and carried by others. |
 | 3 | Process — the practical architecture | Process expands your leadership by turning direction into sequence, operating rhythm, ownership, standards, and coordination. |
 | 4 | Results — the traction extension | Results expands the pattern by making the future visible through decisions, progress, evidence, and measurable movement. |
 
-This is a horizon-and-belief pattern. At its strongest, it helps people see what the work is for without letting the future remain too broad to organise, prioritise, or prove through action.
+This is a future-direction-and-belief pattern. At its strongest, it helps people see what the work is for without letting the future remain too broad to organise, prioritise, or prove through action.
 
 Evidence behind your result
 
@@ -66,7 +66,7 @@ That attention can be commercially valuable because organisations often lose ene
 
 This pattern is especially useful in strategy translation, change leadership, prioritisation, innovation, culture work, customer proposition shifts, operating model change, organisational renewal, and long-range planning. These are settings where people need more than a task list. They need a credible reason to commit effort before every step is fully visible.
 
-People is important because it makes the direction carryable. Without People, Vision can sound distant from the work others actually experience. With People close behind it, your leadership can turn a future direction into something people can discuss, question, trust, and locate themselves inside. The horizon becomes less like a statement and more like a shared orientation.
+People is important because it makes the direction carryable. Without People, Vision can sound distant from the work others actually experience. With People close behind it, your leadership can turn a future direction into something people can discuss, question, trust, and locate themselves inside. The strategic frame becomes less like a statement and more like a shared orientation.
 
 When this pattern is working well, people experience direction with meaning. They understand why the work matters, what it is trying to create, and why their contribution is part of something larger than short-term delivery. The present becomes easier to endure because the future has been made more visible.
 
@@ -78,9 +78,9 @@ In meetings, you may be the person who asks what the decision means for the futu
 
 The possible tension is specificity. People may value the direction and still need a clearer route. They may understand the story but not know what should happen next week. They may believe in the future but need sharper priorities, stronger sequencing, named ownership, and clearer evidence that progress is being made.
 
-This does not mean your leadership is impractical. It means your first move is often to create meaning and shared belief. That is useful, especially when people are discouraged, fragmented, or too close to immediate activity. It can become too narrow when the real leadership requirement is not only to name the horizon, but to make the route usable enough for people to move with confidence.
+This does not mean your leadership is impractical. It means your first move is often to create meaning and shared belief. That is useful, especially when people are discouraged, fragmented, or too close to immediate activity. It can become too narrow when the real leadership requirement is not only to name the larger direction, but to make the route usable enough for people to move with confidence.
 
-The mature version of this pattern keeps the horizon, but makes the horizon operational. It translates future direction into priorities, decisions, rhythms, owners, and evidence without draining the meaning from the work.
+The mature version of this pattern keeps the future direction, but makes it operational. It translates future direction into priorities, decisions, rhythms, owners, and evidence without draining the meaning from the work.
 
 Chapter 3 — Decision behaviour
 
@@ -115,7 +115,7 @@ People adds warmth, relevance, and inclusion to this communication style. You ma
 
 The limitation is that communication may stay too much in the frame of meaning. People may understand the direction and still need the operating detail: what changes, what stays stable, what happens next, who owns which part, where the first decision sits, and how progress will be recognised.
 
-For this pattern, communication becomes strongest when it moves from horizon to route:
+For this pattern, communication becomes strongest when it moves from direction to route:
 
 Here is the direction we are choosing.
 Here is why it matters for the work, the customer, or the organisation.
@@ -132,7 +132,7 @@ Under pressure, your leadership may tighten toward future framing, belief, and p
 
 This can be valuable. When a team is discouraged, reactive, fragmented, or losing meaning, your instinct to return to the larger direction can steady people. You may remind the group what matters, why the current pressure is not the whole story, and what future capability the work is still trying to build.
 
-The tightening risk is inspiration without enough operating grip. People may understand the purpose but still need concrete prioritisation, clearer sequencing, named ownership, immediate action, or delivery evidence. They may agree with the horizon while still feeling unsure about what should happen first.
+The tightening risk is inspiration without enough operating grip. People may understand the purpose but still need concrete prioritisation, clearer sequencing, named ownership, immediate action, or delivery evidence. They may agree with the larger direction while still feeling unsure about what should happen first.
 
 This pressure pattern can produce belief without enough proof. A team may feel reconnected to meaning, but still not know how to act. A change may sound important, but the first practical sequence may remain vague. The group may leave with renewed confidence, then lose that confidence again if the route is not made visible quickly.
 
@@ -150,7 +150,7 @@ Chapter 6 — The strength of this pattern
 
 1. Strategic orientation
 
-You help teams understand the larger direction behind the work. You are likely to notice when activity has become detached from purpose, when a decision needs a longer horizon, or when short-term pressure is making the group forget what it is trying to build.
+You help teams understand the larger direction behind the work. You are likely to notice when activity has become detached from purpose, when a decision needs a longer-term view, or when short-term pressure is making the group forget what it is trying to build.
 
 This strength is valuable because orientation changes how people judge trade-offs. It helps prioritisation, strategy translation, change leadership, and decision follow-through become more coherent. People can connect individual tasks to a broader direction rather than treating each demand as separate.
 
@@ -172,7 +172,7 @@ Chapter 7 — Where the pattern can tighten
 
 The future may be compelling before the practical path is clear enough. People may understand the destination or strategic intent, but not yet know the sequence, owner, rhythm, or next decision that will make it usable.
 
-Why it matters: direction becomes easier to trust when people can see how it will be worked through. Without a route, even a strong horizon can begin to feel distant.
+Why it matters: direction becomes easier to trust when people can see how it will be worked through. Without a route, even a strong future can begin to feel distant.
 
 Range to add: Bring Process in by naming the first sequence, operating rhythm, owner, standard, and review point. Make the direction practical enough for next week's work.
 
@@ -231,7 +231,7 @@ Chapter 10 — Development focus
 
 The development work is not to reduce your future orientation. It is to make the future operational, owned, and evidence-backed.
 
-1. Turn the horizon into the next route
+1. Turn the future direction into the next route
 
 After naming direction, define the first practical sequence of work. Identify the next decision, the first owner, the initial rhythm, and the point where progress will be reviewed.
 
@@ -277,11 +277,11 @@ Your leadership is valuable because it helps people see what the work is for.
 
 You are likely to bring future context where work has become reactive, meaning where activity has become fragmented, and possibility where people are too close to immediate pressure. The Vision-and-People combination gives this pattern its force. You are not simply describing an abstract future; you are helping people understand why the direction matters and how they can locate themselves inside it.
 
-The main tightening risk is that future direction can remain compelling but under-specified. People may believe in the horizon without knowing the first route. They may understand why the work matters without seeing who owns the next step. They may feel the purpose without enough evidence that the organisation is acting on it.
+The main tightening risk is that future direction can remain compelling but under-specified. People may believe in the direction without knowing the first route. They may understand why the work matters without seeing who owns the next step. They may feel the purpose without enough evidence that the organisation is acting on it.
 
 Your growth is not to become less visionary. It is to make the future more operational. Bring Process in early enough that direction gains sequence, rhythm, ownership, and standards. Bring Results in clearly enough that belief becomes visible progress and measurable evidence. Use People to keep the direction human, so practical discipline does not drain the meaning from the work.
 
-At your best, you give people more than a future to believe in. You give them a horizon they can understand, a route they can organise around, and enough visible proof to keep moving toward it together.
+At your best, you give people more than a future to believe in. You give them a direction they can understand, a route they can organise around, and enough visible proof to keep moving toward it together.
 
 Final line
 
@@ -297,11 +297,11 @@ This report is designed as a reference document. Save it, revisit it before impo
 
 Initial quality estimate: 9.0/10 benchmark-candidate draft.
 
-How this differs from process_results_people_vision: The Process-led benchmark begins with structure, sequence, and work becoming easier to hold together. This Vision-led draft begins with future context, strategic meaning, and the horizon that makes the work worth organising. Process appears as range that gives the horizon practical architecture rather than as the first leadership move.
+How this differs from process_results_people_vision: The Process-led benchmark begins with structure, sequence, and work becoming easier to hold together. This Vision-led draft begins with future context, strategic meaning, and the future direction that makes the work worth organising. Process appears as range that gives the direction practical architecture rather than as the first leadership move.
 
 How this differs from results_process_people_vision: The Results-led benchmark begins with action, closure, traction, and visible progress. This Vision-led draft begins before action, with the future direction that gives progress its meaning. Results appears as the traction extension that proves the direction is becoming real rather than as the main leadership route.
 
-How this differs from people_process_results_vision: The People-led benchmark begins with trust, ownership, participation, and the human conditions that make work carryable. This Vision-led draft begins with the horizon itself, then uses People to make that horizon shared and human. Its pressure pattern tightens toward future framing and belief, not protection and cohesion.
+How this differs from people_process_results_vision: The People-led benchmark begins with trust, ownership, participation, and the human conditions that make work carryable. This Vision-led draft begins with the future direction itself, then uses People to make that direction shared and human. Its pressure pattern tightens toward future framing and belief, not protection and cohesion.
 
 Main risk to watch in manual QA: The report should not read as generic inspirational, purpose-led, or strategy-language content. Manual QA should check that Vision remains concrete through operating rhythm, ownership, prioritisation, delivery evidence, and decision follow-through.
 
