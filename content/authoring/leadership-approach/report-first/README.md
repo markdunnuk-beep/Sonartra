@@ -14,6 +14,10 @@ The first benchmark report is:
 process_results_people_vision
 ```
 
+Additional full canonical report drafts:
+
+- `content/authoring/leadership-approach/report-first/canonical-reports/results_process_people_vision.md`
+
 QA comparison:
 
 - `content/authoring/leadership-approach/report-first/qa/process_results_people_vision-report-first-comparison.md`

@@ -96,6 +96,8 @@ The three briefs show that the model can produce distinct Leadership Approach in
 
 Recommended next step: expand the strongest new brief, `results_process_people_vision`, into a full canonical report, then perform a side-by-side QA against the Process-led benchmark before creating schema, renderer, import, PDF, package, or runtime work.
 
+Update after RF4: `results_process_people_vision` has now been expanded into a full canonical report draft at `content/authoring/leadership-approach/report-first/canonical-reports/results_process_people_vision.md`. Manual editorial QA is still required before treating it as benchmark-approved. This remains an authoring proof only and is not production implementation.
+
 ## 11. Decision Status
 
 `REPORT_FIRST_AUTHORING_REPEATABILITY_SUPPORTED`
