@@ -26,6 +26,11 @@ QA comparison:
 - `content/authoring/leadership-approach/report-first/qa/report-first-authoring-repeatability-check.md`
 - `content/authoring/leadership-approach/report-first/qa/report-first-proof-summary-and-decision-gate.md`
 
+Schema proposal:
+
+- `content/authoring/leadership-approach/report-first/schema/report-first-canonical-payload-v1.md`
+- `content/authoring/leadership-approach/report-first/schema/report-first-schema-decision-note.md`
+
 Draft canonical report briefs:
 
 - `content/authoring/leadership-approach/report-first/canonical-report-briefs/`
