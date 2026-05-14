@@ -32,6 +32,11 @@ Schema proposal:
 - `content/authoring/leadership-approach/report-first/schema/report-first-canonical-payload-v1.md`
 - `content/authoring/leadership-approach/report-first/schema/report-first-schema-decision-note.md`
 
+Implementation planning:
+
+- `content/authoring/leadership-approach/report-first/implementation/report-first-production-implementation-plan.md`
+- `content/authoring/leadership-approach/report-first/implementation/report-first-production-task-sequence.md`
+
 Draft canonical report briefs:
 
 - `content/authoring/leadership-approach/report-first/canonical-report-briefs/`
