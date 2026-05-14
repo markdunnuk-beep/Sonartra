@@ -17,6 +17,11 @@ process_results_people_vision
 QA comparison:
 
 - `content/authoring/leadership-approach/report-first/qa/process_results_people_vision-report-first-comparison.md`
+- `content/authoring/leadership-approach/report-first/qa/report-first-authoring-repeatability-check.md`
+
+Draft canonical report briefs:
+
+- `content/authoring/leadership-approach/report-first/canonical-report-briefs/`
 
 No runtime implementation has been changed yet. This track does not add a renderer, schema, import logic, scoring change, admin workflow, result-page behavior, PDF export, workbook compilation, or package PSV change.
 
