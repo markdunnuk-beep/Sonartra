@@ -20,7 +20,8 @@ export type RankedPatternPublishAuditCategory =
   | 'score_shapes'
   | 'section_definitions'
   | 'result_language'
-  | 'preview_cases';
+  | 'preview_cases'
+  | 'report_first_templates';
 
 export type RankedPatternPublishAuditFinding = {
   readonly severity: RankedPatternPublishAuditSeverity;
@@ -38,6 +39,7 @@ export type RankedPatternPublishAuditInput = {
   readonly db: RankedPatternPersistenceDbClient;
   readonly mode?: 'strict' | 'preview';
   readonly includeWarnings?: boolean;
+  readonly auditReportFirstTemplates?: boolean;
 };
 
 export type RankedPatternPublishAuditSummaryCount = {
@@ -162,6 +164,18 @@ type PreviewCaseRow = {
   readonly status: string | null;
 };
 
+type ReportFirstTemplateRow = {
+  readonly id: string;
+  readonly assessment_version_id: string | null;
+  readonly domain_key: string | null;
+  readonly pattern_key: string | null;
+  readonly report_key: string | null;
+  readonly report_contract: string | null;
+  readonly report_template_json: unknown;
+  readonly content_hash: string | null;
+  readonly status: string | null;
+};
+
 type PersistedRankedPatternState = {
   readonly version: VersionRow | null;
   readonly domains: readonly DomainRow[];
@@ -174,8 +188,10 @@ type PersistedRankedPatternState = {
   readonly sectionDefinitions: readonly SectionDefinitionRow[];
   readonly resultLanguageRows: readonly ResultLanguageRow[];
   readonly previewCases: readonly PreviewCaseRow[];
+  readonly reportFirstTemplates: readonly ReportFirstTemplateRow[];
 };
 
+const reportFirstTemplateContract = 'report_first_canonical_payload_v1';
 const supportedScoreShapeSet = new Set<string>(rankedPatternSupportedScoreShapes);
 const supportedRankPositionSet = new Set<number>(rankedPatternSupportedRankPositions);
 
@@ -226,6 +242,7 @@ const emptySummaryCounts: Readonly<
   section_definitions: Object.freeze({ blocking: 0, warning: 0, info: 0 }),
   result_language: Object.freeze({ blocking: 0, warning: 0, info: 0 }),
   preview_cases: Object.freeze({ blocking: 0, warning: 0, info: 0 }),
+  report_first_templates: Object.freeze({ blocking: 0, warning: 0, info: 0 }),
 });
 
 function textValue(value: string | null | undefined): string | null {
@@ -342,6 +359,7 @@ function permutationKeys(signalKeys: readonly string[]): readonly string[] {
 async function loadPersistedRankedPatternState(
   db: RankedPatternPersistenceDbClient,
   assessmentVersionId: string,
+  loadOptions: { readonly includeReportFirstTemplates: boolean },
 ): Promise<PersistedRankedPatternState> {
   const version = await db.query<VersionRow>(
     `
@@ -481,6 +499,26 @@ async function loadPersistedRankedPatternState(
     `,
     [assessmentVersionId],
   );
+  const reportFirstTemplates = loadOptions.includeReportFirstTemplates
+    ? await db.query<ReportFirstTemplateRow>(
+      `
+      SELECT
+        id,
+        assessment_version_id,
+        domain_key,
+        pattern_key,
+        report_key,
+        report_contract,
+        report_template_json,
+        content_hash,
+        status
+      FROM assessment_report_first_templates
+      WHERE assessment_version_id = $1 AND status = 'active'
+      ORDER BY domain_key, pattern_key, id
+      `,
+      [assessmentVersionId],
+    )
+    : { rows: [] as ReportFirstTemplateRow[] };
 
   return Object.freeze({
     version: version.rows[0] ?? null,
@@ -494,6 +532,7 @@ async function loadPersistedRankedPatternState(
     sectionDefinitions: Object.freeze([...sectionDefinitions.rows]),
     resultLanguageRows: Object.freeze([...resultLanguageRows.rows]),
     previewCases: Object.freeze([...previewCases.rows]),
+    reportFirstTemplates: Object.freeze([...reportFirstTemplates.rows]),
   });
 }
 
@@ -1286,6 +1325,143 @@ function auditPreviewCases(
   }
 }
 
+function auditReportFirstTemplates(
+  state: PersistedRankedPatternState,
+  activePatternKeys: readonly string[],
+  activeDomainKey: string | null,
+  findings: RankedPatternPublishAuditFinding[],
+): void {
+  const patternKeySet = new Set(activePatternKeys);
+  const concreteTemplatePatternKeys = state.reportFirstTemplates
+    .map((template) => textValue(template.pattern_key))
+    .filter((value): value is string => value !== null);
+
+  if (state.reportFirstTemplates.length !== 24) {
+    addBlocking(findings, {
+      code: 'REPORT_FIRST_TEMPLATE_COUNT_INVALID',
+      message: 'Report-first publish readiness requires exactly twenty-four active report-first templates.',
+      category: 'report_first_templates',
+      tableName: 'assessment_report_first_templates',
+      relatedKeys: [String(state.reportFirstTemplates.length)],
+    });
+  }
+
+  const duplicatePatternKeys = duplicateValues(concreteTemplatePatternKeys);
+  if (duplicatePatternKeys.length > 0) {
+    addBlocking(findings, {
+      code: 'REPORT_FIRST_TEMPLATE_DUPLICATE_PATTERN',
+      message: 'Active report-first templates must contain no duplicate pattern_key values.',
+      category: 'report_first_templates',
+      tableName: 'assessment_report_first_templates',
+      relatedKeys: duplicatePatternKeys,
+    });
+  }
+
+  for (const template of state.reportFirstTemplates) {
+    const rowKey = template.pattern_key ?? template.report_key ?? template.id;
+    const requiredFields: readonly { readonly field: string; readonly value: string | null }[] = [
+      { field: 'assessment_version_id', value: template.assessment_version_id },
+      { field: 'domain_key', value: template.domain_key },
+      { field: 'pattern_key', value: template.pattern_key },
+      { field: 'report_key', value: template.report_key },
+      { field: 'report_contract', value: template.report_contract },
+      { field: 'content_hash', value: template.content_hash },
+      { field: 'status', value: template.status },
+    ];
+    const missingFields = requiredFields
+      .filter(({ value }) => !textValue(value))
+      .map(({ field }) => field);
+
+    if (missingFields.length > 0) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_MISSING_REQUIRED_FIELD',
+        message: 'Active report-first templates require assessment_version_id, domain_key, pattern_key, report_key, report_contract, content_hash, and status.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+        relatedKeys: missingFields,
+      });
+    }
+
+    if (template.status !== 'active') {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_STATUS_INVALID',
+        message: 'Report-first publish readiness only accepts active report-first templates.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+        relatedKeys: [template.status ?? 'null'],
+      });
+    }
+
+    if (template.report_contract !== reportFirstTemplateContract) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_INVALID_CONTRACT',
+        message: `Active report-first templates must use ${reportFirstTemplateContract}.`,
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+        relatedKeys: [template.report_contract ?? 'null'],
+      });
+    }
+
+    if (!isNonEmptyObject(template.report_template_json)) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_EMPTY_JSON',
+        message: 'Active report-first templates must contain non-empty report_template_json.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+      });
+    }
+
+    if (!textValue(template.content_hash)) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_MISSING_CONTENT_HASH',
+        message: 'Active report-first templates must store content_hash for deterministic import/change tracking.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+      });
+    }
+
+    if (template.pattern_key && !patternKeySet.has(template.pattern_key)) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_UNKNOWN_PATTERN',
+        message: 'Active report-first template pattern_key must resolve to an active ranked pattern.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+        relatedKeys: [template.pattern_key],
+      });
+    }
+
+    if (activeDomainKey && template.domain_key !== activeDomainKey) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_DOMAIN_MISMATCH',
+        message: 'Active report-first templates must use the assessment version active domain_key.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+        relatedKeys: [template.domain_key ?? 'null', activeDomainKey],
+      });
+    }
+  }
+
+  const templatePatternKeySet = new Set(concreteTemplatePatternKeys);
+  for (const patternKey of patternKeySet) {
+    if (!templatePatternKeySet.has(patternKey)) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_MISSING_FOR_PATTERN',
+        message: 'Every active ranked pattern must have exactly one matching active report-first template.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey: patternKey,
+      });
+    }
+  }
+}
+
 function summaryCounts(
   findings: readonly RankedPatternPublishAuditFinding[],
 ): Readonly<Record<RankedPatternPublishAuditCategory, RankedPatternPublishAuditSummaryCount>> {
@@ -1305,7 +1481,9 @@ function summaryCounts(
 export async function auditRankedPatternAssessmentVersion(
   input: RankedPatternPublishAuditInput,
 ): Promise<RankedPatternPublishAuditResult> {
-  const state = await loadPersistedRankedPatternState(input.db, input.assessmentVersionId);
+  const state = await loadPersistedRankedPatternState(input.db, input.assessmentVersionId, {
+    includeReportFirstTemplates: input.auditReportFirstTemplates === true,
+  });
   const findings: RankedPatternPublishAuditFinding[] = [];
 
   auditMetadata(state, findings);
@@ -1318,6 +1496,9 @@ export async function auditRankedPatternAssessmentVersion(
   auditSectionDefinitions(state, findings);
   auditResultLanguage(state, activeSignals, activePatternKeys, activeDomain?.domain_key ?? null, findings);
   auditPreviewCases(state, activeSignals, activePatternKeys, findings);
+  if (input.auditReportFirstTemplates === true) {
+    auditReportFirstTemplates(state, activePatternKeys, activeDomain?.domain_key ?? null, findings);
+  }
 
   const visibleFindings = input.includeWarnings === false
     ? findings.filter((finding) => finding.severity === 'blocking')

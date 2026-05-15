@@ -6,7 +6,7 @@ import type { RankedPatternPublishAuditFinding } from '@/content/assessment-pack
 import { getDbPool } from '@/lib/server/db';
 
 function usage(): string {
-  return 'Usage: npx tsx scripts/assessment-packages/audit-ranked-pattern-publish.ts --assessment-version-id <id>';
+  return 'Usage: npx tsx scripts/assessment-packages/audit-ranked-pattern-publish.ts --assessment-version-id <id> [--report-first]';
 }
 
 function assessmentVersionIdFromArgs(argv: readonly string[]): string | null {
@@ -39,6 +39,7 @@ export async function runRankedPatternPublishAuditCli(argv: readonly string[]): 
   const result = await auditRankedPatternAssessmentVersion({
     assessmentVersionId,
     db: getDbPool(),
+    auditReportFirstTemplates: argv.includes('--report-first'),
   });
   const categoryLines = Object.entries(result.summaryCountsByCategory)
     .filter(([, counts]) => counts.blocking > 0 || counts.warning > 0 || counts.info > 0)

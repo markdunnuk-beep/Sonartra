@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import {
   auditRankedPatternAssessmentVersion,
@@ -20,6 +21,7 @@ type Fixture = {
   sectionDefinitions: readonly Record<string, unknown>[];
   resultLanguageRows: readonly Record<string, unknown>[];
   previewCases: readonly Record<string, unknown>[];
+  reportFirstTemplates: readonly Record<string, unknown>[];
 };
 
 const signalKeys = ['signal_a', 'signal_b', 'signal_c', 'signal_d'] as const;
@@ -32,6 +34,7 @@ const patternScoreShapeSections = [
   'closing_integration',
 ] as const;
 const patternOnlySections = ['strengths', 'narrowing', 'application'] as const;
+const reportFirstContract = 'report_first_canonical_payload_v1';
 
 function allPatterns(): readonly {
   readonly patternKey: string;
@@ -56,6 +59,26 @@ function allPatterns(): readonly {
     }
   }
   return patterns;
+}
+
+function reportFirstTemplatesFor(
+  patterns: readonly { readonly patternKey: string }[] = allPatterns(),
+): readonly Record<string, unknown>[] {
+  return patterns.map(({ patternKey }, index) => ({
+    id: `report-first-template-${index + 1}`,
+    assessment_version_id: 'version-1',
+    domain_key: 'domain_key',
+    pattern_key: patternKey,
+    report_key: `leadership_approach_${patternKey}`,
+    report_contract: reportFirstContract,
+    report_template_json: {
+      report_key: `leadership_approach_${patternKey}`,
+      pattern_key: patternKey,
+      sections: [{ key: 'opening', blocks: [{ type: 'paragraph', text: `Report ${index + 1}` }] }],
+    },
+    content_hash: `hash-${index + 1}`,
+    status: 'active',
+  }));
 }
 
 function completeFixture(): Fixture {
@@ -232,6 +255,7 @@ function completeFixture(): Fixture {
         status: 'active',
       },
     ],
+    reportFirstTemplates: [],
   };
 }
 
@@ -265,16 +289,22 @@ function dbForFixture(fixture: Fixture): RankedPatternPersistenceDbClient {
         rows = fixture.resultLanguageRows.filter((row) => row.status === 'active');
       } else if (text.includes('FROM assessment_report_preview_cases')) {
         rows = fixture.previewCases.filter((row) => row.status === 'active');
+      } else if (text.includes('FROM assessment_report_first_templates')) {
+        rows = fixture.reportFirstTemplates.filter((row) => row.status === 'active');
       }
       return { rows: rows as readonly T[] };
     },
   };
 }
 
-async function auditFixture(fixture: Fixture): Promise<RankedPatternPublishAuditResult> {
+async function auditFixture(
+  fixture: Fixture,
+  options?: { readonly auditReportFirstTemplates?: boolean },
+): Promise<RankedPatternPublishAuditResult> {
   return auditRankedPatternAssessmentVersion({
     assessmentVersionId: 'version-1',
     db: dbForFixture(fixture),
+    auditReportFirstTemplates: options?.auditReportFirstTemplates,
   });
 }
 
@@ -502,4 +532,152 @@ test('publish audit blocks missing preview case and invalid preview references',
   assert.equal(hasCode(invalid, 'PREVIEW_UNSUPPORTED_SCORE_SHAPE'), true);
   assert.equal(hasCode(invalid, 'PREVIEW_RANKED_SIGNAL_KEYS_INVALID'), true);
   assert.equal(hasCode(invalid, 'PREVIEW_NORMALIZED_SCORES_INVALID'), true);
+});
+
+test('report-first publish audit accepts exactly twenty-four matching active templates', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      reportFirstTemplates: reportFirstTemplatesFor(),
+    })),
+    { auditReportFirstTemplates: true },
+  );
+
+  assert.equal(result.canPublish, true);
+  assert.equal(result.blockingCount, 0);
+  assert.equal(result.summaryCountsByCategory.report_first_templates.blocking, 0);
+});
+
+test('report-first publish audit blocks missing template coverage and fewer than twenty-four active templates', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      reportFirstTemplates: reportFirstTemplatesFor().slice(1),
+    })),
+    { auditReportFirstTemplates: true },
+  );
+
+  assert.equal(result.canPublish, false);
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_COUNT_INVALID'), true);
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_MISSING_FOR_PATTERN'), true);
+});
+
+test('report-first publish audit blocks extra unmatched active templates', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      reportFirstTemplates: [
+        ...reportFirstTemplatesFor(),
+        {
+          ...reportFirstTemplatesFor([{ patternKey: 'signal_a_signal_b_signal_c_signal_d' }])[0],
+          id: 'report-first-template-extra',
+          pattern_key: 'unknown_pattern_key',
+          report_key: 'unknown_pattern_key',
+          content_hash: 'hash-extra',
+        },
+      ],
+    })),
+    { auditReportFirstTemplates: true },
+  );
+
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_COUNT_INVALID'), true);
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_UNKNOWN_PATTERN'), true);
+});
+
+test('report-first publish audit blocks duplicate active template pattern keys', async () => {
+  const templates = reportFirstTemplatesFor();
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      reportFirstTemplates: [
+        ...templates,
+        {
+          ...templates[0],
+          id: 'report-first-template-duplicate',
+          report_key: 'duplicate_report_key',
+          content_hash: 'hash-duplicate',
+        },
+      ],
+    })),
+    { auditReportFirstTemplates: true },
+  );
+
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_DUPLICATE_PATTERN'), true);
+});
+
+test('report-first publish audit blocks invalid report contract', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      reportFirstTemplates: reportFirstTemplatesFor().map((template, index) =>
+        index === 0 ? { ...template, report_contract: 'legacy_contract' } : template,
+      ),
+    })),
+    { auditReportFirstTemplates: true },
+  );
+
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_INVALID_CONTRACT'), true);
+});
+
+test('report-first publish audit blocks empty report template json', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      reportFirstTemplates: reportFirstTemplatesFor().map((template, index) =>
+        index === 0 ? { ...template, report_template_json: {} } : template,
+      ),
+    })),
+    { auditReportFirstTemplates: true },
+  );
+
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_EMPTY_JSON'), true);
+});
+
+test('report-first publish audit blocks missing content hash', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      reportFirstTemplates: reportFirstTemplatesFor().map((template, index) =>
+        index === 0 ? { ...template, content_hash: '' } : template,
+      ),
+    })),
+    { auditReportFirstTemplates: true },
+  );
+
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_MISSING_CONTENT_HASH'), true);
+});
+
+test('report-first publish audit blocks mismatched domain key', async () => {
+  const result = await auditFixture(
+    mutateFixture((fixture) => ({
+      ...fixture,
+      reportFirstTemplates: reportFirstTemplatesFor().map((template, index) =>
+        index === 0 ? { ...template, domain_key: 'other_domain' } : template,
+      ),
+    })),
+    { auditReportFirstTemplates: true },
+  );
+
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_DOMAIN_MISMATCH'), true);
+});
+
+test('publish audit does not require report-first templates for modular ranked-pattern versions', async () => {
+  const result = await auditFixture(completeFixture());
+
+  assert.equal(result.canPublish, true);
+  assert.equal(hasCode(result, 'REPORT_FIRST_TEMPLATE_COUNT_INVALID'), false);
+  assert.equal(result.summaryCountsByCategory.report_first_templates.blocking, 0);
+});
+
+test('publish audit remains independent from result runtime readers and payload assembly', () => {
+  const source = readFileSync(
+    'content/assessment-packages/import-contract/ranked-pattern-publish-audit.ts',
+    'utf8',
+  );
+
+  assert.equal(source.includes('canonical_result_payload'), false);
+  assert.equal(source.includes('@/lib/server/assessment-completion'), false);
+  assert.equal(source.includes('@/lib/server/results'), false);
+  assert.equal(source.includes('@/components/results'), false);
+  assert.equal(/\b(INSERT|UPDATE|DELETE)\b/i.test(source), false);
 });
