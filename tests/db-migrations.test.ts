@@ -777,3 +777,44 @@ test('support cases migration declares native support schema and RLS policies', 
   assert.doesNotMatch(sql, /assessment_ranked_patterns/i);
   assert.doesNotMatch(sql, /option_signal_weights/i);
 });
+
+test('report-first template storage migration declares schema-only template storage', async () => {
+  const sql = await readFile(
+    join(process.cwd(), 'db', 'migrations', '202605150001_report_first_template_storage.sql'),
+    'utf8',
+  );
+
+  assert.match(sql, /CREATE TABLE assessment_report_first_templates/i);
+  assert.match(sql, /id UUID PRIMARY KEY DEFAULT gen_random_uuid\(\)/i);
+  assert.match(sql, /assessment_version_id UUID NOT NULL REFERENCES assessment_versions\(id\) ON DELETE CASCADE/i);
+  assert.match(sql, /domain_key TEXT NOT NULL/i);
+  assert.match(sql, /pattern_key TEXT NOT NULL/i);
+  assert.match(sql, /report_key TEXT NOT NULL/i);
+  assert.match(sql, /report_contract TEXT NOT NULL/i);
+  assert.match(sql, /report_template_json JSONB NOT NULL/i);
+  assert.match(sql, /content_hash TEXT NOT NULL/i);
+  assert.match(sql, /status TEXT NOT NULL CHECK \(status IN \('draft', 'active', 'inactive'\)\)/i);
+  assert.match(sql, /created_by UUID REFERENCES users\(id\) ON DELETE SET NULL/i);
+  assert.match(sql, /import_batch_id UUID REFERENCES assessment_import_batches\(id\) ON DELETE SET NULL/i);
+  assert.match(sql, /created_at TIMESTAMPTZ NOT NULL DEFAULT NOW\(\)/i);
+  assert.match(sql, /updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW\(\)/i);
+
+  assert.match(sql, /assessment_report_first_templates_pattern_key_shape_check/i);
+  assert.match(sql, /pattern_key LIKE '%\\_%\\_%\\_%' ESCAPE '\\' AND pattern_key !~ '\\s'/i);
+
+  assert.match(sql, /CREATE UNIQUE INDEX assessment_report_first_templates_active_version_pattern_key/i);
+  assert.match(sql, /ON assessment_report_first_templates \(assessment_version_id, pattern_key\)/i);
+  assert.match(sql, /WHERE status = 'active'/i);
+  assert.match(sql, /assessment_report_first_templates_version_pattern_status_idx/i);
+  assert.match(sql, /ON assessment_report_first_templates \(assessment_version_id, pattern_key, status\)/i);
+  assert.match(sql, /assessment_report_first_templates_version_contract_status_idx/i);
+  assert.match(sql, /assessment_report_first_templates_import_batch_idx/i);
+
+  assert.doesNotMatch(sql, /\bresults\b/i);
+  assert.doesNotMatch(sql, /\battempts\b/i);
+  assert.doesNotMatch(sql, /\bresponses\b/i);
+  assert.doesNotMatch(sql, /option_signal_weights/i);
+  assert.doesNotMatch(sql, /assessment_result_language_rows/i);
+  assert.doesNotMatch(sql, /CREATE POLICY/i);
+  assert.doesNotMatch(sql, /ENABLE ROW LEVEL SECURITY/i);
+});
