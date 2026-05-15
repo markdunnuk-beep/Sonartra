@@ -48,6 +48,8 @@ export type ReportFirstTemplateBlock =
       readonly whyItMatters: string;
     };
 
+type ReportFirstPromptGroupBlock = Extract<ReportFirstTemplateBlock, { readonly type: 'prompt_group' }>;
+
 export type ReportFirstTemplateSignal = {
   readonly rank: number;
   readonly signalKey: string;
@@ -403,7 +405,11 @@ function numberedBlock(
   };
 }
 
-function collectPromptGroup(sourceLines: readonly string[], startIndex: number, title: string): { block: ReportFirstTemplateBlock; nextIndex: number } {
+function collectPromptGroup(
+  sourceLines: readonly string[],
+  startIndex: number,
+  title: string,
+): { block: ReportFirstPromptGroupBlock; nextIndex: number } {
   const prompts: string[] = [];
   let index = startIndex + 1;
 
