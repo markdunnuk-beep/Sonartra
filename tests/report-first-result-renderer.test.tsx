@@ -283,6 +283,10 @@ test('report-first result renderer uses reader-facing navigation and card labels
   assert.match(renderedText, /Your ranked pattern/);
   assert.match(renderedText, /Process, Results, People, Vision/);
   assert.match(renderedText, /Report guide/);
+  assert.match(renderedText, /light/i);
+  assert.match(renderedText, /Focus/);
+  assert.match(renderedText, /Now reading/);
+  assert.match(renderedText, /Up next/);
   assert.match(renderedText, /People expansion/);
   assert.match(renderedText, /Vision expansion/);
   assert.doesNotMatch(renderedText, /RangeRange/);

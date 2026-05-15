@@ -1,5 +1,22 @@
+'use client';
+
 import Image from 'next/image';
-import type { ReactNode } from 'react';
+import { type MouseEvent, type ReactNode, useEffect, useState } from 'react';
+
+import { DraftFocusModeToggle } from '@/components/draft/draft-focus-mode-toggle';
+import {
+  DraftReadingModeToggle,
+  type DraftReadingMode,
+} from '@/components/draft/draft-reading-mode-toggle';
+import {
+  scrollToResultSection,
+  useActiveResultSectionWithConfig,
+} from '@/hooks/use-active-result-section';
+import {
+  createResultReadingSections,
+  type ResultReadingSectionsConfig,
+  type ResultReadingTopLevelSection,
+} from '@/lib/results/result-reading-sections';
 
 import type {
   ReportFirstCanonicalPayloadV1,
@@ -210,6 +227,24 @@ function buildSections(report: ReportFirstReport): readonly ReportFirstSection[]
   ];
 }
 
+function createReportFirstReadingSectionsConfig(
+  sections: readonly ReportFirstSection[],
+): ResultReadingSectionsConfig {
+  return createResultReadingSections({
+    topLevelSections: sections.map(
+      (section, index) =>
+        ({
+          id: section.id,
+          label: section.label,
+          shortLabel: section.label,
+          level: 'section',
+          order: index + 1,
+          intentPrompt: `Read the ${section.label} section.`,
+        }) satisfies ResultReadingTopLevelSection,
+    ),
+  });
+}
+
 function FieldLabel({ children }: { children: ReactNode }) {
   return (
     <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#32D6B0]/85">
@@ -289,7 +324,7 @@ function SignalStack({
               className={cx(
                 'grid gap-3 rounded-[0.95rem] border p-3 sm:items-center',
                 hasScores
-                  ? 'sm:grid-cols-[minmax(9rem,0.8fr)_minmax(10rem,1fr)_3.75rem]'
+                  ? 'grid-cols-[minmax(0,1fr)_4.25rem] sm:grid-cols-[minmax(7rem,0.72fr)_minmax(0,1fr)_4.25rem]'
                   : 'sm:grid-cols-[minmax(9rem,0.55fr)_minmax(0,1fr)]',
                 isLead ? 'border-[#32D6B0]/32 bg-[#32D6B0]/[0.085]' : 'border-[#F3F1EA]/[0.08] bg-[#202622]/48',
               )}
@@ -308,7 +343,7 @@ function SignalStack({
               </div>
               {hasScores ? (
                 <>
-                  <div className="h-2 overflow-hidden rounded-full bg-[#0E1110]/85 ring-1 ring-[#F3F1EA]/[0.08]">
+                  <div className="order-3 col-span-2 h-2 min-w-0 overflow-hidden rounded-full bg-[#0E1110]/85 ring-1 ring-[#F3F1EA]/[0.08] sm:order-none sm:col-span-1">
                     <div
                       className={cx(
                         'h-full rounded-full',
@@ -319,7 +354,7 @@ function SignalStack({
                       style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
                     />
                   </div>
-                  <p className="font-mono text-xl text-[#F3F1EA] sm:text-right">{percentage}%</p>
+                  <p className="w-[4.25rem] justify-self-end text-right font-mono text-xl text-[#F3F1EA]">{percentage}%</p>
                 </>
               ) : (
                 <p className="text-sm leading-6 text-[#C8CEC7]/82">{signal.roleSummary}</p>
@@ -584,69 +619,195 @@ function ChapterSection({ section }: { section: ReportFirstSection }) {
   );
 }
 
-function ReadingRail({ sections }: { sections: readonly ReportFirstSection[] }) {
+function ReadingRail({
+  activeSectionId,
+  focusMode,
+  onFocusModeToggle,
+  onReadingModeToggle,
+  readingMode,
+  sections,
+  sectionsConfig,
+}: {
+  activeSectionId: string | null;
+  focusMode: boolean;
+  onFocusModeToggle: () => void;
+  onReadingModeToggle: () => void;
+  readingMode: DraftReadingMode;
+  sections: readonly ReportFirstSection[];
+  sectionsConfig: ResultReadingSectionsConfig;
+}) {
+  const activeSectionOrder = activeSectionId
+    ? (sectionsConfig.sectionsById[activeSectionId]?.order ?? null)
+    : null;
+
+  function handleSectionAnchorClick(sectionId: string) {
+    return (event: MouseEvent<HTMLAnchorElement>) => {
+      if (scrollToResultSection(sectionId)) {
+        event.preventDefault();
+      }
+    };
+  }
+
   return (
     <nav
       aria-label="Result reading navigation"
       className="hidden xl:sticky xl:top-[5.7rem] xl:block xl:w-[12rem] xl:shrink-0 xl:self-start"
       data-report-first-reading-rail="true"
     >
-      <div className="rounded-[1.35rem] border border-white/[0.08] bg-[#080A0D]/42 px-3 py-3.5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-[14px]">
-        <div className="mb-4 border-b border-white/[0.08] px-1 pb-3">
+      <div className="report-first-reading-rail-card rounded-[1.35rem] border border-white/[0.08] bg-[#080A0D]/42 px-3 py-3.5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-[14px]">
+        <div className="mb-4 space-y-3 border-b border-white/[0.08] px-1 pb-3">
           <Image
-            src="/images/brand/sonartra-logo-white.svg"
+            src={
+              readingMode === 'light'
+                ? '/images/brand/sonartra-logo-black.svg'
+                : '/images/brand/sonartra-logo-white.svg'
+            }
             alt="Sonartra"
             width={6259}
             height={1529}
-            className="h-auto w-[132px] opacity-85"
+            className="report-first-logo h-auto w-[132px] opacity-85"
+          />
+          <DraftReadingModeToggle
+            className="report-first-reading-toggle w-full justify-center px-2.5 py-2 text-[0.62rem]"
+            mode={readingMode}
+            onToggle={onReadingModeToggle}
+          />
+          <DraftFocusModeToggle
+            active={focusMode}
+            className="report-first-focus-toggle w-full justify-center px-2.5 py-2 text-[0.62rem]"
+            onToggle={onFocusModeToggle}
           />
           <p className="mt-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#32D6B0]/75">
             Report guide
           </p>
         </div>
         <ol className="space-y-0.5" role="list">
-          {sections.map((section, index) => (
-            <li key={section.id}>
-              <a
-                href={`#${section.id}`}
-                className="group grid grid-cols-[1.7rem_minmax(0,1fr)] rounded-[0.85rem] px-2.5 py-2 text-[0.78rem] leading-5 text-[#A8B0AA]/76 outline-none transition hover:bg-white/[0.045] hover:text-[#F5F1EA]/92 focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55"
-              >
-                <span className="font-mono text-[0.63rem] text-[#32D6B0]/52">{String(index + 1).padStart(2, '0')}</span>
-                <span>{section.label}</span>
-              </a>
-            </li>
-          ))}
+          {sections.map((section, index) => {
+            const isActive = activeSectionId === section.id;
+            const isRead = activeSectionOrder !== null && index + 1 < activeSectionOrder && !isActive;
+            const isNext = activeSectionOrder !== null && index + 1 === activeSectionOrder + 1;
+
+            return (
+              <li key={section.id}>
+                <a
+                  href={`#${section.id}`}
+                  aria-current={isActive ? 'step' : undefined}
+                  className={cx(
+                    'report-first-rail-item group relative grid grid-cols-[1.7rem_minmax(0,1fr)] rounded-[0.85rem] px-2.5 py-2 text-[0.78rem] leading-5 text-[#A8B0AA]/76 outline-none transition hover:bg-white/[0.045] hover:text-[#F5F1EA]/92 focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55',
+                    isActive && 'bg-[#32D6B0]/[0.085] text-[#F5F1EA] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]',
+                    isRead && 'text-[#A8B0AA]/58',
+                    isNext && 'text-[#D8D0C3]/82',
+                  )}
+                  data-reading-state={isActive ? 'current' : isNext ? 'next' : isRead ? 'read' : 'idle'}
+                  onClick={handleSectionAnchorClick(section.id)}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cx(
+                      'absolute left-[-0.45rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-white/[0.12] bg-[#101312]',
+                      isActive && 'border-[#32D6B0]/40 bg-[#32D6B0]/28 shadow-[0_0_0_5px_rgba(50,214,176,0.075)]',
+                      isRead && 'border-[#32D6B0]/22 bg-[#32D6B0]/12',
+                    )}
+                  />
+                  <span className={cx('font-mono text-[0.63rem] text-[#32D6B0]/52', isRead && 'text-[#32D6B0]/36')}>
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="min-w-0 space-y-0.5">
+                    <span className="block">{section.label}</span>
+                    {isActive ? (
+                      <span className="report-first-state-label block text-[0.54rem] font-semibold uppercase tracking-[0.2em] text-[#8EF0D9]/78">
+                        Now reading
+                      </span>
+                    ) : null}
+                    {isRead ? (
+                      <span className="report-first-state-label block text-[0.54rem] font-semibold uppercase tracking-[0.2em] text-[#32D6B0]/48">
+                        Read
+                      </span>
+                    ) : null}
+                    {isNext ? (
+                      <span className="report-first-state-label block text-[0.54rem] font-semibold uppercase tracking-[0.2em] text-[#D8D0C3]/58">
+                        Up next
+                      </span>
+                    ) : null}
+                  </span>
+                </a>
+              </li>
+            );
+          })}
         </ol>
       </div>
     </nav>
   );
 }
 
-function MobileSectionNav({ sections }: { sections: readonly ReportFirstSection[] }) {
+function MobileSectionNav({
+  activeSectionId,
+  focusMode,
+  onFocusModeToggle,
+  onReadingModeToggle,
+  readingMode,
+  sections,
+}: {
+  activeSectionId: string | null;
+  focusMode: boolean;
+  onFocusModeToggle: () => void;
+  onReadingModeToggle: () => void;
+  readingMode: DraftReadingMode;
+  sections: readonly ReportFirstSection[];
+}) {
+  function handleSectionAnchorClick(sectionId: string) {
+    return (event: MouseEvent<HTMLAnchorElement>) => {
+      if (scrollToResultSection(sectionId)) {
+        event.preventDefault();
+      }
+    };
+  }
+
   return (
     <nav
       aria-label="Result sections"
-      className="sticky top-3 z-20 mb-4 max-w-full overflow-hidden rounded-[1rem] border border-white/[0.09] bg-[#080A0D]/88 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.22)] backdrop-blur-[14px] xl:hidden"
+      className="report-first-mobile-nav sticky top-3 z-20 mb-4 max-w-full overflow-hidden rounded-[1rem] border border-white/[0.09] bg-[#080A0D]/88 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.22)] backdrop-blur-[14px] xl:hidden"
       data-report-first-mobile-nav="true"
     >
       <div className="mb-2 flex items-center justify-between gap-3 px-1.5 pt-1">
         <Image
-          src="/images/brand/sonartra-logo-white.svg"
+          src={
+            readingMode === 'light'
+              ? '/images/brand/sonartra-logo-black.svg'
+              : '/images/brand/sonartra-logo-white.svg'
+          }
           alt="Sonartra"
           width={6259}
           height={1529}
-          className="h-auto w-[112px] opacity-85"
+          className="report-first-logo h-auto w-[112px] opacity-85"
         />
         <span className="font-mono text-[0.58rem] uppercase tracking-[0.18em] text-[#32D6B0]/72">
           Report guide
         </span>
       </div>
+      <div className="mb-2 flex gap-2">
+        <DraftReadingModeToggle
+          className="report-first-reading-toggle flex-1 justify-center px-2.5 py-2 text-[0.62rem]"
+          mode={readingMode}
+          onToggle={onReadingModeToggle}
+        />
+        <DraftFocusModeToggle
+          active={focusMode}
+          className="report-first-focus-toggle flex-1 justify-center px-2.5 py-2 text-[0.62rem]"
+          onToggle={onFocusModeToggle}
+        />
+      </div>
       <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
         {sections.map((section) => (
           <a
             href={`#${section.id}`}
-            className="shrink-0 rounded-[0.78rem] border border-transparent px-3 py-2 text-sm text-[#C8CEC7]/84 outline-none hover:border-[#32D6B0]/20 hover:bg-[#32D6B0]/[0.07] focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55"
+            aria-current={activeSectionId === section.id ? 'step' : undefined}
+            className={cx(
+              'shrink-0 rounded-[0.78rem] border border-transparent px-3 py-2 text-sm text-[#C8CEC7]/84 outline-none hover:border-[#32D6B0]/20 hover:bg-[#32D6B0]/[0.07] focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55',
+              activeSectionId === section.id && 'border-[#32D6B0]/24 bg-[#32D6B0]/[0.095] text-[#F5F1EA]',
+            )}
             key={section.id}
+            onClick={handleSectionAnchorClick(section.id)}
           >
             {section.label}
           </a>
@@ -657,8 +818,16 @@ function MobileSectionNav({ sections }: { sections: readonly ReportFirstSection[
 }
 
 export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanonicalPayloadV1 }) {
-  const report = toReport(payload.report);
-  const sections = buildSections(report);
+  const [focusMode, setFocusMode] = useState(false);
+  const [readingMode, setReadingMode] = useState<DraftReadingMode>('dark');
+  const [report] = useState(() => toReport(payload.report));
+  const [sections] = useState(() => buildSections(report));
+  const [sectionsConfig] = useState(() => createReportFirstReadingSectionsConfig(sections));
+  const activeSectionIdFromScroll = useActiveResultSectionWithConfig(sectionsConfig);
+  const fallbackSectionId = sections[0]?.id ?? null;
+  const activeSectionId = sectionsConfig.sectionsById[activeSectionIdFromScroll ?? '']
+    ? activeSectionIdFromScroll
+    : fallbackSectionId;
   const openingBlocks = toBlocks(report.opening);
   const persistedEvidenceBlocks = templateEvidenceBlocks(payload);
   const heroTitle = report.hero?.title ?? report.reportTitle ?? payload.assessment.title;
@@ -669,33 +838,202 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
   const completionDate = formatDate(payload.attempt.completedAt ?? payload.metadata.completedAt);
   const rankedPatternSummary = payload.rankedSignals.map((signal) => signal.signalLabel).join(', ');
 
+  function toggleReadingMode() {
+    setReadingMode((current) => (current === 'dark' ? 'light' : 'dark'));
+  }
+
+  function toggleFocusMode() {
+    setFocusMode((current) => !current);
+  }
+
+  useEffect(() => {
+    if (!focusMode) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setFocusMode(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [focusMode]);
+
   return (
     <main
-      className="relative isolate min-h-[calc(100vh-4.25rem)] overflow-x-clip bg-[#080A0D] text-[#F5F1EA]"
+      className="report-first-shell relative isolate min-h-[calc(100vh-4.25rem)] overflow-x-clip bg-[#080A0D] text-[#F5F1EA]"
+      data-focus-mode={focusMode ? 'true' : 'false'}
       data-report-first-result="true"
+      data-reading-mode={readingMode}
     >
+      <style>
+        {`
+          .report-first-shell[data-reading-mode='light'] {
+            background: #F4F1EA !important;
+            color: #17201C !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-backdrop {
+            background: linear-gradient(180deg, #F4F1EA 0%, #ECE7DC 38rem, #F7F4EE 100%) !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-backdrop-glow {
+            background:
+              radial-gradient(circle at 18% 7%, rgba(38, 148, 128, 0.12), transparent 31%),
+              radial-gradient(circle at 84% 12%, rgba(164, 101, 67, 0.11), transparent 29%),
+              linear-gradient(180deg, rgba(244, 241, 234, 0) 0%, rgba(244, 241, 234, 0.62) 68%, rgba(244, 241, 234, 0) 100%) !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-backdrop-grid {
+            background-image:
+              linear-gradient(rgba(23, 32, 28, 0.035) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(23, 32, 28, 0.026) 1px, transparent 1px) !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-backdrop-ring,
+          .report-first-shell[data-reading-mode='light'] .report-first-backdrop-ring-teal {
+            border-color: rgba(23, 32, 28, 0.055) !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] :where(h1, h2, h3, h4, blockquote, strong, dd) {
+            color: #17201C !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] :where(p, dt, li, td) {
+            color: #5D6861 !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-surface,
+          .report-first-shell[data-reading-mode='light'] [data-report-first-signal-stack='true'],
+          .report-first-shell[data-reading-mode='light'] [data-report-first-table-block='true'],
+          .report-first-shell[data-reading-mode='light'] [data-report-first-evidence-table='true'],
+          .report-first-shell[data-reading-mode='light'] [data-report-first-card],
+          .report-first-shell[data-reading-mode='light'] [data-report-first-callout],
+          .report-first-shell[data-reading-mode='light'] [data-report-first-prompt-group] {
+            background: rgba(250, 248, 243, 0.84) !important;
+            border-color: rgba(23, 32, 28, 0.11) !important;
+            box-shadow: 0 18px 48px rgba(58, 51, 42, 0.055), inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-teal-surface,
+          .report-first-shell[data-reading-mode='light'] [data-report-first-pull-quote='true'] {
+            background: linear-gradient(135deg, rgba(38, 148, 128, 0.105), rgba(250, 248, 243, 0.76)) !important;
+            border-color: rgba(38, 148, 128, 0.22) !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-mobile-nav,
+          .report-first-shell[data-reading-mode='light'] .report-first-reading-rail-card {
+            background: rgba(250, 248, 243, 0.86) !important;
+            border-color: rgba(23, 32, 28, 0.11) !important;
+            box-shadow: 0 18px 42px rgba(58, 51, 42, 0.09) !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-reading-toggle,
+          .report-first-shell[data-reading-mode='light'] .report-first-focus-toggle {
+            background: rgba(250, 248, 243, 0.88) !important;
+            border-color: rgba(23, 32, 28, 0.16) !important;
+            color: #17201C !important;
+            box-shadow: 0 14px 34px rgba(58, 51, 42, 0.08) !important;
+          }
+
+          .report-first-rail-item[data-reading-state='current'] {
+            background: rgba(50, 214, 176, 0.085);
+            color: #F5F1EA;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+          }
+
+          .report-first-rail-item[data-reading-state='read'] {
+            color: rgba(168, 176, 170, 0.58);
+          }
+
+          .report-first-rail-item[data-reading-state='next'] {
+            color: rgba(216, 208, 195, 0.82);
+          }
+
+          .report-first-rail-item[data-reading-state='current'] .report-first-state-label {
+            color: rgba(142, 240, 217, 0.78);
+          }
+
+          .report-first-rail-item[data-reading-state='read'] .report-first-state-label {
+            color: rgba(50, 214, 176, 0.48);
+          }
+
+          .report-first-rail-item[data-reading-state='next'] .report-first-state-label {
+            color: rgba(216, 208, 195, 0.58);
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-logo {
+            filter: none !important;
+            opacity: 0.82 !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-rail-item,
+          .report-first-shell[data-reading-mode='light'] .report-first-rail-item span {
+            color: rgba(23, 32, 28, 0.72) !important;
+          }
+
+          .report-first-shell[data-reading-mode='light'] .report-first-rail-item[aria-current='step'] {
+            background: rgba(38, 148, 128, 0.09) !important;
+            color: #17201C !important;
+          }
+
+          @media (min-width: 1280px) {
+            .report-first-shell[data-focus-mode='true'] .report-first-shell-inner {
+              max-width: 1280px !important;
+              padding-top: 1.5rem !important;
+            }
+
+            .report-first-shell[data-focus-mode='true'] .report-first-header-frame {
+              opacity: 0.72;
+            }
+
+            .report-first-shell[data-focus-mode='true'] .report-first-article-grid {
+              grid-template-columns: minmax(0, 1fr) 12rem !important;
+              max-width: 78rem;
+              margin-left: auto;
+              margin-right: auto;
+            }
+          }
+        `}
+      </style>
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-y-0 left-0 z-0 w-full overflow-hidden bg-[linear-gradient(180deg,#090B0F_0%,#101715_38rem,#080A0D_100%)]"
+        className="report-first-backdrop pointer-events-none fixed inset-y-0 left-0 z-0 w-full overflow-hidden bg-[linear-gradient(180deg,#090B0F_0%,#101715_38rem,#080A0D_100%)]"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_7%,rgba(50,214,176,0.13),transparent_31%),radial-gradient(circle_at_84%_12%,rgba(245,241,234,0.07),transparent_29%),linear-gradient(180deg,rgba(8,10,13,0)_0%,rgba(8,10,13,0.72)_68%,rgba(8,10,13,0)_100%)]" />
-        <div className="absolute left-1/2 top-12 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.035]" />
-        <div className="absolute left-1/2 top-24 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full border border-[#32D6B0]/[0.045]" />
-        <div className="absolute inset-x-[-8rem] top-0 h-[42rem] bg-[linear-gradient(rgba(245,241,234,0.016)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
+        <div className="report-first-backdrop-glow absolute inset-0 bg-[radial-gradient(circle_at_18%_7%,rgba(50,214,176,0.13),transparent_31%),radial-gradient(circle_at_84%_12%,rgba(245,241,234,0.07),transparent_29%),linear-gradient(180deg,rgba(8,10,13,0)_0%,rgba(8,10,13,0.72)_68%,rgba(8,10,13,0)_100%)]" />
+        <div className="report-first-backdrop-ring absolute left-1/2 top-12 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.035]" />
+        <div className="report-first-backdrop-ring-teal absolute left-1/2 top-24 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full border border-[#32D6B0]/[0.045]" />
+        <div className="report-first-backdrop-grid absolute inset-x-[-8rem] top-0 h-[42rem] bg-[linear-gradient(rgba(245,241,234,0.016)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_58%,rgba(0,0,0,0.2)_100%)]" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-16 pt-8 sm:px-6 md:pb-24 md:pt-10 lg:px-7 xl:px-8">
-        <MobileSectionNav sections={sections} />
+      <div className="report-first-shell-inner relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-16 pt-8 sm:px-6 md:pb-24 md:pt-10 lg:px-7 xl:px-8">
+        <MobileSectionNav
+          activeSectionId={activeSectionId}
+          focusMode={focusMode}
+          onFocusModeToggle={toggleFocusMode}
+          onReadingModeToggle={toggleReadingMode}
+          readingMode={readingMode}
+          sections={sections}
+        />
 
         <header className="grid gap-7 py-6 md:gap-8 md:py-9">
-          <div className="flex flex-col gap-5 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="report-first-header-frame flex flex-col gap-5 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-center sm:justify-between">
             <Image
-              src="/images/brand/sonartra-logo-white.svg"
+              src={
+                readingMode === 'light'
+                  ? '/images/brand/sonartra-logo-black.svg'
+                  : '/images/brand/sonartra-logo-white.svg'
+              }
               alt="Sonartra"
               width={6259}
               height={1529}
-              className="h-auto w-[156px] opacity-90"
+              className="report-first-logo hidden h-auto w-[156px] opacity-90 sm:block"
               priority
             />
             <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#D8D0C3]/70">
@@ -742,7 +1080,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
             </div>
           </div>
 
-          <aside className="rounded-[1.5rem] border border-white/[0.09] bg-[linear-gradient(135deg,rgba(245,241,234,0.062),rgba(50,214,176,0.045)_46%,rgba(9,11,15,0.45))] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.24)] backdrop-blur-sm md:p-6">
+          <aside className="report-first-surface rounded-[1.5rem] border border-white/[0.09] bg-[linear-gradient(135deg,rgba(245,241,234,0.062),rgba(50,214,176,0.045)_46%,rgba(9,11,15,0.45))] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.24)] backdrop-blur-sm md:p-6">
             <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start">
               <div>
                 <FieldLabel>Result basis</FieldLabel>
@@ -752,7 +1090,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
                 <p className="mt-3 text-sm leading-6 text-[#C8CEC7]/82">
                   This report is selected from your ranked signal order and relative strengths at completion.
                 </p>
-                <p className="mt-4 rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.06] px-4 py-3 text-sm leading-6 text-[#DFFCF4]/86">
+                <p className="report-first-teal-surface mt-4 rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.06] px-4 py-3 text-sm leading-6 text-[#DFFCF4]/86">
                   {rankedPatternSummary}
                 </p>
                 <dl className="mt-5 space-y-3 border-t border-[#F3F1EA]/[0.08] pt-4 text-sm">
@@ -773,7 +1111,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
           </aside>
         </header>
 
-        <div className="grid gap-10 xl:grid-cols-[minmax(0,74rem)_11.5rem] xl:items-start xl:justify-center xl:gap-12 2xl:gap-16">
+        <div className="report-first-article-grid grid gap-10 xl:grid-cols-[minmax(0,74rem)_12rem] xl:items-start xl:justify-center xl:gap-12 2xl:gap-16">
           <article className="min-w-0">
             <SectionShell id="overview" heading="Editorial introduction">
               <BlockGroup blocks={openingBlocks} />
@@ -838,7 +1176,15 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
             ) : null}
           </article>
 
-          <ReadingRail sections={sections} />
+          <ReadingRail
+            activeSectionId={activeSectionId}
+            focusMode={focusMode}
+            onFocusModeToggle={toggleFocusMode}
+            onReadingModeToggle={toggleReadingMode}
+            readingMode={readingMode}
+            sections={sections}
+            sectionsConfig={sectionsConfig}
+          />
         </div>
       </div>
     </main>
