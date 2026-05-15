@@ -248,6 +248,8 @@ test('report-first result renderer preserves structured report blocks in source 
   assert.deepEqual(markerPositions, [...markerPositions].sort((left, right) => left - right));
   assert.match(markup, /data-report-first-table-block="true"/);
   assert.match(markup, /data-report-first-signal-stack="true"/);
+  const patternSectionMarkup = markup.match(/data-report-first-section="pattern"[\s\S]*?data-report-first-section="evidence"/)?.[0] ?? '';
+  assert.doesNotMatch(patternSectionMarkup, /data-report-first-signal-stack="true"/);
   assert.match(markup, /data-report-first-card="strength"/);
   assert.match(markup, /data-report-first-card="tightening"/);
   assert.match(markup, /data-report-first-card="development-action"/);

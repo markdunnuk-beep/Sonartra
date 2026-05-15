@@ -140,6 +140,10 @@ function toBlocks(value: unknown): readonly ReportFirstBlock[] {
   return Array.isArray(value) ? (value as readonly ReportFirstBlock[]) : [];
 }
 
+function removeRepeatedSignalStackBlocks(value: unknown): readonly ReportFirstBlock[] {
+  return toBlocks(value).filter((block) => block.type !== 'signal_stack');
+}
+
 function splitParagraphText(value: string | null): readonly string[] {
   if (!value) {
     return [];
@@ -324,13 +328,13 @@ function SignalStack({
               className={cx(
                 'grid gap-3 rounded-[0.95rem] border p-3 sm:items-center',
                 hasScores
-                  ? 'grid-cols-[minmax(0,1fr)_4.25rem] sm:grid-cols-[minmax(7rem,0.72fr)_minmax(0,1fr)_4.25rem]'
+                  ? 'grid-cols-[minmax(0,1fr)_4.25rem] md:grid-cols-[minmax(12rem,0.8fr)_minmax(0,1fr)_4.25rem]'
                   : 'sm:grid-cols-[minmax(9rem,0.55fr)_minmax(0,1fr)]',
                 isLead ? 'border-[#32D6B0]/32 bg-[#32D6B0]/[0.085]' : 'border-[#F3F1EA]/[0.08] bg-[#202622]/48',
               )}
               data-report-first-signal-row="true"
             >
-              <div className="flex min-w-0 items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3 md:min-w-[12rem]">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#F3F1EA]/14 bg-[#101312]/70 font-mono text-xs text-[#F3F1EA]">
                   {signal.rank}
                 </span>
@@ -343,7 +347,7 @@ function SignalStack({
               </div>
               {hasScores ? (
                 <>
-                  <div className="order-3 col-span-2 h-2 min-w-0 overflow-hidden rounded-full bg-[#0E1110]/85 ring-1 ring-[#F3F1EA]/[0.08] sm:order-none sm:col-span-1">
+                  <div className="col-span-2 row-start-2 h-2 min-w-0 overflow-hidden rounded-full bg-[#0E1110]/85 ring-1 ring-[#F3F1EA]/[0.08] md:col-span-1 md:col-start-2 md:row-start-1">
                     <div
                       className={cx(
                         'h-full rounded-full',
@@ -354,7 +358,7 @@ function SignalStack({
                       style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
                     />
                   </div>
-                  <p className="w-[4.25rem] justify-self-end text-right font-mono text-xl text-[#F3F1EA]">{percentage}%</p>
+                  <p className="col-start-2 row-start-1 w-[4.25rem] justify-self-end text-right font-mono text-xl text-[#F3F1EA] md:col-start-3">{percentage}%</p>
                 </>
               ) : (
                 <p className="text-sm leading-6 text-[#C8CEC7]/82">{signal.roleSummary}</p>
@@ -704,8 +708,8 @@ function ReadingRail({
                   <span
                     aria-hidden="true"
                     className={cx(
-                      'absolute left-[-0.45rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-white/[0.12] bg-[#101312]',
-                      isActive && 'border-[#32D6B0]/40 bg-[#32D6B0]/28 shadow-[0_0_0_5px_rgba(50,214,176,0.075)]',
+                      'absolute left-[-0.42rem] top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-white/[0.12] bg-[#101312]',
+                      isActive && 'border-[#32D6B0]/58 bg-[#32D6B0]/42 shadow-[0_0_0_3px_rgba(50,214,176,0.08)]',
                       isRead && 'border-[#32D6B0]/22 bg-[#32D6B0]/12',
                     )}
                   />
@@ -1022,121 +1026,122 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
           sections={sections}
         />
 
-        <header className="grid gap-7 py-6 md:gap-8 md:py-9">
-          <div className="report-first-header-frame flex flex-col gap-5 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-center sm:justify-between">
-            <Image
-              src={
-                readingMode === 'light'
-                  ? '/images/brand/sonartra-logo-black.svg'
-                  : '/images/brand/sonartra-logo-white.svg'
-              }
-              alt="Sonartra"
-              width={6259}
-              height={1529}
-              className="report-first-logo hidden h-auto w-[156px] opacity-90 sm:block"
-              priority
-            />
-            <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#D8D0C3]/70">
-              <span className="rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5">Premium report</span>
-              <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.075] px-3 py-1.5 text-[#A8F4E1]">
-                Full reference
-              </span>
-            </div>
-          </div>
-
-          <div className="max-w-5xl">
-            <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
-              Sonartra leadership report
-            </span>
-            <p className="mt-7 text-sm font-medium uppercase tracking-[0.18em] text-[#C8CEC7]/70">
-              {payload.domain.title} · Completed {completionDate}
-            </p>
-            <h1 className="mt-3 max-w-5xl text-5xl font-semibold leading-[1.02] text-[#F5F1EA] md:text-7xl">
-              {heroTitle}
-            </h1>
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="mr-1 text-sm font-medium text-[#D8D0C3]/68">Your ranked pattern</span>
-              {payload.rankedSignals.map((signal) => (
-                <span
-                  className="rounded-full border border-white/[0.1] bg-white/[0.045] px-3 py-1.5 text-sm font-semibold text-[#F5F1EA]/88"
-                  key={signal.signalKey}
-                >
-                  {signal.rank}. {signal.signalLabel}
-                </span>
-              ))}
-            </div>
-            <div className="mt-6 max-w-3xl space-y-4">
-              {resultStatementParagraphs.map((paragraph, index) => (
-                <p
-                  className={cx(
-                    'text-xl leading-8 text-[#C8CEC7]/95 md:text-2xl md:leading-10',
-                    index > 0 && 'text-lg text-[#C8CEC7]/82 md:text-xl',
-                  )}
-                  key={paragraph}
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </div>
-
-          <aside className="report-first-surface rounded-[1.5rem] border border-white/[0.09] bg-[linear-gradient(135deg,rgba(245,241,234,0.062),rgba(50,214,176,0.045)_46%,rgba(9,11,15,0.45))] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.24)] backdrop-blur-sm md:p-6">
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start">
-              <div>
-                <FieldLabel>Result basis</FieldLabel>
-                <h2 className="mt-3 text-2xl font-semibold text-[#F5F1EA]">
-                  {payload.topSignal.signalLabel} leads this pattern
-                </h2>
-                <p className="mt-3 text-sm leading-6 text-[#C8CEC7]/82">
-                  This report is selected from your ranked signal order and relative strengths at completion.
-                </p>
-                <p className="report-first-teal-surface mt-4 rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.06] px-4 py-3 text-sm leading-6 text-[#DFFCF4]/86">
-                  {rankedPatternSummary}
-                </p>
-                <dl className="mt-5 space-y-3 border-t border-[#F3F1EA]/[0.08] pt-4 text-sm">
-                  <div className="flex items-center justify-between gap-4">
-                    <dt className="text-[#A8B0AA]">Assessment</dt>
-                    <dd className="text-right text-[#F3F1EA]/88">{payload.assessment.title}</dd>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <dt className="text-[#A8B0AA]">Completed responses</dt>
-                    <dd className="text-right text-[#F3F1EA]/88">
-                      {payload.attempt.answeredQuestionCount} of {payload.attempt.totalQuestionCount}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-              <SignalStack rankedSignals={payload.rankedSignals} scoreRows={payload.normalizedScores} />
-            </div>
-          </aside>
-        </header>
-
         <div className="report-first-article-grid grid gap-10 xl:grid-cols-[minmax(0,74rem)_12rem] xl:items-start xl:justify-center xl:gap-12 2xl:gap-16">
-          <article className="min-w-0">
-            <SectionShell id="overview" heading="Editorial introduction">
-              <BlockGroup blocks={openingBlocks} />
-            </SectionShell>
-
-            {report.patternSummary ? (
-              <SectionShell id="pattern" heading={report.patternSummary.title ?? 'Pattern at a glance'}>
-                <BlockGroup blocks={toBlocks(report.patternSummary.blocks)} />
-              </SectionShell>
-            ) : null}
-
-            <SectionShell id="evidence" heading={payload.evidence.title}>
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-                <SignalStack rankedSignals={payload.evidence.rankedSignalEvidence} scoreRows={payload.evidence.scoreRows} />
-                <div className="space-y-5">
-                  <EvidenceTable rows={payload.evidence.scoreRows} />
-                  <p className="rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#F3F1EA]/[0.035] p-5 text-sm leading-7 text-[#C8CEC7]/88">
-                    {payload.evidence.explanatoryNote}
-                  </p>
-                  {persistedEvidenceBlocks.length > 0 ? (
-                    <BlockGroup blocks={persistedEvidenceBlocks} />
-                  ) : null}
+          <div className="min-w-0">
+            <header className="grid gap-7 py-6 md:gap-8 md:py-9">
+              <div className="report-first-header-frame flex flex-col gap-5 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-center sm:justify-between">
+                <Image
+                  src={
+                    readingMode === 'light'
+                      ? '/images/brand/sonartra-logo-black.svg'
+                      : '/images/brand/sonartra-logo-white.svg'
+                  }
+                  alt="Sonartra"
+                  width={6259}
+                  height={1529}
+                  className="report-first-logo hidden h-auto w-[156px] opacity-90 sm:block"
+                  priority
+                />
+                <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#D8D0C3]/70">
+                  <span className="rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5">Premium report</span>
+                  <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.075] px-3 py-1.5 text-[#A8F4E1]">
+                    Full reference
+                  </span>
                 </div>
               </div>
-            </SectionShell>
+
+              <div className="max-w-5xl">
+                <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
+                  Sonartra leadership report
+                </span>
+                <p className="mt-7 text-sm font-medium uppercase tracking-[0.18em] text-[#C8CEC7]/70">
+                  {payload.domain.title} · Completed {completionDate}
+                </p>
+                <h1 className="mt-3 max-w-5xl text-5xl font-semibold leading-[1.02] text-[#F5F1EA] md:text-7xl">
+                  {heroTitle}
+                </h1>
+                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  <span className="mr-1 text-sm font-medium text-[#D8D0C3]/68">Your ranked pattern</span>
+                  {payload.rankedSignals.map((signal) => (
+                    <span
+                      className="rounded-full border border-white/[0.1] bg-white/[0.045] px-3 py-1.5 text-sm font-semibold text-[#F5F1EA]/88"
+                      key={signal.signalKey}
+                    >
+                      {signal.rank}. {signal.signalLabel}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-6 max-w-3xl space-y-4">
+                  {resultStatementParagraphs.map((paragraph, index) => (
+                    <p
+                      className={cx(
+                        'text-xl leading-8 text-[#C8CEC7]/95 md:text-2xl md:leading-10',
+                        index > 0 && 'text-lg text-[#C8CEC7]/82 md:text-xl',
+                      )}
+                      key={paragraph}
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              <aside className="report-first-surface rounded-[1.5rem] border border-white/[0.09] bg-[linear-gradient(135deg,rgba(245,241,234,0.062),rgba(50,214,176,0.045)_46%,rgba(9,11,15,0.45))] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.24)] backdrop-blur-sm md:p-6">
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start">
+                  <div>
+                    <FieldLabel>Result basis</FieldLabel>
+                    <h2 className="mt-3 text-2xl font-semibold text-[#F5F1EA]">
+                      {payload.topSignal.signalLabel} leads this pattern
+                    </h2>
+                    <p className="mt-3 text-sm leading-6 text-[#C8CEC7]/82">
+                      This report is selected from your ranked signal order and relative strengths at completion.
+                    </p>
+                    <p className="report-first-teal-surface mt-4 rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.06] px-4 py-3 text-sm leading-6 text-[#DFFCF4]/86">
+                      {rankedPatternSummary}
+                    </p>
+                    <dl className="mt-5 space-y-3 border-t border-[#F3F1EA]/[0.08] pt-4 text-sm">
+                      <div className="flex items-center justify-between gap-4">
+                        <dt className="text-[#A8B0AA]">Assessment</dt>
+                        <dd className="text-right text-[#F3F1EA]/88">{payload.assessment.title}</dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <dt className="text-[#A8B0AA]">Completed responses</dt>
+                        <dd className="text-right text-[#F3F1EA]/88">
+                          {payload.attempt.answeredQuestionCount} of {payload.attempt.totalQuestionCount}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <SignalStack rankedSignals={payload.rankedSignals} scoreRows={payload.normalizedScores} />
+                </div>
+              </aside>
+            </header>
+
+            <article className="min-w-0">
+              <SectionShell id="overview" heading="Editorial introduction">
+                <BlockGroup blocks={openingBlocks} />
+              </SectionShell>
+
+              {report.patternSummary ? (
+                <SectionShell id="pattern" heading={report.patternSummary.title ?? 'Pattern at a glance'}>
+                  <BlockGroup blocks={removeRepeatedSignalStackBlocks(report.patternSummary.blocks)} />
+                </SectionShell>
+              ) : null}
+
+              <SectionShell id="evidence" heading={payload.evidence.title}>
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+                  <SignalStack rankedSignals={payload.evidence.rankedSignalEvidence} scoreRows={payload.evidence.scoreRows} />
+                  <div className="space-y-5">
+                    <EvidenceTable rows={payload.evidence.scoreRows} />
+                    <p className="rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#F3F1EA]/[0.035] p-5 text-sm leading-7 text-[#C8CEC7]/88">
+                      {payload.evidence.explanatoryNote}
+                    </p>
+                    {persistedEvidenceBlocks.length > 0 ? (
+                      <BlockGroup blocks={persistedEvidenceBlocks} />
+                    ) : null}
+                  </div>
+                </div>
+              </SectionShell>
 
             {report.keyInsight ? (
               <SectionShell id="key-insight" heading="Key insight">
@@ -1175,6 +1180,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
               </SectionShell>
             ) : null}
           </article>
+          </div>
 
           <ReadingRail
             activeSectionId={activeSectionId}
