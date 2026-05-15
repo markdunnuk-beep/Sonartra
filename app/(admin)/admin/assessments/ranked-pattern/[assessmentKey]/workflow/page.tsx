@@ -136,6 +136,12 @@ export default async function RankedPatternWorkflowPage({
           <ButtonLink href="/admin/assessments/ranked-pattern/workflow">
             Start package-first workflow
           </ButtonLink>
+          <ButtonLink
+            href={`/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow/report-first-preview`}
+            variant="primary"
+          >
+            Preview report-first output
+          </ButtonLink>
           <ButtonLink href={`/admin/assessments/single-domain/${assessment.assessmentKey}/review`}>
             Open legacy builder review
           </ButtonLink>
