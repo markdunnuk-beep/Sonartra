@@ -1,25 +1,11 @@
-import { readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-
 import { rankedPatternSupportedScoreShapes } from '@/content/assessment-packages/import-contract/ranked-pattern-import-manifest';
 import { buildReportFirstCanonicalPayload } from '@/lib/server/report-first-result-assembly';
 import { REPORT_FIRST_TEMPLATE_CONTRACT } from '@/lib/server/report-first-template-storage';
+import { getLeadershipReportFirstPackageCoverage } from '@/lib/server/leadership-report-first-package';
 import type { NormalizedResult, RuntimeResponseSet, ScoreResult } from '@/lib/engine/types';
 import type { SingleDomainResultScoreShape, SingleDomainResultSignal } from '@/lib/types/single-domain-result';
 import type { ReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
-import {
-  compileReportFirstTemplateFromMarkdown,
-  type CompiledReportFirstTemplate,
-} from '@/scripts/authoring/compile-report-first-template';
-
-const reportFirstCanonicalReportsDir = join(
-  process.cwd(),
-  'content',
-  'authoring',
-  'leadership-approach',
-  'report-first',
-  'canonical-reports',
-);
+import type { CompiledReportFirstTemplate } from '@/scripts/authoring/compile-report-first-template';
 
 const defaultPreviewPatternKey = 'process_results_people_vision';
 
@@ -295,24 +281,6 @@ function buildReview(params: {
   };
 }
 
-async function compileAvailableReports(): Promise<readonly CompiledReportFirstTemplate[]> {
-  const entries = await readdir(reportFirstCanonicalReportsDir, { withFileTypes: true });
-  const markdownFiles = entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-    .map((entry) => entry.name)
-    .sort();
-
-  const compiled = await Promise.all(
-    markdownFiles.map(async (fileName) => {
-      const inputPath = join(reportFirstCanonicalReportsDir, fileName);
-      const source = await readFile(inputPath, 'utf8');
-      return compileReportFirstTemplateFromMarkdown(source, { inputPath });
-    }),
-  );
-
-  return compiled;
-}
-
 export async function buildAdminReportFirstPreview(params: {
   readonly assessmentKey: string;
   readonly assessmentTitle: string;
@@ -321,7 +289,8 @@ export async function buildAdminReportFirstPreview(params: {
   readonly patternKey?: string | null;
   readonly scoreShape?: string | null;
 }): Promise<AdminReportFirstPreviewResult> {
-  const compiledReports = await compileAvailableReports();
+  const coverage = await getLeadershipReportFirstPackageCoverage();
+  const compiledReports = coverage.availableTemplates.map((entry) => entry.compiled);
   const options = compiledReports.map((compiled) => ({
     patternKey: compiled.pattern_key,
     reportKey: compiled.report_key,
