@@ -23,6 +23,10 @@ import {
   isSingleDomainResultPayload,
   type SingleDomainResultPayload,
 } from '@/lib/types/single-domain-result';
+import {
+  isReportFirstCanonicalPayloadV1,
+  type ReportFirstCanonicalPayloadV1,
+} from '@/lib/types/report-first-result';
 import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
 export type ResultReadModelServiceDeps = {
@@ -137,15 +141,27 @@ type ReadableResultPayload = Omit<CanonicalResultPayload, 'application'> & {
 type ParsedReadablePayload =
   | {
       mode: 'multi_domain';
+      resultKind: 'canonical';
       payload: ReadableResultPayload;
       hasApplicationPlan: boolean;
       singleDomainResult: null;
+      reportFirstResult: null;
     }
   | {
       mode: 'single_domain';
+      resultKind: 'modular_ranked_pattern';
       payload: SingleDomainResultPayload;
       hasApplicationPlan: false;
       singleDomainResult: SingleDomainResultPayload;
+      reportFirstResult: null;
+    }
+  | {
+      mode: 'single_domain';
+      resultKind: 'report_first';
+      payload: ReportFirstCanonicalPayloadV1;
+      hasApplicationPlan: false;
+      singleDomainResult: null;
+      reportFirstResult: ReportFirstCanonicalPayloadV1;
     };
 
 function createEmptyApplicationSection(): CanonicalResultPayload['application'] {
@@ -217,6 +233,17 @@ function getPersistedPayloadMode(
 
 function parseCanonicalPayload(record: PersistedReadyResultRecord): ParsedReadablePayload {
   if (getPersistedPayloadMode(record) === 'single_domain') {
+    if (isReportFirstCanonicalPayloadV1(record.canonicalResultPayload)) {
+      return {
+        mode: 'single_domain',
+        resultKind: 'report_first',
+        payload: record.canonicalResultPayload,
+        hasApplicationPlan: false,
+        singleDomainResult: null,
+        reportFirstResult: record.canonicalResultPayload,
+      };
+    }
+
     if (!isSingleDomainResultPayload(record.canonicalResultPayload)) {
       throw new AssessmentResultPayloadError(
         `Persisted single-domain result payload is malformed for result ${record.resultId}`,
@@ -225,18 +252,22 @@ function parseCanonicalPayload(record: PersistedReadyResultRecord): ParsedReadab
 
     return {
       mode: 'single_domain',
+      resultKind: 'modular_ranked_pattern',
       payload: record.canonicalResultPayload,
       hasApplicationPlan: false,
       singleDomainResult: record.canonicalResultPayload,
+      reportFirstResult: null,
     };
   }
 
   if (isCanonicalResultPayload(record.canonicalResultPayload)) {
     return {
       mode: 'multi_domain',
+      resultKind: 'canonical',
       payload: normalizeCanonicalPayload(record.canonicalResultPayload),
       hasApplicationPlan: true,
       singleDomainResult: null,
+      reportFirstResult: null,
     };
   }
 
@@ -248,9 +279,11 @@ function parseCanonicalPayload(record: PersistedReadyResultRecord): ParsedReadab
 
   return {
     mode: 'multi_domain',
+    resultKind: 'canonical',
     payload: record.canonicalResultPayload,
     hasApplicationPlan: false,
     singleDomainResult: null,
+    reportFirstResult: null,
   };
 }
 
@@ -655,6 +688,107 @@ function toRankedPatternNormalizedScores(
   );
 }
 
+function toReportFirstRankedSignals(
+  payload: ReportFirstCanonicalPayloadV1,
+): readonly AssessmentResultRankedSignalViewModel[] {
+  const scoresBySignalKey = new Map(payload.normalizedScores.map((score) => [score.signalKey, score]));
+  return Object.freeze(
+    payload.rankedSignals.map((signal) => {
+      const score = scoresBySignalKey.get(signal.signalKey);
+      const normalizedPercentage = score?.normalizedPercent ?? 0;
+      const rawScore = score?.rawScore ?? normalizedPercentage;
+      return {
+        signalId: signal.signalKey,
+        signalKey: signal.signalKey,
+        title: signal.signalLabel,
+        domainId: payload.metadata.domainKey,
+        domainKey: payload.metadata.domainKey,
+        normalizedValue: normalizedPercentage,
+        rawTotal: rawScore,
+        percentage: normalizedPercentage,
+        domainPercentage: normalizedPercentage,
+        isOverlay: false,
+        overlayType: 'none' as const,
+        rank: signal.rank,
+      };
+    }),
+  );
+}
+
+function toReportFirstTopSignal(
+  payload: ReportFirstCanonicalPayloadV1,
+): AssessmentResultTopSignalViewModel {
+  return {
+    signalId: payload.topSignal.signalKey,
+    signalKey: payload.topSignal.signalKey,
+    title: payload.topSignal.signalLabel,
+    domainId: payload.metadata.domainKey,
+    domainKey: payload.metadata.domainKey,
+    normalizedValue: payload.topSignal.normalizedPercentage,
+    rawTotal: payload.topSignal.rawScore,
+    percentage: payload.topSignal.normalizedPercentage,
+    rank: 1,
+  };
+}
+
+function toReportFirstNormalizedScores(
+  payload: ReportFirstCanonicalPayloadV1,
+): readonly AssessmentResultSignalScoreViewModel[] {
+  const rankedSignalsByKey = new Map(toReportFirstRankedSignals(payload).map((signal) => [signal.signalKey, signal]));
+  return Object.freeze(
+    payload.normalizedScores.map((score) => {
+      const rankedSignal = rankedSignalsByKey.get(score.signalKey);
+      const normalizedPercentage = score.normalizedPercent;
+      const rawScore = score.rawScore ?? normalizedPercentage;
+      return {
+        signalId: score.signalKey,
+        signalKey: score.signalKey,
+        signalTitle: score.signalLabel,
+        domainId: payload.metadata.domainKey,
+        domainKey: payload.metadata.domainKey,
+        domainSource: 'signal_group' as const,
+        isOverlay: false,
+        overlayType: 'none' as const,
+        rawTotal: rawScore,
+        normalizedValue: normalizedPercentage,
+        percentage: normalizedPercentage,
+        domainPercentage: normalizedPercentage,
+        rank: rankedSignal?.rank ?? 0,
+      };
+    }),
+  );
+}
+
+function toReportFirstDomainSummary(
+  payload: ReportFirstCanonicalPayloadV1,
+): AssessmentResultDomainViewModel {
+  const signalScores = toReportFirstNormalizedScores(payload);
+  return {
+    domainId: payload.domain.key,
+    domainKey: payload.domain.key,
+    domainTitle: payload.domain.title,
+    domainSource: 'signal_group',
+    rawTotal: signalScores.reduce((sum, signal) => sum + signal.rawTotal, 0),
+    normalizedValue: signalScores.reduce((sum, signal) => sum + signal.normalizedValue, 0),
+    percentage: signalScores.reduce((sum, signal) => sum + signal.percentage, 0),
+    signalScores,
+    signalCount: signalScores.length,
+    answeredQuestionCount: payload.attempt.answeredQuestionCount,
+    rankedSignalIds: Object.freeze(signalScores.map((signal) => signal.signalId)),
+    interpretation: null,
+  };
+}
+
+function getReportFirstSummaryLine(payload: ReportFirstCanonicalPayloadV1): string | null {
+  const report = isRecord(payload.report) ? payload.report : {};
+  const hero = isRecord(report.hero) ? report.hero : {};
+  return (
+    readText(hero, 'resultStatement') ??
+    readText(hero, 'title') ??
+    readText(report, 'reportTitle')
+  );
+}
+
 function getSingleDomainScoreShape(payload: SingleDomainResultPayload): string | null {
   return payload.scoreShape?.value ?? null;
 }
@@ -679,15 +813,20 @@ function getSingleDomainSummaryLine(payload: SingleDomainResultPayload): string 
 function toListItem(record: PersistedReadyResultRecord): AssessmentResultListItem {
   const parsed = parseCanonicalPayload(record);
   const topSignal =
-    parsed.mode === 'single_domain'
+    parsed.resultKind === 'report_first'
+      ? toReportFirstTopSignal(parsed.payload)
+      : parsed.mode === 'single_domain'
       ? toSingleDomainTopSignal(parsed.payload)
       : toTopSignal(parsed.payload as CanonicalResultPayload);
   const signalSnapshot =
-    parsed.mode === 'single_domain'
+    parsed.resultKind === 'report_first'
+      ? toReportFirstRankedSignals(parsed.payload)
+      : parsed.mode === 'single_domain'
       ? toSingleDomainRankedSignals(parsed.payload)
       : toRankedSignals(parsed.payload as CanonicalResultPayload);
 
   return {
+    resultKind: parsed.resultKind,
     resultId: record.resultId,
     attemptId: record.attemptId,
     assessmentId: record.assessmentId,
@@ -701,9 +840,21 @@ function toListItem(record: PersistedReadyResultRecord): AssessmentResultListIte
     topSignal,
     topSignalPercentage: topSignal?.percentage ?? null,
     signalSnapshot: Object.freeze(signalSnapshot.slice(0, 4)),
-    scoreShape: parsed.mode === 'single_domain' ? getSingleDomainScoreShape(parsed.payload) : null,
-    patternKey: parsed.mode === 'single_domain' ? getSingleDomainPatternKey(parsed.payload) : null,
-    summaryLine: parsed.mode === 'single_domain' ? getSingleDomainSummaryLine(parsed.payload) : null,
+    scoreShape: parsed.resultKind === 'report_first'
+      ? parsed.payload.scoreShape.value
+      : parsed.mode === 'single_domain'
+        ? getSingleDomainScoreShape(parsed.payload)
+        : null,
+    patternKey: parsed.resultKind === 'report_first'
+      ? parsed.payload.patternKey
+      : parsed.mode === 'single_domain'
+        ? getSingleDomainPatternKey(parsed.payload)
+        : null,
+    summaryLine: parsed.resultKind === 'report_first'
+      ? getReportFirstSummaryLine(parsed.payload)
+      : parsed.mode === 'single_domain'
+        ? getSingleDomainSummaryLine(parsed.payload)
+        : null,
     resultAvailable: true,
   };
 }
@@ -722,12 +873,90 @@ function tryToListItem(record: PersistedReadyResultRecord): AssessmentResultList
 
 function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResultDetailViewModel {
   const parsed = parseCanonicalPayload(record);
+  if (parsed.resultKind === 'report_first') {
+    const topSignal = toReportFirstTopSignal(parsed.payload);
+    const rankedSignals = toReportFirstRankedSignals(parsed.payload);
+    const normalizedScores = toReportFirstNormalizedScores(parsed.payload);
+    const domainSummary = toReportFirstDomainSummary(parsed.payload);
+    const report = isRecord(parsed.payload.report) ? parsed.payload.report : {};
+    const hero = isRecord(report.hero) ? report.hero : {};
+    const headline = readText(hero, 'title') ?? readText(report, 'reportTitle') ?? '';
+    const narrative = readText(hero, 'resultStatement') ?? '';
+
+    return {
+      resultKind: parsed.resultKind,
+      resultId: record.resultId,
+      attemptId: record.attemptId,
+      assessmentId: record.assessmentId,
+      assessmentKey: record.assessmentKey,
+      mode: parsed.mode,
+      assessmentTitle: record.assessmentTitle,
+      version: record.version,
+      metadata: {
+        assessmentKey: parsed.payload.metadata.assessmentKey,
+        assessmentTitle: parsed.payload.metadata.assessmentTitle,
+        mode: 'single_domain',
+        version: parsed.payload.metadata.version,
+        attemptId: parsed.payload.metadata.attemptId,
+        completedAt: parsed.payload.metadata.completedAt,
+        assessmentDescription: parsed.payload.assessment.description,
+      },
+      intro: { assessmentDescription: parsed.payload.assessment.description },
+      hero: {
+        headline,
+        subheadline: null,
+        summary: narrative || null,
+        narrative,
+        pressureOverlay: null,
+        environmentOverlay: null,
+        primaryPattern: {
+          label: topSignal.title,
+          signalKey: topSignal.signalKey,
+          signalLabel: topSignal.title,
+        },
+        heroPattern: null,
+        domainPairWinners: [],
+        traitTotals: [],
+        matchedPatterns: [],
+        domainHighlights: [],
+      },
+      domains: [],
+      actions: {
+        strengths: [],
+        watchouts: [],
+        developmentFocus: [],
+      },
+      application: null,
+      hasApplicationPlan: false,
+      topSignal,
+      rankedSignals,
+      normalizedScores,
+      scoreShape: parsed.payload.scoreShape.value,
+      patternKey: parsed.payload.patternKey,
+      summaryLine: getReportFirstSummaryLine(parsed.payload),
+      domainSummaries: Object.freeze([domainSummary]),
+      overviewSummary: {
+        headline,
+        narrative,
+      },
+      strengths: [],
+      watchouts: [],
+      developmentFocus: [],
+      diagnostics: parsed.payload.diagnostics as unknown as AssessmentResultDetailViewModel['diagnostics'],
+      singleDomainResult: null,
+      reportFirstResult: parsed.reportFirstResult,
+      createdAt: record.createdAt,
+      generatedAt: record.generatedAt,
+    };
+  }
+
   if (parsed.mode === 'single_domain' && isRankedPatternSingleDomainPayload(parsed.payload)) {
     const topSignal = toRankedPatternTopSignal(parsed.payload);
     const rankedSignals = toRankedPatternRankedSignals(parsed.payload);
     const normalizedScores = toRankedPatternNormalizedScores(parsed.payload);
 
     return {
+      resultKind: parsed.resultKind,
       resultId: record.resultId,
       attemptId: record.attemptId,
       assessmentId: record.assessmentId,
@@ -781,6 +1010,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
       developmentFocus: [],
       diagnostics: parsed.payload.diagnostics as unknown as AssessmentResultDetailViewModel['diagnostics'],
       singleDomainResult: parsed.singleDomainResult,
+      reportFirstResult: null,
       createdAt: record.createdAt,
       generatedAt: record.generatedAt,
     };
@@ -796,6 +1026,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
   const normalizedScores = Object.freeze(domainSummaries.flatMap((domain) => domain.signalScores));
 
   return {
+    resultKind: parsed.resultKind,
     resultId: record.resultId,
     attemptId: record.attemptId,
     assessmentId: record.assessmentId,
@@ -826,6 +1057,7 @@ function toDetailViewModel(record: PersistedReadyResultRecord): AssessmentResult
     developmentFocus: toActionItems(payload.actions.developmentFocus),
     diagnostics: payload.diagnostics,
     singleDomainResult: parsed.singleDomainResult,
+    reportFirstResult: null,
     createdAt: record.createdAt,
     generatedAt: record.generatedAt,
   };

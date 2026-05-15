@@ -1,5 +1,6 @@
 import type { CanonicalResultPayload, ResultDiagnostics } from '@/lib/engine/types';
 import type { AssessmentMode } from '@/lib/types/assessment';
+import type { ReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 
 export type AssessmentResultTopSignalViewModel = {
@@ -79,6 +80,7 @@ export type AssessmentResultActionItemViewModel = {
 };
 
 export type AssessmentResultSummary = {
+  resultKind: 'canonical' | 'modular_ranked_pattern' | 'report_first';
   resultId: string;
   attemptId: string;
   assessmentId: string;
@@ -105,6 +107,7 @@ export type AssessmentResultSignalViewModel =
   | AssessmentResultRankedSignalViewModel;
 
 export type AssessmentResultDetailViewModel = {
+  resultKind: 'canonical' | 'modular_ranked_pattern' | 'report_first';
   resultId: string;
   attemptId: string;
   assessmentId: string;
@@ -135,6 +138,7 @@ export type AssessmentResultDetailViewModel = {
   developmentFocus: readonly AssessmentResultActionItemViewModel[];
   diagnostics: ResultDiagnostics;
   singleDomainResult: SingleDomainResultPayload | null;
+  reportFirstResult: ReportFirstCanonicalPayloadV1 | null;
   createdAt: string;
   generatedAt: string | null;
 };
