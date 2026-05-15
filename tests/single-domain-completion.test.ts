@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
 import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
@@ -15,6 +16,7 @@ import {
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import { buildSingleDomainResultPayload } from '@/lib/server/single-domain-completion';
 import type { AssessmentCompletionPayload } from '@/lib/server/assessment-completion-types';
+import { isReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
 import { isSingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import type {
   ApplicationStatementsRow,
@@ -75,6 +77,7 @@ type RuntimeFixture = {
     assessment_version_id: string;
     assessment_version_tag: string;
     assessment_mode: string | null;
+    result_model_key?: string | null;
   };
   domains: Array<{
     domain_id: string;
@@ -124,6 +127,7 @@ type RuntimeFixture = {
     PAIR_SUMMARIES: PairSummariesRow[];
     APPLICATION_STATEMENTS: ApplicationStatementsRow[];
   };
+  reportFirstTemplates?: Array<Record<string, unknown>>;
 };
 
 const PAIR_KEYS = [
@@ -147,6 +151,83 @@ const APPLICATION_DRIVER_ROLES = [
   ['supporting_context', 3],
   ['range_limitation', 4],
 ] as const;
+
+function rankedPatternKeys(signalKeys: readonly string[]): readonly string[] {
+  const keys: string[] = [];
+  for (const first of signalKeys) {
+    for (const second of signalKeys) {
+      for (const third of signalKeys) {
+        for (const fourth of signalKeys) {
+          if (new Set([first, second, third, fourth]).size === 4) {
+            keys.push([first, second, third, fourth].join('_'));
+          }
+        }
+      }
+    }
+  }
+  return keys;
+}
+
+function reportFirstTemplate(patternKey: string, index: number): Record<string, unknown> {
+  return {
+    id: `report-first-${index + 1}`,
+    assessment_version_id: 'blueprint-version',
+    domain_key: 'leadership-approach',
+    pattern_key: patternKey,
+    report_key: `leadership_${patternKey}`,
+    report_contract: 'report_first_canonical_payload_v1',
+    report_template_json: {
+      metadata: {
+        payloadVersion: 1,
+        contractName: 'report_first_canonical_payload_v1',
+        mode: 'single_domain_ranked_pattern',
+        reportModel: 'report_first_canonical',
+        templateVersion: 1,
+      },
+      reportKey: `leadership_${patternKey}`,
+      patternKey,
+      domainKey: 'leadership-approach',
+      report: {
+        reportKey: `leadership_${patternKey}`,
+        patternKey,
+        reportTitle: `Report ${patternKey}`,
+        hero: { title: `Hero ${patternKey}`, resultStatement: 'Structured report-first result.' },
+        opening: [{ type: 'paragraph', text: `Opening ${patternKey}` }],
+        keyInsight: { type: 'pull_quote', text: 'The report comes from the matching active template.' },
+        chapters: [{
+          chapterKey: 'value_creation',
+          chapterNumber: 1,
+          title: 'How your leadership creates value',
+          railLabel: 'Value',
+          blocks: [{ type: 'paragraph', text: 'Chapter content.' }],
+          readerFacing: true,
+        }],
+        closing: {
+          synthesis: [{ type: 'paragraph', text: 'Closing synthesis.' }],
+          finalLine: 'Final line.',
+        },
+        pdf: { title: 'PDF export', body: 'PDF export is gated.' },
+        readerNavigation: [{ id: 'value_creation', label: 'Value', targetChapterKey: 'value_creation' }],
+      },
+      evidenceTemplate: {
+        title: 'Evidence behind your result',
+        blocks: [{ type: 'paragraph', text: 'Injected at completion.' }],
+      },
+      diagnostics: {
+        generatedFrom: 'compiled_report_first_template',
+        adminNotesExcluded: true,
+        editorialQaNotesDetected: false,
+        warningList: [],
+      },
+    },
+    content_hash: `hash-${index + 1}`,
+    status: 'active',
+  };
+}
+
+function reportFirstTemplates(): readonly Record<string, unknown>[] {
+  return rankedPatternKeys(['results', 'process', 'people', 'vision']).map(reportFirstTemplate);
+}
 
 function buildFullPatternApplicationRows(params: {
   domainKey: string;
@@ -201,6 +282,7 @@ function buildRuntimeFixture(): RuntimeFixture {
       assessment_version_id: 'version-1',
       assessment_version_tag: '1.0.0',
       assessment_mode: 'single_domain',
+      result_model_key: null,
     },
     domains: [{
       domain_id: 'domain-1',
@@ -365,6 +447,7 @@ function buildRuntimeFixture(): RuntimeFixture {
         development_statement_2: `${label} development 2`,
       })),
     },
+    reportFirstTemplates: [],
   };
 }
 
@@ -522,6 +605,11 @@ function createDb(config?: {
       runtime.context.assessment_key = 'blueprint-understand-how-you-lead';
       runtime.context.assessment_title = 'Blueprint - Understand how you lead';
       runtime.context.assessment_version_id = 'blueprint-version';
+      attempts.forEach((attempt) => {
+        attempt.assessmentId = 'blueprint-assessment';
+        attempt.assessmentVersionId = 'blueprint-version';
+        attempt.assessmentKey = 'blueprint-understand-how-you-lead';
+      });
       runtime.domains[0]!.domain_key = 'leadership-approach';
       runtime.domains[0]!.domain_label = 'Leadership approach';
       runtime.signals = ([
@@ -713,6 +801,12 @@ function createDb(config?: {
         pairKeys: [...getSingleDomainCanonicalPairKeys(signalKeys)],
       });
     },
+    useReportFirstTemplates(templates: readonly Record<string, unknown>[] = reportFirstTemplates()) {
+      runtime.reportFirstTemplates = [...templates];
+    },
+    useRankedPatternResultModel() {
+      runtime.context.result_model_key = 'ranked_pattern';
+    },
     removeFullPatternApplicationRole(params: {
       patternKey: string;
       focusArea: NonNullable<ApplicationStatementsRow['focus_area']>;
@@ -801,7 +895,7 @@ function createDb(config?: {
           };
         }
 
-        if (sql.includes('FROM attempts') && sql.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+        if (sql.includes('FROM attempts') && sql.includes("lifecycle_status = 'IN_PROGRESS'")) {
           const [userId, assessmentId] = params as [string, string];
           const row = attempts
             .filter((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId && attempt.lifecycleStatus === 'IN_PROGRESS')
@@ -826,7 +920,7 @@ function createDb(config?: {
           };
         }
 
-        if (sql.includes('FROM attempts') && sql.includes('WHERE user_id = $1') && sql.includes('assessment_id = $2') && !sql.includes("AND lifecycle_status = 'IN_PROGRESS'")) {
+        if (sql.includes('FROM attempts') && sql.includes('user_id = $1') && sql.includes('assessment_id = $2') && !sql.includes("lifecycle_status = 'IN_PROGRESS'")) {
           const [userId, assessmentId] = params as [string, string];
           const row = attempts
             .filter((attempt) => attempt.userId === userId && attempt.assessmentId === assessmentId)
@@ -1115,6 +1209,13 @@ function createDb(config?: {
 
         if (sql.includes('FROM assessment_versions av INNER JOIN assessments a ON a.id = av.assessment_id WHERE av.id = $1')) {
           return { rows: [runtime.context] as T[] };
+        }
+
+        if (sql.includes('FROM assessment_report_first_templates')) {
+          return {
+            rows: (runtime.reportFirstTemplates ?? [])
+              .filter((row) => row.assessment_version_id === (params?.[0] as string) && row.status === 'active') as T[],
+          };
         }
 
         if (sql.includes('FROM domains WHERE assessment_version_id = $1')) {
@@ -1476,6 +1577,108 @@ test('single-domain completion resolves drivers from exact pair-scoped driver cl
   );
 });
 
+test('report-first ranked-pattern completion persists a report-first canonical payload from the matching active template', async () => {
+  const harness = createDb();
+  harness.useBlueprintSemanticFallbackFixture();
+  harness.useRankedPatternResultModel();
+  harness.useReportFirstTemplates();
+
+  const service = createAssessmentCompletionService({ db: harness.db });
+  const result = await service.completeAssessmentAttempt({ attemptId: 'attempt-1', userId: 'user-1' });
+  const payload = harness.results[0]?.canonicalResultPayload;
+
+  assert.equal(result.resultStatus, 'ready');
+  assert.equal(result.mode, 'single_domain');
+  assert.equal(harness.results[0]?.readinessStatus, 'READY');
+  assert.equal(isReportFirstCanonicalPayloadV1(payload), true);
+
+  if (!isReportFirstCanonicalPayloadV1(payload)) {
+    throw new Error('Expected report-first payload.');
+  }
+
+  assert.equal(payload.metadata.contractName, 'report_first_canonical_payload_v1');
+  assert.equal(payload.metadata.reportModel, 'report_first_canonical');
+  assert.equal(payload.patternKey, 'results_process_people_vision');
+  assert.equal(payload.reportFirst.templateId, 'report-first-1');
+  assert.equal(payload.reportFirst.contentHash, 'hash-1');
+  assert.equal((payload.report as { reportTitle?: string }).reportTitle, 'Report results_process_people_vision');
+  assert.deepEqual(
+    payload.rankedSignals.map((signal) => signal.signalKey),
+    ['results', 'process', 'people', 'vision'],
+  );
+  assert.deepEqual(
+    payload.normalizedScores.map((score) => [score.signalKey, score.normalizedPercent, score.rawScore]),
+    [['results', 42, 10], ['process', 33, 8], ['people', 17, 4], ['vision', 8, 2]],
+  );
+  assert.equal(payload.scoring.scoreShapeCapturedButNotLanguageDriving, true);
+  assert.equal(payload.diagnostics.reportFirstTemplate.id, 'report-first-1');
+  assert.equal(payload.diagnostics.reportFirstTemplate.reportContract, 'report_first_canonical_payload_v1');
+});
+
+test('report-first ranked-pattern completion fails explicitly when the generated pattern has no active template', async () => {
+  const harness = createDb();
+  harness.useBlueprintSemanticFallbackFixture();
+  harness.useRankedPatternResultModel();
+  harness.useReportFirstTemplates(
+    reportFirstTemplates().map((template) =>
+      template.pattern_key === 'results_process_people_vision'
+        ? { ...template, pattern_key: 'missing_pattern_key' }
+        : template,
+    ),
+  );
+
+  const service = createAssessmentCompletionService({ db: harness.db });
+  await assert.rejects(
+    () => service.completeAssessmentAttempt({ attemptId: 'attempt-1', userId: 'user-1' }),
+    /could not resolve one active template for pattern_key "results_process_people_vision"/i,
+  );
+  assert.equal(harness.results[0]?.readinessStatus, 'FAILED');
+  assert.equal(harness.results[0]?.canonicalResultPayload, null);
+  assert.match(harness.results[0]?.failureReason ?? '', /results_process_people_vision/);
+});
+
+test('report-first ranked-pattern completion fails explicitly for invalid template contract or malformed template JSON', async () => {
+  const invalidContract = createDb();
+  invalidContract.useBlueprintSemanticFallbackFixture();
+  invalidContract.useRankedPatternResultModel();
+  invalidContract.useReportFirstTemplates(
+    reportFirstTemplates().map((template) =>
+      template.pattern_key === 'results_process_people_vision'
+        ? { ...template, report_contract: 'legacy_contract' }
+        : template,
+    ),
+  );
+
+  await assert.rejects(
+    () => createAssessmentCompletionService({ db: invalidContract.db }).completeAssessmentAttempt({
+      attemptId: 'attempt-1',
+      userId: 'user-1',
+    }),
+    /unsupported contract "legacy_contract"/i,
+  );
+  assert.equal(invalidContract.results[0]?.readinessStatus, 'FAILED');
+
+  const malformedTemplate = createDb();
+  malformedTemplate.useBlueprintSemanticFallbackFixture();
+  malformedTemplate.useRankedPatternResultModel();
+  malformedTemplate.useReportFirstTemplates(
+    reportFirstTemplates().map((template) =>
+      template.pattern_key === 'results_process_people_vision'
+        ? { ...template, report_template_json: {} }
+        : template,
+    ),
+  );
+
+  await assert.rejects(
+    () => createAssessmentCompletionService({ db: malformedTemplate.db }).completeAssessmentAttempt({
+      attemptId: 'attempt-1',
+      userId: 'user-1',
+    }),
+    /non-empty report_template_json/i,
+  );
+  assert.equal(malformedTemplate.results[0]?.readinessStatus, 'FAILED');
+});
+
 test('single-domain completion fails without exact pair-scoped driver claims', async () => {
   const harness = createDb();
   harness.useBlueprintSemanticFallbackFixture();
@@ -1779,4 +1982,16 @@ test('multi-domain attempts still route through the injected multi-domain engine
   const result = await service.completeAssessmentAttempt({ attemptId: 'attempt-2', userId: 'user-1' });
   assert.equal(engineCalls, 1);
   assert.equal(result.mode, 'multi_domain');
+});
+
+test('report-first completion does not introduce retrieval-time template lookup or UI result imports', () => {
+  const resultReaderSource = readFileSync('lib/server/result-read-model.ts', 'utf8');
+  const workspaceSource = readFileSync('lib/server/workspace-service.ts', 'utf8');
+  const resultListSource = readFileSync('lib/server/results-service.ts', 'utf8');
+  const completionSource = readFileSync('lib/server/single-domain-completion.ts', 'utf8');
+
+  assert.doesNotMatch(resultReaderSource, /assessment_report_first_templates|report-first-template-storage/);
+  assert.doesNotMatch(workspaceSource, /assessment_report_first_templates|report-first-template-storage/);
+  assert.doesNotMatch(resultListSource, /assessment_report_first_templates|report-first-template-storage/);
+  assert.doesNotMatch(completionSource, /result-read-model|workspace-service|results-service|components\/results/);
 });

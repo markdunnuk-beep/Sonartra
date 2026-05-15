@@ -1,5 +1,6 @@
 import type { CanonicalResultPayload, RuntimeResponseSet } from '@/lib/engine/types';
 import type { AssessmentMode } from '@/lib/types/assessment';
+import type { ReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
 import type { SingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import type {
   AssessmentAttemptRecordSummary,
@@ -17,7 +18,8 @@ export type AssessmentCompletionAttemptSummary = AssessmentAttemptRecordSummary 
 
 export type AssessmentCompletionPayload =
   | CanonicalResultPayload
-  | SingleDomainResultPayload;
+  | SingleDomainResultPayload
+  | ReportFirstCanonicalPayloadV1;
 
 export type AssessmentCompletionPersistedResponse = {
   responseId: string;

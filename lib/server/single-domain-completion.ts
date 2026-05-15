@@ -17,11 +17,17 @@ import type {
   RuntimeAssessmentDefinition,
   RuntimeResponseSet,
 } from '@/lib/engine/types';
+import type { ReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
 import { loadSingleDomainRuntimeDefinition } from '@/lib/server/single-domain-runtime-definition';
 import {
   buildRankedPatternCanonicalResultSections,
   loadRankedPatternResultLanguage,
 } from '@/lib/server/ranked-pattern-result-language';
+import {
+  buildReportFirstCanonicalPayload,
+  loadReportFirstTemplateForCompletion,
+} from '@/lib/server/report-first-result-assembly';
+import { isReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
 import type {
   ApplicationStatementsRow,
   BalancingSectionsRow,
@@ -905,7 +911,7 @@ export async function buildSingleDomainResultPayload(params: {
   db: Queryable;
   assessmentVersionId: string;
   responses: RuntimeResponseSet;
-}): Promise<SingleDomainResultPayload> {
+}): Promise<SingleDomainResultPayload | ReportFirstCanonicalPayloadV1> {
   const runtimeDefinition = await loadSingleDomainRuntimeDefinition(params.db, params.assessmentVersionId);
   const executionDefinition = toExecutionDefinition(runtimeDefinition);
   const executionModel = loadRuntimeExecutionModel(executionDefinition);
@@ -958,6 +964,48 @@ export async function buildSingleDomainResultPayload(params: {
       policyVersion: rankedPatternScoreShape.policyVersion,
     } satisfies SingleDomainResultScoreShape);
     const patternKey = buildRankedPatternKeyFromResultSignals(signals);
+    const reportFirstTemplate = await loadReportFirstTemplateForCompletion({
+      db: params.db,
+      assessmentVersionId: params.assessmentVersionId,
+      patternKey,
+    });
+
+    if (reportFirstTemplate.enabled) {
+      const payload = buildReportFirstCanonicalPayload({
+        assessmentVersionId: runtimeDefinition.metadata.assessmentVersionId,
+        assessmentKey: runtimeDefinition.metadata.assessmentKey,
+        assessmentTitle: runtimeDefinition.metadata.assessmentTitle,
+        assessmentVersionTag: runtimeDefinition.metadata.assessmentVersionTag,
+        assessmentDescription: runtimeDefinition.metadata.assessmentDescription,
+        domainKey: runtimeDefinition.domain.key,
+        domainTitle: runtimeDefinition.domain.title,
+        domainDescription: runtimeDefinition.domain.description,
+        responses: params.responses,
+        scoreResult,
+        normalizedResult,
+        rankedSignals: signals,
+        scoreShape,
+        patternKey,
+        template: reportFirstTemplate.template,
+        counts: {
+          domainCount: runtimeDefinition.diagnostics.counts.domainCount,
+          questionCount: runtimeDefinition.diagnostics.counts.questionCount,
+          optionCount: runtimeDefinition.diagnostics.counts.optionCount,
+          weightCount: runtimeDefinition.diagnostics.counts.weightCount,
+          signalCount: runtimeDefinition.diagnostics.counts.signalCount,
+          derivedPairCount: runtimeDefinition.diagnostics.counts.derivedPairCount,
+        },
+      });
+
+      if (!isReportFirstCanonicalPayloadV1(payload)) {
+        throw new SingleDomainCompletionError(
+          `Generated report-first result payload is malformed for attempt "${params.responses.attemptId}".`,
+        );
+      }
+
+      return payload;
+    }
+
     const rankedPatternLanguage = await loadRankedPatternResultLanguage({
       db: params.db,
       assessmentVersionId: params.assessmentVersionId,

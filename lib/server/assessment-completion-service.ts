@@ -23,6 +23,7 @@ import {
   type AssessmentCompletionServiceResult,
 } from '@/lib/server/assessment-completion-types';
 import { buildSingleDomainResultPayload } from '@/lib/server/single-domain-completion';
+import { isReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
 import { isSingleDomainResultPayload } from '@/lib/types/single-domain-result';
 import { resolveAssessmentMode } from '@/lib/utils/assessment-mode';
 
@@ -194,6 +195,7 @@ export function createAssessmentCompletionService(
         if (
           attempt.assessmentMode === 'single_domain'
           && !isSingleDomainResultPayload(payload)
+          && !isReportFirstCanonicalPayloadV1(payload)
         ) {
           throw new AssessmentCompletionPersistenceError(
             `Generated single-domain result payload is malformed for attempt ${attempt.attemptId}`,
