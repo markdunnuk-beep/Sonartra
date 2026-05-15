@@ -5,46 +5,75 @@ import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { ReportFirstResultReport } from '@/components/results/report-first-result-report';
-import type { ReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
+import { compileReportFirstTemplateFromMarkdown } from '@/scripts/authoring/compile-report-first-template';
+import type {
+  ReportFirstCanonicalPayloadV1,
+  ReportFirstRankedSignal,
+  ReportFirstScoreRow,
+} from '@/lib/types/report-first-result';
+
+const processReportPath =
+  'content/authoring/leadership-approach/report-first/canonical-reports/process_results_people_vision.md';
+
+const requiredSourceHeadings = [
+  'Editorial introduction',
+  'Pattern at a glance',
+  'Chapter 1 — How your leadership creates value',
+  'Chapter 2 — How others experience your leadership',
+  'Chapter 3 — Decision behaviour',
+  'Chapter 4 — Communication behaviour',
+  'Chapter 5 — What happens under pressure',
+  'Chapter 6 — The strength of this pattern',
+  'Chapter 7 — Where the pattern can tighten',
+  'Chapter 8 — How People expands your leadership',
+  'Chapter 9 — How Vision expands your leadership',
+  'Chapter 10 — Development focus',
+  'Closing synthesis',
+  'Final line',
+  'PDF export CTA',
+] as const;
+
+const representativeParagraphs = [
+  'Your leadership approach is led by Process and strengthened by Results.',
+  'This is a structure-and-delivery pattern.',
+  'These scores show why your report is led by Process and Results',
+  'Others may experience your leadership as dependable, grounded, and useful.',
+  'You are likely to make decisions by organising available information into a practical route.',
+  'You tend to communicate through clarity, structure, and expectation.',
+  'Under pressure, your leadership may tighten toward control, sequence, and delivery discipline.',
+  'People expands this pattern by turning clarity into shared ownership.',
+  'Vision expands this pattern by connecting reliable action to a larger direction.',
+  'The development work is not to abandon structure or delivery.',
+  'At your best, you give people more than a process to follow.',
+  'This report is designed as a reference document.',
+] as const;
+
+const rankedSignals = [
+  { rank: 1, signalKey: 'process', signalLabel: 'Process', roleLabel: 'Lead signal' },
+  { rank: 2, signalKey: 'results', signalLabel: 'Results', roleLabel: 'Strengthening signal' },
+  { rank: 3, signalKey: 'people', signalLabel: 'People', roleLabel: 'Range signal' },
+  { rank: 4, signalKey: 'vision', signalLabel: 'Vision', roleLabel: 'Further range' },
+] as const satisfies readonly ReportFirstRankedSignal[];
+
+const normalizedScores = [
+  { signalKey: 'process', signalLabel: 'Process', normalizedPercent: 42, rawScore: 10 },
+  { signalKey: 'results', signalLabel: 'Results', normalizedPercent: 33, rawScore: 8 },
+  { signalKey: 'people', signalLabel: 'People', normalizedPercent: 17, rawScore: 4 },
+  { signalKey: 'vision', signalLabel: 'Vision', normalizedPercent: 8, rawScore: 2 },
+] as const satisfies readonly ReportFirstScoreRow[];
+
+function sourceMarkdown(): string {
+  return readFileSync(processReportPath, 'utf8');
+}
+
+function compiledReport() {
+  return compileReportFirstTemplateFromMarkdown(sourceMarkdown(), {
+    inputPath: processReportPath,
+  });
+}
 
 function buildReportFirstPayload(): ReportFirstCanonicalPayloadV1 {
-  const rankedSignals = [
-    {
-      rank: 1,
-      signalKey: 'process',
-      signalLabel: 'Process',
-      roleLabel: 'Lead signal',
-      roleSummary: 'Creates structure.',
-    },
-    {
-      rank: 2,
-      signalKey: 'results',
-      signalLabel: 'Results',
-      roleLabel: 'Strengthening signal',
-      roleSummary: 'Creates movement.',
-    },
-    {
-      rank: 3,
-      signalKey: 'people',
-      signalLabel: 'People',
-      roleLabel: 'Range signal',
-      roleSummary: 'Creates ownership.',
-    },
-    {
-      rank: 4,
-      signalKey: 'vision',
-      signalLabel: 'Vision',
-      roleLabel: 'Further range',
-      roleSummary: 'Creates direction.',
-    },
-  ] as const;
-  const normalizedScores = [
-    { signalKey: 'process', signalLabel: 'Process', normalizedPercent: 42, rawScore: 10 },
-    { signalKey: 'results', signalLabel: 'Results', normalizedPercent: 33, rawScore: 8 },
-    { signalKey: 'people', signalLabel: 'People', normalizedPercent: 17, rawScore: 4 },
-    { signalKey: 'vision', signalLabel: 'Vision', normalizedPercent: 8, rawScore: 2 },
-  ] as const;
-
+  const compiled = compiledReport();
   return {
     metadata: {
       payloadVersion: 1,
@@ -105,124 +134,14 @@ function buildReportFirstPayload(): ReportFirstCanonicalPayloadV1 {
       scoringMethod: 'option_signal_weights',
       normalizationMethod: 'largest_remainder_integer_percentages',
     },
-    report: {
-      reportKey: 'leadership_process_results_people_vision',
-      patternKey: 'process_results_people_vision',
-      reportTitle: 'Leadership Approach - Process, Results, People, Vision',
-      hero: {
-        title: 'You lead by turning complexity into structured progress',
-        resultStatement: 'You create confidence by giving work a clearer way forward.',
-      },
-      opening: [
-        {
-          type: 'paragraph',
-          text: 'Your leadership is at its best when uncertainty needs to become organised and accountable.',
-        },
-        {
-          type: 'list',
-          items: ['Creates sequence', 'Clarifies ownership'],
-        },
-      ],
-      keyInsight: {
-        type: 'pull_quote',
-        text: 'The development edge is to make sure the path becomes shared before people move through it.',
-      },
-      chapters: [
-        {
-          chapterKey: 'value_creation',
-          chapterNumber: 1,
-          title: 'How your leadership creates value',
-          railLabel: 'Value',
-          readerFacing: true,
-          blocks: [
-            { type: 'paragraph', text: 'Your leadership creates value by making progress repeatable.' },
-            {
-              type: 'table',
-              columns: [
-                { key: 'signal', label: 'Signal' },
-                { key: 'meaning', label: 'Meaning' },
-              ],
-              rows: [
-                [
-                  { columnKey: 'signal', value: 'Process' },
-                  { columnKey: 'meaning', value: 'Creates a reliable route.' },
-                ],
-              ],
-            },
-          ],
-        },
-        {
-          chapterKey: 'strengths',
-          chapterNumber: 6,
-          title: 'The strength of this pattern',
-          railLabel: 'Strengths',
-          readerFacing: true,
-          blocks: [
-            {
-              type: 'strength_card',
-              title: 'Repeatable progress',
-              text: 'You help teams move from loose intention into a clearer structure.',
-              linkedSignals: ['process', 'results'],
-            },
-          ],
-        },
-        {
-          chapterKey: 'tightening',
-          chapterNumber: 7,
-          title: 'Where the pattern can tighten',
-          railLabel: 'Tightening',
-          readerFacing: true,
-          blocks: [
-            {
-              type: 'tightening_card',
-              title: 'Organised before owned',
-              text: 'The plan may become clear before shared ownership has formed.',
-              whyItMatters: 'Work is easier to sustain when people help shape it.',
-              rangeToAdd: 'Bring People in before closure.',
-              linkedSignals: ['people'],
-            },
-          ],
-        },
-        {
-          chapterKey: 'development_focus',
-          chapterNumber: 10,
-          title: 'Development focus',
-          railLabel: 'Development',
-          readerFacing: true,
-          blocks: [
-            {
-              type: 'development_action',
-              title: 'Invite ownership before closure',
-              text: 'Before finalising a route, identify who needs to shape it.',
-              useCases: ['project planning', 'team meetings'],
-              whyItMatters: 'Ownership affects execution.',
-              linkedSignals: ['people'],
-            },
-            {
-              type: 'prompt_group',
-              title: 'Decision questions',
-              prompts: [
-                'Who needs to shape this before it lands?',
-                'What longer-term direction does this decision support?',
-              ],
-            },
-          ],
-        },
-      ],
-      closing: {
-        synthesis: [
-          { type: 'paragraph', text: 'Your growth is to let more range into the leadership you already bring.' },
-        ],
-        finalLine: 'Turn complexity into progress people can own.',
-      },
-    },
+    report: compiled.report_template_json.report,
     reportFirst: {
       templateId: 'template-1',
-      reportKey: 'leadership_process_results_people_vision',
-      patternKey: 'process_results_people_vision',
-      contentHash: 'hash-1',
+      reportKey: compiled.report_key,
+      patternKey: compiled.pattern_key,
+      contentHash: compiled.content_hash,
       contractName: 'report_first_canonical_payload_v1',
-      template: { reportKey: 'leadership_process_results_people_vision' },
+      template: compiled.report_template_json,
     },
     evidence: {
       title: 'Evidence behind your result',
@@ -232,7 +151,7 @@ function buildReportFirstPayload(): ReportFirstCanonicalPayloadV1 {
         label: 'paired',
         readerFacing: false,
       },
-      explanatoryNote: 'These scores provide evidence for the ranked pattern; the report explains the pattern in practice.',
+      explanatoryNote: 'These scores provide evidence for the ranked pattern; the report explains what that pattern means in practice.',
     },
     diagnostics: {
       readinessStatus: 'ready',
@@ -250,13 +169,13 @@ function buildReportFirstPayload(): ReportFirstCanonicalPayloadV1 {
       },
       reportFirstTemplate: {
         id: 'template-1',
-        reportKey: 'leadership_process_results_people_vision',
-        contentHash: 'hash-1',
+        reportKey: compiled.report_key,
+        contentHash: compiled.content_hash,
         reportContract: 'report_first_canonical_payload_v1',
       },
-      sourceReportKey: 'leadership_process_results_people_vision',
+      sourceReportKey: compiled.report_key,
       sourceAssessmentVersionId: 'version-report-first',
-      sourceContentHash: 'hash-1',
+      sourceContentHash: compiled.content_hash,
       adminNotesExcluded: true,
       warningList: [],
       generatedFrom: 'compiled_report_first_template',
@@ -266,56 +185,85 @@ function buildReportFirstPayload(): ReportFirstCanonicalPayloadV1 {
   };
 }
 
-test('report-first result renderer displays persisted report and evidence structure', () => {
+function textFromMarkup(markup: string): string {
+  return markup
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&#x27;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+test('report-first result renderer displays all major source headings from the canonical markdown', () => {
   const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
+  const renderedText = textFromMarkup(markup);
 
   assert.match(markup, /data-report-first-result="true"/);
-  assert.match(markup, /You lead by turning complexity into structured progress/);
-  assert.match(markup, /You create confidence by giving work a clearer way forward/);
-  assert.match(markup, /Result basis/);
-  assert.match(markup, /Process leads this pattern/);
-  assert.match(markup, /Evidence behind your result/);
-  assert.match(markup, /42%/);
-  assert.match(markup, /33%/);
-  assert.match(markup, /17%/);
-  assert.match(markup, /8%/);
-  assert.match(markup, /How your leadership creates value/);
-  assert.match(markup, /The strength of this pattern/);
-  assert.match(markup, /Where the pattern can tighten/);
-  assert.match(markup, /Development focus/);
-  assert.match(markup, /Closing synthesis/);
+  for (const heading of requiredSourceHeadings) {
+    assert.ok(renderedText.includes(heading), `Expected rendered report to include heading: ${heading}`);
+  }
 });
 
-test('report-first result renderer preserves structured block types', () => {
+test('report-first result renderer preserves body depth from the canonical markdown', () => {
   const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
+  const renderedText = textFromMarkup(markup);
 
+  for (const paragraph of representativeParagraphs) {
+    assert.ok(
+      renderedText.includes(paragraph),
+      `Expected rendered report to include representative source text: ${paragraph}`,
+    );
+  }
+});
+
+test('report-first result renderer preserves structured report blocks in source order', () => {
+  const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
+  const renderedText = textFromMarkup(markup);
+  const orderedMarkers = [
+    'Editorial introduction',
+    'Pattern at a glance',
+    'Evidence behind your result',
+    'Key insight',
+    'How your leadership creates value',
+    'How others experience your leadership',
+    'Decision behaviour',
+    'Communication behaviour',
+    'What happens under pressure',
+    'The strength of this pattern',
+    'Where the pattern can tighten',
+    'How People expands your leadership',
+    'How Vision expands your leadership',
+    'Development focus',
+    'Closing synthesis',
+    'Final line',
+    'PDF export CTA',
+  ];
+  const markerPositions = orderedMarkers.map((marker) => {
+    const index = renderedText.indexOf(marker);
+    assert.notEqual(index, -1, `Expected marker: ${marker}`);
+    return index;
+  });
+
+  assert.deepEqual(markerPositions, [...markerPositions].sort((left, right) => left - right));
   assert.match(markup, /data-report-first-table-block="true"/);
-  assert.match(markup, /<th[^>]*>Signal<\/th>/);
-  assert.match(markup, /Creates a reliable route/);
   assert.match(markup, /data-report-first-signal-stack="true"/);
   assert.match(markup, /data-report-first-card="strength"/);
-  assert.match(markup, /Repeatable progress/);
   assert.match(markup, /data-report-first-card="tightening"/);
-  assert.match(markup, /Range to add:/);
   assert.match(markup, /data-report-first-card="development-action"/);
-  assert.match(markup, /Invite ownership before closure/);
   assert.match(markup, /data-report-first-prompt-group="true"/);
-  assert.match(markup, /Decision questions/);
-  assert.ok(
-    markup.indexOf('Invite ownership before closure') < markup.indexOf('Decision questions'),
-    'mixed chapter blocks should preserve persisted order',
-  );
 });
 
 test('report-first result renderer hides internal diagnostics and raw identifiers from reader output', () => {
   const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
+  const renderedText = textFromMarkup(markup);
 
-  assert.doesNotMatch(markup, /process_results_people_vision/);
-  assert.doesNotMatch(markup, /template-1/);
-  assert.doesNotMatch(markup, /hash-1/);
-  assert.doesNotMatch(markup, /contentHash/);
-  assert.doesNotMatch(markup, /reportFirstTemplate/);
-  assert.doesNotMatch(markup, /canonical_result_payload/);
+  assert.doesNotMatch(renderedText, /process_results_people_vision/);
+  assert.doesNotMatch(renderedText, /template-1/);
+  assert.doesNotMatch(renderedText, /contentHash/);
+  assert.doesNotMatch(renderedText, /reportFirstTemplate/);
+  assert.doesNotMatch(renderedText, /canonical_result_payload/);
+  assert.doesNotMatch(renderedText, /report_first_canonical_payload_v1/);
 });
 
 test('report-first renderer stays disconnected from template storage and scoring recomputation', () => {

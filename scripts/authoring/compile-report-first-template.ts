@@ -464,7 +464,7 @@ function parseContentBlocks(content: string, context: 'strengths' | 'tightening'
     }
 
     if (/^\d+\.\s+/.test(trimmed)) {
-      const [, title = ''] = /^(\d+)\.\s+(.+)$/.exec(trimmed) ?? [];
+      const [, , title = ''] = /^(\d+)\.\s+(.+)$/.exec(trimmed) ?? [];
       const collected = collectUntilNextNumbered(sourceLines, index + 1);
       blocks.push(numberedBlock(title, collected.itemLines, context));
       index = collected.nextIndex;

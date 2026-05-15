@@ -11,10 +11,13 @@ type RecordValue = Record<string, unknown>;
 type ReportFirstBlock =
   | { readonly type: 'paragraph'; readonly text: string }
   | { readonly type: 'list'; readonly items: readonly string[] }
+  | { readonly type: 'ordered_list'; readonly items: readonly string[] }
+  | { readonly type: 'unordered_list'; readonly items: readonly string[] }
   | { readonly type: 'table'; readonly columns?: readonly TableColumn[]; readonly rows: readonly (readonly TableCell[])[] }
   | { readonly type: 'pull_quote'; readonly text: string }
   | { readonly type: 'prompt_group'; readonly title?: string; readonly prompts: readonly string[] }
   | { readonly type: 'callout'; readonly title?: string; readonly text: string; readonly tone?: 'neutral' | 'evidence' }
+  | { readonly type: 'signal_stack'; readonly signals: readonly ReportFirstRankedSignal[] }
   | { readonly type: 'strength_card'; readonly title: string; readonly text: string; readonly linkedSignals?: readonly string[] }
   | {
       readonly type: 'tightening_card';
@@ -39,8 +42,9 @@ type TableColumn = {
 };
 
 type TableCell = {
-  readonly columnKey: string;
-  readonly value: string;
+  readonly columnKey?: string;
+  readonly value?: string;
+  readonly text?: string;
 };
 
 type ReportFirstChapter = {
@@ -60,11 +64,20 @@ type ReportFirstReport = {
     readonly resultStatement?: string;
   };
   readonly opening?: readonly ReportFirstBlock[];
+  readonly patternSummary?: {
+    readonly title?: string;
+    readonly blocks?: readonly ReportFirstBlock[];
+  };
   readonly keyInsight?: ReportFirstBlock;
   readonly chapters?: readonly ReportFirstChapter[];
   readonly closing?: {
     readonly synthesis?: readonly ReportFirstBlock[];
     readonly finalLine?: string;
+  };
+  readonly pdf?: {
+    readonly title?: string;
+    readonly body?: string;
+    readonly buttonLabel?: string;
   };
   readonly readerNavigation?: readonly {
     readonly id: string;
@@ -109,6 +122,29 @@ function toBlocks(value: unknown): readonly ReportFirstBlock[] {
   return Array.isArray(value) ? (value as readonly ReportFirstBlock[]) : [];
 }
 
+function splitParagraphText(value: string | null): readonly string[] {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+}
+
+function templateEvidenceBlocks(payload: ReportFirstCanonicalPayloadV1): readonly ReportFirstBlock[] {
+  const template = isRecord(payload.reportFirst.template) ? payload.reportFirst.template : {};
+  const evidenceTemplate = isRecord(template.evidenceTemplate) ? template.evidenceTemplate : {};
+  return toBlocks(evidenceTemplate.blocks).filter(
+    (block) => block.type !== 'signal_stack' && block.type !== 'table',
+  );
+}
+
+function cellText(cell: TableCell | undefined): string {
+  return cell?.value ?? cell?.text ?? '';
+}
+
 function formatDate(value: string | null | undefined): string {
   if (!value) {
     return 'No completion date';
@@ -147,6 +183,7 @@ function buildSections(report: ReportFirstReport): readonly ReportFirstSection[]
 
   return [
     { id: 'overview', label: 'Overview', heading: 'Overview' },
+    ...(report.patternSummary ? [{ id: 'pattern', label: 'Pattern', heading: report.patternSummary.title ?? 'Pattern at a glance' }] : []),
     { id: 'evidence', label: 'Evidence', heading: 'Evidence behind your result' },
     ...(report.keyInsight ? [{ id: 'key-insight', label: 'Insight', heading: 'Key insight' }] : []),
     ...chapters.map((chapter) => ({
@@ -187,7 +224,7 @@ function SectionShell({
       id={id}
       aria-labelledby={headingId}
       className={cx(
-        'results-anchor-target scroll-mt-28 border-t border-[#F3F1EA]/[0.08] py-12 md:py-16',
+        'results-anchor-target min-w-0 scroll-mt-28 border-t border-[#F3F1EA]/[0.08] py-12 md:py-16',
         className,
       )}
       data-report-first-section={id}
@@ -211,6 +248,7 @@ function SignalStack({
   scoreRows: readonly ReportFirstScoreRow[];
 }) {
   const scoresBySignal = new Map(scoreRows.map((score) => [score.signalKey, score]));
+  const hasScores = scoreRows.length > 0;
 
   return (
     <div className="rounded-[1.15rem] border border-[#F3F1EA]/[0.09] bg-[#171D1A]/82 p-4 shadow-[0_24px_70px_rgba(4,7,6,0.18)] sm:p-5" data-report-first-signal-stack="true">
@@ -231,12 +269,15 @@ function SignalStack({
             <div
               key={`${signal.rank}-${signal.signalKey}`}
               role="meter"
-              aria-label={`${signal.signalLabel}, rank ${signal.rank}, ${percentage}%`}
+              aria-label={hasScores ? `${signal.signalLabel}, rank ${signal.rank}, ${percentage}%` : `${signal.signalLabel}, rank ${signal.rank}`}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-valuenow={percentage}
+              aria-valuenow={hasScores ? percentage : undefined}
               className={cx(
-                'grid gap-3 rounded-[0.95rem] border p-3 sm:grid-cols-[minmax(9rem,0.8fr)_minmax(10rem,1fr)_3.75rem] sm:items-center',
+                'grid gap-3 rounded-[0.95rem] border p-3 sm:items-center',
+                hasScores
+                  ? 'sm:grid-cols-[minmax(9rem,0.8fr)_minmax(10rem,1fr)_3.75rem]'
+                  : 'sm:grid-cols-[minmax(9rem,0.55fr)_minmax(0,1fr)]',
                 isLead ? 'border-[#34D8B6]/28 bg-[#34D8B6]/[0.075]' : 'border-[#F3F1EA]/[0.08] bg-[#202622]/48',
               )}
               data-report-first-signal-row="true"
@@ -252,18 +293,24 @@ function SignalStack({
                   </p>
                 </div>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-[#0E1110]/85 ring-1 ring-[#F3F1EA]/[0.08]">
-                <div
-                  className={cx(
-                    'h-full rounded-full',
-                    isLead
-                      ? 'bg-[linear-gradient(90deg,#34D8B6,rgba(52,216,182,0.7))]'
-                      : 'bg-[linear-gradient(90deg,rgba(139,196,181,0.84),rgba(139,196,181,0.48))]',
-                  )}
-                  style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
-                />
-              </div>
-              <p className="font-mono text-xl text-[#F3F1EA] sm:text-right">{percentage}%</p>
+              {hasScores ? (
+                <>
+                  <div className="h-2 overflow-hidden rounded-full bg-[#0E1110]/85 ring-1 ring-[#F3F1EA]/[0.08]">
+                    <div
+                      className={cx(
+                        'h-full rounded-full',
+                        isLead
+                          ? 'bg-[linear-gradient(90deg,#34D8B6,rgba(52,216,182,0.7))]'
+                          : 'bg-[linear-gradient(90deg,rgba(139,196,181,0.84),rgba(139,196,181,0.48))]',
+                      )}
+                      style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
+                    />
+                  </div>
+                  <p className="font-mono text-xl text-[#F3F1EA] sm:text-right">{percentage}%</p>
+                </>
+              ) : (
+                <p className="text-sm leading-6 text-[#C8CEC7]/82">{signal.roleSummary}</p>
+              )}
             </div>
           );
         })}
@@ -274,7 +321,7 @@ function SignalStack({
 
 function EvidenceTable({ rows }: { rows: readonly ReportFirstScoreRow[] }) {
   return (
-    <div className="overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]" data-report-first-evidence-table="true">
+    <div className="min-w-0 max-w-full overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]" data-report-first-evidence-table="true">
       <table className="min-w-full divide-y divide-[#F3F1EA]/[0.08] text-left text-sm">
         <thead className="bg-[#F3F1EA]/[0.035] text-[#A8B0AA]">
           <tr>
@@ -298,11 +345,11 @@ function EvidenceTable({ rows }: { rows: readonly ReportFirstScoreRow[] }) {
 function GenericTable({ block }: { block: Extract<ReportFirstBlock, { type: 'table' }> }) {
   const columns = block.columns && block.columns.length > 0
     ? block.columns
-    : (block.rows[0] ?? []).map((cell, index) => ({ key: cell.columnKey || `column-${index}`, label: cell.value }));
+    : (block.rows[0] ?? []).map((cell, index) => ({ key: cell.columnKey || `column-${index}`, label: cellText(cell) }));
   const bodyRows = block.columns && block.columns.length > 0 ? block.rows : block.rows.slice(1);
 
   return (
-    <div className="my-6 overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]" data-report-first-table-block="true">
+    <div className="my-6 block w-full max-w-full min-w-0 overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]" data-report-first-table-block="true">
       <table className="min-w-full divide-y divide-[#F3F1EA]/[0.08] text-left text-sm">
         <thead className="bg-[#F3F1EA]/[0.035] text-[#A8B0AA]">
           <tr>
@@ -316,7 +363,7 @@ function GenericTable({ block }: { block: Extract<ReportFirstBlock, { type: 'tab
             <tr key={`row-${rowIndex}`}>
               {columns.map((column, columnIndex) => (
                 <td className="px-4 py-3 leading-6 text-[#D3D7D1]/88" key={column.key}>
-                  {row.find((cell) => cell.columnKey === column.key)?.value ?? row[columnIndex]?.value ?? ''}
+                  {cellText(row.find((cell) => cell.columnKey === column.key)) || cellText(row[columnIndex])}
                 </td>
               ))}
             </tr>
@@ -375,6 +422,7 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
     case 'paragraph':
       return <p className="max-w-[58rem] text-[1rem] leading-8 text-[#C8CEC7]/88">{block.text}</p>;
     case 'list':
+    case 'unordered_list':
       return (
         <ul className="grid gap-2.5 text-[0.98rem] leading-7 text-[#C8CEC7]/88" role="list">
           {block.items.map((item) => (
@@ -384,8 +432,23 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
           ))}
         </ul>
       );
+    case 'ordered_list':
+      return (
+        <ol className="grid gap-2.5 text-[0.98rem] leading-7 text-[#C8CEC7]/88">
+          {block.items.map((item, index) => (
+            <li className="grid grid-cols-[1.8rem_minmax(0,1fr)] gap-3" key={item}>
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#F3F1EA]/12 bg-[#101312]/72 font-mono text-xs text-[#A8B0AA]">
+                {index + 1}
+              </span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ol>
+      );
     case 'table':
       return <GenericTable block={block} />;
+    case 'signal_stack':
+      return <SignalStack rankedSignals={block.signals} scoreRows={[]} />;
     case 'pull_quote':
       return (
         <blockquote className="rounded-[1.15rem] border border-[#34D8B6]/20 bg-[#34D8B6]/[0.07] p-5 text-xl font-semibold leading-8 text-[#F3F1EA] md:p-6 md:text-2xl md:leading-10" data-report-first-pull-quote="true">
@@ -499,7 +562,10 @@ function ChapterSection({ section }: { section: ReportFirstSection }) {
   }
 
   return (
-    <SectionShell id={section.id} heading={section.heading} eyebrow={section.eyebrow}>
+    <SectionShell
+      id={section.id}
+      heading={section.eyebrow ? `${section.eyebrow} — ${section.heading}` : section.heading}
+    >
       <BlockGroup blocks={chapter.blocks} />
     </SectionShell>
   );
@@ -538,10 +604,10 @@ function MobileSectionNav({ sections }: { sections: readonly ReportFirstSection[
   return (
     <nav
       aria-label="Result sections"
-      className="sticky top-3 z-20 mb-4 rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/92 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.18)] xl:hidden"
+      className="sticky top-3 z-20 mb-4 max-w-full overflow-hidden rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/92 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.18)] xl:hidden"
       data-report-first-mobile-nav="true"
     >
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
         {sections.map((section) => (
           <a
             href={`#${section.id}`}
@@ -560,10 +626,12 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
   const report = toReport(payload.report);
   const sections = buildSections(report);
   const openingBlocks = toBlocks(report.opening);
+  const persistedEvidenceBlocks = templateEvidenceBlocks(payload);
   const heroTitle = report.hero?.title ?? report.reportTitle ?? payload.assessment.title;
   const resultStatement = report.hero?.resultStatement
     ?? (isRecord(report.keyInsight) ? readText(report.keyInsight, 'text') : null)
     ?? payload.evidence.explanatoryNote;
+  const resultStatementParagraphs = splitParagraphText(resultStatement);
   const completionDate = formatDate(payload.attempt.completedAt ?? payload.metadata.completedAt);
 
   return (
@@ -593,9 +661,19 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
             <h1 className="mt-3 max-w-5xl text-5xl font-semibold leading-[1.02] text-[#F3F1EA] md:text-7xl">
               {heroTitle}
             </h1>
-            <p className="mt-6 max-w-3xl text-xl leading-8 text-[#C8CEC7]/95 md:text-2xl md:leading-10">
-              {resultStatement}
-            </p>
+            <div className="mt-6 max-w-3xl space-y-4">
+              {resultStatementParagraphs.map((paragraph, index) => (
+                <p
+                  className={cx(
+                    'text-xl leading-8 text-[#C8CEC7]/95 md:text-2xl md:leading-10',
+                    index > 0 && 'text-lg text-[#C8CEC7]/82 md:text-xl',
+                  )}
+                  key={paragraph}
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
           </div>
 
           <aside className="rounded-[1.25rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)] md:p-6">
@@ -628,9 +706,15 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
 
         <div className="grid gap-10 xl:grid-cols-[minmax(0,74rem)_11.5rem] xl:items-start xl:justify-center xl:gap-12 2xl:gap-16">
           <article className="min-w-0">
-            <SectionShell id="overview" heading="Overview">
+            <SectionShell id="overview" heading="Editorial introduction">
               <BlockGroup blocks={openingBlocks} />
             </SectionShell>
+
+            {report.patternSummary ? (
+              <SectionShell id="pattern" heading={report.patternSummary.title ?? 'Pattern at a glance'}>
+                <BlockGroup blocks={toBlocks(report.patternSummary.blocks)} />
+              </SectionShell>
+            ) : null}
 
             <SectionShell id="evidence" heading={payload.evidence.title}>
               <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
@@ -640,6 +724,9 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
                   <p className="rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#F3F1EA]/[0.035] p-5 text-sm leading-7 text-[#C8CEC7]/88">
                     {payload.evidence.explanatoryNote}
                   </p>
+                  {persistedEvidenceBlocks.length > 0 ? (
+                    <BlockGroup blocks={persistedEvidenceBlocks} />
+                  ) : null}
                 </div>
               </div>
             </SectionShell>
@@ -658,10 +745,26 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
               <SectionShell id="closing" heading="Closing synthesis">
                 <BlockGroup blocks={toBlocks(report.closing.synthesis)} />
                 {report.closing.finalLine ? (
-                  <p className="mt-7 rounded-[1.15rem] border border-[#34D8B6]/20 bg-[#34D8B6]/[0.07] p-5 text-xl font-semibold leading-8 text-[#F3F1EA] md:p-6">
-                    {report.closing.finalLine}
-                  </p>
+                  <div className="mt-7">
+                    <h3 className="mb-3 text-xl font-semibold leading-7 text-[#F3F1EA]">Final line</h3>
+                    <p className="rounded-[1.15rem] border border-[#34D8B6]/20 bg-[#34D8B6]/[0.07] p-5 text-xl font-semibold leading-8 text-[#F3F1EA] md:p-6">
+                      {report.closing.finalLine}
+                    </p>
+                  </div>
                 ) : null}
+              </SectionShell>
+            ) : null}
+
+            {report.pdf ? (
+              <SectionShell id="pdf-export" heading="PDF export CTA">
+                <div className="rounded-[1.15rem] border border-[#F3F1EA]/[0.08] bg-[#1B211F]/72 p-5 md:p-6">
+                  {report.pdf.title ? (
+                    <h3 className="text-xl font-semibold leading-7 text-[#F3F1EA]">{report.pdf.title}</h3>
+                  ) : null}
+                  {report.pdf.body ? (
+                    <p className="mt-3 max-w-[52rem] text-[1rem] leading-8 text-[#C8CEC7]/88">{report.pdf.body}</p>
+                  ) : null}
+                </div>
               </SectionShell>
             ) : null}
           </article>
