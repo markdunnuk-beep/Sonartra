@@ -176,6 +176,18 @@ function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
+function readerNavLabelForChapter(chapter: ReportFirstChapter): string {
+  if (/How People expands your leadership/i.test(chapter.title)) {
+    return 'People expansion';
+  }
+
+  if (/How Vision expands your leadership/i.test(chapter.title)) {
+    return 'Vision expansion';
+  }
+
+  return chapter.railLabel ?? `Chapter ${chapter.chapterNumber}`;
+}
+
 function buildSections(report: ReportFirstReport): readonly ReportFirstSection[] {
   const chapters = Array.isArray(report.chapters)
     ? report.chapters.filter((chapter) => chapter.readerFacing !== false)
@@ -188,7 +200,7 @@ function buildSections(report: ReportFirstReport): readonly ReportFirstSection[]
     ...(report.keyInsight ? [{ id: 'key-insight', label: 'Insight', heading: 'Key insight' }] : []),
     ...chapters.map((chapter) => ({
       id: slugify(chapter.chapterKey || chapter.title),
-      label: chapter.railLabel ?? `Chapter ${chapter.chapterNumber}`,
+      label: readerNavLabelForChapter(chapter),
       heading: chapter.title,
       eyebrow: `Chapter ${chapter.chapterNumber}`,
       chapter,
@@ -258,7 +270,7 @@ function SignalStack({
           <p className="mt-2 text-lg font-semibold text-[#F3F1EA]">Signal order and relative strength</p>
         </div>
         <p className="max-w-[16rem] text-sm leading-6 text-[#A8B0AA]/82">
-          Read from the persisted result payload.
+          {hasScores ? 'Based on your completed assessment.' : 'Shows how each signal contributes to this pattern.'}
         </p>
       </div>
       <div className="space-y-2.5">
@@ -492,8 +504,8 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
           <SignalTags signalKeys={block.linkedSignals} />
           <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{block.title}</h3>
           <p className="mt-3 text-sm leading-7 text-[#C8CEC7]/88">{block.text}</p>
-          {block.whyItMatters ? <p className="mt-4 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">Why it matters: </strong>{block.whyItMatters}</p> : null}
-          {block.rangeToAdd ? <p className="mt-3 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">Range to add: </strong>{block.rangeToAdd}</p> : null}
+          {block.whyItMatters ? <p className="mt-4 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">Why this matters: </strong>{block.whyItMatters}</p> : null}
+          {block.rangeToAdd ? <p className="mt-3 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">What to bring in: </strong>{block.rangeToAdd}</p> : null}
         </ContentCard>
       );
     case 'development_action':
@@ -502,7 +514,7 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
           <SignalTags signalKeys={block.linkedSignals} />
           <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{block.title}</h3>
           <p className="mt-3 text-sm leading-7 text-[#C8CEC7]/88">{block.text}</p>
-          {block.whyItMatters ? <p className="mt-4 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#8BE7D0]">Why it matters: </strong>{block.whyItMatters}</p> : null}
+          {block.whyItMatters ? <p className="mt-4 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#8BE7D0]">Why this matters: </strong>{block.whyItMatters}</p> : null}
           {block.useCases && block.useCases.length > 0 ? (
             <div className="mt-4 flex flex-wrap gap-2">
               {block.useCases.map((useCase) => (
@@ -684,7 +696,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
                   {payload.topSignal.signalLabel} leads this pattern
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-[#C8CEC7]/82">
-                  This report is selected from the ranked order and percentages persisted at completion time.
+                  This report is selected from your ranked signal order and relative strengths at completion.
                 </p>
                 <dl className="mt-5 space-y-3 border-t border-[#F3F1EA]/[0.08] pt-4 text-sm">
                   <div className="flex items-center justify-between gap-4">
@@ -756,7 +768,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
             ) : null}
 
             {report.pdf ? (
-              <SectionShell id="pdf-export" heading="PDF export CTA">
+              <SectionShell id="pdf-export" heading="Save this report">
                 <div className="rounded-[1.15rem] border border-[#F3F1EA]/[0.08] bg-[#1B211F]/72 p-5 md:p-6">
                   {report.pdf.title ? (
                     <h3 className="text-xl font-semibold leading-7 text-[#F3F1EA]">{report.pdf.title}</h3>

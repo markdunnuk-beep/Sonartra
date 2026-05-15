@@ -30,7 +30,7 @@ const requiredSourceHeadings = [
   'Chapter 10 — Development focus',
   'Closing synthesis',
   'Final line',
-  'PDF export CTA',
+  'Save this report',
 ] as const;
 
 const representativeParagraphs = [
@@ -237,7 +237,7 @@ test('report-first result renderer preserves structured report blocks in source 
     'Development focus',
     'Closing synthesis',
     'Final line',
-    'PDF export CTA',
+    'Save this report',
   ];
   const markerPositions = orderedMarkers.map((marker) => {
     const index = renderedText.indexOf(marker);
@@ -264,6 +264,26 @@ test('report-first result renderer hides internal diagnostics and raw identifier
   assert.doesNotMatch(renderedText, /reportFirstTemplate/);
   assert.doesNotMatch(renderedText, /canonical_result_payload/);
   assert.doesNotMatch(renderedText, /report_first_canonical_payload_v1/);
+  assert.doesNotMatch(renderedText, /persisted result payload/i);
+  assert.doesNotMatch(renderedText, /template id/i);
+  assert.doesNotMatch(renderedText, /content hash/i);
+  assert.doesNotMatch(renderedText, /lookup key/i);
+  assert.doesNotMatch(renderedText, /pattern_key/i);
+  assert.doesNotMatch(renderedText, /draft-only/i);
+  assert.doesNotMatch(renderedText, /PDF export CTA/);
+});
+
+test('report-first result renderer uses reader-facing navigation and card labels', () => {
+  const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
+  const renderedText = textFromMarkup(markup);
+
+  assert.match(renderedText, /People expansion/);
+  assert.match(renderedText, /Vision expansion/);
+  assert.doesNotMatch(renderedText, /RangeRange/);
+  assert.match(renderedText, /Why this matters:/);
+  assert.match(renderedText, /What to bring in:/);
+  assert.doesNotMatch(renderedText, /Why it matters:/);
+  assert.doesNotMatch(renderedText, /Range to add:/);
 });
 
 test('report-first renderer stays disconnected from template storage and scoring recomputation', () => {
