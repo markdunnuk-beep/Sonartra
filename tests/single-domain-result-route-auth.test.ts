@@ -328,7 +328,10 @@ test('single-domain result route stays tied to persisted result retrieval and no
 
   assert.match(source, /getAssessmentResultDetail/);
   assert.match(source, /AssessmentResultNotFoundError/);
-  assert.match(source, /if \(detail\.mode !== 'single_domain' \|\| !detail\.singleDomainResult\)/);
+  assert.match(source, /if \(detail\.mode !== 'single_domain'\)/);
+  assert.match(source, /detail\.resultKind === 'report_first'/);
+  assert.match(source, /ReportFirstResultReport/);
+  assert.match(source, /if \(!detail\.singleDomainResult\)/);
   assert.match(source, /notFound\(\)/);
 });
 
@@ -348,7 +351,7 @@ test('generic result route redirects single-domain results to the canonical repo
 
   assert.match(source, /import \{ notFound, redirect \} from 'next\/navigation';/);
   assert.match(source, /getAssessmentResultDetail/);
-  assert.match(source, /if \(result\.mode === 'single_domain' && result\.singleDomainResult\)/);
+  assert.match(source, /result\.mode === 'single_domain' && \(result\.singleDomainResult \|\| result\.resultKind === 'report_first'\)/);
   assert.match(source, /redirect\(`\/app\/results\/single-domain\/\$\{resultId\}`\)/);
   assert.match(source, /buildDomainSignalRingViewModel/);
   assert.match(source, /No domain summaries are available for this result/);

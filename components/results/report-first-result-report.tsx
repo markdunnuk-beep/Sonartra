@@ -1,0 +1,674 @@
+import type { ReactNode } from 'react';
+
+import type {
+  ReportFirstCanonicalPayloadV1,
+  ReportFirstRankedSignal,
+  ReportFirstScoreRow,
+} from '@/lib/types/report-first-result';
+
+type RecordValue = Record<string, unknown>;
+
+type ReportFirstBlock =
+  | { readonly type: 'paragraph'; readonly text: string }
+  | { readonly type: 'list'; readonly items: readonly string[] }
+  | { readonly type: 'table'; readonly columns?: readonly TableColumn[]; readonly rows: readonly (readonly TableCell[])[] }
+  | { readonly type: 'pull_quote'; readonly text: string }
+  | { readonly type: 'prompt_group'; readonly title?: string; readonly prompts: readonly string[] }
+  | { readonly type: 'callout'; readonly title?: string; readonly text: string; readonly tone?: 'neutral' | 'evidence' }
+  | { readonly type: 'strength_card'; readonly title: string; readonly text: string; readonly linkedSignals?: readonly string[] }
+  | {
+      readonly type: 'tightening_card';
+      readonly title: string;
+      readonly text: string;
+      readonly whyItMatters?: string;
+      readonly rangeToAdd?: string;
+      readonly linkedSignals?: readonly string[];
+    }
+  | {
+      readonly type: 'development_action';
+      readonly title: string;
+      readonly text: string;
+      readonly useCases?: readonly string[];
+      readonly whyItMatters?: string;
+      readonly linkedSignals?: readonly string[];
+    };
+
+type TableColumn = {
+  readonly key: string;
+  readonly label: string;
+};
+
+type TableCell = {
+  readonly columnKey: string;
+  readonly value: string;
+};
+
+type ReportFirstChapter = {
+  readonly chapterKey: string;
+  readonly chapterNumber: number;
+  readonly title: string;
+  readonly railLabel?: string;
+  readonly readerFacing?: boolean;
+  readonly blocks: readonly ReportFirstBlock[];
+};
+
+type ReportFirstReport = {
+  readonly reportKey?: string;
+  readonly reportTitle?: string;
+  readonly hero?: {
+    readonly title?: string;
+    readonly resultStatement?: string;
+  };
+  readonly opening?: readonly ReportFirstBlock[];
+  readonly keyInsight?: ReportFirstBlock;
+  readonly chapters?: readonly ReportFirstChapter[];
+  readonly closing?: {
+    readonly synthesis?: readonly ReportFirstBlock[];
+    readonly finalLine?: string;
+  };
+  readonly readerNavigation?: readonly {
+    readonly id: string;
+    readonly label: string;
+    readonly targetChapterKey?: string;
+  }[];
+};
+
+type ReportFirstSection = {
+  readonly id: string;
+  readonly label: string;
+  readonly heading: string;
+  readonly eyebrow?: string;
+  readonly chapter?: ReportFirstChapter;
+};
+
+type ReportFirstCardBlock = Extract<
+  ReportFirstBlock,
+  { readonly type: 'strength_card' | 'tightening_card' | 'development_action' }
+>;
+
+const signalRoleLabelsByRank = ['Lead signal', 'Strengthening signal', 'Range signal', 'Further range'] as const;
+
+function isRecord(value: unknown): value is RecordValue {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyText(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function readText(record: RecordValue, key: string): string | null {
+  const value = record[key];
+  return isNonEmptyText(value) ? value.trim() : null;
+}
+
+function toReport(value: unknown): ReportFirstReport {
+  return isRecord(value) ? (value as unknown as ReportFirstReport) : {};
+}
+
+function toBlocks(value: unknown): readonly ReportFirstBlock[] {
+  return Array.isArray(value) ? (value as readonly ReportFirstBlock[]) : [];
+}
+
+function formatDate(value: string | null | undefined): string {
+  if (!value) {
+    return 'No completion date';
+  }
+
+  return new Date(value).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function labelFromSignalKey(value: string): string {
+  return value
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(' ');
+}
+
+function buildSections(report: ReportFirstReport): readonly ReportFirstSection[] {
+  const chapters = Array.isArray(report.chapters)
+    ? report.chapters.filter((chapter) => chapter.readerFacing !== false)
+    : [];
+
+  return [
+    { id: 'overview', label: 'Overview', heading: 'Overview' },
+    { id: 'evidence', label: 'Evidence', heading: 'Evidence behind your result' },
+    ...(report.keyInsight ? [{ id: 'key-insight', label: 'Insight', heading: 'Key insight' }] : []),
+    ...chapters.map((chapter) => ({
+      id: slugify(chapter.chapterKey || chapter.title),
+      label: chapter.railLabel ?? `Chapter ${chapter.chapterNumber}`,
+      heading: chapter.title,
+      eyebrow: `Chapter ${chapter.chapterNumber}`,
+      chapter,
+    })),
+    ...(report.closing ? [{ id: 'closing', label: 'Closing', heading: 'Closing synthesis' }] : []),
+  ];
+}
+
+function FieldLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#34D8B6]/85">
+      {children}
+    </p>
+  );
+}
+
+function SectionShell({
+  children,
+  className,
+  eyebrow,
+  heading,
+  id,
+}: {
+  children: ReactNode;
+  className?: string;
+  eyebrow?: string;
+  heading: string;
+  id: string;
+}) {
+  const headingId = `${id}-heading`;
+  return (
+    <section
+      id={id}
+      aria-labelledby={headingId}
+      className={cx(
+        'results-anchor-target scroll-mt-28 border-t border-[#F3F1EA]/[0.08] py-12 md:py-16',
+        className,
+      )}
+      data-report-first-section={id}
+    >
+      <div className="mb-7 max-w-3xl space-y-3">
+        {eyebrow ? <FieldLabel>{eyebrow}</FieldLabel> : null}
+        <h2 id={headingId} className="text-[2rem] font-semibold leading-tight text-[#F3F1EA] md:text-[2.65rem]">
+          {heading}
+        </h2>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function SignalStack({
+  rankedSignals,
+  scoreRows,
+}: {
+  rankedSignals: readonly ReportFirstRankedSignal[];
+  scoreRows: readonly ReportFirstScoreRow[];
+}) {
+  const scoresBySignal = new Map(scoreRows.map((score) => [score.signalKey, score]));
+
+  return (
+    <div className="rounded-[1.15rem] border border-[#F3F1EA]/[0.09] bg-[#171D1A]/82 p-4 shadow-[0_24px_70px_rgba(4,7,6,0.18)] sm:p-5" data-report-first-signal-stack="true">
+      <div className="mb-4 flex flex-col gap-2 border-b border-[#F3F1EA]/[0.08] pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <FieldLabel>Ranked evidence</FieldLabel>
+          <p className="mt-2 text-lg font-semibold text-[#F3F1EA]">Signal order and relative strength</p>
+        </div>
+        <p className="max-w-[16rem] text-sm leading-6 text-[#A8B0AA]/82">
+          Read from the persisted result payload.
+        </p>
+      </div>
+      <div className="space-y-2.5">
+        {rankedSignals.map((signal, index) => {
+          const percentage = scoresBySignal.get(signal.signalKey)?.normalizedPercent ?? 0;
+          const isLead = index === 0;
+          return (
+            <div
+              key={`${signal.rank}-${signal.signalKey}`}
+              role="meter"
+              aria-label={`${signal.signalLabel}, rank ${signal.rank}, ${percentage}%`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={percentage}
+              className={cx(
+                'grid gap-3 rounded-[0.95rem] border p-3 sm:grid-cols-[minmax(9rem,0.8fr)_minmax(10rem,1fr)_3.75rem] sm:items-center',
+                isLead ? 'border-[#34D8B6]/28 bg-[#34D8B6]/[0.075]' : 'border-[#F3F1EA]/[0.08] bg-[#202622]/48',
+              )}
+              data-report-first-signal-row="true"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#F3F1EA]/14 bg-[#101312]/70 font-mono text-xs text-[#F3F1EA]">
+                  {signal.rank}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold leading-5 text-[#F3F1EA]">{signal.signalLabel}</p>
+                  <p className="mt-1 font-mono text-[0.62rem] uppercase tracking-[0.15em] text-[#A8B0AA]/78">
+                    {signal.roleLabel ?? signalRoleLabelsByRank[index] ?? 'Ranked signal'}
+                  </p>
+                </div>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-[#0E1110]/85 ring-1 ring-[#F3F1EA]/[0.08]">
+                <div
+                  className={cx(
+                    'h-full rounded-full',
+                    isLead
+                      ? 'bg-[linear-gradient(90deg,#34D8B6,rgba(52,216,182,0.7))]'
+                      : 'bg-[linear-gradient(90deg,rgba(139,196,181,0.84),rgba(139,196,181,0.48))]',
+                  )}
+                  style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
+                />
+              </div>
+              <p className="font-mono text-xl text-[#F3F1EA] sm:text-right">{percentage}%</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function EvidenceTable({ rows }: { rows: readonly ReportFirstScoreRow[] }) {
+  return (
+    <div className="overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]" data-report-first-evidence-table="true">
+      <table className="min-w-full divide-y divide-[#F3F1EA]/[0.08] text-left text-sm">
+        <thead className="bg-[#F3F1EA]/[0.035] text-[#A8B0AA]">
+          <tr>
+            <th className="px-4 py-3 font-medium">Signal</th>
+            <th className="px-4 py-3 font-medium">Ranked score</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#F3F1EA]/[0.07]">
+          {rows.map((row) => (
+            <tr key={row.signalKey}>
+              <td className="px-4 py-3 text-[#F3F1EA]/90">{row.signalLabel}</td>
+              <td className="px-4 py-3 font-mono text-[#F3F1EA]/90">{row.normalizedPercent}%</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function GenericTable({ block }: { block: Extract<ReportFirstBlock, { type: 'table' }> }) {
+  const columns = block.columns && block.columns.length > 0
+    ? block.columns
+    : (block.rows[0] ?? []).map((cell, index) => ({ key: cell.columnKey || `column-${index}`, label: cell.value }));
+  const bodyRows = block.columns && block.columns.length > 0 ? block.rows : block.rows.slice(1);
+
+  return (
+    <div className="my-6 overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]" data-report-first-table-block="true">
+      <table className="min-w-full divide-y divide-[#F3F1EA]/[0.08] text-left text-sm">
+        <thead className="bg-[#F3F1EA]/[0.035] text-[#A8B0AA]">
+          <tr>
+            {columns.map((column) => (
+              <th className="px-4 py-3 font-medium" key={column.key}>{column.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#F3F1EA]/[0.07]">
+          {bodyRows.map((row, rowIndex) => (
+            <tr key={`row-${rowIndex}`}>
+              {columns.map((column, columnIndex) => (
+                <td className="px-4 py-3 leading-6 text-[#D3D7D1]/88" key={column.key}>
+                  {row.find((cell) => cell.columnKey === column.key)?.value ?? row[columnIndex]?.value ?? ''}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SignalTags({ signalKeys }: { signalKeys?: readonly string[] }) {
+  if (!signalKeys || signalKeys.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {signalKeys.map((signalKey) => (
+        <span
+          className="rounded-full border border-[#34D8B6]/18 bg-[#34D8B6]/[0.075] px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#8BE7D0]"
+          key={signalKey}
+        >
+          {labelFromSignalKey(signalKey)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ContentCard({
+  children,
+  tone = 'neutral',
+  type,
+}: {
+  children: ReactNode;
+  tone?: 'neutral' | 'teal' | 'warm';
+  type: string;
+}) {
+  return (
+    <article
+      className={cx(
+        'rounded-[1rem] border p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]',
+        tone === 'teal' && 'border-[#34D8B6]/18 bg-[#34D8B6]/[0.052]',
+        tone === 'warm' && 'border-[#C98E68]/20 bg-[#C98E68]/[0.052]',
+        tone === 'neutral' && 'border-[#F3F1EA]/[0.08] bg-[#1B211F]/72',
+      )}
+      data-report-first-card={type}
+    >
+      {children}
+    </article>
+  );
+}
+
+function RenderBlock({ block }: { block: ReportFirstBlock }) {
+  switch (block.type) {
+    case 'paragraph':
+      return <p className="max-w-[58rem] text-[1rem] leading-8 text-[#C8CEC7]/88">{block.text}</p>;
+    case 'list':
+      return (
+        <ul className="grid gap-2.5 text-[0.98rem] leading-7 text-[#C8CEC7]/88" role="list">
+          {block.items.map((item) => (
+            <li className="relative pl-5 before:absolute before:left-0 before:top-3 before:h-1.5 before:w-1.5 before:rounded-full before:bg-[#34D8B6]/72" key={item}>
+              {item}
+            </li>
+          ))}
+        </ul>
+      );
+    case 'table':
+      return <GenericTable block={block} />;
+    case 'pull_quote':
+      return (
+        <blockquote className="rounded-[1.15rem] border border-[#34D8B6]/20 bg-[#34D8B6]/[0.07] p-5 text-xl font-semibold leading-8 text-[#F3F1EA] md:p-6 md:text-2xl md:leading-10" data-report-first-pull-quote="true">
+          {block.text}
+        </blockquote>
+      );
+    case 'callout':
+      return (
+        <div className="rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#F3F1EA]/[0.035] p-5" data-report-first-callout={block.tone ?? 'neutral'}>
+          {block.title ? <h3 className="text-lg font-semibold text-[#F3F1EA]">{block.title}</h3> : null}
+          <p className={cx('text-[0.98rem] leading-7 text-[#C8CEC7]/88', block.title && 'mt-3')}>{block.text}</p>
+        </div>
+      );
+    case 'prompt_group':
+      return (
+        <div className="rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/78 p-5" data-report-first-prompt-group="true">
+          {block.title ? <h3 className="text-lg font-semibold text-[#F3F1EA]">{block.title}</h3> : null}
+          <ol className={cx('grid gap-2.5', block.title && 'mt-4')}>
+            {block.prompts.map((prompt, index) => (
+              <li className="grid grid-cols-[1.9rem_minmax(0,1fr)] gap-3 text-[0.98rem] leading-7 text-[#C8CEC7]/88" key={prompt}>
+                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#F3F1EA]/12 bg-[#101312]/72 font-mono text-xs text-[#A8B0AA]">
+                  {index + 1}
+                </span>
+                <span>{prompt}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      );
+    case 'strength_card':
+      return (
+        <ContentCard tone="teal" type="strength">
+          <SignalTags signalKeys={block.linkedSignals} />
+          <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{block.title}</h3>
+          <p className="mt-3 text-sm leading-7 text-[#C8CEC7]/88">{block.text}</p>
+        </ContentCard>
+      );
+    case 'tightening_card':
+      return (
+        <ContentCard tone="warm" type="tightening">
+          <SignalTags signalKeys={block.linkedSignals} />
+          <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{block.title}</h3>
+          <p className="mt-3 text-sm leading-7 text-[#C8CEC7]/88">{block.text}</p>
+          {block.whyItMatters ? <p className="mt-4 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">Why it matters: </strong>{block.whyItMatters}</p> : null}
+          {block.rangeToAdd ? <p className="mt-3 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">Range to add: </strong>{block.rangeToAdd}</p> : null}
+        </ContentCard>
+      );
+    case 'development_action':
+      return (
+        <ContentCard tone="teal" type="development-action">
+          <SignalTags signalKeys={block.linkedSignals} />
+          <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{block.title}</h3>
+          <p className="mt-3 text-sm leading-7 text-[#C8CEC7]/88">{block.text}</p>
+          {block.whyItMatters ? <p className="mt-4 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#8BE7D0]">Why it matters: </strong>{block.whyItMatters}</p> : null}
+          {block.useCases && block.useCases.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {block.useCases.map((useCase) => (
+                <span className="rounded-full border border-[#F3F1EA]/10 bg-[#F3F1EA]/[0.04] px-2.5 py-1 text-xs text-[#C8CEC7]/80" key={useCase}>
+                  {useCase}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </ContentCard>
+      );
+  }
+}
+
+function BlockGroup({ blocks }: { blocks: readonly ReportFirstBlock[] }) {
+  const groups: Array<
+    | { readonly kind: 'cards'; readonly blocks: ReportFirstCardBlock[] }
+    | { readonly kind: 'block'; readonly block: ReportFirstBlock }
+  > = [];
+
+  for (const block of blocks) {
+    if (block.type === 'strength_card' || block.type === 'tightening_card' || block.type === 'development_action') {
+      const previousGroup = groups.at(-1);
+      if (previousGroup?.kind === 'cards') {
+        previousGroup.blocks.push(block);
+      } else {
+        groups.push({ kind: 'cards', blocks: [block] });
+      }
+    } else {
+      groups.push({ kind: 'block', block });
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      {groups.map((group, index) => {
+        if (group.kind === 'block') {
+          return <RenderBlock block={group.block} key={`${group.block.type}-${index}`} />;
+        }
+
+        return (
+          <div className="grid gap-4 lg:grid-cols-3" key={`cards-${index}`}>
+            {group.blocks.map((block, blockIndex) => (
+              <RenderBlock block={block} key={`${block.type}-${blockIndex}`} />
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ChapterSection({ section }: { section: ReportFirstSection }) {
+  const chapter = section.chapter;
+  if (!chapter) {
+    return null;
+  }
+
+  return (
+    <SectionShell id={section.id} heading={section.heading} eyebrow={section.eyebrow}>
+      <BlockGroup blocks={chapter.blocks} />
+    </SectionShell>
+  );
+}
+
+function ReadingRail({ sections }: { sections: readonly ReportFirstSection[] }) {
+  return (
+    <nav
+      aria-label="Result reading navigation"
+      className="hidden xl:sticky xl:top-[5.7rem] xl:block xl:w-[11.5rem] xl:shrink-0 xl:self-start"
+      data-report-first-reading-rail="true"
+    >
+      <div className="rounded-[1.2rem] border border-[#F3F1EA]/[0.075] bg-[#171D1A]/64 px-3 py-3.5 shadow-[0_16px_36px_rgba(4,7,6,0.12)]">
+        <p className="mb-3 pl-2 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#A8B0AA]/60">
+          Read report
+        </p>
+        <ol className="space-y-1" role="list">
+          {sections.map((section, index) => (
+            <li key={section.id}>
+              <a
+                href={`#${section.id}`}
+                className="block rounded-[0.8rem] px-2.5 py-2 text-[0.78rem] leading-5 text-[#A8B0AA]/76 outline-none transition hover:bg-[#F3F1EA]/[0.04] hover:text-[#F3F1EA]/90 focus-visible:ring-2 focus-visible:ring-[#34D8B6]/55"
+              >
+                <span className="mr-2 font-mono text-[0.63rem] text-[#A8B0AA]/48">{String(index + 1).padStart(2, '0')}</span>
+                {section.label}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </nav>
+  );
+}
+
+function MobileSectionNav({ sections }: { sections: readonly ReportFirstSection[] }) {
+  return (
+    <nav
+      aria-label="Result sections"
+      className="sticky top-3 z-20 mb-4 rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/92 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.18)] xl:hidden"
+      data-report-first-mobile-nav="true"
+    >
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {sections.map((section) => (
+          <a
+            href={`#${section.id}`}
+            className="shrink-0 rounded-[0.78rem] border border-transparent px-3 py-2 text-sm text-[#C8CEC7]/84 outline-none hover:border-[#34D8B6]/20 hover:bg-[#34D8B6]/[0.07] focus-visible:ring-2 focus-visible:ring-[#34D8B6]/55"
+            key={section.id}
+          >
+            {section.label}
+          </a>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanonicalPayloadV1 }) {
+  const report = toReport(payload.report);
+  const sections = buildSections(report);
+  const openingBlocks = toBlocks(report.opening);
+  const heroTitle = report.hero?.title ?? report.reportTitle ?? payload.assessment.title;
+  const resultStatement = report.hero?.resultStatement
+    ?? (isRecord(report.keyInsight) ? readText(report.keyInsight, 'text') : null)
+    ?? payload.evidence.explanatoryNote;
+  const completionDate = formatDate(payload.attempt.completedAt ?? payload.metadata.completedAt);
+
+  return (
+    <main
+      className="relative isolate min-h-[calc(100vh-4.25rem)] overflow-x-clip bg-[#101312] text-[#F3F1EA]"
+      data-report-first-result="true"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-y-0 left-0 z-0 w-full overflow-hidden bg-[linear-gradient(180deg,#101312_0%,#151A18_34rem,#0E1110_100%)]"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_6%,rgba(52,216,182,0.075),transparent_31%),radial-gradient(circle_at_82%_8%,rgba(201,142,104,0.055),transparent_30%)]" />
+        <div className="absolute inset-x-[-8rem] top-0 h-[38rem] bg-[linear-gradient(rgba(243,241,234,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(243,241,234,0.009)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_86%)]" />
+      </div>
+
+      <div className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-16 pt-8 sm:px-6 md:pb-24 md:pt-10 lg:px-7 xl:px-8">
+        <MobileSectionNav sections={sections} />
+
+        <header className="grid gap-7 py-6 md:gap-8 md:py-9">
+          <div className="max-w-5xl">
+            <span className="rounded-full border border-[#34D8B6]/24 bg-[#34D8B6]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#34D8B6]">
+              Sonartra leadership report
+            </span>
+            <p className="mt-7 text-sm font-medium uppercase tracking-[0.18em] text-[#C8CEC7]/70">
+              {payload.domain.title} · Completed {completionDate}
+            </p>
+            <h1 className="mt-3 max-w-5xl text-5xl font-semibold leading-[1.02] text-[#F3F1EA] md:text-7xl">
+              {heroTitle}
+            </h1>
+            <p className="mt-6 max-w-3xl text-xl leading-8 text-[#C8CEC7]/95 md:text-2xl md:leading-10">
+              {resultStatement}
+            </p>
+          </div>
+
+          <aside className="rounded-[1.25rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)] md:p-6">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start">
+              <div>
+                <FieldLabel>Result basis</FieldLabel>
+                <h2 className="mt-3 text-2xl font-semibold text-[#F3F1EA]">
+                  {payload.topSignal.signalLabel} leads this pattern
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-[#C8CEC7]/82">
+                  This report is selected from the ranked order and percentages persisted at completion time.
+                </p>
+                <dl className="mt-5 space-y-3 border-t border-[#F3F1EA]/[0.08] pt-4 text-sm">
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-[#A8B0AA]">Assessment</dt>
+                    <dd className="text-right text-[#F3F1EA]/88">{payload.assessment.title}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-[#A8B0AA]">Completed responses</dt>
+                    <dd className="text-right text-[#F3F1EA]/88">
+                      {payload.attempt.answeredQuestionCount} of {payload.attempt.totalQuestionCount}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+              <SignalStack rankedSignals={payload.rankedSignals} scoreRows={payload.normalizedScores} />
+            </div>
+          </aside>
+        </header>
+
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,74rem)_11.5rem] xl:items-start xl:justify-center xl:gap-12 2xl:gap-16">
+          <article className="min-w-0">
+            <SectionShell id="overview" heading="Overview">
+              <BlockGroup blocks={openingBlocks} />
+            </SectionShell>
+
+            <SectionShell id="evidence" heading={payload.evidence.title}>
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+                <SignalStack rankedSignals={payload.evidence.rankedSignalEvidence} scoreRows={payload.evidence.scoreRows} />
+                <div className="space-y-5">
+                  <EvidenceTable rows={payload.evidence.scoreRows} />
+                  <p className="rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#F3F1EA]/[0.035] p-5 text-sm leading-7 text-[#C8CEC7]/88">
+                    {payload.evidence.explanatoryNote}
+                  </p>
+                </div>
+              </div>
+            </SectionShell>
+
+            {report.keyInsight ? (
+              <SectionShell id="key-insight" heading="Key insight">
+                <RenderBlock block={report.keyInsight} />
+              </SectionShell>
+            ) : null}
+
+            {sections.map((section) => (
+              <ChapterSection key={section.id} section={section} />
+            ))}
+
+            {report.closing ? (
+              <SectionShell id="closing" heading="Closing synthesis">
+                <BlockGroup blocks={toBlocks(report.closing.synthesis)} />
+                {report.closing.finalLine ? (
+                  <p className="mt-7 rounded-[1.15rem] border border-[#34D8B6]/20 bg-[#34D8B6]/[0.07] p-5 text-xl font-semibold leading-8 text-[#F3F1EA] md:p-6">
+                    {report.closing.finalLine}
+                  </p>
+                ) : null}
+              </SectionShell>
+            ) : null}
+          </article>
+
+          <ReadingRail sections={sections} />
+        </div>
+      </div>
+    </main>
+  );
+}

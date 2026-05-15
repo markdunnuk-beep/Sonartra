@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { RankedPatternResultReport } from '@/components/results/ranked-pattern-result-report';
+import { ReportFirstResultReport } from '@/components/results/report-first-result-report';
 import { SingleDomainResultReport } from '@/components/results/single-domain-result-report';
 import { isRankedPatternRenderablePayload } from '@/lib/results/ranked-pattern-renderable';
 import { getDbPool } from '@/lib/server/db';
@@ -37,7 +38,15 @@ export default async function SingleDomainResultPage(
     throw error;
   }
 
-  if (detail.mode !== 'single_domain' || !detail.singleDomainResult) {
+  if (detail.mode !== 'single_domain') {
+    notFound();
+  }
+
+  if (detail.resultKind === 'report_first' && detail.reportFirstResult) {
+    return <ReportFirstResultReport payload={detail.reportFirstResult} />;
+  }
+
+  if (!detail.singleDomainResult) {
     notFound();
   }
 

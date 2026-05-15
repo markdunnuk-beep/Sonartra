@@ -526,7 +526,7 @@ export default async function ResultDetailPage({ params }: ResultDetailPageProps
     throw error;
   }
 
-  if (result.mode === 'single_domain' && result.singleDomainResult) {
+  if (result.mode === 'single_domain' && (result.singleDomainResult || result.resultKind === 'report_first')) {
     redirect(`/app/results/single-domain/${resultId}`);
   }
 
