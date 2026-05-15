@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import type { ReactNode } from 'react';
 
 import type {
@@ -211,7 +212,7 @@ function buildSections(report: ReportFirstReport): readonly ReportFirstSection[]
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#34D8B6]/85">
+    <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#32D6B0]/85">
       {children}
     </p>
   );
@@ -243,7 +244,7 @@ function SectionShell({
     >
       <div className="mb-7 max-w-3xl space-y-3">
         {eyebrow ? <FieldLabel>{eyebrow}</FieldLabel> : null}
-        <h2 id={headingId} className="text-[2rem] font-semibold leading-tight text-[#F3F1EA] md:text-[2.65rem]">
+        <h2 id={headingId} className="text-[2rem] font-semibold leading-tight text-[#F5F1EA] md:text-[2.65rem]">
           {heading}
         </h2>
       </div>
@@ -263,7 +264,7 @@ function SignalStack({
   const hasScores = scoreRows.length > 0;
 
   return (
-    <div className="rounded-[1.15rem] border border-[#F3F1EA]/[0.09] bg-[#171D1A]/82 p-4 shadow-[0_24px_70px_rgba(4,7,6,0.18)] sm:p-5" data-report-first-signal-stack="true">
+    <div className="rounded-[1.25rem] border border-white/[0.09] bg-[linear-gradient(180deg,rgba(245,241,234,0.055),rgba(9,11,15,0.24))] p-4 shadow-[0_24px_70px_rgba(4,7,6,0.18)] backdrop-blur-sm sm:p-5" data-report-first-signal-stack="true">
       <div className="mb-4 flex flex-col gap-2 border-b border-[#F3F1EA]/[0.08] pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <FieldLabel>Ranked evidence</FieldLabel>
@@ -290,7 +291,7 @@ function SignalStack({
                 hasScores
                   ? 'sm:grid-cols-[minmax(9rem,0.8fr)_minmax(10rem,1fr)_3.75rem]'
                   : 'sm:grid-cols-[minmax(9rem,0.55fr)_minmax(0,1fr)]',
-                isLead ? 'border-[#34D8B6]/28 bg-[#34D8B6]/[0.075]' : 'border-[#F3F1EA]/[0.08] bg-[#202622]/48',
+                isLead ? 'border-[#32D6B0]/32 bg-[#32D6B0]/[0.085]' : 'border-[#F3F1EA]/[0.08] bg-[#202622]/48',
               )}
               data-report-first-signal-row="true"
             >
@@ -312,7 +313,7 @@ function SignalStack({
                       className={cx(
                         'h-full rounded-full',
                         isLead
-                          ? 'bg-[linear-gradient(90deg,#34D8B6,rgba(52,216,182,0.7))]'
+                          ? 'bg-[linear-gradient(90deg,#32D6B0,rgba(50,214,176,0.7))]'
                           : 'bg-[linear-gradient(90deg,rgba(139,196,181,0.84),rgba(139,196,181,0.48))]',
                       )}
                       style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
@@ -333,7 +334,7 @@ function SignalStack({
 
 function EvidenceTable({ rows }: { rows: readonly ReportFirstScoreRow[] }) {
   return (
-    <div className="min-w-0 max-w-full overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]" data-report-first-evidence-table="true">
+    <div className="min-w-0 max-w-full overflow-x-auto rounded-[1rem] border border-white/[0.09] bg-[#080A0D]/24" data-report-first-evidence-table="true">
       <table className="min-w-full divide-y divide-[#F3F1EA]/[0.08] text-left text-sm">
         <thead className="bg-[#F3F1EA]/[0.035] text-[#A8B0AA]">
           <tr>
@@ -395,7 +396,7 @@ function SignalTags({ signalKeys }: { signalKeys?: readonly string[] }) {
     <div className="flex flex-wrap gap-2">
       {signalKeys.map((signalKey) => (
         <span
-          className="rounded-full border border-[#34D8B6]/18 bg-[#34D8B6]/[0.075] px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#8BE7D0]"
+          className="rounded-full border border-[#32D6B0]/18 bg-[#32D6B0]/[0.075] px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#8BE7D0]"
           key={signalKey}
         >
           {labelFromSignalKey(signalKey)}
@@ -418,7 +419,7 @@ function ContentCard({
     <article
       className={cx(
         'rounded-[1rem] border p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]',
-        tone === 'teal' && 'border-[#34D8B6]/18 bg-[#34D8B6]/[0.052]',
+        tone === 'teal' && 'border-[#32D6B0]/18 bg-[#32D6B0]/[0.052]',
         tone === 'warm' && 'border-[#C98E68]/20 bg-[#C98E68]/[0.052]',
         tone === 'neutral' && 'border-[#F3F1EA]/[0.08] bg-[#1B211F]/72',
       )}
@@ -438,7 +439,7 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
       return (
         <ul className="grid gap-2.5 text-[0.98rem] leading-7 text-[#C8CEC7]/88" role="list">
           {block.items.map((item) => (
-            <li className="relative pl-5 before:absolute before:left-0 before:top-3 before:h-1.5 before:w-1.5 before:rounded-full before:bg-[#34D8B6]/72" key={item}>
+            <li className="relative pl-5 before:absolute before:left-0 before:top-3 before:h-1.5 before:w-1.5 before:rounded-full before:bg-[#32D6B0]/72" key={item}>
               {item}
             </li>
           ))}
@@ -463,7 +464,7 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
       return <SignalStack rankedSignals={block.signals} scoreRows={[]} />;
     case 'pull_quote':
       return (
-        <blockquote className="rounded-[1.15rem] border border-[#34D8B6]/20 bg-[#34D8B6]/[0.07] p-5 text-xl font-semibold leading-8 text-[#F3F1EA] md:p-6 md:text-2xl md:leading-10" data-report-first-pull-quote="true">
+        <blockquote className="rounded-[1.25rem] border border-[#32D6B0]/22 bg-[linear-gradient(135deg,rgba(50,214,176,0.1),rgba(245,241,234,0.035))] p-5 text-xl font-semibold leading-8 text-[#F5F1EA] md:p-6 md:text-2xl md:leading-10" data-report-first-pull-quote="true">
           {block.text}
         </blockquote>
       );
@@ -587,22 +588,31 @@ function ReadingRail({ sections }: { sections: readonly ReportFirstSection[] }) 
   return (
     <nav
       aria-label="Result reading navigation"
-      className="hidden xl:sticky xl:top-[5.7rem] xl:block xl:w-[11.5rem] xl:shrink-0 xl:self-start"
+      className="hidden xl:sticky xl:top-[5.7rem] xl:block xl:w-[12rem] xl:shrink-0 xl:self-start"
       data-report-first-reading-rail="true"
     >
-      <div className="rounded-[1.2rem] border border-[#F3F1EA]/[0.075] bg-[#171D1A]/64 px-3 py-3.5 shadow-[0_16px_36px_rgba(4,7,6,0.12)]">
-        <p className="mb-3 pl-2 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#A8B0AA]/60">
-          Read report
-        </p>
-        <ol className="space-y-1" role="list">
+      <div className="rounded-[1.35rem] border border-white/[0.08] bg-[#080A0D]/42 px-3 py-3.5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-[14px]">
+        <div className="mb-4 border-b border-white/[0.08] px-1 pb-3">
+          <Image
+            src="/images/brand/sonartra-logo-white.svg"
+            alt="Sonartra"
+            width={6259}
+            height={1529}
+            className="h-auto w-[132px] opacity-85"
+          />
+          <p className="mt-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#32D6B0]/75">
+            Report guide
+          </p>
+        </div>
+        <ol className="space-y-0.5" role="list">
           {sections.map((section, index) => (
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
-                className="block rounded-[0.8rem] px-2.5 py-2 text-[0.78rem] leading-5 text-[#A8B0AA]/76 outline-none transition hover:bg-[#F3F1EA]/[0.04] hover:text-[#F3F1EA]/90 focus-visible:ring-2 focus-visible:ring-[#34D8B6]/55"
+                className="group grid grid-cols-[1.7rem_minmax(0,1fr)] rounded-[0.85rem] px-2.5 py-2 text-[0.78rem] leading-5 text-[#A8B0AA]/76 outline-none transition hover:bg-white/[0.045] hover:text-[#F5F1EA]/92 focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55"
               >
-                <span className="mr-2 font-mono text-[0.63rem] text-[#A8B0AA]/48">{String(index + 1).padStart(2, '0')}</span>
-                {section.label}
+                <span className="font-mono text-[0.63rem] text-[#32D6B0]/52">{String(index + 1).padStart(2, '0')}</span>
+                <span>{section.label}</span>
               </a>
             </li>
           ))}
@@ -616,14 +626,26 @@ function MobileSectionNav({ sections }: { sections: readonly ReportFirstSection[
   return (
     <nav
       aria-label="Result sections"
-      className="sticky top-3 z-20 mb-4 max-w-full overflow-hidden rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/92 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.18)] xl:hidden"
+      className="sticky top-3 z-20 mb-4 max-w-full overflow-hidden rounded-[1rem] border border-white/[0.09] bg-[#080A0D]/88 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.22)] backdrop-blur-[14px] xl:hidden"
       data-report-first-mobile-nav="true"
     >
+      <div className="mb-2 flex items-center justify-between gap-3 px-1.5 pt-1">
+        <Image
+          src="/images/brand/sonartra-logo-white.svg"
+          alt="Sonartra"
+          width={6259}
+          height={1529}
+          className="h-auto w-[112px] opacity-85"
+        />
+        <span className="font-mono text-[0.58rem] uppercase tracking-[0.18em] text-[#32D6B0]/72">
+          Report guide
+        </span>
+      </div>
       <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
         {sections.map((section) => (
           <a
             href={`#${section.id}`}
-            className="shrink-0 rounded-[0.78rem] border border-transparent px-3 py-2 text-sm text-[#C8CEC7]/84 outline-none hover:border-[#34D8B6]/20 hover:bg-[#34D8B6]/[0.07] focus-visible:ring-2 focus-visible:ring-[#34D8B6]/55"
+            className="shrink-0 rounded-[0.78rem] border border-transparent px-3 py-2 text-sm text-[#C8CEC7]/84 outline-none hover:border-[#32D6B0]/20 hover:bg-[#32D6B0]/[0.07] focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55"
             key={section.id}
           >
             {section.label}
@@ -645,34 +667,66 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
     ?? payload.evidence.explanatoryNote;
   const resultStatementParagraphs = splitParagraphText(resultStatement);
   const completionDate = formatDate(payload.attempt.completedAt ?? payload.metadata.completedAt);
+  const rankedPatternSummary = payload.rankedSignals.map((signal) => signal.signalLabel).join(', ');
 
   return (
     <main
-      className="relative isolate min-h-[calc(100vh-4.25rem)] overflow-x-clip bg-[#101312] text-[#F3F1EA]"
+      className="relative isolate min-h-[calc(100vh-4.25rem)] overflow-x-clip bg-[#080A0D] text-[#F5F1EA]"
       data-report-first-result="true"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-y-0 left-0 z-0 w-full overflow-hidden bg-[linear-gradient(180deg,#101312_0%,#151A18_34rem,#0E1110_100%)]"
+        className="pointer-events-none fixed inset-y-0 left-0 z-0 w-full overflow-hidden bg-[linear-gradient(180deg,#090B0F_0%,#101715_38rem,#080A0D_100%)]"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_6%,rgba(52,216,182,0.075),transparent_31%),radial-gradient(circle_at_82%_8%,rgba(201,142,104,0.055),transparent_30%)]" />
-        <div className="absolute inset-x-[-8rem] top-0 h-[38rem] bg-[linear-gradient(rgba(243,241,234,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(243,241,234,0.009)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_86%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_7%,rgba(50,214,176,0.13),transparent_31%),radial-gradient(circle_at_84%_12%,rgba(245,241,234,0.07),transparent_29%),linear-gradient(180deg,rgba(8,10,13,0)_0%,rgba(8,10,13,0.72)_68%,rgba(8,10,13,0)_100%)]" />
+        <div className="absolute left-1/2 top-12 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full border border-[#F5F1EA]/[0.035]" />
+        <div className="absolute left-1/2 top-24 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full border border-[#32D6B0]/[0.045]" />
+        <div className="absolute inset-x-[-8rem] top-0 h-[42rem] bg-[linear-gradient(rgba(245,241,234,0.016)_1px,transparent_1px),linear-gradient(90deg,rgba(245,241,234,0.012)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_58%,rgba(0,0,0,0.2)_100%)]" />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-16 pt-8 sm:px-6 md:pb-24 md:pt-10 lg:px-7 xl:px-8">
         <MobileSectionNav sections={sections} />
 
         <header className="grid gap-7 py-6 md:gap-8 md:py-9">
+          <div className="flex flex-col gap-5 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-center sm:justify-between">
+            <Image
+              src="/images/brand/sonartra-logo-white.svg"
+              alt="Sonartra"
+              width={6259}
+              height={1529}
+              className="h-auto w-[156px] opacity-90"
+              priority
+            />
+            <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#D8D0C3]/70">
+              <span className="rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5">Premium report</span>
+              <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.075] px-3 py-1.5 text-[#A8F4E1]">
+                Full reference
+              </span>
+            </div>
+          </div>
+
           <div className="max-w-5xl">
-            <span className="rounded-full border border-[#34D8B6]/24 bg-[#34D8B6]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#34D8B6]">
+            <span className="rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.07] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#32D6B0]">
               Sonartra leadership report
             </span>
             <p className="mt-7 text-sm font-medium uppercase tracking-[0.18em] text-[#C8CEC7]/70">
               {payload.domain.title} · Completed {completionDate}
             </p>
-            <h1 className="mt-3 max-w-5xl text-5xl font-semibold leading-[1.02] text-[#F3F1EA] md:text-7xl">
+            <h1 className="mt-3 max-w-5xl text-5xl font-semibold leading-[1.02] text-[#F5F1EA] md:text-7xl">
               {heroTitle}
             </h1>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="mr-1 text-sm font-medium text-[#D8D0C3]/68">Your ranked pattern</span>
+              {payload.rankedSignals.map((signal) => (
+                <span
+                  className="rounded-full border border-white/[0.1] bg-white/[0.045] px-3 py-1.5 text-sm font-semibold text-[#F5F1EA]/88"
+                  key={signal.signalKey}
+                >
+                  {signal.rank}. {signal.signalLabel}
+                </span>
+              ))}
+            </div>
             <div className="mt-6 max-w-3xl space-y-4">
               {resultStatementParagraphs.map((paragraph, index) => (
                 <p
@@ -688,15 +742,18 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
             </div>
           </div>
 
-          <aside className="rounded-[1.25rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/82 p-5 shadow-[0_24px_80px_rgba(4,7,6,0.2)] md:p-6">
+          <aside className="rounded-[1.5rem] border border-white/[0.09] bg-[linear-gradient(135deg,rgba(245,241,234,0.062),rgba(50,214,176,0.045)_46%,rgba(9,11,15,0.45))] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.24)] backdrop-blur-sm md:p-6">
             <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start">
               <div>
                 <FieldLabel>Result basis</FieldLabel>
-                <h2 className="mt-3 text-2xl font-semibold text-[#F3F1EA]">
+                <h2 className="mt-3 text-2xl font-semibold text-[#F5F1EA]">
                   {payload.topSignal.signalLabel} leads this pattern
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-[#C8CEC7]/82">
                   This report is selected from your ranked signal order and relative strengths at completion.
+                </p>
+                <p className="mt-4 rounded-[1rem] border border-[#32D6B0]/18 bg-[#32D6B0]/[0.06] px-4 py-3 text-sm leading-6 text-[#DFFCF4]/86">
+                  {rankedPatternSummary}
                 </p>
                 <dl className="mt-5 space-y-3 border-t border-[#F3F1EA]/[0.08] pt-4 text-sm">
                   <div className="flex items-center justify-between gap-4">
@@ -759,7 +816,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
                 {report.closing.finalLine ? (
                   <div className="mt-7">
                     <h3 className="mb-3 text-xl font-semibold leading-7 text-[#F3F1EA]">Final line</h3>
-                    <p className="rounded-[1.15rem] border border-[#34D8B6]/20 bg-[#34D8B6]/[0.07] p-5 text-xl font-semibold leading-8 text-[#F3F1EA] md:p-6">
+                    <p className="rounded-[1.15rem] border border-[#32D6B0]/20 bg-[#32D6B0]/[0.07] p-5 text-xl font-semibold leading-8 text-[#F3F1EA] md:p-6">
                       {report.closing.finalLine}
                     </p>
                   </div>

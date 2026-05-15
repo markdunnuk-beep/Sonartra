@@ -277,6 +277,12 @@ test('report-first result renderer uses reader-facing navigation and card labels
   const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
   const renderedText = textFromMarkup(markup);
 
+  assert.match(markup, /sonartra-logo-white\.svg/);
+  assert.match(renderedText, /Premium report/);
+  assert.match(renderedText, /Full reference/);
+  assert.match(renderedText, /Your ranked pattern/);
+  assert.match(renderedText, /Process, Results, People, Vision/);
+  assert.match(renderedText, /Report guide/);
   assert.match(renderedText, /People expansion/);
   assert.match(renderedText, /Vision expansion/);
   assert.doesNotMatch(renderedText, /RangeRange/);
