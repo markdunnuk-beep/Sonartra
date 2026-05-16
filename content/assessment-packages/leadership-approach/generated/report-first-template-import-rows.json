@@ -10507,8 +10507,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_people_results_process.md",
-      "source_content_hash": "c05b8b061a2fed52c346c018bad52b96276defde8b18ebd71a6d3ab5479b815c",
-      "content_hash": "c05b8b061a2fed52c346c018bad52b96276defde8b18ebd71a6d3ab5479b815c",
+      "source_content_hash": "30c4be5dfb0c86a920248b552e68199d7deb5f486295ea6d144f868d00158aad",
+      "content_hash": "30c4be5dfb0c86a920248b552e68199d7deb5f486295ea6d144f868d00158aad",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -10525,25 +10525,25 @@
           "patternKey": "vision_people_results_process",
           "reportTitle": "Leadership Approach — Vision, People, Results, Process",
           "hero": {
-            "title": "You lead by building belief in a future and turning that belief into movement",
-            "resultStatement": "You create confidence by helping people see a future worth moving toward, then using visible progress to prove that future can become real. Your leadership is at its best when direction needs human commitment and action needs meaning.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+            "title": "You lead by making the future worth committing to, then proving it through visible progress",
+            "resultStatement": "You create confidence by helping people understand what the work is meant to build, where they belong in it, and what evidence would show the direction is becoming real. Your leadership is at its best when a strategic shift needs both human commitment and practical proof before it can hold.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
           },
           "opening": [
             {
               "type": "paragraph",
-              "text": "Your leadership approach is led by Vision and strengthened by People. You are likely to create value by helping people understand what the work is becoming and why their contribution matters inside that direction."
+              "text": "Your leadership approach is led by Vision and strengthened by People. You are likely to create value by making a future direction specific enough for people to recognise the customer promise, capability, or strategic risk it is meant to address, then making their contribution feel necessary inside that work."
             },
             {
               "type": "paragraph",
-              "text": "Results is the first expansion. The future becomes more credible when belief turns into visible movement: decisions, milestones, customer impact, or evidence that the organisation is acting on what it says matters."
+              "text": "Results is the first expansion. The direction becomes credible when commitment turns into visible movement: decisions closed, milestones reached, customer impact improved, or evidence that the organisation is acting on what it says matters."
             },
             {
               "type": "paragraph",
-              "text": "Process is the furthest extension. The development edge is to turn shared belief into a clear operating rhythm before enthusiasm diffuses across too many interpretations. Without enough method, commitment can be strong but coordination uneven."
+              "text": "Process is the furthest extension. The development edge is to turn shared commitment into a clear operating rhythm before different teams interpret the future in different ways. Without enough method, early progress can depend too heavily on personal conviction, informal coordination, or heroic follow-through."
             },
             {
               "type": "paragraph",
-              "text": "Your strongest leadership builds belief, turns belief into proof, and then gives proof a repeatable operating form."
+              "text": "Your strongest leadership makes the future worth carrying, creates proof that it is possible, and gives that proof a repeatable operating form."
             }
           ],
           "patternSummary": {
@@ -10571,14 +10571,14 @@
                     "signalKey": "results",
                     "signalLabel": "Results",
                     "roleLabel": "the proof expansion",
-                    "roleSummary": "Results gives belief tangible movement, evidence, decisions, and progress."
+                    "roleSummary": "Results gives commitment tangible movement, evidence, decisions, and progress."
                   },
                   {
                     "rank": 4,
                     "signalKey": "process",
                     "signalLabel": "Process",
                     "roleLabel": "the operating edge",
-                    "roleSummary": "Process adds repeatability, handovers, standards, governance, and cadence so belief and action do not fragment."
+                    "roleSummary": "Process adds repeatability, handovers, standards, governance, and cadence so commitment and action do not fragment."
                   }
                 ]
               },
@@ -10629,7 +10629,7 @@
                       "text": "Results — the proof expansion"
                     },
                     {
-                      "text": "Results gives belief tangible movement, evidence, decisions, and progress."
+                      "text": "Results gives commitment tangible movement, evidence, decisions, and progress."
                     }
                   ],
                   [
@@ -10640,20 +10640,20 @@
                       "text": "Process — the operating edge"
                     },
                     {
-                      "text": "Process adds repeatability, handovers, standards, governance, and cadence so belief and action do not fragment."
+                      "text": "Process adds repeatability, handovers, standards, governance, and cadence so commitment and action do not fragment."
                     }
                   ]
                 ]
               },
               {
                 "type": "paragraph",
-                "text": "This is a belief-and-progress pattern. Its best version mobilises people around a future, proves the future through action, and then builds enough method to sustain the movement."
+                "text": "This is a commitment-and-progress pattern. Its best version mobilises people around a future, proves the future through action, and then builds enough method to sustain the work."
               }
             ]
           },
           "keyInsight": {
             "type": "pull_quote",
-            "text": "Your leadership creates confidence by making the future meaningful and shared. The development edge is to give belief and progress enough operating discipline to last."
+            "text": "Your leadership creates confidence by making the future meaningful, shared, and testable. The development edge is to give commitment and progress enough operating discipline to last."
           },
           "chapters": [
             {
@@ -10664,15 +10664,15 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Your leadership creates value by creating meaning-rich mobilisation."
+                  "text": "Your leadership creates value by making strategic change feel human enough to be carried and concrete enough to be tested."
                 },
                 {
                   "type": "paragraph",
-                  "text": "People may follow a task, but they commit differently when they understand what future the work serves and where they fit inside it. You are likely to bring that wider frame. You can help people see the purpose of a change, the capability being built, and the customer or organisational promise behind current effort."
+                  "text": "People may complete a task, but they commit differently when they understand what future the work serves, what capability is being built, and why their judgement matters. You are likely to bring that wider frame. You can connect current effort to a customer promise, a market risk, a transformation need, or a capability the organisation cannot keep postponing."
                 },
                 {
                   "type": "paragraph",
-                  "text": "People strengthens your Vision by making it relational. The direction is not only explained; it is made relevant to the people who need to carry it."
+                  "text": "People strengthens your Vision by making it relational and owned. The direction is not only explained; it is made relevant to the people who need to change habits, make trade-offs, handle uncertainty, and carry the work when the initial message is no longer fresh."
                 },
                 {
                   "type": "paragraph",
@@ -10680,7 +10680,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Process is the stabiliser. It turns belief and proof into repeatable work rather than many separate interpretations of the same future."
+                  "text": "Process is the stabiliser. It turns belief and proof into repeatable work rather than many separate interpretations of the same future. Without it, the organisation may have energy and early wins but still lack decision rights, review rhythm, handover clarity, and a dependable way to repeat what worked."
                 }
               ],
               "readerFacing": true
@@ -10693,15 +10693,15 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Others may experience your leadership as inclusive, energising, and orienting. You can make people feel that the work matters and that their contribution has a place in what is being built."
+                  "text": "Others may experience your leadership as inclusive, energising, and orienting. You can make people feel that the work matters, that their contribution has a place in what is being built, and that progress is possible rather than abstract."
                 },
                 {
                   "type": "paragraph",
-                  "text": "This can be powerful in culture change, growth initiatives, transformation, innovation, and moments where people need confidence before all the detail is known."
+                  "text": "This can be powerful in culture change, growth initiatives, transformation, innovation, and moments where people need enough confidence to act before all the detail is known."
                 },
                 {
                   "type": "paragraph",
-                  "text": "The possible tension is that people may feel inspired but later need more structure. Once movement begins, questions about sequence, handovers, ownership, and standards become more important. If those remain unclear, belief can fragment."
+                  "text": "The possible tension is that people may feel included and activated, then later discover that the work is harder to coordinate than it first appeared. Once movement begins, questions about sequence, handovers, ownership, review points, and standards become more important. If those remain unclear, belief can fragment into local interpretations, duplicated effort, hidden labour, and stakeholder confidence that fades because progress is hard to repeat."
                 }
               ],
               "readerFacing": true
@@ -10718,15 +10718,15 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "A decision feels strong when it serves the direction, strengthens belief, and creates a visible move. Results asks what action will demonstrate progress."
+                  "text": "A decision feels strong when it serves the direction, strengthens commitment, and creates a visible move. Results asks what action will demonstrate progress and what proof will keep the future credible."
                 },
                 {
                   "type": "paragraph",
-                  "text": "The risk is that Process may be under-specified. A decision can be meaningful and motivating while still leaving unclear who owns the next step, how work will be reviewed, or what standard applies."
+                  "text": "The risk is that Process may be under-specified. A decision can be meaningful and motivating while still leaving unclear who owns the next step, who has authority to make trade-offs, how work will be reviewed, or what standard applies across teams."
                 },
                 {
                   "type": "paragraph",
-                  "text": "The strongest decisions for this pattern combine direction, human commitment, proof, and method."
+                  "text": "The strongest decisions for this pattern combine direction, human commitment, proof, and method. They do not only ask whether people believe in the move; they clarify how the move will survive handovers, dependencies, and operational pressure."
                 }
               ],
               "readerFacing": true
@@ -10739,15 +10739,15 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "You tend to communicate through story, inclusion, belief, and action."
+                  "text": "You tend to communicate through strategic story, inclusion, commitment, and action."
                 },
                 {
                   "type": "paragraph",
-                  "text": "You may be effective when people need to understand why the work matters and why they should commit to it. You can connect future direction to contribution and then name the action that would make the future visible."
+                  "text": "You may be effective when people need to understand why the work matters and why they should commit to it. You can connect future direction to contribution and then name the action that would make the direction visible."
                 },
                 {
                   "type": "paragraph",
-                  "text": "The communication edge is to add more operating clarity. People should not have to infer the route from the story. They need to know the sequence, owner, standard, and review point that will hold the action."
+                  "text": "The communication edge is to add more operating clarity. People should not have to infer the route from the story or translate commitment into structure alone. They need to know the sequence, owner, decision point, standard, and review rhythm that will hold the action."
                 }
               ],
               "readerFacing": true
@@ -10764,15 +10764,15 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "This can help when morale is low or hesitation is costing the organisation movement. You can restore belief and bring people back to the larger reason for the work."
+                  "text": "This can help when morale is low or hesitation is costing the organisation movement. You can restore conviction and bring people back to the strategic reason for the work."
                 },
                 {
                   "type": "paragraph",
-                  "text": "The risk is assuming shared belief will solve coordination. People may be committed, but commitment does not automatically define handovers, decision rights, operating cadence, or governance. Work can become energetic but uneven."
+                  "text": "The risk is assuming shared commitment will solve coordination. People may be committed, but commitment does not automatically define handovers, decision rights, operating cadence, or governance. Work can become energetic but uneven: early progress depends on a few influential people, teams interpret the same future differently, review rhythm is missing, and transformation fatigue builds because effort is high but the operating system is unclear."
                 },
                 {
                   "type": "paragraph",
-                  "text": "The pressure move is to translate belief into method: what happens first, who owns it, what standard applies, and when progress will be reviewed?"
+                  "text": "The pressure move is to translate commitment into method: what happens first, who owns it, who can decide, what standard applies, and when progress will be reviewed?"
                 }
               ],
               "readerFacing": true
@@ -10795,8 +10795,8 @@
                 },
                 {
                   "type": "strength_card",
-                  "title": "Proof of belief",
-                  "text": "Results turns shared belief into movement that others can see and evaluate."
+                  "title": "Proof of commitment",
+                  "text": "Results turns shared commitment into movement that others can see and evaluate."
                 }
               ],
               "readerFacing": true
@@ -10809,7 +10809,7 @@
               "blocks": [
                 {
                   "type": "tightening_card",
-                  "title": "Belief before method",
+                  "title": "Commitment before method",
                   "text": "People may commit before the operating route is clear.",
                   "rangeToAdd": "Bring Process in through cadence, handovers, standards, and ownership.",
                   "whyItMatters": "Bring Process in through cadence, handovers, standards, and ownership."
@@ -10849,7 +10849,7 @@
                   "type": "prompt_group",
                   "title": "Results questions to bring forward",
                   "prompts": [
-                    "What visible action will show this belief is real?",
+                    "What visible action will show this commitment is real?",
                     "Which customer or commercial consequence should improve?",
                     "What decision needs to close now?",
                     "What evidence will help people keep trusting the direction?"
@@ -10866,15 +10866,15 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Process expands this pattern by giving belief and action repeatability."
+                  "text": "Process expands this pattern by giving commitment and action repeatability."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Because Process is the furthest extension, it may need deliberate attention. You may naturally create meaning, commitment, and movement before fully defining the operating method. But without Process, people may carry the same direction in different ways."
+                  "text": "Because Process is the furthest extension, it may need deliberate attention. You may naturally create strategic meaning, commitment, and progress before fully defining the operating method. But without Process, people may carry the same direction in different ways, and the organisation may confuse early energy with a working model."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Process adds handovers, standards, cadence, governance, and a way to review progress. It helps the future become a shared system rather than a shared feeling."
+                  "text": "Process adds handovers, standards, cadence, governance, decision rights, and a way to review progress. It helps the future become a shared system rather than a shared conviction. It also protects people from the hidden labour of constantly working out how to coordinate the work themselves."
                 },
                 {
                   "type": "prompt_group",
@@ -10898,12 +10898,12 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Your development focus is to turn shared belief into a clear operating rhythm."
+                  "text": "Your development focus is to turn shared commitment into a clear operating rhythm."
                 },
                 {
                   "type": "development_action",
                   "title": "Define the first cadence",
-                  "text": "Name when the work will be reviewed, by whom, and against what evidence.",
+                  "text": "Name when the work will be reviewed, by whom, and against what evidence. A review rhythm keeps progress from depending on personal energy alone.",
                   "useCases": [
                     "change mobilisation",
                     "team alignment",
@@ -10914,7 +10914,7 @@
                 {
                   "type": "development_action",
                   "title": "Assign ownership clearly",
-                  "text": "Commitment needs owners, not only enthusiasm.",
+                  "text": "Commitment needs owners, decision rights, and handover points, not only enthusiasm.",
                   "useCases": [
                     "delegation",
                     "implementation planning",
@@ -10925,7 +10925,7 @@
                 {
                   "type": "development_action",
                   "title": "Standardise the proof point",
-                  "text": "Make sure progress means the same thing across teams.",
+                  "text": "Make sure progress means the same thing across teams, especially where customer impact, delivery recovery, or adoption evidence is being used to prove the direction.",
                   "useCases": [
                     "commercial reviews",
                     "transformation governance",
@@ -10936,7 +10936,7 @@
                 {
                   "type": "development_action",
                   "title": "Watch for hidden strain",
-                  "text": "People may be committed but overloaded by unclear coordination.",
+                  "text": "People may be committed but overloaded by unclear coordination, uneven workload distribution, or repeated interpretation work.",
                   "useCases": [
                     "manager check-ins",
                     "adoption reviews",
@@ -10947,7 +10947,7 @@
                 {
                   "type": "development_action",
                   "title": "Keep meaning connected to method",
-                  "text": "Do not let process feel like an add-on. Explain how it protects the future people believe in.",
+                  "text": "Do not let process feel like an add-on. Explain how it protects the customer promise, capability, or strategic shift people are trying to carry.",
                   "useCases": [
                     "change communication",
                     "operating model design",
@@ -10963,18 +10963,18 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it makes the future human and actionable."
+                "text": "Your leadership is valuable because it makes the future human, credible, and actionable."
               },
               {
                 "type": "paragraph",
-                "text": "Vision gives your leadership its direction. People turns that direction into commitment. Results gives commitment proof. The growth edge is Process: the discipline that prevents belief and action from fragmenting."
+                "text": "Vision gives your leadership its strategic frame. People turns that frame into shared commitment. Results gives commitment proof through decisions, customer impact, delivery movement, or visible progress. The growth edge is Process: the discipline that prevents belief and action from fragmenting once the work moves beyond the first push."
               },
               {
                 "type": "paragraph",
-                "text": "Your risk under pressure is asking shared belief to carry coordination that has not yet been designed. Your strongest leadership keeps the future meaningful, keeps people included, keeps progress visible, and builds the operating rhythm that lets commitment last."
+                "text": "Your risk under pressure is asking shared commitment to carry coordination that has not yet been designed. That can create transformation fatigue, uneven ownership, and progress that stakeholders admire early but cannot trust over time. Your strongest leadership keeps the direction meaningful, keeps people included, keeps progress visible, and builds the operating rhythm that lets commitment become dependable work."
               }
             ],
-            "finalLine": "Your strongest leadership turns shared belief in the future into progress that has enough method to endure."
+            "finalLine": "Your strongest leadership turns shared commitment to the future into progress the organisation can repeat, govern, and trust."
           },
           "pdf": {
             "title": "Save this report",
@@ -11178,8 +11178,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_process_people_results.md",
-      "source_content_hash": "2a1e3b6068a5d26ef4c8d0f06c4a179d09936c57e45aeb9679cddb2217841c3b",
-      "content_hash": "2a1e3b6068a5d26ef4c8d0f06c4a179d09936c57e45aeb9679cddb2217841c3b",
+      "source_content_hash": "6207ae1ce844fe7e94913c50155d5d26a5fff25a38b5ead257db8fba52a30231",
+      "content_hash": "6207ae1ce844fe7e94913c50155d5d26a5fff25a38b5ead257db8fba52a30231",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -11197,24 +11197,24 @@
           "reportTitle": "Leadership Approach — Vision, Process, People, Results",
           "hero": {
             "title": "You lead by building a coherent path toward the future and inviting people to own it",
-            "resultStatement": "You create confidence by turning future direction into a way of working that people can understand and shape. Your leadership is at its best when a team needs strategic steadiness, practical logic, and shared ownership before the work can move well.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+            "resultStatement": "You create confidence by turning strategic intent into a way of working that people can understand, shape, and carry. Your leadership is at its best when a team needs steadiness, practical logic, and shared ownership, but must still prove that the work is changing something that matters.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
           },
           "opening": [
             {
               "type": "paragraph",
-              "text": "Your leadership approach is led by Vision and strengthened by Process. You are likely to create value by naming what the work is meant to build, then translating that direction into a coherent operating path."
+              "text": "Your leadership approach is led by Vision and strengthened by Process. You are likely to create value by naming what the work is meant to build, what strategic risk or opportunity it addresses, and then translating that intent into a coherent operating path."
             },
             {
               "type": "paragraph",
-              "text": "People is the first expansion. This makes the future-facing process more participative and credible. Others are not only asked to understand the method; they are invited to help shape it and trust it."
+              "text": "People is the first expansion. This makes the future-facing process more participative and credible. Others are not only asked to understand the method; they are invited to help shape it, test it against local reality, and own it."
             },
             {
               "type": "paragraph",
-              "text": "Results is the furthest extension. The development edge is to define the result that will show whether the shared path is working. Without enough proof, the pattern can become thoughtful, coherent, and inclusive while still under-forcing progress."
+              "text": "Results is the furthest extension. The development edge is to define the result that will show whether the shared path is working. Without enough proof, the pattern can become thoughtful, coherent, and inclusive while senior stakeholders still ask what has changed, customers see little difference, or broad priorities remain open."
             },
             {
               "type": "paragraph",
-              "text": "Your strongest leadership builds a future-facing method, invites people into ownership, and then names the measurable outcome that proves the method is creating movement."
+              "text": "Your strongest leadership builds a future-facing method, invites people into ownership, and then names the measurable outcome that proves the method is creating consequence."
             }
           ],
           "patternSummary": {
@@ -11335,19 +11335,19 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Your leadership creates value by making strategic direction steady enough for people to carry."
+                  "text": "Your leadership creates value by making strategic direction steady enough for people to carry and specific enough for the organisation to test."
                 },
                 {
                   "type": "paragraph",
-                  "text": "You may see where an ambition needs a method: sequence, standards, governance, and a practical way for people to coordinate around the future. Process gives your Vision credibility because the direction is not left as a statement."
+                  "text": "You may see where an ambition needs a method: sequence, standards, governance, decision rights, and a practical way for people to coordinate around the work. Process gives your Vision credibility because the direction is not left as a statement; it becomes a way choices, resources, and responsibilities can be organised."
                 },
                 {
                   "type": "paragraph",
-                  "text": "People expands the value by making the method shared. You are likely to be more effective when people have room to question the route, contribute local knowledge, and see their own ownership inside the work."
+                  "text": "People expands the value by making the method shared. You are likely to be more effective when people have room to question the operating path, contribute local knowledge, and see their own ownership inside the change."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Results is the edge to keep close. A coherent and trusted path still needs proof. It should produce visible progress, better decisions, customer consequences, or delivery evidence."
+                  "text": "Results is the edge to keep close. A coherent and trusted path still needs proof. It should produce visible progress, better decisions, customer consequences, delivery evidence, or a clearer commercial trade-off. Otherwise the work can feel well held without yet altering the reality it was designed to change."
                 }
               ],
               "readerFacing": true
@@ -11360,7 +11360,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Others may experience your leadership as thoughtful, orienting, and inclusive. You can help people understand where the work is going and how it might be organised."
+                  "text": "Others may experience your leadership as thoughtful, orienting, and inclusive. You can help people understand where the work is going, how it will be organised, and where their judgement can influence the route."
                 },
                 {
                   "type": "paragraph",
@@ -11368,7 +11368,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The possible tension is that people may wait too long for sharper progress signals. Alignment may feel strong, but delivery pressure can remain soft. Senior stakeholders may ask what has changed, what decision has closed, or what proof shows the shared path is working."
+                  "text": "The possible tension is that people may wait too long for sharper progress signals. Alignment may feel strong, but delivery pressure can remain soft. Senior stakeholders may ask what has changed, customer impact may remain hard to point to, and broad priorities may stay open because participation has not yet been converted into closure."
                 }
               ],
               "readerFacing": true
@@ -11435,7 +11435,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The risk is postponing closure until alignment feels sufficient. The team may keep discussing the route, refining participation, or strengthening trust while the customer consequence, commercial risk, or delivery commitment needs clearer movement."
+                  "text": "The risk is postponing closure until alignment feels sufficient. The team may keep discussing the route, refining participation, or strengthening trust while the customer consequence, commercial risk, or delivery commitment needs clearer movement. A trusted route can still carry diffuse delivery pressure if nobody names what must now close."
                 },
                 {
                   "type": "paragraph",
@@ -11478,22 +11478,22 @@
                   "type": "tightening_card",
                   "title": "Alignment before proof",
                   "text": "The work may feel meaningful and well held, but progress may remain under-defined.",
-                  "rangeToAdd": "Name the outcome, evidence, and review point early.",
-                  "whyItMatters": "Name the outcome, evidence, and review point early."
+                  "rangeToAdd": "Name the outcome, evidence, and review point early, before agreement becomes a substitute for movement.",
+                  "whyItMatters": "Name the outcome, evidence, and review point early, before agreement becomes a substitute for movement."
                 },
                 {
                   "type": "tightening_card",
                   "title": "Participation delays closure",
                   "text": "Involvement can become a reason to keep decisions open too long.",
-                  "rangeToAdd": "Separate input from decision rights. Be clear about where judgement is invited and where closure belongs.",
-                  "whyItMatters": "Separate input from decision rights. Be clear about where judgement is invited and where closure belongs."
+                  "rangeToAdd": "Separate input from decision rights. Be clear about where judgement is invited, where closure belongs, and what trade-off has now been made.",
+                  "whyItMatters": "Separate input from decision rights. Be clear about where judgement is invited, where closure belongs, and what trade-off has now been made."
                 },
                 {
                   "type": "tightening_card",
                   "title": "Method becomes too explanatory",
                   "text": "The operating path may be explained in detail without enough commercial consequence.",
-                  "rangeToAdd": "Connect the method to customer value, delivery proof, or resource trade-offs.",
-                  "whyItMatters": "Connect the method to customer value, delivery proof, or resource trade-offs."
+                  "rangeToAdd": "Connect the method to customer value, delivery proof, resource trade-offs, or the capability the organisation is trying to build.",
+                  "whyItMatters": "Connect the method to customer value, delivery proof, resource trade-offs, or the capability the organisation is trying to build."
                 }
               ],
               "readerFacing": true
@@ -11537,11 +11537,11 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Because Results is the furthest extension, it may need deliberate force. You may naturally explain the direction, design the method, and involve people before naming the hard outcome. But proof is what turns this pattern into commercial leadership."
+                  "text": "Because Results is the furthest extension, it may need deliberate force. You may naturally explain the direction, design the method, and involve people before naming the hard outcome. But proof is what turns this pattern into commercial leadership. It is the difference between a well-owned route and a route that changes customer experience, resource allocation, delivery risk, or strategic capability."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Results asks what has moved: the decision closed, the customer issue improved, the delivery risk reduced, the capability built, or the priority made real."
+                  "text": "Results asks what has moved: the decision closed, the customer issue improved, the delivery risk reduced, the capability built, or the priority made real. It also asks what will happen if the evidence does not appear."
                 },
                 {
                   "type": "prompt_group",
@@ -11569,7 +11569,7 @@
                 {
                   "type": "development_action",
                   "title": "Define the result early",
-                  "text": "Before alignment work expands, name the outcome the path must produce.",
+                  "text": "Before alignment work expands, name the outcome the path must produce and the evidence that would make it credible.",
                   "useCases": [
                     "transformation planning",
                     "governance",
@@ -11580,7 +11580,7 @@
                 {
                   "type": "development_action",
                   "title": "Clarify decision rights",
-                  "text": "Participation works best when closure is clear.",
+                  "text": "Participation works best when closure is clear. People need to know where they are shaping the work and where accountable movement now belongs.",
                   "useCases": [
                     "leadership forums",
                     "cross-functional work",
@@ -11591,7 +11591,7 @@
                 {
                   "type": "development_action",
                   "title": "Tie method to commercial consequence",
-                  "text": "Explain how the process improves customer value, delivery, risk, or resource use.",
+                  "text": "Explain how the process improves customer value, delivery, risk, resource use, or future capability.",
                   "useCases": [
                     "commercial reviews",
                     "prioritisation",
@@ -11602,7 +11602,7 @@
                 {
                   "type": "development_action",
                   "title": "Review evidence, not only confidence",
-                  "text": "Ask what changed because the shared path exists.",
+                  "text": "Ask what changed because the shared path exists. Confidence is useful, but the review should also show movement, decision closure, or customer consequence.",
                   "useCases": [
                     "operating reviews",
                     "retrospectives",
@@ -11629,7 +11629,7 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it makes the future coherent and shared."
+                "text": "Your leadership is valuable because it makes the future coherent, shared, and usable."
               },
               {
                 "type": "paragraph",
@@ -11637,10 +11637,10 @@
               },
               {
                 "type": "paragraph",
-                "text": "Your risk under pressure is thoughtful coherence without enough closure. Your strongest leadership keeps the direction, method, and participation, then names the outcome that must now become visible."
+                "text": "Your risk under pressure is thoughtful coherence without enough closure. The work can be sensible, participative, and well explained while still leaving stakeholders unsure what has changed. Your strongest leadership keeps the direction, method, and participation, then names the outcome that must now become visible in customer impact, delivery progress, decision closure, or capability built."
               }
             ],
-            "finalLine": "Your strongest leadership turns a shared path toward the future into proof that the future is starting to work."
+            "finalLine": "Your strongest leadership turns a shared path toward the future into evidence that the future is starting to work."
           },
           "pdf": {
             "title": "Save this report",
