@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 
@@ -147,6 +148,12 @@ export function ReportFirstTemplateImportPanel({
       <form action={action}>
         <SubmitButton disabled={actionDisabled} />
       </form>
+      <Link
+        className="sonartra-button sonartra-focus-ring inline-flex w-full justify-center sm:w-auto"
+        href="/admin/qa/report-first"
+      >
+        Open report-first QA route
+      </Link>
       {actionDisabled ? (
         <p className="text-sm leading-6 text-white/48">
           Create or resolve a draft version before importing report-first templates.
