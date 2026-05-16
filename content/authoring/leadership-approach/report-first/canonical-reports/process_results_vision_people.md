@@ -54,7 +54,7 @@ These scores show why your report is led by Process and strengthened by Results,
 
 Key insight
 
-Your leadership creates confidence by making work hold together and move. The development edge is to make sure the route is shaped with people early enough that commitment is created, not only requested.
+Your leadership creates confidence by making work hold together and move. The development edge is to make sure the operating plan is shaped with people early enough that commitment is created, not only requested.
 
 Chapter 1 — How your leadership creates value
 
@@ -198,7 +198,7 @@ Use this in: process redesign, governance changes, delivery recovery, cross-func
 
 2. Put the future reason near the front
 
-Do not wait until implementation to explain why the route matters. Name the future capability or strategic risk the process is meant to address.
+Do not wait until implementation to explain why the work matters. Name the future capability or strategic risk the process is meant to address.
 
 Use this in: strategy execution, change communication, operating-model work, prioritisation.
 

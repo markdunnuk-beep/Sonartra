@@ -94,7 +94,7 @@ People asks another test: who needs to shape this before we decide? If the decis
 
 Chapter 4 — Communication behaviour
 
-You tend to communicate through route, rationale, and direction.
+You tend to communicate through sequence, rationale, and direction.
 
 You may be good at explaining how different pieces of work connect. You can show why a sequence matters, how a standard supports the direction, or why a governance rhythm is needed. Your communication can help people see the architecture of change rather than only the next task.
 
@@ -188,7 +188,7 @@ People makes the pathway more durable because it is carried by judgement, not on
 
 Chapter 10 — Development focus
 
-Your development focus is to make the pathway provable and participative.
+Your development focus is to make the operating path provable and participative.
 
 1. Define the first proof point
 

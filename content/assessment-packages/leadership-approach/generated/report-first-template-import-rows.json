@@ -941,8 +941,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_people_results_vision.md",
-      "source_content_hash": "ee199cfe55bb08b0c82f150fb01d7fb654efc528fd94199dda614ae92d4d0fe7",
-      "content_hash": "ee199cfe55bb08b0c82f150fb01d7fb654efc528fd94199dda614ae92d4d0fe7",
+      "source_content_hash": "e6a08a811ce5d70f58b09ef8ba205794a68b5a7f1c3c3b6a2b101469d283f5c4",
+      "content_hash": "e6a08a811ce5d70f58b09ef8ba205794a68b5a7f1c3c3b6a2b101469d283f5c4",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -960,7 +960,7 @@
           "reportTitle": "Leadership Approach — Process, People, Results, Vision",
           "hero": {
             "title": "You lead by creating reliable ways of working that people can trust",
-            "resultStatement": "You create confidence by making work clearer, steadier, and easier for people to carry together. Your leadership is at its best when a team needs dependable structure, shared expectations, and a practical route that can turn coordinated effort into outcomes.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+            "resultStatement": "You create confidence by making work clearer, steadier, and easier for people to carry together. Your leadership is at its best when a team needs dependable structure, shared expectations, and practical operating discipline that can turn coordinated effort into outcomes.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
           },
           "opening": [
             {
@@ -969,7 +969,7 @@
             },
             {
               "type": "paragraph",
-              "text": "People gives your Process a relational intelligence. You are not only organising tasks. You are likely to care whether the route is usable, fair, and owned by the people inside it. You may build structure partly because you understand what ambiguity costs people: duplicated effort, quiet frustration, uneven workload, and avoidable tension."
+              "text": "People gives your Process a relational intelligence. You are not only organising tasks. You are likely to care whether the working system is usable, fair, and owned by the people inside it. You may build structure partly because you understand what ambiguity costs people: duplicated effort, quiet frustration, uneven workload, and avoidable tension."
             },
             {
               "type": "paragraph",
@@ -977,11 +977,11 @@
             },
             {
               "type": "paragraph",
-              "text": "Vision is the furthest extension. The development edge is to connect the reliable team process to a more explicit future direction. When the work is going well operationally, you may need to name what it is building beyond smoother execution."
+              "text": "Vision is the furthest extension. The development edge is to connect the reliable team process to a more explicit strategic direction. When the work is going well operationally, you may need to name what it is building beyond smoother execution: future capability, customer promise, scalable operating strength, or a clearer position for the organisation."
             },
             {
               "type": "paragraph",
-              "text": "Your strongest leadership creates a trustworthy operating route, uses it to produce outcomes, and then connects those outcomes to a larger direction the team can recognise."
+              "text": "Your strongest leadership creates a trustworthy operating base, uses it to produce outcomes, and then connects those outcomes to a larger direction the team can recognise. That is what turns reliable performance into strategic accumulation rather than repeated delivery."
             }
           ],
           "patternSummary": {
@@ -1085,7 +1085,7 @@
               },
               {
                 "type": "paragraph",
-                "text": "This is a trusted-process pattern. Its best version makes work easier to carry together, then turns that reliability into outcomes that support a clearer future."
+                "text": "This is a trusted-process pattern. Its best version makes work easier to carry together, then turns that reliability into outcomes that build a clearer future."
               }
             ]
           },
@@ -1118,7 +1118,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Vision extends the value further. It asks what this reliable way of working is building over time: a stronger team, a scalable operating model, a more credible customer promise, or a culture capable of handling more complex work."
+                  "text": "Vision extends the value further. It asks what this reliable way of working is building over time: a stronger team, a scalable operating model, a more credible customer promise, or a culture capable of handling more complex work. It helps the team understand whether improved delivery is simply helping the current system run better, or whether it is creating capability the organisation will need next."
                 }
               ],
               "readerFacing": true
@@ -1139,7 +1139,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The possible tension is that the team may become comfortable inside the operating rhythm without enough connection to the larger direction. The process works, people trust it, and outcomes may improve, but the strategic story can remain under-explained."
+                  "text": "The possible tension is that the team may become comfortable inside the operating cadence without enough connection to the larger direction. The process works, people trust it, and outcomes may improve, but the strategic story can remain under-explained. Work can get delivered repeatedly without clearly building future capability or strengthening the customer promise."
                 },
                 {
                   "type": "paragraph",
@@ -1168,7 +1168,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Vision asks whether the decision fits the future direction. Without enough Vision, decisions can optimise the current operating rhythm while leaving the team unclear about what it is becoming. The route may be reliable, but not sufficiently strategic."
+                  "text": "Vision asks whether the decision fits the future direction. Without enough Vision, decisions can optimise the current operating model while leaving the team unclear about what it is becoming. The method may be reliable, but not sufficiently strategic."
                 },
                 {
                   "type": "paragraph",
@@ -1197,7 +1197,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The communication edge is to add more future direction and performance sharpness. If the message focuses mainly on how the team will work together, people may miss what the work is ultimately meant to build or achieve."
+                  "text": "The communication edge is to add more strategic direction and performance sharpness. If the message focuses mainly on how the team will work together, people may miss what the work is ultimately meant to build or achieve."
                 },
                 {
                   "type": "paragraph",
@@ -1222,11 +1222,11 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The risk is that pressure may make Vision disappear and Results become too moderated. You may focus on keeping the system fair, calm, and workable while under-naming the harder commercial requirement or the future risk. People may feel supported, but the team may not receive a strong enough signal about what must now change."
+                  "text": "The risk is that pressure may make Vision disappear and Results become too moderated. You may focus on keeping the system fair, calm, and workable while under-naming the harder commercial requirement or the future risk. People may feel supported, but the team may not receive a strong enough signal about what must now change or what the pressure is meant to strengthen."
                 },
                 {
                   "type": "paragraph",
-                  "text": "This can show up as repeated mobilisation without strategic accumulation. The team works hard, supports one another, and improves the immediate route, but effort does not clearly compound into a longer-term direction."
+                  "text": "This can show up as repeated mobilisation without strategic accumulation. The team works hard, supports one another, and improves the immediate operating method, but effort does not clearly compound into a longer-term direction. Delivery is recovered, reviews are calmer, and the experience improves, but the organisation may still be unclear about the future capability being built."
                 },
                 {
                   "type": "paragraph",
@@ -1269,8 +1269,8 @@
                   "type": "tightening_card",
                   "title": "Reliability without enough future direction",
                   "text": "The team may work well together but remain unclear about what the reliability is meant to build. That can limit strategic energy.",
-                  "rangeToAdd": "Bring Vision into operating conversations. Name the future capability or direction the process supports.",
-                  "whyItMatters": "Bring Vision into operating conversations. Name the future capability or direction the process supports."
+                  "rangeToAdd": "Bring Vision into operating conversations. Name the future capability, customer promise, or strategic direction the process supports.",
+                  "whyItMatters": "Bring Vision into operating conversations. Name the future capability, customer promise, or strategic direction the process supports."
                 },
                 {
                   "type": "tightening_card",
@@ -1282,9 +1282,9 @@
                 {
                   "type": "tightening_card",
                   "title": "Process protects comfort",
-                  "text": "A trusted rhythm can become too familiar. The team may preserve a way of working because it feels stable, even when the future requires a different standard.",
-                  "rangeToAdd": "Use Results and Vision to challenge whether the process is still serving the work that matters now.",
-                  "whyItMatters": "Use Results and Vision to challenge whether the process is still serving the work that matters now."
+                  "text": "A trusted cadence can become too familiar. The team may preserve a way of working because it feels stable, even when the future requires a different standard.",
+                  "rangeToAdd": "Use Results and Vision to challenge whether the process is still serving the work that matters now and building the capability the organisation needs next.",
+                  "whyItMatters": "Use Results and Vision to challenge whether the process is still serving the work that matters now and building the capability the organisation needs next."
                 }
               ],
               "readerFacing": true
@@ -1319,7 +1319,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Results gives the trusted route its proof."
+                  "text": "Results gives the trusted system its proof."
                 }
               ],
               "readerFacing": true
@@ -1332,15 +1332,15 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Vision expands this pattern by connecting reliable work to a larger direction."
+                  "text": "Vision expands this pattern by connecting reliable work to future capability."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Because Vision is the furthest extension, it may not appear early unless you deliberately bring it forward. You may focus first on creating a process people can trust and outcomes that prove the route is working. Those are strong moves, but the team also needs to know what the work is building over time."
+                  "text": "Because Vision is the furthest extension, it may not appear early unless you deliberately bring it forward. You may focus first on creating a process people can trust and outcomes that prove the system is working. Those are strong moves, but the team also needs to know what the work is building over time."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Vision helps the team see beyond today's operating rhythm. It explains why the standards matter, what future capability is being created, and how current discipline contributes to a direction worth sustaining."
+                  "text": "Vision helps the team see beyond today's operating cadence. It explains why the standards matter, what future capability is being created, and how current discipline contributes to a direction worth sustaining. It turns improved execution into a story of strategic accumulation: better handovers become scalability, stronger standards become customer reliability, clearer decision rights become leadership capacity, and repeated delivery becomes evidence that the organisation can carry more complex work."
                 },
                 {
                   "type": "prompt_group",
@@ -1349,12 +1349,13 @@
                     "What future are we making easier to reach through this way of working?",
                     "What capability should this team build next?",
                     "How does this process support the strategy, customer promise, or leadership culture we want?",
+                    "Where could today's performance become tomorrow's advantage?",
                     "What story would help effort compound rather than repeat?"
                   ]
                 },
                 {
                   "type": "paragraph",
-                  "text": "Vision prevents reliability from becoming maintenance only. It helps the team see why the work matters beyond the current cycle."
+                  "text": "Vision prevents reliability from becoming maintenance only. It helps the team see why the work matters beyond the current cycle and how useful outcomes can accumulate into strategic capability."
                 }
               ],
               "readerFacing": true
@@ -1367,11 +1368,11 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Your development focus is to connect trusted process to performance and direction."
+                  "text": "Your development focus is to connect trusted process to performance and future capability."
                 },
                 {
                   "type": "development_action",
-                  "title": "Name the result attached to the rhythm",
+                  "title": "Name the result attached to the cadence",
                   "text": "For each meeting cadence, handover, or standard, clarify what outcome it is meant to improve.",
                   "useCases": [
                     "operating reviews",
@@ -1395,7 +1396,7 @@
                 {
                   "type": "development_action",
                   "title": "Bring Vision into stable work",
-                  "text": "When the team is working well, explain what future capability that reliability is creating.",
+                  "text": "When the team is working well, explain what future capability that reliability is creating. Link the operating improvement to customer promise, scale, leadership capacity, or strategic resilience.",
                   "useCases": [
                     "strategy updates",
                     "team briefings",
@@ -1406,7 +1407,7 @@
                 {
                   "type": "development_action",
                   "title": "Watch for hidden comfort",
-                  "text": "Ask whether a trusted process is still serving the work or merely preserving stability.",
+                  "text": "Ask whether a trusted process is still serving the work or merely preserving stability. Stability is valuable, but it should not become a reason to avoid the next standard the future requires.",
                   "useCases": [
                     "retrospectives",
                     "governance reviews",
@@ -1417,7 +1418,7 @@
                 {
                   "type": "development_action",
                   "title": "Convert support into ownership",
-                  "text": "Do not only help people feel supported by the route. Help them own the standard, the outcome, and the future direction it supports.",
+                  "text": "Do not only help people feel supported by the system. Help them own the standard, the outcome, and the future direction it supports.",
                   "useCases": [
                     "ownership transfer",
                     "manager check-ins",
@@ -1433,18 +1434,22 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it creates ways of working people can trust."
+                "text": "Your leadership is valuable because it creates ways of working people can trust and use."
               },
               {
                 "type": "paragraph",
-                "text": "You bring structure that reduces confusion and care that makes the structure usable. You can help teams work with less hidden friction and more shared confidence. Results adds the performance edge: the process should produce visible improvement, not only a better experience."
+                "text": "Process gives your leadership its steadiness. You reduce confusion, clarify ownership, and build operating discipline that makes work easier to carry. People gives that discipline its credibility. The structure is not only efficient; it is more humane, more usable, and more likely to be owned by the team. Results then turns that trusted system into performance, helping the work produce better delivery, clearer decisions, stronger quality, or improved customer experience."
               },
               {
                 "type": "paragraph",
-                "text": "The growth edge is Vision. Your most complete leadership connects reliable work to a future direction, so effort does not only repeat well. It compounds into something more strategic."
+                "text": "The growth edge is Vision. Without it, this pattern can become very effective inside the current operating frame while leaving the larger direction underdeveloped. The team may deliver repeatedly, support one another well, and improve the immediate experience, but not clearly see what future capability those outcomes are building. Your most complete leadership connects reliable performance to strategic accumulation, so effort does not simply repeat. It compounds into a stronger customer promise, a more scalable operating model, and a clearer direction for the team to grow into."
+              },
+              {
+                "type": "paragraph",
+                "text": "Under pressure, the work is not only to keep the system fair and productive. It is to name what this reliability is meant to make possible next."
               }
             ],
-            "finalLine": "Your strongest leadership builds reliable work people trust, then turns that reliability into outcomes that point somewhere larger."
+            "finalLine": "Your strongest leadership builds reliable work people trust, then turns that reliability into outcomes that build future capability."
           },
           "pdf": {
             "title": "Save this report",
@@ -1648,8 +1653,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_people_vision_results.md",
-      "source_content_hash": "a1ac80858d5db82754b7ba1b8b0aa1f9f07a427dc6ea89d451ccc5cbdaecab2c",
-      "content_hash": "a1ac80858d5db82754b7ba1b8b0aa1f9f07a427dc6ea89d451ccc5cbdaecab2c",
+      "source_content_hash": "ad7f7cad2c7a37e54aba2be3428cc30670733da77f0360824dc326a363db0390",
+      "content_hash": "ad7f7cad2c7a37e54aba2be3428cc30670733da77f0360824dc326a363db0390",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -1667,7 +1672,7 @@
           "reportTitle": "Leadership Approach — Process, People, Vision, Results",
           "hero": {
             "title": "You lead by building trusted ways of working and connecting them to shared direction",
-            "resultStatement": "You create confidence by making work coherent, fair, and easier to carry together. Your leadership is at its best when people need a reliable route, a shared sense of how to work, and a clearer reason for why that work matters.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+            "resultStatement": "You create confidence by making work coherent, fair, and easier to carry together. Your leadership is at its best when people need dependable structure, a shared sense of how to work, and a clearer reason for why that work matters.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
           },
           "opening": [
             {
@@ -1688,7 +1693,7 @@
             },
             {
               "type": "paragraph",
-              "text": "Your strongest leadership builds a trusted route, connects it to shared direction, and then names the result that must now be achieved."
+              "text": "Your strongest leadership builds a trusted operating base, connects it to shared direction, and then names the result that must now be achieved. That final move matters: it turns care and purpose into accountable movement rather than comfortable alignment."
             }
           ],
           "patternSummary": {
@@ -1792,7 +1797,7 @@
               },
               {
                 "type": "paragraph",
-                "text": "This is a trust-and-direction pattern. Its best version gives people a reliable way to work together, helps them understand what the work is building, and then turns that shared direction into progress."
+                "text": "This is a trust-and-direction pattern. Its best version gives people a reliable way to work together, helps them understand what the work is building, and then turns that shared direction into measurable progress."
               }
             ]
           },
@@ -1825,7 +1830,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Results is the edge that protects the pattern from becoming too internally coherent. The work must eventually move. The trusted route and shared direction should produce decisions, customer impact, delivery improvement, or measurable progress."
+                  "text": "Results is the edge that protects the pattern from becoming too internally coherent. The work must eventually move. Trusted structure and shared direction should show up in decisions made, customer consequences improved, delivery recovery completed, priorities closed, or measurable progress that changes the next commercial review."
                 }
               ],
               "readerFacing": true
@@ -1850,7 +1855,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Results being fourth means the commercial edge may need deliberate activation. Without it, work can become well held but under-forced. Meetings are thoughtful, the route is respectful, the purpose is clear, yet delivery pressure remains too diffuse."
+                  "text": "Results being fourth means the commercial edge may need deliberate activation. Without it, work can become well held but under-forced. Meetings are thoughtful, the working method is respectful, the purpose is clear, yet delivery pressure remains too diffuse. People may leave with alignment rather than a decision, sympathy for workload rather than a resource trade-off, or broad priorities rather than a clear answer about what must now win."
                 }
               ],
               "readerFacing": true
@@ -1875,11 +1880,11 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The risk is that decisions may be softened by the desire to preserve trust and coherence. You may keep gathering input, refining the route, or explaining the direction when the moment now requires a firmer call."
+                  "text": "The risk is that decisions may be softened by the desire to preserve trust and coherence. You may keep gathering input, refining the working method, or explaining the direction when the moment now requires a firmer call."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Results asks the deciding question: what outcome must this decision now create? A trusted route becomes more powerful when it is tied to visible progress."
+                  "text": "Results asks the deciding question: what outcome must this decision now create? A trusted way of working becomes more powerful when it is tied to evidence, accountability, and visible movement."
                 }
               ],
               "readerFacing": true
@@ -1933,11 +1938,11 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "This can create quiet drift. People feel included and aligned, but priorities remain too broad. Decision rights remain a little too polite. Workload is discussed sympathetically, but the trade-off is not made. The team understands the purpose but lacks the sharp outcome that would focus effort."
+                  "text": "This can create quiet drift. People feel included and aligned, but priorities remain too broad. Decision rights remain a little too polite. Workload is discussed sympathetically, but the trade-off is not made. A governance review can become a careful conversation about constraints without anyone deciding what stops. A commercial review can acknowledge pressure without naming the recovery action. The team understands the purpose but lacks the sharp outcome that would focus effort."
                 },
                 {
                   "type": "paragraph",
-                  "text": "The pressure move is to keep the trust and name the result. Ask: what must now be delivered, what decision right needs to be used, what work should stop, and what evidence will show that our shared direction is becoming real?"
+                  "text": "The pressure move is to keep the trust and name the result. Ask: what must now be delivered, what decision right needs to be used, what work should stop, and what evidence will show that our shared direction is becoming real? This is not impatience; it is consequence. It protects people from the greater strain of well-intentioned drift."
                 }
               ],
               "readerFacing": true
@@ -1975,21 +1980,21 @@
                 {
                   "type": "tightening_card",
                   "title": "Coherence substitutes for progress",
-                  "text": "The work may feel clear, fair, and meaningful, but still lack visible movement. This matters when customers, senior stakeholders, or delivery commitments need proof.",
-                  "rangeToAdd": "Make Results explicit. Name the outcome, evidence, and review point.",
-                  "whyItMatters": "Make Results explicit. Name the outcome, evidence, and review point."
+                  "text": "The work may feel clear, fair, and meaningful, but still lack visible movement. This matters when customers, senior stakeholders, or delivery commitments need proof. A team can be aligned around the story and still miss the recovery window, delay a resourcing decision, or keep too many priorities alive because no outcome has been forced into view.",
+                  "rangeToAdd": "Make Results explicit. Name the outcome, evidence, review point, and decision owner.",
+                  "whyItMatters": "Make Results explicit. Name the outcome, evidence, review point, and decision owner."
                 },
                 {
                   "type": "tightening_card",
                   "title": "Trust delays harder choices",
-                  "text": "You may hesitate to create pressure if it risks unsettling people. But unclear performance expectations can create more strain later.",
-                  "rangeToAdd": "Use direct accountability as a form of respect. People should know what must now be achieved.",
-                  "whyItMatters": "Use direct accountability as a form of respect. People should know what must now be achieved."
+                  "text": "You may hesitate to create pressure if it risks unsettling people. But unclear performance expectations can create more strain later. When no one names the result, people often carry the anxiety privately and solve the prioritisation problem in different ways.",
+                  "rangeToAdd": "Use direct accountability as a form of respect. People should know what must now be achieved, what can pause, and who has the authority to make the trade-off.",
+                  "whyItMatters": "Use direct accountability as a form of respect. People should know what must now be achieved, what can pause, and who has the authority to make the trade-off."
                 },
                 {
                   "type": "tightening_card",
                   "title": "Direction remains too broad",
-                  "text": "Vision can create shared meaning, but it needs prioritisation. If the future direction does not help the team choose, it may not change behaviour.",
+                  "text": "Vision can create shared meaning, but it needs prioritisation. If the future direction does not help the team choose, it may not change behaviour. Purpose becomes commercially useful when it clarifies which customer promise, investment, risk, or delivery commitment now takes precedence.",
                   "rangeToAdd": "Convert purpose into trade-offs. Ask what this direction requires us to do now, stop now, or measure next.",
                   "whyItMatters": "Convert purpose into trade-offs. Ask what this direction requires us to do now, stop now, or measure next."
                 }
@@ -2043,11 +2048,15 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Because Results is the furthest extension, it may need active attention. You may naturally build the route, protect the experience, and explain the direction before you force the performance question. But the performance question is what turns the pattern into commercial leadership."
+                  "text": "Because Results is the furthest extension, it may need active attention. You may naturally build the working system, protect the experience, and explain the direction before you force the performance question. But the performance question is what turns the pattern into commercial leadership."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Results asks whether the team is moving, not only whether it is aligned. It asks what has changed, what decision has been made, what customer impact is visible, what priority has been closed, and what evidence shows progress."
+                  "text": "Results asks whether the team is moving, not only whether it is aligned. It asks what has changed, what decision has been made, what customer impact is visible, what priority has been closed, and what evidence shows progress. It brings the conversation back to proof: not as pressure for its own sake, but as the way trust and purpose become useful in the real operating environment."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, Results is especially important in senior settings where broad agreement can mask weak commitment. It helps a leadership team move from supportive discussion to resource allocation, from shared purpose to customer consequence, and from careful governance to accountable movement."
                 },
                 {
                   "type": "prompt_group",
@@ -2055,13 +2064,14 @@
                   "prompts": [
                     "What outcome must now be delivered?",
                     "Which metric, milestone, or behaviour will show movement?",
+                    "What decision right needs to be used rather than deferred?",
                     "What trade-off does this direction require?",
                     "Where are we preserving comfort instead of creating progress?"
                   ]
                 },
                 {
                   "type": "paragraph",
-                  "text": "Results does not make this pattern harsh. It makes it consequential."
+                  "text": "Results does not make this pattern harsh. It makes it consequential. It ensures the trusted environment is not only good to work inside, but capable of producing the proof the work requires."
                 }
               ],
               "readerFacing": true
@@ -2074,12 +2084,12 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Your development focus is to turn trusted direction into visible progress."
+                  "text": "Your development focus is to turn trusted direction into accountable progress."
                 },
                 {
                   "type": "development_action",
                   "title": "Attach every process to an outcome",
-                  "text": "When defining a route, name the progress it should create. If a rhythm does not improve a result, review whether it is still needed.",
+                  "text": "When defining a way of working, name the progress it should create. If a meeting, handover, or review point does not improve a result, review whether it is still needed.",
                   "useCases": [
                     "operating cadence design",
                     "governance",
@@ -2091,18 +2101,19 @@
                 {
                   "type": "development_action",
                   "title": "Convert purpose into trade-offs",
-                  "text": "Use Vision to decide, not only to inspire. Name what the direction requires the team to prioritise or stop.",
+                  "text": "Use Vision to decide, not only to inspire. Name what the direction requires the team to prioritise, fund, pause, or stop.",
                   "useCases": [
                     "strategy communication",
                     "prioritisation",
-                    "resource allocation."
+                    "resource allocation",
+                    "commercial reviews."
                   ],
-                  "whyItMatters": "Use this in: strategy communication, prioritisation, resource allocation.."
+                  "whyItMatters": "Use this in: strategy communication, prioritisation, resource allocation, commercial reviews.."
                 },
                 {
                   "type": "development_action",
                   "title": "Make accountability explicit and fair",
-                  "text": "People can handle clear expectations when they understand the route and the reason. Do not let care become vagueness.",
+                  "text": "People can handle clear expectations when they understand the method and the reason. Do not let care become vagueness.",
                   "useCases": [
                     "delegation",
                     "performance conversations",
@@ -2113,7 +2124,7 @@
                 {
                   "type": "development_action",
                   "title": "Review evidence, not only experience",
-                  "text": "Ask how the trusted way of working is changing delivery, quality, decision speed, or customer consequences.",
+                  "text": "Ask how the trusted way of working is changing delivery, quality, decision speed, customer consequences, or recovery confidence.",
                   "useCases": [
                     "retrospectives",
                     "operating reviews",
@@ -2124,7 +2135,7 @@
                 {
                   "type": "development_action",
                   "title": "Use pressure to clarify, not overwhelm",
-                  "text": "In urgent moments, keep people oriented and supported, then name the result that cannot wait.",
+                  "text": "In urgent moments, keep people oriented and supported, then name the result that cannot wait. Make the decision right clear enough that the team does not have to infer authority under pressure.",
                   "useCases": [
                     "delivery recovery",
                     "customer escalations",
@@ -2141,18 +2152,22 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it creates work that people can trust and understand."
+                "text": "Your leadership is valuable because it creates work that people can trust, understand, and connect to something larger."
               },
               {
                 "type": "paragraph",
-                "text": "You bring structure with care, and you connect that structure to a direction that makes effort feel meaningful. That combination can be powerful in complex or fatigued teams because it reduces confusion while rebuilding shared confidence."
+                "text": "Process gives your leadership its organising strength. You reduce confusion, clarify standards, and create a way for shared work to hold together. People gives that structure its human credibility. The system is not only cleaner; it is more usable, fairer to carry, and more likely to earn trust. Vision then gives the work a reason beyond internal order. It helps people see what the discipline is building and why the shared effort matters."
               },
               {
                 "type": "paragraph",
-                "text": "The growth edge is Results. Your most complete leadership keeps the trusted route and the shared direction, then names the progress that must now happen. That is where coherence becomes performance."
+                "text": "The growth edge is Results. Without it, this pattern can become too comfortable inside its own strengths: thoughtful, coherent, considerate, and purposeful, but not sharp enough about what must now change. The most complete version of your leadership names the proof. It turns alignment into prioritisation, sympathy into resource choices, purpose into delivery decisions, and trust into accountable movement."
+              },
+              {
+                "type": "paragraph",
+                "text": "Under pressure, your task is not to become harsher. It is to become clearer about consequence. People are better served by a trusted environment that also knows what result it must produce."
               }
             ],
-            "finalLine": "Your strongest leadership builds trust around the way forward, then turns that trust into progress that proves the direction."
+            "finalLine": "Your strongest leadership builds trust around the way forward, then turns that trust into the evidence, decisions, and delivery that prove the direction is real."
           },
           "pdf": {
             "title": "Save this report",
@@ -3118,8 +3133,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_results_vision_people.md",
-      "source_content_hash": "30fd7e47803d420a71844d111727e5dd37df69b5283afb5f1179dba0bdc8c9a5",
-      "content_hash": "30fd7e47803d420a71844d111727e5dd37df69b5283afb5f1179dba0bdc8c9a5",
+      "source_content_hash": "504e4fa871738c06f6775c86bb5c3058f13fa2b465c67b87b6ab4217316b325d",
+      "content_hash": "504e4fa871738c06f6775c86bb5c3058f13fa2b465c67b87b6ab4217316b325d",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -3268,7 +3283,7 @@
           },
           "keyInsight": {
             "type": "pull_quote",
-            "text": "Your leadership creates confidence by making work hold together and move. The development edge is to make sure the route is shaped with people early enough that commitment is created, not only requested."
+            "text": "Your leadership creates confidence by making work hold together and move. The development edge is to make sure the operating plan is shaped with people early enough that commitment is created, not only requested."
           },
           "chapters": [
             {
@@ -3569,7 +3584,7 @@
                 {
                   "type": "development_action",
                   "title": "Put the future reason near the front",
-                  "text": "Do not wait until implementation to explain why the route matters. Name the future capability or strategic risk the process is meant to address.",
+                  "text": "Do not wait until implementation to explain why the work matters. Name the future capability or strategic risk the process is meant to address.",
                   "useCases": [
                     "strategy execution",
                     "change communication",
@@ -3837,8 +3852,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_vision_people_results.md",
-      "source_content_hash": "9acc517597b3cdb5e40f33d26bf6d9ccbe2f0c90a9b914882135b24fd4849c14",
-      "content_hash": "9acc517597b3cdb5e40f33d26bf6d9ccbe2f0c90a9b914882135b24fd4849c14",
+      "source_content_hash": "ea81860a0458ac322ccae273f1c44e1942b3f1b618c168c7fdc49c640c7d0016",
+      "content_hash": "ea81860a0458ac322ccae273f1c44e1942b3f1b618c168c7fdc49c640c7d0016",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -3983,7 +3998,7 @@
           },
           "keyInsight": {
             "type": "pull_quote",
-            "text": "Your leadership creates confidence by making direction coherent and owned. The development edge is to turn shared understanding into visible progress before momentum becomes too gentle."
+            "text": "Your leadership creates confidence by making direction coherent and owned. The development edge is to turn shared understanding into measurable progress before momentum becomes too gentle."
           },
           "chapters": [
             {
@@ -4550,8 +4565,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_vision_results_people.md",
-      "source_content_hash": "7be25eb321351fd09b2a5ee7d88b685d4468f0d764609767667742fd5ebf77d1",
-      "content_hash": "7be25eb321351fd09b2a5ee7d88b685d4468f0d764609767667742fd5ebf77d1",
+      "source_content_hash": "6649a77638439671bbe6662c5dea0c202bbdaddb97a659235225853b2e9c05a7",
+      "content_hash": "6649a77638439671bbe6662c5dea0c202bbdaddb97a659235225853b2e9c05a7",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -4798,7 +4813,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "You tend to communicate through route, rationale, and direction."
+                  "text": "You tend to communicate through sequence, rationale, and direction."
                 },
                 {
                   "type": "paragraph",
@@ -4984,7 +4999,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Your development focus is to make the pathway provable and participative."
+                  "text": "Your development focus is to make the operating path provable and participative."
                 },
                 {
                   "type": "development_action",

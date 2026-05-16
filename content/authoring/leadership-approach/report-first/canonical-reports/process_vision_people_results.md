@@ -52,7 +52,7 @@ These scores show why your report is led by Process and strengthened by Vision, 
 
 Key insight
 
-Your leadership creates confidence by making direction coherent and owned. The development edge is to turn shared understanding into visible progress before momentum becomes too gentle.
+Your leadership creates confidence by making direction coherent and owned. The development edge is to turn shared understanding into measurable progress before momentum becomes too gentle.
 
 Chapter 1 — How your leadership creates value
 
