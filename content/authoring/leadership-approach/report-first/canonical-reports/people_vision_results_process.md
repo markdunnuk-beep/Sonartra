@@ -1,8 +1,8 @@
 Leadership Approach — People, Vision, Results, Process
 
-You lead by building shared belief and turning it into visible progress
+You lead by building shared commitment and turning it into proof people can organise
 
-You create confidence by helping people see themselves in a meaningful direction, then turning that shared commitment into action. Your leadership is at its best when people need belonging, purpose, and proof that the work can become real.
+You create confidence by helping people see themselves in a meaningful direction, then turning that shared commitment into action. Your leadership is at its best when people need shared purpose and proof, but the work also needs an operating system strong enough to prevent fragmentation.
 
 This report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader.
 
@@ -12,7 +12,7 @@ Your leadership approach is led by People and strengthened by Vision. You are li
 
 Results is the first expansion. It helps shared purpose become credible through visible movement: decisions, customer impact, delivery proof, or progress that shows the direction is more than a story.
 
-Process is the furthest extension. The development edge is to build the system behind the shared purpose before people begin carrying ambiguity as extra work. Without Process, commitment and proof can fragment across teams, interpretations, and informal coordination.
+Process is the furthest extension. The development edge is to build the system behind the shared purpose before people begin carrying ambiguity as extra work. Without Process, commitment and proof can fragment across teams, interpretations, decision rights, handovers, and informal coordination.
 
 Your strongest leadership makes the future human, proves it through action, and then gives the work enough operating discipline to be sustained.
 
@@ -25,7 +25,7 @@ Pattern at a glance
 | 3 | Results — the proof expansion | Results turns shared purpose into action, closure, delivery evidence, and visible progress. |
 | 4 | Process — the operating edge | Process adds rhythm, decision rights, handovers, standards, governance, and repeatability. |
 
-This is a people-and-vision pattern with a proof expansion. Its best version helps people believe in the work, see progress, and then coordinate that progress reliably.
+This is a people-and-vision pattern with a proof expansion. Its best version helps people commit to the work, see evidence, and then coordinate that progress reliably.
 
 Evidence behind your result
 
@@ -104,9 +104,9 @@ Under pressure, your leadership may tighten toward protecting shared purpose and
 
 This can help when morale is low, change feels fragmented, or people are losing sight of why the work matters. You can restore commitment by reconnecting people to the direction and to each other.
 
-The risk is that shared purpose may be asked to bridge operating gaps. People may be inspired and willing, but purpose does not automatically define handovers, decision rights, governance, workload distribution, or review cadence.
+The risk is that shared purpose may be asked to bridge operating gaps. People may be committed and willing, but purpose does not automatically define handovers, decision rights, governance, workload distribution, or review cadence.
 
-That can create hidden strain. Committed people may compensate for unclear method. Different teams may interpret the future differently. Early progress may depend on personal conviction rather than a repeatable system. Stakeholders may see energy but question whether the work can scale.
+That can create hidden strain. Committed people may compensate for unclear method. Different teams may interpret the future differently. Early progress may depend on the most committed people rather than a repeatable system. Stakeholders may see energy but question whether the work can scale, transfer, or survive handovers.
 
 The pressure move is to protect purpose by building method: what happens first, who owns it, how decisions close, what standard applies, and how progress will be reviewed.
 
@@ -126,23 +126,23 @@ Results helps shared belief become visible through action, evidence, customer im
 
 Chapter 7 — Where the pattern can tighten
 
-1. Purpose before method
+1. Purpose before operating discipline
 
 People may believe in the direction before the operating route is clear.
 
-Range to add: Bring Process in through roles, sequence, standards, and review rhythm.
+Range to add: Bring Process in through roles, sequence, standards, decision rights, and review rhythm.
 
 2. Belonging carries ambiguity
 
 People may take on extra interpretation work because they care about the future.
 
-Range to add: Treat clear coordination as a way of protecting commitment.
+Range to add: Treat clear coordination as a way of protecting commitment and preventing uneven workload.
 
 3. Proof depends on conviction
 
 Progress may rely on the energy of people who believe most strongly.
 
-Range to add: Build governance and cadence around the proof point so progress can continue beyond the first push.
+Range to add: Build governance, handover discipline, and cadence around the proof point so progress can continue beyond the first push.
 
 Chapter 8 — How Results expands your leadership
 
@@ -161,11 +161,11 @@ What evidence will help people keep trusting the direction?
 
 Chapter 9 — How Process expands your leadership
 
-Process expands this pattern by giving shared purpose and visible progress a working system.
+Process expands this pattern by giving shared purpose and proof a working system.
 
-Because Process is the furthest extension, it may need deliberate attention. You may naturally build commitment, explain the future, and create movement before fully defining the operating model. But without Process, people may carry the same purpose in different ways.
+Because Process is the furthest extension, it may need deliberate attention. You may naturally build commitment, explain the future, and create movement before fully defining the operating model. But without Process, people may carry the same purpose in different ways, and early proof may be hard to repeat.
 
-Process adds decision rights, handovers, standards, governance, cadence, and review rhythm. It protects people from hidden labour and protects progress from becoming uneven, local, or dependent on personal conviction.
+Process adds decision rights, handovers, standards, governance, cadence, and review rhythm. It protects people from hidden labour and protects progress from becoming uneven, local, or dependent on personal conviction. It also helps senior stakeholders trust that proof can scale rather than remain a one-off success.
 
 Process questions to bring forward:
 
@@ -215,7 +215,7 @@ Your leadership is valuable because it makes the future something people can bel
 
 People gives your leadership its trust base. Vision gives trust a meaningful direction. Results turns shared purpose into evidence. The growth edge is Process: the operating discipline that prevents belief, commitment, and action from fragmenting.
 
-Your risk under pressure is asking purpose and commitment to carry coordination that has not yet been designed. Your strongest leadership keeps people included, keeps the future meaningful, keeps proof visible, and builds the system that lets shared purpose become reliable work.
+Your risk under pressure is asking purpose and commitment to carry coordination that has not yet been designed. That can create governance gaps, unclear decision rights, repeated interpretation work, and uneven workload for the people most invested in the future. Your strongest leadership keeps people included, keeps the future meaningful, keeps proof visible, and builds the system that lets shared purpose become reliable work.
 
 Final line
 

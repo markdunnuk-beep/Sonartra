@@ -1,8 +1,8 @@
 Leadership Approach — People, Process, Vision, Results
 
-You lead by building trust, giving it a route, and connecting it to a wider direction
+You lead by turning trust into a working route, then asking that route to prove its value
 
-You create confidence by helping people understand how work can be carried together, then connecting that trusted way of working to a broader purpose. Your leadership is at its best when people need voice, structure, and meaning before they can fully commit.
+You create confidence by helping people understand how work can be carried together, then connecting that trusted way of working to a broader purpose. Your leadership is at its best when people need voice, structure, and meaning, but the route still has to produce proof.
 
 This report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader.
 
@@ -12,9 +12,9 @@ Your leadership approach is led by People and strengthened by Process. You are l
 
 Vision is the first expansion. It helps the trusted process point beyond itself toward future capability, customer promise, strategic direction, or a reason the work matters.
 
-Results is the furthest extension. The development edge is to make progress expectations explicit without treating performance pressure as a threat to trust. Without enough Results, the pattern can become considerate, coherent, and meaningful while still delaying visible movement.
+Results is the furthest extension. The development edge is to make progress expectations explicit without treating performance pressure as a threat to trust. Without enough Results, the pattern can become considerate, coherent, and meaningful while customer impact stays unclear, trade-offs stay slow, and senior stakeholders struggle to see proof.
 
-Your strongest leadership creates trust people can work through, gives that trust strategic direction, and then names the proof that shows the work is changing something.
+Your strongest leadership creates trust people can work through, gives that trust strategic direction, and then names the proof that shows the work is changing something material.
 
 Pattern at a glance
 
@@ -72,9 +72,9 @@ Others may experience your leadership as steady, inclusive, and well held. You c
 
 This can be valuable in operating model change, team development, culture repair, stakeholder-heavy work, and situations where adoption matters as much as design. People may feel that their judgement is invited and that the way of working is understandable.
 
-The possible tension is that progress pressure may feel delayed. The team may feel involved and oriented, but still need clearer urgency, decision closure, and measurable movement. Senior stakeholders may ask what has changed because the trusted route exists.
+The possible tension is that progress pressure may feel delayed. The team may feel involved and oriented, but still need clearer urgency, decision closure, and measurable movement. Senior stakeholders may ask what has changed because the trusted route exists. Customers may not yet feel the improvement. Slow trade-offs can leave the process respected but commercially under-proven.
 
-When mature, this pattern does not choose between trust and performance. It uses trust and process to make performance more credible, fair, and sustainable.
+When mature, this pattern does not choose between trust and performance. It uses trust and process to make performance more credible, fair, and sustainable, then tests that performance through evidence.
 
 Chapter 3 — Decision behaviour
 
@@ -104,9 +104,9 @@ Under pressure, your leadership may tighten toward protecting trust and clarifyi
 
 This can help when people are anxious, adoption is fragile, or change is being handled carelessly. You can restore confidence by making the route fairer and more understandable.
 
-The risk is that thoughtful participation and process care can delay the harder move into evidence. A team may keep refining the route, strengthening confidence, or broadening alignment while customer impact, delivery recovery, or commercial risk needs more decisive movement.
+The risk is that thoughtful participation and process care can delay the harder move into evidence. A team may keep refining the route, strengthening confidence, or broadening alignment while customer impact, delivery recovery, or commercial risk needs more decisive movement. The work can be well held and still underpowered.
 
-Results-last is commercially important here. If progress is not made explicit, trust can become comfortable, process can become maintenance, and the wider direction can remain aspirational rather than proven.
+Results-last is commercially important here. If evidence is not made explicit, trust can become comfortable, process can become maintenance, accountability can soften, and the wider direction can remain aspirational rather than proven.
 
 The pressure move is to keep care and process, then name the accountable step: what must change, by when, by whom, and what evidence will show that the trusted route is working?
 
@@ -126,23 +126,23 @@ Vision helps your process avoid becoming only internal coordination. It points t
 
 Chapter 7 — Where the pattern can tighten
 
-1. Trust before proof
+1. Trust before evidence
 
-The team may feel well held, but progress may remain under-defined.
+The team may feel well held, but the evidence of movement may remain under-defined.
 
-Range to add: Bring Results in by naming the outcome, evidence, owner, and review point early.
+Range to add: Bring Results in by naming the outcome, evidence, owner, review point, and decision that must now close.
 
 2. Process protects comfort
 
 The way of working may become reassuring without creating enough change.
 
-Range to add: Tie process to customer consequence, delivery proof, or commercial risk.
+Range to add: Tie process to customer consequence, delivery proof, commercial risk, or resource trade-offs.
 
 3. Meaning softens accountability
 
 The future direction may be compelling, but the immediate performance expectation may remain too gentle.
 
-Range to add: Translate purpose into priorities, decisions, and visible movement.
+Range to add: Translate purpose into priorities, decisions, evidence, and accountable movement.
 
 Chapter 8 — How Vision expands your leadership
 
@@ -161,11 +161,11 @@ How does the way we work now prepare us for what comes next?
 
 Chapter 9 — How Results expands your leadership
 
-Results expands this pattern by turning trust, process, and direction into proof.
+Results expands this pattern by turning trust, process, and direction into commercial proof.
 
-Because Results is the furthest extension, it may need deliberate force. You may naturally create participation, clarify the route, and explain the wider reason before naming the hard outcome. But proof is what keeps this pattern commercially strong.
+Because Results is the furthest extension, it may need deliberate force. You may naturally create participation, clarify the route, and explain the wider reason before naming the hard outcome. But proof is what keeps this pattern commercially strong. It shows whether the trusted route is improving customer experience, reducing delivery risk, closing decisions, or building the capability it promised.
 
-Results asks what has changed: the decision closed, the customer issue improved, the delivery risk reduced, the priority made real, or the capability demonstrated. It prevents alignment from becoming a comfortable substitute for movement.
+Results asks what has changed: the decision closed, the customer issue improved, the delivery risk reduced, the priority made real, or the capability demonstrated. It prevents alignment from becoming a comfortable substitute for movement and stops soft accountability from hiding inside good process.
 
 Results questions to bring forward:
 
@@ -176,49 +176,49 @@ Where is trust becoming a reason to delay progress?
 
 Chapter 10 — Development focus
 
-Your development focus is to make trusted alignment produce visible progress.
+Your development focus is to make trusted alignment produce visible evidence.
 
 1. Define the proof point
 
-Name the result the trusted process must produce before alignment work expands.
+Name the result the trusted process must produce before alignment work expands, including the evidence stakeholders will recognise.
 
 Use this in: operating reviews, transformation planning, governance forums.
 
 2. Pair involvement with closure
 
-Clarify where people are shaping the work and where a decision now belongs.
+Clarify where people are shaping the work and where a decision now belongs. Trust improves when people know when input has become accountable closure.
 
 Use this in: stakeholder workshops, leadership meetings, cross-functional planning.
 
 3. Make performance respectful
 
-Frame accountability as a way of honouring trust, not threatening it.
+Frame accountability as a way of honouring trust, not threatening it. Make the standard, consequence, and support visible.
 
 Use this in: feedback, delivery recovery, role clarity, performance conversations.
 
 4. Tie direction to evidence
 
-Translate the future reason into measurable movement, customer impact, or capability proof.
+Translate the future reason into measurable movement, customer impact, decision closure, or capability proof.
 
 Use this in: strategy updates, commercial reviews, prioritisation.
 
 5. Watch for comfortable coherence
 
-Notice when the group feels aligned but the work has not materially changed.
+Notice when the group feels aligned but the work has not materially changed. Ask what customer, stakeholder, or delivery consequence is still missing.
 
 Use this in: retrospectives, senior updates, team development.
 
 Closing synthesis
 
-Your leadership is valuable because it makes work trusted, organised, and meaningful.
+Your leadership is valuable because it makes work trusted, organised, meaningful, and testable.
 
-People gives your leadership its human foundation. Process turns that foundation into a route people can use. Vision connects the route to future value. The growth edge is Results: the proof that the trusted and meaningful way of working is producing visible movement.
+People gives your leadership its human foundation. Process turns that foundation into a route people can use. Vision connects the route to future value. The growth edge is Results: the proof that the trusted and meaningful way of working is producing customer consequence, decision closure, delivery confidence, or capability evidence.
 
-Your risk under pressure is preserving trust and coherence while progress remains too soft. Your strongest leadership keeps people included, keeps the route clear, keeps the future visible, and names the outcome that will show the work is genuinely moving.
+Your risk under pressure is preserving trust and coherence while consequence remains too soft. That can create well-held teams without visible movement, careful alignment without closure, and stakeholder confidence that fades because proof is late. Your strongest leadership keeps people included, keeps the route clear, keeps the future visible, and names the outcome that will show the work is genuinely moving.
 
 Final line
 
-Your strongest leadership turns trusted alignment into progress people can see, measure, and keep carrying.
+Your strongest leadership turns trusted alignment into proof people can see, measure, and keep carrying.
 
 PDF export CTA
 
