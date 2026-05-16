@@ -7,6 +7,7 @@ import type {
   RankedPatternPublishVersionResult,
 } from '@/lib/server/ranked-pattern-admin-versioning';
 import type { RankedPatternWorkbookStorageReference } from '@/lib/server/ranked-pattern-workbook-storage';
+import type { ReportFirstTemplateImportSummary } from '@/lib/server/report-first-template-import';
 
 export type RankedPatternAdminImportActionState = {
   readonly ok: boolean;
@@ -58,6 +59,15 @@ export type RankedPatternPublishVersionActionState = {
   readonly result: RankedPatternPublishVersionResult | null;
 };
 
+export type ReportFirstTemplateImportActionState = {
+  readonly ok: boolean;
+  readonly message: string | null;
+  readonly formError: string | null;
+  readonly formSuccess: string | null;
+  readonly fieldErrors: Readonly<Record<string, string>>;
+  readonly result: ReportFirstTemplateImportSummary | null;
+};
+
 export const initialRankedPatternAdminImportActionState: RankedPatternAdminImportActionState = {
   ok: false,
   message: null,
@@ -92,6 +102,15 @@ export const initialRankedPatternDraftVersionActionState: RankedPatternDraftVers
 };
 
 export const initialRankedPatternPublishVersionActionState: RankedPatternPublishVersionActionState = {
+  ok: false,
+  message: null,
+  formError: null,
+  formSuccess: null,
+  fieldErrors: {},
+  result: null,
+};
+
+export const initialReportFirstTemplateImportActionState: ReportFirstTemplateImportActionState = {
   ok: false,
   message: null,
   formError: null,

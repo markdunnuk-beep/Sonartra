@@ -1,5 +1,6 @@
 import { rankedPatternSupportedScoreShapes } from '@/content/assessment-packages/import-contract/ranked-pattern-import-manifest';
 import { buildReportFirstCanonicalPayload } from '@/lib/server/report-first-result-assembly';
+import { getDbPool } from '@/lib/server/db';
 import { REPORT_FIRST_TEMPLATE_CONTRACT } from '@/lib/server/report-first-template-storage';
 import {
   buildLeadershipReportFirstImportArtifact,
@@ -87,6 +88,21 @@ type PreviewTemplateRow = {
   readonly report_contract: string;
   readonly report_template_json: unknown;
   readonly content_hash: string;
+  readonly status: string;
+};
+
+type PreviewTemplateSource = {
+  readonly domain_key: string;
+  readonly pattern_key: string;
+  readonly report_key: string;
+  readonly report_contract: string;
+  readonly report_template_json: unknown;
+  readonly content_hash: string;
+};
+
+type ImportedPreviewTemplateRow = PreviewTemplateSource & {
+  readonly id: string;
+  readonly assessment_version_id: string;
   readonly status: string;
 };
 
@@ -255,9 +271,10 @@ function previewHeadingCoverage(payload: ReportFirstCanonicalPayloadV1): readonl
 }
 
 function buildReview(params: {
-  readonly row: LeadershipReportFirstImportRow;
+  readonly row: PreviewTemplateSource;
   readonly payload: ReportFirstCanonicalPayloadV1;
   readonly scoreShape: string;
+  readonly sourceStatus: string;
 }): AdminReportFirstPreviewReview {
   const reportText = textFromTemplate({
     report: params.payload.report,
@@ -272,7 +289,7 @@ function buildReview(params: {
     reportKey: params.row.report_key,
     signalOrderLabel: reportLabel(params.row.pattern_key),
     scoreShape: params.scoreShape,
-    sourceStatus: 'Loaded from generated report-first import artifact',
+    sourceStatus: params.sourceStatus,
     fullBodyPresent: reportText.length > 12000,
     requiredHeadingsPresent: missingHeadings.length === 0,
     evidenceRenderable: params.payload.rankedSignals.length === 4 && params.payload.normalizedScores.length === 4,
@@ -281,6 +298,43 @@ function buildReview(params: {
     missingHeadings,
     forbiddenLabels,
   };
+}
+
+async function loadImportedPreviewTemplate(params: {
+  readonly assessmentVersionId: string | null;
+  readonly patternKey: string;
+}): Promise<ImportedPreviewTemplateRow | null> {
+  if (!params.assessmentVersionId || !process.env.DATABASE_URL) {
+    return null;
+  }
+
+  try {
+    const result = await getDbPool().query<ImportedPreviewTemplateRow>(
+      `
+      SELECT
+        id,
+        assessment_version_id,
+        domain_key,
+        pattern_key,
+        report_key,
+        report_contract,
+        report_template_json,
+        content_hash,
+        status
+      FROM assessment_report_first_templates
+      WHERE assessment_version_id = $1
+        AND pattern_key = $2
+        AND status = 'draft'
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 1
+      `,
+      [params.assessmentVersionId, params.patternKey],
+    );
+
+    return result.rows[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function buildAdminReportFirstPreview(params: {
@@ -324,7 +378,16 @@ export async function buildAdminReportFirstPreview(params: {
     };
   }
 
-  const rankedSignals = rankedSignalsForPattern(selected.pattern_key);
+  const importedTemplate = await loadImportedPreviewTemplate({
+    assessmentVersionId: params.assessmentVersionId,
+    patternKey: selected.pattern_key,
+  });
+  const template = importedTemplate ?? selected;
+  const sourceStatus = importedTemplate
+    ? 'Loaded from imported draft report-first template storage'
+    : 'Loaded from generated report-first import artifact';
+
+  const rankedSignals = rankedSignalsForPattern(template.pattern_key);
   if (rankedSignals.length !== 4) {
     return {
       status: 'error',
@@ -342,7 +405,7 @@ export async function buildAdminReportFirstPreview(params: {
     assessmentTitle: params.assessmentTitle,
     assessmentVersionTag: params.assessmentVersionTag ?? 'admin-preview',
     assessmentDescription: 'Admin-only report-first template preview.',
-    domainKey: selected.domain_key,
+    domainKey: template.domain_key,
     domainTitle: 'Leadership Approach',
     domainDescription: null,
     responses: syntheticResponses(),
@@ -350,8 +413,8 @@ export async function buildAdminReportFirstPreview(params: {
     normalizedResult: syntheticNormalizedResult(rankedSignals),
     rankedSignals,
     scoreShape: shape,
-    patternKey: selected.pattern_key,
-    template: templateRowFromImportRow(selected, params.assessmentVersionId ?? 'admin-preview-version'),
+    patternKey: template.pattern_key,
+    template: importedTemplate ?? templateRowFromImportRow(selected, params.assessmentVersionId ?? 'admin-preview-version'),
     counts: {
       domainCount: 1,
       questionCount: 24,
@@ -367,9 +430,10 @@ export async function buildAdminReportFirstPreview(params: {
     options,
     payload,
     review: buildReview({
-      row: selected,
+      row: template,
       payload,
       scoreShape: shape.value,
+      sourceStatus,
     }),
   };
 }

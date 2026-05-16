@@ -149,10 +149,16 @@ test('admin report-first preview is wired to the ranked-pattern workflow without
     join(process.cwd(), 'app', '(user)', 'app', 'results', 'single-domain', '[resultId]', 'page.tsx'),
     'utf8',
   );
+  const importPanelSource = readFileSync(
+    join(process.cwd(), 'components', 'admin', 'report-first-template-import-panel.tsx'),
+    'utf8',
+  );
 
   assert.match(workflowSource, /Preview report-first output/);
-  assert.match(workflowSource, /data-report-first-import-status="true"/);
-  assert.match(workflowSource, /Report-first import handoff/);
+  assert.match(workflowSource, /ReportFirstTemplateImportPanel/);
+  assert.match(importPanelSource, /data-report-first-import-status="true"/);
+  assert.match(importPanelSource, /Report-first import handoff/);
+  assert.match(importPanelSource, /Import generated report templates/);
   assert.match(previewRouteSource, /buildAdminReportFirstPreview/);
   assert.match(previewRouteSource, /ReportFirstResultReport/);
   assert.match(previewRouteSource, /Does not create user results/);

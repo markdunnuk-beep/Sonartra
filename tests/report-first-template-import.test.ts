@@ -51,7 +51,7 @@ function createFakeDb() {
     rows: [] as StoredTemplateRow[],
     nextId: 1,
     queries: [] as string[],
-    activePatterns: new Set(availablePatternKeys.map((patternKey) => `${assessmentVersionId}|leadership-approach|${patternKey}`)),
+    activePatterns: new Set(availablePatternKeys.map((patternKey) => `${assessmentVersionId}|${patternKey}`)),
   };
 
   return {
@@ -66,8 +66,8 @@ function createFakeDb() {
         }
 
         if (sql.includes('FROM assessment_ranked_patterns')) {
-          const key = `${String(params?.[0] ?? '')}|${String(params?.[1] ?? '')}|${String(params?.[2] ?? '')}`;
-          return { rows: (state.activePatterns.has(key) ? [{ pattern_key: params?.[2] }] : []) as T[] };
+          const key = `${String(params?.[0] ?? '')}|${String(params?.[1] ?? '')}`;
+          return { rows: (state.activePatterns.has(key) ? [{ pattern_key: params?.[1] }] : []) as T[] };
         }
 
         if (sql.includes('FROM assessment_report_first_templates') && sql.includes("status = 'draft'")) {

@@ -122,11 +122,10 @@ async function assertActiveRankedPatternExists(
     SELECT pattern_key
     FROM assessment_ranked_patterns
     WHERE assessment_version_id = $1
-      AND domain_key = $2
-      AND pattern_key = $3
+      AND pattern_key = $2
       AND status = 'active'
     `,
-    [assessmentVersionId, template.domain_key, template.pattern_key],
+    [assessmentVersionId, template.pattern_key],
   );
 
   if (result.rows.length !== 1) {
@@ -201,7 +200,7 @@ async function insertReportFirstTemplate(
       created_by,
       import_batch_id
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, $12::jsonb, $13, $14, $15, $16, $17, $18, $19::boolean, $20::boolean, $21, $22)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11::jsonb, $12, $13, $14, $15, $16, $17, $18, $19::boolean, $20::boolean, $21, $22)
     RETURNING
       id,
       assessment_version_id,

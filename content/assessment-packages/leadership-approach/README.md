@@ -77,6 +77,15 @@ structured report body, and persists only rows marked `ready_for_import: true` a
 `publishable: true`. Missing manifest entries are reported as blocking coverage findings; they are
 not inserted as active or publishable placeholders.
 
+The keyed ranked-pattern workflow exposes the handoff as an admin action:
+
+- route: `/admin/assessments/ranked-pattern/leadership-approach/workflow`
+- action: `Import generated report templates`
+- expected current result: 4 draft template rows imported, 20 templates missing, publish blocked
+
+The action is idempotent for draft rows: running it again updates the same draft template rows
+rather than creating duplicate draft rows for the same pattern.
+
 Current coverage:
 
 - expected patterns: 24

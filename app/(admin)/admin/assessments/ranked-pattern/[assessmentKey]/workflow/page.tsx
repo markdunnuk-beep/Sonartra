@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 
+import { ReportFirstTemplateImportPanel } from '@/components/admin/report-first-template-import-panel';
 import { RankedPatternImportPanel } from '@/components/admin/ranked-pattern-import-panel';
 import {
   ButtonLink,
@@ -16,27 +17,6 @@ import { getDbPool } from '@/lib/server/db';
 import { buildLeadershipReportFirstImportArtifact } from '@/lib/server/leadership-report-first-package';
 import { auditImportedReportFirstTemplateCoverage } from '@/lib/server/report-first-template-import';
 import { isRankedPatternPackageCompatibleAssessment } from '@/lib/ranked-pattern-admin-compatibility';
-
-function AdminReportFirstBlockingCopy({
-  importedCount,
-  missingCount,
-}: Readonly<{
-  importedCount: number;
-  missingCount: number;
-}>) {
-  return (
-    <div className="rounded-[1rem] border border-[rgba(255,184,107,0.2)] bg-[rgba(255,184,107,0.08)] px-4 py-3">
-      <p className="text-sm font-medium text-[rgba(255,235,204,0.92)]">
-        Report-first publish coverage remains blocked
-      </p>
-      <p className="mt-1 text-sm leading-6 text-[rgba(255,235,204,0.68)]">
-        {importedCount} report-first templates are present in draft storage. {missingCount} required
-        ranked-pattern templates are still missing, so publish audit must continue to block
-        report-first readiness.
-      </p>
-    </div>
-  );
-}
 
 export default async function RankedPatternWorkflowPage({
   params,
@@ -180,49 +160,15 @@ export default async function RankedPatternWorkflowPage({
         </div>
       </SurfaceCard>
 
-      <SurfaceCard className="space-y-5 p-5 lg:p-6" data-report-first-import-status="true">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="sonartra-page-eyebrow">Report-first templates</p>
-          <LabelPill>
-            {reportFirstArtifact.coverage.generated_import_ready_count} generated rows
-          </LabelPill>
-          <LabelPill className="border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.1)] text-[rgba(255,227,187,0.9)]">
-            {reportFirstArtifact.coverage.missing_template_count} missing
-          </LabelPill>
-        </div>
-        <div className="space-y-2">
-          <CardTitle>Report-first import handoff</CardTitle>
-          <SecondaryText>
-            The generated package artifact is available for draft import. It currently contains the
-            four authored Leadership Approach report templates and keeps full report-first coverage
-            non-publishable until all twenty-four templates exist.
-          </SecondaryText>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetaItem label="Artifact" value="Found" />
-          <MetaItem
-            label="Draft imported rows"
-            value={
-              reportFirstDraftCoverage
-                ? String(reportFirstDraftCoverage.importedTemplateCount)
-                : 'Create a draft first'
-            }
-          />
-          <MetaItem
-            label="Coverage"
-            value={reportFirstArtifact.coverage.publishable_full_coverage ? 'Publishable' : 'Blocked'}
-          />
-          <MetaItem label="Score-shape policy" value={reportFirstArtifact.score_shape_policy} />
-        </div>
-        <AdminReportFirstBlockingCopy
-          importedCount={reportFirstDraftCoverage?.importedTemplateCount ?? 0}
-          missingCount={
-            reportFirstDraftCoverage
-              ? reportFirstDraftCoverage.missingPatternKeys.length
-              : reportFirstArtifact.coverage.missing_template_count
-          }
-        />
-      </SurfaceCard>
+      <ReportFirstTemplateImportPanel
+        assessmentKey={assessment.assessmentKey}
+        generatedImportReadyCount={reportFirstArtifact.coverage.generated_import_ready_count}
+        importedDraftCount={reportFirstDraftCoverage?.importedTemplateCount ?? null}
+        missingTemplateCount={reportFirstArtifact.coverage.missing_template_count}
+        publishableCoverage={reportFirstArtifact.coverage.publishable_full_coverage}
+        scoreShapePolicy={reportFirstArtifact.score_shape_policy}
+        targetAssessmentVersionId={assessment.latestDraftVersion?.assessmentVersionId ?? null}
+      />
 
       <RankedPatternImportPanel
         assessmentId={assessment.assessmentId}

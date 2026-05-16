@@ -84,7 +84,7 @@ function createFakeDb(seed: FakeDbSeed = {}) {
         assessmentVersionId,
         domainKey: 'leadership-approach',
         patternKey,
-      }]).map((item) => `${item.assessmentVersionId}|${item.domainKey}|${item.patternKey}`),
+      }]).map((item) => `${item.assessmentVersionId}|${item.patternKey}`),
     ),
   };
 
@@ -118,9 +118,9 @@ function createFakeDb(seed: FakeDbSeed = {}) {
         }
 
         if (sql.includes('FROM assessment_ranked_patterns')) {
-          const key = `${String(params?.[0] ?? '')}|${String(params?.[1] ?? '')}|${String(params?.[2] ?? '')}`;
+          const key = `${String(params?.[0] ?? '')}|${String(params?.[1] ?? '')}`;
           return {
-            rows: (state.activePatterns.has(key) ? [{ pattern_key: params?.[2] }] : []) as T[],
+            rows: (state.activePatterns.has(key) ? [{ pattern_key: params?.[1] }] : []) as T[],
           };
         }
 

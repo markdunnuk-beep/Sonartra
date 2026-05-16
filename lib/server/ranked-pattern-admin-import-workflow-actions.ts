@@ -9,6 +9,8 @@ import {
   createOrResolveRankedPatternPackageDraftForAdmin,
   dryRunRankedPatternImportForAdmin,
 } from '@/lib/server/ranked-pattern-admin-import-workflow';
+import { getDbPool } from '@/lib/server/db';
+import { importReportFirstTemplateRows } from '@/lib/server/report-first-template-import';
 import { requireAdminUser } from '@/lib/server/admin-access';
 import {
   createRankedPatternDraftVersion,
@@ -20,6 +22,7 @@ import type {
   RankedPatternPublishAuditActionState,
   RankedPatternPublishVersionActionState,
   RankedPatternWorkbookUploadActionState,
+  ReportFirstTemplateImportActionState,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-action-state';
 import {
   signRankedPatternWorkbookStorageReference,
@@ -37,6 +40,11 @@ type RankedPatternVersionActionContext = {
   readonly targetAssessmentVersionId?: string;
 };
 
+type ReportFirstTemplateImportActionContext = {
+  readonly assessmentKey: string;
+  readonly targetAssessmentVersionId?: string;
+};
+
 type RankedPatternAdminImportActionDependencies = {
   readonly requireAdminUser?: typeof requireAdminUser;
   readonly uploadWorkbook?: typeof uploadRankedPatternWorkbookPackage;
@@ -49,6 +57,8 @@ type RankedPatternAdminImportActionDependencies = {
   readonly createDraftVersion?: typeof createRankedPatternDraftVersion;
   readonly createPackageDraftVersion?: typeof createOrResolveRankedPatternPackageDraftForAdmin;
   readonly publishVersion?: typeof publishRankedPatternAssessmentVersion;
+  readonly importReportFirstTemplates?: typeof importReportFirstTemplateRows;
+  readonly getDbPool?: typeof getDbPool;
   readonly revalidatePath?: typeof revalidatePath;
 };
 
@@ -64,6 +74,8 @@ const defaultDependencies: RankedPatternAdminImportActionDependencies = {
   createDraftVersion: createRankedPatternDraftVersion,
   createPackageDraftVersion: createOrResolveRankedPatternPackageDraftForAdmin,
   publishVersion: publishRankedPatternAssessmentVersion,
+  importReportFirstTemplates: importReportFirstTemplateRows,
+  getDbPool,
   revalidatePath,
 };
 
@@ -140,6 +152,12 @@ function revalidateAssessmentAdminPaths(
   dependencies.revalidatePath?.(`/admin/assessments/${assessmentKey}`);
 }
 
+function storageActorId(userId: string): string | null {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)
+    ? userId
+    : null;
+}
+
 export async function auditRankedPatternPackageAction(
   context: RankedPatternAdminImportActionContext,
   _previousState: RankedPatternAdminImportActionState,
@@ -201,6 +219,76 @@ export async function uploadRankedPatternWorkbookPackageAction(
   formData: FormData,
 ): Promise<RankedPatternWorkbookUploadActionState> {
   return uploadRankedPatternWorkbookPackageActionWithDependencies(formData, defaultDependencies);
+}
+
+export async function importReportFirstTemplatesAction(
+  context: ReportFirstTemplateImportActionContext,
+  _previousState: ReportFirstTemplateImportActionState,
+  _formData: FormData,
+): Promise<ReportFirstTemplateImportActionState> {
+  return importReportFirstTemplatesActionWithDependencies(context, defaultDependencies);
+}
+
+export async function importReportFirstTemplatesActionWithDependencies(
+  context: ReportFirstTemplateImportActionContext,
+  dependencies: RankedPatternAdminImportActionDependencies,
+): Promise<ReportFirstTemplateImportActionState> {
+  const targetAssessmentVersionId = context.targetAssessmentVersionId?.trim() ?? '';
+  if (!targetAssessmentVersionId) {
+    const message = 'Create or open a draft version before importing report-first templates.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      formSuccess: null,
+      fieldErrors: {
+        targetAssessmentVersionId: 'Report-first template import requires an editable draft version.',
+      },
+      result: null,
+    };
+  }
+
+  try {
+    const requireAdmin = dependencies.requireAdminUser ?? requireAdminUser;
+    const adminUser = await requireAdmin();
+    const importTemplates = dependencies.importReportFirstTemplates ?? importReportFirstTemplateRows;
+    const result = await importTemplates({
+      db: (dependencies.getDbPool ?? getDbPool)(),
+      assessmentKey: context.assessmentKey,
+      assessmentVersionId: targetAssessmentVersionId,
+      actorId: storageActorId(adminUser.userId),
+      importBatchId: null,
+    });
+
+    dependencies.revalidatePath?.(`/admin/assessments/ranked-pattern/${context.assessmentKey}/workflow`);
+    dependencies.revalidatePath?.(`/admin/assessments/ranked-pattern/${context.assessmentKey}/workflow/report-first-preview`);
+
+    const coverageCopy = result.publishableFullCoverage
+      ? 'Full report-first coverage is publishable.'
+      : `${result.missingTemplateCount} report-first templates are still missing, so publish remains blocked.`;
+
+    return {
+      ok: true,
+      message: `Imported ${result.importedTemplateCount} report-first template rows. ${coverageCopy}`,
+      formError: null,
+      formSuccess: `Imported ${result.importedTemplateCount} report-first template rows. ${coverageCopy}`,
+      fieldErrors: {},
+      result,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message.trim()
+        ? error.message
+        : 'Report-first template import could not run. Check the draft version and generated artifact, then try again.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      formSuccess: null,
+      fieldErrors: {},
+      result: null,
+    };
+  }
 }
 
 export async function uploadRankedPatternWorkbookPackageActionWithDependencies(
