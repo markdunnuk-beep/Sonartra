@@ -40,7 +40,7 @@ export default function AdminAssessmentTypeSelectionPage() {
       <PageHeader
         eyebrow="Admin Workspace"
         title="Create assessment version"
-        description="Use the ranked-pattern package workflow for new active builds. Legacy builders remain available only for historical maintenance."
+        description="Use the ranked-pattern package workflow for all active assessment authoring. Legacy builder access has been retired from the admin surface."
       />
 
       <section className="grid gap-6 xl:grid-cols-2">
@@ -57,17 +57,30 @@ export default function AdminAssessmentTypeSelectionPage() {
           variant="primary"
         />
 
-        <AssessmentTypeCard
-          title="Legacy Builders"
-          description="Archived transitional builder paths for old assessment history and maintenance only."
-          points={[
-            'Multi-domain and flexible signal authoring are superseded for new active builds.',
-            'Do not use these paths to create ranked-pattern assessment versions.',
-            'Use only when preserving or inspecting legacy records that still require these routes.',
-          ]}
-          href="/admin/assessments/create"
-          cta="Open legacy multi-domain builder"
-        />
+        <SurfaceCard muted className="flex h-full flex-col justify-between gap-6 p-6 lg:p-7">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <CardTitle>Legacy builder access removed</CardTitle>
+              <SecondaryText>
+                Multi-domain and old single-domain authoring are no longer active product paths.
+                Historical records should be archived or handled through a controlled data plan,
+                not opened through legacy builders.
+              </SecondaryText>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm leading-7 text-white/68">
+                Do not create new assessment versions through the legacy multi-domain builder.
+              </p>
+              <p className="text-sm leading-7 text-white/68">
+                Do not use old single-domain pair-oriented authoring to bypass ranked-pattern
+                import, report-first storage, or publish audit.
+              </p>
+              <p className="text-sm leading-7 text-white/68">
+                Use the ranked-pattern workflow for active assessment authoring.
+              </p>
+            </div>
+          </div>
+        </SurfaceCard>
       </section>
     </PageFrame>
   );

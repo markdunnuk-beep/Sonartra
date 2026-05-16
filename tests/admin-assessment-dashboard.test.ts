@@ -509,7 +509,7 @@ test('single-domain authoring datasets override a stale multi-domain dashboard m
   assert.equal(assessment?.modeLabel, 'Single-Domain');
   assert.equal(
     assessment?.actionHref,
-    '/admin/assessments/single-domain/sonartra-leadership-approach',
+    '/admin/assessments/ranked-pattern/sonartra-leadership-approach/workflow',
   );
 });
 

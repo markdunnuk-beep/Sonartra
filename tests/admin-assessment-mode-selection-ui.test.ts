@@ -7,33 +7,29 @@ function readSource(...segments: string[]): string {
   return readFileSync(join(process.cwd(), ...segments), 'utf8');
 }
 
-test('assessment type selection page presents ranked-pattern workflow as active and legacy builders as archived', () => {
+test('assessment type selection page presents ranked-pattern workflow as the only active authoring path', () => {
   const source = readSource('app', '(admin)', 'admin', 'assessments', 'new', 'page.tsx');
 
   assert.match(source, /Ranked-Pattern Package Workflow/);
-  assert.match(source, /Legacy Builders/);
-  assert.match(source, /new active builds/i);
+  assert.match(source, /Legacy builder access removed/);
+  assert.match(source, /active assessment authoring/i);
   assert.match(source, /href="\/admin\/assessments\/ranked-pattern\/workflow"/);
   assert.match(source, /Start from workbook metadata/);
-  assert.match(source, /href="\/admin\/assessments\/create"/);
+  assert.doesNotMatch(source, /href="\/admin\/assessments\/create"/);
   assert.doesNotMatch(source, /Continue to multi-domain builder/);
   assert.doesNotMatch(source, /Continue to single-domain builder/);
+  assert.doesNotMatch(source, /Open legacy multi-domain builder/);
 });
 
-test('single-domain entry page points operators to ranked-pattern package workflow', () => {
+test('single-domain entry page is retired and points operators to ranked-pattern package workflow', () => {
   const source = readSource('app', '(admin)', 'admin', 'assessments', 'single-domain', 'page.tsx');
 
-  assert.match(source, /Ranked-pattern package workflow/);
-  assert.match(source, /Recommended active workflow/);
-  assert.match(source, /Start from an existing single-domain assessment/);
-  assert.match(source, /const workflowHref = `\/admin\/assessments\/ranked-pattern\/\$\{assessment\.assessmentKey\}\/workflow`;/);
-  assert.match(source, /Open import workflow/);
-  assert.match(source, /href=\{workflowHref\}/);
-  assert.match(source, /Create draft version/);
-  assert.match(source, /Open legacy builder review/);
-  assert.match(source, /href=\{`\$\{assessment\.actionHref\}\/review`\}/);
-  assert.match(source, /Open legacy single-domain shell/);
-  assert.match(source, /href="\/admin\/assessments\/single-domain\/new"/);
+  assert.match(source, /Legacy single-domain builder retired/);
+  assert.match(source, /Open ranked-pattern workflow/);
+  assert.match(source, /href="\/admin\/assessments\/ranked-pattern\/workflow"/);
+  assert.match(source, /Back to assessment packages/);
+  assert.doesNotMatch(source, /Open legacy builder review/);
+  assert.doesNotMatch(source, /href="\/admin\/assessments\/single-domain\/new"/);
   assert.doesNotMatch(source, /Open assessment dashboard/);
 });
 
@@ -53,11 +49,10 @@ test('assessment dashboard create actions route through the ranked-pattern workf
   assert.doesNotMatch(source, /Creates a new assessment with its first editable draft/);
 });
 
-test('single-domain create route is labelled as a legacy scaffold', () => {
+test('single-domain create route redirects to ranked-pattern workflow', () => {
   const source = readSource('app', '(admin)', 'admin', 'assessments', 'single-domain', 'new', 'page.tsx');
 
-  assert.match(source, /mode="single_domain"/);
-  assert.match(source, /Legacy single-domain shell/);
-  assert.match(source, /Do not use this path to bypass ranked-pattern package import, publish audit, or explicit publish/i);
-  assert.match(source, /showIntroCard=\{false\}/);
+  assert.match(source, /redirect\('\/admin\/assessments\/ranked-pattern\/workflow'\)/);
+  assert.doesNotMatch(source, /mode="single_domain"/);
+  assert.doesNotMatch(source, /Create single-domain assessment/);
 });

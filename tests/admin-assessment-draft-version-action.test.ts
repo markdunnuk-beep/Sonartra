@@ -68,11 +68,11 @@ test('admin create-version action redirects created multi-domain drafts to revie
   });
 });
 
-test('admin create-version action redirects created single-domain drafts to review', async () => {
+test('admin create-version action redirects created single-domain drafts to ranked-pattern workflow', async () => {
   const redirect = await resolveWith('single_domain', createResult('created'));
 
   assert.deepEqual(redirect, {
-    href: '/admin/assessments/single-domain/leadership-pattern/review?draftVersionCreated=2.00',
+    href: '/admin/assessments/ranked-pattern/leadership-pattern/workflow',
   });
 });
 
@@ -162,5 +162,6 @@ test('create-version routes render outcome messages and links', () => {
   assert.match(componentSource, /Open existing draft/);
   assert.doesNotMatch(componentSource, /raw database/i);
   assert.match(multiDomainRouteSource, /mode="multi_domain"/);
-  assert.match(singleDomainRouteSource, /mode="single_domain"/);
+  assert.match(singleDomainRouteSource, /redirect\(`\/admin\/assessments\/ranked-pattern\/\$\{assessmentKey\}\/workflow`\)/);
+  assert.doesNotMatch(singleDomainRouteSource, /mode="single_domain"/);
 });

@@ -126,10 +126,8 @@ function AssessmentCard({
   assessment: AdminAssessmentDashboardItem;
   tone?: 'active' | 'draft' | 'legacy';
 }) {
-  const isSingleDomain = assessment.mode === 'single_domain';
   const isCompatibleRankedPattern = !isTestOrLegacyAssessment(assessment);
   const rankedPatternWorkflowHref = `/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`;
-  const primaryHref = isCompatibleRankedPattern ? rankedPatternWorkflowHref : assessment.actionHref;
   const reviewHref =
     isCompatibleRankedPattern || assessment.latestDraftVersion
       ? isCompatibleRankedPattern
@@ -144,14 +142,7 @@ function AssessmentCard({
     : assessment.latestDraftReadiness === 'ready'
       ? 'Review and publish'
       : 'Review draft';
-  const builderLabel =
-    tone === 'legacy'
-      ? isSingleDomain
-        ? 'Open archived builder path'
-        : 'Open legacy builder'
-      : isCompatibleRankedPattern
-        ? 'Open workflow'
-        : 'Open legacy builder';
+  const builderLabel = isCompatibleRankedPattern ? 'Open workflow' : 'Legacy builder unavailable';
   const createVersionLabel = isCompatibleRankedPattern ? 'Create draft' : 'Create draft version';
 
   return (
@@ -198,9 +189,15 @@ function AssessmentCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <ButtonLink href={primaryHref} variant={tone === 'legacy' ? 'secondary' : 'primary'}>
-              {builderLabel}
-            </ButtonLink>
+            {isCompatibleRankedPattern ? (
+              <ButtonLink href={rankedPatternWorkflowHref} variant={tone === 'legacy' ? 'secondary' : 'primary'}>
+                {builderLabel}
+              </ButtonLink>
+            ) : (
+              <span className="inline-flex min-h-11 items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-white/52">
+                {builderLabel}
+              </span>
+            )}
             {tone !== 'legacy' && isCompatibleRankedPattern ? (
               <Link
                 className={cn(
@@ -291,7 +288,7 @@ export function AdminAssessmentsDashboard({
               {showArchived ? 'Hide archived or test records' : `Show archived or test records${summary.archivedCount > 0 ? ` (${summary.archivedCount})` : ''}`}
             </Link>
             <p className="text-sm text-white/52">
-              Test and older builder-created records stay secondary.
+              Archived records are visible for audit context only.
             </p>
           </div>
         </div>
@@ -389,8 +386,8 @@ export function AdminAssessmentsDashboard({
       <section className="sonartra-section">
         <SectionHeader
           eyebrow="Archived or test records"
-          title="Archived builder paths"
-          description="Historical single-domain, multi-domain, and test records are available for maintenance only. They are not the primary package workflow."
+          title="Archived assessment records"
+          description="Historical single-domain, multi-domain, and test records are visible for audit context only. Legacy builder access has been removed from active admin navigation."
         />
 
         {legacyAssessments.length === 0 ? (

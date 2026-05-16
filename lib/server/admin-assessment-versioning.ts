@@ -113,8 +113,8 @@ function assessmentPath(assessmentKey: string): string {
   return `/admin/assessments/${assessmentKey}`;
 }
 
-function singleDomainAssessmentPath(assessmentKey: string): string {
-  return `/admin/assessments/single-domain/${assessmentKey}`;
+function rankedPatternWorkflowPath(assessmentKey: string): string {
+  return `/admin/assessments/ranked-pattern/${assessmentKey}/workflow`;
 }
 
 function getAssessmentRevalidationPaths(assessmentKey: string): readonly string[] {
@@ -123,9 +123,7 @@ function getAssessmentRevalidationPaths(assessmentKey: string): readonly string[
     assessmentPath(assessmentKey),
     `${assessmentPath(assessmentKey)}/overview`,
     `${assessmentPath(assessmentKey)}/review`,
-    singleDomainAssessmentPath(assessmentKey),
-    `${singleDomainAssessmentPath(assessmentKey)}/overview`,
-    `${singleDomainAssessmentPath(assessmentKey)}/review`,
+    rankedPatternWorkflowPath(assessmentKey),
     '/app/assessments',
     `/app/assessments/${assessmentKey}`,
     '/app/workspace',

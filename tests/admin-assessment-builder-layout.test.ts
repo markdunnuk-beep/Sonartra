@@ -7,7 +7,7 @@ function readSource(...segments: string[]): string {
   return readFileSync(join(process.cwd(), ...segments), 'utf8');
 }
 
-test('authoring layout switches into published-no-draft banner mode', () => {
+test('multi-domain authoring layout redirects to ranked-pattern workflow', () => {
   const source = readSource(
     'app',
     '(admin)',
@@ -17,16 +17,12 @@ test('authoring layout switches into published-no-draft banner mode', () => {
     'layout.tsx',
   );
 
-  assert.match(source, /assessment\.builderMode === 'published_no_draft'/);
-  assert.match(source, /Browse the published assessment and create a draft when you are ready to change it\./);
-  assert.match(source, /<AdminPublishedNoDraftBanner/);
-  assert.match(source, /<AdminCreateVersionHeaderAction/);
-  assert.match(source, /href=\{`\/admin\/assessments\/\$\{assessment\.assessmentKey\}\/versions\/new`\}/);
-  assert.match(source, /space-y-4 sm:space-y-5 lg:space-y-6/);
-  assert.match(source, /overflow-hidden p-4 sm:p-5 lg:p-6/);
+  assert.match(source, /redirect\(`\/admin\/assessments\/ranked-pattern\/\$\{assessmentKey\}\/workflow`\)/);
+  assert.doesNotMatch(source, /<AdminPublishedNoDraftBanner/);
+  assert.doesNotMatch(source, /<AdminCreateVersionHeaderAction/);
 });
 
-test('single-domain authoring layout exposes the create-new-version placeholder entry point', () => {
+test('single-domain authoring layout redirects to ranked-pattern workflow', () => {
   const source = readSource(
     'app',
     '(admin)',
@@ -37,11 +33,8 @@ test('single-domain authoring layout exposes the create-new-version placeholder 
     'layout.tsx',
   );
 
-  assert.match(source, /<AdminCreateVersionHeaderAction/);
-  assert.match(
-    source,
-    /href=\{`\/admin\/assessments\/single-domain\/\$\{assessment\.assessmentKey\}\/versions\/new`\}/,
-  );
+  assert.match(source, /redirect\(`\/admin\/assessments\/ranked-pattern\/\$\{assessmentKey\}\/workflow`\)/);
+  assert.doesNotMatch(source, /<AdminCreateVersionHeaderAction/);
 });
 
 test('header create-version action hides itself on version creation routes only', () => {
@@ -57,7 +50,7 @@ test('header create-version action hides itself on version creation routes only'
   assert.match(source, /Create new version/);
 });
 
-test('create-new-version routes invoke draft creation and render outcome states', () => {
+test('active create-new-version route invokes draft creation while deprecated single-domain route redirects', () => {
   const componentSource = readSource(
     'components',
     'admin',
@@ -93,8 +86,9 @@ test('create-new-version routes invoke draft creation and render outcome states'
   assert.match(componentSource, /createDraftVersionAction\.bind\(null, mode, assessmentKey\)/);
   assert.match(multiDomainRouteSource, /AdminAssessmentVersionPlaceholder/);
   assert.match(multiDomainRouteSource, /mode="multi_domain"/);
-  assert.match(singleDomainRouteSource, /AdminAssessmentVersionPlaceholder/);
-  assert.match(singleDomainRouteSource, /mode="single_domain"/);
+  assert.match(singleDomainRouteSource, /redirect\(`\/admin\/assessments\/ranked-pattern\/\$\{assessmentKey\}\/workflow`\)/);
+  assert.doesNotMatch(singleDomainRouteSource, /AdminAssessmentVersionPlaceholder/);
+  assert.doesNotMatch(singleDomainRouteSource, /mode="single_domain"/);
 });
 
 test('guarded authoring stages route published assessments into the reusable read-only state', () => {
@@ -115,7 +109,7 @@ test('guarded authoring stages route published assessments into the reusable rea
   assert.match(introSource, /Create a draft version before authoring assessment intro content for the next release\./);
 });
 
-test('authoring layout tightens header chrome for small screens without removing builder context', () => {
+test('authoring layout no longer exposes legacy builder chrome', () => {
   const source = readSource(
     'app',
     '(admin)',
@@ -126,5 +120,6 @@ test('authoring layout tightens header chrome for small screens without removing
   );
 
   assert.doesNotMatch(source, /Admin Workspace/);
-  assert.match(source, /text-\[1\.72rem\].*sm:text-\[2rem\].*lg:text-\[2\.2rem\]/);
+  assert.doesNotMatch(source, /text-\[1\.72rem\].*sm:text-\[2rem\].*lg:text-\[2\.2rem\]/);
+  assert.match(source, /ranked-pattern/);
 });

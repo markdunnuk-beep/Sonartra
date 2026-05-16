@@ -20,7 +20,7 @@ export function getAdminAssessmentBuilderBasePath(
   assessmentKey: string,
 ): string {
   return mode === 'single_domain'
-    ? `/admin/assessments/single-domain/${assessmentKey}`
+    ? `/admin/assessments/ranked-pattern/${assessmentKey}/workflow`
     : `/admin/assessments/${assessmentKey}`;
 }
 
@@ -34,13 +34,17 @@ export async function resolveCreateDraftVersionRedirect(
   },
 ): Promise<CreateDraftVersionRedirect> {
   const builderBasePath = getAdminAssessmentBuilderBasePath(params.mode, params.assessmentKey);
-  const createVersionPath = `${builderBasePath}/versions/new`;
+  const createVersionPath = params.mode === 'single_domain'
+    ? builderBasePath
+    : `${builderBasePath}/versions/new`;
   const result = await dependencies.createDraftVersion(params.assessmentKey);
 
   switch (result.status) {
     case 'created':
       return {
-        href: `${builderBasePath}/review?draftVersionCreated=${encodeURIComponent(result.draftVersionTag)}`,
+        href: params.mode === 'single_domain'
+          ? builderBasePath
+          : `${builderBasePath}/review?draftVersionCreated=${encodeURIComponent(result.draftVersionTag)}`,
       };
     case 'draft_exists':
       return {

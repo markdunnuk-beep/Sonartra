@@ -170,7 +170,27 @@ function formatOverallStatus(params: {
 }
 
 function buildActionHref(assessmentKey: string, mode?: AssessmentMode | string | null): string {
-  return getAssessmentBuilderBasePath(assessmentKey, mode);
+  try {
+    return getAssessmentBuilderBasePath(assessmentKey, mode);
+  } catch {
+    return getAssessmentBuilderBasePath(assessmentKey, 'multi_domain');
+  }
+}
+
+function resolveDashboardAssessmentMode(mode?: AssessmentMode | string | null): AssessmentMode {
+  try {
+    return resolveAssessmentMode(mode);
+  } catch {
+    return 'multi_domain';
+  }
+}
+
+function getDashboardAssessmentModeLabel(mode?: AssessmentMode | string | null): 'Multi-Domain' | 'Single-Domain' {
+  try {
+    return getAssessmentModeLabel(mode);
+  } catch {
+    return 'Multi-Domain';
+  }
 }
 
 function mapAssessmentDashboardItem(
@@ -236,8 +256,8 @@ function mapAssessmentDashboardItem(
   return {
     assessmentId: firstRow.assessment_id,
     assessmentKey: firstRow.assessment_key,
-    mode: resolveAssessmentMode(firstRow.assessment_mode),
-    modeLabel: getAssessmentModeLabel(firstRow.assessment_mode),
+    mode: resolveDashboardAssessmentMode(firstRow.assessment_mode),
+    modeLabel: getDashboardAssessmentModeLabel(firstRow.assessment_mode),
     title: firstRow.assessment_title,
     description: firstRow.assessment_description,
     isActive: firstRow.assessment_is_active,

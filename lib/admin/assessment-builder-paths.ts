@@ -6,7 +6,7 @@ export function getAssessmentBuilderBasePath(
   mode?: AssessmentMode | string | null,
 ): string {
   return resolveAssessmentMode(mode) === 'single_domain'
-    ? `/admin/assessments/single-domain/${assessmentKey}`
+    ? `/admin/assessments/ranked-pattern/${assessmentKey}/workflow`
     : `/admin/assessments/${assessmentKey}`;
 }
 
@@ -15,5 +15,6 @@ export function getAssessmentBuilderStepPath(
   stepSlug: string,
   mode?: AssessmentMode | string | null,
 ): string {
-  return `${getAssessmentBuilderBasePath(assessmentKey, mode)}/${stepSlug}`;
+  const basePath = getAssessmentBuilderBasePath(assessmentKey, mode);
+  return basePath.includes('/ranked-pattern/') ? basePath : `${basePath}/${stepSlug}`;
 }

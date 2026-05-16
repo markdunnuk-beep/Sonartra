@@ -24,13 +24,14 @@ test('assessment index presents ranked-pattern package operations as the active 
   assert.match(source, /Published assessments/);
   assert.match(source, /Drafts and imports/);
   assert.match(source, /Archived or test records/);
-  assert.match(source, /Archived builder paths/);
+  assert.match(source, /Archived assessment records/);
   assert.match(source, /isTestOrLegacyAssessment/);
   assert.match(source, /isRankedPatternPackageCompatibleAssessment/);
   assert.match(source, /haystack\.includes\('test'\)/);
   assert.match(source, /Legacy \/ archive/);
-  assert.match(source, /Test and older builder-created records stay secondary\./);
-  assert.match(source, /Open legacy builder/);
+  assert.match(source, /Legacy builder unavailable/);
+  assert.doesNotMatch(source, /Test and older builder-created records stay secondary\./);
+  assert.doesNotMatch(source, /Open legacy builder/);
   assert.match(source, /Create draft/);
   assert.match(source, /const rankedPatternWorkflowHref = `\/admin\/assessments\/ranked-pattern\/\$\{assessment\.assessmentKey\}\/workflow`;/);
   assert.match(source, /const createVersionHref = isCompatibleRankedPattern/);

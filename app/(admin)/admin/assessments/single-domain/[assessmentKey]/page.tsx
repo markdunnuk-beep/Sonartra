@@ -7,5 +7,5 @@ export default async function SingleDomainAssessmentBuilderRedirectPage({
 }>) {
   const { assessmentKey } = await params;
 
-  redirect(`/admin/assessments/single-domain/${assessmentKey}/overview`);
+  redirect(`/admin/assessments/ranked-pattern/${assessmentKey}/workflow`);
 }

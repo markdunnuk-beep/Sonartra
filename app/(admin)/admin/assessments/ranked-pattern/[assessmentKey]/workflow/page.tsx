@@ -149,8 +149,8 @@ export default async function RankedPatternWorkflowPage({
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <ButtonLink href="/admin/assessments/single-domain">
-            Back to workflow selector
+          <ButtonLink href="/admin/assessments">
+            Back to assessment packages
           </ButtonLink>
           <ButtonLink href="/admin/assessments/ranked-pattern/workflow">
             Start package-first workflow
@@ -160,9 +160,6 @@ export default async function RankedPatternWorkflowPage({
             variant="primary"
           >
             Preview report-first output
-          </ButtonLink>
-          <ButtonLink href={`/admin/assessments/single-domain/${assessment.assessmentKey}/review`}>
-            Open legacy builder review
           </ButtonLink>
         </div>
       </SurfaceCard>
