@@ -255,7 +255,7 @@ function validateArtifact(
       message: 'Artifact expected_template_count must remain 24 for Leadership Approach.',
     });
   }
-  if (coverage.publishable_full_coverage !== false || missingTemplates.length > 0) {
+  if (coverage.publishable_full_coverage !== true || missingTemplates.length > 0) {
     findings.push({
       severity: 'blocking',
       code: 'REPORT_FIRST_IMPORT_FULL_COVERAGE_INCOMPLETE',
@@ -344,7 +344,10 @@ export async function importReportFirstTemplateRows(
     importedTemplateCount: storedTemplates.length,
     missingTemplateCount: missingPatternKeys.length,
     skippedTemplateCount: artifact.missing_templates.length,
-    publishableFullCoverage: false,
+    publishableFullCoverage:
+      artifact.coverage.publishable_full_coverage === true &&
+      missingPatternKeys.length === 0 &&
+      !validationFindings.some((finding) => finding.severity === 'blocking'),
     importedPatternKeys,
     missingPatternKeys,
     auditFindings: validationFindings,

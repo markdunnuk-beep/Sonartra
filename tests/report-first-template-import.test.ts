@@ -41,6 +41,11 @@ type StoredTemplateRow = {
 const assessmentVersionId = 'version-report-first-import';
 const availablePatternKeys = [
   'people_process_results_vision',
+  'people_process_vision_results',
+  'people_results_process_vision',
+  'people_results_vision_process',
+  'people_vision_process_results',
+  'people_vision_results_process',
   'process_people_results_vision',
   'process_people_vision_results',
   'process_results_people_vision',
@@ -232,11 +237,11 @@ test('report-first importer persists exactly the import-ready templates', async 
   });
 
   assert.equal(summary.expectedTemplateCount, 24);
-  assert.equal(summary.importedTemplateCount, 19);
-  assert.equal(summary.missingTemplateCount, 5);
-  assert.equal(summary.publishableFullCoverage, false);
+  assert.equal(summary.importedTemplateCount, 24);
+  assert.equal(summary.missingTemplateCount, 0);
+  assert.equal(summary.publishableFullCoverage, true);
   assert.deepEqual(summary.importedPatternKeys, [...availablePatternKeys].sort());
-  assert.equal(fake.state.rows.length, 19);
+  assert.equal(fake.state.rows.length, 24);
   assert.ok(fake.state.rows.every((row) => row.status === 'draft'));
   assert.ok(fake.state.rows.every((row) => row.publishable === true));
   assert.ok(fake.state.rows.every((row) => row.ready_for_import === true));
@@ -277,13 +282,13 @@ test('report-first importer is idempotent for draft rows', async () => {
     assessmentVersionId,
   });
 
-  assert.equal(first.importedTemplateCount, 19);
-  assert.equal(second.importedTemplateCount, 19);
-  assert.equal(fake.state.rows.length, 19);
+  assert.equal(first.importedTemplateCount, 24);
+  assert.equal(second.importedTemplateCount, 24);
+  assert.equal(fake.state.rows.length, 24);
   assert.ok(fake.state.rows.every((row) => row.updated_at === '2026-05-16T00:05:00.000Z'));
 });
 
-test('report-first imported coverage helper blocks incomplete coverage', async () => {
+test('report-first imported coverage helper reports complete coverage', async () => {
   const fake = createFakeDb();
   await importReportFirstTemplateRows({
     db: fake.db,
@@ -298,13 +303,13 @@ test('report-first imported coverage helper blocks incomplete coverage', async (
   });
 
   assert.equal(coverage.expectedPatternCount, 24);
-  assert.equal(coverage.importedTemplateCount, 19);
-  assert.equal(coverage.missingPatternKeys.length, 5);
-  assert.equal(coverage.coverageComplete, false);
-  assert.equal(coverage.blockingFindings[0]?.code, 'REPORT_FIRST_IMPORTED_COVERAGE_INCOMPLETE');
+  assert.equal(coverage.importedTemplateCount, 24);
+  assert.equal(coverage.missingPatternKeys.length, 0);
+  assert.equal(coverage.coverageComplete, true);
+  assert.deepEqual(coverage.blockingFindings, []);
 });
 
-test('report-first importer reports incomplete package coverage as blocking finding without importing placeholders', async () => {
+test('report-first importer reports full package coverage without missing placeholders', async () => {
   const fake = createFakeDb();
   const summary = await importReportFirstTemplateRows({
     db: fake.db,
@@ -312,8 +317,8 @@ test('report-first importer reports incomplete package coverage as blocking find
     assessmentVersionId,
   });
 
-  assert.ok(summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_IMPORT_FULL_COVERAGE_INCOMPLETE'));
-  assert.equal(fake.state.rows.some((row) => row.pattern_key === 'people_results_process_vision'), false);
+  assert.ok(!summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_IMPORT_FULL_COVERAGE_INCOMPLETE'));
+  assert.equal(fake.state.rows.some((row) => row.pattern_key === 'people_results_process_vision'), true);
 });
 
 test('report-first importer rejects missing artifact path clearly', async () => {

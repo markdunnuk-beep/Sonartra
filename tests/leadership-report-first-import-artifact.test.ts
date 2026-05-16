@@ -11,6 +11,11 @@ import { buildAdminReportFirstPreview } from '@/lib/server/admin-report-first-pr
 
 const availablePatternKeys = [
   'people_process_results_vision',
+  'people_process_vision_results',
+  'people_results_process_vision',
+  'people_results_vision_process',
+  'people_vision_process_results',
+  'people_vision_results_process',
   'process_people_results_vision',
   'process_people_vision_results',
   'process_results_people_vision',
@@ -49,12 +54,12 @@ test('leadership report-first import artifact generates rows only for available 
 
   assert.equal(artifact.artifact_contract, 'leadership_report_first_template_import_rows_v1');
   assert.equal(artifact.coverage.expected_template_count, 24);
-  assert.equal(artifact.coverage.generated_import_ready_count, 19);
-  assert.equal(artifact.coverage.missing_template_count, 5);
-  assert.equal(artifact.coverage.publishable_full_coverage, false);
+  assert.equal(artifact.coverage.generated_import_ready_count, 24);
+  assert.equal(artifact.coverage.missing_template_count, 0);
+  assert.equal(artifact.coverage.publishable_full_coverage, true);
   assert.deepEqual(artifact.expected_pattern_keys, leadershipReportFirstExpectedPatternKeys());
   assert.deepEqual(artifact.import_rows.map((row) => row.pattern_key), availablePatternKeys);
-  assert.equal(artifact.missing_templates.length, 5);
+  assert.equal(artifact.missing_templates.length, 0);
   assert.ok(artifact.missing_templates.every((template) => template.ready_for_import === false));
   assert.ok(artifact.missing_templates.every((template) => template.publishable === false));
 });
@@ -142,7 +147,7 @@ test('admin preview remains compatible with generated import artifact rows', asy
     throw new Error('Expected ready report-first admin preview.');
   }
 
-  assert.equal(preview.options.length, 19);
+  assert.equal(preview.options.length, 24);
   assert.equal(preview.payload.patternKey, 'process_results_people_vision');
   assert.equal(preview.review.sourceStatus, 'Loaded from generated report-first import artifact');
   assert.equal(preview.review.requiredHeadingsPresent, true);
@@ -154,7 +159,7 @@ test('admin preview missing template state remains clear', async () => {
     assessmentTitle: 'Leadership Approach',
     assessmentVersionId: 'version-admin-preview',
     assessmentVersionTag: 'admin-preview',
-    patternKey: 'people_results_process_vision',
+    patternKey: 'missing_report_first_template',
     scoreShape: 'paired',
   });
 

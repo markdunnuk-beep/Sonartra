@@ -62,6 +62,14 @@ const p12dVisionLedPatternKeys = [
   'vision_people_results_process',
 ] as const;
 
+const p12ePeopleLedPatternKeys = [
+  'people_results_process_vision',
+  'people_results_vision_process',
+  'people_process_vision_results',
+  'people_vision_results_process',
+  'people_vision_process_results',
+] as const;
+
 test('leadership report-first package declares all twenty-four ranked pattern keys', () => {
   assert.deepEqual(leadershipReportFirstExpectedPatternKeys(), expectedPatternKeys);
 });
@@ -72,13 +80,18 @@ test('leadership report-first package coverage reports available and missing tem
   assert.equal(coverage.manifest.assessment_key, 'leadership-approach');
   assert.equal(coverage.manifest.domain_key, 'leadership-approach');
   assert.equal(coverage.expectedCount, 24);
-  assert.equal(coverage.presentCount, 19);
-  assert.equal(coverage.missingCount, 5);
-  assert.equal(coverage.publishable, false);
+  assert.equal(coverage.presentCount, 24);
+  assert.equal(coverage.missingCount, 0);
+  assert.equal(coverage.publishable, true);
   assert.deepEqual(
     coverage.presentPatternKeys.sort(),
     [
       'people_process_results_vision',
+      'people_process_vision_results',
+      'people_results_process_vision',
+      'people_results_vision_process',
+      'people_vision_process_results',
+      'people_vision_results_process',
       'process_people_results_vision',
       'process_people_vision_results',
       'process_results_people_vision',
@@ -102,8 +115,9 @@ test('leadership report-first package coverage reports available and missing tem
   assert.ok(!coverage.missingPatternKeys.includes('results_process_vision_people'));
   assert.ok(!coverage.missingPatternKeys.includes('process_results_vision_people'));
   assert.ok(!coverage.missingPatternKeys.includes('vision_results_process_people'));
-  assert.ok(coverage.missingPatternKeys.includes('people_results_process_vision'));
-  assert.ok(coverage.missingPatternKeys.includes('people_vision_process_results'));
+  assert.ok(!coverage.missingPatternKeys.includes('people_results_process_vision'));
+  assert.ok(!coverage.missingPatternKeys.includes('people_vision_process_results'));
+  assert.deepEqual(coverage.missingPatternKeys, []);
 });
 
 test('available leadership report-first markdown templates compile into full structured JSON', async () => {
@@ -189,15 +203,35 @@ test('P12D Vision-led report-first templates are authored and import-ready', asy
   }
 });
 
-test('missing leadership report-first templates do not satisfy publishable coverage', async () => {
+test('P12E People-led report-first templates are authored and import-ready', async () => {
+  const coverage = await getLeadershipReportFirstPackageCoverage();
+
+  for (const patternKey of p12ePeopleLedPatternKeys) {
+    const manifestEntry = coverage.manifest.templates.find((template) => template.pattern_key === patternKey);
+    const compiled = coverage.availableTemplates.find((template) => template.compiled.pattern_key === patternKey);
+
+    assert.ok(manifestEntry, `Expected manifest entry for ${patternKey}`);
+    assert.equal(manifestEntry?.status, 'ready_for_import');
+    assert.equal(manifestEntry?.ready_for_import, true);
+    assert.equal(manifestEntry?.publishable, true);
+    assert.match(manifestEntry?.source_markdown_path ?? '', new RegExp(`${patternKey}\\.md$`));
+
+    assert.ok(compiled, `Expected compiled template for ${patternKey}`);
+    assert.equal(compiled?.readyForImport, true);
+    assert.equal(compiled?.compiled.report_template_json.report.chapters.length, 10);
+    assert.deepEqual(compiled?.missingHeadings, []);
+    assert.deepEqual(compiled?.forbiddenLabels, []);
+  }
+});
+
+test('complete leadership report-first template coverage satisfies package publishable coverage', async () => {
   const coverage = await getLeadershipReportFirstPackageCoverage();
   const manifestMissing = coverage.manifest.templates.filter((template) => template.status === 'missing');
 
-  assert.equal(manifestMissing.length, 5);
-  assert.ok(manifestMissing.every((template) => template.ready_for_import === false));
-  assert.ok(manifestMissing.every((template) => template.publishable === false));
-  assert.equal(coverage.availableTemplates.length, 19);
-  assert.notEqual(coverage.availableTemplates.length, coverage.expectedCount);
+  assert.equal(manifestMissing.length, 0);
+  assert.equal(coverage.availableTemplates.length, 24);
+  assert.equal(coverage.availableTemplates.length, coverage.expectedCount);
+  assert.equal(coverage.publishable, true);
 });
 
 test('admin preview remains compatible with the package-backed available template manifest', async () => {
@@ -217,7 +251,7 @@ test('admin preview remains compatible with the package-backed available templat
 
   assert.equal(preview.payload.patternKey, 'process_results_people_vision');
   assert.equal(preview.payload.reportFirst.reportKey, 'process_results_people_vision');
-  assert.equal(preview.options.length, 19);
+  assert.equal(preview.options.length, 24);
   assert.ok(preview.options.some((option) => option.patternKey === 'vision_people_process_results'));
   assert.ok(preview.options.some((option) => option.patternKey === 'results_vision_people_process'));
   assert.ok(preview.options.some((option) => option.patternKey === 'process_vision_people_results'));

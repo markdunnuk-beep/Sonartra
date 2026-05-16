@@ -8,12 +8,17 @@ import type { ReportFirstTemplateImportSummary } from '@/lib/server/report-first
 
 const baseSummary: ReportFirstTemplateImportSummary = {
   expectedTemplateCount: 24,
-  importedTemplateCount: 19,
-  missingTemplateCount: 5,
-  skippedTemplateCount: 5,
-  publishableFullCoverage: false,
+  importedTemplateCount: 24,
+  missingTemplateCount: 0,
+  skippedTemplateCount: 0,
+  publishableFullCoverage: true,
   importedPatternKeys: [
     'people_process_results_vision',
+    'people_process_vision_results',
+    'people_results_process_vision',
+    'people_results_vision_process',
+    'people_vision_process_results',
+    'people_vision_results_process',
     'process_people_results_vision',
     'process_people_vision_results',
     'process_results_people_vision',
@@ -33,14 +38,8 @@ const baseSummary: ReportFirstTemplateImportSummary = {
     'vision_results_people_process',
     'vision_results_process_people',
   ],
-  missingPatternKeys: ['people_results_process_vision'],
-  auditFindings: [
-    {
-      severity: 'blocking',
-      code: 'REPORT_FIRST_IMPORT_FULL_COVERAGE_INCOMPLETE',
-      message: 'Report-first package coverage is incomplete: 19 of 24 templates are import-ready.',
-    },
-  ],
+  missingPatternKeys: [],
+  auditFindings: [],
   storedTemplates: [],
 };
 
@@ -101,11 +100,11 @@ test('report-first template import action imports rows for selected draft versio
   );
 
   assert.equal(result.ok, true);
-  assert.equal(result.result?.importedTemplateCount, 19);
-  assert.equal(result.result?.missingTemplateCount, 5);
-  assert.equal(result.result?.publishableFullCoverage, false);
-  assert.match(result.formSuccess ?? '', /Imported 19 report-first template rows/);
-  assert.match(result.formSuccess ?? '', /5 report-first templates are still missing/);
+  assert.equal(result.result?.importedTemplateCount, 24);
+  assert.equal(result.result?.missingTemplateCount, 0);
+  assert.equal(result.result?.publishableFullCoverage, true);
+  assert.match(result.formSuccess ?? '', /Imported 24 report-first template rows/);
+  assert.match(result.formSuccess ?? '', /Full report-first coverage is publishable/);
   assert.equal(seen[0]?.assessmentKey, 'leadership-approach');
   assert.equal(seen[0]?.assessmentVersionId, 'draft-version-1');
   assert.ok(revalidated.includes('/admin/assessments/ranked-pattern/leadership-approach/workflow'));
@@ -130,8 +129,8 @@ test('report-first template import action remains idempotent through service res
   );
 
   assert.equal(calls, 2);
-  assert.equal(first.result?.importedTemplateCount, 19);
-  assert.equal(second.result?.importedTemplateCount, 19);
+  assert.equal(first.result?.importedTemplateCount, 24);
+  assert.equal(second.result?.importedTemplateCount, 24);
 });
 
 test('report-first template import action blocks when draft version is missing', async () => {

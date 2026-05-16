@@ -144,15 +144,17 @@
     },
     {
       "pattern_key": "people_results_process_vision",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_results_process_vision.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "people_results_vision_process",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_results_vision_process.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "people_process_results_vision",
@@ -163,21 +165,24 @@
     },
     {
       "pattern_key": "people_process_vision_results",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_process_vision_results.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "people_vision_results_process",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_vision_results_process.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "people_vision_process_results",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_vision_process_results.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     }
   ]
 }

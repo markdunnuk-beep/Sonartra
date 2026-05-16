@@ -64,8 +64,11 @@ function ActionResult({ state }: Readonly<{ state: ReportFirstTemplateImportActi
         <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
           Import complete
         </LabelPill>
-        <LabelPill className="border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.1)] text-[rgba(255,227,187,0.9)]">
-          Coverage blocked
+        <LabelPill className={state.result.publishableFullCoverage
+          ? 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]'
+          : 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.1)] text-[rgba(255,227,187,0.9)]'}
+        >
+          {state.result.publishableFullCoverage ? 'Coverage complete' : 'Coverage blocked'}
         </LabelPill>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
@@ -75,8 +78,9 @@ function ActionResult({ state }: Readonly<{ state: ReportFirstTemplateImportActi
       </div>
       <p className="text-sm leading-6 text-[rgba(214,246,233,0.72)]">
         {state.result.importedTemplateCount} of {state.result.expectedTemplateCount} report-first
-        templates are imported. {state.result.missingTemplateCount} templates are still missing, so
-        publish remains blocked.
+        templates are imported. {state.result.publishableFullCoverage
+          ? 'Report-first template coverage is complete. Publishing still requires the normal admin publish workflow.'
+          : `${state.result.missingTemplateCount} templates are still missing, so publish remains blocked.`}
       </p>
     </div>
   );
@@ -115,7 +119,10 @@ export function ReportFirstTemplateImportPanel({
       <div className="flex flex-wrap items-center gap-2">
         <p className="sonartra-page-eyebrow">Report-first templates</p>
         <LabelPill>{generatedImportReadyCount} generated rows</LabelPill>
-        <LabelPill className="border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.1)] text-[rgba(255,227,187,0.9)]">
+        <LabelPill className={visibleMissingCount === 0
+          ? 'border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]'
+          : 'border-[rgba(255,184,107,0.22)] bg-[rgba(255,184,107,0.1)] text-[rgba(255,227,187,0.9)]'}
+        >
           {visibleMissingCount} missing
         </LabelPill>
       </div>
@@ -135,14 +142,26 @@ export function ReportFirstTemplateImportPanel({
         <MetaItem label="Coverage" value={publishableCoverage ? 'Publishable' : 'Blocked'} />
         <MetaItem label="Score-shape policy" value={scoreShapePolicy} />
       </div>
-      <div className="rounded-[1rem] border border-[rgba(255,184,107,0.2)] bg-[rgba(255,184,107,0.08)] px-4 py-3">
-        <p className="text-sm font-medium text-[rgba(255,235,204,0.92)]">
-          Report-first publish coverage remains blocked
+      <div className={publishableCoverage
+        ? 'rounded-[1rem] border border-[rgba(116,209,177,0.2)] bg-[rgba(116,209,177,0.08)] px-4 py-3'
+        : 'rounded-[1rem] border border-[rgba(255,184,107,0.2)] bg-[rgba(255,184,107,0.08)] px-4 py-3'}
+      >
+        <p className={publishableCoverage
+          ? 'text-sm font-medium text-[rgba(214,246,233,0.92)]'
+          : 'text-sm font-medium text-[rgba(255,235,204,0.92)]'}
+        >
+          {publishableCoverage
+            ? 'Report-first template coverage is complete'
+            : 'Report-first publish coverage remains blocked'}
         </p>
-        <p className="mt-1 text-sm leading-6 text-[rgba(255,235,204,0.68)]">
+        <p className={publishableCoverage
+          ? 'mt-1 text-sm leading-6 text-[rgba(214,246,233,0.68)]'
+          : 'mt-1 text-sm leading-6 text-[rgba(255,235,204,0.68)]'}
+        >
           {visibleImportedCount ?? 0} report-first templates are present in draft storage.{' '}
-          {visibleMissingCount} required ranked-pattern templates are still missing, so publish
-          audit must continue to block report-first readiness.
+          {publishableCoverage
+            ? 'All required ranked-pattern templates are available. Publishing still requires the normal admin publish workflow.'
+            : `${visibleMissingCount} required ranked-pattern templates are still missing, so publish audit must continue to block report-first readiness.`}
         </p>
       </div>
       <form action={action}>
