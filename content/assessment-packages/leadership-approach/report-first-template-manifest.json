@@ -2,7 +2,7 @@
   "assessment_key": "leadership-approach",
   "package_key": "leadership-approach-report-first",
   "package_version": "p9-report-first-coverage",
-  "domain_key": "leadership-approach",
+  "domain_key": "leadership_approach",
   "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports",
   "generated_artifact_status": "manifest_only_compiled_on_demand",
   "report_contract": "report_first_canonical_payload_v1",

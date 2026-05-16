@@ -73,6 +73,7 @@ function createFakeDb() {
     nextId: 1,
     queries: [] as string[],
     activePatterns: new Set(availablePatternKeys.map((patternKey) => `${assessmentVersionId}|${patternKey}`)),
+    domainKey: 'leadership_approach',
   };
 
   return {
@@ -84,6 +85,10 @@ function createFakeDb() {
 
         if (sql.includes('FROM assessment_versions')) {
           return { rows: [{ id: params?.[0] }] as T[] };
+        }
+
+        if (sql.includes('FROM domains')) {
+          return { rows: [{ domain_key: state.domainKey }] as T[] };
         }
 
         if (sql.includes('FROM assessment_ranked_patterns')) {
@@ -252,6 +257,7 @@ function createFakeDb() {
               .sort((left, right) => left.pattern_key.localeCompare(right.pattern_key))
               .map((row) => ({
                 pattern_key: row.pattern_key,
+                domain_key: row.domain_key,
                 report_key: row.report_key,
                 report_contract: row.report_contract,
                 report_template_json: row.report_template_json,
@@ -531,6 +537,39 @@ test('report-first promotion is idempotent when active coverage already exists',
   assert.equal(summary.status, 'already_active');
   assert.equal(summary.promotedTemplateCount, 0);
   assert.equal(fake.state.rows.filter((row) => row.status === 'active').length, 24);
+});
+
+test('report-first promotion replaces stale active rows with domain-matched draft rows', async () => {
+  const fake = createFakeDb();
+  await importReportFirstTemplateRows({
+    db: fake.db,
+    assessmentKey: 'leadership-approach',
+    assessmentVersionId,
+  });
+  await promoteReportFirstTemplatesForPublish({
+    db: fake.db,
+    assessmentVersionId,
+  });
+  for (const row of fake.state.rows.filter((item) => item.status === 'active')) {
+    row.domain_key = 'leadership-approach';
+  }
+  await importReportFirstTemplateRows({
+    db: fake.db,
+    assessmentKey: 'leadership-approach',
+    assessmentVersionId,
+  });
+
+  const summary = await promoteReportFirstTemplatesForPublish({
+    db: fake.db,
+    assessmentVersionId,
+  });
+  const activeRows = fake.state.rows.filter((row) => row.status === 'active');
+
+  assert.equal(summary.status, 'promoted');
+  assert.equal(summary.promotedTemplateCount, 24);
+  assert.equal(activeRows.length, 24);
+  assert.ok(activeRows.every((row) => row.domain_key === 'leadership_approach'));
+  assert.equal(fake.state.rows.filter((row) => row.status === 'inactive' && row.domain_key === 'leadership-approach').length, 24);
 });
 
 test('report-first promotion blocks when generated artifact is complete but DB rows are missing', async () => {

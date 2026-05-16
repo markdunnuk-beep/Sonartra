@@ -45,6 +45,7 @@ export type ReportFirstTemplateCoverageSummary = {
   readonly importedTemplateCount: number;
   readonly missingPatternKeys: readonly string[];
   readonly duplicatePatternKeys: readonly string[];
+  readonly domainMismatchPatternKeys: readonly string[];
   readonly unsupportedScoreShapePolicies: readonly string[];
   readonly incompletePatternKeys: readonly string[];
   readonly nonPublishablePatternKeys: readonly string[];
@@ -449,6 +450,24 @@ async function activeRankedPatternKeys(params: {
   );
 }
 
+async function activeDomainKey(params: {
+  readonly db: Queryable;
+  readonly assessmentVersionId: string;
+}): Promise<string | null> {
+  const result = await params.db.query<{ readonly domain_key: string | null }>(
+    `
+    SELECT domain_key
+    FROM domains
+    WHERE assessment_version_id = $1
+    ORDER BY domain_key ASC
+    LIMIT 1
+    `,
+    [params.assessmentVersionId],
+  );
+
+  return result.rows[0]?.domain_key ?? null;
+}
+
 function coverageFindings(params: {
   readonly coverage: ReportFirstTemplateCoverageSummary;
   readonly expectedPatternKeys: readonly string[];
@@ -477,6 +496,14 @@ function coverageFindings(params: {
       severity: 'blocking',
       code: 'REPORT_FIRST_PROMOTION_PATTERN_DUPLICATE',
       message: 'Promotion requires exactly one report-first template row per pattern_key.',
+      patternKey,
+    });
+  }
+  for (const patternKey of params.coverage.domainMismatchPatternKeys) {
+    findings.push({
+      severity: 'blocking',
+      code: 'REPORT_FIRST_PROMOTION_DOMAIN_MISMATCH',
+      message: 'Promotion requires report-first rows to use the assessment version active domain_key.',
       patternKey,
     });
   }
@@ -547,10 +574,12 @@ export async function promoteReportFirstTemplatesForPublish(params: {
   readonly assessmentVersionId: string;
 }): Promise<ReportFirstTemplatePromotionSummary> {
   const expectedPatternKeys = leadershipReportFirstExpectedPatternKeys();
+  const domainKey = await activeDomainKey(params);
   const activeCoverage = await auditImportedReportFirstTemplateCoverage({
     db: params.db,
     assessmentVersionId: params.assessmentVersionId,
     status: 'active',
+    domainKey,
   });
   const activePatternKeys = await activeRankedPatternKeys(params);
   const activeFindings = coverageFindings({
@@ -578,6 +607,7 @@ export async function promoteReportFirstTemplatesForPublish(params: {
     db: params.db,
     assessmentVersionId: params.assessmentVersionId,
     status: 'draft',
+    domainKey,
   });
   const draftFindings = coverageFindings({
     coverage: draftCoverage,
@@ -650,6 +680,7 @@ export async function auditImportedReportFirstTemplateCoverage(params: {
   readonly db: Queryable;
   readonly assessmentVersionId: string;
   readonly status?: 'draft' | 'active';
+  readonly domainKey?: string | null;
 }): Promise<ReportFirstTemplateCoverageSummary> {
   const expectedPatternKeys = leadershipReportFirstExpectedPatternKeys();
   const status = params.status ?? 'draft';
@@ -657,6 +688,7 @@ export async function auditImportedReportFirstTemplateCoverage(params: {
     `
     SELECT
       pattern_key,
+      domain_key,
       report_key,
       report_contract,
       report_template_json,
@@ -676,6 +708,7 @@ export async function auditImportedReportFirstTemplateCoverage(params: {
 
   const patternCounts = new Map<string, number>();
   const importedPatternKeys: string[] = [];
+  const domainMismatchPatternKeys: string[] = [];
   const unsupportedScoreShapePolicies: string[] = [];
   const incompletePatternKeys: string[] = [];
   const nonPublishablePatternKeys: string[] = [];
@@ -688,6 +721,9 @@ export async function auditImportedReportFirstTemplateCoverage(params: {
     patternCounts.set(patternKey, (patternCounts.get(patternKey) ?? 0) + 1);
     if (!importedPatternKeys.includes(patternKey)) {
       importedPatternKeys.push(patternKey);
+    }
+    if (params.domainKey && row.domain_key !== params.domainKey) {
+      domainMismatchPatternKeys.push(patternKey);
     }
     if (row.score_shape_policy !== leadershipReportFirstScoreShapePolicy || row.score_shape !== null) {
       unsupportedScoreShapePolicies.push(patternKey);
@@ -712,6 +748,7 @@ export async function auditImportedReportFirstTemplateCoverage(params: {
   const coverageComplete =
     missingPatternKeys.length === 0 &&
     duplicatePatternKeys.length === 0 &&
+    domainMismatchPatternKeys.length === 0 &&
     unsupportedScoreShapePolicies.length === 0 &&
     incompletePatternKeys.length === 0 &&
     nonPublishablePatternKeys.length === 0;
@@ -730,6 +767,7 @@ export async function auditImportedReportFirstTemplateCoverage(params: {
     importedTemplateCount: importedPatternKeys.length,
     missingPatternKeys: Object.freeze(missingPatternKeys),
     duplicatePatternKeys: Object.freeze(duplicatePatternKeys),
+    domainMismatchPatternKeys: Object.freeze([...new Set(domainMismatchPatternKeys)].sort((left, right) => left.localeCompare(right))),
     unsupportedScoreShapePolicies: Object.freeze(unsupportedScoreShapePolicies),
     incompletePatternKeys: Object.freeze(incompletePatternKeys),
     nonPublishablePatternKeys: Object.freeze(nonPublishablePatternKeys),

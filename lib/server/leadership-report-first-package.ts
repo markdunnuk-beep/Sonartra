@@ -17,6 +17,7 @@ export const leadershipReportFirstManifestPath = join(
 );
 
 export const leadershipReportFirstSignals = ['results', 'process', 'vision', 'people'] as const;
+export const leadershipReportFirstDomainKey = 'leadership_approach' as const;
 
 export const leadershipReportFirstRequiredHeadings = [
   'Editorial introduction',
@@ -238,7 +239,7 @@ function isManifest(value: unknown): value is LeadershipReportFirstManifest {
 
   const record = value as Record<string, unknown>;
   return record.assessment_key === 'leadership-approach'
-    && record.domain_key === 'leadership-approach'
+    && record.domain_key === leadershipReportFirstDomainKey
     && record.report_contract === 'report_first_canonical_payload_v1'
     && Array.isArray(record.templates);
 }
@@ -317,6 +318,7 @@ async function compileTemplate(
   const source = await readFile(sourcePath, 'utf8');
   const compiled = compileReportFirstTemplateFromMarkdown(source, {
     inputPath: entry.source_markdown_path,
+    domainKey: leadershipReportFirstDomainKey,
   });
   const headingGaps = missingHeadings(compiled);
   const paragraphGaps = missingRepresentativeParagraphs(compiled);

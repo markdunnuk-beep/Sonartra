@@ -70,7 +70,7 @@ test('leadership report-first import rows include storage-ready report template 
   for (const row of artifact.import_rows) {
     assert.equal(row.assessment_key, 'leadership-approach');
     assert.equal(row.assessment_version, 'p9-report-first-coverage');
-    assert.equal(row.domain_key, 'leadership-approach');
+    assert.equal(row.domain_key, 'leadership_approach');
     assert.equal(row.status, 'active');
     assert.equal(row.manifest_status, 'ready_for_import');
     assert.equal(row.publishable, true);

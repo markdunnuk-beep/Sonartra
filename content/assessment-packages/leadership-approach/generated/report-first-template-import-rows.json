@@ -3,7 +3,7 @@
   "assessment_key": "leadership-approach",
   "package_key": "leadership-approach-report-first",
   "package_version": "p9-report-first-coverage",
-  "domain_key": "leadership-approach",
+  "domain_key": "leadership_approach",
   "report_contract": "report_first_canonical_payload_v1",
   "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports",
   "score_shape_policy": "pattern_level_score_shape_neutral",
@@ -52,7 +52,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "people_process_results_vision",
       "report_key": "people_process_results_vision",
       "report_contract": "report_first_canonical_payload_v1",
@@ -65,8 +65,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_process_results_vision.md",
-      "source_content_hash": "4372983c155008ac6be966db7b169dba272e1c3901cc5bb99b2d159e117ea9aa",
-      "content_hash": "4372983c155008ac6be966db7b169dba272e1c3901cc5bb99b2d159e117ea9aa",
+      "source_content_hash": "460eff8f810c06b42c26143e80f5a611e0b3cc3ff7fd74547198f43893ac9883",
+      "content_hash": "460eff8f810c06b42c26143e80f5a611e0b3cc3ff7fd74547198f43893ac9883",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -77,7 +77,7 @@
         },
         "reportKey": "people_process_results_vision",
         "patternKey": "people_process_results_vision",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "people_process_results_vision",
           "patternKey": "people_process_results_vision",
@@ -827,7 +827,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "people_process_vision_results",
       "report_key": "people_process_vision_results",
       "report_contract": "report_first_canonical_payload_v1",
@@ -840,8 +840,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_process_vision_results.md",
-      "source_content_hash": "7571a0d003f90761125f802afa80f3136de21bd97b357e1eff4e826ae86a9cd8",
-      "content_hash": "7571a0d003f90761125f802afa80f3136de21bd97b357e1eff4e826ae86a9cd8",
+      "source_content_hash": "e1bbb37f80756b09ff533e75b64e825b570829b54c612020f36ba501b4bd1ac8",
+      "content_hash": "e1bbb37f80756b09ff533e75b64e825b570829b54c612020f36ba501b4bd1ac8",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -852,7 +852,7 @@
         },
         "reportKey": "people_process_vision_results",
         "patternKey": "people_process_vision_results",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "people_process_vision_results",
           "patternKey": "people_process_vision_results",
@@ -1518,7 +1518,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "people_results_process_vision",
       "report_key": "people_results_process_vision",
       "report_contract": "report_first_canonical_payload_v1",
@@ -1531,8 +1531,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_results_process_vision.md",
-      "source_content_hash": "7beebf3fd3bc9e506295bf0c0307c7db331a5b9dedec348cb9191faaacbf0929",
-      "content_hash": "7beebf3fd3bc9e506295bf0c0307c7db331a5b9dedec348cb9191faaacbf0929",
+      "source_content_hash": "ef628e4ac8ec0d44ab51a8900ec1652454d58752588100f79e025fac7edae084",
+      "content_hash": "ef628e4ac8ec0d44ab51a8900ec1652454d58752588100f79e025fac7edae084",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -1543,7 +1543,7 @@
         },
         "reportKey": "people_results_process_vision",
         "patternKey": "people_results_process_vision",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "people_results_process_vision",
           "patternKey": "people_results_process_vision",
@@ -2210,7 +2210,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "people_results_vision_process",
       "report_key": "people_results_vision_process",
       "report_contract": "report_first_canonical_payload_v1",
@@ -2223,8 +2223,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_results_vision_process.md",
-      "source_content_hash": "34fd0dd321efa9b1b1f9fe104ea7c7bdc20d272577beec5737a7de73286be68c",
-      "content_hash": "34fd0dd321efa9b1b1f9fe104ea7c7bdc20d272577beec5737a7de73286be68c",
+      "source_content_hash": "c2b4709765f1c0d1a8c5f290b5f48ecb4c87d7a6fd316f8cd7a63d0825545ddd",
+      "content_hash": "c2b4709765f1c0d1a8c5f290b5f48ecb4c87d7a6fd316f8cd7a63d0825545ddd",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -2235,7 +2235,7 @@
         },
         "reportKey": "people_results_vision_process",
         "patternKey": "people_results_vision_process",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "people_results_vision_process",
           "patternKey": "people_results_vision_process",
@@ -2901,7 +2901,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "people_vision_process_results",
       "report_key": "people_vision_process_results",
       "report_contract": "report_first_canonical_payload_v1",
@@ -2914,8 +2914,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_vision_process_results.md",
-      "source_content_hash": "83dedd1eb13df0bb3590c84a55f281c1a7c24507029ce99e6f9fb2b166b39342",
-      "content_hash": "83dedd1eb13df0bb3590c84a55f281c1a7c24507029ce99e6f9fb2b166b39342",
+      "source_content_hash": "539138b2a73cf8fa3c51529eb448e0f306c23b870b479a84dcdea1532e412dea",
+      "content_hash": "539138b2a73cf8fa3c51529eb448e0f306c23b870b479a84dcdea1532e412dea",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -2926,7 +2926,7 @@
         },
         "reportKey": "people_vision_process_results",
         "patternKey": "people_vision_process_results",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "people_vision_process_results",
           "patternKey": "people_vision_process_results",
@@ -3593,7 +3593,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "people_vision_results_process",
       "report_key": "people_vision_results_process",
       "report_contract": "report_first_canonical_payload_v1",
@@ -3606,8 +3606,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/people_vision_results_process.md",
-      "source_content_hash": "6d830c3fff87a7bd2e47fb09e8b991135f403e64dc7c81a80d38dd128e689ea2",
-      "content_hash": "6d830c3fff87a7bd2e47fb09e8b991135f403e64dc7c81a80d38dd128e689ea2",
+      "source_content_hash": "c25cee2f048741a309d02c57fd7b3cfce655b2c56511985da9a222893b1484b0",
+      "content_hash": "c25cee2f048741a309d02c57fd7b3cfce655b2c56511985da9a222893b1484b0",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -3618,7 +3618,7 @@
         },
         "reportKey": "people_vision_results_process",
         "patternKey": "people_vision_results_process",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "people_vision_results_process",
           "patternKey": "people_vision_results_process",
@@ -4284,7 +4284,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "process_people_results_vision",
       "report_key": "process_people_results_vision",
       "report_contract": "report_first_canonical_payload_v1",
@@ -4297,8 +4297,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_people_results_vision.md",
-      "source_content_hash": "1b6c6678932af32856a2ef44dc32049c0d80877ff7e8dc944294041e5271aff0",
-      "content_hash": "1b6c6678932af32856a2ef44dc32049c0d80877ff7e8dc944294041e5271aff0",
+      "source_content_hash": "80753f64bb5bcfd6b10d5c9ea86ea91533b569dd53f1d42d791202c9cd15747d",
+      "content_hash": "80753f64bb5bcfd6b10d5c9ea86ea91533b569dd53f1d42d791202c9cd15747d",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -4309,7 +4309,7 @@
         },
         "reportKey": "process_people_results_vision",
         "patternKey": "process_people_results_vision",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "process_people_results_vision",
           "patternKey": "process_people_results_vision",
@@ -4996,7 +4996,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "process_people_vision_results",
       "report_key": "process_people_vision_results",
       "report_contract": "report_first_canonical_payload_v1",
@@ -5009,8 +5009,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_people_vision_results.md",
-      "source_content_hash": "c5005c746a603ad805eff5689ea8ba8e610ccb211f9baea126474ac41a772fd5",
-      "content_hash": "c5005c746a603ad805eff5689ea8ba8e610ccb211f9baea126474ac41a772fd5",
+      "source_content_hash": "913b446170c08d73bb68f84fd9aa9cb889d278eba5a7d361fbce9af5bb2a8d46",
+      "content_hash": "913b446170c08d73bb68f84fd9aa9cb889d278eba5a7d361fbce9af5bb2a8d46",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -5021,7 +5021,7 @@
         },
         "reportKey": "process_people_vision_results",
         "patternKey": "process_people_vision_results",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "process_people_vision_results",
           "patternKey": "process_people_vision_results",
@@ -5714,7 +5714,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "process_results_people_vision",
       "report_key": "process_results_people_vision",
       "report_contract": "report_first_canonical_payload_v1",
@@ -5727,8 +5727,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_results_people_vision.md",
-      "source_content_hash": "24c9ef459422022c0aacf7b80ab77fa98db6740b9c6f7ee0c2cfb058eff3b33d",
-      "content_hash": "24c9ef459422022c0aacf7b80ab77fa98db6740b9c6f7ee0c2cfb058eff3b33d",
+      "source_content_hash": "92b28e3a323a9c2ff5f6f1e26ed1b04b54f7920852a422a0ffdf1e5afa108d41",
+      "content_hash": "92b28e3a323a9c2ff5f6f1e26ed1b04b54f7920852a422a0ffdf1e5afa108d41",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -5739,7 +5739,7 @@
         },
         "reportKey": "process_results_people_vision",
         "patternKey": "process_results_people_vision",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "process_results_people_vision",
           "patternKey": "process_results_people_vision",
@@ -6476,7 +6476,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "process_results_vision_people",
       "report_key": "process_results_vision_people",
       "report_contract": "report_first_canonical_payload_v1",
@@ -6489,8 +6489,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_results_vision_people.md",
-      "source_content_hash": "9540e4c8a5bbb18d39204e7a2f1371cd8cbaacff09f713f6d8cc93429aa99921",
-      "content_hash": "9540e4c8a5bbb18d39204e7a2f1371cd8cbaacff09f713f6d8cc93429aa99921",
+      "source_content_hash": "f4b0a51e4daf82ad0a454c28d3665aeb9d30aab50fa3fb943ae029b585a25d5a",
+      "content_hash": "f4b0a51e4daf82ad0a454c28d3665aeb9d30aab50fa3fb943ae029b585a25d5a",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -6501,7 +6501,7 @@
         },
         "reportKey": "process_results_vision_people",
         "patternKey": "process_results_vision_people",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "process_results_vision_people",
           "patternKey": "process_results_vision_people",
@@ -7195,7 +7195,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "process_vision_people_results",
       "report_key": "process_vision_people_results",
       "report_contract": "report_first_canonical_payload_v1",
@@ -7208,8 +7208,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_vision_people_results.md",
-      "source_content_hash": "600452ad8eb09d7a20fd95a159d9c08699b52c35d2114eabd7c36670f7a845f0",
-      "content_hash": "600452ad8eb09d7a20fd95a159d9c08699b52c35d2114eabd7c36670f7a845f0",
+      "source_content_hash": "8f7c142507382261e35bf6912ee2c7da8ebba0311e17283e1d211207e6c7f84d",
+      "content_hash": "8f7c142507382261e35bf6912ee2c7da8ebba0311e17283e1d211207e6c7f84d",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -7220,7 +7220,7 @@
         },
         "reportKey": "process_vision_people_results",
         "patternKey": "process_vision_people_results",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "process_vision_people_results",
           "patternKey": "process_vision_people_results",
@@ -7908,7 +7908,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "process_vision_results_people",
       "report_key": "process_vision_results_people",
       "report_contract": "report_first_canonical_payload_v1",
@@ -7921,8 +7921,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_vision_results_people.md",
-      "source_content_hash": "57f4a03d204452cc92d1c216e194eddebf5c8e718000d98b58bc4c0d31cc6dd3",
-      "content_hash": "57f4a03d204452cc92d1c216e194eddebf5c8e718000d98b58bc4c0d31cc6dd3",
+      "source_content_hash": "2f2f31ebde3c49831c25e51c3c167df4bdbaac44c63ca25a90ddec42d10a2f71",
+      "content_hash": "2f2f31ebde3c49831c25e51c3c167df4bdbaac44c63ca25a90ddec42d10a2f71",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -7933,7 +7933,7 @@
         },
         "reportKey": "process_vision_results_people",
         "patternKey": "process_vision_results_people",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "process_vision_results_people",
           "patternKey": "process_vision_results_people",
@@ -8623,7 +8623,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "results_people_process_vision",
       "report_key": "results_people_process_vision",
       "report_contract": "report_first_canonical_payload_v1",
@@ -8636,8 +8636,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_people_process_vision.md",
-      "source_content_hash": "77702ca28c997c7a580d05876d9e8903633cd96136edcf9273e6f867834dc8e1",
-      "content_hash": "77702ca28c997c7a580d05876d9e8903633cd96136edcf9273e6f867834dc8e1",
+      "source_content_hash": "8a9451a06d364a89b1e3bf7222d5c24abfe79498b107ccc0f15d154b698e149f",
+      "content_hash": "8a9451a06d364a89b1e3bf7222d5c24abfe79498b107ccc0f15d154b698e149f",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -8648,7 +8648,7 @@
         },
         "reportKey": "results_people_process_vision",
         "patternKey": "results_people_process_vision",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "results_people_process_vision",
           "patternKey": "results_people_process_vision",
@@ -9368,7 +9368,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "results_people_vision_process",
       "report_key": "results_people_vision_process",
       "report_contract": "report_first_canonical_payload_v1",
@@ -9381,8 +9381,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_people_vision_process.md",
-      "source_content_hash": "009a9d6373f1d49c143e39c2c406aea2097be33c66ff15b55663b66576f718ed",
-      "content_hash": "009a9d6373f1d49c143e39c2c406aea2097be33c66ff15b55663b66576f718ed",
+      "source_content_hash": "ae429ae3b5910de33e6ae5717132cf164fb05953a84ca52aaeb91e22d9d274d3",
+      "content_hash": "ae429ae3b5910de33e6ae5717132cf164fb05953a84ca52aaeb91e22d9d274d3",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -9393,7 +9393,7 @@
         },
         "reportKey": "results_people_vision_process",
         "patternKey": "results_people_vision_process",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "results_people_vision_process",
           "patternKey": "results_people_vision_process",
@@ -10110,7 +10110,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "results_process_people_vision",
       "report_key": "results_process_people_vision",
       "report_contract": "report_first_canonical_payload_v1",
@@ -10123,8 +10123,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_process_people_vision.md",
-      "source_content_hash": "9e5f46eb9d64538107eb21ea7c3ba0280f85b7317a5d5416dee23e4a26187d31",
-      "content_hash": "9e5f46eb9d64538107eb21ea7c3ba0280f85b7317a5d5416dee23e4a26187d31",
+      "source_content_hash": "39d275de2b599b3c2c06519bf39439ba46e839571ab2cb69e3e2fadb713e6175",
+      "content_hash": "39d275de2b599b3c2c06519bf39439ba46e839571ab2cb69e3e2fadb713e6175",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -10135,7 +10135,7 @@
         },
         "reportKey": "results_process_people_vision",
         "patternKey": "results_process_people_vision",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "results_process_people_vision",
           "patternKey": "results_process_people_vision",
@@ -10884,7 +10884,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "results_process_vision_people",
       "report_key": "results_process_vision_people",
       "report_contract": "report_first_canonical_payload_v1",
@@ -10897,8 +10897,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_process_vision_people.md",
-      "source_content_hash": "d58cbb02dbdaf0a0cc6f2db2c9398bd5fabab10b6e00f3b4cf4c3db21630e216",
-      "content_hash": "d58cbb02dbdaf0a0cc6f2db2c9398bd5fabab10b6e00f3b4cf4c3db21630e216",
+      "source_content_hash": "132b00fb1154475b88f0356d02b9220285d0e146f58aa530cadc1fb1510702bf",
+      "content_hash": "132b00fb1154475b88f0356d02b9220285d0e146f58aa530cadc1fb1510702bf",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -10909,7 +10909,7 @@
         },
         "reportKey": "results_process_vision_people",
         "patternKey": "results_process_vision_people",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "results_process_vision_people",
           "patternKey": "results_process_vision_people",
@@ -11639,7 +11639,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "results_vision_people_process",
       "report_key": "results_vision_people_process",
       "report_contract": "report_first_canonical_payload_v1",
@@ -11652,8 +11652,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_vision_people_process.md",
-      "source_content_hash": "2e3b063280a2c6bf10b917fceda4ec3d5bc23722ce9a25b32a47d6f6fa3d84e9",
-      "content_hash": "2e3b063280a2c6bf10b917fceda4ec3d5bc23722ce9a25b32a47d6f6fa3d84e9",
+      "source_content_hash": "ccb722ac4dee12e12fddeb5eaf01578d9916c9a6d08967c99cb89ddcfc896b7b",
+      "content_hash": "ccb722ac4dee12e12fddeb5eaf01578d9916c9a6d08967c99cb89ddcfc896b7b",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -11664,7 +11664,7 @@
         },
         "reportKey": "results_vision_people_process",
         "patternKey": "results_vision_people_process",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "results_vision_people_process",
           "patternKey": "results_vision_people_process",
@@ -12379,7 +12379,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "results_vision_process_people",
       "report_key": "results_vision_process_people",
       "report_contract": "report_first_canonical_payload_v1",
@@ -12392,8 +12392,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_vision_process_people.md",
-      "source_content_hash": "3c8ed9ca92a340a83d45317f049be1b7efdc35a1fb1bba989931baf156068d42",
-      "content_hash": "3c8ed9ca92a340a83d45317f049be1b7efdc35a1fb1bba989931baf156068d42",
+      "source_content_hash": "f0972e603f2b3f00444395d699c42606cd065f1b59e54a9ab67d29edea528fd6",
+      "content_hash": "f0972e603f2b3f00444395d699c42606cd065f1b59e54a9ab67d29edea528fd6",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -12404,7 +12404,7 @@
         },
         "reportKey": "results_vision_process_people",
         "patternKey": "results_vision_process_people",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "results_vision_process_people",
           "patternKey": "results_vision_process_people",
@@ -13130,7 +13130,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "vision_people_process_results",
       "report_key": "vision_people_process_results",
       "report_contract": "report_first_canonical_payload_v1",
@@ -13143,8 +13143,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_people_process_results.md",
-      "source_content_hash": "76cbd511ef9bbf8d0b547a1fd84a589c55ec4d8c37e54c53845fe9ad263be3dc",
-      "content_hash": "76cbd511ef9bbf8d0b547a1fd84a589c55ec4d8c37e54c53845fe9ad263be3dc",
+      "source_content_hash": "636a9af66a4c5c1b3aecbe70f201339dc38f54306a0f8324489b45f9bf1c4888",
+      "content_hash": "636a9af66a4c5c1b3aecbe70f201339dc38f54306a0f8324489b45f9bf1c4888",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -13155,7 +13155,7 @@
         },
         "reportKey": "vision_people_process_results",
         "patternKey": "vision_people_process_results",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "vision_people_process_results",
           "patternKey": "vision_people_process_results",
@@ -13900,7 +13900,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "vision_people_results_process",
       "report_key": "vision_people_results_process",
       "report_contract": "report_first_canonical_payload_v1",
@@ -13913,8 +13913,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_people_results_process.md",
-      "source_content_hash": "868e3a416acd6dffc605e317f57dc91048c602bf5b67bbfac3365c34db42ee71",
-      "content_hash": "868e3a416acd6dffc605e317f57dc91048c602bf5b67bbfac3365c34db42ee71",
+      "source_content_hash": "95d793041fe8cc6b0e382c88317fa8e2e5c55ceb608f631b23e5a969030824ec",
+      "content_hash": "95d793041fe8cc6b0e382c88317fa8e2e5c55ceb608f631b23e5a969030824ec",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -13925,7 +13925,7 @@
         },
         "reportKey": "vision_people_results_process",
         "patternKey": "vision_people_results_process",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "vision_people_results_process",
           "patternKey": "vision_people_results_process",
@@ -14571,7 +14571,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "vision_process_people_results",
       "report_key": "vision_process_people_results",
       "report_contract": "report_first_canonical_payload_v1",
@@ -14584,8 +14584,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_process_people_results.md",
-      "source_content_hash": "0c33b09269e072fd8602b8eaa58cce54f412840a8754a03a2ce7c8f29b63c4bb",
-      "content_hash": "0c33b09269e072fd8602b8eaa58cce54f412840a8754a03a2ce7c8f29b63c4bb",
+      "source_content_hash": "e68b91854858af1d32235d99f1d5567cc327ff8b272aea937299dd6c8653e5ca",
+      "content_hash": "e68b91854858af1d32235d99f1d5567cc327ff8b272aea937299dd6c8653e5ca",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -14596,7 +14596,7 @@
         },
         "reportKey": "vision_process_people_results",
         "patternKey": "vision_process_people_results",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "vision_process_people_results",
           "patternKey": "vision_process_people_results",
@@ -15237,7 +15237,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "vision_process_results_people",
       "report_key": "vision_process_results_people",
       "report_contract": "report_first_canonical_payload_v1",
@@ -15250,8 +15250,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_process_results_people.md",
-      "source_content_hash": "25be0ff0789be25a09a5e53b24b674988389a31e7dfdb1fe44c528fd88d3f99e",
-      "content_hash": "25be0ff0789be25a09a5e53b24b674988389a31e7dfdb1fe44c528fd88d3f99e",
+      "source_content_hash": "7f7f7b24ab261d5f7d32484ea0657d3f862018752a9487749c2576bce61f4ba6",
+      "content_hash": "7f7f7b24ab261d5f7d32484ea0657d3f862018752a9487749c2576bce61f4ba6",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -15262,7 +15262,7 @@
         },
         "reportKey": "vision_process_results_people",
         "patternKey": "vision_process_results_people",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "vision_process_results_people",
           "patternKey": "vision_process_results_people",
@@ -15915,7 +15915,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "vision_results_people_process",
       "report_key": "vision_results_people_process",
       "report_contract": "report_first_canonical_payload_v1",
@@ -15928,8 +15928,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_results_people_process.md",
-      "source_content_hash": "3632c23009b1de62de5a64a8432578b59275127a686dff5f0f7fdb07fa0d358f",
-      "content_hash": "3632c23009b1de62de5a64a8432578b59275127a686dff5f0f7fdb07fa0d358f",
+      "source_content_hash": "89b435b37650be48704ecc8474c1a59bce3b1b85e496fbee1a590c6717901af5",
+      "content_hash": "89b435b37650be48704ecc8474c1a59bce3b1b85e496fbee1a590c6717901af5",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -15940,7 +15940,7 @@
         },
         "reportKey": "vision_results_people_process",
         "patternKey": "vision_results_people_process",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "vision_results_people_process",
           "patternKey": "vision_results_people_process",
@@ -16591,7 +16591,7 @@
       "assessment_version": "p9-report-first-coverage",
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
+      "domain_key": "leadership_approach",
       "pattern_key": "vision_results_process_people",
       "report_key": "vision_results_process_people",
       "report_contract": "report_first_canonical_payload_v1",
@@ -16604,8 +16604,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_results_process_people.md",
-      "source_content_hash": "0d97396d8890af5e065484ad09f7c7577cbeeea062cb4cecc51547dc1300b368",
-      "content_hash": "0d97396d8890af5e065484ad09f7c7577cbeeea062cb4cecc51547dc1300b368",
+      "source_content_hash": "f24fd915d195ff0af25bd3ebe45d18fb593cc5d5fd488592d2c8debbf3977dcb",
+      "content_hash": "f24fd915d195ff0af25bd3ebe45d18fb593cc5d5fd488592d2c8debbf3977dcb",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -16616,7 +16616,7 @@
         },
         "reportKey": "vision_results_process_people",
         "patternKey": "vision_results_process_people",
-        "domainKey": "leadership-approach",
+        "domainKey": "leadership_approach",
         "report": {
           "reportKey": "vision_results_process_people",
           "patternKey": "vision_results_process_people",

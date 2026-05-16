@@ -78,7 +78,7 @@ test('leadership report-first package coverage reports available and missing tem
   const coverage = await getLeadershipReportFirstPackageCoverage();
 
   assert.equal(coverage.manifest.assessment_key, 'leadership-approach');
-  assert.equal(coverage.manifest.domain_key, 'leadership-approach');
+  assert.equal(coverage.manifest.domain_key, 'leadership_approach');
   assert.equal(coverage.expectedCount, 24);
   assert.equal(coverage.presentCount, 24);
   assert.equal(coverage.missingCount, 0);
