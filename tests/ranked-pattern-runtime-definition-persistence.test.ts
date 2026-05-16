@@ -436,3 +436,63 @@ test('apply mode aborts before database writes when blocking diagnostics exist',
     true,
   );
 });
+
+test('apply mode clears stale option weights before inserting package weights', async () => {
+  const normalisedPackage = normaliseRankedPatternWorkbook(baseRuntimeDefinitionWorkbook());
+  const statements: string[] = [];
+  let deleteIndex = -1;
+  let insertWeightIndex = -1;
+
+  const result = await persistRankedPatternRuntimeDefinition({
+    normalisedPackage,
+    dryRun: false,
+    db: {
+      async connect() {
+        return {
+          async query<T>(text: string, params?: readonly unknown[]) {
+            statements.push(text);
+            const index = statements.length - 1;
+
+            if (text.includes('DELETE FROM option_signal_weights')) {
+              deleteIndex = index;
+              return { rows: [] as T[] };
+            }
+            if (text.includes('INSERT INTO option_signal_weights')) {
+              insertWeightIndex = index;
+              return { rows: [] as T[] };
+            }
+            if (text.includes('INSERT INTO assessments')) {
+              return { rows: [{ id: 'assessment-1' }] as T[] };
+            }
+            if (text.includes('INSERT INTO assessment_versions')) {
+              return { rows: [{ id: 'version-1' }] as T[] };
+            }
+            if (text.includes('INSERT INTO domains')) {
+              return { rows: [{ id: 'domain-1' }] as T[] };
+            }
+            if (text.includes('INSERT INTO signals')) {
+              const signalKey = String(params?.[2] ?? '');
+              return { rows: [{ id: `signal-${signalKey}` }] as T[] };
+            }
+            if (text.includes('INSERT INTO questions')) {
+              const questionKey = String(params?.[2] ?? '');
+              return { rows: [{ id: `question-${questionKey}` }] as T[] };
+            }
+            if (text.includes('INSERT INTO options')) {
+              const optionKey = String(params?.[2] ?? '');
+              return { rows: [{ id: `option-${optionKey}` }] as T[] };
+            }
+            return { rows: [] as T[] };
+          },
+          release() {},
+        };
+      },
+    },
+  });
+
+  assert.equal(result.dryRun, false);
+  assert.equal(result.countsByTable.option_signal_weights, 1);
+  assert.ok(deleteIndex >= 0);
+  assert.ok(insertWeightIndex >= 0);
+  assert.ok(deleteIndex < insertWeightIndex);
+});

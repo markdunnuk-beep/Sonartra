@@ -43,6 +43,36 @@ test('Leadership Approach package metadata and scored signals match the test pac
   assert.equal(normalised.signals.every((signal) => signal.scored), true);
 });
 
+test('Leadership Approach package uses the product-approved 24-question runtime set', () => {
+  const normalised = normaliseRankedPatternWorkbook(parseRankedPatternWorkbookFile(workbookPath));
+  const activeSignals = new Set(normalised.signals.filter((signal) => signal.scored).map((signal) => signal.signalKey));
+  const expectedQuestionKeys = Array.from(
+    { length: 24 },
+    (_, index) => `leadership_approach_q${String(index + 1).padStart(2, '0')}`,
+  );
+
+  assert.deepEqual(normalised.questions.map((question) => question.questionKey), expectedQuestionKeys);
+  assert.equal(normalised.questions.length, 24);
+  assert.equal(normalised.options.length, 96);
+  assert.equal(normalised.optionWeights.length, 96);
+  assert.equal(normalised.questions.every((question) => question.domainKey === 'leadership_approach'), true);
+
+  for (const questionKey of expectedQuestionKeys) {
+    const options = normalised.options.filter((option) => option.questionKey === questionKey);
+    assert.deepEqual(options.map((option) => option.optionKey), ['A', 'B', 'C', 'D']);
+    assert.equal(options.every((option) => option.domainKey === 'leadership_approach'), true);
+
+    for (const option of options) {
+      const optionWeights = normalised.optionWeights.filter(
+        (weight) => weight.questionKey === questionKey && weight.optionKey === option.optionKey,
+      );
+      assert.equal(optionWeights.length, 1);
+      assert.equal(activeSignals.has(optionWeights[0]?.signalKey ?? ''), true);
+      assert.equal(optionWeights[0]?.domainKey, 'leadership_approach');
+    }
+  }
+});
+
 test('Leadership Approach package audit passes without blocking findings or warnings', () => {
   const audit = auditRankedPatternWorkbookFile(workbookPath);
 
@@ -87,9 +117,9 @@ test('Leadership Approach dry-run plans expected runtime and result-language ope
     assessment_versions: 1,
     domains: 1,
     signals: 4,
-    questions: 16,
-    options: 64,
-    option_signal_weights: 64,
+    questions: 24,
+    options: 96,
+    option_signal_weights: 96,
   });
   assert.equal(resultLanguagePlan.operationCountsByTable.assessment_ranked_patterns, 24);
   assert.equal(resultLanguagePlan.operationCountsByTable.assessment_result_section_definitions, 10);

@@ -378,6 +378,17 @@ test('publish audit accepts a minimal complete persisted ranked-pattern fixture'
   assert.equal(result.blockingCount, 0);
 });
 
+test('publish audit does not make Leadership 24-question coverage a global ranked-pattern requirement', async () => {
+  const fixture = completeFixture();
+  const result = await auditFixture(fixture);
+
+  assert.equal(fixture.questions.length, 1);
+  assert.equal(fixture.options.length, 1);
+  assert.equal(fixture.optionWeights.length, 1);
+  assert.equal(result.canPublish, true);
+  assert.equal(result.blockingCount, 0);
+});
+
 test('publish audit blocks missing assessment version', async () => {
   const result = await auditFixture(mutateFixture((fixture) => ({ ...fixture, version: [] })));
 

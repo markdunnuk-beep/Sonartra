@@ -810,6 +810,21 @@ async function upsertOptionWeights(params: {
   }
 }
 
+async function deleteExistingOptionWeightsForVersion(params: {
+  readonly db: RankedPatternPersistenceDbClient;
+  readonly assessmentVersionId: string;
+}): Promise<void> {
+  await params.db.query(
+    `
+    DELETE FROM option_signal_weights osw
+    USING options o
+    WHERE osw.option_id = o.id
+      AND o.assessment_version_id = $1
+    `,
+    [params.assessmentVersionId],
+  );
+}
+
 export async function persistRankedPatternRuntimeDefinition(
   input: RankedPatternRuntimeDefinitionPersistenceInput,
 ): Promise<RankedPatternRuntimeDefinitionPersistenceResult> {
@@ -868,6 +883,10 @@ export async function persistRankedPatternRuntimeDefinition(
       assessmentVersionId,
       questionIds,
       options: input.normalisedPackage.options,
+    });
+    await deleteExistingOptionWeightsForVersion({
+      db: client,
+      assessmentVersionId,
     });
     await upsertOptionWeights({
       db: client,

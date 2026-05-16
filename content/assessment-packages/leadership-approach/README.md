@@ -40,6 +40,13 @@ The runtime engine must not read this workbook. Runtime assessment delivery, sco
 - `domain_key`: `leadership_approach`
 - `domain_title`: `Leadership Approach`
 - scored signals: `results`, `process`, `vision`, `people`
+- active questions: 24
+- active options: 96
+- active option-signal weight rows: 96
+
+The 24-question runtime set is a Leadership Approach product decision, not a
+global ranked-pattern engine rule. Other ranked-pattern packages may define
+their own question counts if their package audit and publish audit pass.
 
 ## Report-First Template Coverage
 
@@ -69,8 +76,8 @@ P11 adds the draft-storage handoff:
 - importer service: `lib/server/report-first-template-import.ts`
 - storage destination: `assessment_report_first_templates`
 - imported row status: `draft`
-- imported-ready rows today: 4
-- missing templates today: 20
+- imported-ready rows today: 24
+- missing templates today: 0
 
 The importer consumes the generated JSON artifact, validates the package metadata and full
 structured report body, and persists only rows marked `ready_for_import: true` and
@@ -81,7 +88,7 @@ The keyed ranked-pattern workflow exposes the handoff as an admin action:
 
 - route: `/admin/assessments/ranked-pattern/leadership-approach/workflow`
 - action: `Import generated report templates`
-- expected current result: 4 draft template rows imported, 20 templates missing, publish blocked
+- expected current result: 24 draft template rows imported, 0 templates missing
 
 The action is idempotent for draft rows: running it again updates the same draft template rows
 rather than creating duplicate draft rows for the same pattern.
@@ -89,20 +96,9 @@ rather than creating duplicate draft rows for the same pattern.
 Current coverage:
 
 - expected patterns: 24
-- authored/import-ready templates: 4
-- missing templates: 20
-- package publishable as report-first: no
-
-Available templates:
-
-- `process_results_people_vision`
-- `results_process_people_vision`
-- `people_process_results_vision`
-- `vision_people_process_results`
-
-Missing templates are explicitly marked `missing`, `ready_for_import: false`, and
-`publishable: false`. They must not satisfy publish readiness until full canonical reports are
-authored, compiled, reviewed, and marked import-ready.
+- authored/import-ready templates: 24
+- missing templates: 0
+- package publishable as report-first: yes
 
 The current report-first canonical templates are pattern-level and score-shape-neutral. The
 generated import rows therefore set `score_shape_policy` to `pattern_level_score_shape_neutral`,
@@ -123,6 +119,3 @@ to read persisted `canonical_result_payload` only.
 Importing report-first templates into draft storage is different from user result persistence:
 template rows prepare future completion-time report assembly, while user results remain immutable
 records produced by the engine and stored in `results.canonical_result_payload`.
-
-Next step: author and review the remaining twenty report-first templates, regenerate the artifact,
-import all twenty-four rows, then run report-first publish audit coverage.

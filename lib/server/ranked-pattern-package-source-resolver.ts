@@ -49,6 +49,7 @@ export type RankedPatternResolvedPackageSource =
 
 const PACKAGE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd(), 'content', 'assessment-packages');
 const XLSX_EXTENSION = '.xlsx';
+const CANONICAL_PACKAGE_WORKBOOK_PREFIX = 'sonartra_reader_first_import_schema_';
 const PACKAGE_ROOT_RELATIVE = path.join('content', 'assessment-packages');
 
 function diagnostic(
@@ -196,6 +197,7 @@ function resolvePackageReference(reference: string): {
 
   const workbookFiles = readdirSync(packageDirectory)
     .filter((entry) => entry.toLowerCase().endsWith(XLSX_EXTENSION))
+    .sort((left, right) => left.localeCompare(right))
     .map((entry) => path.join(packageDirectory, entry));
 
   if (workbookFiles.length === 0) {
@@ -208,6 +210,18 @@ function resolvePackageReference(reference: string): {
     };
   }
 
+  const canonicalWorkbookFiles = workbookFiles.filter((workbookFile) =>
+    path.basename(workbookFile).toLowerCase().startsWith(CANONICAL_PACKAGE_WORKBOOK_PREFIX),
+  );
+
+  if (canonicalWorkbookFiles.length === 1) {
+    return Object.freeze({
+      sourceKind: 'package_reference' as const,
+      resolvedPath: canonicalWorkbookFiles[0],
+      diagnostics: Object.freeze([]),
+    });
+  }
+
   if (workbookFiles.length > 1) {
     return {
       sourceKind: 'package_reference',
@@ -215,7 +229,7 @@ function resolvePackageReference(reference: string): {
       diagnostics: Object.freeze([
         diagnostic(
           'PACKAGE_REFERENCE_AMBIGUOUS',
-          'The package folder contains multiple .xlsx workbooks. Use an explicit workbook path.',
+          'The package folder contains multiple .xlsx workbooks and no single canonical import workbook. Use an explicit workbook path.',
         ),
       ]),
     };

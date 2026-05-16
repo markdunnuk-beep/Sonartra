@@ -499,7 +499,7 @@ test('dry-run import works through the package source resolver without database 
   assert.equal(result.status, 'ready');
   assert.equal(result.source.sourceHash?.length, 64);
   assert.equal(result.source.sourceName, 'sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_TEST.xlsx');
-  assert.equal(result.runtimeDefinitionPlanSummary?.operationCountsByTable.questions, 16);
+  assert.equal(result.runtimeDefinitionPlanSummary?.operationCountsByTable.questions, 24);
   assert.equal(result.resultLanguagePlanSummary?.operationCountsByTable.assessment_result_language_rows, 713);
 });
 
