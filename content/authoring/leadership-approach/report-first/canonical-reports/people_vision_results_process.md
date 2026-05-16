@@ -10,11 +10,11 @@ Editorial introduction
 
 Your leadership approach is led by People and strengthened by Vision. You are likely to create value by building shared commitment around a future people can understand and feel part of.
 
-Results is the first expansion. It helps shared purpose become credible through visible movement: decisions, customer impact, delivery proof, or progress that shows the direction is more than a story.
+Results is the first expansion. It helps shared purpose become credible through visible progress: decisions, customer impact, delivery proof, or progress that shows the direction is more than a story.
 
-Process is the furthest extension. The development edge is to build the system behind the shared purpose before people begin carrying ambiguity as extra work. Without Process, commitment and proof can fragment across teams, interpretations, decision rights, handovers, and informal coordination.
+Process is the furthest extension. The main growth move is to build the system behind the shared purpose before people begin carrying ambiguity as extra work. Without Process, commitment and proof can fragment across teams, interpretations, decision rights, handovers, and informal coordination.
 
-Your strongest leadership makes the future human, proves it through action, and then gives the work enough operating discipline to be sustained.
+Your strongest leadership makes the future personal, proves it through action, and then gives the work enough structure to be sustained.
 
 Pattern at a glance
 
@@ -52,7 +52,7 @@ These scores show why your report is led by People and strengthened by Vision, w
 
 Key insight
 
-Your leadership creates confidence by making the future shared and human. The development edge is to give shared purpose enough operating discipline to survive real delivery.
+Your leadership creates confidence by making the future shared and personal. The main growth move is to give shared purpose enough structure to survive real delivery.
 
 Chapter 1 — How your leadership creates value
 
@@ -72,7 +72,7 @@ Others may experience your leadership as inclusive, meaningful, and activating. 
 
 This can be powerful in transformation, culture change, strategic renewal, customer promise work, and moments where people need a reason to engage beyond compliance. You can make the future feel like something people can help shape rather than something handed down.
 
-The possible tension is that shared purpose can become heavy if the operating route is unclear. People may believe in the direction and want to make progress, but still carry ambiguity through extra coordination, repeated interpretation, or uneven workload.
+The possible tension is that shared purpose can become heavy if the working path is unclear. People may believe in the direction and want to make progress, but still carry ambiguity through extra coordination, repeated interpretation, or uneven workload.
 
 When this pattern is mature, people experience purpose with proof and method. They know why the work matters, what progress will show it is real, and how the work will be held.
 
@@ -80,7 +80,7 @@ Chapter 3 — Decision behaviour
 
 You are likely to make decisions by considering what people can commit to, what future the decision serves, and what action would make that future credible.
 
-A decision feels strong when it protects trust, serves the direction, and creates visible movement. You may resist decisions that produce speed but weaken commitment or make people feel disconnected from the why behind the work.
+A decision feels strong when it protects trust, serves the direction, and creates visible progress. You may resist decisions that produce speed but weaken commitment or make people feel disconnected from the why behind the work.
 
 Results adds useful consequence. It asks what will change because this decision has been made, and what evidence will show the future is becoming more real.
 
@@ -126,9 +126,9 @@ Results helps shared belief become visible through action, evidence, customer im
 
 Chapter 7 — Where the pattern can tighten
 
-1. Purpose before operating discipline
+1. Purpose before working structure
 
-People may believe in the direction before the operating route is clear.
+People may believe in the direction before the working path is clear.
 
 Range to add: Bring Process in through roles, sequence, standards, decision rights, and review rhythm.
 
@@ -195,7 +195,7 @@ Use this in: workload reviews, manager check-ins, adoption tracking.
 
 When progress appears, define the method that made it possible.
 
-Use this in: commercial reviews, retrospectives, delivery recovery.
+Use this in: commercial reviews, retrospectives, getting delivery back on track.
 
 4. Govern the direction
 
@@ -213,7 +213,7 @@ Closing synthesis
 
 Your leadership is valuable because it makes the future something people can belong to and act on.
 
-People gives your leadership its trust base. Vision gives trust a meaningful direction. Results turns shared purpose into evidence. The growth edge is Process: the operating discipline that prevents belief, commitment, and action from fragmenting.
+People gives your leadership its trust base. Vision gives trust a direction that matters. Results turns shared purpose into evidence. The main growth move is Process: the clear working system that prevents belief, commitment, and action from fragmenting.
 
 Your risk under pressure is asking purpose and commitment to carry coordination that has not yet been designed. That can create governance gaps, unclear decision rights, repeated interpretation work, and uneven workload for the people most invested in the future. Your strongest leadership keeps people included, keeps the future meaningful, keeps proof visible, and builds the system that lets shared purpose become reliable work.
 
@@ -225,4 +225,4 @@ PDF export CTA
 
 Save this report
 
-Use this report as a reference when people believe in the direction and progress is beginning, but the system behind the work needs to become clearer. Return to it before change mobilisation, governance design, senior alignment, or moments where purpose needs operating discipline.
+Use this report as a reference when people believe in the direction and progress is beginning, but the system behind the work needs to become clearer. Return to it before change mobilisation, governance design, senior alignment, or moments where purpose needs working structure.

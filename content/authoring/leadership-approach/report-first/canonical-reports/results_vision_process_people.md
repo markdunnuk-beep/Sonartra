@@ -54,7 +54,7 @@ These scores show why your report is led by Results and strengthened by Vision, 
 
 Key insight
 
-Your leadership creates confidence by making the future move. The development edge is to ground that movement in enough method and participation that people can carry it, not only respond to it.
+Your leadership creates confidence by making the future move. The main growth move is to ground that progress in enough method and participation that people can carry it, not only respond to it.
 
 Chapter 1 — How your leadership creates value
 
@@ -90,9 +90,9 @@ A decision feels strong when it moves the direction closer. You may prefer a dec
 
 Vision gives your decision-making a sense of significance. You may ask whether the option builds capability, opens a market, strengthens trust, creates learning, or moves the organisation closer to where it needs to be.
 
-The risk is that purposeful action may be trusted before the operating route is ready. A decision can be strategically right and still difficult to execute if ownership, sequence, resourcing, and review are unclear. That is why Process is the first expansion.
+The risk is that purposeful action may be trusted before the working method is ready. A decision can be strategically right and still difficult to deliver if ownership, sequence, resourcing, and review are unclear. That is why Process is the first expansion.
 
-People is the deeper growth edge. A decision may be bold, sensible, and well structured, but still under-owned if people were not included early enough. Participation is not a courtesy after the decision. It is part of making the decision durable.
+People is the deeper growth move. A decision may be bold, sensible, and well structured, but still under-owned if people were not included early enough. Participation is not a courtesy after the decision. It is part of making the decision durable.
 
 Useful decision checks include:
 
@@ -209,7 +209,7 @@ Chapter 10 — Development focus
 
 The development focus is to make ambitious progress more executable and more shared.
 
-1. Turn the horizon into an operating route
+1. Turn the horizon into a working path
 
 After naming the future, define the first practical route. Make the work visible enough for people to coordinate.
 

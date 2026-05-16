@@ -12,22 +12,22 @@ Your leadership approach is led by Vision and strengthened by Results. You are l
 
 This is not generic optimism. Your pattern is concerned with consequence: what future is being served, what opportunity is being made credible, what risk is being reduced, and what evidence would show that the organisation is moving in the right direction.
 
-Process is the first expansion. The direction and proof points become stronger when they are supported by operating discipline: sequence, decision rights, standards, ownership, review rhythm, and enough governance to make progress repeatable.
+Process is the first expansion. The direction and proof points become stronger when they are supported by working discipline: sequence, decision rights, standards, ownership, review rhythm, and enough governance to make progress repeatable.
 
-People is the furthest extension. The development edge is to bring people into the strategic judgement before asking them to deliver proof of it. Others may understand the goal and see the urgency, but still need room to shape the meaning, local implications, and human commitments behind the work.
+People is the furthest extension. The main growth move is to bring people into the strategic judgement before asking them to deliver proof of it. Others may understand the goal and see the urgency, but still need room to shape the meaning, local implications, and personal commitments behind the work.
 
-Your strongest leadership names the future, proves it through movement, builds the operating discipline to sustain it, and involves people early enough that the direction is carried rather than simply received.
+Your strongest leadership names the future, proves it through progress, builds the working discipline to sustain it, and involves people early enough that the direction is carried rather than simply received.
 
 Pattern at a glance
 
 | Rank | Role in your pattern | What it means in practice |
 |---|---|---|
 | 1 | Vision — the strategic frame | You tend to lead by naming future direction, capability, opportunity, risk, and the larger reason current work matters. |
-| 2 | Results — the proof support | Results turns direction into visible movement, decisions, evidence, and progress that can be tested. |
+| 2 | Results — the proof support | Results turns direction into visible progress, decisions, evidence, and progress that can be reviewed. |
 | 3 | Process — the operating expansion | Process gives future-facing action sequence, standards, ownership, governance, and repeatability. |
 | 4 | People — the adoption edge | People asks whether others have shaped the strategic judgement and can genuinely carry the direction. |
 
-This is a future-and-proof pattern. Its best version turns strategic intent into visible progress without losing the operating discipline and participation required to sustain it.
+This is a future-and-proof pattern. Its best version turns strategic intent into visible progress without losing the working discipline and participation required to sustain it.
 
 Evidence behind your result
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Vision and strengthened by Results, 
 
 Key insight
 
-Your leadership creates confidence by making the future testable. The development edge is to let people shape the judgement before asking them to deliver proof of the direction.
+Your leadership creates confidence by making the future clear enough to prove. The main growth move is to let people shape the judgement before asking them to deliver proof of the direction.
 
 Chapter 1 — How your leadership creates value
 
@@ -92,7 +92,7 @@ Decision checks that strengthen this pattern:
 
 What future are we making more credible?
 What proof point should this decision create?
-What operating discipline will keep the proof honest?
+What working discipline will keep the proof honest?
 Who needs to shape this judgement before we ask for delivery?
 
 Chapter 4 — Communication behaviour
@@ -119,7 +119,7 @@ The pressure move is to keep the proof point, then add two checks: what structur
 
 Chapter 6 — The strength of this pattern
 
-1. Future made testable
+1. Future made easy to check
 
 You can convert direction into evidence. That helps teams avoid vague ambition and gives senior stakeholders a clearer way to judge whether a strategic choice is becoming real.
 
@@ -135,7 +135,7 @@ Chapter 7 — Where the pattern can tighten
 
 1. Proof before method
 
-The work may move before the operating discipline is strong enough. This can make early progress difficult to repeat.
+The work may move before the working discipline is strong enough. This can make early progress difficult to repeat.
 
 Range to add: Bring Process in through sequence, owners, standards, review cadence, and decision rights.
 
@@ -153,7 +153,7 @@ Range to add: Use Process to define what learning counts as progress and how the
 
 Chapter 8 — How Process expands your leadership
 
-Process expands this pattern by giving future-facing action operating discipline.
+Process expands this pattern by giving future-facing action working discipline.
 
 When Process is active, proof does not depend only on urgency or personal conviction. The work gains sequence, ownership, governance, standards, and review. The future becomes easier to pursue because people can see how progress will be held.
 
@@ -190,7 +190,7 @@ Your development focus is to make proof sustainable and owned.
 
 For every proof point, define the sequence, owner, standard, and review point.
 
-Use this in: strategy execution, delivery recovery, commercial reviews, transformation governance.
+Use this in: strategy delivery, getting delivery back on track, commercial reviews, transformation governance.
 
 2. Invite judgement before the push hardens
 
@@ -220,9 +220,9 @@ Closing synthesis
 
 Your leadership is valuable because it makes direction consequential.
 
-Vision gives your leadership its strategic reach. You help people see what future the work is serving and what capability or opportunity is at stake. Results gives that future a test, pushing the work toward evidence, decisions, and visible movement. Process then makes the proof repeatable, and People makes it more deeply owned.
+Vision gives your leadership its strategic reach. You help people see what future the work is serving and what capability or opportunity is at stake. Results gives that future a test, pushing the work toward evidence, decisions, and visible progress. Process then makes the proof repeatable, and People makes it more deeply owned.
 
-The risk under pressure is that the future and proof point move faster than the method or the commitment. Your growth move is to keep the ambition and the evidence, while making the operating discipline and participation strong enough to sustain them.
+The risk under pressure is that the future and proof point move faster than the method or the commitment. Your growth move is to keep the ambition and the evidence, while making the working discipline and participation strong enough to sustain them.
 
 Final line
 

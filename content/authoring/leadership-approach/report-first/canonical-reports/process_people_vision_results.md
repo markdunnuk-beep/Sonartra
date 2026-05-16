@@ -14,7 +14,7 @@ People gives your structure a human quality. You are likely to care about whethe
 
 Vision is the first expansion. The next leadership move is to connect trusted ways of working to a shared direction. People are more likely to carry a process when they understand what future it is helping to build.
 
-Results is the furthest extension. The development edge is to make sure trust, coherence, and meaning do not become substitutes for visible progress. A team can feel aligned and well supported while still needing sharper outcomes, clearer trade-offs, and stronger evidence that the work is moving.
+Results is the furthest extension. The main growth move is to make sure trust, coherence, and meaning do not become substitutes for visible progress. A team can feel aligned and well supported while still needing sharper outcomes, clearer trade-offs, and stronger evidence that the work is changing something.
 
 Your strongest leadership builds a trusted operating base, connects it to shared direction, and then names the result that must now be achieved. That final move matters: it turns care and purpose into accountable movement rather than comfortable alignment.
 
@@ -25,7 +25,7 @@ Pattern at a glance
 | 1 | Process — the reliable route | You tend to lead by creating structure, sequence, standards, ownership, and repeatable rhythm. |
 | 2 | People — the trust support | People helps your structure become usable, fair, and genuinely carried by the team. |
 | 3 | Vision — the meaning expansion | Vision connects the way of working to shared direction, future capability, and purpose. |
-| 4 | Results — the progress edge | Results asks whether coherence and trust are producing visible movement, closure, and performance. |
+| 4 | Results — the progress focus | Results asks whether coherence and trust are producing visible progress, closure, and performance. |
 
 This is a trust-and-direction pattern. Its best version gives people a reliable way to work together, helps them understand what the work is building, and then turns that shared direction into measurable progress.
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Process and strengthened by People, 
 
 Key insight
 
-Your leadership creates confidence by making work reliable, trusted, and meaningful. The development edge is to make sure that trust and meaning become visible progress.
+Your leadership creates confidence by making work reliable, trusted, and meaningful. The main growth move is to make sure that trust and meaning become visible progress.
 
 Chapter 1 — How your leadership creates value
 
@@ -66,7 +66,7 @@ People strengthens this pattern because you are likely to see structure through 
 
 Vision expands the value by connecting that trusted route to a shared future. The process is not only there to make current work smoother. It can help build a stronger team, a clearer service promise, a more scalable operating model, or a leadership culture that is easier to trust.
 
-Results is the edge that protects the pattern from becoming too internally coherent. The work must eventually move. Trusted structure and shared direction should show up in decisions made, customer consequences improved, delivery recovery completed, priorities closed, or measurable progress that changes the next commercial review.
+Results is the focus that protects the pattern from becoming too internally coherent. The work must eventually move. Trusted structure and shared direction should show up in decisions made, customer consequences improved, delivery getting back on track, priorities closed, or measurable progress that changes the next commercial review.
 
 Chapter 2 — How others experience your leadership
 
@@ -76,7 +76,7 @@ This can be valuable in teams that have experienced churn, unclear priorities, o
 
 The possible tension is that the team may feel aligned before it is sufficiently mobilised. People may appreciate the clarity, trust the process, and understand the future direction, but still need a stronger signal about what must now be achieved.
 
-Results being fourth means the commercial edge may need deliberate activation. Without it, work can become well held but under-forced. Meetings are thoughtful, the working method is respectful, the purpose is clear, yet delivery pressure remains too diffuse. People may leave with alignment rather than a decision, sympathy for workload rather than a resource trade-off, or broad priorities rather than a clear answer about what must now win.
+Results being fourth means proof may need deliberate attention. Without it, work can become well held but under-forced. Meetings are thoughtful, the working method is respectful, the purpose is clear, yet delivery pressure remains too diffuse. People may leave with alignment rather than a decision, sympathy for workload rather than a resource trade-off, or broad priorities rather than a clear answer about what must now win.
 
 Chapter 3 — Decision behaviour
 
@@ -88,7 +88,7 @@ Vision helps you avoid purely local optimisation. You may ask whether a decision
 
 The risk is that decisions may be softened by the desire to preserve trust and coherence. You may keep gathering input, refining the working method, or explaining the direction when the moment now requires a firmer call.
 
-Results asks the deciding question: what outcome must this decision now create? A trusted way of working becomes more powerful when it is tied to evidence, accountability, and visible movement.
+Results asks the deciding question: what outcome must this decision now create? A trusted way of working becomes more powerful when it is tied to evidence, accountability, and visible progress.
 
 Chapter 4 — Communication behaviour
 
@@ -120,7 +120,7 @@ Chapter 6 — The strength of this pattern
 
 You can create structure that people are more willing to use because it feels fair, clear, and humanly sensible.
 
-2. Meaningful operating discipline
+2. Meaningful working discipline
 
 Vision helps your process point beyond routine. People can understand why a standard, cadence, or handover matters in the larger direction.
 
@@ -132,7 +132,7 @@ Chapter 7 — Where the pattern can tighten
 
 1. Coherence substitutes for progress
 
-The work may feel clear, fair, and meaningful, but still lack visible movement. This matters when customers, senior stakeholders, or delivery commitments need proof. A team can be aligned around the story and still miss the recovery window, delay a resourcing decision, or keep too many priorities alive because no outcome has been forced into view.
+The work may feel clear, fair, and meaningful, but still lack visible progress. This matters when customers, senior stakeholders, or delivery commitments need proof. A team can be aligned around the story and still miss the recovery window, delay a resourcing decision, or keep too many priorities alive because no outcome has been forced into view.
 
 Range to add: Make Results explicit. Name the outcome, evidence, review point, and decision owner.
 
@@ -217,7 +217,7 @@ Use this in: retrospectives, operating reviews, senior updates.
 
 In urgent moments, keep people oriented and supported, then name the result that cannot wait. Make the decision right clear enough that the team does not have to infer authority under pressure.
 
-Use this in: delivery recovery, customer escalations, deadline pressure, commercial reviews.
+Use this in: getting delivery back on track, customer escalations, deadline pressure, commercial reviews.
 
 Closing synthesis
 
@@ -225,7 +225,7 @@ Your leadership is valuable because it creates work that people can trust, under
 
 Process gives your leadership its organising strength. You reduce confusion, clarify standards, and create a way for shared work to hold together. People gives that structure its human credibility. The system is not only cleaner; it is more usable, fairer to carry, and more likely to earn trust. Vision then gives the work a reason beyond internal order. It helps people see what the discipline is building and why the shared effort matters.
 
-The growth edge is Results. Without it, this pattern can become too comfortable inside its own strengths: thoughtful, coherent, considerate, and purposeful, but not sharp enough about what must now change. The most complete version of your leadership names the proof. It turns alignment into prioritisation, sympathy into resource choices, purpose into delivery decisions, and trust into accountable movement.
+The main growth move is Results. Without it, this pattern can become too comfortable inside its own strengths: thoughtful, coherent, considerate, and purposeful, but not sharp enough about what must now change. The most complete version of your leadership names the proof. It turns alignment into prioritisation, sympathy into resource choices, purpose into delivery decisions, and trust into accountable progress.
 
 Under pressure, your task is not to become harsher. It is to become clearer about consequence. People are better served by a trusted environment that also knows what result it must produce.
 
@@ -237,4 +237,4 @@ PDF export CTA
 
 Save this report
 
-Use this report as a reference when a team has trust and clarity but needs stronger movement. Return to it before prioritisation, governance reviews, delivery recovery, or conversations where purpose must become a result.
+Use this report as a reference when a team has trust and clarity but needs stronger progress. Return to it before prioritisation, governance reviews, getting delivery back on track, or conversations where purpose must become a result.

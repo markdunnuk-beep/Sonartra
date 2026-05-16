@@ -10,9 +10,9 @@ Editorial introduction
 
 Your leadership approach is led by Vision and strengthened by People. You are likely to create value by making a future direction specific enough for people to recognise the customer promise, capability, or strategic risk it is meant to address, then making their contribution feel necessary inside that work.
 
-Results is the first expansion. The direction becomes credible when commitment turns into visible movement: decisions closed, milestones reached, customer impact improved, or evidence that the organisation is acting on what it says matters.
+Results is the first expansion. The direction becomes credible when commitment turns into visible progress: decisions closed, milestones reached, customer impact improved, or evidence that the organisation is acting on what it says matters.
 
-Process is the furthest extension. The development edge is to turn shared commitment into a clear operating rhythm before different teams interpret the future in different ways. Without enough method, early progress can depend too heavily on personal conviction, informal coordination, or heroic follow-through.
+Process is the furthest extension. The main growth move is to turn shared commitment into a clear operating rhythm before different teams interpret the future in different ways. Without enough method, early progress can depend too heavily on personal conviction, informal coordination, or heroic follow-through.
 
 Your strongest leadership makes the future worth carrying, creates proof that it is possible, and gives that proof a repeatable operating form.
 
@@ -52,7 +52,7 @@ These scores show why your report is led by Vision and strengthened by People, w
 
 Key insight
 
-Your leadership creates confidence by making the future meaningful, shared, and testable. The development edge is to give commitment and progress enough operating discipline to last.
+Your leadership creates confidence by making the future meaningful, shared, and clear enough to prove. The main growth move is to give commitment and progress enough working discipline to last.
 
 Chapter 1 — How your leadership creates value
 
@@ -120,7 +120,7 @@ Chapter 7 — Where the pattern can tighten
 
 1. Commitment before method
 
-People may commit before the operating route is clear.
+People may commit before the working path is clear.
 
 Range to add: Bring Process in through cadence, handovers, standards, and ownership.
 
@@ -183,9 +183,9 @@ Use this in: delegation, implementation planning, cross-functional work.
 
 3. Standardise the proof point
 
-Make sure progress means the same thing across teams, especially where customer impact, delivery recovery, or adoption evidence is being used to prove the direction.
+Make sure progress means the same thing across teams, especially where customer impact, getting delivery back on track, or evidence of people using the change is being used to prove the direction.
 
-Use this in: commercial reviews, transformation governance, delivery recovery.
+Use this in: commercial reviews, transformation governance, getting delivery back on track.
 
 4. Watch for hidden strain
 
@@ -203,7 +203,7 @@ Closing synthesis
 
 Your leadership is valuable because it makes the future human, credible, and actionable.
 
-Vision gives your leadership its strategic frame. People turns that frame into shared commitment. Results gives commitment proof through decisions, customer impact, delivery movement, or visible progress. The growth edge is Process: the discipline that prevents belief and action from fragmenting once the work moves beyond the first push.
+Vision gives your leadership its strategic frame. People turns that frame into shared commitment. Results gives commitment proof through decisions, customer impact, delivery progress, or visible progress. The main growth move is Process: the discipline that prevents belief and action from fragmenting once the work moves beyond the first push.
 
 Your risk under pressure is asking shared commitment to carry coordination that has not yet been designed. That can create transformation fatigue, uneven ownership, and progress that stakeholders admire early but cannot trust over time. Your strongest leadership keeps the direction meaningful, keeps people included, keeps progress visible, and builds the operating rhythm that lets commitment become dependable work.
 
@@ -215,4 +215,4 @@ PDF export CTA
 
 Save this report
 
-Use this report as a reference when a team is energised by direction but needs clearer operating discipline. Return to it before mobilisation, delivery recovery, governance design, or moments where belief needs structure.
+Use this report as a reference when a team is energised by direction but needs clearer working discipline. Return to it before mobilisation, getting delivery back on track, governance design, or moments where belief needs structure.

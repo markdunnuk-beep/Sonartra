@@ -14,7 +14,7 @@ This is not action for its own sake. Your pattern is practical, but it is not ne
 
 That can make your leadership valuable in delivery-heavy, commercially exposed, or performance-sensitive environments. When teams are circling an issue, postponing a decision, waiting for perfect certainty, or confusing more conversation with progress, you can often help convert energy into action.
 
-The development edge is that momentum may sometimes become clear before it becomes fully owned. People may understand what needs to happen without feeling sufficiently involved in the judgement behind it. Vision may also arrive later than the action itself, which means the team can move before it fully understands what the progress is meant to build.
+The main growth move is that momentum may sometimes become clear before it becomes fully owned. People may understand what needs to happen without feeling sufficiently involved in the judgement behind it. Vision may also arrive later than the action itself, which means the team can move before it fully understands what the progress is meant to build.
 
 Your most effective leadership does not reduce pace or soften the need for results. It broadens momentum. The strongest version of this pattern uses Results and Process to create visible traction, then brings People and Vision in early enough that progress becomes trusted, evidence-aware, and directionally meaningful.
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Results and strengthened by Process,
 
 Key insight
 
-Your leadership creates confidence by making progress real. The development edge is to make sure the traction is owned, tested, and connected to a direction before pace becomes the only thing holding it together.
+Your leadership creates confidence by making progress real. The main growth move is to make sure the traction is owned, checked, and connected to a direction before pace becomes the only thing holding it together.
 
 Chapter 1 — How your leadership creates value
 
@@ -62,7 +62,7 @@ Your leadership creates value by reducing the gap between intention and executio
 
 Where others may experience uncertainty as a reason to keep discussing, you are likely to look for the point where forward motion becomes possible. You notice where a decision is overdue, where ownership is vague, where effort is not yet changing the work, or where a team has agreed in principle but not in practice. That attention can be commercially valuable because many organisations do not fail through lack of ambition. They fail through slow closure, unclear priorities, repeated conversations, and decisions that never become visible progress.
 
-This pattern is especially useful in delivery recovery, commercial execution, performance improvement, operational turnaround, rollout planning, prioritisation, and high-stakes project leadership. These are settings where useful thinking must eventually become action, and where action must create evidence that the work is actually changing.
+This pattern is especially useful when delivery needs to get back on track, in commercial delivery, performance improvement, operational turnaround, rollout planning, prioritisation, and high-stakes project leadership. These are settings where useful thinking must eventually become action, and where action must create evidence that the work is actually changing.
 
 Your contribution is not simply that you push people to do more. It is that you help the work cross the threshold from possibility into practical change. You can make the next step more visible, the decision more concrete, the priority less negotiable, and the evidence of progress easier to see.
 
@@ -230,7 +230,7 @@ The development work is not to reduce your drive for progress. It is to make mom
 
 Before increasing pace, identify who needs to shape the route, challenge the assumption, or understand the trade-offs. This does not mean opening every action to broad consultation. It means knowing where ownership will materially affect execution.
 
-Use this in: delivery recovery, team mobilisation, rollout planning, performance improvement, urgent project work.
+Use this in: getting delivery back on track, team mobilisation, rollout planning, performance improvement, urgent project work.
 
 Why it matters: progress is easier to sustain when the people carrying it have had a meaningful role in shaping it.
 
@@ -287,13 +287,3 @@ PDF export CTA
 Download your Leadership Approach report as a PDF.
 
 This report is designed as a reference document. Save it, revisit it before important decisions, and use the development questions to broaden your leadership range over time.
-
-# Editorial QA Notes
-
-Initial quality estimate: 9.1/10 benchmark-candidate draft.
-
-How this differs from process_results_people_vision: The Process-led benchmark begins with structure, sequence, and work becoming easier to hold together. This Results-led draft begins with progress, closure, traction, and visible action. Process supports the pace rather than leading the report. The pressure pattern is also distinct: this report tightens toward urgency, closure, output, and pace, while the Process-led benchmark tightens toward control and delivery discipline.
-
-Main risk to watch in manual QA: The report should not read as a general pro-action leadership report. Manual QA should check that Results remains grounded by Process and broadened by People and Vision, rather than becoming generic pace, delivery, or productivity language.
-
-Suitability for 24-report model: Suitable as the Results-led benchmark candidate. The report appears distinct enough from the Process-led benchmark to support the 24-report model, provided later reports keep pressure behaviour, development edge, and chapter examples differentiated.

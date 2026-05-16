@@ -22,10 +22,10 @@ Pattern at a glance
 
 | Rank | Role in your pattern | What it means in practice |
 |---|---|---|
-| 1 | Process — the operating route | You tend to lead by creating sequence, standards, ownership, cadence, and a coherent way through complexity. |
+| 1 | Process — the working path | You tend to lead by creating sequence, standards, ownership, rhythm, and a coherent way through complexity. |
 | 2 | Vision — the future direction | Vision gives your structure strategic meaning. It helps the route point toward future capability, purpose, and advantage. |
-| 3 | Results — the traction expansion | Results asks whether the pathway is producing visible movement, proof, and practical progress. |
-| 4 | People — the ownership edge | People asks whether the people affected by the route are shaping it early enough to trust and carry it. |
+| 3 | Results — the traction expansion | Results asks whether the pathway is producing visible progress, proof, and practical progress. |
+| 4 | People — the ownership focus | People asks whether the people affected by the plan are shaping it early enough to trust and carry it. |
 
 This is a system-and-direction pattern. Its best version turns future ambition into a credible operating path, then proves that path through progress people can see and own.
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Process and strengthened by Vision, 
 
 Key insight
 
-Your leadership creates confidence by making direction operational. The development edge is to prove progress and involve people while the route is still open enough to shape.
+Your leadership creates confidence by making direction operational. The main growth move is to prove progress and involve people while the plan is still open enough to shape.
 
 Chapter 1 — How your leadership creates value
 
@@ -76,7 +76,7 @@ This can be especially valuable for teams that are tired of vague strategy, repe
 
 The possible tension is that the pathway may feel designed before people have had enough influence over it. Because Process and Vision work strongly together, you may arrive with a route that is both logical and meaningful. That can be compelling, but it can also leave people feeling like contributors to implementation rather than co-authors of the work.
 
-Results can also arrive slightly late. Others may admire the coherence of the plan while wondering when it will produce visible movement. In commercially pressured settings, confidence often depends on proof as well as direction.
+Results can also arrive slightly late. Others may admire the coherence of the plan while wondering when it will produce visible progress. In commercially pressured settings, confidence often depends on proof as well as direction.
 
 The complete version of this pattern keeps the strategic route, but creates early traction and earlier participation.
 
@@ -154,9 +154,9 @@ Range to add: Balance explanation with evidence and voice. Ask what needs to mov
 
 Chapter 8 — How Results expands your leadership
 
-Results expands this pattern by converting a coherent path into visible movement.
+Results expands this pattern by converting a coherent path into visible progress.
 
-When Results is brought in deliberately, your leadership becomes more commercially testable. The route is not judged only by whether it makes sense, but by whether it produces decisions, momentum, customer impact, operational improvement, or measurable progress.
+When Results is brought in deliberately, your leadership becomes easier to judge commercially. The path is not judged only by whether it makes sense, but by whether it produces decisions, momentum, customer impact, operational improvement, or measurable progress.
 
 This matters because Process and Vision can build a strong conceptual and operating frame. But teams also need proof. Senior stakeholders often trust direction more when they can see evidence that the path is changing behaviour or performance.
 
@@ -224,9 +224,9 @@ Closing synthesis
 
 Your leadership is valuable because it makes future direction operational.
 
-You can take ambition, complexity, and uncertainty and turn them into a route people can understand. You bring sequence, standards, cadence, and operating discipline to work that might otherwise remain abstract.
+You can take ambition, complexity, and uncertainty and turn them into a path people can understand. You bring sequence, standards, rhythm, and working discipline to work that might otherwise remain abstract.
 
-The growth edge is to make the route produce proof sooner and to involve people before the plan feels complete. When you do that, your leadership does more than design a credible path. It creates movement that people trust enough to carry.
+The main growth move is to make the path produce proof sooner and to involve people before the plan feels complete. When you do that, your leadership does more than design a credible path. It creates progress that people trust enough to carry.
 
 Final line
 

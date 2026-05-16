@@ -14,7 +14,7 @@ This is not inspiration for its own sake. Your pattern is future-facing, but it 
 
 That can make your leadership especially valuable in strategy translation, change leadership, innovation, organisational renewal, culture work, long-range planning, team alignment, and moments where people need confidence in a direction before every step is known. You can help work avoid becoming small, reactive, or trapped in immediate activity.
 
-The development edge is that the future may sometimes become compelling before the route is concrete enough. People may understand why the work matters but still need sharper priorities, clearer ownership, operating rhythm, decision follow-through, and delivery evidence. Process and Results matter because they help the direction become usable and visible in real work.
+The main growth move is that the future may sometimes become compelling before the route is concrete enough. People may understand why the work matters but still need sharper priorities, clearer ownership, operating rhythm, decision follow-through, and delivery evidence. Process and Results matter because they help the direction become usable and visible in real work.
 
 Your most effective leadership does not reduce the future or make the direction less ambitious. It makes the strategic frame more workable. The strongest version of this pattern uses Vision and People to create shared confidence, then brings Process and Results in early enough that the future becomes organised, owned, evidence-backed, and capable of visible progress.
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Vision and strengthened by People, w
 
 Key insight
 
-Your leadership creates confidence by helping people see what the work is becoming. The development edge is to make the future concrete enough that confidence can turn into ownership, rhythm, and visible proof.
+Your leadership creates confidence by helping people see what the work is becoming. The main growth move is to make the future concrete enough that confidence can turn into ownership, rhythm, and visible proof.
 
 Chapter 1 — How your leadership creates value
 
@@ -292,17 +292,3 @@ PDF export CTA
 Download your Leadership Approach report as a PDF.
 
 This report is designed as a reference document. Save it, revisit it before important decisions, and use the development questions to broaden your leadership range over time.
-
-# Editorial QA Notes
-
-Initial quality estimate: 9.0/10 benchmark-candidate draft.
-
-How this differs from process_results_people_vision: The Process-led benchmark begins with structure, sequence, and work becoming easier to hold together. This Vision-led draft begins with future context, strategic meaning, and the future direction that makes the work worth organising. Process appears as range that gives the direction practical structure rather than as the first leadership move.
-
-How this differs from results_process_people_vision: The Results-led benchmark begins with action, closure, traction, and visible progress. This Vision-led draft begins before action, with the future direction that gives progress its meaning. Results appears as the traction extension that proves the direction is becoming real rather than as the main leadership route.
-
-How this differs from people_process_results_vision: The People-led benchmark begins with trust, ownership, participation, and the human conditions that make work carryable. This Vision-led draft begins with the future direction itself, then uses People to make that direction shared and human. Its pressure pattern tightens toward explaining the future direction and building confidence, not protection and cohesion.
-
-Main risk to watch in manual QA: The report should not read as generic inspirational, purpose-led, or strategy-language content. Manual QA should check that Vision remains concrete through operating rhythm, ownership, prioritisation, delivery evidence, and decision follow-through.
-
-Suitability for 24-report model: Suitable as the Vision-led benchmark candidate. The report appears distinct enough from the Process-led, Results-led, and People-led drafts to support the 24-report model, provided later Vision-led reports keep future direction grounded in practical structure and visible proof.

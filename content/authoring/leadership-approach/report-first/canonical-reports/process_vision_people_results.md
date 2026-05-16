@@ -12,9 +12,9 @@ Your leadership approach is led by Process and strengthened by Vision. You are l
 
 People is the first expansion. This matters. Your route is not only a technical or operational construct; it becomes stronger when people understand it, shape it, and see their own judgement inside it. You are likely to become more effective when you treat ownership as part of the operating design, not simply as a communication outcome.
 
-Results is the furthest extension. The development edge is to make sure coherence, meaning, and ownership convert into visible progress soon enough. A team can understand the future, trust the pathway, and still move too slowly if the outcome is not named clearly or if progress is not forced into view.
+Results is the furthest extension. The main growth move is to make sure coherence, meaning, and ownership convert into visible progress soon enough. A team can understand the future, trust the pathway, and still move too slowly if the outcome is not named clearly or if progress is not forced into view.
 
-Your strongest leadership builds a route toward the future, creates shared ownership around that route, and then gives the work a sharper commercial edge so understanding becomes action.
+Your strongest leadership builds a way toward the future, creates shared ownership around that way of working, and then gives the work sharper proof so understanding becomes action.
 
 Pattern at a glance
 
@@ -23,7 +23,7 @@ Pattern at a glance
 | 1 | Process — the coherent path | You tend to lead by creating sequence, standards, rhythm, ownership, and a way for complex work to hold together. |
 | 2 | Vision — the future direction | Vision gives the path meaning and helps people understand what the work is meant to build. |
 | 3 | People — the ownership expansion | People helps the route become shared, trusted, and shaped by the people who must carry it. |
-| 4 | Results — the commercial edge | Results asks whether the shared path is creating visible movement, closure, and useful evidence. |
+| 4 | Results — the proof focus | Results asks whether the shared path is creating visible progress, closure, and useful evidence. |
 
 This is a coherence-and-ownership pattern. Its best version makes future direction understandable and shared, then translates that shared understanding into progress.
 
@@ -52,7 +52,7 @@ These scores show why your report is led by Process and strengthened by Vision, 
 
 Key insight
 
-Your leadership creates confidence by making direction coherent and owned. The development edge is to turn shared understanding into measurable progress before momentum becomes too gentle.
+Your leadership creates confidence by making direction coherent and owned. The main growth move is to turn shared understanding into measurable progress before momentum becomes too gentle.
 
 Chapter 1 — How your leadership creates value
 
@@ -82,7 +82,7 @@ Chapter 3 — Decision behaviour
 
 You are likely to make decisions by looking for the option that creates a coherent route toward the future and can be carried by the people involved.
 
-A decision feels sound when it fits the direction, makes operational sense, and does not ignore the human conditions of execution. You may want to know how the decision changes ways of working, what it asks of people, and whether it will build or damage trust.
+A decision feels sound when it fits the direction, makes operational sense, and does not ignore what people need to put it into practice. You may want to know how the decision changes ways of working, what it asks of people, and whether it will build or damage trust.
 
 People improves your decision quality by helping you notice where adoption, confidence, workload, or local knowledge should shape the route. You may understand that a decision is not complete until the people affected by it can see how to own it.
 
@@ -102,7 +102,7 @@ The communication edge is to make outcomes as explicit as meaning. If people hea
 
 Stronger communication for this pattern often includes: here is the direction, here is the route, here is where your judgement matters, and here is the outcome we now need to prove.
 
-That final clause gives shared understanding a commercial edge.
+That final clause gives shared understanding a sharper proof point.
 
 Chapter 5 — What happens under pressure
 
@@ -182,7 +182,7 @@ What will we stop doing so this can move?
 What evidence will show that ownership is producing progress?
 Which decision would convert understanding into action?
 
-Results gives this pattern its commercial edge. It helps shared understanding become performance.
+Results gives this pattern its proof focus. It helps shared understanding become performance.
 
 Chapter 10 — Development focus
 
@@ -224,7 +224,7 @@ Your leadership is valuable because it makes direction coherent and shared.
 
 You can take a future aim and build the operating path that makes it understandable. You can involve people in a way that turns process from a control system into a shared way of working.
 
-The growth edge is Results. Your most complete leadership does not stop at clarity, meaning, or ownership. It names the outcome, forces the trade-off, and shows that the shared path is producing movement.
+The main growth move is Results. Your most complete leadership does not stop at clarity, meaning, or ownership. It names the outcome, forces the trade-off, and shows that the shared path is producing progress.
 
 Final line
 

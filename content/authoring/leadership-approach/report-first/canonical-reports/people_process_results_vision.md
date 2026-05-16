@@ -2,7 +2,7 @@ Leadership Approach — People, Process, Results, Vision
 
 You lead by turning shared trust into organised progress
 
-You create confidence by noticing the human conditions that make work possible. You pay attention to whether people understand the work, feel able to contribute, trust the route, and can take ownership of what is being asked of them.
+You create confidence by noticing what people need in order to carry the work well. You pay attention to whether people understand the work, feel able to contribute, trust the way forward, and can take ownership of what is being asked of them.
 
 Process gives that trust practical structure and rhythm. It helps involvement become coordination rather than goodwill alone. Results and Vision broaden the pattern by making sure care, participation, and shared ownership produce timely action, visible progress, and a direction people can see beyond the immediate task.
 
@@ -14,7 +14,7 @@ This is not softness or avoidance. Your pattern is relational, but it is also pr
 
 That can make your leadership especially valuable in team development, change adoption, stakeholder-heavy work, cross-functional coordination, culture repair, facilitation, and ownership transfer. These are settings where the quality of the work depends heavily on whether people believe in the route, understand their part in it, and feel able to contribute honestly.
 
-The development edge is that alignment may sometimes feel necessary before closure can happen. You may keep listening, including, clarifying, or protecting cohesion when the work also needs a firmer decision, a clearer standard, or a visible next move. Results and Vision matter because they help trust become action and help shared effort connect to a larger direction.
+The main growth move is that alignment may sometimes feel necessary before closure can happen. You may keep listening, including, clarifying, or protecting cohesion when the work also needs a firmer decision, a clearer standard, or a visible next move. Results and Vision matter because they help trust become action and help shared effort connect to a larger direction.
 
 Your most effective leadership does not abandon care or participation. It makes them more decisive. The strongest version of this pattern uses People and Process to create shared ownership, then brings Results and Vision in early enough that trust becomes structured, action-oriented, and directionally meaningful.
 
@@ -25,7 +25,7 @@ Pattern at a glance
 | 1 | People — the first trust route | You tend to lead first by reading people, building ownership, and creating conditions where contribution feels possible. |
 | 2 | Process — the organising support | Process gives shared effort structure, rhythm, standards, agreements, and follow-through. |
 | 3 | Results — the traction range | Results expands your leadership by making participation produce decisions, action, accountability, and visible progress. |
-| 4 | Vision — the meaning extension | Vision expands the pattern by connecting shared effort to future capability, broader direction, and a reason to keep committing. |
+| 4 | Vision — the meaning extension | Vision expands the pattern by connecting shared effort to the capability being built, the broader direction, and a reason to keep committing. |
 
 This is a trust-and-coordination pattern. At its strongest, it makes work easier for people to own together without letting inclusion become delay or cohesion become a substitute for progress.
 
@@ -54,13 +54,13 @@ These scores show why your report is led by People and strengthened by Process, 
 
 Key insight
 
-Your leadership creates confidence by making work feel owned, not merely assigned. The development edge is to make sure that trust produces timely decisions, candid standards, and progress people can see.
+Your leadership creates confidence by making work feel owned, not merely assigned. The main growth move is to make sure that trust produces timely decisions, candid standards, and progress people can see.
 
 Chapter 1 — How your leadership creates value
 
 Your leadership creates value by making work easier to own together.
 
-Where others may focus first on the task, plan, target, or decision, you are likely to notice whether the human conditions around the work are strong enough to carry it. You may see where people are complying without conviction, where a handover is technically clear but relationally fragile, where a stakeholder has not been brought in early enough, or where a team is avoiding a concern because naming it could disturb the surface agreement.
+Where others may focus first on the task, plan, target, or decision, you are likely to notice whether people have what they need to carry the work well. You may see where people are complying without conviction, where a handover is technically clear but trust is thin, where a stakeholder has not been brought in early enough, or where a team is avoiding a concern because naming it could disturb the surface agreement.
 
 That attention can be commercially valuable because many organisational problems do not fail at the level of intent. They fail because trust is thin, expectations are uneven, contribution is poorly invited, ownership is assumed rather than built, or people do not feel able to say what would improve the work before the route hardens.
 
@@ -158,7 +158,7 @@ This strength is valuable because shared ownership changes execution. People rai
 
 You notice where misunderstanding, silence, unresolved tension, or unspoken concern could weaken the work. You may be able to name what is happening in the room without turning it into drama. That can help teams handle difficult issues before they become resistance, avoidance, or fragmented effort.
 
-This does not mean making every issue personal. At its best, your relational clarity keeps attention on the work by making the human conditions around the work more honest.
+This does not mean making every issue personal. At its best, your relational clarity keeps attention on the work by making the people side of the work more honest.
 
 3. Organised participation
 
@@ -266,7 +266,7 @@ Why it matters: progress can increase trust when people recognise their contribu
 
 5. Add the wider reason
 
-Explain how the group's shared effort connects to a future capability, organisational need, customer promise, or strategic direction. Keep the reason concrete enough to guide action.
+Explain how the group's shared effort connects to a capability being built, organisational need, customer promise, or strategic direction. Keep the reason concrete enough to guide action.
 
 Use this in: change leadership, culture work, strategy translation, team development, stakeholder alignment.
 
@@ -293,15 +293,3 @@ PDF export CTA
 Download your Leadership Approach report as a PDF.
 
 This report is designed as a reference document. Save it, revisit it before important decisions, and use the development questions to broaden your leadership range over time.
-
-# Editorial QA Notes
-
-Initial quality estimate: 9.1/10 benchmark-candidate draft.
-
-How this differs from process_results_people_vision: The Process-led benchmark begins with structure, sequence, and work becoming easier to hold together. This People-led draft begins with trust, ownership, participation, and the human conditions that make the work carryable. Process supports coordination rather than leading the interpretation. The pressure pattern is also distinct: this report tightens toward protection, reassurance, and cohesion, while the Process-led benchmark tightens toward control and delivery discipline.
-
-How this differs from results_process_people_vision: The Results-led benchmark begins with action, closure, traction, and visible progress. This People-led draft begins before action, with the trust and ownership conditions that determine whether progress will be carried honestly. Results appears as range that makes participation decisive rather than as the first leadership move.
-
-Main risk to watch in manual QA: The report should not read as generic inclusive-leadership or soft-skills content. Manual QA should check that People remains commercially grounded through Process, Results, and Vision, especially in the decision, pressure, and development chapters.
-
-Suitability for 24-report model: Suitable as the People-led benchmark candidate. The report appears distinct enough from the Process-led and Results-led drafts to support the 24-report model, provided later People-led reports vary their pressure behaviour, decision edge, and examples by rank order.

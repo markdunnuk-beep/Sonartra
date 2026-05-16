@@ -16,7 +16,7 @@ The distinctive expansion in this pattern is Vision. Once the work has a route a
 
 People is the furthest extension. That does not mean people do not matter to you. It means your automatic pattern may settle the route before enough people have shaped it. The plan may be sensible, commercially useful, and strategically aligned, while still feeling to others as though they are being asked to step into a system that has already closed.
 
-Your strongest leadership keeps the operating discipline and the delivery edge, adds strategic meaning early, and makes space for voice and ownership before the route becomes too fixed to influence.
+Your strongest leadership keeps the working discipline and delivery focus, adds strategic meaning early, and makes space for voice and ownership before the plan becomes too fixed to influence.
 
 Pattern at a glance
 
@@ -25,7 +25,7 @@ Pattern at a glance
 | 1 | Process — the first structure | You tend to lead by creating sequence, ownership, standards, rhythm, and a workable route through complexity. |
 | 2 | Results — the delivery support | Results keeps the route connected to movement, closure, measurable progress, and practical evidence. |
 | 3 | Vision — the strategic expansion | Vision helps the route serve a larger direction, future capability, and long-term value rather than only immediate order. |
-| 4 | People — the ownership edge | People asks whether the people who must carry the route have helped shape it, trust it, and see themselves in it. |
+| 4 | People — the ownership focus | People asks whether the people who must carry the work have helped shape it, trust it, and see themselves in it. |
 
 This is a structure-and-progress pattern with a strategic expansion. Its best version makes work organised, productive, and meaningful before asking people to commit to it fully.
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Process and strengthened by Results,
 
 Key insight
 
-Your leadership creates confidence by making work hold together and move. The development edge is to make sure the operating plan is shaped with people early enough that commitment is created, not only requested.
+Your leadership creates confidence by making work hold together and move. The main growth move is to make sure the operating plan is shaped with people early enough that commitment is created, not only requested.
 
 Chapter 1 — How your leadership creates value
 
@@ -62,7 +62,7 @@ Your leadership creates value by turning complexity into structured progress.
 
 In many organisations, work does not fail because people lack effort. It fails because ownership is unclear, decision rights are assumed rather than named, standards vary by team, handovers depend on goodwill, and meetings create agreement without changing behaviour. You are likely to notice those weak points quickly.
 
-Your contribution is to give the work a more usable route. You can clarify what needs to happen first, who owns the next move, what good looks like, where review belongs, and how progress will be made visible. That can make you valuable in operating-model work, implementation planning, delivery recovery, governance design, process improvement, and cross-functional coordination.
+Your contribution is to give the work a more usable path. You can clarify what needs to happen first, who owns the next move, what good looks like, where review belongs, and how progress will be made visible. That can make you valuable in operating-model work, implementation planning, getting delivery back on track, governance design, process improvement, and cross-functional coordination.
 
 Results prevents this from becoming administrative. The point of the route is not the route itself. It is to create movement that can be seen and sustained. You are likely to care whether the structure helps the team make decisions, reduce rework, improve customer consequences, or deliver against a real commercial requirement.
 
@@ -192,9 +192,9 @@ Your development focus is to make the route not only clear and productive, but o
 
 1. Build participation into the design stage
 
-Before locking the route, identify whose judgement could materially improve it. This is most important when changing operating cadence, decision rights, handovers, or standards.
+Before locking the path, identify whose judgement could materially improve it. This is most important when changing operating rhythm, decision rights, handovers, or standards.
 
-Use this in: process redesign, governance changes, delivery recovery, cross-functional planning.
+Use this in: process redesign, governance changes, getting delivery back on track, cross-functional planning.
 
 2. Put the future reason near the front
 
@@ -224,9 +224,9 @@ Closing synthesis
 
 Your leadership is valuable because it makes work easier to hold and easier to move.
 
-You bring order without losing sight of progress. You can reduce ambiguity, clarify ownership, and create a route that turns effort into visible movement. Vision gives that route strategic meaning, helping the team understand what the work is building beyond the immediate task.
+You bring order without losing sight of progress. You can reduce ambiguity, clarify ownership, and create a path that turns effort into visible progress. Vision gives that path strategic meaning, helping the team understand what the work is building beyond the immediate task.
 
-The growth edge is People. Your most complete leadership does not only design a strong route and explain why it matters. It lets the people who must carry the route shape it while their judgement can still improve it. That is where structure becomes commitment, not just coordination.
+The main growth move is People. Your most complete leadership does not only design a strong path and explain why it matters. It lets the people who must carry the work shape it while their judgement can still improve it. That is where structure becomes commitment, not just coordination.
 
 Final line
 

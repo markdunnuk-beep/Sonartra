@@ -13,7 +13,7 @@ This is not structure for its own sake. Your pattern is practical. You are unlik
 
 That can make your leadership especially valuable in operationally demanding, commercially important, or implementation-heavy environments. When other people are still circling the issue, generating options, expressing concerns, or debating possible directions, you can often help convert the discussion into a workable plan.
 
-The development edge is that your working approach may sometimes become clear before it becomes fully shared. People may understand what needs to happen without feeling they have sufficiently shaped it, owned it, or connected it to a larger direction. Vision may also arrive later than the plan itself, which means the team can know what to do before it fully understands what the work is meant to build.
+The main growth move is that your working approach may sometimes become clear before it becomes fully shared. People may understand what needs to happen without feeling they have sufficiently shaped it, owned it, or connected it to a larger direction. Vision may also arrive later than the plan itself, which means the team can know what to do before it fully understands what the work is meant to build.
 
 Your most effective leadership does not abandon structure or delivery discipline. It broadens them. The strongest version of this pattern uses Process and Results to create a dependable way forward, then brings People and Vision in early enough that the path becomes trusted, owned, and strategically meaningful.
 
@@ -50,7 +50,7 @@ These scores show why your report is led by Process and Results, while People an
 
 Key insight
 
-Your leadership creates confidence by making work feel more manageable. The development edge is to make sure the path becomes shared and meaningful before you ask people to move through it.
+Your leadership creates confidence by making work feel more manageable. The main growth move is to make sure the path becomes shared and meaningful before you ask people to move through it.
 
 Chapter 1 — How your leadership creates value
 

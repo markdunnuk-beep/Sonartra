@@ -14,7 +14,7 @@ Process gives that progress a working spine. It helps your pace become less depe
 
 The distinctive feature of this pattern is that Vision is the first expansion. The further development is not only to involve people earlier. It is first to make sure visible progress is connected to something worth building. Your strongest leadership does not simply ask, "What needs to move?" It also asks, "What future capability, position, or advantage will this movement support?"
 
-The growth edge is that People sits furthest from the automatic pattern. When pressure rises, you may move quickly toward progress, method, and strategic usefulness while leaving less room for how others are experiencing the route. People may understand the plan and even understand the purpose, but still feel they were brought in after the action had already hardened.
+The main growth move is that People sits furthest from the automatic pattern. When pressure rises, you may move quickly toward progress, method, and strategic usefulness while leaving less room for how others are experiencing the path. People may understand the plan and even understand the purpose, but still feel they were brought in after the action had already hardened.
 
 Your most effective leadership keeps the traction and the method, adds the strategic reason early, and then creates enough participation that commitment can shape the route rather than react to it.
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Results and strengthened by Process,
 
 Key insight
 
-Your leadership creates confidence by making progress visible and structured. The development edge is to make sure the people who must carry that progress can shape it before the route becomes fixed.
+Your leadership creates confidence by making progress visible and structured. The main growth move is to make sure the people who must carry that progress can shape it before the path becomes fixed.
 
 Chapter 1 — How your leadership creates value
 
@@ -62,7 +62,7 @@ Your leadership creates value by turning unresolved work into usable movement.
 
 Where others may stay with discussion, concern, or possibility, you are likely to look for the next piece of evidence. What decision would change the situation? What priority needs to become less negotiable? What owner needs to be named? What action would show whether the team is serious?
 
-This is commercially useful in environments where delay is expensive: delivery recovery, implementation planning, performance improvement, customer issues, operational change, and senior decision forums. In those settings, insight alone is not enough. The organisation needs progress that can be seen, tested, and held.
+This is commercially useful in environments where delay is expensive: getting delivery back on track, implementation planning, performance improvement, customer issues, operational change, and senior decision forums. In those settings, insight alone is not enough. The organisation needs progress that can be seen, checked, and held.
 
 Process strengthens your value because it prevents movement from becoming a burst of effort. You are likely to care whether progress has a route. You may ask how the work will be sequenced, who owns the next step, what standard applies, and when the evidence will be reviewed. That makes your leadership more reliable than simple urgency.
 
@@ -88,7 +88,7 @@ You are likely to make decisions by looking for the option that creates traction
 
 A decision feels useful when it moves the work out of uncertainty. It should clarify what matters now, who owns the next step, what evidence will be created, and how progress will be reviewed. You may become impatient with decisions that generate more language than movement.
 
-Process improves this decision style by asking whether the action can hold. A fast decision is not enough if the route is unclear, the standard is vague, or the review point is missing. You are likely to trust progress more when it has enough operating discipline around it.
+Process improves this decision style by asking whether the action can hold. A fast decision is not enough if the path is unclear, the standard is vague, or the review point is missing. You are likely to trust progress more when it has enough working discipline around it.
 
 Vision asks a different question: what future does this action support? That question can lift your decision-making above immediate closure. It helps you distinguish between action that only clears pressure and action that builds capability, confidence, or strategic position.
 
@@ -192,7 +192,7 @@ What story would help people understand the value of the work?
 
 Chapter 9 — How People expands your leadership
 
-People gives this pattern its ownership edge by turning a clear route into shared commitment.
+People gives this pattern its ownership focus by turning a clear path into shared commitment.
 
 Because People is the furthest extension, it may not arrive naturally before the action starts moving. You may communicate the route well, explain the purpose clearly, and still leave too little space for others to influence the judgement behind it.
 
@@ -215,7 +215,7 @@ The development focus is not to reduce your drive for progress. It is to make pr
 
 Before finalising a route, identify whose judgement needs to be heard. This is especially important when the action affects workload, role clarity, trust, or team confidence.
 
-Use this in: delivery recovery, operating changes, senior decision meetings, team mobilisation.
+Use this in: getting delivery back on track, operating changes, senior decision meetings, team mobilisation.
 
 2. Connect action to future value
 

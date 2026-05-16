@@ -12,9 +12,9 @@ Your leadership approach is led by Vision and strengthened by Results. You are l
 
 People is the first expansion. This is important: the push is strongest when people do not only hear the future and the proof point, but can see themselves inside the movement. Your leadership can mobilise commitment by connecting strategic meaning to visible progress.
 
-Process is the furthest extension. The development edge is to build the operating method before the energy of the push becomes uneven or dependent on personal conviction. Without enough method, people may be inspired and active while still unclear about sequence, governance, handovers, or standards.
+Process is the furthest extension. The main growth move is to build the working method before the energy of the push becomes uneven or dependent on personal conviction. Without enough method, people may be inspired and active while still unclear about sequence, governance, handovers, or standards.
 
-Your strongest leadership makes the future compelling, creates proof that it is becoming real, mobilises people around that proof, and then gives the movement enough operating discipline to last.
+Your strongest leadership makes the future compelling, creates proof that it is becoming real, mobilises people around that proof, and then gives the progress enough working discipline to last.
 
 Pattern at a glance
 
@@ -52,7 +52,7 @@ These scores show why your report is led by Vision and strengthened by Results, 
 
 Key insight
 
-Your leadership creates confidence by turning future belief into visible movement. The development edge is to build enough method that the movement can be repeated, coordinated, and sustained.
+Your leadership creates confidence by turning future belief into visible progress. The main growth move is to build enough method that the progress can be repeated, coordinated, and sustained.
 
 Chapter 1 — How your leadership creates value
 
@@ -175,7 +175,7 @@ Your development focus is to make inspired movement operationally reliable.
 
 Define the meeting rhythm, review point, and decision path before the push spreads.
 
-Use this in: transformation launches, growth initiatives, delivery recovery, strategic pilots.
+Use this in: transformation launches, growth initiatives, getting delivery back on track, strategic pilots.
 
 2. Convert commitment into roles
 
@@ -205,7 +205,7 @@ Closing synthesis
 
 Your leadership is valuable because it makes the future feel possible and worth moving toward.
 
-Vision gives your leadership direction. Results gives it proof. People makes the push shared and emotionally credible. The growth edge is Process: the operating method that keeps energy from scattering and turns commitment into repeatable progress.
+Vision gives your leadership direction. Results gives it proof. People makes the push shared and emotionally credible. The main growth move is Process: the working method that keeps energy from scattering and turns commitment into repeatable progress.
 
 Under pressure, your risk is asking belief to do the work of structure. Your strongest leadership keeps the future compelling, keeps proof visible, keeps people involved, and makes the method clear enough for the movement to last.
 

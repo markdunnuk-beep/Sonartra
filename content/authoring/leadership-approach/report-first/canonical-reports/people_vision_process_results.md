@@ -1,6 +1,6 @@
 Leadership Approach — People, Vision, Process, Results
 
-You lead by building commitment around a meaningful direction, then making the route prove itself
+You lead by building commitment around a direction that matters, then making the work prove itself
 
 You create confidence by helping people understand the future they are contributing to, then creating a way of working they can trust. Your leadership is at its best when belonging, direction, and coordination need to come together, but the work still has to show measurable progress.
 
@@ -12,7 +12,7 @@ Your leadership approach is led by People and strengthened by Vision. You are li
 
 Process is the first expansion. It gives shared purpose a dependable route: roles, sequence, decision rights, standards, cadence, and review rhythm.
 
-Results is the furthest extension. The development edge is to avoid letting alignment substitute for evidence. Without enough Results, the pattern can become trusted, meaningful, and well organised while decisions stay open, customer impact remains unchanged, and stakeholders struggle to see what the shared direction has actually produced.
+Results is the furthest extension. The main growth move is to avoid letting alignment substitute for evidence. Without enough Results, the pattern can become trusted, meaningful, and well organised while decisions stay open, customer impact remains unchanged, and stakeholders struggle to see what the shared direction has actually produced.
 
 Your strongest leadership builds commitment, names the future, creates a trusted route, and then defines the outcome that proves the shared direction is becoming real in decisions, delivery, customer consequence, or capability built.
 
@@ -23,7 +23,7 @@ Pattern at a glance
 | 1 | People — the commitment mechanism | You tend to lead through trust, ownership, contribution, adoption, and human judgement. |
 | 2 | Vision — the meaning support | Vision gives commitment future direction, purpose, capability, and customer promise. |
 | 3 | Process — the route expansion | Process makes shared purpose usable through sequence, roles, cadence, standards, and governance. |
-| 4 | Results — the proof edge | Results asks what visible progress, closure, commercial evidence, or customer impact the route must produce. |
+| 4 | Results — the proof focus | Results asks what visible progress, closure, commercial evidence, or customer impact the work must produce. |
 
 This is a commitment-direction-and-route pattern. Its best version helps people believe in the work, understand how to move through it, and then prove that the movement has changed something material.
 
@@ -52,7 +52,7 @@ These scores show why your report is led by People and strengthened by Vision, w
 
 Key insight
 
-Your leadership creates confidence by making direction shared and usable. The development edge is to make progress specific enough that alignment becomes evidence, not only agreement.
+Your leadership creates confidence by making direction shared and usable. The main growth move is to make progress specific enough that alignment becomes evidence, not only agreement.
 
 Chapter 1 — How your leadership creates value
 
@@ -106,7 +106,7 @@ This can help when people are anxious, fragmented, or resistant to change. You c
 
 The risk is that alignment can become too comfortable. People may feel included and oriented, but delayed decisions, unresolved priorities, and weak commercial proof can leave stakeholders uncertain. The team may keep refining the route while delivery drifts, customer impact stays flat, or broad priorities remain too open to guide trade-offs.
 
-Results-last is commercially serious. A trusted and meaningful path must eventually show what has changed: customer consequence, delivery recovery, capability built, decision closure, measurable movement, or a clearer allocation of resources.
+Results-last is commercially serious. A trusted and meaningful path must eventually show what has changed: customer consequence, delivery back on track, capability built, decision closure, measurable progress, or a clearer allocation of resources.
 
 The pressure move is to keep trust and direction, then name the proof: what outcome must now become visible, who owns it, what trade-off is being made, when it will be reviewed, and what evidence will show the shared direction is working.
 
@@ -146,7 +146,7 @@ Range to add: Connect the method to customer impact, delivery proof, capability 
 
 Chapter 8 — How Process expands your leadership
 
-Process expands this pattern by giving shared purpose a trusted operating route.
+Process expands this pattern by giving shared purpose a trusted way of working.
 
 When Process is active, people do not have to carry the direction through goodwill alone. They can see the sequence, roles, standards, decision rights, and review rhythm that make the future usable in real work.
 
@@ -202,7 +202,7 @@ Use this in: commercial reviews, retrospectives, senior updates.
 
 Tie cadence, roles, and governance to measurable movement.
 
-Use this in: delivery recovery, cross-functional work, customer-impact reviews.
+Use this in: getting delivery back on track, cross-functional work, customer-impact reviews.
 
 5. Make progress safe to discuss
 
@@ -214,7 +214,7 @@ Closing synthesis
 
 Your leadership is valuable because it makes direction something people can trust, carry, and test.
 
-People gives your leadership its human foundation. Vision gives that foundation a future. Process turns the future into a route. The growth edge is Results: the proof that the shared direction is producing visible movement, customer consequence, decision closure, or capability evidence.
+People gives your leadership its trust base. Vision gives that foundation a future. Process turns the future into a way of working. The main growth move is Results: the proof that the shared direction is producing visible progress, customer consequence, decision closure, or capability evidence.
 
 Your risk under pressure is letting alignment, purpose, and process become a substitute for evidence. That can create delayed decisions, unresolved priorities, stakeholder uncertainty, and delivery drift. Your strongest leadership keeps people committed, keeps the direction meaningful, keeps the route trusted, and names the outcome that will show the work is genuinely changing something.
 
@@ -226,4 +226,4 @@ PDF export CTA
 
 Save this report
 
-Use this report as a reference when people are aligned around a meaningful direction but progress needs sharper proof. Return to it before prioritisation, governance reviews, strategy execution, or moments where shared purpose must become visible movement.
+Use this report as a reference when people are aligned around a direction that matters but progress needs sharper proof. Return to it before prioritisation, governance reviews, strategy delivery, or moments where shared purpose must become visible progress.

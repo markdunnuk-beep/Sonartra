@@ -12,7 +12,7 @@ Your leadership approach is led by Vision and strengthened by Process. You are l
 
 People is the first expansion. This makes the future-facing process more participative and credible. Others are not only asked to understand the method; they are invited to help shape it, test it against local reality, and own it.
 
-Results is the furthest extension. The development edge is to define the result that will show whether the shared path is working. Without enough proof, the pattern can become thoughtful, coherent, and inclusive while senior stakeholders still ask what has changed, customers see little difference, or broad priorities remain open.
+Results is the furthest extension. The main growth move is to define the result that will show whether the shared path is working. Without enough proof, the pattern can become thoughtful, coherent, and inclusive while senior stakeholders still ask what has changed, customers see little difference, or broad priorities remain open.
 
 Your strongest leadership builds a future-facing method, invites people into ownership, and then names the measurable outcome that proves the method is creating consequence.
 
@@ -21,9 +21,9 @@ Pattern at a glance
 | Rank | Role in your pattern | What it means in practice |
 |---|---|---|
 | 1 | Vision — the future direction | You tend to lead by naming what the work should build, protect, or make possible. |
-| 2 | Process — the coherent method | Process translates direction into sequence, standards, decision rights, and operating discipline. |
+| 2 | Process — the coherent method | Process translates direction into sequence, standards, decision rights, and working discipline. |
 | 3 | People — the ownership expansion | People makes the future-facing process participative, trusted, and shaped by those who must carry it. |
-| 4 | Results — the proof edge | Results asks whether the shared method is creating visible progress, closure, and commercial evidence. |
+| 4 | Results — the proof focus | Results asks whether the shared method is creating visible progress, closure, and commercial evidence. |
 
 This is a future-method-and-ownership pattern. Its best version turns strategic direction into a trusted way of working, then proves that the shared path is producing progress.
 
@@ -52,7 +52,7 @@ These scores show why your report is led by Vision and strengthened by Process, 
 
 Key insight
 
-Your leadership creates confidence by making the future coherent and owned. The development edge is to make progress explicit enough that alignment becomes evidence.
+Your leadership creates confidence by making the future coherent and owned. The main growth move is to make progress explicit enough that alignment becomes evidence.
 
 Chapter 1 — How your leadership creates value
 
@@ -182,7 +182,7 @@ Use this in: leadership forums, cross-functional work, operating model design.
 
 Explain how the process improves customer value, delivery, risk, resource use, or future capability.
 
-Use this in: commercial reviews, prioritisation, delivery recovery.
+Use this in: commercial reviews, prioritisation, getting delivery back on track.
 
 4. Review evidence, not only confidence
 
@@ -200,7 +200,7 @@ Closing synthesis
 
 Your leadership is valuable because it makes the future coherent, shared, and usable.
 
-Vision gives your leadership the strategic frame. Process turns that frame into a method. People makes the method trusted and owned. The growth edge is Results: the proof that the shared path is doing more than creating alignment.
+Vision gives your leadership the strategic frame. Process turns that frame into a method. People makes the method trusted and owned. The main growth move is Results: the proof that the shared path is doing more than creating alignment.
 
 Your risk under pressure is thoughtful coherence without enough closure. The work can be sensible, participative, and well explained while still leaving stakeholders unsure what has changed. Your strongest leadership keeps the direction, method, and participation, then names the outcome that must now become visible in customer impact, delivery progress, decision closure, or capability built.
 
@@ -212,4 +212,4 @@ PDF export CTA
 
 Save this report
 
-Use this report as a reference when strategy, process, and ownership are strong but progress needs sharper proof. Return to it before governance reviews, prioritisation, delivery recovery, or moments where alignment must become evidence.
+Use this report as a reference when strategy, process, and ownership are strong but progress needs sharper proof. Return to it before governance reviews, prioritisation, getting delivery back on track, or moments where alignment must become evidence.

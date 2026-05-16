@@ -14,7 +14,7 @@ This is not Results as individual force. People sits close behind it, which mean
 
 The first expansion is Process. Human energy can create movement, but it needs structure to become reliable. Process adds sequence, ownership, standards, handovers, and review points so shared effort does not depend only on goodwill or urgency.
 
-The furthest extension is Vision. That is the main development edge. When people are willing to move and the work can be organised, the larger direction may still remain under-explained. The team may know what needs to happen and feel ready to help, but not fully understand what future their effort is creating or how today's responsiveness compounds into strategy.
+The furthest extension is Vision. That is the main growth move. When people are willing to move and the work can be organised, the larger direction may still remain under-explained. The team may know what needs to happen and feel ready to help, but not fully understand what future their effort is creating or how today's responsiveness builds into strategy.
 
 Your most effective leadership mobilises people around progress, makes that effort reliable, and then gives the work a future direction strong enough to prevent repeated mobilisation from becoming fatigue.
 
@@ -54,11 +54,11 @@ These scores show why your report is led by Results and strengthened by People, 
 
 Key insight
 
-Your leadership creates confidence by mobilising people into progress. The development edge is to make sure that progress is connected to a larger direction before effort becomes only immediate response.
+Your leadership creates confidence by mobilising people into progress. The main growth move is to make sure that progress is connected to a larger direction before effort becomes only immediate response.
 
 Chapter 1 — How your leadership creates value
 
-Your leadership creates value by converting human commitment into visible movement.
+Your leadership creates value by converting team commitment into visible progress.
 
 Where others may see engagement as the end point, you are likely to ask what it should produce. What action will this commitment support? What progress needs to happen now? Who is ready to own the next step? How can the team's energy become useful work?
 
@@ -242,7 +242,7 @@ Closing synthesis
 
 Your leadership turns people's willingness into progress.
 
-You are likely to bring action where the team is engaged but not yet moving, ownership where responsibility has been vague, and practical energy where work needs visible movement. Results gives the pattern its drive. People gives that drive commitment and human relevance.
+You are likely to bring action where the team is engaged but not yet moving, ownership where responsibility has been vague, and practical energy where work needs visible progress. Results gives the pattern its drive. People gives that drive commitment and personal relevance.
 
 The main tightening risk is that progress may become reliable before it becomes clearly directional. People may be ready to act, and the work may even become organised, but the larger future can remain under-explained. Over time, that can turn commitment into fatigue because people experience another well-run push without seeing what it is meant to build.
 

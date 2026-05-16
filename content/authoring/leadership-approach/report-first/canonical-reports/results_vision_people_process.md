@@ -4,7 +4,7 @@ You lead by mobilising people around meaningful progress
 
 You create confidence by making the future feel close enough to act on. Your leadership is at its best when people need to see why movement matters, feel invited into that movement, and begin turning shared belief into visible progress.
 
-People turns future-facing momentum into commitment. Process extends it further by giving that commitment the operating discipline it needs to last.
+People turns future-facing momentum into commitment. Process extends it further by giving that commitment the working discipline it needs to last.
 
 Editorial introduction
 
@@ -14,7 +14,7 @@ Vision gives your Results drive meaning. The action is not only a task to comple
 
 People is the first expansion. This means the pattern becomes stronger when you bring others into the energy of the direction. Progress becomes more powerful when it is not only asserted by you but carried by people who understand why it matters and can see themselves in it.
 
-Process is the furthest extension. That is the main development edge. When a future-facing push has energy and commitment, it can still become difficult to sustain if priorities, roles, standards, cadence, and handovers remain too loose.
+Process is the furthest extension. That is the main growth move. When a future-facing push has energy and commitment, it can still become difficult to sustain if priorities, roles, standards, review rhythm, and handovers remain too loose.
 
 Your most effective leadership turns belief into progress, then gives that progress enough method to avoid becoming dependent on urgency, personality, or enthusiasm.
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Results and strengthened by Vision, 
 
 Key insight
 
-Your leadership creates confidence by making the future feel actionable. The development edge is to build enough method around that movement so people do not have to turn energy into structure by themselves.
+Your leadership creates confidence by making the future feel actionable. The main growth move is to build enough method around that progress so people do not have to turn energy into structure by themselves.
 
 Chapter 1 — How your leadership creates value
 
@@ -66,7 +66,7 @@ This pattern is especially useful in change leadership, growth initiatives, new 
 
 People becomes important because the future does not become real only through activity. It becomes real when people begin to identify with it. You can help others feel that progress is not just being demanded from them, but created with them.
 
-The missing edge is Process. When people are energised by the future, the work can still become uneven. Different people may interpret the direction differently. Enthusiasm may run ahead of role clarity. A strong message may create movement before the operating route is stable enough.
+The missing focus is Process. When people are energised by the future, the work can still become uneven. Different people may interpret the direction differently. Enthusiasm may run ahead of role clarity. A strong message may create progress before the working method is stable enough.
 
 When this pattern works well, teams experience progress that feels significant and human. They can see why the work matters, feel invited into it, and begin to move. The next level is making that movement repeatable.
 
@@ -90,7 +90,7 @@ A decision feels strong when it turns aspiration into movement. You may prefer a
 
 Vision gives your decisions meaning. You may ask what the decision is building, what future risk it reduces, or what story it helps the organisation prove. People adds a further question: who needs to believe in this enough to carry it?
 
-The risk is that the decision may be emotionally and directionally compelling before the operating route is ready. People may want to move, but not know how. They may share the ambition, but lack the process required to coordinate action without confusion.
+The risk is that the decision may be emotionally and directionally compelling before the working method is ready. People may want to move, but not know how. They may share the ambition, but lack the process required to coordinate action without confusion.
 
 Useful decision checks include:
 

@@ -2,7 +2,7 @@ Leadership Approach — Process, People, Results, Vision
 
 You lead by creating reliable ways of working that people can trust
 
-You create confidence by making work clearer, steadier, and easier for people to carry together. Your leadership is at its best when a team needs dependable structure, shared expectations, and practical operating discipline that can turn coordinated effort into outcomes.
+You create confidence by making work clearer, steadier, and easier for people to carry together. Your leadership is at its best when a team needs dependable structure, shared expectations, and practical working habits that can turn coordinated effort into outcomes.
 
 This report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader.
 
@@ -14,9 +14,9 @@ People gives your Process a relational intelligence. You are not only organising
 
 Results is the first expansion. The next leadership move is to make sure trusted structure produces visible outcomes. A reliable way of working should not only feel better; it should improve delivery, decision quality, customer impact, or performance.
 
-Vision is the furthest extension. The development edge is to connect the reliable team process to a more explicit strategic direction. When the work is going well operationally, you may need to name what it is building beyond smoother execution: future capability, customer promise, scalable operating strength, or a clearer position for the organisation.
+Vision is the furthest extension. The main growth move is to connect the reliable team process to a more explicit strategic direction. When the work is going well operationally, you may need to name what it is building beyond smoother delivery: capability for the future, customer promise, scalable operating strength, or a clearer position for the organisation.
 
-Your strongest leadership creates a trustworthy operating base, uses it to produce outcomes, and then connects those outcomes to a larger direction the team can recognise. That is what turns reliable performance into strategic accumulation rather than repeated delivery.
+Your strongest leadership creates a trustworthy operating base, uses it to produce outcomes, and then connects those outcomes to a larger direction the team can recognise. That is what turns reliable performance into capability that builds over time rather than repeated delivery.
 
 Pattern at a glance
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Process and strengthened by People, 
 
 Key insight
 
-Your leadership creates confidence by making work reliable and humanly usable. The development edge is to connect that reliability to outcomes and a clearer future direction.
+Your leadership creates confidence by making work reliable and usable for real people. The main growth move is to connect that reliability to outcomes and a clearer future direction.
 
 Chapter 1 — How your leadership creates value
 
@@ -110,7 +110,7 @@ This can be valuable. When pressure creates confusion or anxiety, you can restor
 
 The risk is that pressure may make Vision disappear and Results become too moderated. You may focus on keeping the system fair, calm, and workable while under-naming the harder commercial requirement or the future risk. People may feel supported, but the team may not receive a strong enough signal about what must now change or what the pressure is meant to strengthen.
 
-This can show up as repeated mobilisation without strategic accumulation. The team works hard, supports one another, and improves the immediate operating method, but effort does not clearly compound into a longer-term direction. Delivery is recovered, reviews are calmer, and the experience improves, but the organisation may still be unclear about the future capability being built.
+This can show up as repeated mobilisation without a clear strategic gain. The team works hard, supports one another, and improves the immediate operating method, but effort does not clearly build toward a longer-term direction. Delivery gets back on track, reviews are calmer, and the experience improves, but the organisation may still be unclear about the capability being built.
 
 The pressure move is to keep the support while naming the performance and future stakes. Ask: what result must this rhythm now produce, what trade-off are we avoiding, and what direction will this effort strengthen if we get it right?
 
@@ -120,7 +120,7 @@ Chapter 6 — The strength of this pattern
 
 You can make expectations, standards, and handovers more reliable. That reduces anxiety and helps people put energy into the work rather than the coordination around the work.
 
-2. Fairer operating discipline
+2. Fairer working discipline
 
 Because People sits close to Process, your structure is more likely to consider impact. You can reduce hidden labour, uneven workload, and informal dependency on a few people.
 
@@ -171,7 +171,7 @@ Vision expands this pattern by connecting reliable work to future capability.
 
 Because Vision is the furthest extension, it may not appear early unless you deliberately bring it forward. You may focus first on creating a process people can trust and outcomes that prove the system is working. Those are strong moves, but the team also needs to know what the work is building over time.
 
-Vision helps the team see beyond today's operating cadence. It explains why the standards matter, what future capability is being created, and how current discipline contributes to a direction worth sustaining. It turns improved execution into a story of strategic accumulation: better handovers become scalability, stronger standards become customer reliability, clearer decision rights become leadership capacity, and repeated delivery becomes evidence that the organisation can carry more complex work.
+Vision helps the team see beyond today's operating rhythm. It explains why the standards matter, what capability is being created for the future, and how current discipline contributes to a direction worth sustaining. It turns improved delivery into a story of steady build: better handovers become scalability, stronger standards become customer reliability, clearer decision rights become leadership capacity, and repeated delivery becomes evidence that the organisation can carry more complex work.
 
 Direction questions to bring forward:
 
@@ -221,9 +221,9 @@ Closing synthesis
 
 Your leadership is valuable because it creates ways of working people can trust and use.
 
-Process gives your leadership its steadiness. You reduce confusion, clarify ownership, and build operating discipline that makes work easier to carry. People gives that discipline its credibility. The structure is not only efficient; it is more humane, more usable, and more likely to be owned by the team. Results then turns that trusted system into performance, helping the work produce better delivery, clearer decisions, stronger quality, or improved customer experience.
+Process gives your leadership its steadiness. You reduce confusion, clarify ownership, and build working discipline that makes work easier to carry. People gives that discipline its credibility. The structure is not only efficient; it is more practical, more usable, and more likely to be owned by the team. Results then turns that trusted system into performance, helping the work produce better delivery, clearer decisions, stronger quality, or improved customer experience.
 
-The growth edge is Vision. Without it, this pattern can become very effective inside the current operating frame while leaving the larger direction underdeveloped. The team may deliver repeatedly, support one another well, and improve the immediate experience, but not clearly see what future capability those outcomes are building. Your most complete leadership connects reliable performance to strategic accumulation, so effort does not simply repeat. It compounds into a stronger customer promise, a more scalable operating model, and a clearer direction for the team to grow into.
+The main growth move is Vision. Without it, this pattern can become very effective inside the current operating frame while leaving the larger direction underdeveloped. The team may deliver repeatedly, support one another well, and improve the immediate experience, but not clearly see what capability those outcomes are building for the future. Your most complete leadership connects reliable performance to a larger build, so effort does not simply repeat. It compounds into a stronger customer promise, a more scalable operating model, and a clearer direction for the team to grow into.
 
 Under pressure, the work is not only to keep the system fair and productive. It is to name what this reliability is meant to make possible next.
 
@@ -235,4 +235,4 @@ PDF export CTA
 
 Save this report
 
-Use this report as a reference when you are improving team rhythm, ownership, handovers, or operating discipline. Return to it when a trusted process needs sharper outcomes and a clearer future direction.
+Use this report as a reference when you are improving team rhythm, ownership, handovers, or working discipline. Return to it when a trusted process needs sharper outcomes and a clearer future direction.

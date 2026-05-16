@@ -12,9 +12,9 @@ Your leadership approach is led by People and strengthened by Results. You are l
 
 Process is the first expansion. It helps commitment become reliable rather than dependent on goodwill, individual effort, or informal coordination. Process gives your people-led progress roles, sequence, decision rights, standards, and review rhythm.
 
-Vision is the furthest extension. The development edge is to connect the team's effort to a future story before commitment becomes fatigue. Without enough Vision, people may keep responding, delivering, and taking responsibility without seeing what their effort is building beyond the next demand.
+Vision is the furthest extension. The main growth move is to connect the team's effort to a future story before commitment becomes fatigue. Without enough Vision, people may keep responding, delivering, and taking responsibility without seeing what their effort is building beyond the next demand.
 
-Your strongest leadership builds trust, activates progress, gives that progress a dependable operating route, and names the future that makes the effort worth sustaining.
+Your strongest leadership builds trust, activates progress, gives that progress a dependable working path, and names the future that makes the effort worth sustaining.
 
 Pattern at a glance
 
@@ -52,7 +52,7 @@ These scores show why your report is led by People and strengthened by Results, 
 
 Key insight
 
-Your leadership creates confidence by making progress feel owned, not imposed. The development edge is to connect reliable effort to a future direction before commitment becomes repeated mobilisation.
+Your leadership creates confidence by making progress feel owned, not imposed. The main growth move is to connect reliable effort to a future direction before commitment becomes repeated mobilisation.
 
 Chapter 1 — How your leadership creates value
 
@@ -70,11 +70,11 @@ Chapter 2 — How others experience your leadership
 
 Others may experience your leadership as energising, practical, and personally activating. You can make people feel that their contribution matters and that the work is not simply being pushed onto them.
 
-This can be valuable in delivery recovery, team mobilisation, customer-facing work, performance improvement, and moments where effort needs to rise without breaking trust. You can create the conditions where people are willing to move because they feel seen, needed, and accountable.
+This can be valuable when delivery needs to get back on track, in team mobilisation, customer-facing work, performance improvement, and moments where effort needs to rise without breaking trust. You can create the conditions where people are willing to move because they feel seen, needed, and accountable.
 
 The possible tension is that people may feel strongly called into action without always seeing the longer story. They may know what needs to happen next, and they may be willing to do it, but repeated mobilisation can become tiring if the future reason stays implied.
 
-When this pattern is mature, people do not feel used for output. They understand the progress required, the operating route that will make it fair, and the future value their effort is meant to create.
+When this pattern is mature, people do not feel used for output. They understand the progress required, the working path that will make it fair, and the future value their effort is meant to create.
 
 Chapter 3 — Decision behaviour
 
@@ -106,7 +106,7 @@ This can help when hesitation is costly, customers are waiting, or a team has lo
 
 The risk is that commitment becomes the fuel for repeated delivery without enough strategic explanation. People may respond because they care, because they trust you, or because they do not want to let the team down. If the future direction is weakly named, that commitment can become fatigue.
 
-Pressure can also narrow the pattern toward personal effort. People may work harder before the operating route is clear enough, or they may keep solving the same delivery problems because the wider capability question has not been named.
+Pressure can also narrow the pattern toward personal effort. People may work harder before the working path is clear enough, or they may keep solving the same delivery problems because the wider capability question has not been named.
 
 The pressure move is to pause long enough to name the future value of the effort: what this progress is building, what capability it strengthens, and why this demand matters beyond the current push.
 
@@ -150,7 +150,7 @@ Process expands this pattern by making people-led progress reliable.
 
 When Process is active, commitment has a route. The team knows who owns the next step, what standard applies, when the work will be reviewed, and how handovers should happen. This protects people from the hidden labour of organising progress informally.
 
-Process matters because People plus Results can create high effort without enough operating discipline. The team may care deeply and move quickly, but still experience uneven workload, duplicated work, unclear decision rights, or delivery friction.
+Process matters because People plus Results can create high effort without enough working discipline. The team may care deeply and move quickly, but still experience uneven workload, duplicated work, unclear decision rights, or delivery friction.
 
 Process questions to bring forward:
 
@@ -184,7 +184,7 @@ Your development focus is to connect mobilised progress to a future story.
 
 When asking for commitment, explain the capability, customer promise, or strategic need behind the work.
 
-Use this in: delivery recovery, team mobilisation, customer-facing initiatives.
+Use this in: getting delivery back on track, team mobilisation, customer-facing initiatives.
 
 2. Make accountability fair
 
@@ -214,7 +214,7 @@ Closing synthesis
 
 Your leadership is valuable because it makes progress something people can own.
 
-People gives your leadership its trust base. Results turns that trust into movement. Process gives movement a fair and repeatable operating route. The growth edge is Vision: the future story that prevents repeated commitment from becoming fatigue.
+People gives your leadership its trust base. Results turns that trust into progress. Process gives progress a fair and repeatable working path. The main growth move is Vision: the future story that prevents repeated commitment from becoming fatigue.
 
 Your risk under pressure is asking people to keep responding without enough explanation of what their effort is building. Your strongest leadership keeps people trusted, progress visible, work structured, and direction clear enough that effort compounds into capability rather than simply meeting the next demand.
 
@@ -226,4 +226,4 @@ PDF export CTA
 
 Save this report
 
-Use this report as a reference when people are willing to move but need clearer structure and a stronger future story. Return to it before delivery recovery, performance conversations, resourcing decisions, or moments where commitment risks becoming fatigue.
+Use this report as a reference when people are willing to move but need clearer structure and a stronger future story. Return to it before getting delivery back on track, performance conversations, resourcing decisions, or moments where commitment risks becoming fatigue.

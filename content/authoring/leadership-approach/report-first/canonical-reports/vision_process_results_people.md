@@ -14,7 +14,7 @@ This pattern is strategic but not vague. Vision gives the future logic. Process 
 
 Results is the first expansion. The system becomes more credible when it produces visible outcomes, near-term proof, and evidence that the future-facing design is working.
 
-People is the furthest extension. The development edge is to bring human adoption into the design conversation early, before the system becomes too complete to challenge. A strong design still needs lived use, trust, and local reality checks.
+People is the furthest extension. The main growth move is to bring real user and team take-up into the design conversation early, before the system becomes too complete to challenge. A strong design still needs lived use, trust, and local reality checks.
 
 Your strongest leadership begins with the future, uses Process as the translation mechanism, tests the design through outcomes, and involves people early enough that the system is adopted rather than only admired.
 
@@ -54,7 +54,7 @@ These scores show why your report is led by Vision and strengthened by Process, 
 
 Key insight
 
-Your leadership creates confidence by making direction operationally coherent. The development edge is to test the system through outcomes and involve people before the design becomes too fixed.
+Your leadership creates confidence by making direction operationally coherent. The main growth move is to test the system through outcomes and involve people before the design becomes too fixed.
 
 Chapter 1 — How your leadership creates value
 
@@ -170,7 +170,7 @@ What would help people trust and use this system?
 
 Chapter 10 — Development focus
 
-Your development focus is to make strategic architecture testable and adoptable.
+Your development focus is to make strategic architecture clear enough to prove and easy enough for people to take on.
 
 1. Define proof for the design
 

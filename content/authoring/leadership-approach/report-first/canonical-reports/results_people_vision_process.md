@@ -14,7 +14,7 @@ People gives your Results drive a human route. You are unlikely to see progress 
 
 Vision is the first expansion. This means your leadership becomes stronger when mobilisation is connected to a larger direction. People can move because they are needed; Vision helps them understand what their effort is building.
 
-Process is the furthest extension and the main development edge. When people are committed and the purpose is meaningful, the work can still become commercially fragile if the route is underdefined. The team may care deeply, but still need clearer decision rights, dependency management, operating cadence, handovers, standards, and review rhythm.
+Process is the furthest extension and the main growth move. When people are committed and the purpose is meaningful, the work can still become commercially fragile if the path is underdefined. The team may care deeply, but still need clearer decision rights, dependency management, operating rhythm, handovers, standards, and review rhythm.
 
 Your most effective leadership builds human momentum, connects it to a future, and then gives that momentum enough method that commitment does not become hidden labour for the most responsive people.
 
@@ -54,13 +54,13 @@ These scores show why your report is led by Results and strengthened by People, 
 
 Key insight
 
-Your leadership creates confidence by mobilising people into meaningful progress. The development edge is to translate that commitment into a working method before energy fragments or people start solving the same problem in different ways.
+Your leadership creates confidence by mobilising people into meaningful progress. The main growth move is to translate that commitment into a working method before energy fragments or people start solving the same problem in different ways.
 
 Chapter 1 — How your leadership creates value
 
 Your leadership creates value by helping people act with purpose.
 
-Where others may see team energy as encouraging but unfocused, you are likely to ask what progress that energy should create. What should people do now? What contribution matters? What visible movement would show that the team is serious?
+Where others may see team energy as encouraging but unfocused, you are likely to ask what progress that energy should create. What should people do now? What contribution matters? What visible progress would show that the team is serious?
 
 This pattern is useful in change work, team recovery, performance mobilisation, customer experience improvements, growth initiatives, and situations where progress depends on people choosing to engage. You can help teams feel that their effort matters and that movement is possible.
 
@@ -204,7 +204,7 @@ Where do we need governance before goodwill becomes the coordination system?
 
 Chapter 10 — Development focus
 
-The development focus is to give commitment an operating route.
+The development focus is to give commitment a working path.
 
 1. Define roles before the work spreads
 

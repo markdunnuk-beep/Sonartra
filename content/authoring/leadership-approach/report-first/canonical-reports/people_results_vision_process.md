@@ -12,9 +12,9 @@ Your leadership approach is led by People and strengthened by Results. You are l
 
 Vision is the first expansion. It gives progress a larger meaning: the customer promise, future capability, strategic risk, or organisational direction that makes the effort worth sustaining.
 
-Process is the furthest extension. The development edge is to provide the method early enough that people do not have to convert commitment into structure alone. Without Process, motivated people may move with purpose but still lack decision rights, handovers, standards, governance, or review rhythm.
+Process is the furthest extension. The main growth move is to provide the method early enough that people do not have to convert commitment into structure alone. Without Process, motivated people may move with purpose but still lack decision rights, handovers, standards, governance, or review rhythm.
 
-Your strongest leadership mobilises people, creates proof, connects effort to a meaningful direction, and then builds the operating discipline that lets the work endure.
+Your strongest leadership mobilises people, creates proof, connects effort to a direction that matters, and then builds the working discipline that lets the work endure.
 
 Pattern at a glance
 
@@ -52,7 +52,7 @@ These scores show why your report is led by People and strengthened by Results, 
 
 Key insight
 
-Your leadership creates confidence by making progress feel owned and meaningful. The development edge is to give that commitment enough operating discipline to be repeated without hidden strain.
+Your leadership creates confidence by making progress feel owned and meaningful. The main growth move is to give that commitment enough working discipline to be repeated without hidden strain.
 
 Chapter 1 — How your leadership creates value
 
@@ -70,17 +70,17 @@ Chapter 2 — How others experience your leadership
 
 Others may experience your leadership as energising, relationally intelligent, and action-oriented. You can make people feel that their effort matters and that progress is possible now, not only after perfect alignment.
 
-This can be powerful in change mobilisation, customer-facing improvement, delivery recovery, and moments where a team needs to believe its work still has consequence. You can help people reconnect with why their effort matters while also naming the practical move required.
+This can be powerful in change mobilisation, customer-facing improvement, getting delivery back on track, and moments where a team needs to believe its work still has consequence. You can help people reconnect with why their effort matters while also naming the practical move required.
 
 The possible tension is that people may feel motivated and purposeful but later need more operating clarity. They may understand why the work matters and what progress is needed, but still have to infer sequence, owners, handovers, review points, or decision rights.
 
-When this pattern matures, people do not have to convert meaning into method on their own. They understand the reason, the action, and the operating route.
+When this pattern matures, people do not have to convert meaning into method on their own. They understand the reason, the action, and the working path.
 
 Chapter 3 — Decision behaviour
 
 You are likely to make decisions by considering what people can commit to, what progress must now happen, and what direction gives that progress meaning.
 
-A decision feels strong when it mobilises ownership and creates visible movement toward something that matters. You may be drawn to choices that people can understand, act on, and feel personally connected to.
+A decision feels strong when it mobilises ownership and creates visible progress toward something that matters. You may be drawn to choices that people can understand, act on, and feel personally connected to.
 
 Vision helps your decisions carry strategic weight. It asks what the action is building and why it matters beyond the immediate delivery moment.
 
@@ -96,7 +96,7 @@ You may be effective when people need to hear that their contribution matters an
 
 Results gives your communication practical force. Vision gives it significance. Together, they can help people feel both needed and oriented.
 
-The communication edge is to make the operating route explicit. People should not have to infer the method from the energy of the message. Stronger communication for this pattern includes the action, owner, decision point, standard, and review rhythm that will hold the work.
+The communication focus is to make the working path explicit. People should not have to infer the method from the energy of the message. Stronger communication for this pattern includes the action, owner, decision point, standard, and review rhythm that will hold the work.
 
 Chapter 5 — What happens under pressure
 
@@ -179,11 +179,11 @@ Chapter 10 — Development focus
 
 Your development focus is to turn meaningful commitment into repeatable work.
 
-1. Define the operating route early
+1. Define the working path early
 
 Name owners, sequence, decision points, and review rhythm before momentum spreads too far.
 
-Use this in: change mobilisation, delivery recovery, cross-functional work.
+Use this in: change mobilisation, getting delivery back on track, cross-functional work.
 
 2. Protect people from hidden coordination
 
@@ -207,13 +207,13 @@ Use this in: strategy communication, transformation governance, leadership updat
 
 Ask whether progress can continue without relying on the same people to compensate for unclear process.
 
-Use this in: retrospectives, operating reviews, delivery recovery.
+Use this in: retrospectives, operating reviews, getting delivery back on track.
 
 Closing synthesis
 
 Your leadership is valuable because it helps people move with both commitment and meaning.
 
-People gives your leadership its trust base. Results turns trust into visible movement. Vision gives that movement a reason to matter beyond the immediate task. The growth edge is Process: the operating discipline that prevents motivated people from carrying ambiguity as extra work.
+People gives your leadership its trust base. Results turns trust into visible progress. Vision gives that progress a reason to matter beyond the immediate task. The main growth move is Process: the working discipline that prevents motivated people from carrying ambiguity as extra work.
 
 Your risk under pressure is relying on commitment, urgency, and purpose to solve coordination. Your strongest leadership keeps people activated, keeps progress visible, keeps the future meaningful, and builds the method that lets effort become reliable work rather than heroic response.
 
@@ -225,4 +225,4 @@ PDF export CTA
 
 Save this report
 
-Use this report as a reference when people are motivated and progress is visible, but the operating route needs to become clearer. Return to it before transformation work, cross-functional delivery, governance design, or moments where purpose needs method.
+Use this report as a reference when people are motivated and progress is visible, but the working path needs to become clearer. Return to it before transformation work, cross-functional delivery, governance design, or moments where purpose needs method.
