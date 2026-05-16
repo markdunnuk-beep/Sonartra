@@ -27,7 +27,7 @@ Pattern at a glance
 | 3 | Vision — the direction range | Vision expands your leadership by connecting visible progress to future value, capability, and strategic meaning. |
 | 4 | People — the ownership extension | People expands the pattern by making sure the route is shaped, trusted, and carried by the team, not only understood by them. |
 
-This is a progress-and-method pattern with a strategic expansion. At its strongest, it creates practical movement that is repeatable, purposeful, and eventually shared.
+This is a progress-and-method pattern with a strategic expansion. Its best version creates practical movement that is repeatable, purposeful, and shared before commitment is tested.
 
 Evidence behind your result
 
@@ -80,7 +80,7 @@ Because Process sits close behind Results, your pace is often easier to work wit
 
 The possible tension is that others may feel the route is already moving before they have fully shaped it. Vision may help them understand the point of the progress, but People is still the furthest extension. The team may know where the work is going and how it will move, while still feeling that the human impact, concern, or local knowledge arrived late in the conversation.
 
-The mature version of this pattern keeps the pace, method, and future direction, but lets people influence the route while it is still open enough to be improved.
+The more complete version keeps the pace, method, and future direction, but lets people influence the route while it is still open enough to be improved.
 
 Chapter 3 — Decision behaviour
 
@@ -175,7 +175,7 @@ Range to add: Use Process to define what learning counts as progress. Make space
 
 Chapter 8 — How Vision expands your leadership
 
-Vision expands this pattern by connecting progress to a future worth building.
+Vision gives this pattern its strategic reach by connecting progress to a future worth building.
 
 When Vision is brought in deliberately, your leadership becomes more than delivery discipline. You can explain what the action is strengthening, what capability it is building, what risk it is reducing, or what opportunity it is making more credible.
 
@@ -183,7 +183,7 @@ This matters because Results and Process can sometimes create an efficient route
 
 Vision helps you move from "What needs to happen next?" to "What should this progress make possible?" That question improves prioritisation. It prevents every urgent task from being treated as equally important.
 
-Useful activation questions include:
+Strategic questions to bring forward:
 
 What future capability are we building through this progress?
 What should become stronger if we get this right?
@@ -192,7 +192,7 @@ What story would help people understand the value of the work?
 
 Chapter 9 — How People expands your leadership
 
-People expands this pattern by turning a clear route into shared commitment.
+People gives this pattern its ownership edge by turning a clear route into shared commitment.
 
 Because People is the furthest extension, it may not arrive naturally before the action starts moving. You may communicate the route well, explain the purpose clearly, and still leave too little space for others to influence the judgement behind it.
 
@@ -200,7 +200,7 @@ People adds a different kind of evidence. It helps you notice hesitation, overlo
 
 For this pattern, People works best when brought in before the route hardens. The aim is not to open every decision endlessly. It is to identify where participation will materially improve commitment, risk awareness, and execution quality.
 
-Useful activation questions include:
+Ownership questions to bring forward:
 
 Who needs to shape this before the route is fixed?
 What concern would make the action stronger if we heard it now?
@@ -209,7 +209,7 @@ What support or context would help people carry this progress well?
 
 Chapter 10 — Development focus
 
-The development work is not to reduce your drive for progress. It is to make progress more complete before it accelerates.
+The development focus is not to reduce your drive for progress. It is to make progress more complete before it accelerates.
 
 1. Add an ownership check before closure
 
@@ -243,7 +243,7 @@ Use this in: pressure moments, team briefings, performance recovery, cross-funct
 
 Closing synthesis
 
-Your leadership is valuable because it makes progress practical.
+Your leadership makes progress practical.
 
 You are likely to bring movement where there has been delay, structure where action could become scattered, and strategic usefulness where immediate tasks could otherwise feel disconnected. Results gives the pattern its drive. Process gives that drive a route. Vision helps the route point somewhere that matters.
 

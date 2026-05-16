@@ -4,7 +4,7 @@ You lead by moving people toward a future worth acting on
 
 You create confidence by mobilising people into progress and connecting that progress to something meaningful. Your leadership is at its best when a team needs to feel involved, needed, and pointed toward a future that deserves visible action.
 
-Vision expands this pattern by giving commitment a larger direction. Process extends it further by giving that commitment the operating spine required to last.
+Vision gives commitment a larger direction. Process extends it further by giving that commitment the operating spine required to last.
 
 Editorial introduction
 
@@ -14,9 +14,9 @@ People gives your Results drive a human route. You are unlikely to see progress 
 
 Vision is the first expansion. This means your leadership becomes stronger when mobilisation is connected to a larger direction. People can move because they are needed; Vision helps them understand what their effort is building.
 
-Process is the furthest extension and the main development edge. When people are committed and the purpose is meaningful, the work can still become scattered if the route is underdefined. The team may care deeply and still need clearer roles, sequence, handovers, standards, and review rhythm.
+Process is the furthest extension and the main development edge. When people are committed and the purpose is meaningful, the work can still become commercially fragile if the route is underdefined. The team may care deeply, but still need clearer decision rights, dependency management, operating cadence, handovers, standards, and review rhythm.
 
-Your most effective leadership builds human momentum, connects it to a future, and then gives that momentum enough method to become reliable.
+Your most effective leadership builds human momentum, connects it to a future, and then gives that momentum enough method that commitment does not become hidden labour for the most responsive people.
 
 Pattern at a glance
 
@@ -27,7 +27,7 @@ Pattern at a glance
 | 3 | Vision — the meaning range | Vision expands your leadership by connecting human effort to a larger direction and future value. |
 | 4 | Process — the operating extension | Process expands the pattern by adding method, rhythm, role clarity, standards, and review discipline. |
 
-This is a progress-and-people pattern with a future expansion. At its strongest, it creates committed action that feels meaningful and eventually becomes well organised.
+This is a progress-and-people pattern with a future expansion. Its strongest version creates committed action that feels meaningful, then turns that commitment into a way of working that can survive real delivery pressure.
 
 Evidence behind your result
 
@@ -66,9 +66,9 @@ This pattern is useful in change work, team recovery, performance mobilisation, 
 
 Vision adds depth by connecting action to a future worth working for. Without Vision, mobilisation can become only response. With Vision, the team can see what the progress is meant to build, protect, or make possible.
 
-Process is the missing operating edge. Commitment and meaning are powerful, but they do not automatically create coordination. People may begin with shared energy and then diverge in execution because the method is not clear enough.
+Process is the missing operating edge. Commitment and meaning are powerful, but they do not automatically create coordination. People may begin with shared energy and then diverge in execution because decision rights, dependencies, escalation routes, and delivery standards have not been made explicit.
 
-When this pattern works well, others feel both needed and oriented. The work has energy, purpose, and a visible next step. The next level is making that movement repeatable.
+When this pattern works well, others feel both needed and oriented. The work has energy, purpose, and a visible next step. The next level is making that movement operationally reliable enough that progress does not depend on informal coordination or repeated personal effort.
 
 Chapter 2 — How others experience your leadership
 
@@ -78,9 +78,9 @@ In meetings, you may connect the practical ask to the people in the room. You ma
 
 This can create strong engagement. People may feel trusted and called into action. They may understand that progress is expected, but also that their involvement matters.
 
-The possible tension is that the route may be less clear than the commitment. People can leave aligned around purpose and willing to move, then become uncertain about ownership, sequence, decision rights, or standards. That uncertainty can quietly drain the energy that your leadership created.
+The possible tension is that the route may be less clear than the commitment. People can leave aligned around purpose and willing to move, then become uncertain about ownership, sequence, decision rights, resourcing, or standards. That uncertainty can quietly drain the energy that your leadership created.
 
-The mature version of this pattern keeps the human mobilisation and future meaning, then gives the team enough structure to work together without guessing.
+The stronger version keeps the human mobilisation and future meaning, then gives the team enough structure to work together without guessing. It prevents the most committed people from becoming the unofficial project managers, dependency trackers, and problem escalators.
 
 Chapter 3 — Decision behaviour
 
@@ -90,14 +90,14 @@ A decision feels useful when it activates the team and moves the work forward. Y
 
 People strengthens your decision-making by keeping commitment in view. You may notice whether the decision will create energy or resistance, ownership or passivity. Vision adds the question of significance: what future does this decision serve?
 
-The risk is that a decision can be high-commitment and high-meaning while still low-method. People may agree with the decision and care about the outcome, but still lack the operating clarity needed to execute consistently.
+The risk is that a decision can be high-commitment and high-meaning while still low-method. People may agree with the decision and care about the outcome, but still lack the operating clarity needed to execute consistently. In senior work, that gap shows up as slow handovers, unclear authority, duplicated effort, and decisions that reappear because no one knew who could close them.
 
 Useful decision checks include:
 
 What progress should this decision create?
 Who needs to own it, not only support it?
 What larger direction does it serve?
-What method will stop people from translating it differently?
+What decision rights and dependencies need to be explicit before people start translating it differently?
 
 Chapter 4 — Communication behaviour
 
@@ -107,7 +107,7 @@ You may be effective when people need to feel both trusted and directed. Your co
 
 Vision helps you explain why the action matters. You may connect the work to a customer, a capability, a future state, or a promise the organisation needs to make real.
 
-The limitation is that communication may not always define the route tightly enough. A strong message can create commitment, but commitment still needs practical guidance. Without it, people may improvise in ways that create rework or confusion.
+The limitation is that communication may not always define the route tightly enough. A strong message can create commitment, but commitment still needs practical guidance. Without it, people may improvise in ways that create rework, duplicated stakeholder conversations, missed dependencies, or confusion about who can make the next call.
 
 For this pattern, communication becomes stronger when it adds method:
 
@@ -122,16 +122,16 @@ Under pressure, your leadership may tighten toward emotional urgency and visible
 
 This can be useful when the team is flat, hesitant, or disconnected from the work. You may be able to re-engage people by naming why the progress matters and why their effort is needed.
 
-The tightening risk is that commitment can be expected to compensate for weak structure. People may act because they care, but unclear process can create duplicated work, uneven decisions, or hidden overload.
+The tightening risk is that commitment can be expected to compensate for weak structure. People may act because they care, but unclear process can create duplicated work, uneven decisions, hidden overload, and dependency failures that only become visible when deadlines or customers are affected.
 
-This pressure pattern can make people work hard without always making work easier to coordinate. The team may feel the importance of the moment, but still need sharper operating support.
+This pressure pattern can make people work hard without making work easier to coordinate. The team may feel the importance of the moment, but still need sharper operating support: who decides, who escalates, who owns cross-functional friction, what can be deprioritised, and how competing demands will be resolved.
 
-The pressure move is to support commitment with method:
+The pressure move is to turn commitment into an operating contract:
 
 What are people being asked to carry?
 Where do roles or decisions need to be clearer?
-What sequence will reduce rework?
-How will we review progress without relying on constant urgency?
+Which dependencies could fail if no one owns them?
+What governance will stop urgency becoming the only coordination system?
 
 Chapter 6 — The strength of this pattern
 
@@ -151,25 +151,25 @@ Chapter 7 — Where the pattern can tighten
 
 1. Commitment before coordination
 
-People may be ready to move before the route is clear. That can create activity without consistent execution.
+People may be ready to move before the route is clear. That can create activity without consistent execution. The first week may look energetic; the second week may reveal unclear decision rights, uneven ownership, and unresolved dependencies.
 
-Range to add: Bring Process in early. Define roles, standards, sequence, and review points before the work spreads.
+Range to add: Bring Process in early. Define roles, standards, sequence, decision rights, escalation points, and review rhythm before the work spreads.
 
 2. Purpose hides practical gaps
 
-The future may feel meaningful enough that people tolerate ambiguity longer than they should.
+The future may feel meaningful enough that people tolerate ambiguity longer than they should. People may absorb unclear ownership as extra labour because they believe in the work.
 
-Range to add: Ask where the method is unclear. Treat process gaps as risks to commitment, not administrative detail.
+Range to add: Ask where the method is unclear. Treat process gaps as risks to commitment, customer confidence, and delivery quality, not administrative detail.
 
 3. Energy becomes uneven
 
-Some people may carry more because they care more, have more context, or respond faster to the call.
+Some people may carry more because they care more, have more context, or respond faster to the call. That can create quiet unfairness: the same people become the informal coordinators, translators, and deadline rescuers.
 
-Range to add: Use Process to distribute work fairly and make ownership visible.
+Range to add: Use Process to distribute work fairly, make ownership visible, and make resourcing trade-offs explicit.
 
 Chapter 8 — How Vision expands your leadership
 
-Vision expands this pattern by giving commitment a larger reason.
+Vision gives this pattern a larger reason for commitment.
 
 When Vision is brought in deliberately, people do not only know that progress is needed. They understand what their effort is helping to build. This can make mobilisation more resilient because the work has meaning beyond the immediate ask.
 
@@ -177,7 +177,7 @@ This matters because Results and People can create strong responsiveness. The te
 
 Vision also improves judgement. When people understand the direction, they can make better choices in the details. They are less dependent on you to define every next step.
 
-Useful activation questions include:
+Direction questions to bring forward:
 
 What future are we asking people to help create?
 What should this progress make possible?
@@ -186,28 +186,29 @@ What story would help people use judgement, not only effort?
 
 Chapter 9 — How Process expands your leadership
 
-Process expands this pattern by turning committed action into coordinated progress.
+Process turns committed action into coordinated progress.
 
-Because Process is the furthest extension, it may be easy to assume that people will work out the route because they care about the outcome. That assumption can create avoidable strain.
+Because Process is the furthest extension, it may be easy to assume that people will work out the route because they care about the outcome. That assumption can create avoidable strain. It can also create operational risk: informal coordination replaces governance, dependencies rely on memory, and authority remains unclear until something stalls.
 
-Process gives people a fairer way to work. It clarifies who owns what, where handovers sit, what standard applies, and how progress will be reviewed. It reduces the hidden burden of interpretation.
+Process gives people a fairer way to work. It clarifies who owns what, where handovers sit, what standard applies, how decisions move, and how progress will be reviewed. It reduces the hidden burden of interpretation.
 
-For this pattern, Process should not feel bureaucratic. It should feel like support for commitment. The aim is to protect energy, reduce rework, and make meaningful progress easier to sustain.
+For this pattern, Process should not feel bureaucratic. It should feel like protection for commitment. The aim is to protect energy, reduce rework, prevent dependency failure, and make meaningful progress easier to sustain.
 
-Useful activation questions include:
+Operating questions to bring forward:
 
 What method will make this easier to carry?
 Where could committed people duplicate effort?
 What decision rights need to be named?
 What cadence will keep progress visible without constant pressure?
+Where do we need governance before goodwill becomes the coordination system?
 
 Chapter 10 — Development focus
 
-The development work is to give commitment an operating route.
+The development focus is to give commitment an operating route.
 
-1. Define roles after mobilisation
+1. Define roles before the work spreads
 
-When people are ready to act, quickly clarify ownership. Do not let enthusiasm blur accountability.
+When people are ready to act, quickly clarify ownership, authority, and handovers. Do not let enthusiasm blur accountability.
 
 Use this in: team launches, change work, urgent delivery, cross-functional projects.
 
@@ -219,31 +220,31 @@ Use this in: strategy updates, team briefings, planning, stakeholder communicati
 
 3. Protect people from ambiguity
 
-Ambiguity often becomes extra work for the most committed people. Clarify the route before strain builds.
+Ambiguity often becomes extra work for the most committed people. Clarify the route before strain builds, especially where dependencies, resourcing, or escalation paths are likely to be contested.
 
 Use this in: workload reviews, delivery planning, team retrospectives.
 
 4. Review coordination, not only output
 
-Ask whether the way of working is helping people sustain progress.
+Ask whether the way of working is helping people sustain progress. Look for repeated handover friction, unclear decisions, duplicated stakeholder management, or progress that depends on one person holding too much context.
 
 Use this in: project reviews, operating meetings, manager check-ins.
 
 5. Make progress less dependent on your energy
 
-Build rhythms and standards that help the team continue when you are not the person driving the moment.
+Build rhythms and standards that help the team continue when you are not the person driving the moment. The test is whether progress survives without your urgency, reassurance, or personal follow-up.
 
 Use this in: delegation, leadership team routines, scaling work, handovers.
 
 Closing synthesis
 
-Your leadership is valuable because it moves people toward meaningful progress.
+Your leadership moves people toward meaningful progress.
 
 You are likely to bring action where people care but have not yet moved, purpose where effort could feel merely reactive, and commitment where progress needs human energy. Results gives the pattern its movement. People gives that movement ownership and trust. Vision gives it a future reason.
 
-The main tightening risk is that the method may arrive too late. People may believe in the work and want to contribute, but still lack the operating clarity that makes contribution reliable. Over time, that can scatter energy and create hidden strain.
+The main tightening risk is that the method may arrive too late. People may believe in the work and want to contribute, but still lack the operating clarity that makes contribution reliable. Over time, that can scatter energy, create hidden strain, and make delivery depend on informal coordination rather than a system the team can trust.
 
-Your growth is to translate commitment into method. Bring Vision in so people know what their progress is building. Bring Process in so that progress has a way to hold.
+Your growth is to translate commitment into method. Bring Vision in so people know what their progress is building. Bring Process in so that progress has a way to hold under real dependencies, decision pressure, and workload trade-offs.
 
 At your best, you give people more than a reason to care. You give them a meaningful direction, a visible way to contribute, and a practical method for turning commitment into progress.
 

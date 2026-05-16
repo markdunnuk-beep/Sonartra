@@ -1753,8 +1753,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_people_process_vision.md",
-      "source_content_hash": "00d2402c49d92873af96377f96a7fb592e5f4a188ece3307eca1e338094381fc",
-      "content_hash": "00d2402c49d92873af96377f96a7fb592e5f4a188ece3307eca1e338094381fc",
+      "source_content_hash": "7eb0a281f2efac26ef8c3b9598a5534aeced11057d694f49ba4cad57ecdcf353",
+      "content_hash": "7eb0a281f2efac26ef8c3b9598a5534aeced11057d694f49ba4cad57ecdcf353",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -1772,7 +1772,7 @@
           "reportTitle": "Leadership Approach — Results, People, Process, Vision",
           "hero": {
             "title": "You lead by turning commitment into visible progress",
-            "resultStatement": "You create confidence by helping people move together toward practical outcomes. Your leadership is at its best when a team has energy, concern, or willingness, but needs that human commitment to become action, ownership, and reliable delivery.\n\nProcess expands this pattern by making shared effort more dependable. Vision extends it further by connecting progress to the larger direction the team is helping to build."
+            "resultStatement": "You create confidence by helping people move together toward practical outcomes. Your leadership is at its best when a team has energy, concern, or willingness, but needs that human commitment to become action, ownership, and reliable delivery.\n\nProcess makes shared effort more dependable. Vision extends it further by connecting progress to the larger direction the team is helping to build."
           },
           "opening": [
             {
@@ -1789,11 +1789,11 @@
             },
             {
               "type": "paragraph",
-              "text": "The furthest extension is Vision. That is the main development edge. When people are willing to move and the work can be organised, the larger direction may still remain under-explained. The team may know what needs to happen and feel ready to help, but not fully understand what future their effort is creating."
+              "text": "The furthest extension is Vision. That is the main development edge. When people are willing to move and the work can be organised, the larger direction may still remain under-explained. The team may know what needs to happen and feel ready to help, but not fully understand what future their effort is creating or how today's responsiveness compounds into strategy."
             },
             {
               "type": "paragraph",
-              "text": "Your most effective leadership mobilises people around progress, then gives that progress structure and meaning."
+              "text": "Your most effective leadership mobilises people around progress, makes that effort reliable, and then gives the work a future direction strong enough to prevent repeated mobilisation from becoming fatigue."
             }
           ],
           "patternSummary": {
@@ -1897,7 +1897,7 @@
               },
               {
                 "type": "paragraph",
-                "text": "This is a progress-and-commitment pattern. At its strongest, it turns people's willingness into practical movement that can be organised and made meaningful."
+                "text": "This is a progress-and-commitment pattern. Its strongest version turns people's willingness into practical movement that is reliable first, then strategically meaningful enough to feel worth sustaining."
               }
             ]
           },
@@ -1963,7 +1963,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The mature version of this pattern keeps the mobilisation and practical action, then explains the larger direction early enough that effort feels significant, not only necessary."
+                  "text": "The more complete version keeps the mobilisation and practical action, then explains the larger direction early enough that effort feels significant, not only necessary."
                 }
               ],
               "readerFacing": true
@@ -1992,7 +1992,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Vision is the edge. A decision can mobilise people and organise effort while still under-explaining the future. That can make the work feel like repeated short-term response. The question to add is: what larger purpose does this progress serve?"
+                  "text": "Vision is the edge. A decision can mobilise people and organise effort while still under-explaining the future. That can make the work feel like repeated short-term response: useful, well held, and still not clearly accumulating into something larger. The question to add is: what larger purpose does this progress serve?"
                 },
                 {
                   "type": "prompt_group",
@@ -2000,7 +2000,7 @@
                   "prompts": [
                     "Who needs to be with this for it to move well?",
                     "What structure will make shared effort reliable?",
-                    "What future reason should guide this decision?",
+                    "What future reason should guide this decision so effort compounds rather than resets?",
                     "Where could people overcommit because they want to help?"
                   ]
                 }
@@ -2027,7 +2027,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The limitation is that communication may become too immediate. People may hear what they need to do and feel valued in doing it, but not understand the larger direction clearly enough to use judgement when the situation changes."
+                  "text": "The limitation is that communication may become too immediate. People may hear what they need to do and feel valued in doing it, but not understand the larger direction clearly enough to use judgement when the situation changes. Over time, that can make even well-organised progress feel like another demand rather than a contribution to a larger build."
                 },
                 {
                   "type": "paragraph",
@@ -2056,11 +2056,11 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The tightening risk is that commitment can be used before direction is fully explained. You may lean on people's willingness, loyalty, or responsiveness because the work needs to move. The team may deliver, but later wonder whether the effort was connected to a coherent future."
+                  "text": "The tightening risk is that commitment can be used before direction is fully explained. You may lean on people's willingness, loyalty, or responsiveness because the work needs to move. The team may deliver, but later wonder whether the effort was connected to a coherent future or simply absorbed another urgent demand."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Process may also become corrective under pressure. You may introduce structure after signs of strain appear rather than before. That can help, but it may feel like control if people were first mobilised emotionally and then managed operationally."
+                  "text": "Process may also become corrective under pressure. You may introduce structure after signs of strain appear rather than before. That can help, but if Vision stays quiet, the structure may only make the immediate push more efficient rather than more meaningful."
                 },
                 {
                   "type": "prompt_group",
@@ -2068,8 +2068,9 @@
                   "prompts": [
                     "What are we asking people to carry?",
                     "What route will keep effort coordinated?",
-                    "What future reason makes this effort worth it?",
-                    "Where might commitment become fatigue if the purpose stays unclear?"
+                    "What future reason makes this effort worth carrying again tomorrow?",
+                    "Where might commitment become fatigue if the purpose stays unclear?",
+                    "How will this progress change the strategic position, not only clear the current demand?"
                   ]
                 }
               ],
@@ -2108,9 +2109,9 @@
                 {
                   "type": "tightening_card",
                   "title": "Commitment before direction",
-                  "text": "People may be willing to move before the future reason has been made clear. That can create action, but not always strategic confidence.",
-                  "rangeToAdd": "Bring Vision in early. Explain what the effort is meant to build, strengthen, prevent, or make possible.",
-                  "whyItMatters": "Bring Vision in early. Explain what the effort is meant to build, strengthen, prevent, or make possible."
+                  "text": "People may be willing to move before the future reason has been made clear. That can create action, but not always strategic confidence. The team may become responsive without becoming more oriented.",
+                  "rangeToAdd": "Bring Vision in early. Explain what the effort is meant to build, strengthen, prevent, or make possible, so the work feels like contribution rather than repeated mobilisation.",
+                  "whyItMatters": "Bring Vision in early. Explain what the effort is meant to build, strengthen, prevent, or make possible, so the work feels like contribution rather than repeated mobilisation."
                 },
                 {
                   "type": "tightening_card",
@@ -2122,9 +2123,9 @@
                 {
                   "type": "tightening_card",
                   "title": "Action becomes personal pressure",
-                  "text": "Because progress is tied to people, performance pressure may feel personal. People may not want to disappoint the group or the leader.",
-                  "rangeToAdd": "Separate accountability from personal approval. Make the work clear without making pressure relationally heavy.",
-                  "whyItMatters": "Separate accountability from personal approval. Make the work clear without making pressure relationally heavy."
+                  "text": "Because progress is tied to people, performance pressure may feel personal. People may not want to disappoint the group or the leader. If the future reason is weak, effort can start to feel like being valued mainly for output.",
+                  "rangeToAdd": "Separate accountability from personal approval. Make the work clear without making pressure relationally heavy, and name the future value that makes the effort worth asking for.",
+                  "whyItMatters": "Separate accountability from personal approval. Make the work clear without making pressure relationally heavy, and name the future value that makes the effort worth asking for."
                 }
               ],
               "readerFacing": true
@@ -2137,7 +2138,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Process expands this pattern by making shared effort reliable."
+                  "text": "Process gives this pattern its reliability edge by making shared effort easier to coordinate and sustain."
                 },
                 {
                   "type": "paragraph",
@@ -2153,7 +2154,7 @@
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Reliability questions to bring forward",
                   "prompts": [
                     "What role does each person actually own?",
                     "What handover could break under pressure?",
@@ -2172,23 +2173,23 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Vision expands this pattern by giving effort a larger reason."
+                  "text": "Vision gives effort a larger reason."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Because Vision is the furthest extension, the team may sometimes know what needs to happen before it fully understands why the work matters beyond the current demand. People may be willing to act, but the future story may remain implicit."
+                  "text": "Because Vision is the furthest extension, the team may sometimes know what needs to happen before it fully understands why the work matters beyond the current demand. People may be willing to act, and Process may make that action reliable, but the future story may remain implicit."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Vision helps you connect mobilisation to purpose. It asks what the progress is building, what capability is being strengthened, what future risk is being reduced, or what direction the team is helping to make real."
+                  "text": "Vision helps you connect mobilisation to purpose. It asks what the progress is building, what capability is being strengthened, what future risk is being reduced, or what direction the team is helping to make real. It helps effort compound into strategy instead of resetting with each new urgent ask."
                 },
                 {
                   "type": "paragraph",
-                  "text": "This is not decorative inspiration. For this pattern, Vision protects people from feeling that commitment is only being used to meet the next urgent need. It helps effort feel significant and strategic."
+                  "text": "This is not decorative inspiration. For this pattern, Vision protects people from feeling that commitment is only being used to meet the next urgent need. It helps effort feel significant, strategic, and worth sustaining when the work becomes repetitive or commercially pressured."
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Direction questions to bring forward",
                   "prompts": [
                     "What future are we asking people to help create?",
                     "What will this effort make possible if we get it right?",
@@ -2207,12 +2208,12 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "The development work is to connect mobilisation with structure and direction."
+                  "text": "The development focus is to connect mobilisation with structure and direction."
                 },
                 {
                   "type": "development_action",
                   "title": "Explain the future before asking for extra effort",
-                  "text": "When people are ready to move, give them the larger reason. Do not let willingness replace strategic context.",
+                  "text": "When people are ready to move, give them the larger reason. Do not let willingness replace strategic context or repeated responsiveness become the default operating model.",
                   "useCases": [
                     "urgent delivery",
                     "change programmes",
@@ -2224,7 +2225,7 @@
                 {
                   "type": "development_action",
                   "title": "Build a coordination route",
-                  "text": "Translate commitment into roles, sequence, standards, and review. This helps people work together without guessing.",
+                  "text": "Translate commitment into roles, sequence, standards, and review. This helps people work together without guessing and keeps reliable effort from depending on informal coordination.",
                   "useCases": [
                     "cross-functional work",
                     "delegation",
@@ -2236,7 +2237,7 @@
                 {
                   "type": "development_action",
                   "title": "Watch for over-responsibility",
-                  "text": "People may take on too much because they care. Check where commitment is turning into hidden strain.",
+                  "text": "People may take on too much because they care. Check where commitment is turning into hidden strain, especially when the same people repeatedly absorb urgent work without seeing the strategic payoff.",
                   "useCases": [
                     "manager check-ins",
                     "workload reviews",
@@ -2258,7 +2259,7 @@
                 {
                   "type": "development_action",
                   "title": "Use the team to improve the route",
-                  "text": "Invite people to shape the method, not only deliver through it. Their local judgement can strengthen the action.",
+                  "text": "Invite people to shape the method, not only deliver through it. Their local judgement can strengthen the action and show where the immediate route is not yet connected to the longer direction.",
                   "useCases": [
                     "planning sessions",
                     "retrospectives",
@@ -2274,7 +2275,7 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it turns people's willingness into progress."
+                "text": "Your leadership turns people's willingness into progress."
               },
               {
                 "type": "paragraph",
@@ -2282,11 +2283,11 @@
               },
               {
                 "type": "paragraph",
-                "text": "The main tightening risk is that progress may become immediate before it becomes clearly directional. People may be ready to act, and the work may even become organised, but the larger future can remain under-explained. Over time, that can turn commitment into fatigue."
+                "text": "The main tightening risk is that progress may become reliable before it becomes clearly directional. People may be ready to act, and the work may even become organised, but the larger future can remain under-explained. Over time, that can turn commitment into fatigue because people experience another well-run push without seeing what it is meant to build."
               },
               {
                 "type": "paragraph",
-                "text": "Your growth is to make effort meaningful and reliable. Bring Process in so shared work has structure. Bring Vision in so people understand what their effort is building."
+                "text": "Your growth is to make reliable effort strategically meaningful. Bring Process in so shared work has structure. Bring Vision in so people understand what their effort is building and why the next push is not just another demand."
               },
               {
                 "type": "paragraph",
@@ -2497,8 +2498,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_people_vision_process.md",
-      "source_content_hash": "98125729cfe819ee3bb22fc911732b98c61cd55c61e7df1ec3105760188eeb30",
-      "content_hash": "98125729cfe819ee3bb22fc911732b98c61cd55c61e7df1ec3105760188eeb30",
+      "source_content_hash": "e367ea97ddf566b3f4f737a42fb1ec8b08513ab5c53f6c856707e2cf9518c79b",
+      "content_hash": "e367ea97ddf566b3f4f737a42fb1ec8b08513ab5c53f6c856707e2cf9518c79b",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -2516,7 +2517,7 @@
           "reportTitle": "Leadership Approach — Results, People, Vision, Process",
           "hero": {
             "title": "You lead by moving people toward a future worth acting on",
-            "resultStatement": "You create confidence by mobilising people into progress and connecting that progress to something meaningful. Your leadership is at its best when a team needs to feel involved, needed, and pointed toward a future that deserves visible action.\n\nVision expands this pattern by giving commitment a larger direction. Process extends it further by giving that commitment the operating spine required to last."
+            "resultStatement": "You create confidence by mobilising people into progress and connecting that progress to something meaningful. Your leadership is at its best when a team needs to feel involved, needed, and pointed toward a future that deserves visible action.\n\nVision gives commitment a larger direction. Process extends it further by giving that commitment the operating spine required to last."
           },
           "opening": [
             {
@@ -2533,11 +2534,11 @@
             },
             {
               "type": "paragraph",
-              "text": "Process is the furthest extension and the main development edge. When people are committed and the purpose is meaningful, the work can still become scattered if the route is underdefined. The team may care deeply and still need clearer roles, sequence, handovers, standards, and review rhythm."
+              "text": "Process is the furthest extension and the main development edge. When people are committed and the purpose is meaningful, the work can still become commercially fragile if the route is underdefined. The team may care deeply, but still need clearer decision rights, dependency management, operating cadence, handovers, standards, and review rhythm."
             },
             {
               "type": "paragraph",
-              "text": "Your most effective leadership builds human momentum, connects it to a future, and then gives that momentum enough method to become reliable."
+              "text": "Your most effective leadership builds human momentum, connects it to a future, and then gives that momentum enough method that commitment does not become hidden labour for the most responsive people."
             }
           ],
           "patternSummary": {
@@ -2641,7 +2642,7 @@
               },
               {
                 "type": "paragraph",
-                "text": "This is a progress-and-people pattern with a future expansion. At its strongest, it creates committed action that feels meaningful and eventually becomes well organised."
+                "text": "This is a progress-and-people pattern with a future expansion. Its strongest version creates committed action that feels meaningful, then turns that commitment into a way of working that can survive real delivery pressure."
               }
             ]
           },
@@ -2674,11 +2675,11 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "Process is the missing operating edge. Commitment and meaning are powerful, but they do not automatically create coordination. People may begin with shared energy and then diverge in execution because the method is not clear enough."
+                  "text": "Process is the missing operating edge. Commitment and meaning are powerful, but they do not automatically create coordination. People may begin with shared energy and then diverge in execution because decision rights, dependencies, escalation routes, and delivery standards have not been made explicit."
                 },
                 {
                   "type": "paragraph",
-                  "text": "When this pattern works well, others feel both needed and oriented. The work has energy, purpose, and a visible next step. The next level is making that movement repeatable."
+                  "text": "When this pattern works well, others feel both needed and oriented. The work has energy, purpose, and a visible next step. The next level is making that movement operationally reliable enough that progress does not depend on informal coordination or repeated personal effort."
                 }
               ],
               "readerFacing": true
@@ -2703,11 +2704,11 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The possible tension is that the route may be less clear than the commitment. People can leave aligned around purpose and willing to move, then become uncertain about ownership, sequence, decision rights, or standards. That uncertainty can quietly drain the energy that your leadership created."
+                  "text": "The possible tension is that the route may be less clear than the commitment. People can leave aligned around purpose and willing to move, then become uncertain about ownership, sequence, decision rights, resourcing, or standards. That uncertainty can quietly drain the energy that your leadership created."
                 },
                 {
                   "type": "paragraph",
-                  "text": "The mature version of this pattern keeps the human mobilisation and future meaning, then gives the team enough structure to work together without guessing."
+                  "text": "The stronger version keeps the human mobilisation and future meaning, then gives the team enough structure to work together without guessing. It prevents the most committed people from becoming the unofficial project managers, dependency trackers, and problem escalators."
                 }
               ],
               "readerFacing": true
@@ -2732,7 +2733,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The risk is that a decision can be high-commitment and high-meaning while still low-method. People may agree with the decision and care about the outcome, but still lack the operating clarity needed to execute consistently."
+                  "text": "The risk is that a decision can be high-commitment and high-meaning while still low-method. People may agree with the decision and care about the outcome, but still lack the operating clarity needed to execute consistently. In senior work, that gap shows up as slow handovers, unclear authority, duplicated effort, and decisions that reappear because no one knew who could close them."
                 },
                 {
                   "type": "prompt_group",
@@ -2741,7 +2742,7 @@
                     "What progress should this decision create?",
                     "Who needs to own it, not only support it?",
                     "What larger direction does it serve?",
-                    "What method will stop people from translating it differently?"
+                    "What decision rights and dependencies need to be explicit before people start translating it differently?"
                   ]
                 }
               ],
@@ -2767,7 +2768,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The limitation is that communication may not always define the route tightly enough. A strong message can create commitment, but commitment still needs practical guidance. Without it, people may improvise in ways that create rework or confusion."
+                  "text": "The limitation is that communication may not always define the route tightly enough. A strong message can create commitment, but commitment still needs practical guidance. Without it, people may improvise in ways that create rework, duplicated stakeholder conversations, missed dependencies, or confusion about who can make the next call."
                 },
                 {
                   "type": "paragraph",
@@ -2796,20 +2797,20 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The tightening risk is that commitment can be expected to compensate for weak structure. People may act because they care, but unclear process can create duplicated work, uneven decisions, or hidden overload."
+                  "text": "The tightening risk is that commitment can be expected to compensate for weak structure. People may act because they care, but unclear process can create duplicated work, uneven decisions, hidden overload, and dependency failures that only become visible when deadlines or customers are affected."
                 },
                 {
                   "type": "paragraph",
-                  "text": "This pressure pattern can make people work hard without always making work easier to coordinate. The team may feel the importance of the moment, but still need sharper operating support."
+                  "text": "This pressure pattern can make people work hard without making work easier to coordinate. The team may feel the importance of the moment, but still need sharper operating support: who decides, who escalates, who owns cross-functional friction, what can be deprioritised, and how competing demands will be resolved."
                 },
                 {
                   "type": "prompt_group",
-                  "title": "The pressure move is to support commitment with method",
+                  "title": "The pressure move is to turn commitment into an operating contract",
                   "prompts": [
                     "What are people being asked to carry?",
                     "Where do roles or decisions need to be clearer?",
-                    "What sequence will reduce rework?",
-                    "How will we review progress without relying on constant urgency?"
+                    "Which dependencies could fail if no one owns them?",
+                    "What governance will stop urgency becoming the only coordination system?"
                   ]
                 }
               ],
@@ -2848,23 +2849,23 @@
                 {
                   "type": "tightening_card",
                   "title": "Commitment before coordination",
-                  "text": "People may be ready to move before the route is clear. That can create activity without consistent execution.",
-                  "rangeToAdd": "Bring Process in early. Define roles, standards, sequence, and review points before the work spreads.",
-                  "whyItMatters": "Bring Process in early. Define roles, standards, sequence, and review points before the work spreads."
+                  "text": "People may be ready to move before the route is clear. That can create activity without consistent execution. The first week may look energetic; the second week may reveal unclear decision rights, uneven ownership, and unresolved dependencies.",
+                  "rangeToAdd": "Bring Process in early. Define roles, standards, sequence, decision rights, escalation points, and review rhythm before the work spreads.",
+                  "whyItMatters": "Bring Process in early. Define roles, standards, sequence, decision rights, escalation points, and review rhythm before the work spreads."
                 },
                 {
                   "type": "tightening_card",
                   "title": "Purpose hides practical gaps",
-                  "text": "The future may feel meaningful enough that people tolerate ambiguity longer than they should.",
-                  "rangeToAdd": "Ask where the method is unclear. Treat process gaps as risks to commitment, not administrative detail.",
-                  "whyItMatters": "Ask where the method is unclear. Treat process gaps as risks to commitment, not administrative detail."
+                  "text": "The future may feel meaningful enough that people tolerate ambiguity longer than they should. People may absorb unclear ownership as extra labour because they believe in the work.",
+                  "rangeToAdd": "Ask where the method is unclear. Treat process gaps as risks to commitment, customer confidence, and delivery quality, not administrative detail.",
+                  "whyItMatters": "Ask where the method is unclear. Treat process gaps as risks to commitment, customer confidence, and delivery quality, not administrative detail."
                 },
                 {
                   "type": "tightening_card",
                   "title": "Energy becomes uneven",
-                  "text": "Some people may carry more because they care more, have more context, or respond faster to the call.",
-                  "rangeToAdd": "Use Process to distribute work fairly and make ownership visible.",
-                  "whyItMatters": "Use Process to distribute work fairly and make ownership visible."
+                  "text": "Some people may carry more because they care more, have more context, or respond faster to the call. That can create quiet unfairness: the same people become the informal coordinators, translators, and deadline rescuers.",
+                  "rangeToAdd": "Use Process to distribute work fairly, make ownership visible, and make resourcing trade-offs explicit.",
+                  "whyItMatters": "Use Process to distribute work fairly, make ownership visible, and make resourcing trade-offs explicit."
                 }
               ],
               "readerFacing": true
@@ -2877,7 +2878,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Vision expands this pattern by giving commitment a larger reason."
+                  "text": "Vision gives this pattern a larger reason for commitment."
                 },
                 {
                   "type": "paragraph",
@@ -2893,7 +2894,7 @@
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Direction questions to bring forward",
                   "prompts": [
                     "What future are we asking people to help create?",
                     "What should this progress make possible?",
@@ -2912,28 +2913,29 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Process expands this pattern by turning committed action into coordinated progress."
+                  "text": "Process turns committed action into coordinated progress."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Because Process is the furthest extension, it may be easy to assume that people will work out the route because they care about the outcome. That assumption can create avoidable strain."
+                  "text": "Because Process is the furthest extension, it may be easy to assume that people will work out the route because they care about the outcome. That assumption can create avoidable strain. It can also create operational risk: informal coordination replaces governance, dependencies rely on memory, and authority remains unclear until something stalls."
                 },
                 {
                   "type": "paragraph",
-                  "text": "Process gives people a fairer way to work. It clarifies who owns what, where handovers sit, what standard applies, and how progress will be reviewed. It reduces the hidden burden of interpretation."
+                  "text": "Process gives people a fairer way to work. It clarifies who owns what, where handovers sit, what standard applies, how decisions move, and how progress will be reviewed. It reduces the hidden burden of interpretation."
                 },
                 {
                   "type": "paragraph",
-                  "text": "For this pattern, Process should not feel bureaucratic. It should feel like support for commitment. The aim is to protect energy, reduce rework, and make meaningful progress easier to sustain."
+                  "text": "For this pattern, Process should not feel bureaucratic. It should feel like protection for commitment. The aim is to protect energy, reduce rework, prevent dependency failure, and make meaningful progress easier to sustain."
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Operating questions to bring forward",
                   "prompts": [
                     "What method will make this easier to carry?",
                     "Where could committed people duplicate effort?",
                     "What decision rights need to be named?",
-                    "What cadence will keep progress visible without constant pressure?"
+                    "What cadence will keep progress visible without constant pressure?",
+                    "Where do we need governance before goodwill becomes the coordination system?"
                   ]
                 }
               ],
@@ -2947,12 +2949,12 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "The development work is to give commitment an operating route."
+                  "text": "The development focus is to give commitment an operating route."
                 },
                 {
                   "type": "development_action",
-                  "title": "Define roles after mobilisation",
-                  "text": "When people are ready to act, quickly clarify ownership. Do not let enthusiasm blur accountability.",
+                  "title": "Define roles before the work spreads",
+                  "text": "When people are ready to act, quickly clarify ownership, authority, and handovers. Do not let enthusiasm blur accountability.",
                   "useCases": [
                     "team launches",
                     "change work",
@@ -2976,7 +2978,7 @@
                 {
                   "type": "development_action",
                   "title": "Protect people from ambiguity",
-                  "text": "Ambiguity often becomes extra work for the most committed people. Clarify the route before strain builds.",
+                  "text": "Ambiguity often becomes extra work for the most committed people. Clarify the route before strain builds, especially where dependencies, resourcing, or escalation paths are likely to be contested.",
                   "useCases": [
                     "workload reviews",
                     "delivery planning",
@@ -2987,7 +2989,7 @@
                 {
                   "type": "development_action",
                   "title": "Review coordination, not only output",
-                  "text": "Ask whether the way of working is helping people sustain progress.",
+                  "text": "Ask whether the way of working is helping people sustain progress. Look for repeated handover friction, unclear decisions, duplicated stakeholder management, or progress that depends on one person holding too much context.",
                   "useCases": [
                     "project reviews",
                     "operating meetings",
@@ -2998,7 +3000,7 @@
                 {
                   "type": "development_action",
                   "title": "Make progress less dependent on your energy",
-                  "text": "Build rhythms and standards that help the team continue when you are not the person driving the moment.",
+                  "text": "Build rhythms and standards that help the team continue when you are not the person driving the moment. The test is whether progress survives without your urgency, reassurance, or personal follow-up.",
                   "useCases": [
                     "delegation",
                     "leadership team routines",
@@ -3015,7 +3017,7 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it moves people toward meaningful progress."
+                "text": "Your leadership moves people toward meaningful progress."
               },
               {
                 "type": "paragraph",
@@ -3023,11 +3025,11 @@
               },
               {
                 "type": "paragraph",
-                "text": "The main tightening risk is that the method may arrive too late. People may believe in the work and want to contribute, but still lack the operating clarity that makes contribution reliable. Over time, that can scatter energy and create hidden strain."
+                "text": "The main tightening risk is that the method may arrive too late. People may believe in the work and want to contribute, but still lack the operating clarity that makes contribution reliable. Over time, that can scatter energy, create hidden strain, and make delivery depend on informal coordination rather than a system the team can trust."
               },
               {
                 "type": "paragraph",
-                "text": "Your growth is to translate commitment into method. Bring Vision in so people know what their progress is building. Bring Process in so that progress has a way to hold."
+                "text": "Your growth is to translate commitment into method. Bring Vision in so people know what their progress is building. Bring Process in so that progress has a way to hold under real dependencies, decision pressure, and workload trade-offs."
               },
               {
                 "type": "paragraph",
@@ -4012,8 +4014,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_process_vision_people.md",
-      "source_content_hash": "5375cc590122a0567318140a9f69f54755536938e42fbf2856f16237693dea39",
-      "content_hash": "5375cc590122a0567318140a9f69f54755536938e42fbf2856f16237693dea39",
+      "source_content_hash": "6043791aa0b2ccb58c69aea018a6bd119a7e6dc362e89f3b1eebde857e09b79e",
+      "content_hash": "6043791aa0b2ccb58c69aea018a6bd119a7e6dc362e89f3b1eebde857e09b79e",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -4156,7 +4158,7 @@
               },
               {
                 "type": "paragraph",
-                "text": "This is a progress-and-method pattern with a strategic expansion. At its strongest, it creates practical movement that is repeatable, purposeful, and eventually shared."
+                "text": "This is a progress-and-method pattern with a strategic expansion. Its best version creates practical movement that is repeatable, purposeful, and shared before commitment is tested."
               }
             ]
           },
@@ -4222,7 +4224,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The mature version of this pattern keeps the pace, method, and future direction, but lets people influence the route while it is still open enough to be improved."
+                  "text": "The more complete version keeps the pace, method, and future direction, but lets people influence the route while it is still open enough to be improved."
                 }
               ],
               "readerFacing": true
@@ -4404,7 +4406,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Vision expands this pattern by connecting progress to a future worth building."
+                  "text": "Vision gives this pattern its strategic reach by connecting progress to a future worth building."
                 },
                 {
                   "type": "paragraph",
@@ -4420,7 +4422,7 @@
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Strategic questions to bring forward",
                   "prompts": [
                     "What future capability are we building through this progress?",
                     "What should become stronger if we get this right?",
@@ -4439,7 +4441,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "People expands this pattern by turning a clear route into shared commitment."
+                  "text": "People gives this pattern its ownership edge by turning a clear route into shared commitment."
                 },
                 {
                   "type": "paragraph",
@@ -4455,7 +4457,7 @@
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Ownership questions to bring forward",
                   "prompts": [
                     "Who needs to shape this before the route is fixed?",
                     "What concern would make the action stronger if we heard it now?",
@@ -4474,7 +4476,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "The development work is not to reduce your drive for progress. It is to make progress more complete before it accelerates."
+                  "text": "The development focus is not to reduce your drive for progress. It is to make progress more complete before it accelerates."
                 },
                 {
                   "type": "development_action",
@@ -4544,7 +4546,7 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it makes progress practical."
+                "text": "Your leadership makes progress practical."
               },
               {
                 "type": "paragraph",
@@ -4767,8 +4769,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_vision_people_process.md",
-      "source_content_hash": "c1ab04ca506b76a690a80f7f2a68e832ae21df8c8a9f531fce34a96aeab05286",
-      "content_hash": "c1ab04ca506b76a690a80f7f2a68e832ae21df8c8a9f531fce34a96aeab05286",
+      "source_content_hash": "d29b682eac9f50e067ea9a2ff2b7e83fba7865358c8ceba0390743d0a1cd64eb",
+      "content_hash": "d29b682eac9f50e067ea9a2ff2b7e83fba7865358c8ceba0390743d0a1cd64eb",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -4786,7 +4788,7 @@
           "reportTitle": "Leadership Approach — Results, Vision, People, Process",
           "hero": {
             "title": "You lead by mobilising people around meaningful progress",
-            "resultStatement": "You create confidence by making the future feel close enough to act on. Your leadership is at its best when people need to see why movement matters, feel invited into that movement, and begin turning shared belief into visible progress.\n\nPeople expands this pattern by turning future-facing momentum into commitment. Process extends it further by giving that commitment the operating discipline it needs to last."
+            "resultStatement": "You create confidence by making the future feel close enough to act on. Your leadership is at its best when people need to see why movement matters, feel invited into that movement, and begin turning shared belief into visible progress.\n\nPeople turns future-facing momentum into commitment. Process extends it further by giving that commitment the operating discipline it needs to last."
           },
           "opening": [
             {
@@ -4911,7 +4913,7 @@
               },
               {
                 "type": "paragraph",
-                "text": "This is a progress-and-future pattern with a people expansion. At its strongest, it creates meaningful movement that people want to join and can eventually organise."
+                "text": "This is a progress-and-future pattern with a people expansion. Its best version creates meaningful movement that people want to join and can eventually organise."
               }
             ]
           },
@@ -4977,7 +4979,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The mature version of this pattern keeps the energy and invitation, then adds method early enough that people know how to coordinate their commitment."
+                  "text": "The more complete version keeps the energy and invitation, then adds method early enough that people know how to coordinate their commitment."
                 }
               ],
               "readerFacing": true
@@ -5147,7 +5149,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "People expands this pattern by turning future-facing momentum into shared commitment."
+                  "text": "People gives this pattern its mobilisation strength by turning future-facing momentum into shared commitment."
                 },
                 {
                   "type": "paragraph",
@@ -5163,7 +5165,7 @@
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Mobilisation questions to bring forward",
                   "prompts": [
                     "Who needs to feel part of this before we accelerate?",
                     "What contribution are we asking people to make?",
@@ -5182,7 +5184,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Process expands this pattern by giving meaningful movement a working spine."
+                  "text": "Process gives meaningful movement a working spine."
                 },
                 {
                   "type": "paragraph",
@@ -5198,7 +5200,7 @@
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Operating questions to bring forward",
                   "prompts": [
                     "What rhythm will keep this movement coordinated?",
                     "Who owns the next decision and the next handover?",
@@ -5217,7 +5219,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "The development work is to turn energy into a repeatable way of working."
+                  "text": "The development focus is to turn energy into a repeatable way of working."
                 },
                 {
                   "type": "development_action",
@@ -5284,7 +5286,7 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it makes meaningful progress feel possible."
+                "text": "Your leadership makes meaningful progress feel possible."
               },
               {
                 "type": "paragraph",
@@ -5507,8 +5509,8 @@
         "balanced"
       ],
       "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_vision_process_people.md",
-      "source_content_hash": "e5d8b2bb09e1e6020e87d77c1dafebc423f31ea40406e12702506e9f3a8842e5",
-      "content_hash": "e5d8b2bb09e1e6020e87d77c1dafebc423f31ea40406e12702506e9f3a8842e5",
+      "source_content_hash": "a1db794723a3d509c8150a52be01abb7f009c80d1a426c56c319d5e8e9f559e8",
+      "content_hash": "a1db794723a3d509c8150a52be01abb7f009c80d1a426c56c319d5e8e9f559e8",
       "report_template_json": {
         "metadata": {
           "payloadVersion": 1,
@@ -5526,7 +5528,7 @@
           "reportTitle": "Leadership Approach — Results, Vision, Process, People",
           "hero": {
             "title": "You lead by turning future intent into visible progress",
-            "resultStatement": "You create confidence by making ambition move. Your leadership is at its best when people can see that a direction matters, but the work still needs a practical move, a proof point, and enough structure to make the future executable.\n\nProcess expands this pattern by grounding purposeful momentum in method. People extends it further by making sure commitment is shaped with others, not only requested once the direction is already moving."
+            "resultStatement": "You create confidence by making ambition move. Your leadership is at its best when people can see that a direction matters, but the work still needs a practical move, a proof point, and enough structure to make the future executable.\n\nProcess grounds purposeful momentum in method. People extends it further by making sure commitment is shaped with others, not only requested once the direction is already moving."
           },
           "opening": [
             {
@@ -5651,7 +5653,7 @@
               },
               {
                 "type": "paragraph",
-                "text": "This is a progress-and-direction pattern. At its strongest, it makes the future feel urgent, practical, and worth organising around."
+                "text": "This is a progress-and-direction pattern. Its best version makes the future feel urgent, practical, and worth organising around."
               }
             ]
           },
@@ -5717,7 +5719,7 @@
                 },
                 {
                   "type": "paragraph",
-                  "text": "The mature version of this pattern does not dilute ambition. It makes the ambition more usable. It invites challenge, defines the route, and gives people a visible place in shaping how the future becomes work."
+                  "text": "The more complete version does not dilute ambition. It makes the ambition more usable. It invites challenge, defines the route, and gives people a visible place in shaping how the future becomes work."
                 }
               ],
               "readerFacing": true
@@ -5895,7 +5897,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "Process expands this pattern by making purposeful momentum executable."
+                  "text": "Process makes this pattern executable by giving purposeful momentum a route."
                 },
                 {
                   "type": "paragraph",
@@ -5911,7 +5913,7 @@
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Execution questions to bring forward",
                   "prompts": [
                     "What working rhythm will hold this direction?",
                     "What must be sequenced before we accelerate?",
@@ -5930,7 +5932,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "People expands this pattern by making commitment participative."
+                  "text": "People gives this pattern participative strength."
                 },
                 {
                   "type": "paragraph",
@@ -5946,7 +5948,7 @@
                 },
                 {
                   "type": "prompt_group",
-                  "title": "Useful activation questions include",
+                  "title": "Participation questions to bring forward",
                   "prompts": [
                     "Who needs to test this direction before we ask for commitment?",
                     "What concern would make the action stronger?",
@@ -5965,7 +5967,7 @@
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "The development work is to make ambitious progress more executable and more shared."
+                  "text": "The development focus is to make ambitious progress more executable and more shared."
                 },
                 {
                   "type": "development_action",
@@ -6035,7 +6037,7 @@
             "synthesis": [
               {
                 "type": "paragraph",
-                "text": "Your leadership is valuable because it makes the future move."
+                "text": "Your leadership makes the future move."
               },
               {
                 "type": "paragraph",

@@ -4,7 +4,7 @@ You lead by mobilising people around meaningful progress
 
 You create confidence by making the future feel close enough to act on. Your leadership is at its best when people need to see why movement matters, feel invited into that movement, and begin turning shared belief into visible progress.
 
-People expands this pattern by turning future-facing momentum into commitment. Process extends it further by giving that commitment the operating discipline it needs to last.
+People turns future-facing momentum into commitment. Process extends it further by giving that commitment the operating discipline it needs to last.
 
 Editorial introduction
 
@@ -27,7 +27,7 @@ Pattern at a glance
 | 3 | People — the mobilisation range | People expands your leadership by turning future-facing momentum into shared commitment and human energy. |
 | 4 | Process — the operating extension | Process expands the pattern by adding rhythm, sequence, roles, standards, and review discipline. |
 
-This is a progress-and-future pattern with a people expansion. At its strongest, it creates meaningful movement that people want to join and can eventually organise.
+This is a progress-and-future pattern with a people expansion. Its best version creates meaningful movement that people want to join and can eventually organise.
 
 Evidence behind your result
 
@@ -80,7 +80,7 @@ This can create strong commitment. People may feel called into the work rather t
 
 The possible tension is that the operating detail may arrive late. People can leave a conversation inspired and still be unclear about sequence, ownership, decision rights, or what standard will define good work. The team may agree on the future but then start solving the practical route in different ways.
 
-The mature version of this pattern keeps the energy and invitation, then adds method early enough that people know how to coordinate their commitment.
+The more complete version keeps the energy and invitation, then adds method early enough that people know how to coordinate their commitment.
 
 Chapter 3 — Decision behaviour
 
@@ -169,7 +169,7 @@ Range to add: Name how decisions will be made and how friction will be escalated
 
 Chapter 8 — How People expands your leadership
 
-People expands this pattern by turning future-facing momentum into shared commitment.
+People gives this pattern its mobilisation strength by turning future-facing momentum into shared commitment.
 
 When People is brought in deliberately, your leadership becomes more than a compelling push. You invite others to see their own role in the progress. The future becomes not only something you describe, but something people can help carry.
 
@@ -177,7 +177,7 @@ This matters because Results and Vision can create movement that feels exciting 
 
 People adds trust, voice, and contribution. It helps you ask what people need to understand, what they need to influence, and where they may be quietly uncertain even while supporting the direction.
 
-Useful activation questions include:
+Mobilisation questions to bring forward:
 
 Who needs to feel part of this before we accelerate?
 What contribution are we asking people to make?
@@ -186,7 +186,7 @@ What would make this progress feel shared rather than announced?
 
 Chapter 9 — How Process expands your leadership
 
-Process expands this pattern by giving meaningful movement a working spine.
+Process gives meaningful movement a working spine.
 
 Because Process is the furthest extension, it may be the easiest to underplay when energy is high. The team may believe in the direction, understand the action, and feel motivated, while still lacking the method needed to sustain progress.
 
@@ -194,7 +194,7 @@ Process does not reduce the human energy of this pattern. It protects it. It giv
 
 For this pattern, Process should be practical and light enough to support movement without smothering it. It should clarify roles, sequence, standards, review points, and how learning will change the route.
 
-Useful activation questions include:
+Operating questions to bring forward:
 
 What rhythm will keep this movement coordinated?
 Who owns the next decision and the next handover?
@@ -203,7 +203,7 @@ What will we review before asking people for more effort?
 
 Chapter 10 — Development focus
 
-The development work is to turn energy into a repeatable way of working.
+The development focus is to turn energy into a repeatable way of working.
 
 1. Add operating clarity after the call to action
 
@@ -237,7 +237,7 @@ Use this in: planning, team briefings, resource trade-offs, senior updates.
 
 Closing synthesis
 
-Your leadership is valuable because it makes meaningful progress feel possible.
+Your leadership makes meaningful progress feel possible.
 
 You are likely to bring movement where aspiration has stayed too distant, belief where people need a reason to act, and visible proof where the future needs credibility. Results gives the pattern its traction. Vision gives that traction significance. People helps others join the work with commitment.
 

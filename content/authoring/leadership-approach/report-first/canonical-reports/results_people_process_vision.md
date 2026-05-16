@@ -4,7 +4,7 @@ You lead by turning commitment into visible progress
 
 You create confidence by helping people move together toward practical outcomes. Your leadership is at its best when a team has energy, concern, or willingness, but needs that human commitment to become action, ownership, and reliable delivery.
 
-Process expands this pattern by making shared effort more dependable. Vision extends it further by connecting progress to the larger direction the team is helping to build.
+Process makes shared effort more dependable. Vision extends it further by connecting progress to the larger direction the team is helping to build.
 
 Editorial introduction
 
@@ -14,9 +14,9 @@ This is not Results as individual force. People sits close behind it, which mean
 
 The first expansion is Process. Human energy can create movement, but it needs structure to become reliable. Process adds sequence, ownership, standards, handovers, and review points so shared effort does not depend only on goodwill or urgency.
 
-The furthest extension is Vision. That is the main development edge. When people are willing to move and the work can be organised, the larger direction may still remain under-explained. The team may know what needs to happen and feel ready to help, but not fully understand what future their effort is creating.
+The furthest extension is Vision. That is the main development edge. When people are willing to move and the work can be organised, the larger direction may still remain under-explained. The team may know what needs to happen and feel ready to help, but not fully understand what future their effort is creating or how today's responsiveness compounds into strategy.
 
-Your most effective leadership mobilises people around progress, then gives that progress structure and meaning.
+Your most effective leadership mobilises people around progress, makes that effort reliable, and then gives the work a future direction strong enough to prevent repeated mobilisation from becoming fatigue.
 
 Pattern at a glance
 
@@ -27,7 +27,7 @@ Pattern at a glance
 | 3 | Process — the reliability range | Process expands your leadership by turning shared effort into repeatable work with sequence, standards, and ownership. |
 | 4 | Vision — the direction extension | Vision expands the pattern by connecting immediate progress to a larger future, purpose, or strategic reason. |
 
-This is a progress-and-commitment pattern. At its strongest, it turns people's willingness into practical movement that can be organised and made meaningful.
+This is a progress-and-commitment pattern. Its strongest version turns people's willingness into practical movement that is reliable first, then strategically meaningful enough to feel worth sustaining.
 
 Evidence behind your result
 
@@ -80,7 +80,7 @@ For many teams, this can feel motivating. People may feel seen, trusted, and cal
 
 The possible tension is that the bigger direction may be less visible. People may understand what needs to happen and feel involved in making it happen, but still not know what the work is building beyond the current objective. Vision can arrive late when the team's willingness is already high.
 
-The mature version of this pattern keeps the mobilisation and practical action, then explains the larger direction early enough that effort feels significant, not only necessary.
+The more complete version keeps the mobilisation and practical action, then explains the larger direction early enough that effort feels significant, not only necessary.
 
 Chapter 3 — Decision behaviour
 
@@ -92,13 +92,13 @@ People strengthens your decision-making by keeping human capacity and ownership 
 
 Process adds the next level of quality. A decision that people support still needs a route. The team needs to know how the work will be sequenced, where standards sit, what review points matter, and how handovers will be managed.
 
-Vision is the edge. A decision can mobilise people and organise effort while still under-explaining the future. That can make the work feel like repeated short-term response. The question to add is: what larger purpose does this progress serve?
+Vision is the edge. A decision can mobilise people and organise effort while still under-explaining the future. That can make the work feel like repeated short-term response: useful, well held, and still not clearly accumulating into something larger. The question to add is: what larger purpose does this progress serve?
 
 Useful decision checks include:
 
 Who needs to be with this for it to move well?
 What structure will make shared effort reliable?
-What future reason should guide this decision?
+What future reason should guide this decision so effort compounds rather than resets?
 Where could people overcommit because they want to help?
 
 Chapter 4 — Communication behaviour
@@ -109,7 +109,7 @@ You may be effective when people need to move from concern or willingness into a
 
 Your communication may include clear asks, ownership language, encouragement, and practical next steps. You may be good at making people feel that their contribution matters now.
 
-The limitation is that communication may become too immediate. People may hear what they need to do and feel valued in doing it, but not understand the larger direction clearly enough to use judgement when the situation changes.
+The limitation is that communication may become too immediate. People may hear what they need to do and feel valued in doing it, but not understand the larger direction clearly enough to use judgement when the situation changes. Over time, that can make even well-organised progress feel like another demand rather than a contribution to a larger build.
 
 For this pattern, communication becomes stronger when it adds future context:
 
@@ -124,16 +124,17 @@ Under pressure, your leadership may tighten toward asking people to respond, con
 
 This can be valuable. When work is stuck, your ability to mobilise people around action can create movement quickly. You may help the team feel capable rather than paralysed.
 
-The tightening risk is that commitment can be used before direction is fully explained. You may lean on people's willingness, loyalty, or responsiveness because the work needs to move. The team may deliver, but later wonder whether the effort was connected to a coherent future.
+The tightening risk is that commitment can be used before direction is fully explained. You may lean on people's willingness, loyalty, or responsiveness because the work needs to move. The team may deliver, but later wonder whether the effort was connected to a coherent future or simply absorbed another urgent demand.
 
-Process may also become corrective under pressure. You may introduce structure after signs of strain appear rather than before. That can help, but it may feel like control if people were first mobilised emotionally and then managed operationally.
+Process may also become corrective under pressure. You may introduce structure after signs of strain appear rather than before. That can help, but if Vision stays quiet, the structure may only make the immediate push more efficient rather than more meaningful.
 
 The pressure move is to protect commitment with direction and method:
 
 What are we asking people to carry?
 What route will keep effort coordinated?
-What future reason makes this effort worth it?
+What future reason makes this effort worth carrying again tomorrow?
 Where might commitment become fatigue if the purpose stays unclear?
+How will this progress change the strategic position, not only clear the current demand?
 
 Chapter 6 — The strength of this pattern
 
@@ -153,9 +154,9 @@ Chapter 7 — Where the pattern can tighten
 
 1. Commitment before direction
 
-People may be willing to move before the future reason has been made clear. That can create action, but not always strategic confidence.
+People may be willing to move before the future reason has been made clear. That can create action, but not always strategic confidence. The team may become responsive without becoming more oriented.
 
-Range to add: Bring Vision in early. Explain what the effort is meant to build, strengthen, prevent, or make possible.
+Range to add: Bring Vision in early. Explain what the effort is meant to build, strengthen, prevent, or make possible, so the work feels like contribution rather than repeated mobilisation.
 
 2. Goodwill carries the system
 
@@ -165,13 +166,13 @@ Range to add: Use Process to define roles, standards, handovers, and review poin
 
 3. Action becomes personal pressure
 
-Because progress is tied to people, performance pressure may feel personal. People may not want to disappoint the group or the leader.
+Because progress is tied to people, performance pressure may feel personal. People may not want to disappoint the group or the leader. If the future reason is weak, effort can start to feel like being valued mainly for output.
 
-Range to add: Separate accountability from personal approval. Make the work clear without making pressure relationally heavy.
+Range to add: Separate accountability from personal approval. Make the work clear without making pressure relationally heavy, and name the future value that makes the effort worth asking for.
 
 Chapter 8 — How Process expands your leadership
 
-Process expands this pattern by making shared effort reliable.
+Process gives this pattern its reliability edge by making shared effort easier to coordinate and sustain.
 
 When Process is brought in deliberately, your leadership does not become less human. It becomes fairer and easier to sustain. People know what they own, how work moves, what standard matters, and where decisions will be reviewed.
 
@@ -179,7 +180,7 @@ This matters because Results and People can create strong mobilisation. The team
 
 Process helps turn willingness into coordination. It gives commitment a route so people are not left to organise progress through informal effort alone.
 
-Useful activation questions include:
+Reliability questions to bring forward:
 
 What role does each person actually own?
 What handover could break under pressure?
@@ -188,15 +189,15 @@ What review rhythm will protect people from repeated urgency?
 
 Chapter 9 — How Vision expands your leadership
 
-Vision expands this pattern by giving effort a larger reason.
+Vision gives effort a larger reason.
 
-Because Vision is the furthest extension, the team may sometimes know what needs to happen before it fully understands why the work matters beyond the current demand. People may be willing to act, but the future story may remain implicit.
+Because Vision is the furthest extension, the team may sometimes know what needs to happen before it fully understands why the work matters beyond the current demand. People may be willing to act, and Process may make that action reliable, but the future story may remain implicit.
 
-Vision helps you connect mobilisation to purpose. It asks what the progress is building, what capability is being strengthened, what future risk is being reduced, or what direction the team is helping to make real.
+Vision helps you connect mobilisation to purpose. It asks what the progress is building, what capability is being strengthened, what future risk is being reduced, or what direction the team is helping to make real. It helps effort compound into strategy instead of resetting with each new urgent ask.
 
-This is not decorative inspiration. For this pattern, Vision protects people from feeling that commitment is only being used to meet the next urgent need. It helps effort feel significant and strategic.
+This is not decorative inspiration. For this pattern, Vision protects people from feeling that commitment is only being used to meet the next urgent need. It helps effort feel significant, strategic, and worth sustaining when the work becomes repetitive or commercially pressured.
 
-Useful activation questions include:
+Direction questions to bring forward:
 
 What future are we asking people to help create?
 What will this effort make possible if we get it right?
@@ -205,23 +206,23 @@ What story would make the work feel worth carrying?
 
 Chapter 10 — Development focus
 
-The development work is to connect mobilisation with structure and direction.
+The development focus is to connect mobilisation with structure and direction.
 
 1. Explain the future before asking for extra effort
 
-When people are ready to move, give them the larger reason. Do not let willingness replace strategic context.
+When people are ready to move, give them the larger reason. Do not let willingness replace strategic context or repeated responsiveness become the default operating model.
 
 Use this in: urgent delivery, change programmes, team briefings, performance recovery.
 
 2. Build a coordination route
 
-Translate commitment into roles, sequence, standards, and review. This helps people work together without guessing.
+Translate commitment into roles, sequence, standards, and review. This helps people work together without guessing and keeps reliable effort from depending on informal coordination.
 
 Use this in: cross-functional work, delegation, project delivery, operational pressure.
 
 3. Watch for over-responsibility
 
-People may take on too much because they care. Check where commitment is turning into hidden strain.
+People may take on too much because they care. Check where commitment is turning into hidden strain, especially when the same people repeatedly absorb urgent work without seeing the strategic payoff.
 
 Use this in: manager check-ins, workload reviews, high-pressure delivery.
 
@@ -233,19 +234,19 @@ Use this in: performance conversations, urgent asks, team recovery.
 
 5. Use the team to improve the route
 
-Invite people to shape the method, not only deliver through it. Their local judgement can strengthen the action.
+Invite people to shape the method, not only deliver through it. Their local judgement can strengthen the action and show where the immediate route is not yet connected to the longer direction.
 
 Use this in: planning sessions, retrospectives, implementation reviews.
 
 Closing synthesis
 
-Your leadership is valuable because it turns people's willingness into progress.
+Your leadership turns people's willingness into progress.
 
 You are likely to bring action where the team is engaged but not yet moving, ownership where responsibility has been vague, and practical energy where work needs visible movement. Results gives the pattern its drive. People gives that drive commitment and human relevance.
 
-The main tightening risk is that progress may become immediate before it becomes clearly directional. People may be ready to act, and the work may even become organised, but the larger future can remain under-explained. Over time, that can turn commitment into fatigue.
+The main tightening risk is that progress may become reliable before it becomes clearly directional. People may be ready to act, and the work may even become organised, but the larger future can remain under-explained. Over time, that can turn commitment into fatigue because people experience another well-run push without seeing what it is meant to build.
 
-Your growth is to make effort meaningful and reliable. Bring Process in so shared work has structure. Bring Vision in so people understand what their effort is building.
+Your growth is to make reliable effort strategically meaningful. Bring Process in so shared work has structure. Bring Vision in so people understand what their effort is building and why the next push is not just another demand.
 
 At your best, you give people more than a task to deliver. You give them a practical role in progress, a method for working together, and a future reason that makes their commitment worth sustaining.
 

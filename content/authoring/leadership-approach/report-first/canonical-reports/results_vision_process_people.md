@@ -4,7 +4,7 @@ You lead by turning future intent into visible progress
 
 You create confidence by making ambition move. Your leadership is at its best when people can see that a direction matters, but the work still needs a practical move, a proof point, and enough structure to make the future executable.
 
-Process expands this pattern by grounding purposeful momentum in method. People extends it further by making sure commitment is shaped with others, not only requested once the direction is already moving.
+Process grounds purposeful momentum in method. People extends it further by making sure commitment is shaped with others, not only requested once the direction is already moving.
 
 Editorial introduction
 
@@ -27,7 +27,7 @@ Pattern at a glance
 | 3 | Process — the execution range | Process expands your leadership by turning purposeful momentum into a route people can coordinate, review, and repeat. |
 | 4 | People — the commitment extension | People expands the pattern by making sure the direction is shaped with enough voice, trust, and shared ownership. |
 
-This is a progress-and-direction pattern. At its strongest, it makes the future feel urgent, practical, and worth organising around.
+This is a progress-and-direction pattern. Its best version makes the future feel urgent, practical, and worth organising around.
 
 Evidence behind your result
 
@@ -80,7 +80,7 @@ For people who want purpose and pace, this can be compelling. You may help them 
 
 The possible tension is that your certainty about the direction may run ahead of other people's participation. You may believe the opportunity is clear and the action sensible. Others may still need to test assumptions, raise implications, or connect the future to their own responsibilities before they can commit fully.
 
-The mature version of this pattern does not dilute ambition. It makes the ambition more usable. It invites challenge, defines the route, and gives people a visible place in shaping how the future becomes work.
+The more complete version does not dilute ambition. It makes the ambition more usable. It invites challenge, defines the route, and gives people a visible place in shaping how the future becomes work.
 
 Chapter 3 — Decision behaviour
 
@@ -173,7 +173,7 @@ Range to add: Separate challenge from resistance. Invite concerns as a way to pr
 
 Chapter 8 — How Process expands your leadership
 
-Process expands this pattern by making purposeful momentum executable.
+Process makes this pattern executable by giving purposeful momentum a route.
 
 When Process is brought in deliberately, your leadership does not become less ambitious. It becomes more credible. The future gains a route, the action gains owners, and progress becomes easier to review.
 
@@ -181,7 +181,7 @@ This matters because Results and Vision together can create strong energy. The t
 
 Process helps you translate the future into operating choices. What is the first move? Who owns it? What standard matters? What dependency needs managing? What evidence will tell us whether the move is working?
 
-Useful activation questions include:
+Execution questions to bring forward:
 
 What working rhythm will hold this direction?
 What must be sequenced before we accelerate?
@@ -190,7 +190,7 @@ What evidence will tell us whether the future is becoming real?
 
 Chapter 9 — How People expands your leadership
 
-People expands this pattern by making commitment participative.
+People gives this pattern participative strength.
 
 Because People is the furthest extension, you may sometimes communicate the future and the action before creating enough space for others to shape the judgement. The direction may be strong, but people still need to see where their voice matters.
 
@@ -198,7 +198,7 @@ People helps you notice whether support is genuine or only polite. It helps you 
 
 For this pattern, People is not about softening ambition. It is about making ambition shared enough to survive reality. People can raise constraints, concerns, and insights that improve the route before the organisation has committed too publicly.
 
-Useful activation questions include:
+Participation questions to bring forward:
 
 Who needs to test this direction before we ask for commitment?
 What concern would make the action stronger?
@@ -207,7 +207,7 @@ What would help the team own the future, not only believe in it?
 
 Chapter 10 — Development focus
 
-The development work is to make ambitious progress more executable and more shared.
+The development focus is to make ambitious progress more executable and more shared.
 
 1. Turn the horizon into an operating route
 
@@ -241,7 +241,7 @@ Use this in: pilots, staged delivery, new operating models, strategic experiment
 
 Closing synthesis
 
-Your leadership is valuable because it makes the future move.
+Your leadership makes the future move.
 
 You are likely to bring action where ambition has stayed theoretical, urgency where direction has become distant, and practical evidence where people need confidence that the future is more than a statement. Results gives the pattern its movement. Vision gives the movement meaning.
 
