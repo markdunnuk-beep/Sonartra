@@ -17,6 +17,8 @@ type AssessmentDashboardFixture = {
     assessmentVersionId: string;
     versionTag: string;
     status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+    mode?: string | null;
+    resultModelKey?: string | null;
     questionCount: number;
     publishedAt?: string | null;
     createdAt?: string;
@@ -36,6 +38,8 @@ type AdminAssessmentDashboardRowFixture = {
   assessment_version_id: string | null;
   version_tag: string | null;
   version_status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | null;
+  version_mode: string | null;
+  result_model_key: string | null;
   title_override: string | null;
   description_override: string | null;
   published_at: string | null;
@@ -77,6 +81,8 @@ function createFakeDb(
                 assessment_version_id: null,
                 version_tag: null,
                 version_status: null,
+                version_mode: null,
+                result_model_key: null,
                 title_override: null,
                 description_override: null,
                 published_at: null,
@@ -104,6 +110,8 @@ function createFakeDb(
               assessment_version_id: version.assessmentVersionId,
               version_tag: version.versionTag,
               version_status: version.status,
+              version_mode: version.mode ?? fixture.mode ?? null,
+              result_model_key: version.resultModelKey ?? null,
               title_override: null,
               description_override: null,
               published_at: version.publishedAt ?? null,
@@ -308,6 +316,8 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
             assessmentVersionId: 'version-2',
             versionTag: '1.1.0',
             status: 'DRAFT',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
             questionCount: 82,
             updatedAt: '2026-01-04T00:00:00.000Z',
           },
@@ -315,6 +325,8 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
             assessmentVersionId: 'version-1',
             versionTag: '1.0.0',
             status: 'PUBLISHED',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
             questionCount: 80,
             publishedAt: '2026-01-03T00:00:00.000Z',
             updatedAt: '2026-01-03T00:00:00.000Z',
@@ -331,6 +343,8 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
             assessmentVersionId: 'version-3',
             versionTag: '0.9.0',
             status: 'DRAFT',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
             questionCount: 24,
             updatedAt: '2026-01-05T00:00:00.000Z',
           },
@@ -362,18 +376,18 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
     ]),
   );
 
-  assert.equal(viewModel.summary.totalAssessments, 3);
+  assert.equal(viewModel.summary.totalAssessments, 2);
   assert.equal(viewModel.summary.archivedCount, 1);
   assert.equal(viewModel.summary.publishedCount, 1);
   assert.equal(viewModel.summary.publishedAndDraftCount, 1);
   assert.equal(viewModel.summary.draftOnlyCount, 1);
-  assert.equal(viewModel.summary.noVersionsCount, 1);
+  assert.equal(viewModel.summary.noVersionsCount, 0);
   assert.equal(viewModel.summary.setupIncompleteCount, 0);
 
   const flagship = viewModel.assessments.find((assessment) => assessment.assessmentKey === 'wplp80');
   assert.equal(flagship?.overallStatus, 'published_and_draft');
-  assert.equal(flagship?.mode, 'multi_domain');
-  assert.equal(flagship?.modeLabel, 'Multi-Domain');
+  assert.equal(flagship?.mode, 'single_domain');
+  assert.equal(flagship?.modeLabel, 'Single-Domain');
   assert.equal(flagship?.publishedVersion?.versionTag, '1.0.0');
   assert.equal(flagship?.latestDraftVersion?.versionTag, '1.1.0');
   assert.equal(flagship?.latestDraftReadiness, 'ready');
@@ -386,11 +400,10 @@ test('builds admin assessment dashboard states from persisted version lifecycle 
   assert.equal(draftOnly?.overallStatus, 'draft_only');
   assert.equal(draftOnly?.latestDraftReadiness, 'not_ready');
 
-  const noVersions = viewModel.assessments.find(
-    (assessment) => assessment.assessmentKey === 'team-map',
+  assert.equal(
+    viewModel.assessments.some((assessment) => assessment.assessmentKey === 'team-map'),
+    false,
   );
-  assert.equal(noVersions?.overallStatus, 'no_versions');
-  assert.equal(noVersions?.latestDraftReadiness, 'no_draft');
 
   assert.equal(
     viewModel.assessments.some((assessment) => assessment.assessmentKey === 'archive-only'),
@@ -439,6 +452,109 @@ test('dashboard can include archived assessments when explicitly requested', asy
   );
 });
 
+test('default dashboard excludes published legacy single-domain and multi-domain rows from active packages', async () => {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(
+    createFakeDb([
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'leadership-approach',
+        mode: 'single_domain',
+        title: 'Leadership Approach',
+        description: 'Legacy published single-domain version',
+        versions: [
+          {
+            assessmentVersionId: 'legacy-leadership-version',
+            versionTag: '2',
+            status: 'PUBLISHED',
+            mode: 'single_domain',
+            resultModelKey: null,
+            questionCount: 80,
+            publishedAt: '2026-05-01T00:00:00.000Z',
+            updatedAt: '2026-05-01T00:00:00.000Z',
+          },
+        ],
+      },
+      {
+        assessmentId: 'assessment-2',
+        assessmentKey: 'legacy-multi',
+        mode: 'multi_domain',
+        title: 'Legacy Multi',
+        description: 'Legacy published multi-domain version',
+        versions: [
+          {
+            assessmentVersionId: 'legacy-multi-version',
+            versionTag: '1',
+            status: 'PUBLISHED',
+            mode: 'multi_domain',
+            resultModelKey: null,
+            questionCount: 40,
+            publishedAt: '2026-05-01T00:00:00.000Z',
+            updatedAt: '2026-05-01T00:00:00.000Z',
+          },
+        ],
+      },
+      {
+        assessmentId: 'assessment-3',
+        assessmentKey: 'ranked-package',
+        mode: 'single_domain',
+        title: 'Ranked Package',
+        description: null,
+        versions: [
+          {
+            assessmentVersionId: 'ranked-version',
+            versionTag: '1',
+            status: 'PUBLISHED',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
+            questionCount: 16,
+            publishedAt: '2026-05-01T00:00:00.000Z',
+            updatedAt: '2026-05-01T00:00:00.000Z',
+          },
+        ],
+      },
+    ]),
+  );
+
+  assert.deepEqual(
+    viewModel.assessments.map((assessment) => assessment.assessmentKey),
+    ['ranked-package'],
+  );
+  assert.equal(viewModel.summary.totalAssessments, 1);
+  assert.equal(viewModel.summary.publishedCount, 1);
+  assert.equal(viewModel.assessments[0]?.versions[0]?.resultModelKey, 'ranked_pattern');
+});
+
+test('show archived dashboard can surface legacy records only as audit context', async () => {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(
+    createFakeDb([
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'leadership-approach',
+        mode: 'single_domain',
+        title: 'Leadership Approach',
+        description: 'Legacy published single-domain version',
+        versions: [
+          {
+            assessmentVersionId: 'legacy-leadership-version',
+            versionTag: '2',
+            status: 'PUBLISHED',
+            mode: 'single_domain',
+            resultModelKey: null,
+            questionCount: 80,
+            publishedAt: '2026-05-01T00:00:00.000Z',
+            updatedAt: '2026-05-01T00:00:00.000Z',
+          },
+        ],
+      },
+    ]),
+    { showArchived: true },
+  );
+
+  assert.equal(viewModel.assessments.length, 1);
+  assert.equal(viewModel.assessments[0]?.assessmentKey, 'leadership-approach');
+  assert.equal(viewModel.assessments[0]?.versions[0]?.resultModelKey, null);
+});
+
 test('undefined and unknown modes resolve safely for dashboard labels', async () => {
   const viewModel = await buildAdminAssessmentDashboardViewModel(
     createFakeDb([
@@ -466,6 +582,7 @@ test('undefined and unknown modes resolve safely for dashboard labels', async ()
         versions: [],
       },
     ]),
+    { showArchived: true },
   );
 
   assert.equal(
@@ -497,6 +614,8 @@ test('single-domain authoring datasets override a stale multi-domain dashboard m
             assessmentVersionId: 'version-2',
             versionTag: '1.0.1',
             status: 'DRAFT',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
             questionCount: 80,
             updatedAt: '2026-04-30T00:00:00.000Z',
           },
@@ -537,6 +656,7 @@ test('dashboard falls back safely when assessment mode columns are not present i
         missingModeColumns: true,
       },
     ),
+    { showArchived: true },
   );
 
   assert.equal(viewModel.assessments[0]?.assessmentKey, 'legacy-mode');

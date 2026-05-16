@@ -30,6 +30,7 @@ test('assessment index presents ranked-pattern package operations as the active 
   assert.match(source, /haystack\.includes\('test'\)/);
   assert.match(source, /Legacy \/ archive/);
   assert.match(source, /Legacy builder unavailable/);
+  assert.match(source, /isCompatibleRankedPattern \? 'Ranked-pattern' : assessment\.modeLabel/);
   assert.doesNotMatch(source, /Test and older builder-created records stay secondary\./);
   assert.doesNotMatch(source, /Open legacy builder/);
   assert.match(source, /Create draft/);

@@ -94,7 +94,12 @@ function formatAssessmentStatusSummary(assessment: AdminAssessmentDashboardItem)
 
 function isTestOrLegacyAssessment(assessment: AdminAssessmentDashboardItem): boolean {
   const haystack = `${assessment.assessmentKey} ${assessment.title}`.toLowerCase();
+  const hasRankedPatternVersion = assessment.versions.some(
+    (version) => version.resultModelKey === 'ranked_pattern',
+  );
+
   return (
+    !hasRankedPatternVersion ||
     !isRankedPatternPackageCompatibleAssessment(assessment) ||
     haystack.includes('test') ||
     haystack.includes('legacy')
@@ -153,7 +158,7 @@ function AssessmentCard({
             <div className="flex flex-wrap items-center gap-2">
               <LabelPill>{assessment.assessmentKey}</LabelPill>
               <LabelPill className="border-white/10 bg-white/[0.04] text-white/68">
-                {assessment.modeLabel}
+                {isCompatibleRankedPattern ? 'Ranked-pattern' : assessment.modeLabel}
               </LabelPill>
               <LabelPill className={getStatusPillClass(assessment.overallStatus)}>
                 {assessment.overallStatusLabel}

@@ -18,6 +18,8 @@ export type AdminAssessmentVersionSummary = {
   assessmentVersionId: string;
   versionTag: string;
   status: AdminAssessmentVersionStatus;
+  mode: AssessmentMode;
+  resultModelKey: string | null;
   titleOverride: string | null;
   descriptionOverride: string | null;
   publishedAt: string | null;
@@ -76,6 +78,8 @@ type AdminAssessmentCatalogRow = {
   assessment_version_id: string | null;
   version_tag: string | null;
   version_status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | null;
+  version_mode: string | null;
+  result_model_key: string | null;
   title_override: string | null;
   description_override: string | null;
   published_at: string | null;
@@ -224,6 +228,8 @@ function mapAssessmentDashboardItem(
           assessmentVersionId: row.assessment_version_id,
           versionTag: row.version_tag,
           status,
+          mode: resolveDashboardAssessmentMode(row.version_mode ?? row.assessment_mode),
+          resultModelKey: row.result_model_key,
           titleOverride: row.title_override,
           descriptionOverride: row.description_override,
           publishedAt: row.published_at,
@@ -247,6 +253,9 @@ function mapAssessmentDashboardItem(
   const latestUpdatedAt =
     [firstRow.assessment_updated_at, ...versions.map((version) => version.updatedAt)]
       .sort(compareTimestampsDesc)[0] ?? firstRow.assessment_updated_at;
+  const dashboardMode = firstRow.assessment_mode
+    ? resolveDashboardAssessmentMode(firstRow.assessment_mode)
+    : versions[0]?.mode ?? 'multi_domain';
   const statusProjection = formatOverallStatus({
     publishedVersion,
     latestDraftVersion,
@@ -256,8 +265,8 @@ function mapAssessmentDashboardItem(
   return {
     assessmentId: firstRow.assessment_id,
     assessmentKey: firstRow.assessment_key,
-    mode: resolveDashboardAssessmentMode(firstRow.assessment_mode),
-    modeLabel: getDashboardAssessmentModeLabel(firstRow.assessment_mode),
+    mode: dashboardMode,
+    modeLabel: dashboardMode === 'single_domain' ? 'Single-Domain' : 'Multi-Domain',
     title: firstRow.assessment_title,
     description: firstRow.assessment_description,
     isActive: firstRow.assessment_is_active,
@@ -310,6 +319,8 @@ async function listAdminAssessmentCatalogRows(
       av.id AS assessment_version_id,
       av.version AS version_tag,
       av.lifecycle_status AS version_status,
+      av.mode AS version_mode,
+      av.result_model_key,
       av.title_override,
       av.description_override,
       av.published_at,
@@ -330,6 +341,7 @@ async function listAdminAssessmentCatalogRows(
       a.updated_at,
       av.id,
       av.mode,
+      av.result_model_key,
       av.version,
       av.lifecycle_status,
       av.title_override,
@@ -357,6 +369,8 @@ async function listAdminAssessmentCatalogRows(
       av.id AS assessment_version_id,
       av.version AS version_tag,
       av.lifecycle_status AS version_status,
+      NULL AS version_mode,
+      NULL AS result_model_key,
       av.title_override,
       av.description_override,
       av.published_at,
@@ -415,11 +429,20 @@ export async function buildAdminAssessmentDashboardViewModel(
 
   const groupedRows = Array.from(rowsByAssessmentId.values());
   const showArchived = options?.showArchived === true;
-  const filteredGroups = groupedRows.filter((group) => showArchived || group[0]?.assessment_is_active !== false);
+  const dashboardGroups = showArchived
+    ? groupedRows
+    : groupedRows.flatMap((group) => {
+        if (group[0]?.assessment_is_active === false) {
+          return [];
+        }
+
+        const rankedPatternRows = group.filter((row) => row.result_model_key === 'ranked_pattern');
+        return rankedPatternRows.length > 0 ? [rankedPatternRows] : [];
+      });
   const readinessByAssessmentKey = new Map<string, AdminAssessmentDraftReadiness>();
 
   await Promise.all(
-    filteredGroups.map(async (group) => {
+    dashboardGroups.map(async (group) => {
       const assessmentKey = group[0]?.assessment_key;
       if (!assessmentKey) {
         return;
@@ -438,7 +461,7 @@ export async function buildAdminAssessmentDashboardViewModel(
   );
 
   const assessments = Object.freeze(
-    filteredGroups.map((group) =>
+    dashboardGroups.map((group) =>
       mapAssessmentDashboardItem(
         group,
         readinessByAssessmentKey.get(group[0]?.assessment_key ?? '') ?? 'no_draft',
