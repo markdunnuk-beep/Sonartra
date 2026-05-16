@@ -151,6 +151,8 @@ test('admin report-first preview is wired to the ranked-pattern workflow without
   );
 
   assert.match(workflowSource, /Preview report-first output/);
+  assert.match(workflowSource, /data-report-first-import-status="true"/);
+  assert.match(workflowSource, /Report-first import handoff/);
   assert.match(previewRouteSource, /buildAdminReportFirstPreview/);
   assert.match(previewRouteSource, /ReportFirstResultReport/);
   assert.match(previewRouteSource, /Does not create user results/);

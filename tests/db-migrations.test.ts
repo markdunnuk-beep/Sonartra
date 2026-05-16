@@ -818,3 +818,30 @@ test('report-first template storage migration declares schema-only template stor
   assert.doesNotMatch(sql, /CREATE POLICY/i);
   assert.doesNotMatch(sql, /ENABLE ROW LEVEL SECURITY/i);
 });
+
+test('report-first template import metadata migration preserves package handoff fields', async () => {
+  const sql = await readFile(
+    join(process.cwd(), 'db', 'migrations', '202605160001_report_first_template_import_metadata.sql'),
+    'utf8',
+  );
+
+  assert.match(sql, /ALTER TABLE assessment_report_first_templates/i);
+  assert.match(sql, /ADD COLUMN assessment_key TEXT/i);
+  assert.match(sql, /ADD COLUMN package_key TEXT/i);
+  assert.match(sql, /ADD COLUMN score_shape_policy TEXT NOT NULL DEFAULT 'pattern_level_score_shape_neutral'/i);
+  assert.match(sql, /ADD COLUMN score_shape TEXT/i);
+  assert.match(sql, /ADD COLUMN supported_score_shapes JSONB NOT NULL DEFAULT '\[\]'::jsonb/i);
+  assert.match(sql, /ADD COLUMN source_markdown_path TEXT/i);
+  assert.match(sql, /ADD COLUMN source_content_hash TEXT/i);
+  assert.match(sql, /ADD COLUMN publishable BOOLEAN NOT NULL DEFAULT TRUE/i);
+  assert.match(sql, /ADD COLUMN ready_for_import BOOLEAN NOT NULL DEFAULT TRUE/i);
+  assert.match(sql, /assessment_report_first_templates_supported_score_shapes_array_check/i);
+  assert.match(sql, /assessment_report_first_templates_active_version_pattern_shape/i);
+  assert.match(sql, /COALESCE\(score_shape, ''\)/i);
+  assert.match(sql, /DROP INDEX IF EXISTS assessment_report_first_templates_active_version_pattern_key/i);
+
+  assert.doesNotMatch(sql, /canonical_result_payload/i);
+  assert.doesNotMatch(sql, /\bresults\b/i);
+  assert.doesNotMatch(sql, /\battempts\b/i);
+  assert.doesNotMatch(sql, /\bresponses\b/i);
+});

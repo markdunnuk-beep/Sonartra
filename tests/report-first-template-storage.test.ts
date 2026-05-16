@@ -18,9 +18,21 @@ type StoredTemplateRow = {
   pattern_key: string;
   report_key: string;
   report_contract: string;
+  score_shape_policy: string;
+  score_shape: string | null;
+  supported_score_shapes: unknown;
+  source_markdown_path: string | null;
+  source_content_hash: string | null;
   report_template_json: unknown;
   content_hash: string;
   status: ReportFirstTemplateStatus;
+  assessment_key: string | null;
+  assessment_version: string | null;
+  package_key: string | null;
+  package_version: string | null;
+  manifest_status: string | null;
+  publishable: boolean;
+  ready_for_import: boolean;
   created_by: string | null;
   import_batch_id: string | null;
   created_at: string;
@@ -126,7 +138,7 @@ function createFakeDb(seed: FakeDbSeed = {}) {
         }
 
         if (sql.startsWith('INSERT INTO assessment_report_first_templates')) {
-          const status = params?.[7] as ReportFirstTemplateStatus;
+          const status = params?.[12] as ReportFirstTemplateStatus;
           const versionId = String(params?.[0] ?? '');
           const requestedPatternKey = String(params?.[2] ?? '');
 
@@ -148,11 +160,23 @@ function createFakeDb(seed: FakeDbSeed = {}) {
             pattern_key: requestedPatternKey,
             report_key: String(params?.[3] ?? ''),
             report_contract: String(params?.[4] ?? ''),
-            report_template_json: JSON.parse(String(params?.[5] ?? '{}')) as unknown,
-            content_hash: String(params?.[6] ?? ''),
+            score_shape_policy: String(params?.[5] ?? ''),
+            score_shape: (params?.[6] as string | null | undefined) ?? null,
+            supported_score_shapes: JSON.parse(String(params?.[7] ?? '[]')) as unknown,
+            source_markdown_path: (params?.[8] as string | null | undefined) ?? null,
+            source_content_hash: (params?.[9] as string | null | undefined) ?? null,
+            report_template_json: JSON.parse(String(params?.[10] ?? '{}')) as unknown,
+            content_hash: String(params?.[11] ?? ''),
             status,
-            created_by: (params?.[8] as string | null | undefined) ?? null,
-            import_batch_id: (params?.[9] as string | null | undefined) ?? null,
+            assessment_key: (params?.[13] as string | null | undefined) ?? null,
+            assessment_version: (params?.[14] as string | null | undefined) ?? null,
+            package_key: (params?.[15] as string | null | undefined) ?? null,
+            package_version: (params?.[16] as string | null | undefined) ?? null,
+            manifest_status: (params?.[17] as string | null | undefined) ?? null,
+            publishable: Boolean(params?.[18]),
+            ready_for_import: Boolean(params?.[19]),
+            created_by: (params?.[20] as string | null | undefined) ?? null,
+            import_batch_id: (params?.[21] as string | null | undefined) ?? null,
             created_at: `2026-05-15T00:00:0${state.nextId}.000Z`,
             updated_at: `2026-05-15T00:00:0${state.nextId}.000Z`,
           };
@@ -199,10 +223,22 @@ function createFakeDb(seed: FakeDbSeed = {}) {
           existing.domain_key = String(params?.[1] ?? '');
           existing.report_key = String(params?.[2] ?? '');
           existing.report_contract = String(params?.[3] ?? '');
-          existing.report_template_json = JSON.parse(String(params?.[4] ?? '{}')) as unknown;
-          existing.content_hash = String(params?.[5] ?? '');
-          existing.created_by = (params?.[6] as string | null | undefined) ?? null;
-          existing.import_batch_id = (params?.[7] as string | null | undefined) ?? null;
+          existing.score_shape_policy = String(params?.[4] ?? '');
+          existing.score_shape = (params?.[5] as string | null | undefined) ?? null;
+          existing.supported_score_shapes = JSON.parse(String(params?.[6] ?? '[]')) as unknown;
+          existing.source_markdown_path = (params?.[7] as string | null | undefined) ?? null;
+          existing.source_content_hash = (params?.[8] as string | null | undefined) ?? null;
+          existing.report_template_json = JSON.parse(String(params?.[9] ?? '{}')) as unknown;
+          existing.content_hash = String(params?.[10] ?? '');
+          existing.assessment_key = (params?.[11] as string | null | undefined) ?? null;
+          existing.assessment_version = (params?.[12] as string | null | undefined) ?? null;
+          existing.package_key = (params?.[13] as string | null | undefined) ?? null;
+          existing.package_version = (params?.[14] as string | null | undefined) ?? null;
+          existing.manifest_status = (params?.[15] as string | null | undefined) ?? null;
+          existing.publishable = Boolean(params?.[16]);
+          existing.ready_for_import = Boolean(params?.[17]);
+          existing.created_by = (params?.[18] as string | null | undefined) ?? null;
+          existing.import_batch_id = (params?.[19] as string | null | undefined) ?? null;
           existing.updated_at = '2026-05-15T00:05:00.000Z';
 
           return {

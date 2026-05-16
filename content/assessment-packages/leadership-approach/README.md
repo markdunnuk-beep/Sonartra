@@ -64,6 +64,19 @@ That artifact is package/import preparation only. It is not a runtime dependency
 change the canonical result payload. Future XLSX/import package generation should consume those
 rows when loading `assessment_report_first_templates`.
 
+P11 adds the draft-storage handoff:
+
+- importer service: `lib/server/report-first-template-import.ts`
+- storage destination: `assessment_report_first_templates`
+- imported row status: `draft`
+- imported-ready rows today: 4
+- missing templates today: 20
+
+The importer consumes the generated JSON artifact, validates the package metadata and full
+structured report body, and persists only rows marked `ready_for_import: true` and
+`publishable: true`. Missing manifest entries are reported as blocking coverage findings; they are
+not inserted as active or publishable placeholders.
+
 Current coverage:
 
 - expected patterns: 24
@@ -97,3 +110,10 @@ The compiler path remains:
 
 The runtime engine must not read the manifest, Markdown, or workbook. Runtime result pages continue
 to read persisted `canonical_result_payload` only.
+
+Importing report-first templates into draft storage is different from user result persistence:
+template rows prepare future completion-time report assembly, while user results remain immutable
+records produced by the engine and stored in `results.canonical_result_payload`.
+
+Next step: author and review the remaining twenty report-first templates, regenerate the artifact,
+import all twenty-four rows, then run report-first publish audit coverage.

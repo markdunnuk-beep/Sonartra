@@ -12,12 +12,24 @@ export class ReportFirstTemplateStorageError extends Error {
 export type ReportFirstTemplateStatus = 'draft' | 'active' | 'inactive';
 
 export type CompiledReportFirstTemplateForStorage = {
+  readonly assessment_key?: string;
+  readonly assessment_version?: string;
+  readonly package_key?: string;
+  readonly package_version?: string;
   readonly report_key: string;
   readonly pattern_key: string;
   readonly domain_key: string;
   readonly report_contract: string;
+  readonly score_shape_policy?: string;
+  readonly score_shape?: string | null;
+  readonly supported_score_shapes?: readonly string[];
+  readonly source_markdown_path?: string;
+  readonly source_content_hash?: string;
   readonly content_hash: string;
   readonly report_template_json: unknown;
+  readonly manifest_status?: string;
+  readonly publishable?: boolean;
+  readonly ready_for_import?: boolean;
 };
 
 export type StoredReportFirstTemplate = {
@@ -171,13 +183,25 @@ async function insertReportFirstTemplate(
       pattern_key,
       report_key,
       report_contract,
+      score_shape_policy,
+      score_shape,
+      supported_score_shapes,
+      source_markdown_path,
+      source_content_hash,
       report_template_json,
       content_hash,
       status,
+      assessment_key,
+      assessment_version,
+      package_key,
+      package_version,
+      manifest_status,
+      publishable,
+      ready_for_import,
       created_by,
       import_batch_id
     )
-    VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, $12::jsonb, $13, $14, $15, $16, $17, $18, $19::boolean, $20::boolean, $21, $22)
     RETURNING
       id,
       assessment_version_id,
@@ -194,9 +218,21 @@ async function insertReportFirstTemplate(
       params.template.pattern_key,
       params.template.report_key,
       params.template.report_contract,
+      params.template.score_shape_policy ?? 'pattern_level_score_shape_neutral',
+      params.template.score_shape ?? null,
+      JSON.stringify(params.template.supported_score_shapes ?? []),
+      params.template.source_markdown_path ?? null,
+      params.template.source_content_hash ?? null,
       JSON.stringify(params.template.report_template_json),
       params.template.content_hash,
       params.status,
+      params.template.assessment_key ?? null,
+      params.template.assessment_version ?? null,
+      params.template.package_key ?? null,
+      params.template.package_version ?? null,
+      params.template.manifest_status ?? null,
+      params.template.publishable ?? true,
+      params.template.ready_for_import ?? true,
       params.createdBy ?? null,
       params.importBatchId ?? null,
     ],
@@ -220,10 +256,22 @@ async function updateDraftReportFirstTemplate(
       domain_key = $2,
       report_key = $3,
       report_contract = $4,
-      report_template_json = $5::jsonb,
-      content_hash = $6,
-      created_by = $7,
-      import_batch_id = $8,
+      score_shape_policy = $5,
+      score_shape = $6,
+      supported_score_shapes = $7::jsonb,
+      source_markdown_path = $8,
+      source_content_hash = $9,
+      report_template_json = $10::jsonb,
+      content_hash = $11,
+      assessment_key = $12,
+      assessment_version = $13,
+      package_key = $14,
+      package_version = $15,
+      manifest_status = $16,
+      publishable = $17,
+      ready_for_import = $18,
+      created_by = $19,
+      import_batch_id = $20,
       updated_at = NOW()
     WHERE id = $1
       AND status = 'draft'
@@ -242,8 +290,20 @@ async function updateDraftReportFirstTemplate(
       params.template.domain_key,
       params.template.report_key,
       params.template.report_contract,
+      params.template.score_shape_policy ?? 'pattern_level_score_shape_neutral',
+      params.template.score_shape ?? null,
+      JSON.stringify(params.template.supported_score_shapes ?? []),
+      params.template.source_markdown_path ?? null,
+      params.template.source_content_hash ?? null,
       JSON.stringify(params.template.report_template_json),
       params.template.content_hash,
+      params.template.assessment_key ?? null,
+      params.template.assessment_version ?? null,
+      params.template.package_key ?? null,
+      params.template.package_version ?? null,
+      params.template.manifest_status ?? null,
+      params.template.publishable ?? true,
+      params.template.ready_for_import ?? true,
       params.createdBy ?? null,
       params.importBatchId ?? null,
     ],
