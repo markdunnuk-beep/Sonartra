@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
 import { ReportFirstTemplateImportPanel } from '@/components/admin/report-first-template-import-panel';
 import { RankedPatternImportPanel } from '@/components/admin/ranked-pattern-import-panel';
@@ -12,9 +12,9 @@ import {
   SecondaryText,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
-import { getSingleDomainBuilderAssessment } from '@/lib/server/admin-single-domain-builder';
 import { getDbPool } from '@/lib/server/db';
 import { buildLeadershipReportFirstImportArtifact } from '@/lib/server/leadership-report-first-package';
+import { getRankedPatternWorkflowAssessment } from '@/lib/server/ranked-pattern-admin-workflow-page';
 import { auditImportedReportFirstTemplateCoverage } from '@/lib/server/report-first-template-import';
 import { isRankedPatternPackageCompatibleAssessment } from '@/lib/ranked-pattern-admin-compatibility';
 
@@ -24,11 +24,7 @@ export default async function RankedPatternWorkflowPage({
   params: Promise<{ assessmentKey: string }>;
 }>) {
   const { assessmentKey } = await params;
-  const { assessment, redirectTo } = await getSingleDomainBuilderAssessment(getDbPool(), assessmentKey);
-
-  if (redirectTo) {
-    redirect(redirectTo);
-  }
+  const assessment = await getRankedPatternWorkflowAssessment(getDbPool(), assessmentKey);
 
   if (!assessment) {
     notFound();
@@ -38,8 +34,8 @@ export default async function RankedPatternWorkflowPage({
     !isRankedPatternPackageCompatibleAssessment({
       assessmentKey: assessment.assessmentKey,
       title: assessment.title,
-      mode: 'single_domain',
-      isActive: true,
+      mode: assessment.mode,
+      isActive: assessment.isActive,
     })
   ) {
     return (
@@ -163,6 +159,25 @@ export default async function RankedPatternWorkflowPage({
           </ButtonLink>
         </div>
       </SurfaceCard>
+
+      {!assessment.latestDraftVersion ? (
+        <SurfaceCard className="space-y-4 p-5 lg:p-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="sonartra-page-eyebrow">No draft in progress</p>
+            <LabelPill className="border-white/10 bg-white/[0.04] text-white/64">
+              Import actions locked
+            </LabelPill>
+          </div>
+          <div className="space-y-2">
+            <CardTitle>Create or resolve a draft before importing</CardTitle>
+            <SecondaryText>
+              This assessment has a published ranked-pattern version, but no editable draft is
+              currently open. The workflow remains available for review, but report-first import,
+              publish prep, package import, and publish audit actions require a draft target.
+            </SecondaryText>
+          </div>
+        </SurfaceCard>
+      ) : null}
 
       <ReportFirstTemplateImportPanel
         assessmentKey={assessment.assessmentKey}
