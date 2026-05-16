@@ -15,8 +15,8 @@
   ],
   "coverage": {
     "expected_template_count": 24,
-    "generated_import_ready_count": 14,
-    "missing_template_count": 10,
+    "generated_import_ready_count": 19,
+    "missing_template_count": 5,
     "publishable_full_coverage": false
   },
   "expected_pattern_keys": [
@@ -46,56 +46,6 @@
     "people_vision_process_results"
   ],
   "missing_templates": [
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "vision_results_process_people",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "vision_results_people_process",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "vision_process_results_people",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "vision_process_people_results",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "vision_people_results_process",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
     {
       "assessment_key": "leadership-approach",
       "package_key": "leadership-approach-report-first",
@@ -10526,6 +10476,3399 @@
           "generatedFrom": "compiled_report_first_template",
           "adminNotesExcluded": true,
           "editorialQaNotesDetected": true,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "vision_people_results_process",
+      "report_key": "vision_people_results_process",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_people_results_process.md",
+      "source_content_hash": "c05b8b061a2fed52c346c018bad52b96276defde8b18ebd71a6d3ab5479b815c",
+      "content_hash": "c05b8b061a2fed52c346c018bad52b96276defde8b18ebd71a6d3ab5479b815c",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "vision_people_results_process",
+        "patternKey": "vision_people_results_process",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "vision_people_results_process",
+          "patternKey": "vision_people_results_process",
+          "reportTitle": "Leadership Approach — Vision, People, Results, Process",
+          "hero": {
+            "title": "You lead by building belief in a future and turning that belief into movement",
+            "resultStatement": "You create confidence by helping people see a future worth moving toward, then using visible progress to prove that future can become real. Your leadership is at its best when direction needs human commitment and action needs meaning.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Vision and strengthened by People. You are likely to create value by helping people understand what the work is becoming and why their contribution matters inside that direction."
+            },
+            {
+              "type": "paragraph",
+              "text": "Results is the first expansion. The future becomes more credible when belief turns into visible movement: decisions, milestones, customer impact, or evidence that the organisation is acting on what it says matters."
+            },
+            {
+              "type": "paragraph",
+              "text": "Process is the furthest extension. The development edge is to turn shared belief into a clear operating rhythm before enthusiasm diffuses across too many interpretations. Without enough method, commitment can be strong but coordination uneven."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your strongest leadership builds belief, turns belief into proof, and then gives proof a repeatable operating form."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the future people can see",
+                    "roleSummary": "You tend to lead by naming possibility, strategic direction, capability, and what the work is meant to build."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the commitment support",
+                    "roleSummary": "People makes the future human, shared, trusted, and connected to contribution."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the proof expansion",
+                    "roleSummary": "Results gives belief tangible movement, evidence, decisions, and progress."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the operating edge",
+                    "roleSummary": "Process adds repeatability, handovers, standards, governance, and cadence so belief and action do not fragment."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Vision — the future people can see"
+                    },
+                    {
+                      "text": "You tend to lead by naming possibility, strategic direction, capability, and what the work is meant to build."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "People — the commitment support"
+                    },
+                    {
+                      "text": "People makes the future human, shared, trusted, and connected to contribution."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "Results — the proof expansion"
+                    },
+                    {
+                      "text": "Results gives belief tangible movement, evidence, decisions, and progress."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "Process — the operating edge"
+                    },
+                    {
+                      "text": "Process adds repeatability, handovers, standards, governance, and cadence so belief and action do not fragment."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a belief-and-progress pattern. Its best version mobilises people around a future, proves the future through action, and then builds enough method to sustain the movement."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by making the future meaningful and shared. The development edge is to give belief and progress enough operating discipline to last."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by creating meaning-rich mobilisation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People may follow a task, but they commit differently when they understand what future the work serves and where they fit inside it. You are likely to bring that wider frame. You can help people see the purpose of a change, the capability being built, and the customer or organisational promise behind current effort."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People strengthens your Vision by making it relational. The direction is not only explained; it is made relevant to the people who need to carry it."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Results expands the value by turning belief into visible progress. That matters because commitment needs evidence. People need to see that the future is becoming real through decisions, action, customer impact, or delivery movement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process is the stabiliser. It turns belief and proof into repeatable work rather than many separate interpretations of the same future."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as inclusive, energising, and orienting. You can make people feel that the work matters and that their contribution has a place in what is being built."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be powerful in culture change, growth initiatives, transformation, innovation, and moments where people need confidence before all the detail is known."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that people may feel inspired but later need more structure. Once movement begins, questions about sequence, handovers, ownership, and standards become more important. If those remain unclear, belief can fragment."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to weigh decisions by their alignment with the future and their ability to mobilise commitment."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels strong when it serves the direction, strengthens belief, and creates a visible move. Results asks what action will demonstrate progress."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that Process may be under-specified. A decision can be meaningful and motivating while still leaving unclear who owns the next step, how work will be reviewed, or what standard applies."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The strongest decisions for this pattern combine direction, human commitment, proof, and method."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through story, inclusion, belief, and action."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when people need to understand why the work matters and why they should commit to it. You can connect future direction to contribution and then name the action that would make the future visible."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The communication edge is to add more operating clarity. People should not have to infer the route from the story. They need to know the sequence, owner, standard, and review point that will hold the action."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward rallying people around the future and asking for commitment."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can help when morale is low or hesitation is costing the organisation movement. You can restore belief and bring people back to the larger reason for the work."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is assuming shared belief will solve coordination. People may be committed, but commitment does not automatically define handovers, decision rights, operating cadence, or governance. Work can become energetic but uneven."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The pressure move is to translate belief into method: what happens first, who owns it, what standard applies, and when progress will be reviewed?"
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Meaning-rich mobilisation",
+                  "text": "You can help people see why the work matters and where they belong in it."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Human commitment",
+                  "text": "People makes your Vision more grounded. The direction is not only strategic; it is connected to contribution and trust."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Proof of belief",
+                  "text": "Results turns shared belief into movement that others can see and evaluate."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Belief before method",
+                  "text": "People may commit before the operating route is clear.",
+                  "rangeToAdd": "Bring Process in through cadence, handovers, standards, and ownership.",
+                  "whyItMatters": "Bring Process in through cadence, handovers, standards, and ownership."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Energy fragments",
+                  "text": "Different people may interpret the direction differently once action begins.",
+                  "rangeToAdd": "Define the shared operating model before movement spreads too far.",
+                  "whyItMatters": "Define the shared operating model before movement spreads too far."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Proof depends on personal drive",
+                  "text": "Progress may rely on conviction rather than repeatable coordination.",
+                  "rangeToAdd": "Build review rhythm and decision rights around the proof point.",
+                  "whyItMatters": "Build review rhythm and decision rights around the proof point."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How Results expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Results expands this pattern by giving people-centred Vision tangible movement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When Results is active, belief becomes evidence. The team can see what has changed, what decision has closed, what customer value has improved, and what progress proves the future is becoming real."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Results questions to bring forward",
+                  "prompts": [
+                    "What visible action will show this belief is real?",
+                    "Which customer or commercial consequence should improve?",
+                    "What decision needs to close now?",
+                    "What evidence will help people keep trusting the direction?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How Process expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Process expands this pattern by giving belief and action repeatability."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because Process is the furthest extension, it may need deliberate attention. You may naturally create meaning, commitment, and movement before fully defining the operating method. But without Process, people may carry the same direction in different ways."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process adds handovers, standards, cadence, governance, and a way to review progress. It helps the future become a shared system rather than a shared feeling."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Process questions to bring forward",
+                  "prompts": [
+                    "What rhythm will hold this work?",
+                    "Who owns the next step?",
+                    "Where could handovers fail?",
+                    "What standard will keep action coherent?",
+                    "How will we review learning and progress?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your development focus is to turn shared belief into a clear operating rhythm."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Define the first cadence",
+                  "text": "Name when the work will be reviewed, by whom, and against what evidence.",
+                  "useCases": [
+                    "change mobilisation",
+                    "team alignment",
+                    "customer-facing initiatives."
+                  ],
+                  "whyItMatters": "Use this in: change mobilisation, team alignment, customer-facing initiatives.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Assign ownership clearly",
+                  "text": "Commitment needs owners, not only enthusiasm.",
+                  "useCases": [
+                    "delegation",
+                    "implementation planning",
+                    "cross-functional work."
+                  ],
+                  "whyItMatters": "Use this in: delegation, implementation planning, cross-functional work.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Standardise the proof point",
+                  "text": "Make sure progress means the same thing across teams.",
+                  "useCases": [
+                    "commercial reviews",
+                    "transformation governance",
+                    "delivery recovery."
+                  ],
+                  "whyItMatters": "Use this in: commercial reviews, transformation governance, delivery recovery.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Watch for hidden strain",
+                  "text": "People may be committed but overloaded by unclear coordination.",
+                  "useCases": [
+                    "manager check-ins",
+                    "adoption reviews",
+                    "workload planning."
+                  ],
+                  "whyItMatters": "Use this in: manager check-ins, adoption reviews, workload planning.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Keep meaning connected to method",
+                  "text": "Do not let process feel like an add-on. Explain how it protects the future people believe in.",
+                  "useCases": [
+                    "change communication",
+                    "operating model design",
+                    "leadership updates."
+                  ],
+                  "whyItMatters": "Use this in: change communication, operating model design, leadership updates.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it makes the future human and actionable."
+              },
+              {
+                "type": "paragraph",
+                "text": "Vision gives your leadership its direction. People turns that direction into commitment. Results gives commitment proof. The growth edge is Process: the discipline that prevents belief and action from fragmenting."
+              },
+              {
+                "type": "paragraph",
+                "text": "Your risk under pressure is asking shared belief to carry coordination that has not yet been designed. Your strongest leadership keeps the future meaningful, keeps people included, keeps progress visible, and builds the operating rhythm that lets commitment last."
+              }
+            ],
+            "finalLine": "Your strongest leadership turns shared belief in the future into progress that has enough method to endure."
+          },
+          "pdf": {
+            "title": "Save this report",
+            "body": "Use this report as a reference when a team is energised by direction but needs clearer operating discipline. Return to it before mobilisation, delivery recovery, governance design, or moments where belief needs structure."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Vision, People, Results, Process"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Vision and strengthened by People, while Results and Process are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "vision_process_people_results",
+      "report_key": "vision_process_people_results",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_process_people_results.md",
+      "source_content_hash": "2a1e3b6068a5d26ef4c8d0f06c4a179d09936c57e45aeb9679cddb2217841c3b",
+      "content_hash": "2a1e3b6068a5d26ef4c8d0f06c4a179d09936c57e45aeb9679cddb2217841c3b",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "vision_process_people_results",
+        "patternKey": "vision_process_people_results",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "vision_process_people_results",
+          "patternKey": "vision_process_people_results",
+          "reportTitle": "Leadership Approach — Vision, Process, People, Results",
+          "hero": {
+            "title": "You lead by building a coherent path toward the future and inviting people to own it",
+            "resultStatement": "You create confidence by turning future direction into a way of working that people can understand and shape. Your leadership is at its best when a team needs strategic steadiness, practical logic, and shared ownership before the work can move well.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Vision and strengthened by Process. You are likely to create value by naming what the work is meant to build, then translating that direction into a coherent operating path."
+            },
+            {
+              "type": "paragraph",
+              "text": "People is the first expansion. This makes the future-facing process more participative and credible. Others are not only asked to understand the method; they are invited to help shape it and trust it."
+            },
+            {
+              "type": "paragraph",
+              "text": "Results is the furthest extension. The development edge is to define the result that will show whether the shared path is working. Without enough proof, the pattern can become thoughtful, coherent, and inclusive while still under-forcing progress."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your strongest leadership builds a future-facing method, invites people into ownership, and then names the measurable outcome that proves the method is creating movement."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the future direction",
+                    "roleSummary": "You tend to lead by naming what the work should build, protect, or make possible."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the coherent method",
+                    "roleSummary": "Process translates direction into sequence, standards, decision rights, and operating discipline."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the ownership expansion",
+                    "roleSummary": "People makes the future-facing process participative, trusted, and shaped by those who must carry it."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the proof edge",
+                    "roleSummary": "Results asks whether the shared method is creating visible progress, closure, and commercial evidence."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Vision — the future direction"
+                    },
+                    {
+                      "text": "You tend to lead by naming what the work should build, protect, or make possible."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "Process — the coherent method"
+                    },
+                    {
+                      "text": "Process translates direction into sequence, standards, decision rights, and operating discipline."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "People — the ownership expansion"
+                    },
+                    {
+                      "text": "People makes the future-facing process participative, trusted, and shaped by those who must carry it."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "Results — the proof edge"
+                    },
+                    {
+                      "text": "Results asks whether the shared method is creating visible progress, closure, and commercial evidence."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a future-method-and-ownership pattern. Its best version turns strategic direction into a trusted way of working, then proves that the shared path is producing progress."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by making the future coherent and owned. The development edge is to make progress explicit enough that alignment becomes evidence."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by making strategic direction steady enough for people to carry."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may see where an ambition needs a method: sequence, standards, governance, and a practical way for people to coordinate around the future. Process gives your Vision credibility because the direction is not left as a statement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People expands the value by making the method shared. You are likely to be more effective when people have room to question the route, contribute local knowledge, and see their own ownership inside the work."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Results is the edge to keep close. A coherent and trusted path still needs proof. It should produce visible progress, better decisions, customer consequences, or delivery evidence."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as thoughtful, orienting, and inclusive. You can help people understand where the work is going and how it might be organised."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be valuable in change work where people need more than a target. They need a process they can trust and a place in the direction being built."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that people may wait too long for sharper progress signals. Alignment may feel strong, but delivery pressure can remain soft. Senior stakeholders may ask what has changed, what decision has closed, or what proof shows the shared path is working."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by asking what path best serves the long-term direction and what people need in order to trust it."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels sound when it fits the future, strengthens the method, and can be carried by the team. You may resist choices that create speed but damage coherence or trust."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Results asks the sharper question: what will this decision change? What evidence will show it was useful? Without this, decisions may remain well reasoned but not sufficiently consequential."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through purpose, logic, method, and involvement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective at explaining why the work matters, how the pieces connect, and where people can contribute. This can help teams feel oriented and respected."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The communication edge is to add more direct outcome language. People should know not only why the work matters and how it will be held, but what must now move."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Stronger communication for this pattern includes: the future we are serving, the method we will use, where your judgement matters, and the result we now need to prove."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward explaining and refining the strategic process."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can help when people are confused or change is being handled reactively. You can restore logic and protect coherence."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is postponing closure until alignment feels sufficient. The team may keep discussing the route, refining participation, or strengthening trust while the customer consequence, commercial risk, or delivery commitment needs clearer movement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The pressure move is to keep the method and ownership, then name the proof: what must be delivered, by when, by whom, and what evidence will show that the shared path is working?"
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Coherent direction",
+                  "text": "You help people see how the future can become a practical method rather than a vague aspiration."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Participative process",
+                  "text": "People makes the method more credible because others can shape it and trust it."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Strategic steadiness",
+                  "text": "You can prevent change from becoming reactive by keeping the long-term direction and operating logic visible."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Alignment before proof",
+                  "text": "The work may feel meaningful and well held, but progress may remain under-defined.",
+                  "rangeToAdd": "Name the outcome, evidence, and review point early.",
+                  "whyItMatters": "Name the outcome, evidence, and review point early."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Participation delays closure",
+                  "text": "Involvement can become a reason to keep decisions open too long.",
+                  "rangeToAdd": "Separate input from decision rights. Be clear about where judgement is invited and where closure belongs.",
+                  "whyItMatters": "Separate input from decision rights. Be clear about where judgement is invited and where closure belongs."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Method becomes too explanatory",
+                  "text": "The operating path may be explained in detail without enough commercial consequence.",
+                  "rangeToAdd": "Connect the method to customer value, delivery proof, or resource trade-offs.",
+                  "whyItMatters": "Connect the method to customer value, delivery proof, or resource trade-offs."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How People expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "People expands this pattern by making the future-facing method shared."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When People is active, the process is not only designed for people; it is shaped with them. That improves adoption, trust, and local fit. It also helps you see where a logical method may create hidden labour or unclear ownership."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "People questions to bring forward",
+                  "prompts": [
+                    "Who needs to shape this method before it is final?",
+                    "Where might people agree publicly but adapt privately?",
+                    "What support would make ownership real?",
+                    "What local reality could improve the path?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How Results expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Results expands this pattern by turning coherence and ownership into proof."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because Results is the furthest extension, it may need deliberate force. You may naturally explain the direction, design the method, and involve people before naming the hard outcome. But proof is what turns this pattern into commercial leadership."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Results asks what has moved: the decision closed, the customer issue improved, the delivery risk reduced, the capability built, or the priority made real."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Results questions to bring forward",
+                  "prompts": [
+                    "What outcome will prove this path is working?",
+                    "Which decision must close now?",
+                    "What evidence will we review?",
+                    "Where is alignment becoming a substitute for movement?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your development focus is to turn shared method into measurable progress."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Define the result early",
+                  "text": "Before alignment work expands, name the outcome the path must produce.",
+                  "useCases": [
+                    "transformation planning",
+                    "governance",
+                    "strategy execution."
+                  ],
+                  "whyItMatters": "Use this in: transformation planning, governance, strategy execution.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Clarify decision rights",
+                  "text": "Participation works best when closure is clear.",
+                  "useCases": [
+                    "leadership forums",
+                    "cross-functional work",
+                    "operating model design."
+                  ],
+                  "whyItMatters": "Use this in: leadership forums, cross-functional work, operating model design.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Tie method to commercial consequence",
+                  "text": "Explain how the process improves customer value, delivery, risk, or resource use.",
+                  "useCases": [
+                    "commercial reviews",
+                    "prioritisation",
+                    "delivery recovery."
+                  ],
+                  "whyItMatters": "Use this in: commercial reviews, prioritisation, delivery recovery.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Review evidence, not only confidence",
+                  "text": "Ask what changed because the shared path exists.",
+                  "useCases": [
+                    "operating reviews",
+                    "retrospectives",
+                    "senior updates."
+                  ],
+                  "whyItMatters": "Use this in: operating reviews, retrospectives, senior updates.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Use pressure to focus",
+                  "text": "When stakes rise, name the next proof point rather than refining the explanation again.",
+                  "useCases": [
+                    "customer escalations",
+                    "missed milestones",
+                    "resource trade-offs."
+                  ],
+                  "whyItMatters": "Use this in: customer escalations, missed milestones, resource trade-offs.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it makes the future coherent and shared."
+              },
+              {
+                "type": "paragraph",
+                "text": "Vision gives your leadership the strategic frame. Process turns that frame into a method. People makes the method trusted and owned. The growth edge is Results: the proof that the shared path is doing more than creating alignment."
+              },
+              {
+                "type": "paragraph",
+                "text": "Your risk under pressure is thoughtful coherence without enough closure. Your strongest leadership keeps the direction, method, and participation, then names the outcome that must now become visible."
+              }
+            ],
+            "finalLine": "Your strongest leadership turns a shared path toward the future into proof that the future is starting to work."
+          },
+          "pdf": {
+            "title": "Save this report",
+            "body": "Use this report as a reference when strategy, process, and ownership are strong but progress needs sharper proof. Return to it before governance reviews, prioritisation, delivery recovery, or moments where alignment must become evidence."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Vision, Process, People, Results"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Vision and strengthened by Process, while People and Results are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "vision_process_results_people",
+      "report_key": "vision_process_results_people",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_process_results_people.md",
+      "source_content_hash": "a582f28b0cda271871956162d58f65b726583830a70f22b6af013677c11d80c7",
+      "content_hash": "a582f28b0cda271871956162d58f65b726583830a70f22b6af013677c11d80c7",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "vision_process_results_people",
+        "patternKey": "vision_process_results_people",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "vision_process_results_people",
+          "patternKey": "vision_process_results_people",
+          "reportTitle": "Leadership Approach — Vision, Process, Results, People",
+          "hero": {
+            "title": "You lead by translating future direction into a coherent system",
+            "resultStatement": "You create confidence by making ambition operational. Your leadership is at its best when a future direction needs to become a credible design: sequenced, governed, prioritised, and capable of producing evidence.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Vision and strengthened by Process. You are likely to create value by asking what the work is meant to build, then translating that direction into an operating system that can support it."
+            },
+            {
+              "type": "paragraph",
+              "text": "This pattern is strategic but not vague. Vision gives the future logic. Process makes that logic usable through sequence, standards, decision rights, governance, and disciplined implementation. You may be especially attentive to whether the current system can actually carry the future the organisation says it wants."
+            },
+            {
+              "type": "paragraph",
+              "text": "Results is the first expansion. The system becomes more credible when it produces visible outcomes, near-term proof, and evidence that the future-facing design is working."
+            },
+            {
+              "type": "paragraph",
+              "text": "People is the furthest extension. The development edge is to bring human adoption into the design conversation early, before the system becomes too complete to challenge. A strong design still needs lived use, trust, and local reality checks."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your strongest leadership begins with the future, uses Process as the translation mechanism, tests the design through outcomes, and involves people early enough that the system is adopted rather than only admired."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the future logic",
+                    "roleSummary": "You tend to lead by naming what the work should build, protect, change, or make possible."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the translation support",
+                    "roleSummary": "Process turns the future into architecture, sequence, governance, standards, and practical design."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the proof expansion",
+                    "roleSummary": "Results tests whether the future-facing system is producing visible progress and useful outcomes."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the adoption edge",
+                    "roleSummary": "People checks whether the design is trusted, usable, and shaped by those who must live inside it."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Vision — the future logic"
+                    },
+                    {
+                      "text": "You tend to lead by naming what the work should build, protect, change, or make possible."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "Process — the translation support"
+                    },
+                    {
+                      "text": "Process turns the future into architecture, sequence, governance, standards, and practical design."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "Results — the proof expansion"
+                    },
+                    {
+                      "text": "Results tests whether the future-facing system is producing visible progress and useful outcomes."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "People — the adoption edge"
+                    },
+                    {
+                      "text": "People checks whether the design is trusted, usable, and shaped by those who must live inside it."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a future-and-system pattern. Its best version turns ambition into operating design, then tests that design through progress people can adopt."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by making direction operationally coherent. The development edge is to test the system through outcomes and involve people before the design becomes too fixed."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by turning future intent into operating architecture."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Many organisations can describe a future direction but struggle to build the system that would make it real. You are likely to notice the gap between ambition and operating conditions: unclear decision rights, weak sequencing, competing standards, under-defined governance, or capabilities that the current model cannot yet support."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process strengthens your Vision by giving it shape. You may ask how the organisation should work differently if the future direction is serious. What cadence is needed? Which decisions need to move closer to the work? What standards must change? Which handovers will break at scale?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Results expands the value by forcing evidence. A future-facing system should not only look coherent; it should improve delivery, customer experience, decision speed, quality, or strategic confidence."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People keeps the design grounded. The system has to be lived in, not only described."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as strategic, ordered, and architecturally clear. You can help people see not only where the organisation is trying to go, but what kind of system would make that future credible."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be valuable in transformation, operating model change, governance redesign, product or service evolution, and leadership alignment. You can make ambition feel less like an abstract statement and more like a set of design choices."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that people may feel the architecture is complete before their experience has shaped it. They may admire the logic but wonder whether the design understands workload, trust, local constraints, or informal coordination."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The complete version of this pattern keeps the strategic architecture while inviting human adoption evidence early."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by asking which choice protects the future logic and operating coherence of the work."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels sound when it fits the strategic direction and strengthens the system required to reach it. You may be less persuaded by a quick win if it creates future fragmentation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Results asks whether the decision produces evidence. What outcome will test whether the design is working? What proof point will show that the operating model is not only elegant but useful?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People asks whether the decision can be adopted. Who needs to challenge the design? Where might the system create hidden labour? What local reality could change the sequence?"
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through direction, frameworks, design choices, and system evolution."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when people need to understand how a strategic shift changes the way work should happen. You can explain the logic of a new operating model, governance approach, or implementation sequence."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The limitation is that the communication may feel more designed than participative. People may understand the framework but not yet see where their experience can influence it."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Strong communication for this pattern includes the future logic, the system design, the proof the system must create, and the places where people are invited to challenge the design before it hardens."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward refining the architecture and defending the strategic logic."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be useful when pressure tempts a team into reactive fixes that would weaken the future model. You can protect coherence and prevent short-term choices from damaging long-term capability."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that you may become less responsive to team experience. You may improve the design while missing adoption signals: quiet resistance, informal workarounds, workload strain, or local knowledge that would make the system better."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The pressure move is to test the architecture through both outcomes and lived use. Ask what proof the system is producing and what people are experiencing as they use it."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Strategic architecture",
+                  "text": "You can translate future direction into design choices. That helps organisations move from aspiration to operating reality."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Coherent implementation",
+                  "text": "Process keeps the direction from fragmenting. Sequence, standards, and governance make the future easier to pursue."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Evidence-based refinement",
+                  "text": "Results helps the system learn. Progress becomes a way of testing whether the design is working."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Architecture before adoption",
+                  "text": "The system may become too complete before people have shaped it.",
+                  "rangeToAdd": "Bring People into design reviews early. Ask where the system will be hard to use.",
+                  "whyItMatters": "Bring People into design reviews early. Ask where the system will be hard to use."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Coherence before proof",
+                  "text": "The model may be logically strong but slow to demonstrate value.",
+                  "rangeToAdd": "Define near-term outcomes that test the system.",
+                  "whyItMatters": "Define near-term outcomes that test the system."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Design protects itself",
+                  "text": "Under pressure, you may defend the logic rather than listen for evidence that the design needs adjustment.",
+                  "rangeToAdd": "Treat adoption friction as data, not resistance.",
+                  "whyItMatters": "Treat adoption friction as data, not resistance."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How Results expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Results expands this pattern by testing whether the future-facing system works."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When Results is active, the design is judged by evidence. Does it improve customer reliability? Does it reduce rework? Does it speed decisions? Does it make strategic progress visible?"
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Proof questions to bring forward",
+                  "prompts": [
+                    "What outcome will test this design?",
+                    "What evidence would make us change the system?",
+                    "Where should progress be visible first?",
+                    "Which decision must close to make the future more credible?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How People expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "People expands this pattern by making the system adoptable."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because People is the furthest extension, it may need deliberate attention. A system can be strategically sound and operationally coherent while still failing in lived use. People brings participation, trust, local knowledge, and the practical reality of how work is carried."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Adoption questions to bring forward",
+                  "prompts": [
+                    "Who needs to challenge the design before it is final?",
+                    "Where might the system create hidden labour?",
+                    "What informal coordination does the design assume?",
+                    "What would help people trust and use this system?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your development focus is to make strategic architecture testable and adoptable."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Define proof for the design",
+                  "text": "Name the outcome that will show whether the system is working.",
+                  "useCases": [
+                    "operating model design",
+                    "transformation governance",
+                    "strategic implementation."
+                  ],
+                  "whyItMatters": "Use this in: operating model design, transformation governance, strategic implementation.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Invite adoption evidence early",
+                  "text": "Ask people how the system will actually work before it is final.",
+                  "useCases": [
+                    "process redesign",
+                    "cross-functional planning",
+                    "team implementation."
+                  ],
+                  "whyItMatters": "Use this in: process redesign, cross-functional planning, team implementation.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Treat friction as information",
+                  "text": "Do not dismiss adoption difficulty as resistance. It may reveal design gaps.",
+                  "useCases": [
+                    "retrospectives",
+                    "pilots",
+                    "implementation reviews."
+                  ],
+                  "whyItMatters": "Use this in: retrospectives, pilots, implementation reviews.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Protect coherence without rigidity",
+                  "text": "Keep the future logic clear while allowing evidence to adjust the method.",
+                  "useCases": [
+                    "governance",
+                    "senior alignment",
+                    "roadmap decisions."
+                  ],
+                  "whyItMatters": "Use this in: governance, senior alignment, roadmap decisions.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Make decision rights visible",
+                  "text": "Strategic systems fail when authority is unclear.",
+                  "useCases": [
+                    "leadership forums",
+                    "dependency management",
+                    "operating cadence design."
+                  ],
+                  "whyItMatters": "Use this in: leadership forums, dependency management, operating cadence design.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it makes ambition operational."
+              },
+              {
+                "type": "paragraph",
+                "text": "Vision gives your leadership its strategic logic. Process turns that logic into design, sequence, standards, and governance. Results then tests whether the design is working, while People reminds you that every system must be adopted by real people doing real work."
+              },
+              {
+                "type": "paragraph",
+                "text": "The risk is an elegant system that has not been tested enough or shaped enough by lived use. Your growth move is to keep the architecture, but let outcomes and human adoption evidence improve it."
+              }
+            ],
+            "finalLine": "Your strongest leadership turns future direction into a system that can be tested, trusted, and used."
+          },
+          "pdf": {
+            "title": "Save this report",
+            "body": "Use this report as a reference when you are translating strategy into operating design. Return to it before governance changes, transformation plans, operating model reviews, or moments when architecture needs proof and adoption."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Vision, Process, Results, People"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Vision and strengthened by Process, while Results and People are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "vision_results_people_process",
+      "report_key": "vision_results_people_process",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_results_people_process.md",
+      "source_content_hash": "84a720b6938b7511a3c14b946dd40aa67511bd3b0fee296642fd0493233d1d51",
+      "content_hash": "84a720b6938b7511a3c14b946dd40aa67511bd3b0fee296642fd0493233d1d51",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "vision_results_people_process",
+        "patternKey": "vision_results_people_process",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "vision_results_people_process",
+          "patternKey": "vision_results_people_process",
+          "reportTitle": "Leadership Approach — Vision, Results, People, Process",
+          "hero": {
+            "title": "You lead by making the future feel urgent, shared, and possible",
+            "resultStatement": "You create confidence by setting a future direction, pushing for movement toward it, and helping people believe that the proof is worth carrying. Your leadership is at its best when a team needs urgency and meaning together.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Vision and strengthened by Results. You are likely to create value by naming what the work is meant to build, then moving quickly toward evidence that the future is possible."
+            },
+            {
+              "type": "paragraph",
+              "text": "People is the first expansion. This is important: the push is strongest when people do not only hear the future and the proof point, but can see themselves inside the movement. Your leadership can mobilise commitment by connecting strategic meaning to visible progress."
+            },
+            {
+              "type": "paragraph",
+              "text": "Process is the furthest extension. The development edge is to build the operating method before the energy of the push becomes uneven or dependent on personal conviction. Without enough method, people may be inspired and active while still unclear about sequence, governance, handovers, or standards."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your strongest leadership makes the future compelling, creates proof that it is becoming real, mobilises people around that proof, and then gives the movement enough operating discipline to last."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the strategic direction",
+                    "roleSummary": "You tend to lead by naming future possibility, capability, opportunity, and the larger reason the work matters."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the proof support",
+                    "roleSummary": "Results creates visible action, evidence, decisions, and progress toward the future."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the mobilisation expansion",
+                    "roleSummary": "People helps the push become shared, credible, and carried by those who need to make it real."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the operating edge",
+                    "roleSummary": "Process adds sequence, cadence, standards, accountability, and practical constraints so energy does not scatter."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Vision — the strategic direction"
+                    },
+                    {
+                      "text": "You tend to lead by naming future possibility, capability, opportunity, and the larger reason the work matters."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "Results — the proof support"
+                    },
+                    {
+                      "text": "Results creates visible action, evidence, decisions, and progress toward the future."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "People — the mobilisation expansion"
+                    },
+                    {
+                      "text": "People helps the push become shared, credible, and carried by those who need to make it real."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "Process — the operating edge"
+                    },
+                    {
+                      "text": "Process adds sequence, cadence, standards, accountability, and practical constraints so energy does not scatter."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a future-and-mobilisation pattern. Its best version creates movement people believe in, then gives that movement a disciplined way to travel."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by turning future belief into visible movement. The development edge is to build enough method that the movement can be repeated, coordinated, and sustained."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by making a future feel actionable."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may notice when a team needs more than a plan. It needs a reason to move. You can name the customer promise, capability, opportunity, or strategic shift that gives current work significance. Results then asks what action would show that this future is more than language."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People expands the value by making the movement emotionally and practically credible. You may be able to help others see why their contribution matters and why the work deserves effort now."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pattern can be powerful in change leadership, growth initiatives, innovation, market repositioning, customer proposition work, and moments where confidence depends on visible proof that a strategic shift can happen."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process is the necessary stabiliser. Once people are moving, the work needs cadence, decision rights, sequencing, standards, and review. Otherwise, commitment may be high but coordination uneven."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as energising, ambitious, and activating. You can create a sense that the work matters now, not someday. People may feel that they are part of something that could become meaningful and commercially important."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that energy can outrun method. People may feel inspired and willing, but still need clearer operating guidance. They may ask how the work will be sequenced, what decisions have been made, where accountability sits, and how progress will be reviewed."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This does not make the pattern careless. It means your first strength is movement around meaning. The complete version protects that energy by giving it operational form before interpretation fragments across teams."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by asking what moves the future closer and what proof would show real progress."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels strong when it advances the strategic direction and creates evidence. People adds another test: will this decision mobilise commitment, not only compliance?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that Process may arrive late. A decision may be compelling and activating but still under-designed. Governance, handovers, resourcing constraints, and review points may remain less clear than the energy of the decision suggests."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Better decisions for this pattern answer four questions: what future does this serve, what proof will it create, who needs to carry it, and what operating method will keep it coherent?"
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through future, evidence, movement, and belief in people."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when a team needs to understand why action matters. You can connect the push to customer value, market opportunity, organisational capability, or a larger strategic shift. People helps you speak in a way that invites commitment rather than only issuing a challenge."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The limitation is that communication may under-specify mechanics. People may leave motivated but unclear about sequence, decision rights, standards, or what happens if early evidence changes the route."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, communication becomes stronger when it adds operating clarity: here is what we are building, here is the proof we need, here is where your contribution matters, and here is the cadence that will hold the work."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward rallying people around a bold move."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can help when hesitation is costing the organisation momentum. You can restore urgency, remind people what is at stake, and ask for commitment to visible progress."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that commitment is asked to carry what Process has not clarified. People may say yes to the future but then interpret priorities differently. Workload may become uneven. Handovers may rely on goodwill. Governance may lag behind the pace of the push."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The pressure move is not to reduce ambition. It is to pause long enough to define the operating backbone: what sequence comes first, who owns which decision, what standard matters, and when the work will be reviewed."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Meaning with momentum",
+                  "text": "You can combine a future-facing story with action. That helps teams avoid passive inspiration and creates movement toward what matters."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Mobilising energy",
+                  "text": "People helps your Vision and Results land with commitment. Others may feel included in the push, not merely instructed to execute it."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Proof of possibility",
+                  "text": "Results gives the future credibility. Early evidence can help people believe that the change is possible and worth sustaining."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Energy without operating method",
+                  "text": "The push may begin before sequence, ownership, and governance are clear enough.",
+                  "rangeToAdd": "Bring Process in through cadence, handovers, standards, and decision rights.",
+                  "whyItMatters": "Bring Process in through cadence, handovers, standards, and decision rights."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Commitment carries ambiguity",
+                  "text": "People may be willing to move, but willingness can hide unclear priorities.",
+                  "rangeToAdd": "Translate commitment into roles, decisions, and review points.",
+                  "whyItMatters": "Translate commitment into roles, decisions, and review points."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Proof becomes uneven",
+                  "text": "Different teams may create different kinds of progress, making evidence hard to compare.",
+                  "rangeToAdd": "Define what proof counts and how it will be reviewed.",
+                  "whyItMatters": "Define what proof counts and how it will be reviewed."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How People expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "People expands this pattern by making the future-led push shared and credible."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When People is active, the direction becomes more than a message. Others can discuss it, question it, connect their work to it, and bring their judgement into it. This matters because future-facing movement needs human commitment, not only agreement."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "People questions to bring forward",
+                  "prompts": [
+                    "Who needs to see themselves in this direction?",
+                    "Where could enthusiasm be masking concern?",
+                    "What commitment are we asking for, and what support does it require?",
+                    "How do we make this proof point shared rather than leader-dependent?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How Process expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Process expands this pattern by giving belief and action a durable operating form."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because Process is the furthest extension, it may need deliberate activation. You may naturally create the future story, the proof point, and the mobilisation before defining the full method. But inspired action needs structure if it is going to survive pressure."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process adds sequence, governance, role clarity, standards, handovers, and review rhythm. It prevents movement from depending too heavily on personal conviction or informal coordination."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Process questions to bring forward",
+                  "prompts": [
+                    "What operating cadence will hold this work?",
+                    "Who owns the handovers?",
+                    "What standard defines progress?",
+                    "Where could enthusiasm create duplicated or conflicting effort?",
+                    "What decision rights need to be explicit?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your development focus is to make inspired movement operationally reliable."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Build the cadence early",
+                  "text": "Define the meeting rhythm, review point, and decision path before the push spreads.",
+                  "useCases": [
+                    "transformation launches",
+                    "growth initiatives",
+                    "delivery recovery",
+                    "strategic pilots."
+                  ],
+                  "whyItMatters": "Use this in: transformation launches, growth initiatives, delivery recovery, strategic pilots.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Convert commitment into roles",
+                  "text": "Name who owns what, where judgement sits, and what support is available.",
+                  "useCases": [
+                    "team mobilisation",
+                    "cross-functional work",
+                    "change leadership."
+                  ],
+                  "whyItMatters": "Use this in: team mobilisation, cross-functional work, change leadership.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Define proof consistently",
+                  "text": "Clarify what evidence will show movement and how different teams should report it.",
+                  "useCases": [
+                    "commercial reviews",
+                    "governance",
+                    "customer-facing change."
+                  ],
+                  "whyItMatters": "Use this in: commercial reviews, governance, customer-facing change.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Protect energy from fragmentation",
+                  "text": "Use Process to keep enthusiasm from becoming many disconnected interpretations.",
+                  "useCases": [
+                    "scaling work",
+                    "implementation planning",
+                    "partner handovers."
+                  ],
+                  "whyItMatters": "Use this in: scaling work, implementation planning, partner handovers.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Review strain as well as movement",
+                  "text": "People may be willing to carry a push, but willingness is not infinite.",
+                  "useCases": [
+                    "pressure moments",
+                    "manager check-ins",
+                    "adoption reviews."
+                  ],
+                  "whyItMatters": "Use this in: pressure moments, manager check-ins, adoption reviews.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it makes the future feel possible and worth moving toward."
+              },
+              {
+                "type": "paragraph",
+                "text": "Vision gives your leadership direction. Results gives it proof. People makes the push shared and emotionally credible. The growth edge is Process: the operating method that keeps energy from scattering and turns commitment into repeatable progress."
+              },
+              {
+                "type": "paragraph",
+                "text": "Under pressure, your risk is asking belief to do the work of structure. Your strongest leadership keeps the future compelling, keeps proof visible, keeps people involved, and makes the method clear enough for the movement to last."
+              }
+            ],
+            "finalLine": "Your strongest leadership turns belief in the future into movement people can carry and a method that can hold."
+          },
+          "pdf": {
+            "title": "Save this report",
+            "body": "Use this report as a reference when a future-facing push needs both energy and discipline. Return to it before launches, mobilisation moments, governance reviews, or any point where commitment needs a clearer operating method."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Vision, Results, People, Process"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Vision and strengthened by Results, while People and Process are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "vision_results_process_people",
+      "report_key": "vision_results_process_people",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_results_process_people.md",
+      "source_content_hash": "a3d1522c552660e77f8759fc6d68467dfdf8a12fee398e3b804781ede1b8d6b6",
+      "content_hash": "a3d1522c552660e77f8759fc6d68467dfdf8a12fee398e3b804781ede1b8d6b6",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "vision_results_process_people",
+        "patternKey": "vision_results_process_people",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "vision_results_process_people",
+          "patternKey": "vision_results_process_people",
+          "reportTitle": "Leadership Approach — Vision, Results, Process, People",
+          "hero": {
+            "title": "You lead by pointing work toward a future and proving it through progress",
+            "resultStatement": "You create confidence by naming what the work is meant to build, then pushing for evidence that the direction is becoming real. Your leadership is at its best when a team needs to move beyond present pressure and understand what future capability, customer promise, or strategic opportunity current effort should serve.\n\nThis report explains how your leadership pattern tends to show up in real work: what it helps you create, how others may experience it, where it can tighten under pressure, and how to broaden it without becoming a different kind of leader."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Vision and strengthened by Results. You are likely to create value by helping people see what the work is for, then asking what progress would prove the direction is not only attractive but real. Vision gives the work its future logic. Results gives that future a test."
+            },
+            {
+              "type": "paragraph",
+              "text": "This is not generic optimism. Your pattern is concerned with consequence: what future is being served, what opportunity is being made credible, what risk is being reduced, and what evidence would show that the organisation is moving in the right direction."
+            },
+            {
+              "type": "paragraph",
+              "text": "Process is the first expansion. The direction and proof points become stronger when they are supported by operating discipline: sequence, decision rights, standards, ownership, review rhythm, and enough governance to make progress repeatable."
+            },
+            {
+              "type": "paragraph",
+              "text": "People is the furthest extension. The development edge is to bring people into the strategic judgement before asking them to deliver proof of it. Others may understand the goal and see the urgency, but still need room to shape the meaning, local implications, and human commitments behind the work."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your strongest leadership names the future, proves it through movement, builds the operating discipline to sustain it, and involves people early enough that the direction is carried rather than simply received."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the strategic frame",
+                    "roleSummary": "You tend to lead by naming future direction, capability, opportunity, risk, and the larger reason current work matters."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the proof support",
+                    "roleSummary": "Results turns direction into visible movement, decisions, evidence, and progress that can be tested."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the operating expansion",
+                    "roleSummary": "Process gives future-facing action sequence, standards, ownership, governance, and repeatability."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the adoption edge",
+                    "roleSummary": "People asks whether others have shaped the strategic judgement and can genuinely carry the direction."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Vision — the strategic frame"
+                    },
+                    {
+                      "text": "You tend to lead by naming future direction, capability, opportunity, risk, and the larger reason current work matters."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "Results — the proof support"
+                    },
+                    {
+                      "text": "Results turns direction into visible movement, decisions, evidence, and progress that can be tested."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "Process — the operating expansion"
+                    },
+                    {
+                      "text": "Process gives future-facing action sequence, standards, ownership, governance, and repeatability."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "People — the adoption edge"
+                    },
+                    {
+                      "text": "People asks whether others have shaped the strategic judgement and can genuinely carry the direction."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a future-and-proof pattern. Its best version turns strategic intent into visible progress without losing the operating discipline and participation required to sustain it."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by making the future testable. The development edge is to let people shape the judgement before asking them to deliver proof of the direction."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by making strategic direction consequential."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Where others may stay close to the immediate task, you are likely to ask what the work is really building. Is this decision protecting a future capability? Is this initiative moving the customer promise forward? Is the organisation proving a strategic choice, or only staying busy? These questions can lift a team out of short-term reaction."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Results gives your Vision practical force. You do not only want a direction people can admire. You want progress that can be seen: a closed decision, a clearer priority, a customer consequence, a delivery milestone, an early proof point, or evidence that the future is becoming operationally credible."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "That makes this pattern valuable in strategy translation, commercial repositioning, transformation work, product or service shifts, leadership alignment, and moments where the organisation needs to show that a future promise is more than language."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process expands this value by making progress repeatable. People expands it by making sure the proof is not achieved through compliance alone, but through commitment and local judgement."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as ambitious, energising, and commercially serious. You can help people understand why action matters now and why the current work connects to something larger than the next task."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For colleagues frustrated by vague strategy, your Results support can be reassuring. You are likely to ask what would demonstrate movement, which decision must close, and what evidence will show whether the direction is working."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is pace and ownership. People may feel pulled toward a future they did not fully help interpret. They may understand the strategic case and the required proof, but still need more room to raise concerns, shape implications, and connect the direction to their lived work."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The more complete version keeps the strategic push, but makes it participative enough that people carry the future with judgement rather than simply deliver against it."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by asking which choice advances the future and creates evidence quickly."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels strong when it clarifies the strategic bet and produces movement. You may be impatient with decisions that preserve optionality but do not move the organisation closer to the capability, customer promise, or position it says it wants."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process improves this decision style by asking how the move will be sequenced, governed, reviewed, and made repeatable. Without Process, a strong future-facing decision can create a burst of energy but weak operating follow-through."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People improves it by asking who needs to shape the judgement before it lands. A decision can be strategically sound and still lose power if those closest to the work feel consulted too late."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Decision checks that strengthen this pattern",
+                  "prompts": [
+                    "What future are we making more credible?",
+                    "What proof point should this decision create?",
+                    "What operating discipline will keep the proof honest?",
+                    "Who needs to shape this judgement before we ask for delivery?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through stakes, direction, opportunity, and proof."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when a group needs to understand why current effort matters. You can connect immediate work to market movement, customer value, organisational capability, or strategic risk. Results adds clarity by naming the next evidence point rather than leaving the message at aspiration."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The limitation is that your communication may compress the operating and human translation. People may hear the opportunity and the proof required, but not yet understand the sequence, the decision rights, the support available, or where their judgement is wanted."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Stronger communication for this pattern moves in four parts: what future the work serves, what progress would prove it, how the work will be organised, and where people can shape the route before it hardens."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward bold direction and fast proof."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be valuable. When teams are drifting, over-analysing, or losing conviction, you can restore a sense of what matters and ask for evidence that the organisation is still moving. You may help people avoid mistaking discussion for strategic progress."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that Process and People become compressed. You may push for the visible proof point before the operating method is stable enough or before people have enough voice to carry the decision well. That can create progress that is impressive but fragile."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In practice, this can show up as a strong commercial move with unclear handovers, a strategic initiative with weak governance, or a team asked to prove momentum before concerns about capacity, role clarity, or local impact have been surfaced."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The pressure move is to keep the proof point, then add two checks: what structure will sustain this, and whose judgement needs to be heard before the push becomes too fixed?"
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Future made testable",
+                  "text": "You can convert direction into evidence. That helps teams avoid vague ambition and gives senior stakeholders a clearer way to judge whether a strategic choice is becoming real."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Commercial momentum",
+                  "text": "Results gives your Vision traction. You can name what must move, which decision matters now, and what proof should be visible in the next review."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Strategic courage",
+                  "text": "You may be willing to name a future before every detail is known. That can help organisations act when waiting for certainty would mean losing opportunity or allowing risk to deepen."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Proof before method",
+                  "text": "The work may move before the operating discipline is strong enough. This can make early progress difficult to repeat.",
+                  "rangeToAdd": "Bring Process in through sequence, owners, standards, review cadence, and decision rights.",
+                  "whyItMatters": "Bring Process in through sequence, owners, standards, review cadence, and decision rights."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Direction before participation",
+                  "text": "People may be asked to deliver proof before they have helped shape the judgement. That can create compliance rather than commitment.",
+                  "rangeToAdd": "Bring People into the strategic conversation earlier, especially where workload, trust, identity, or local knowledge will affect execution.",
+                  "whyItMatters": "Bring People into the strategic conversation earlier, especially where workload, trust, identity, or local knowledge will affect execution."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Urgency narrows learning",
+                  "text": "The need to show progress can make early evidence feel like a verdict rather than learning.",
+                  "rangeToAdd": "Use Process to define what learning counts as progress and how the route will adapt.",
+                  "whyItMatters": "Use Process to define what learning counts as progress and how the route will adapt."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How Process expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Process expands this pattern by giving future-facing action operating discipline."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When Process is active, proof does not depend only on urgency or personal conviction. The work gains sequence, ownership, governance, standards, and review. The future becomes easier to pursue because people can see how progress will be held."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This matters because Vision and Results can create strong movement quickly. But if the method is unclear, movement can become uneven. Teams may solve the same problem differently, handovers may fail, and evidence may be difficult to interpret."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Process questions to bring forward",
+                  "prompts": [
+                    "What sequence will make this proof point credible?",
+                    "Who owns the decision rights?",
+                    "What standard will define good progress?",
+                    "Where will we review evidence and adjust?",
+                    "Which handovers could break if we rely on enthusiasm alone?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How People expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "People expands this pattern by turning strategic proof into shared commitment."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because People is the furthest extension, it may need deliberate attention. You may assume that a compelling future and visible progress will bring people with you. Often they help, but commitment deepens when people influence the judgement behind the work."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People adds local reality, trust, concern, and ownership. It helps you see whether the team is genuinely carrying the direction or simply responding to pressure and clarity."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Ownership questions to bring forward",
+                  "prompts": [
+                    "Who needs to shape the strategic judgement?",
+                    "Where might people comply without committing?",
+                    "What concern would improve the direction if heard now?",
+                    "What support would help the team carry the proof point well?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your development focus is to make proof sustainable and owned."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Add method to momentum",
+                  "text": "For every proof point, define the sequence, owner, standard, and review point.",
+                  "useCases": [
+                    "strategy execution",
+                    "delivery recovery",
+                    "commercial reviews",
+                    "transformation governance."
+                  ],
+                  "whyItMatters": "Use this in: strategy execution, delivery recovery, commercial reviews, transformation governance.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Invite judgement before the push hardens",
+                  "text": "Ask for challenge before people are only being asked to deliver.",
+                  "useCases": [
+                    "leadership alignment",
+                    "change mobilisation",
+                    "cross-functional initiatives."
+                  ],
+                  "whyItMatters": "Use this in: leadership alignment, change mobilisation, cross-functional initiatives.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Treat early evidence as learning",
+                  "text": "Define what will count as proof, what will count as useful learning, and how the route will adjust.",
+                  "useCases": [
+                    "pilots",
+                    "product change",
+                    "operating model shifts."
+                  ],
+                  "whyItMatters": "Use this in: pilots, product change, operating model shifts.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Clarify decision rights",
+                  "text": "Future-facing work loses pace when authority is assumed. Name who decides, who advises, and who owns the next move.",
+                  "useCases": [
+                    "governance",
+                    "prioritisation",
+                    "resource allocation."
+                  ],
+                  "whyItMatters": "Use this in: governance, prioritisation, resource allocation.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Keep human impact visible",
+                  "text": "Review workload, trust, and local implications alongside delivery evidence.",
+                  "useCases": [
+                    "pressure moments",
+                    "manager conversations",
+                    "adoption reviews."
+                  ],
+                  "whyItMatters": "Use this in: pressure moments, manager conversations, adoption reviews.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it makes direction consequential."
+              },
+              {
+                "type": "paragraph",
+                "text": "Vision gives your leadership its strategic reach. You help people see what future the work is serving and what capability or opportunity is at stake. Results gives that future a test, pushing the work toward evidence, decisions, and visible movement. Process then makes the proof repeatable, and People makes it more deeply owned."
+              },
+              {
+                "type": "paragraph",
+                "text": "The risk under pressure is that the future and proof point move faster than the method or the commitment. Your growth move is to keep the ambition and the evidence, while making the operating discipline and participation strong enough to sustain them."
+              }
+            ],
+            "finalLine": "Your strongest leadership turns a future worth pursuing into proof people can organise, trust, and carry."
+          },
+          "pdf": {
+            "title": "Save this report",
+            "body": "Use this report as a reference when you are translating strategic direction into proof. Return to it before major commercial decisions, transformation reviews, delivery pushes, or moments where progress needs both evidence and ownership."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Vision, Results, Process, People"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Vision and strengthened by Results, while Process and People are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
           "warningList": []
         }
       },

@@ -102,33 +102,38 @@
     },
     {
       "pattern_key": "vision_results_process_people",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_results_process_people.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "vision_results_people_process",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_results_people_process.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "vision_process_results_people",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_process_results_people.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "vision_process_people_results",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_process_people_results.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "vision_people_results_process",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/vision_people_results_process.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "vision_people_process_results",

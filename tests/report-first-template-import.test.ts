@@ -54,6 +54,11 @@ const availablePatternKeys = [
   'results_vision_people_process',
   'results_vision_process_people',
   'vision_people_process_results',
+  'vision_people_results_process',
+  'vision_process_people_results',
+  'vision_process_results_people',
+  'vision_results_people_process',
+  'vision_results_process_people',
 ] as const;
 
 function createFakeDb() {
@@ -227,11 +232,11 @@ test('report-first importer persists exactly the import-ready templates', async 
   });
 
   assert.equal(summary.expectedTemplateCount, 24);
-  assert.equal(summary.importedTemplateCount, 14);
-  assert.equal(summary.missingTemplateCount, 10);
+  assert.equal(summary.importedTemplateCount, 19);
+  assert.equal(summary.missingTemplateCount, 5);
   assert.equal(summary.publishableFullCoverage, false);
   assert.deepEqual(summary.importedPatternKeys, [...availablePatternKeys].sort());
-  assert.equal(fake.state.rows.length, 14);
+  assert.equal(fake.state.rows.length, 19);
   assert.ok(fake.state.rows.every((row) => row.status === 'draft'));
   assert.ok(fake.state.rows.every((row) => row.publishable === true));
   assert.ok(fake.state.rows.every((row) => row.ready_for_import === true));
@@ -272,9 +277,9 @@ test('report-first importer is idempotent for draft rows', async () => {
     assessmentVersionId,
   });
 
-  assert.equal(first.importedTemplateCount, 14);
-  assert.equal(second.importedTemplateCount, 14);
-  assert.equal(fake.state.rows.length, 14);
+  assert.equal(first.importedTemplateCount, 19);
+  assert.equal(second.importedTemplateCount, 19);
+  assert.equal(fake.state.rows.length, 19);
   assert.ok(fake.state.rows.every((row) => row.updated_at === '2026-05-16T00:05:00.000Z'));
 });
 
@@ -293,8 +298,8 @@ test('report-first imported coverage helper blocks incomplete coverage', async (
   });
 
   assert.equal(coverage.expectedPatternCount, 24);
-  assert.equal(coverage.importedTemplateCount, 14);
-  assert.equal(coverage.missingPatternKeys.length, 10);
+  assert.equal(coverage.importedTemplateCount, 19);
+  assert.equal(coverage.missingPatternKeys.length, 5);
   assert.equal(coverage.coverageComplete, false);
   assert.equal(coverage.blockingFindings[0]?.code, 'REPORT_FIRST_IMPORTED_COVERAGE_INCOMPLETE');
 });
@@ -308,7 +313,7 @@ test('report-first importer reports incomplete package coverage as blocking find
   });
 
   assert.ok(summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_IMPORT_FULL_COVERAGE_INCOMPLETE'));
-  assert.equal(fake.state.rows.some((row) => row.pattern_key === 'vision_results_process_people'), false);
+  assert.equal(fake.state.rows.some((row) => row.pattern_key === 'people_results_process_vision'), false);
 });
 
 test('report-first importer rejects missing artifact path clearly', async () => {
