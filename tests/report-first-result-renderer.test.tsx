@@ -298,6 +298,23 @@ test('report-first result renderer uses reader-facing navigation and card labels
   assert.doesNotMatch(renderedText, /Range to add:/);
 });
 
+test('report-first renderer formats Chapter 10 development actions without duplicated metadata labels', () => {
+  const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
+  const developmentSectionMarkup =
+    markup.match(/data-report-first-section="development-focus"[\s\S]*?data-report-first-section="closing"/)?.[0] ?? '';
+  const developmentText = textFromMarkup(developmentSectionMarkup);
+
+  assert.match(developmentSectionMarkup, /data-report-first-card="development-action"/);
+  assert.match(developmentText, /Use this in project planning, process changes, delegation, team meetings, change delivery\./);
+  assert.doesNotMatch(developmentText, /Why this matters:\s*Use this in/i);
+  assert.doesNotMatch(developmentText, /Use this in:\s*Use this in/i);
+  assert.doesNotMatch(developmentText, /\.\./);
+
+  const actionCardCount = (developmentSectionMarkup.match(/data-report-first-card="development-action"/g) ?? []).length;
+  const useThisInCount = (developmentText.match(/Use this in/g) ?? []).length;
+  assert.equal(useThisInCount, actionCardCount);
+});
+
 test('report-first renderer stays disconnected from template storage and scoring recomputation', () => {
   const componentSource = readFileSync(
     join(process.cwd(), 'components', 'results', 'report-first-result-report.tsx'),

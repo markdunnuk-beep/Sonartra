@@ -198,6 +198,26 @@ function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
+function normalizeUseCase(value: string): string {
+  return value.replace(/\s+/g, ' ').replace(/[.\s]+$/g, '').trim();
+}
+
+function developmentActionUseCases(block: Extract<ReportFirstBlock, { readonly type: 'development_action' }>): readonly string[] {
+  const explicitUseCases = (block.useCases ?? [])
+    .map(normalizeUseCase)
+    .filter(Boolean);
+
+  if (explicitUseCases.length > 0) {
+    return explicitUseCases;
+  }
+
+  const fallback = block.whyItMatters?.replace(/^Use this in:\s*/i, '') ?? '';
+  return fallback
+    .split(',')
+    .map(normalizeUseCase)
+    .filter(Boolean);
+}
+
 function readerNavLabelForChapter(chapter: ReportFirstChapter): string {
   if (/How People expands your leadership/i.test(chapter.title)) {
     return 'People expansion';
@@ -548,24 +568,24 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
           {block.rangeToAdd ? <p className="mt-3 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">What to bring in: </strong>{block.rangeToAdd}</p> : null}
         </ContentCard>
       );
-    case 'development_action':
+    case 'development_action': {
+      const useCases = developmentActionUseCases(block);
       return (
         <ContentCard tone="teal" type="development-action">
           <SignalTags signalKeys={block.linkedSignals} />
           <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{block.title}</h3>
           <p className="mt-3 text-sm leading-7 text-[#C8CEC7]/88">{block.text}</p>
-          {block.whyItMatters ? <p className="mt-4 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#8BE7D0]">Why this matters: </strong>{block.whyItMatters}</p> : null}
-          {block.useCases && block.useCases.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {block.useCases.map((useCase) => (
-                <span className="rounded-full border border-[#F3F1EA]/10 bg-[#F3F1EA]/[0.04] px-2.5 py-1 text-xs text-[#C8CEC7]/80" key={useCase}>
-                  {useCase}
-                </span>
-              ))}
+          {useCases.length > 0 ? (
+            <div className="mt-4 border-t border-[#F3F1EA]/10 pt-4">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-[#8BE7D0]/82">
+                Use this in
+              </p>
+              <p className="mt-2 text-sm leading-7 text-[#A8B0AA]/88">{useCases.join(', ')}.</p>
             </div>
           ) : null}
         </ContentCard>
       );
+    }
   }
 }
 
