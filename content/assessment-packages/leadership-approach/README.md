@@ -25,6 +25,7 @@ Flow State remains the original populated example fixture for the ranked-pattern
 
 - `sonartra_reader_first_import_schema_LEADERSHIP_APPROACH_TEST.xlsx`
 - `report-first-template-manifest.json`
+- `generated/report-first-template-import-rows.json`
 
 ## Runtime Boundary
 
@@ -54,6 +55,15 @@ The manifest maps the 24 required ranked-pattern `pattern_key` permutations for 
 signals to their source Markdown paths when authored. It is an import-readiness map, not a second
 source of report prose.
 
+Generated report-first import rows are derived from the available canonical Markdown templates and
+written to:
+
+- `content/assessment-packages/leadership-approach/generated/report-first-template-import-rows.json`
+
+That artifact is package/import preparation only. It is not a runtime dependency, and it does not
+change the canonical result payload. Future XLSX/import package generation should consume those
+rows when loading `assessment_report_first_templates`.
+
 Current coverage:
 
 - expected patterns: 24
@@ -72,12 +82,18 @@ Missing templates are explicitly marked `missing`, `ready_for_import: false`, an
 `publishable: false`. They must not satisfy publish readiness until full canonical reports are
 authored, compiled, reviewed, and marked import-ready.
 
+The current report-first canonical templates are pattern-level and score-shape-neutral. The
+generated import rows therefore set `score_shape_policy` to `pattern_level_score_shape_neutral`,
+keep `score_shape` as `null`, and list the supported score shapes as metadata. This must not be
+read as score-shape-specific editorial coverage.
+
 The compiler path remains:
 
 1. Author canonical Markdown in `content/authoring/leadership-approach/report-first/canonical-reports/`.
 2. Compile with `scripts/authoring/compile-report-first-template.ts`.
-3. Validate coverage through `lib/server/leadership-report-first-package.ts`.
-4. Later import compiled structured JSON into `assessment_report_first_templates`.
+3. Generate package import rows with `scripts/authoring/generate-leadership-report-first-import-artifact.ts`.
+4. Validate coverage through `lib/server/leadership-report-first-package.ts`.
+5. Later import compiled structured JSON into `assessment_report_first_templates`.
 
 The runtime engine must not read the manifest, Markdown, or workbook. Runtime result pages continue
 to read persisted `canonical_result_payload` only.

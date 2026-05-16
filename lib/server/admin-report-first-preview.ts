@@ -1,11 +1,13 @@
 import { rankedPatternSupportedScoreShapes } from '@/content/assessment-packages/import-contract/ranked-pattern-import-manifest';
 import { buildReportFirstCanonicalPayload } from '@/lib/server/report-first-result-assembly';
 import { REPORT_FIRST_TEMPLATE_CONTRACT } from '@/lib/server/report-first-template-storage';
-import { getLeadershipReportFirstPackageCoverage } from '@/lib/server/leadership-report-first-package';
+import {
+  buildLeadershipReportFirstImportArtifact,
+  type LeadershipReportFirstImportRow,
+} from '@/lib/server/leadership-report-first-package';
 import type { NormalizedResult, RuntimeResponseSet, ScoreResult } from '@/lib/engine/types';
 import type { SingleDomainResultScoreShape, SingleDomainResultSignal } from '@/lib/types/single-domain-result';
 import type { ReportFirstCanonicalPayloadV1 } from '@/lib/types/report-first-result';
-import type { CompiledReportFirstTemplate } from '@/scripts/authoring/compile-report-first-template';
 
 const defaultPreviewPatternKey = 'process_results_people_vision';
 
@@ -190,19 +192,19 @@ function syntheticResponses(): RuntimeResponseSet {
   };
 }
 
-function templateRowFromCompiled(
-  compiled: CompiledReportFirstTemplate,
+function templateRowFromImportRow(
+  row: LeadershipReportFirstImportRow,
   assessmentVersionId: string,
 ): PreviewTemplateRow {
   return {
-    id: `admin-preview-${compiled.pattern_key}`,
+    id: `admin-preview-${row.pattern_key}`,
     assessment_version_id: assessmentVersionId,
-    domain_key: compiled.domain_key,
-    pattern_key: compiled.pattern_key,
-    report_key: compiled.report_key,
-    report_contract: compiled.report_contract,
-    report_template_json: compiled.report_template_json,
-    content_hash: compiled.content_hash,
+    domain_key: row.domain_key,
+    pattern_key: row.pattern_key,
+    report_key: row.report_key,
+    report_contract: row.report_contract,
+    report_template_json: row.report_template_json,
+    content_hash: row.content_hash,
     status: 'active',
   };
 }
@@ -253,7 +255,7 @@ function previewHeadingCoverage(payload: ReportFirstCanonicalPayloadV1): readonl
 }
 
 function buildReview(params: {
-  readonly compiled: CompiledReportFirstTemplate;
+  readonly row: LeadershipReportFirstImportRow;
   readonly payload: ReportFirstCanonicalPayloadV1;
   readonly scoreShape: string;
 }): AdminReportFirstPreviewReview {
@@ -267,10 +269,10 @@ function buildReview(params: {
   );
 
   return {
-    reportKey: params.compiled.report_key,
-    signalOrderLabel: reportLabel(params.compiled.pattern_key),
+    reportKey: params.row.report_key,
+    signalOrderLabel: reportLabel(params.row.pattern_key),
     scoreShape: params.scoreShape,
-    sourceStatus: 'Compiled from canonical Markdown for admin preview',
+    sourceStatus: 'Loaded from generated report-first import artifact',
     fullBodyPresent: reportText.length > 12000,
     requiredHeadingsPresent: missingHeadings.length === 0,
     evidenceRenderable: params.payload.rankedSignals.length === 4 && params.payload.normalizedScores.length === 4,
@@ -289,18 +291,18 @@ export async function buildAdminReportFirstPreview(params: {
   readonly patternKey?: string | null;
   readonly scoreShape?: string | null;
 }): Promise<AdminReportFirstPreviewResult> {
-  const coverage = await getLeadershipReportFirstPackageCoverage();
-  const compiledReports = coverage.availableTemplates.map((entry) => entry.compiled);
-  const options = compiledReports.map((compiled) => ({
-    patternKey: compiled.pattern_key,
-    reportKey: compiled.report_key,
-    label: reportLabel(compiled.pattern_key),
+  const artifact = await buildLeadershipReportFirstImportArtifact();
+  const rows = artifact.import_rows;
+  const options = rows.map((row) => ({
+    patternKey: row.pattern_key,
+    reportKey: row.report_key,
+    label: reportLabel(row.pattern_key),
   }));
   const selectedPatternKey = params.patternKey?.trim()
     || options.find((option) => option.patternKey === defaultPreviewPatternKey)?.patternKey
     || options[0]?.patternKey
     || '';
-  const selected = compiledReports.find((compiled) => compiled.pattern_key === selectedPatternKey);
+  const selected = rows.find((row) => row.pattern_key === selectedPatternKey);
 
   if (!selected || !selectedPatternKey) {
     return {
@@ -349,7 +351,7 @@ export async function buildAdminReportFirstPreview(params: {
     rankedSignals,
     scoreShape: shape,
     patternKey: selected.pattern_key,
-    template: templateRowFromCompiled(selected, params.assessmentVersionId ?? 'admin-preview-version'),
+    template: templateRowFromImportRow(selected, params.assessmentVersionId ?? 'admin-preview-version'),
     counts: {
       domainCount: 1,
       questionCount: 24,
@@ -365,7 +367,7 @@ export async function buildAdminReportFirstPreview(params: {
     options,
     payload,
     review: buildReview({
-      compiled: selected,
+      row: selected,
       payload,
       scoreShape: shape.value,
     }),

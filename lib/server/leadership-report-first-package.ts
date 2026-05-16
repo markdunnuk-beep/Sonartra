@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import {
   compileReportFirstTemplateFromMarkdown,
   type CompiledReportFirstTemplate,
+  type ReportFirstTemplateJson,
 } from '@/scripts/authoring/compile-report-first-template';
 
 export const leadershipReportFirstManifestPath = join(
@@ -109,6 +110,80 @@ export type LeadershipReportFirstCoverage = {
   readonly presentCount: number;
   readonly missingCount: number;
   readonly publishable: boolean;
+};
+
+export const leadershipReportFirstImportArtifactPath = join(
+  /* turbopackIgnore: true */ process.cwd(),
+  'content',
+  'assessment-packages',
+  'leadership-approach',
+  'generated',
+  'report-first-template-import-rows.json',
+);
+
+export const leadershipReportFirstImportArtifactRelativePath =
+  'content/assessment-packages/leadership-approach/generated/report-first-template-import-rows.json';
+
+export const leadershipReportFirstScoreShapePolicy =
+  'pattern_level_score_shape_neutral' as const;
+
+export type LeadershipReportFirstImportRow = {
+  readonly assessment_key: string;
+  readonly assessment_version: string;
+  readonly package_key: string;
+  readonly package_version: string;
+  readonly domain_key: string;
+  readonly pattern_key: string;
+  readonly report_key: string;
+  readonly report_contract: string;
+  readonly score_shape_policy: typeof leadershipReportFirstScoreShapePolicy;
+  readonly score_shape: null;
+  readonly supported_score_shapes: readonly string[];
+  readonly source_markdown_path: string;
+  readonly source_content_hash: string;
+  readonly content_hash: string;
+  readonly report_template_json: ReportFirstTemplateJson;
+  readonly status: 'active';
+  readonly manifest_status: 'ready_for_import';
+  readonly publishable: true;
+  readonly ready_for_import: true;
+  readonly generation_metadata: {
+    readonly generated_from: 'leadership_report_first_manifest';
+    readonly deterministic: true;
+    readonly source_of_truth: string;
+  };
+};
+
+export type LeadershipReportFirstMissingImportTemplate = {
+  readonly assessment_key: string;
+  readonly package_key: string;
+  readonly package_version: string;
+  readonly domain_key: string;
+  readonly pattern_key: string;
+  readonly status: ManifestTemplateStatus;
+  readonly ready_for_import: false;
+  readonly publishable: false;
+};
+
+export type LeadershipReportFirstImportArtifact = {
+  readonly artifact_contract: 'leadership_report_first_template_import_rows_v1';
+  readonly assessment_key: string;
+  readonly package_key: string;
+  readonly package_version: string;
+  readonly domain_key: string;
+  readonly report_contract: string;
+  readonly source_of_truth: string;
+  readonly score_shape_policy: typeof leadershipReportFirstScoreShapePolicy;
+  readonly supported_score_shapes: readonly string[];
+  readonly coverage: {
+    readonly expected_template_count: number;
+    readonly generated_import_ready_count: number;
+    readonly missing_template_count: number;
+    readonly publishable_full_coverage: boolean;
+  };
+  readonly expected_pattern_keys: readonly string[];
+  readonly missing_templates: readonly LeadershipReportFirstMissingImportTemplate[];
+  readonly import_rows: readonly LeadershipReportFirstImportRow[];
 };
 
 function permutations(values: readonly string[]): readonly string[][] {
@@ -263,5 +338,82 @@ export async function getLeadershipReportFirstPackageCoverage(): Promise<Leaders
       manifest.coverage_policy.publishable_requires_all_expected_templates
       && missingPatternKeys.length === 0
       && availableTemplates.length === expectedPatternKeys.length,
+  };
+}
+
+export async function buildLeadershipReportFirstImportArtifact(): Promise<LeadershipReportFirstImportArtifact> {
+  const coverage = await getLeadershipReportFirstPackageCoverage();
+  const availableTemplates = [...coverage.availableTemplates].sort((left, right) =>
+    left.compiled.pattern_key.localeCompare(right.compiled.pattern_key),
+  );
+  const entriesByPattern = new Map(coverage.manifest.templates.map((entry) => [entry.pattern_key, entry]));
+
+  const importRows = availableTemplates.map((entry): LeadershipReportFirstImportRow => {
+    const sourceMarkdownPath = entry.manifestEntry.source_markdown_path;
+    if (!sourceMarkdownPath) {
+      throw new Error(`Ready report-first template ${entry.compiled.pattern_key} is missing source_markdown_path.`);
+    }
+
+    return {
+      assessment_key: coverage.manifest.assessment_key,
+      assessment_version: coverage.manifest.package_version,
+      package_key: coverage.manifest.package_key,
+      package_version: coverage.manifest.package_version,
+      domain_key: entry.compiled.domain_key,
+      pattern_key: entry.compiled.pattern_key,
+      report_key: entry.compiled.report_key,
+      report_contract: entry.compiled.report_contract,
+      score_shape_policy: leadershipReportFirstScoreShapePolicy,
+      score_shape: null,
+      supported_score_shapes: coverage.manifest.score_shapes,
+      source_markdown_path: sourceMarkdownPath,
+      source_content_hash: entry.compiled.content_hash,
+      content_hash: entry.compiled.content_hash,
+      report_template_json: entry.compiled.report_template_json,
+      status: 'active',
+      manifest_status: 'ready_for_import',
+      publishable: true,
+      ready_for_import: true,
+      generation_metadata: {
+        generated_from: 'leadership_report_first_manifest',
+        deterministic: true,
+        source_of_truth: coverage.manifest.source_of_truth,
+      },
+    };
+  });
+
+  const missingTemplates = coverage.missingPatternKeys.map((patternKey): LeadershipReportFirstMissingImportTemplate => {
+    const entry = entriesByPattern.get(patternKey);
+    return {
+      assessment_key: coverage.manifest.assessment_key,
+      package_key: coverage.manifest.package_key,
+      package_version: coverage.manifest.package_version,
+      domain_key: coverage.manifest.domain_key,
+      pattern_key: patternKey,
+      status: entry?.status ?? 'missing',
+      ready_for_import: false,
+      publishable: false,
+    };
+  });
+
+  return {
+    artifact_contract: 'leadership_report_first_template_import_rows_v1',
+    assessment_key: coverage.manifest.assessment_key,
+    package_key: coverage.manifest.package_key,
+    package_version: coverage.manifest.package_version,
+    domain_key: coverage.manifest.domain_key,
+    report_contract: coverage.manifest.report_contract,
+    source_of_truth: coverage.manifest.source_of_truth,
+    score_shape_policy: leadershipReportFirstScoreShapePolicy,
+    supported_score_shapes: coverage.manifest.score_shapes,
+    coverage: {
+      expected_template_count: coverage.expectedCount,
+      generated_import_ready_count: importRows.length,
+      missing_template_count: coverage.missingCount,
+      publishable_full_coverage: coverage.publishable,
+    },
+    expected_pattern_keys: coverage.expectedPatternKeys,
+    missing_templates: missingTemplates,
+    import_rows: importRows,
   };
 }
