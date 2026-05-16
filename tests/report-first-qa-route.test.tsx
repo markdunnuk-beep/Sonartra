@@ -137,7 +137,7 @@ test('report-first QA missing template state remains admin-readable', async () =
     assessmentTitle: 'Leadership Approach',
     assessmentVersionId: 'version-report-first-qa',
     assessmentVersionTag: 'qa-preview',
-    patternKey: 'process_results_vision_people',
+    patternKey: 'vision_results_process_people',
     scoreShape: 'paired',
   });
 

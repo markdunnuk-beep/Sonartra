@@ -41,8 +41,18 @@ type StoredTemplateRow = {
 const assessmentVersionId = 'version-report-first-import';
 const availablePatternKeys = [
   'people_process_results_vision',
+  'process_people_results_vision',
+  'process_people_vision_results',
   'process_results_people_vision',
+  'process_results_vision_people',
+  'process_vision_people_results',
+  'process_vision_results_people',
+  'results_people_process_vision',
+  'results_people_vision_process',
   'results_process_people_vision',
+  'results_process_vision_people',
+  'results_vision_people_process',
+  'results_vision_process_people',
   'vision_people_process_results',
 ] as const;
 
@@ -206,7 +216,7 @@ async function loadArtifact(): Promise<LeadershipReportFirstImportArtifact> {
   ) as LeadershipReportFirstImportArtifact;
 }
 
-test('report-first importer persists exactly the four import-ready templates', async () => {
+test('report-first importer persists exactly the import-ready templates', async () => {
   const fake = createFakeDb();
   const summary = await importReportFirstTemplateRows({
     db: fake.db,
@@ -217,11 +227,11 @@ test('report-first importer persists exactly the four import-ready templates', a
   });
 
   assert.equal(summary.expectedTemplateCount, 24);
-  assert.equal(summary.importedTemplateCount, 4);
-  assert.equal(summary.missingTemplateCount, 20);
+  assert.equal(summary.importedTemplateCount, 14);
+  assert.equal(summary.missingTemplateCount, 10);
   assert.equal(summary.publishableFullCoverage, false);
   assert.deepEqual(summary.importedPatternKeys, [...availablePatternKeys].sort());
-  assert.equal(fake.state.rows.length, 4);
+  assert.equal(fake.state.rows.length, 14);
   assert.ok(fake.state.rows.every((row) => row.status === 'draft'));
   assert.ok(fake.state.rows.every((row) => row.publishable === true));
   assert.ok(fake.state.rows.every((row) => row.ready_for_import === true));
@@ -262,9 +272,9 @@ test('report-first importer is idempotent for draft rows', async () => {
     assessmentVersionId,
   });
 
-  assert.equal(first.importedTemplateCount, 4);
-  assert.equal(second.importedTemplateCount, 4);
-  assert.equal(fake.state.rows.length, 4);
+  assert.equal(first.importedTemplateCount, 14);
+  assert.equal(second.importedTemplateCount, 14);
+  assert.equal(fake.state.rows.length, 14);
   assert.ok(fake.state.rows.every((row) => row.updated_at === '2026-05-16T00:05:00.000Z'));
 });
 
@@ -283,8 +293,8 @@ test('report-first imported coverage helper blocks incomplete coverage', async (
   });
 
   assert.equal(coverage.expectedPatternCount, 24);
-  assert.equal(coverage.importedTemplateCount, 4);
-  assert.equal(coverage.missingPatternKeys.length, 20);
+  assert.equal(coverage.importedTemplateCount, 14);
+  assert.equal(coverage.missingPatternKeys.length, 10);
   assert.equal(coverage.coverageComplete, false);
   assert.equal(coverage.blockingFindings[0]?.code, 'REPORT_FIRST_IMPORTED_COVERAGE_INCOMPLETE');
 });
@@ -298,7 +308,7 @@ test('report-first importer reports incomplete package coverage as blocking find
   });
 
   assert.ok(summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_IMPORT_FULL_COVERAGE_INCOMPLETE'));
-  assert.equal(fake.state.rows.some((row) => row.pattern_key === 'results_process_vision_people'), false);
+  assert.equal(fake.state.rows.some((row) => row.pattern_key === 'vision_results_process_people'), false);
 });
 
 test('report-first importer rejects missing artifact path clearly', async () => {

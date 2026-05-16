@@ -60,9 +60,10 @@
     },
     {
       "pattern_key": "process_results_vision_people",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_results_vision_people.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "process_results_people_vision",
@@ -73,27 +74,31 @@
     },
     {
       "pattern_key": "process_vision_results_people",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_vision_results_people.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "process_vision_people_results",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_vision_people_results.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "process_people_results_vision",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_people_results_vision.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "process_people_vision_results",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/process_people_vision_results.md",
+      "status": "ready_for_import",
+      "ready_for_import": true,
+      "publishable": true
     },
     {
       "pattern_key": "vision_results_process_people",
