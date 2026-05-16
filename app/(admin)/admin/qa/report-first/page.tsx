@@ -12,7 +12,6 @@ import {
   SecondaryText,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
-import { rankedPatternSupportedScoreShapes } from '@/content/assessment-packages/import-contract/ranked-pattern-import-manifest';
 import {
   adminReportFirstRequiredPreviewHeadings,
   buildAdminReportFirstPreview,
@@ -51,7 +50,7 @@ function loadGeneratedArtifactForQa(): LeadershipReportFirstImportArtifact | nul
 export default async function ReportFirstQaRoutePage({
   searchParams,
 }: Readonly<{
-  searchParams: Promise<{ pattern?: string; scoreShape?: string }>;
+  searchParams: Promise<{ pattern?: string }>;
 }>) {
   const query = await searchParams;
   const db = getDbPool();
@@ -74,14 +73,11 @@ export default async function ReportFirstQaRoutePage({
     assessmentVersionId: assessment.latestDraftVersion?.assessmentVersionId ?? assessment.publishedVersion?.assessmentVersionId ?? null,
     assessmentVersionTag: assessment.latestDraftVersion?.versionTag ?? assessment.publishedVersion?.versionTag ?? null,
     patternKey: query.pattern,
-    scoreShape: query.scoreShape,
+    scoreShape: 'paired',
   });
   const selectedPattern = preview.status === 'ready'
     ? preview.payload.patternKey
     : preview.selectedPatternKey || preview.options[0]?.patternKey || '';
-  const selectedScoreShape = preview.status === 'ready'
-    ? preview.payload.scoreShape.value
-    : query.scoreShape || 'paired';
   const sourceStatus = preview.status === 'ready'
     ? sourceLabel(preview.review.sourceStatus)
     : 'Unavailable for selected template';
@@ -129,6 +125,7 @@ export default async function ReportFirstQaRoutePage({
                 }
               />
               <MetaItem label="Publish status" value="Blocked" />
+              <MetaItem label="Score-shape policy" value="Pattern-level, score-shape neutral" />
             </div>
           </SurfaceCard>
 
@@ -137,10 +134,10 @@ export default async function ReportFirstQaRoutePage({
               <CardTitle>QA controls</CardTitle>
               <SecondaryText>
                 Select one of the currently available Leadership Approach report-first templates.
-                Missing templates remain unavailable and should fail with an admin-readable error.
+                Preview selection is driven by signal order only.
               </SecondaryText>
             </div>
-            <form className="grid gap-3 md:grid-cols-[minmax(0,1fr)_14rem_auto]" method="get">
+            <form className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]" method="get">
               <label className="space-y-2">
                 <span className="sonartra-meta-label">Signal order</span>
                 <select
@@ -155,26 +152,20 @@ export default async function ReportFirstQaRoutePage({
                   ))}
                 </select>
               </label>
-              <label className="space-y-2">
-                <span className="sonartra-meta-label">Score shape</span>
-                <select
-                  className="w-full rounded-[0.85rem] border border-white/10 bg-black/20 px-3 py-3 text-sm text-white/86 outline-none focus:border-[rgba(50,214,176,0.45)]"
-                  defaultValue={selectedScoreShape}
-                  name="scoreShape"
-                >
-                  {rankedPatternSupportedScoreShapes.map((shape) => (
-                    <option key={shape} value={shape}>
-                      {shape}
-                    </option>
-                  ))}
-                </select>
-              </label>
               <div className="flex items-end">
                 <button className="sonartra-button sonartra-button-primary sonartra-focus-ring w-full justify-center" type="submit">
                   Preview report
                 </button>
               </div>
             </form>
+            <div className="grid gap-3 lg:grid-cols-[18rem_minmax(0,1fr)]">
+              <MetaItem label="Score-shape policy" value="Pattern-level, score-shape neutral" />
+              <SecondaryText>
+                This report-first template does not vary by score shape. Score shape remains part
+                of runtime scoring evidence, but it does not select different report prose for this
+                template set.
+              </SecondaryText>
+            </div>
             <div className="flex flex-wrap gap-3">
               <ButtonLink href="/admin/assessments/ranked-pattern/leadership-approach/workflow">
                 Back to workflow

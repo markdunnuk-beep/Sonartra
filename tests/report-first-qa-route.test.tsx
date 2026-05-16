@@ -119,6 +119,18 @@ test('report-first QA route exposes coverage and selectable available templates 
   assert.match(importPanelSource, /Open report-first QA route/);
 });
 
+test('report-first QA route shows static score-shape policy instead of active selector', () => {
+  const qaRouteSource = readSource('app', '(admin)', 'admin', 'qa', 'report-first', 'page.tsx');
+
+  assert.doesNotMatch(qaRouteSource, /rankedPatternSupportedScoreShapes/);
+  assert.doesNotMatch(qaRouteSource, /name="scoreShape"/);
+  assert.doesNotMatch(qaRouteSource, /query\.scoreShape/);
+  assert.match(qaRouteSource, /Score-shape policy/);
+  assert.match(qaRouteSource, /Pattern-level, score-shape neutral/);
+  assert.match(qaRouteSource, /does not vary by score shape/);
+  assert.match(qaRouteSource, /Score shape remains part\s+of runtime scoring evidence/);
+});
+
 test('report-first QA missing template state remains admin-readable', async () => {
   const preview = await buildAdminReportFirstPreview({
     assessmentKey: 'leadership-approach',

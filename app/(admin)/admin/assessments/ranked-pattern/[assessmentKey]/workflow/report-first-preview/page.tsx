@@ -11,7 +11,6 @@ import {
   SecondaryText,
   SurfaceCard,
 } from '@/components/shared/user-app-ui';
-import { rankedPatternSupportedScoreShapes } from '@/content/assessment-packages/import-contract/ranked-pattern-import-manifest';
 import {
   adminReportFirstRequiredPreviewHeadings,
   buildAdminReportFirstPreview,
@@ -58,9 +57,14 @@ function ReviewSummary({ review }: Readonly<{ review: AdminReportFirstPreviewRev
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetaItem label="Report key" value={review.reportKey} />
         <MetaItem label="Signal order" value={review.signalOrderLabel} />
-        <MetaItem label="Score shape" value={review.scoreShape} />
+        <MetaItem label="Score-shape policy" value="Pattern-level, score-shape neutral" />
         <MetaItem label="Source status" value={review.sourceStatus} />
       </div>
+      <SecondaryText>
+        This report-first template does not vary by score shape. Score shape remains part of
+        runtime scoring evidence, but it does not select different report prose for this template
+        set.
+      </SecondaryText>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <ReviewCheck label="Full report body present" passed={review.fullBodyPresent} />
         <ReviewCheck label="Required headings present" passed={review.requiredHeadingsPresent} />
@@ -88,7 +92,7 @@ export default async function ReportFirstAdminPreviewPage({
   searchParams,
 }: Readonly<{
   params: Promise<{ assessmentKey: string }>;
-  searchParams: Promise<{ pattern?: string; scoreShape?: string }>;
+  searchParams: Promise<{ pattern?: string }>;
 }>) {
   const { assessmentKey } = await params;
   const query = await searchParams;
@@ -130,15 +134,12 @@ export default async function ReportFirstAdminPreviewPage({
     assessmentVersionId: assessment.latestDraftVersion?.assessmentVersionId ?? assessment.publishedVersion?.assessmentVersionId ?? null,
     assessmentVersionTag: assessment.latestDraftVersion?.versionTag ?? assessment.publishedVersion?.versionTag ?? null,
     patternKey: query.pattern,
-    scoreShape: query.scoreShape,
+    scoreShape: 'paired',
   });
 
   const selectedPattern = preview.status === 'ready'
     ? preview.payload.patternKey
     : preview.selectedPatternKey || preview.options[0]?.patternKey || '';
-  const selectedScoreShape = preview.status === 'ready'
-    ? preview.payload.scoreShape.value
-    : query.scoreShape || 'paired';
 
   return (
     <>
@@ -147,7 +148,7 @@ export default async function ReportFirstAdminPreviewPage({
           <PageHeader
             eyebrow="Report-first admin preview"
             title="Review report-first template output"
-            description="Assemble an admin-only preview payload for a selected ranked pattern and score shape, then render it with the production report-first report shell."
+            description="Assemble an admin-only preview payload for a selected ranked pattern, then render it with the production report-first report shell."
           />
 
         <SurfaceCard className="space-y-5 p-5 lg:p-6" data-admin-report-first-preview="true">
@@ -161,11 +162,12 @@ export default async function ReportFirstAdminPreviewPage({
           <div className="space-y-2">
             <CardTitle>Preview controls</CardTitle>
             <SecondaryText>
-              Choose the available report-first template and score shape to review how the full
-              compiled report body will read in the production report shell.
+              Choose the available report-first template to review how the full compiled report
+              body will read in the production report shell. Preview selection is driven by signal
+              order only.
             </SecondaryText>
           </div>
-          <form className="grid gap-3 md:grid-cols-[minmax(0,1fr)_14rem_auto]" method="get">
+          <form className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]" method="get">
             <label className="space-y-2">
               <span className="sonartra-meta-label">Signal order</span>
               <select
@@ -180,26 +182,20 @@ export default async function ReportFirstAdminPreviewPage({
                 ))}
               </select>
             </label>
-            <label className="space-y-2">
-              <span className="sonartra-meta-label">Score shape</span>
-              <select
-                className="w-full rounded-[0.85rem] border border-white/10 bg-black/20 px-3 py-3 text-sm text-white/86 outline-none focus:border-[rgba(50,214,176,0.45)]"
-                defaultValue={selectedScoreShape}
-                name="scoreShape"
-              >
-                {rankedPatternSupportedScoreShapes.map((shape) => (
-                  <option key={shape} value={shape}>
-                    {shape}
-                  </option>
-                ))}
-              </select>
-            </label>
             <div className="flex items-end">
               <button className="sonartra-button sonartra-button-primary sonartra-focus-ring w-full justify-center" type="submit">
                 Preview report
               </button>
             </div>
           </form>
+          <div className="grid gap-3 lg:grid-cols-[18rem_minmax(0,1fr)]">
+            <MetaItem label="Score-shape policy" value="Pattern-level, score-shape neutral" />
+            <SecondaryText>
+              This report-first template does not vary by score shape. Score shape remains part
+              of runtime scoring evidence, but it does not select different report prose for this
+              template set.
+            </SecondaryText>
+          </div>
           <div className="flex flex-wrap gap-3">
             <ButtonLink href={`/admin/assessments/ranked-pattern/${assessment.assessmentKey}/workflow`}>
               Back to workflow

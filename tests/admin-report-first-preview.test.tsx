@@ -126,6 +126,32 @@ test('admin report-first preview uses generated artifact instead of authoring ma
   assert.doesNotMatch(previewHelperSource, /compileReportFirstTemplate|canonical-reports/);
 });
 
+test('admin report-first preview route shows static score-shape policy instead of active selector', () => {
+  const previewRouteSource = readFileSync(
+    join(
+      process.cwd(),
+      'app',
+      '(admin)',
+      'admin',
+      'assessments',
+      'ranked-pattern',
+      '[assessmentKey]',
+      'workflow',
+      'report-first-preview',
+      'page.tsx',
+    ),
+    'utf8',
+  );
+
+  assert.doesNotMatch(previewRouteSource, /rankedPatternSupportedScoreShapes/);
+  assert.doesNotMatch(previewRouteSource, /name="scoreShape"/);
+  assert.doesNotMatch(previewRouteSource, /query\.scoreShape/);
+  assert.match(previewRouteSource, /Score-shape policy/);
+  assert.match(previewRouteSource, /Pattern-level, score-shape neutral/);
+  assert.match(previewRouteSource, /does not vary by score shape/);
+  assert.match(previewRouteSource, /Score shape remains part\s+of runtime scoring evidence/);
+});
+
 test('admin report-first preview is wired to the ranked-pattern workflow without changing user result routes', () => {
   const workflowSource = readFileSync(
     join(
