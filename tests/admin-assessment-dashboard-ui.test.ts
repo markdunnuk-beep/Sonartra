@@ -27,6 +27,8 @@ test('assessment index presents ranked-pattern package operations as the active 
   assert.match(source, /Archived assessment records/);
   assert.match(source, /isTestOrLegacyAssessment/);
   assert.match(source, /isRankedPatternPackageCompatibleAssessment/);
+  assert.match(source, /hasDefaultInventoryState/);
+  assert.match(source, /assessment\.hasActiveImportWorkflow/);
   assert.match(source, /haystack\.includes\('test'\)/);
   assert.match(source, /Legacy \/ archive/);
   assert.match(source, /Legacy builder unavailable/);
@@ -41,6 +43,7 @@ test('assessment index presents ranked-pattern package operations as the active 
   assert.match(source, /Review draft/);
   assert.match(source, /Current live version/);
   assert.match(source, /No draft in progress/);
+  assert.match(source, /tone === 'active' && assessment\.publishedVersion/);
   assert.doesNotMatch(source, /Starts a new assessment with draft version/);
   assert.doesNotMatch(source, /Creates a new assessment with its first editable draft/);
   assert.doesNotMatch(source, /Assessment list/);

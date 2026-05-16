@@ -97,9 +97,14 @@ function isTestOrLegacyAssessment(assessment: AdminAssessmentDashboardItem): boo
   const hasRankedPatternVersion = assessment.versions.some(
     (version) => version.resultModelKey === 'ranked_pattern',
   );
+  const hasDefaultInventoryState =
+    assessment.publishedVersion !== null
+    || assessment.latestDraftVersion !== null
+    || assessment.hasActiveImportWorkflow;
 
   return (
     !hasRankedPatternVersion ||
+    !hasDefaultInventoryState ||
     !isRankedPatternPackageCompatibleAssessment(assessment) ||
     haystack.includes('test') ||
     haystack.includes('legacy')
@@ -166,7 +171,7 @@ function AssessmentCard({
               <LabelPill className={getDraftReadinessPillClass(assessment.latestDraftReadiness)}>
                 {formatDraftReadiness(assessment.latestDraftReadiness)}
               </LabelPill>
-              {tone === 'active' ? (
+              {tone === 'active' && assessment.publishedVersion ? (
                 <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
                   Published assessment
                 </LabelPill>

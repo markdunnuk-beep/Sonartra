@@ -45,6 +45,7 @@ export type AdminAssessmentDashboardItem = {
   publishedVersion: AdminAssessmentVersionSummary | null;
   latestDraftVersion: AdminAssessmentVersionSummary | null;
   latestDraftReadiness: AdminAssessmentDraftReadiness;
+  hasActiveImportWorkflow: boolean;
   latestUpdatedAt: string;
   actionHref: string;
   versions: readonly AdminAssessmentVersionSummary[];
@@ -86,6 +87,7 @@ type AdminAssessmentCatalogRow = {
   version_created_at: string | null;
   version_updated_at: string | null;
   question_count: string;
+  active_import_workflow_count: string;
 };
 
 function toComparableString(value: unknown): string {
@@ -250,6 +252,7 @@ function mapAssessmentDashboardItem(
 
   const publishedVersion = versions.find((version) => version.status === 'published') ?? null;
   const latestDraftVersion = versions.find((version) => version.status === 'draft') ?? null;
+  const hasActiveImportWorkflow = rows.some((row) => Number(row.active_import_workflow_count) > 0);
   const latestUpdatedAt =
     [firstRow.assessment_updated_at, ...versions.map((version) => version.updatedAt)]
       .sort(compareTimestampsDesc)[0] ?? firstRow.assessment_updated_at;
@@ -277,10 +280,25 @@ function mapAssessmentDashboardItem(
     publishedVersion,
     latestDraftVersion,
     latestDraftReadiness,
+    hasActiveImportWorkflow,
     latestUpdatedAt,
     actionHref: buildActionHref(firstRow.assessment_key, firstRow.assessment_mode),
     versions: Object.freeze(versions),
   };
+}
+
+function hasDefaultRankedPatternInventoryState(rows: readonly AdminAssessmentCatalogRow[]): boolean {
+  return rows.some((row) => {
+    if (row.result_model_key !== 'ranked_pattern') {
+      return false;
+    }
+
+    return (
+      row.version_status === 'PUBLISHED'
+      || row.version_status === 'DRAFT'
+      || Number(row.active_import_workflow_count) > 0
+    );
+  });
 }
 
 async function listAdminAssessmentCatalogRows(
@@ -326,7 +344,13 @@ async function listAdminAssessmentCatalogRows(
       av.published_at,
       av.created_at AS version_created_at,
       av.updated_at AS version_updated_at,
-      COUNT(q.id) AS question_count
+      COUNT(q.id) AS question_count,
+      (
+        SELECT COUNT(*)
+        FROM assessment_import_batches aib
+        WHERE aib.assessment_id = a.id
+          AND aib.import_status IN ('pending', 'running')
+      ) AS active_import_workflow_count
     FROM assessments a
     LEFT JOIN assessment_versions av ON av.assessment_id = a.id
     LEFT JOIN questions q ON q.assessment_version_id = av.id
@@ -376,7 +400,13 @@ async function listAdminAssessmentCatalogRows(
       av.published_at,
       av.created_at AS version_created_at,
       av.updated_at AS version_updated_at,
-      COUNT(q.id) AS question_count
+      COUNT(q.id) AS question_count,
+      (
+        SELECT COUNT(*)
+        FROM assessment_import_batches aib
+        WHERE aib.assessment_id = a.id
+          AND aib.import_status IN ('pending', 'running')
+      ) AS active_import_workflow_count
     FROM assessments a
     LEFT JOIN assessment_versions av ON av.assessment_id = a.id
     LEFT JOIN questions q ON q.assessment_version_id = av.id
@@ -437,6 +467,10 @@ export async function buildAdminAssessmentDashboardViewModel(
         }
 
         const rankedPatternRows = group.filter((row) => row.result_model_key === 'ranked_pattern');
+        if (!hasDefaultRankedPatternInventoryState(rankedPatternRows)) {
+          return [];
+        }
+
         return rankedPatternRows.length > 0 ? [rankedPatternRows] : [];
       });
   const readinessByAssessmentKey = new Map<string, AdminAssessmentDraftReadiness>();

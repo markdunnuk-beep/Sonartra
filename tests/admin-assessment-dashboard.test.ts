@@ -13,6 +13,7 @@ type AssessmentDashboardFixture = {
   description: string | null;
   isActive?: boolean;
   assessmentUpdatedAt?: string;
+  activeImportWorkflowCount?: number;
   versions: Array<{
     assessmentVersionId: string;
     versionTag: string;
@@ -46,6 +47,7 @@ type AdminAssessmentDashboardRowFixture = {
   version_created_at: string | null;
   version_updated_at: string | null;
   question_count: string;
+  active_import_workflow_count: string;
 };
 
 function createFakeDb(
@@ -89,6 +91,7 @@ function createFakeDb(
                 version_created_at: null,
                 version_updated_at: null,
                 question_count: '0',
+                active_import_workflow_count: String(fixture.activeImportWorkflowCount ?? 0),
               });
             continue;
           }
@@ -118,6 +121,7 @@ function createFakeDb(
               version_created_at: version.createdAt ?? '2026-01-01T00:00:00.000Z',
               version_updated_at: version.updatedAt ?? '2026-01-01T00:00:00.000Z',
               question_count: String(version.questionCount),
+              active_import_workflow_count: String(fixture.activeImportWorkflowCount ?? 0),
             });
           }
         }
@@ -522,6 +526,140 @@ test('default dashboard excludes published legacy single-domain and multi-domain
   assert.equal(viewModel.summary.totalAssessments, 1);
   assert.equal(viewModel.summary.publishedCount, 1);
   assert.equal(viewModel.assessments[0]?.versions[0]?.resultModelKey, 'ranked_pattern');
+});
+
+test('default dashboard excludes orphan ranked-pattern parents with only archived versions', async () => {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(
+    createFakeDb([
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'leadership-approach',
+        mode: 'single_domain',
+        title: 'Leadership Approach',
+        description: null,
+        versions: [
+          {
+            assessmentVersionId: 'archived-leadership-version',
+            versionTag: '2',
+            status: 'ARCHIVED',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
+            questionCount: 24,
+            publishedAt: null,
+            updatedAt: '2026-05-16T22:27:29.044Z',
+          },
+        ],
+      },
+      {
+        assessmentId: 'assessment-2',
+        assessmentKey: 'published-package',
+        mode: 'single_domain',
+        title: 'Published Package',
+        description: null,
+        versions: [
+          {
+            assessmentVersionId: 'published-version',
+            versionTag: '1',
+            status: 'PUBLISHED',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
+            questionCount: 24,
+            publishedAt: '2026-05-01T00:00:00.000Z',
+            updatedAt: '2026-05-01T00:00:00.000Z',
+          },
+        ],
+      },
+      {
+        assessmentId: 'assessment-3',
+        assessmentKey: 'draft-package',
+        mode: 'single_domain',
+        title: 'Draft Package',
+        description: null,
+        versions: [
+          {
+            assessmentVersionId: 'draft-version',
+            versionTag: '2',
+            status: 'DRAFT',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
+            questionCount: 24,
+            updatedAt: '2026-05-02T00:00:00.000Z',
+          },
+        ],
+      },
+      {
+        assessmentId: 'assessment-4',
+        assessmentKey: 'import-package',
+        mode: 'single_domain',
+        title: 'Import Package',
+        description: null,
+        activeImportWorkflowCount: 1,
+        versions: [
+          {
+            assessmentVersionId: 'import-archived-version',
+            versionTag: '1',
+            status: 'ARCHIVED',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
+            questionCount: 24,
+            updatedAt: '2026-05-03T00:00:00.000Z',
+          },
+        ],
+      },
+    ]),
+  );
+
+  assert.deepEqual(
+    viewModel.assessments.map((assessment) => assessment.assessmentKey).sort(),
+    ['draft-package', 'import-package', 'published-package'],
+  );
+  assert.equal(viewModel.summary.totalAssessments, 3);
+  assert.equal(viewModel.summary.publishedCount, 1);
+  assert.equal(viewModel.summary.draftOnlyCount, 1);
+  assert.equal(viewModel.summary.setupIncompleteCount, 1);
+  assert.equal(viewModel.summary.noVersionsCount, 0);
+  assert.equal(
+    viewModel.assessments.some((assessment) => assessment.assessmentKey === 'leadership-approach'),
+    false,
+  );
+  assert.equal(
+    viewModel.assessments.find((assessment) => assessment.assessmentKey === 'import-package')
+      ?.hasActiveImportWorkflow,
+    true,
+  );
+});
+
+test('show archived dashboard surfaces orphan ranked-pattern parents only for audit context', async () => {
+  const viewModel = await buildAdminAssessmentDashboardViewModel(
+    createFakeDb([
+      {
+        assessmentId: 'assessment-1',
+        assessmentKey: 'leadership-approach',
+        mode: 'single_domain',
+        title: 'Leadership Approach',
+        description: null,
+        versions: [
+          {
+            assessmentVersionId: 'archived-leadership-version',
+            versionTag: '2',
+            status: 'ARCHIVED',
+            mode: 'single_domain',
+            resultModelKey: 'ranked_pattern',
+            questionCount: 24,
+            updatedAt: '2026-05-16T22:27:29.044Z',
+          },
+        ],
+      },
+    ]),
+    { showArchived: true },
+  );
+
+  assert.equal(viewModel.assessments.length, 1);
+  assert.equal(viewModel.assessments[0]?.assessmentKey, 'leadership-approach');
+  assert.equal(viewModel.assessments[0]?.overallStatus, 'setup_incomplete');
+  assert.equal(viewModel.assessments[0]?.publishedVersion, null);
+  assert.equal(viewModel.assessments[0]?.latestDraftVersion, null);
+  assert.equal(viewModel.assessments[0]?.hasActiveImportWorkflow, false);
 });
 
 test('show archived dashboard can surface legacy records only as audit context', async () => {
