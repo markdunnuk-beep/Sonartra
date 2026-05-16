@@ -601,6 +601,7 @@ export async function auditRankedPatternPublishReadinessForAdmin(
     return await deps.auditAssessmentVersion({
       assessmentVersionId: input.targetAssessmentVersionId,
       db: client,
+      auditReportFirstTemplates: true,
     });
   } finally {
     client.release?.();

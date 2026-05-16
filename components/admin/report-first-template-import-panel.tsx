@@ -10,10 +10,13 @@ import {
 } from '@/components/admin/admin-feedback-primitives';
 import {
   importReportFirstTemplatesAction,
+  promoteReportFirstTemplatesAction,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-actions';
 import {
   initialReportFirstTemplateImportActionState,
+  initialReportFirstTemplatePromotionActionState,
   type ReportFirstTemplateImportActionState,
+  type ReportFirstTemplatePromotionActionState,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-action-state';
 import {
   CardTitle,
@@ -24,7 +27,15 @@ import {
   cn,
 } from '@/components/shared/user-app-ui';
 
-function SubmitButton({ disabled }: Readonly<{ disabled: boolean }>) {
+function SubmitButton({
+  disabled,
+  idleLabel,
+  pendingLabel,
+}: Readonly<{
+  disabled: boolean;
+  idleLabel: string;
+  pendingLabel: string;
+}>) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -37,7 +48,7 @@ function SubmitButton({ disabled }: Readonly<{ disabled: boolean }>) {
       disabled={pending || disabled}
       type="submit"
     >
-      {pending ? 'Importing templates...' : 'Import generated report templates'}
+      {pending ? pendingLabel : idleLabel}
     </button>
   );
 }
@@ -77,10 +88,48 @@ function ActionResult({ state }: Readonly<{ state: ReportFirstTemplateImportActi
         <AdminFeedbackStat label="Publishable coverage" value={state.result.publishableFullCoverage ? 'Yes' : 'No'} />
       </div>
       <p className="text-sm leading-6 text-[rgba(214,246,233,0.72)]">
-        {state.result.importedTemplateCount} of {state.result.expectedTemplateCount} report-first
+          {state.result.importedTemplateCount} of {state.result.expectedTemplateCount} report-first
         templates are imported. {state.result.publishableFullCoverage
-          ? 'Report-first template coverage is complete. Publishing still requires the normal admin publish workflow.'
+          ? 'Generated report-first template coverage is complete. Publish audit still requires active DB template rows.'
           : `${state.result.missingTemplateCount} templates are still missing, so publish remains blocked.`}
+      </p>
+    </div>
+  );
+}
+
+function PromotionResult({ state }: Readonly<{ state: ReportFirstTemplatePromotionActionState }>) {
+  if (state.formError) {
+    return (
+      <AdminFeedbackNotice tone="danger" title="Report-first publish prep blocked">
+        <span>{state.formError}</span>
+      </AdminFeedbackNotice>
+    );
+  }
+
+  if (!state.result) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-4 rounded-[1rem] border border-[rgba(116,209,177,0.18)] bg-[rgba(116,209,177,0.07)] p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
+          Publish prep complete
+        </LabelPill>
+        <LabelPill className="border-[rgba(116,209,177,0.22)] bg-[rgba(116,209,177,0.1)] text-[rgba(214,246,233,0.86)]">
+          DB coverage ready
+        </LabelPill>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <AdminFeedbackStat label="Promoted rows" value={String(state.result.promotedTemplateCount)} />
+        <AdminFeedbackStat label="Active publish rows" value={String(state.result.activeTemplateCount)} />
+        <AdminFeedbackStat label="Assessment published" value="No" />
+      </div>
+      <p className="text-sm leading-6 text-[rgba(214,246,233,0.72)]">
+        {state.result.status === 'already_active'
+          ? 'The report-first template set was already active and publishable in DB storage.'
+          : `${state.result.promotedTemplateCount} draft templates were prepared as active DB rows for publish audit.`}{' '}
+        The assessment itself has not been published.
       </p>
     </div>
   );
@@ -90,17 +139,21 @@ export function ReportFirstTemplateImportPanel({
   assessmentKey,
   targetAssessmentVersionId,
   generatedImportReadyCount,
+  generatedPublishableCoverage,
   importedDraftCount,
+  importedActiveCount,
+  importedActiveCoverageComplete,
   missingTemplateCount,
-  publishableCoverage,
   scoreShapePolicy,
 }: Readonly<{
   assessmentKey: string;
   targetAssessmentVersionId: string | null;
   generatedImportReadyCount: number;
+  generatedPublishableCoverage: boolean;
   importedDraftCount: number | null;
+  importedActiveCount: number | null;
+  importedActiveCoverageComplete: boolean;
   missingTemplateCount: number;
-  publishableCoverage: boolean;
   scoreShapePolicy: string;
 }>) {
   const [state, action] = useActionState(
@@ -110,9 +163,19 @@ export function ReportFirstTemplateImportPanel({
     }),
     initialReportFirstTemplateImportActionState,
   );
+  const [promotionState, promotionAction] = useActionState(
+    promoteReportFirstTemplatesAction.bind(null, {
+      assessmentKey,
+      targetAssessmentVersionId: targetAssessmentVersionId ?? undefined,
+    }),
+    initialReportFirstTemplatePromotionActionState,
+  );
   const visibleImportedCount = state.result?.importedTemplateCount ?? importedDraftCount;
+  const visibleActiveCount = promotionState.result?.activeTemplateCount ?? importedActiveCount;
+  const visibleActiveCoverageComplete = promotionState.result?.publishableFullCoverage ?? importedActiveCoverageComplete;
   const visibleMissingCount = state.result?.missingTemplateCount ?? missingTemplateCount;
   const actionDisabled = !targetAssessmentVersionId;
+  const promotionDisabled = actionDisabled || visibleImportedCount !== 24;
 
   return (
     <SurfaceCard className="space-y-5 p-5 lg:p-6" data-report-first-import-status="true">
@@ -129,44 +192,63 @@ export function ReportFirstTemplateImportPanel({
       <div className="space-y-2">
         <CardTitle>Report-first import handoff</CardTitle>
         <SecondaryText>
-          Import the generated package rows into draft template storage. This does not publish the
-          assessment and does not change user results.
+          Import the generated package rows into draft template storage. This does not publish the assessment and does not change user results.
         </SecondaryText>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetaItem label="Artifact" value="Found" />
+        <MetaItem label="Generated coverage" value={generatedPublishableCoverage ? '24/24 complete' : 'Incomplete'} />
         <MetaItem
           label="Draft imported rows"
           value={visibleImportedCount === null ? 'Create a draft first' : String(visibleImportedCount)}
         />
-        <MetaItem label="Coverage" value={publishableCoverage ? 'Publishable' : 'Blocked'} />
+        <MetaItem
+          label="Active publish rows"
+          value={visibleActiveCount === null ? 'Create a draft first' : String(visibleActiveCount)}
+        />
+        <MetaItem label="Promotion available" value={!promotionDisabled && !visibleActiveCoverageComplete ? 'Yes' : 'No'} />
+        <MetaItem label="Publish audit DB coverage" value={visibleActiveCoverageComplete ? 'Ready' : 'Blocked'} />
         <MetaItem label="Score-shape policy" value={scoreShapePolicy} />
       </div>
-      <div className={publishableCoverage
+      <div className={visibleActiveCoverageComplete
         ? 'rounded-[1rem] border border-[rgba(116,209,177,0.2)] bg-[rgba(116,209,177,0.08)] px-4 py-3'
         : 'rounded-[1rem] border border-[rgba(255,184,107,0.2)] bg-[rgba(255,184,107,0.08)] px-4 py-3'}
       >
-        <p className={publishableCoverage
+        <p className={visibleActiveCoverageComplete
           ? 'text-sm font-medium text-[rgba(214,246,233,0.92)]'
           : 'text-sm font-medium text-[rgba(255,235,204,0.92)]'}
         >
-          {publishableCoverage
-            ? 'Report-first template coverage is complete'
-            : 'Report-first publish coverage remains blocked'}
+          {visibleActiveCoverageComplete
+            ? 'Report-first DB publish coverage is complete'
+            : 'Report-first DB publish coverage remains blocked'}
         </p>
-        <p className={publishableCoverage
+        <p className={visibleActiveCoverageComplete
           ? 'mt-1 text-sm leading-6 text-[rgba(214,246,233,0.68)]'
           : 'mt-1 text-sm leading-6 text-[rgba(255,235,204,0.68)]'}
         >
-          {visibleImportedCount ?? 0} report-first templates are present in draft storage.{' '}
-          {publishableCoverage
-            ? 'All required ranked-pattern templates are available. Publishing still requires the normal admin publish workflow.'
-            : `${visibleMissingCount} required ranked-pattern templates are still missing, so publish audit must continue to block report-first readiness.`}
+          Generated artifact coverage is {generatedPublishableCoverage ? 'complete' : 'incomplete'}, with {generatedImportReadyCount} rows.{' '}
+          {visibleImportedCount ?? 0} rows are in draft storage and {visibleActiveCount ?? 0} active rows are available for publish audit.{' '}
+          {visibleActiveCoverageComplete
+            ? 'All required active DB templates are available. Publishing still requires the normal admin publish workflow.'
+            : 'Publish audit checks active DB template rows, so generated artifact coverage or draft-only rows do not make this publish-ready.'}
         </p>
       </div>
-      <form action={action}>
-        <SubmitButton disabled={actionDisabled} />
-      </form>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <form action={action}>
+          <SubmitButton
+            disabled={actionDisabled}
+            idleLabel="Import generated report templates"
+            pendingLabel="Importing templates..."
+          />
+        </form>
+        <form action={promotionAction}>
+          <SubmitButton
+            disabled={promotionDisabled}
+            idleLabel="Prepare report-first templates for publish"
+            pendingLabel="Preparing templates..."
+          />
+        </form>
+      </div>
       <Link
         className="sonartra-button sonartra-focus-ring inline-flex w-full justify-center sm:w-auto"
         href="/admin/qa/report-first"
@@ -178,7 +260,13 @@ export function ReportFirstTemplateImportPanel({
           Create or resolve a draft version before importing report-first templates.
         </p>
       ) : null}
+      {!actionDisabled && promotionDisabled && !visibleActiveCoverageComplete ? (
+        <p className="text-sm leading-6 text-white/48">
+          Import all 24 generated report-first templates before preparing them for publish audit.
+        </p>
+      ) : null}
       <ActionResult state={state} />
+      <PromotionResult state={promotionState} />
     </SurfaceCard>
   );
 }

@@ -196,6 +196,13 @@ test('admin report-first preview is wired to the ranked-pattern workflow without
   assert.match(importPanelSource, /data-report-first-import-status="true"/);
   assert.match(importPanelSource, /Report-first import handoff/);
   assert.match(importPanelSource, /Import generated report templates/);
+  assert.match(importPanelSource, /Prepare report-first templates for publish/);
+  assert.match(importPanelSource, /This does not publish the assessment/);
+  assert.match(importPanelSource, /Generated coverage/);
+  assert.match(importPanelSource, /Draft imported rows/);
+  assert.match(importPanelSource, /Active publish rows/);
+  assert.match(importPanelSource, /Publish audit DB coverage/);
+  assert.match(importPanelSource, /generated artifact coverage or draft-only rows do not make this publish-ready/);
   assert.match(previewRouteSource, /buildAdminReportFirstPreview/);
   assert.match(previewRouteSource, /ReportFirstResultReport/);
   assert.match(previewRouteSource, /Does not create user results/);

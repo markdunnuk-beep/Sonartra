@@ -673,6 +673,7 @@ test('publish audit workflow is read-only and releases the database client', asy
       },
       async auditAssessmentVersion(input) {
         assert.equal(input.assessmentVersionId, 'version-1');
+        assert.equal(input.auditReportFirstTemplates, true);
         return {
           assessmentVersionId: 'version-1',
           canPublish: true,

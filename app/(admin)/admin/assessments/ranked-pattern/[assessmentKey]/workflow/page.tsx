@@ -89,6 +89,13 @@ export default async function RankedPatternWorkflowPage({
         status: 'draft',
       })
     : null;
+  const reportFirstActiveCoverage = assessment.latestDraftVersion
+    ? await auditImportedReportFirstTemplateCoverage({
+        db: getDbPool(),
+        assessmentVersionId: assessment.latestDraftVersion.assessmentVersionId,
+        status: 'active',
+      })
+    : null;
 
   return (
     <PageFrame className="space-y-8">
@@ -163,9 +170,11 @@ export default async function RankedPatternWorkflowPage({
       <ReportFirstTemplateImportPanel
         assessmentKey={assessment.assessmentKey}
         generatedImportReadyCount={reportFirstArtifact.coverage.generated_import_ready_count}
+        generatedPublishableCoverage={reportFirstArtifact.coverage.publishable_full_coverage}
         importedDraftCount={reportFirstDraftCoverage?.importedTemplateCount ?? null}
+        importedActiveCount={reportFirstActiveCoverage?.importedTemplateCount ?? null}
+        importedActiveCoverageComplete={reportFirstActiveCoverage?.coverageComplete ?? false}
         missingTemplateCount={reportFirstArtifact.coverage.missing_template_count}
-        publishableCoverage={reportFirstArtifact.coverage.publishable_full_coverage}
         scoreShapePolicy={reportFirstArtifact.score_shape_policy}
         targetAssessmentVersionId={assessment.latestDraftVersion?.assessmentVersionId ?? null}
       />

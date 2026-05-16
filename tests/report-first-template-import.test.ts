@@ -5,6 +5,7 @@ import test from 'node:test';
 import {
   auditImportedReportFirstTemplateCoverage,
   importReportFirstTemplateRows,
+  promoteReportFirstTemplatesForPublish,
   ReportFirstTemplateImportError,
 } from '@/lib/server/report-first-template-import';
 import type { ReportFirstTemplateStatus } from '@/lib/server/report-first-template-storage';
@@ -86,11 +87,37 @@ function createFakeDb() {
         }
 
         if (sql.includes('FROM assessment_ranked_patterns')) {
+          if (params?.length === 1) {
+            const versionId = String(params?.[0] ?? '');
+            return {
+              rows: [...state.activePatterns]
+                .filter((key) => key.startsWith(`${versionId}|`))
+                .map((key) => ({ pattern_key: key.split('|')[1] })) as T[],
+            };
+          }
           const key = `${String(params?.[0] ?? '')}|${String(params?.[1] ?? '')}`;
           return { rows: (state.activePatterns.has(key) ? [{ pattern_key: params?.[1] }] : []) as T[] };
         }
 
-        if (sql.includes('FROM assessment_report_first_templates') && sql.includes("status = 'draft'")) {
+        if (
+          sql.includes('FROM assessment_report_first_templates') &&
+          sql.includes("status = 'draft'") &&
+          sql.includes('SELECT id, pattern_key')
+        ) {
+          const versionId = String(params?.[0] ?? '');
+          return {
+            rows: state.rows
+              .filter((row) => row.assessment_version_id === versionId && row.status === 'draft')
+              .sort((left, right) => left.pattern_key.localeCompare(right.pattern_key))
+              .map((row) => ({ id: row.id, pattern_key: row.pattern_key })) as T[],
+          };
+        }
+
+        if (
+          sql.includes('FROM assessment_report_first_templates') &&
+          sql.includes("status = 'draft'") &&
+          sql.includes('LIMIT 1')
+        ) {
           const versionId = String(params?.[0] ?? '');
           const patternKey = String(params?.[1] ?? '');
           const latest = [...state.rows]
@@ -149,6 +176,29 @@ function createFakeDb() {
         }
 
         if (sql.startsWith('UPDATE assessment_report_first_templates')) {
+          if (sql.includes("status = 'inactive'")) {
+            const versionId = String(params?.[0] ?? '');
+            for (const row of state.rows) {
+              if (row.assessment_version_id === versionId && row.status === 'active') {
+                row.status = 'inactive';
+                row.updated_at = '2026-05-16T00:10:00.000Z';
+              }
+            }
+            return { rows: [] as T[] };
+          }
+          if (sql.includes("status = 'active'") && sql.includes('id = ANY')) {
+            const versionId = String(params?.[0] ?? '');
+            const ids = new Set((params?.[1] as string[] | undefined) ?? []);
+            for (const row of state.rows) {
+              if (row.assessment_version_id === versionId && ids.has(row.id) && row.status === 'draft') {
+                row.status = 'active';
+                row.publishable = true;
+                row.ready_for_import = true;
+                row.updated_at = '2026-05-16T00:15:00.000Z';
+              }
+            }
+            return { rows: [] as T[] };
+          }
           const id = String(params?.[0] ?? '');
           const row = state.rows.find((item) => item.id === id && item.status === 'draft');
           if (!row) {
@@ -208,6 +258,7 @@ function createFakeDb() {
                 content_hash: row.content_hash,
                 status: row.status,
                 score_shape_policy: row.score_shape_policy,
+                score_shape: row.score_shape,
                 publishable: row.publishable,
                 ready_for_import: row.ready_for_import,
               })) as T[],
@@ -433,4 +484,98 @@ test('report-first importer blocks unsupported score-shape policy', async () => 
       message: /score-shape-neutral/,
     },
   );
+});
+
+test('report-first promotion activates a complete valid draft template set', async () => {
+  const fake = createFakeDb();
+  await importReportFirstTemplateRows({
+    db: fake.db,
+    assessmentKey: 'leadership-approach',
+    assessmentVersionId,
+  });
+
+  const summary = await promoteReportFirstTemplatesForPublish({
+    db: fake.db,
+    assessmentVersionId,
+  });
+  const activeCoverage = await auditImportedReportFirstTemplateCoverage({
+    db: fake.db,
+    assessmentVersionId,
+    status: 'active',
+  });
+
+  assert.equal(summary.status, 'promoted');
+  assert.equal(summary.promotedTemplateCount, 24);
+  assert.equal(summary.publishableFullCoverage, true);
+  assert.equal(activeCoverage.coverageComplete, true);
+  assert.equal(fake.state.rows.filter((row) => row.status === 'active').length, 24);
+});
+
+test('report-first promotion is idempotent when active coverage already exists', async () => {
+  const fake = createFakeDb();
+  await importReportFirstTemplateRows({
+    db: fake.db,
+    assessmentKey: 'leadership-approach',
+    assessmentVersionId,
+  });
+  await promoteReportFirstTemplatesForPublish({
+    db: fake.db,
+    assessmentVersionId,
+  });
+
+  const summary = await promoteReportFirstTemplatesForPublish({
+    db: fake.db,
+    assessmentVersionId,
+  });
+
+  assert.equal(summary.status, 'already_active');
+  assert.equal(summary.promotedTemplateCount, 0);
+  assert.equal(fake.state.rows.filter((row) => row.status === 'active').length, 24);
+});
+
+test('report-first promotion blocks when generated artifact is complete but DB rows are missing', async () => {
+  const fake = createFakeDb();
+
+  const summary = await promoteReportFirstTemplatesForPublish({
+    db: fake.db,
+    assessmentVersionId,
+  });
+
+  assert.equal(summary.status, 'blocked');
+  assert.equal(summary.publishableFullCoverage, false);
+  assert.equal(summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_PROMOTION_COUNT_INVALID'), true);
+});
+
+test('report-first promotion blocks partial duplicate malformed unsupported and unresolved draft rows', async () => {
+  const fake = createFakeDb();
+  await importReportFirstTemplateRows({
+    db: fake.db,
+    assessmentKey: 'leadership-approach',
+    assessmentVersionId,
+  });
+  fake.state.rows = [
+    ...fake.state.rows.slice(0, 23),
+    { ...fake.state.rows[0]!, id: 'template-duplicate', updated_at: '2026-05-16T00:20:00.000Z' },
+    {
+      ...fake.state.rows[1]!,
+      report_template_json: {},
+      score_shape_policy: 'score_shape_specific',
+      score_shape: 'balanced',
+      report_contract: 'legacy_contract',
+      updated_at: '2026-05-16T00:21:00.000Z',
+    },
+  ];
+  fake.state.activePatterns.delete(`${assessmentVersionId}|${fake.state.rows[2]?.pattern_key ?? ''}`);
+
+  const summary = await promoteReportFirstTemplatesForPublish({
+    db: fake.db,
+    assessmentVersionId,
+  });
+
+  assert.equal(summary.status, 'blocked');
+  assert.equal(summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_PROMOTION_PATTERN_DUPLICATE'), true);
+  assert.equal(summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_PROMOTION_BODY_INCOMPLETE'), true);
+  assert.equal(summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_PROMOTION_SCORE_SHAPE_POLICY_UNSUPPORTED'), true);
+  assert.equal(summary.auditFindings.some((finding) => finding.code === 'REPORT_FIRST_PROMOTION_PATTERN_UNRESOLVED'), true);
+  assert.equal(fake.state.rows.some((row) => row.status === 'active'), false);
 });

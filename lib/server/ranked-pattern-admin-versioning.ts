@@ -800,6 +800,7 @@ export async function runRankedPatternVersionPublishAudit(
       ? await deps.auditAssessmentVersion({
           assessmentVersionId: input.targetAssessmentVersionId,
           db: client,
+          auditReportFirstTemplates: true,
         })
       : null;
 
@@ -859,6 +860,7 @@ export async function publishRankedPatternAssessmentVersion(
     const publishAudit = await deps.auditAssessmentVersion({
       assessmentVersionId: input.targetAssessmentVersionId,
       db: client,
+      auditReportFirstTemplates: true,
     });
     const auditDiagnostics = publishAudit.findings.map((finding) => diagnostic({
       severity: finding.severity === 'blocking' ? 'error' : 'warning',

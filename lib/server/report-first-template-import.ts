@@ -52,6 +52,18 @@ export type ReportFirstTemplateCoverageSummary = {
   readonly blockingFindings: readonly ReportFirstTemplateImportFinding[];
 };
 
+export type ReportFirstTemplatePromotionSummary = {
+  readonly expectedTemplateCount: number;
+  readonly promotedTemplateCount: number;
+  readonly activeTemplateCount: number;
+  readonly missingTemplateCount: number;
+  readonly publishableFullCoverage: boolean;
+  readonly promotedPatternKeys: readonly string[];
+  readonly activePatternKeys: readonly string[];
+  readonly auditFindings: readonly ReportFirstTemplateImportFinding[];
+  readonly status: 'promoted' | 'already_active' | 'blocked';
+};
+
 type ImportParams = {
   readonly db: Queryable;
   readonly assessmentKey: string;
@@ -64,16 +76,36 @@ type ImportParams = {
 type ArtifactReader = (artifactPath: string) => Promise<string>;
 
 type ImportedTemplateRow = {
+  readonly id?: string | null;
   readonly pattern_key: string | null;
+  readonly domain_key?: string | null;
   readonly report_key: string | null;
   readonly report_contract: string | null;
   readonly report_template_json: unknown;
   readonly content_hash: string | null;
   readonly status: string | null;
   readonly score_shape_policy: string | null;
+  readonly score_shape: string | null;
   readonly publishable: boolean | null;
   readonly ready_for_import: boolean | null;
 };
+
+type ActiveRankedPatternRow = {
+  readonly pattern_key: string | null;
+};
+
+const requiredChapterTitlePatterns = [
+  'How your leadership creates value',
+  'How others experience your leadership',
+  'Decision behaviour',
+  'Communication behaviour',
+  'What happens under pressure',
+  'The strength of this pattern',
+  'Where the pattern can tighten',
+  /^How [A-Za-z]+ expands your leadership$/,
+  /^How [A-Za-z]+ expands your leadership$/,
+  'Development focus',
+] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -363,12 +395,255 @@ function requiredBodyIncomplete(row: ImportedTemplateRow): boolean {
   const evidence: Record<string, unknown> = isRecord(row.report_template_json.evidenceTemplate)
     ? row.report_template_json.evidenceTemplate
     : {};
+  const patternSummary: Record<string, unknown> = isRecord(report.patternSummary) ? report.patternSummary : {};
+  const closing: Record<string, unknown> = isRecord(report.closing) ? report.closing : {};
+  const pdf: Record<string, unknown> = isRecord(report.pdf) ? report.pdf : {};
+  const chapters = Array.isArray(report.chapters) ? report.chapters : [];
   return !Array.isArray(report.opening) ||
     report.opening.length === 0 ||
-    !Array.isArray(report.chapters) ||
-    report.chapters.length !== 10 ||
+    !Array.isArray(patternSummary.blocks) ||
+    patternSummary.blocks.length === 0 ||
+    !(nonEmptyText(report.keyInsight) || isRecord(report.keyInsight)) ||
+    chapters.length !== 10 ||
+    chapters.some((chapter, index) => {
+      if (!isRecord(chapter)) {
+        return true;
+      }
+      const titlePattern = requiredChapterTitlePatterns[index];
+      const title = typeof chapter.title === 'string' ? chapter.title : '';
+      const titleMatches = typeof titlePattern === 'string'
+        ? title === titlePattern
+        : titlePattern.test(title);
+      return chapter.chapterNumber !== index + 1 ||
+        !titleMatches ||
+        !Array.isArray(chapter.blocks) ||
+        chapter.blocks.length === 0;
+    }) ||
     !Array.isArray(evidence.blocks) ||
-    evidence.blocks.length === 0;
+    evidence.blocks.length === 0 ||
+    !Array.isArray(closing.synthesis) ||
+    closing.synthesis.length === 0 ||
+    !nonEmptyText(closing.finalLine) ||
+    !nonEmptyText(pdf.title);
+}
+
+async function activeRankedPatternKeys(params: {
+  readonly db: Queryable;
+  readonly assessmentVersionId: string;
+}): Promise<readonly string[]> {
+  const result = await params.db.query<ActiveRankedPatternRow>(
+    `
+    SELECT pattern_key
+    FROM assessment_ranked_patterns
+    WHERE assessment_version_id = $1
+      AND status = 'active'
+    ORDER BY pattern_key ASC
+    `,
+    [params.assessmentVersionId],
+  );
+
+  return Object.freeze(
+    result.rows
+      .map((row) => row.pattern_key)
+      .filter((patternKey): patternKey is string => nonEmptyText(patternKey)),
+  );
+}
+
+function coverageFindings(params: {
+  readonly coverage: ReportFirstTemplateCoverageSummary;
+  readonly expectedPatternKeys: readonly string[];
+  readonly activePatternKeys: readonly string[];
+  readonly status: 'draft' | 'active';
+}): readonly ReportFirstTemplateImportFinding[] {
+  const findings: ReportFirstTemplateImportFinding[] = [];
+
+  if (params.coverage.importedTemplateCount !== params.expectedPatternKeys.length) {
+    findings.push({
+      severity: 'blocking',
+      code: 'REPORT_FIRST_PROMOTION_COUNT_INVALID',
+      message: `Report-first promotion requires exactly ${params.expectedPatternKeys.length} ${params.status} template rows; found ${params.coverage.importedTemplateCount}.`,
+    });
+  }
+  for (const patternKey of params.coverage.missingPatternKeys) {
+    findings.push({
+      severity: 'blocking',
+      code: 'REPORT_FIRST_PROMOTION_PATTERN_MISSING',
+      message: 'Every expected ranked pattern must have one report-first template row before promotion.',
+      patternKey,
+    });
+  }
+  for (const patternKey of params.coverage.duplicatePatternKeys) {
+    findings.push({
+      severity: 'blocking',
+      code: 'REPORT_FIRST_PROMOTION_PATTERN_DUPLICATE',
+      message: 'Promotion requires exactly one report-first template row per pattern_key.',
+      patternKey,
+    });
+  }
+  for (const patternKey of params.coverage.unsupportedScoreShapePolicies) {
+    findings.push({
+      severity: 'blocking',
+      code: 'REPORT_FIRST_PROMOTION_SCORE_SHAPE_POLICY_UNSUPPORTED',
+      message: 'Promotion requires pattern-level score-shape-neutral rows with score_shape set to null.',
+      patternKey,
+    });
+  }
+  for (const patternKey of params.coverage.incompletePatternKeys) {
+    findings.push({
+      severity: 'blocking',
+      code: 'REPORT_FIRST_PROMOTION_BODY_INCOMPLETE',
+      message: 'Promotion requires a valid report contract, content hash, and full structured report body.',
+      patternKey,
+    });
+  }
+  for (const patternKey of params.coverage.nonPublishablePatternKeys) {
+    findings.push({
+      severity: 'blocking',
+      code: 'REPORT_FIRST_PROMOTION_ROW_NOT_PUBLISHABLE',
+      message: 'Promotion requires rows marked publishable and ready_for_import.',
+      patternKey,
+    });
+  }
+
+  const activePatternSet = new Set(params.activePatternKeys);
+  for (const patternKey of params.expectedPatternKeys) {
+    if (!activePatternSet.has(patternKey)) {
+      findings.push({
+        severity: 'blocking',
+        code: 'REPORT_FIRST_PROMOTION_PATTERN_UNRESOLVED',
+        message: 'Expected report-first pattern_key does not resolve to an active assessment_ranked_patterns row for this assessment version.',
+        patternKey,
+      });
+    }
+  }
+
+  return Object.freeze(findings);
+}
+
+async function draftTemplateIdsForPromotion(params: {
+  readonly db: Queryable;
+  readonly assessmentVersionId: string;
+}): Promise<readonly { readonly id: string; readonly patternKey: string }[]> {
+  const result = await params.db.query<{ readonly id: string; readonly pattern_key: string | null }>(
+    `
+    SELECT id, pattern_key
+    FROM assessment_report_first_templates
+    WHERE assessment_version_id = $1
+      AND status = 'draft'
+    ORDER BY pattern_key ASC, updated_at DESC, id DESC
+    `,
+    [params.assessmentVersionId],
+  );
+
+  return Object.freeze(
+    result.rows
+      .filter((row) => nonEmptyText(row.id) && nonEmptyText(row.pattern_key))
+      .map((row) => Object.freeze({ id: row.id, patternKey: row.pattern_key as string })),
+  );
+}
+
+export async function promoteReportFirstTemplatesForPublish(params: {
+  readonly db: Queryable;
+  readonly assessmentVersionId: string;
+}): Promise<ReportFirstTemplatePromotionSummary> {
+  const expectedPatternKeys = leadershipReportFirstExpectedPatternKeys();
+  const activeCoverage = await auditImportedReportFirstTemplateCoverage({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    status: 'active',
+  });
+  const activePatternKeys = await activeRankedPatternKeys(params);
+  const activeFindings = coverageFindings({
+    coverage: activeCoverage,
+    expectedPatternKeys,
+    activePatternKeys,
+    status: 'active',
+  });
+
+  if (activeCoverage.coverageComplete && activeFindings.length === 0) {
+    return Object.freeze({
+      expectedTemplateCount: expectedPatternKeys.length,
+      promotedTemplateCount: 0,
+      activeTemplateCount: activeCoverage.importedTemplateCount,
+      missingTemplateCount: activeCoverage.missingPatternKeys.length,
+      publishableFullCoverage: true,
+      promotedPatternKeys: Object.freeze([]),
+      activePatternKeys: Object.freeze([...expectedPatternKeys].sort((left, right) => left.localeCompare(right))),
+      auditFindings: Object.freeze([]),
+      status: 'already_active',
+    });
+  }
+
+  const draftCoverage = await auditImportedReportFirstTemplateCoverage({
+    db: params.db,
+    assessmentVersionId: params.assessmentVersionId,
+    status: 'draft',
+  });
+  const draftFindings = coverageFindings({
+    coverage: draftCoverage,
+    expectedPatternKeys,
+    activePatternKeys,
+    status: 'draft',
+  });
+
+  if (draftFindings.length > 0 || !draftCoverage.coverageComplete) {
+    return Object.freeze({
+      expectedTemplateCount: expectedPatternKeys.length,
+      promotedTemplateCount: 0,
+      activeTemplateCount: activeCoverage.importedTemplateCount,
+      missingTemplateCount: draftCoverage.missingPatternKeys.length,
+      publishableFullCoverage: false,
+      promotedPatternKeys: Object.freeze([]),
+      activePatternKeys: Object.freeze([]),
+      auditFindings: Object.freeze(draftFindings),
+      status: 'blocked',
+    });
+  }
+
+  const draftRows = await draftTemplateIdsForPromotion(params);
+  const draftIds = draftRows.map((row) => row.id);
+  await params.db.query('BEGIN');
+  try {
+    await params.db.query(
+      `
+      UPDATE assessment_report_first_templates
+      SET status = 'inactive',
+          updated_at = NOW()
+      WHERE assessment_version_id = $1
+        AND status = 'active'
+      `,
+      [params.assessmentVersionId],
+    );
+    await params.db.query(
+      `
+      UPDATE assessment_report_first_templates
+      SET status = 'active',
+          publishable = TRUE,
+          ready_for_import = TRUE,
+          updated_at = NOW()
+      WHERE assessment_version_id = $1
+        AND id = ANY($2::uuid[])
+        AND status = 'draft'
+      `,
+      [params.assessmentVersionId, draftIds],
+    );
+    await params.db.query('COMMIT');
+  } catch (error) {
+    await params.db.query('ROLLBACK').catch(() => undefined);
+    throw error;
+  }
+
+  return Object.freeze({
+    expectedTemplateCount: expectedPatternKeys.length,
+    promotedTemplateCount: draftRows.length,
+    activeTemplateCount: draftRows.length,
+    missingTemplateCount: 0,
+    publishableFullCoverage: true,
+    promotedPatternKeys: Object.freeze(draftRows.map((row) => row.patternKey).sort((left, right) => left.localeCompare(right))),
+    activePatternKeys: Object.freeze(draftRows.map((row) => row.patternKey).sort((left, right) => left.localeCompare(right))),
+    auditFindings: Object.freeze([]),
+    status: 'promoted',
+  });
 }
 
 export async function auditImportedReportFirstTemplateCoverage(params: {
@@ -388,6 +663,7 @@ export async function auditImportedReportFirstTemplateCoverage(params: {
       content_hash,
       status,
       score_shape_policy,
+      score_shape,
       publishable,
       ready_for_import
     FROM assessment_report_first_templates
@@ -413,7 +689,7 @@ export async function auditImportedReportFirstTemplateCoverage(params: {
     if (!importedPatternKeys.includes(patternKey)) {
       importedPatternKeys.push(patternKey);
     }
-    if (row.score_shape_policy !== leadershipReportFirstScoreShapePolicy) {
+    if (row.score_shape_policy !== leadershipReportFirstScoreShapePolicy || row.score_shape !== null) {
       unsupportedScoreShapePolicies.push(patternKey);
     }
     if (

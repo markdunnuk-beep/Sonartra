@@ -35,6 +35,65 @@ const patternScoreShapeSections = [
 ] as const;
 const patternOnlySections = ['strengths', 'narrowing', 'application'] as const;
 const reportFirstContract = 'report_first_canonical_payload_v1';
+const reportFirstScoreShapePolicy = 'pattern_level_score_shape_neutral';
+
+function fullReportFirstTemplateJson(patternKey: string, index: number): Record<string, unknown> {
+  const block = (text: string) => ({ type: 'paragraph', text });
+  return {
+    metadata: {
+      contractName: reportFirstContract,
+      reportModel: 'report_first_canonical',
+    },
+    reportKey: `leadership_approach_${patternKey}`,
+    patternKey,
+    domainKey: 'domain_key',
+    report: {
+      reportKey: `leadership_approach_${patternKey}`,
+      patternKey,
+      reportTitle: `Leadership Approach - ${patternKey}`,
+      hero: {
+        title: `Report ${index + 1}`,
+        statement: 'A complete report-first template.',
+      },
+      opening: [block('Editorial introduction.')],
+      patternSummary: {
+        title: 'Pattern at a glance',
+        blocks: [block('Pattern summary.')],
+      },
+      keyInsight: 'Key insight.',
+      chapters: [
+        'How your leadership creates value',
+        'How others experience your leadership',
+        'Decision behaviour',
+        'Communication behaviour',
+        'What happens under pressure',
+        'The strength of this pattern',
+        'Where the pattern can tighten',
+        'How Results expands your leadership',
+        'How Vision expands your leadership',
+        'Development focus',
+      ].map((title, chapterIndex) => ({
+        chapterKey: `chapter_${chapterIndex + 1}`,
+        chapterNumber: chapterIndex + 1,
+        title,
+        blocks: [block(`${title} body.`)],
+        readerFacing: true,
+      })),
+      closing: {
+        synthesis: [block('Closing synthesis.')],
+        finalLine: 'Final line.',
+      },
+      pdf: {
+        title: 'Save this report',
+        blocks: [block('Save this report for later review.')],
+      },
+    },
+    evidenceTemplate: {
+      title: 'Evidence behind your result',
+      blocks: [block('Evidence block.')],
+    },
+  };
+}
 
 function allPatterns(): readonly {
   readonly patternKey: string;
@@ -71,13 +130,13 @@ function reportFirstTemplatesFor(
     pattern_key: patternKey,
     report_key: `leadership_approach_${patternKey}`,
     report_contract: reportFirstContract,
-    report_template_json: {
-      report_key: `leadership_approach_${patternKey}`,
-      pattern_key: patternKey,
-      sections: [{ key: 'opening', blocks: [{ type: 'paragraph', text: `Report ${index + 1}` }] }],
-    },
+    score_shape_policy: reportFirstScoreShapePolicy,
+    score_shape: null,
+    report_template_json: fullReportFirstTemplateJson(patternKey, index),
     content_hash: `hash-${index + 1}`,
     status: 'active',
+    publishable: true,
+    ready_for_import: true,
   }));
 }
 

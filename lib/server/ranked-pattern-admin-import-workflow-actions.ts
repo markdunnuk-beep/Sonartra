@@ -10,7 +10,10 @@ import {
   dryRunRankedPatternImportForAdmin,
 } from '@/lib/server/ranked-pattern-admin-import-workflow';
 import { getDbPool } from '@/lib/server/db';
-import { importReportFirstTemplateRows } from '@/lib/server/report-first-template-import';
+import {
+  importReportFirstTemplateRows,
+  promoteReportFirstTemplatesForPublish,
+} from '@/lib/server/report-first-template-import';
 import { requireAdminUser } from '@/lib/server/admin-access';
 import {
   createRankedPatternDraftVersion,
@@ -23,6 +26,7 @@ import type {
   RankedPatternPublishVersionActionState,
   RankedPatternWorkbookUploadActionState,
   ReportFirstTemplateImportActionState,
+  ReportFirstTemplatePromotionActionState,
 } from '@/lib/server/ranked-pattern-admin-import-workflow-action-state';
 import {
   signRankedPatternWorkbookStorageReference,
@@ -58,6 +62,7 @@ type RankedPatternAdminImportActionDependencies = {
   readonly createPackageDraftVersion?: typeof createOrResolveRankedPatternPackageDraftForAdmin;
   readonly publishVersion?: typeof publishRankedPatternAssessmentVersion;
   readonly importReportFirstTemplates?: typeof importReportFirstTemplateRows;
+  readonly promoteReportFirstTemplates?: typeof promoteReportFirstTemplatesForPublish;
   readonly getDbPool?: typeof getDbPool;
   readonly revalidatePath?: typeof revalidatePath;
 };
@@ -75,6 +80,7 @@ const defaultDependencies: RankedPatternAdminImportActionDependencies = {
   createPackageDraftVersion: createOrResolveRankedPatternPackageDraftForAdmin,
   publishVersion: publishRankedPatternAssessmentVersion,
   importReportFirstTemplates: importReportFirstTemplateRows,
+  promoteReportFirstTemplates: promoteReportFirstTemplatesForPublish,
   getDbPool,
   revalidatePath,
 };
@@ -229,6 +235,14 @@ export async function importReportFirstTemplatesAction(
   return importReportFirstTemplatesActionWithDependencies(context, defaultDependencies);
 }
 
+export async function promoteReportFirstTemplatesAction(
+  context: ReportFirstTemplateImportActionContext,
+  _previousState: ReportFirstTemplatePromotionActionState,
+  _formData: FormData,
+): Promise<ReportFirstTemplatePromotionActionState> {
+  return promoteReportFirstTemplatesActionWithDependencies(context, defaultDependencies);
+}
+
 export async function importReportFirstTemplatesActionWithDependencies(
   context: ReportFirstTemplateImportActionContext,
   dependencies: RankedPatternAdminImportActionDependencies,
@@ -264,7 +278,7 @@ export async function importReportFirstTemplatesActionWithDependencies(
     dependencies.revalidatePath?.(`/admin/assessments/ranked-pattern/${context.assessmentKey}/workflow/report-first-preview`);
 
     const coverageCopy = result.publishableFullCoverage
-      ? 'Full report-first coverage is publishable.'
+      ? 'Generated report-first coverage is complete; publish audit still checks active DB template rows.'
       : `${result.missingTemplateCount} report-first templates are still missing, so publish remains blocked.`;
 
     return {
@@ -280,6 +294,79 @@ export async function importReportFirstTemplatesActionWithDependencies(
       error instanceof Error && error.message.trim()
         ? error.message
         : 'Report-first template import could not run. Check the draft version and generated artifact, then try again.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      formSuccess: null,
+      fieldErrors: {},
+      result: null,
+    };
+  }
+}
+
+export async function promoteReportFirstTemplatesActionWithDependencies(
+  context: ReportFirstTemplateImportActionContext,
+  dependencies: RankedPatternAdminImportActionDependencies,
+): Promise<ReportFirstTemplatePromotionActionState> {
+  const targetAssessmentVersionId = context.targetAssessmentVersionId?.trim() ?? '';
+  if (!targetAssessmentVersionId) {
+    const message = 'Create or open a draft version before preparing report-first templates for publish.';
+    return {
+      ok: false,
+      message,
+      formError: message,
+      formSuccess: null,
+      fieldErrors: {
+        targetAssessmentVersionId: 'Report-first publish prep requires an editable draft version.',
+      },
+      result: null,
+    };
+  }
+
+  try {
+    const requireAdmin = dependencies.requireAdminUser ?? requireAdminUser;
+    await requireAdmin();
+    const promoteTemplates = dependencies.promoteReportFirstTemplates ?? promoteReportFirstTemplatesForPublish;
+    const result = await promoteTemplates({
+      db: (dependencies.getDbPool ?? getDbPool)(),
+      assessmentVersionId: targetAssessmentVersionId,
+    });
+
+    dependencies.revalidatePath?.(`/admin/assessments/ranked-pattern/${context.assessmentKey}/workflow`);
+    dependencies.revalidatePath?.(`/admin/assessments/ranked-pattern/${context.assessmentKey}/workflow/report-first-preview`);
+
+    if (result.status === 'blocked') {
+      const message =
+        result.auditFindings[0]?.message ??
+        'Report-first templates are not ready for publish prep. Import a complete, valid 24-template set first.';
+      return {
+        ok: false,
+        message,
+        formError: message,
+        formSuccess: null,
+        fieldErrors: {},
+        result,
+      };
+    }
+
+    const actionCopy = result.status === 'already_active'
+      ? 'Report-first templates were already prepared for publish.'
+      : `Prepared ${result.promotedTemplateCount} report-first templates for publish audit.`;
+    const message = `${actionCopy} This does not publish the assessment.`;
+    return {
+      ok: true,
+      message,
+      formError: null,
+      formSuccess: message,
+      fieldErrors: {},
+      result,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message.trim()
+        ? error.message
+        : 'Report-first template publish prep could not run. Check draft storage and try again.';
     return {
       ok: false,
       message,

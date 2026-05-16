@@ -455,7 +455,8 @@ test('publish blocks when ranked-pattern publish audit has blocking findings', a
       getDbPool() {
         return fake.pool;
       },
-      async auditAssessmentVersion() {
+      async auditAssessmentVersion(input) {
+        assert.equal(input.auditReportFirstTemplates, true);
         return {
           assessmentVersionId: 'version-2',
           canPublish: false,
@@ -492,7 +493,8 @@ test('publish succeeds after ranked-pattern audit passes and preserves old resul
       getDbPool() {
         return fake.pool;
       },
-      async auditAssessmentVersion() {
+      async auditAssessmentVersion(input) {
+        assert.equal(input.auditReportFirstTemplates, true);
         return {
           assessmentVersionId: 'version-2',
           canPublish: true,

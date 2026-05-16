@@ -7,7 +7,10 @@ import type {
   RankedPatternPublishVersionResult,
 } from '@/lib/server/ranked-pattern-admin-versioning';
 import type { RankedPatternWorkbookStorageReference } from '@/lib/server/ranked-pattern-workbook-storage';
-import type { ReportFirstTemplateImportSummary } from '@/lib/server/report-first-template-import';
+import type {
+  ReportFirstTemplateImportSummary,
+  ReportFirstTemplatePromotionSummary,
+} from '@/lib/server/report-first-template-import';
 
 export type RankedPatternAdminImportActionState = {
   readonly ok: boolean;
@@ -68,6 +71,15 @@ export type ReportFirstTemplateImportActionState = {
   readonly result: ReportFirstTemplateImportSummary | null;
 };
 
+export type ReportFirstTemplatePromotionActionState = {
+  readonly ok: boolean;
+  readonly message: string | null;
+  readonly formError: string | null;
+  readonly formSuccess: string | null;
+  readonly fieldErrors: Readonly<Record<string, string>>;
+  readonly result: ReportFirstTemplatePromotionSummary | null;
+};
+
 export const initialRankedPatternAdminImportActionState: RankedPatternAdminImportActionState = {
   ok: false,
   message: null,
@@ -111,6 +123,15 @@ export const initialRankedPatternPublishVersionActionState: RankedPatternPublish
 };
 
 export const initialReportFirstTemplateImportActionState: ReportFirstTemplateImportActionState = {
+  ok: false,
+  message: null,
+  formError: null,
+  formSuccess: null,
+  fieldErrors: {},
+  result: null,
+};
+
+export const initialReportFirstTemplatePromotionActionState: ReportFirstTemplatePromotionActionState = {
   ok: false,
   message: null,
   formError: null,

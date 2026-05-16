@@ -171,9 +171,13 @@ type ReportFirstTemplateRow = {
   readonly pattern_key: string | null;
   readonly report_key: string | null;
   readonly report_contract: string | null;
+  readonly score_shape_policy: string | null;
+  readonly score_shape: string | null;
   readonly report_template_json: unknown;
   readonly content_hash: string | null;
   readonly status: string | null;
+  readonly publishable: boolean | null;
+  readonly ready_for_import: boolean | null;
 };
 
 type PersistedRankedPatternState = {
@@ -192,8 +196,21 @@ type PersistedRankedPatternState = {
 };
 
 const reportFirstTemplateContract = 'report_first_canonical_payload_v1';
+const reportFirstScoreShapePolicy = 'pattern_level_score_shape_neutral';
 const supportedScoreShapeSet = new Set<string>(rankedPatternSupportedScoreShapes);
 const supportedRankPositionSet = new Set<number>(rankedPatternSupportedRankPositions);
+const expectedReportFirstChapterTitlePatterns = [
+  'How your leadership creates value',
+  'How others experience your leadership',
+  'Decision behaviour',
+  'Communication behaviour',
+  'What happens under pressure',
+  'The strength of this pattern',
+  'Where the pattern can tighten',
+  /^How [A-Za-z]+ expands your leadership$/,
+  /^How [A-Za-z]+ expands your leadership$/,
+  'Development focus',
+] as const;
 
 const expectedRuntimeSections = [
   { sectionKey: 'context', sourceSheetKey: '05_Context', order: 1 },
@@ -311,6 +328,32 @@ function parsedJsonValue(value: unknown): unknown {
   } catch {
     return value;
   }
+}
+
+function parsedJsonObject(value: unknown): Record<string, unknown> | null {
+  const parsed = parsedJsonValue(value);
+  if (
+    typeof parsed === 'object' &&
+    parsed !== null &&
+    !Array.isArray(parsed)
+  ) {
+    return parsed as Record<string, unknown>;
+  }
+  return null;
+}
+
+function objectValue(value: unknown): Record<string, unknown> | null {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value)
+  )
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function arrayValue(value: unknown): readonly unknown[] | null {
+  return Array.isArray(value) ? value : null;
 }
 
 function isNonEmptyObject(value: unknown): boolean {
@@ -509,9 +552,13 @@ async function loadPersistedRankedPatternState(
         pattern_key,
         report_key,
         report_contract,
+        score_shape_policy,
+        score_shape,
         report_template_json,
         content_hash,
-        status
+        status,
+        publishable,
+        ready_for_import
       FROM assessment_report_first_templates
       WHERE assessment_version_id = $1 AND status = 'active'
       ORDER BY domain_key, pattern_key, id
@@ -1325,6 +1372,79 @@ function auditPreviewCases(
   }
 }
 
+function reportFirstTemplateBodyFindings(
+  template: ReportFirstTemplateRow,
+): readonly string[] {
+  const json = parsedJsonObject(template.report_template_json);
+  const failures: string[] = [];
+  if (!json || Object.keys(json).length === 0) {
+    return ['report_template_json must be a non-empty structured object'];
+  }
+
+  const report = objectValue(json.report);
+  if (!report) {
+    return ['report_template_json.report is required'];
+  }
+
+  const opening = arrayValue(report.opening);
+  const patternSummary = objectValue(report.patternSummary);
+  const evidenceTemplate = objectValue(json.evidenceTemplate);
+  const evidenceBlocks = arrayValue(evidenceTemplate?.blocks);
+  const chapters = arrayValue(report.chapters);
+  const closing = objectValue(report.closing);
+  const closingSynthesis = arrayValue(closing?.synthesis);
+  const pdf = objectValue(report.pdf);
+
+  if (!opening || opening.length === 0) {
+    failures.push('Editorial introduction blocks are required');
+  }
+  if (!patternSummary || (arrayValue(patternSummary.blocks)?.length ?? 0) === 0) {
+    failures.push('Pattern at a glance blocks are required');
+  }
+  if (!evidenceBlocks || evidenceBlocks.length === 0) {
+    failures.push('Evidence behind your result blocks are required');
+  }
+  if (!textValue(typeof report.keyInsight === 'string' ? report.keyInsight : null) && !objectValue(report.keyInsight)) {
+    failures.push('Key insight text is required');
+  }
+  if (!chapters || chapters.length !== 10) {
+    failures.push('Exactly ten report chapters are required');
+  } else {
+    chapters.forEach((chapterValue, index) => {
+      const chapter = objectValue(chapterValue);
+      const rowLabel = `Chapter ${index + 1}`;
+      if (!chapter) {
+        failures.push(`${rowLabel} must be a structured object`);
+        return;
+      }
+      if (chapter.chapterNumber !== index + 1) {
+        failures.push(`${rowLabel} chapterNumber must be ${index + 1}`);
+      }
+      const titlePattern = expectedReportFirstChapterTitlePatterns[index];
+      const title = typeof chapter.title === 'string' ? chapter.title : '';
+      const titleMatches = typeof titlePattern === 'string'
+        ? title === titlePattern
+        : titlePattern.test(title);
+      if (!titleMatches) {
+        failures.push(`${rowLabel} title must match the report-first canonical chapter heading policy`);
+      }
+      if ((arrayValue(chapter.blocks)?.length ?? 0) === 0) {
+        failures.push(`${rowLabel} must include reader-facing body blocks`);
+      }
+    });
+  }
+  if (!closing || !closingSynthesis || closingSynthesis.length === 0 || !textValue(
+    typeof closing.finalLine === 'string' ? closing.finalLine : null,
+  )) {
+    failures.push('Closing synthesis and final line are required');
+  }
+  if (!pdf || !textValue(typeof pdf.title === 'string' ? pdf.title : null)) {
+    failures.push('Save this report / PDF reference section is required');
+  }
+
+  return failures;
+}
+
 function auditReportFirstTemplates(
   state: PersistedRankedPatternState,
   activePatternKeys: readonly string[],
@@ -1335,14 +1455,31 @@ function auditReportFirstTemplates(
   const concreteTemplatePatternKeys = state.reportFirstTemplates
     .map((template) => textValue(template.pattern_key))
     .filter((value): value is string => value !== null);
+  const publishableTemplatePatternKeys = state.reportFirstTemplates
+    .filter((template) =>
+      template.publishable === true &&
+      template.ready_for_import === true &&
+      template.report_contract === reportFirstTemplateContract &&
+      template.score_shape_policy === reportFirstScoreShapePolicy &&
+      template.score_shape === null &&
+      textValue(template.pattern_key) !== null &&
+      textValue(template.report_key) !== null &&
+      textValue(template.content_hash) !== null &&
+      reportFirstTemplateBodyFindings(template).length === 0,
+    )
+    .map((template) => textValue(template.pattern_key))
+    .filter((value): value is string => value !== null);
 
-  if (state.reportFirstTemplates.length !== 24) {
+  if (publishableTemplatePatternKeys.length !== 24 || state.reportFirstTemplates.length !== 24) {
     addBlocking(findings, {
       code: 'REPORT_FIRST_TEMPLATE_COUNT_INVALID',
-      message: 'Report-first publish readiness requires exactly twenty-four active report-first templates.',
+      message: 'Report-first publish readiness requires exactly twenty-four active, publishable, valid report-first templates in DB storage.',
       category: 'report_first_templates',
       tableName: 'assessment_report_first_templates',
-      relatedKeys: [String(state.reportFirstTemplates.length)],
+      relatedKeys: [
+        `active_rows=${state.reportFirstTemplates.length}`,
+        `valid_publishable_rows=${publishableTemplatePatternKeys.length}`,
+      ],
     });
   }
 
@@ -1354,6 +1491,27 @@ function auditReportFirstTemplates(
       category: 'report_first_templates',
       tableName: 'assessment_report_first_templates',
       relatedKeys: duplicatePatternKeys,
+    });
+  }
+  const duplicatePatternPolicyShapeKeys = duplicateValues(
+    state.reportFirstTemplates
+      .filter((template) => template.publishable === true)
+      .map((template) =>
+        [
+          template.pattern_key ?? '',
+          template.score_shape_policy ?? '',
+          template.score_shape ?? '',
+        ].join('::'),
+      )
+      .filter(Boolean),
+  );
+  if (duplicatePatternPolicyShapeKeys.length > 0) {
+    addBlocking(findings, {
+      code: 'REPORT_FIRST_TEMPLATE_DUPLICATE_PATTERN_POLICY_SHAPE',
+      message: 'Active publishable report-first templates must contain no duplicate pattern_key, score_shape_policy, and score_shape combination.',
+      category: 'report_first_templates',
+      tableName: 'assessment_report_first_templates',
+      relatedKeys: duplicatePatternPolicyShapeKeys,
     });
   }
 
@@ -1405,6 +1563,38 @@ function auditReportFirstTemplates(
       });
     }
 
+    if (template.score_shape_policy !== reportFirstScoreShapePolicy) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_UNSUPPORTED_SCORE_SHAPE_POLICY',
+        message: `Report-first templates must use score_shape_policy ${reportFirstScoreShapePolicy}.`,
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+        relatedKeys: [template.score_shape_policy ?? 'null'],
+      });
+    }
+
+    if (template.score_shape !== null) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_SCORE_SHAPE_NOT_NULL',
+        message: 'Pattern-level score-shape-neutral report-first templates must store score_shape as null.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+        relatedKeys: [template.score_shape],
+      });
+    }
+
+    if (template.publishable !== true || template.ready_for_import !== true) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_NOT_PUBLISHABLE',
+        message: 'Report-first publish readiness only accepts rows marked publishable and ready_for_import.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+      });
+    }
+
     if (!isNonEmptyObject(template.report_template_json)) {
       addBlocking(findings, {
         code: 'REPORT_FIRST_TEMPLATE_EMPTY_JSON',
@@ -1412,6 +1602,17 @@ function auditReportFirstTemplates(
         category: 'report_first_templates',
         tableName: 'assessment_report_first_templates',
         rowKey,
+      });
+    }
+    const bodyFailures = reportFirstTemplateBodyFindings(template);
+    if (bodyFailures.length > 0) {
+      addBlocking(findings, {
+        code: 'REPORT_FIRST_TEMPLATE_BODY_INCOMPLETE',
+        message: 'Report-first template JSON must contain the full structured report body required by the report-first renderer.',
+        category: 'report_first_templates',
+        tableName: 'assessment_report_first_templates',
+        rowKey,
+        relatedKeys: bodyFailures,
       });
     }
 
@@ -1450,7 +1651,7 @@ function auditReportFirstTemplates(
 
   const templatePatternKeySet = new Set(concreteTemplatePatternKeys);
   for (const patternKey of patternKeySet) {
-    if (!templatePatternKeySet.has(patternKey)) {
+    if (!templatePatternKeySet.has(patternKey) || concreteTemplatePatternKeys.filter((key) => key === patternKey).length !== 1) {
       addBlocking(findings, {
         code: 'REPORT_FIRST_TEMPLATE_MISSING_FOR_PATTERN',
         message: 'Every active ranked pattern must have exactly one matching active report-first template.',
