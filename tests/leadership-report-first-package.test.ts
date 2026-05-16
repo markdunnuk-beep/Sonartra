@@ -38,6 +38,14 @@ const expectedPatternKeys = [
   'people_vision_process_results',
 ] as const;
 
+const p12bResultsLedPatternKeys = [
+  'results_process_vision_people',
+  'results_vision_process_people',
+  'results_vision_people_process',
+  'results_people_process_vision',
+  'results_people_vision_process',
+] as const;
+
 test('leadership report-first package declares all twenty-four ranked pattern keys', () => {
   assert.deepEqual(leadershipReportFirstExpectedPatternKeys(), expectedPatternKeys);
 });
@@ -48,19 +56,25 @@ test('leadership report-first package coverage reports available and missing tem
   assert.equal(coverage.manifest.assessment_key, 'leadership-approach');
   assert.equal(coverage.manifest.domain_key, 'leadership-approach');
   assert.equal(coverage.expectedCount, 24);
-  assert.equal(coverage.presentCount, 4);
-  assert.equal(coverage.missingCount, 20);
+  assert.equal(coverage.presentCount, 9);
+  assert.equal(coverage.missingCount, 15);
   assert.equal(coverage.publishable, false);
   assert.deepEqual(
     coverage.presentPatternKeys.sort(),
     [
       'people_process_results_vision',
       'process_results_people_vision',
+      'results_people_process_vision',
+      'results_people_vision_process',
       'results_process_people_vision',
+      'results_process_vision_people',
+      'results_vision_people_process',
+      'results_vision_process_people',
       'vision_people_process_results',
     ],
   );
-  assert.ok(coverage.missingPatternKeys.includes('results_process_vision_people'));
+  assert.ok(!coverage.missingPatternKeys.includes('results_process_vision_people'));
+  assert.ok(coverage.missingPatternKeys.includes('process_results_vision_people'));
   assert.ok(coverage.missingPatternKeys.includes('people_vision_process_results'));
 });
 
@@ -84,14 +98,35 @@ test('available leadership report-first markdown templates compile into full str
   }
 });
 
+test('P12B Results-led report-first templates are authored and import-ready', async () => {
+  const coverage = await getLeadershipReportFirstPackageCoverage();
+
+  for (const patternKey of p12bResultsLedPatternKeys) {
+    const manifestEntry = coverage.manifest.templates.find((template) => template.pattern_key === patternKey);
+    const compiled = coverage.availableTemplates.find((template) => template.compiled.pattern_key === patternKey);
+
+    assert.ok(manifestEntry, `Expected manifest entry for ${patternKey}`);
+    assert.equal(manifestEntry?.status, 'ready_for_import');
+    assert.equal(manifestEntry?.ready_for_import, true);
+    assert.equal(manifestEntry?.publishable, true);
+    assert.match(manifestEntry?.source_markdown_path ?? '', new RegExp(`${patternKey}\\.md$`));
+
+    assert.ok(compiled, `Expected compiled template for ${patternKey}`);
+    assert.equal(compiled?.readyForImport, true);
+    assert.equal(compiled?.compiled.report_template_json.report.chapters.length, 10);
+    assert.deepEqual(compiled?.missingHeadings, []);
+    assert.deepEqual(compiled?.forbiddenLabels, []);
+  }
+});
+
 test('missing leadership report-first templates do not satisfy publishable coverage', async () => {
   const coverage = await getLeadershipReportFirstPackageCoverage();
   const manifestMissing = coverage.manifest.templates.filter((template) => template.status === 'missing');
 
-  assert.equal(manifestMissing.length, 20);
+  assert.equal(manifestMissing.length, 15);
   assert.ok(manifestMissing.every((template) => template.ready_for_import === false));
   assert.ok(manifestMissing.every((template) => template.publishable === false));
-  assert.equal(coverage.availableTemplates.length, 4);
+  assert.equal(coverage.availableTemplates.length, 9);
   assert.notEqual(coverage.availableTemplates.length, coverage.expectedCount);
 });
 
@@ -112,8 +147,9 @@ test('admin preview remains compatible with the package-backed available templat
 
   assert.equal(preview.payload.patternKey, 'process_results_people_vision');
   assert.equal(preview.payload.reportFirst.reportKey, 'process_results_people_vision');
-  assert.equal(preview.options.length, 4);
+  assert.equal(preview.options.length, 9);
   assert.ok(preview.options.some((option) => option.patternKey === 'vision_people_process_results'));
+  assert.ok(preview.options.some((option) => option.patternKey === 'results_vision_people_process'));
   assert.equal(preview.review.requiredHeadingsPresent, true);
   assert.equal(preview.review.readerInternalLabelsAbsent, true);
 });

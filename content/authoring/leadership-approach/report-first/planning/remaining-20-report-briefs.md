@@ -2,6 +2,8 @@
 
 Status: planning only. These briefs are not canonical report templates, import-ready artifacts, or publishable content.
 
+P12B status note: the five Results-led briefs in this file have now been used to author canonical report markdown files. They remain here as planning records and differentiation references for review.
+
 Report-first template policy: Leadership Approach report-first templates are pattern-level and score-shape-neutral. Score shape remains runtime scoring evidence, but it does not select different report prose for this template set.
 
 Existing authored references:

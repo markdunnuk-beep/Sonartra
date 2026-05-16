@@ -15,8 +15,8 @@
   ],
   "coverage": {
     "expected_template_count": 24,
-    "generated_import_ready_count": 4,
-    "missing_template_count": 20,
+    "generated_import_ready_count": 9,
+    "missing_template_count": 15,
     "publishable_full_coverage": false
   },
   "expected_pattern_keys": [
@@ -46,56 +46,6 @@
     "people_vision_process_results"
   ],
   "missing_templates": [
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "results_process_vision_people",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "results_vision_process_people",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "results_vision_people_process",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "results_people_process_vision",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
-    {
-      "assessment_key": "leadership-approach",
-      "package_key": "leadership-approach-report-first",
-      "package_version": "p9-report-first-coverage",
-      "domain_key": "leadership-approach",
-      "pattern_key": "results_people_vision_process",
-      "status": "missing",
-      "ready_for_import": false,
-      "publishable": false
-    },
     {
       "assessment_key": "leadership-approach",
       "package_key": "leadership-approach-report-first",
@@ -1791,6 +1741,1491 @@
       "package_key": "leadership-approach-report-first",
       "package_version": "p9-report-first-coverage",
       "domain_key": "leadership-approach",
+      "pattern_key": "results_people_process_vision",
+      "report_key": "results_people_process_vision",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_people_process_vision.md",
+      "source_content_hash": "00d2402c49d92873af96377f96a7fb592e5f4a188ece3307eca1e338094381fc",
+      "content_hash": "00d2402c49d92873af96377f96a7fb592e5f4a188ece3307eca1e338094381fc",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "results_people_process_vision",
+        "patternKey": "results_people_process_vision",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "results_people_process_vision",
+          "patternKey": "results_people_process_vision",
+          "reportTitle": "Leadership Approach — Results, People, Process, Vision",
+          "hero": {
+            "title": "You lead by turning commitment into visible progress",
+            "resultStatement": "You create confidence by helping people move together toward practical outcomes. Your leadership is at its best when a team has energy, concern, or willingness, but needs that human commitment to become action, ownership, and reliable delivery.\n\nProcess expands this pattern by making shared effort more dependable. Vision extends it further by connecting progress to the larger direction the team is helping to build."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Results and strengthened by People. You are likely to create confidence by mobilising people around the action that needs to happen. You may notice where a team is willing but unfocused, engaged but not yet moving, or concerned but unsure how to turn that concern into progress."
+            },
+            {
+              "type": "paragraph",
+              "text": "This is not Results as individual force. People sits close behind it, which means you are likely to care whether others are with the work. Progress matters, but so does commitment. You may be effective at creating a sense that people can contribute, respond, and help move something important forward."
+            },
+            {
+              "type": "paragraph",
+              "text": "The first expansion is Process. Human energy can create movement, but it needs structure to become reliable. Process adds sequence, ownership, standards, handovers, and review points so shared effort does not depend only on goodwill or urgency."
+            },
+            {
+              "type": "paragraph",
+              "text": "The furthest extension is Vision. That is the main development edge. When people are willing to move and the work can be organised, the larger direction may still remain under-explained. The team may know what needs to happen and feel ready to help, but not fully understand what future their effort is creating."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your most effective leadership mobilises people around progress, then gives that progress structure and meaning."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the first movement",
+                    "roleSummary": "You tend to lead first by identifying the action, output, priority, or practical progress needed now."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the close mobilisation",
+                    "roleSummary": "People gives your progress human commitment, involvement, energy, and attention to how others will carry the work."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the reliability range",
+                    "roleSummary": "Process expands your leadership by turning shared effort into repeatable work with sequence, standards, and ownership."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the direction extension",
+                    "roleSummary": "Vision expands the pattern by connecting immediate progress to a larger future, purpose, or strategic reason."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Results — the first movement"
+                    },
+                    {
+                      "text": "You tend to lead first by identifying the action, output, priority, or practical progress needed now."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "People — the close mobilisation"
+                    },
+                    {
+                      "text": "People gives your progress human commitment, involvement, energy, and attention to how others will carry the work."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "Process — the reliability range"
+                    },
+                    {
+                      "text": "Process expands your leadership by turning shared effort into repeatable work with sequence, standards, and ownership."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "Vision — the direction extension"
+                    },
+                    {
+                      "text": "Vision expands the pattern by connecting immediate progress to a larger future, purpose, or strategic reason."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a progress-and-commitment pattern. At its strongest, it turns people's willingness into practical movement that can be organised and made meaningful."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by mobilising people into progress. The development edge is to make sure that progress is connected to a larger direction before effort becomes only immediate response."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by converting human commitment into visible movement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Where others may see engagement as the end point, you are likely to ask what it should produce. What action will this commitment support? What progress needs to happen now? Who is ready to own the next step? How can the team's energy become useful work?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pattern is valuable in team mobilisation, performance recovery, change communication, delivery pressure, customer-facing work, and situations where progress depends on people choosing to lean in. You can help teams move because they feel involved, needed, and practically directed."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People gives your Results drive a relational route. You may be able to sense whether people are ready, stretched, hesitant, or capable of more. You can use that awareness to mobilise progress without treating people as units of output."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process is important because commitment alone does not guarantee delivery. Willing people can still duplicate effort, miss handovers, interpret standards differently, or over-rely on informal coordination. Process helps shared effort become dependable."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When this pattern works well, people experience progress as something they are part of. The work moves because commitment has been activated and organised."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as energising, involving, and practical. You can create a sense that people matter to the progress and that progress matters enough to require action."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In meetings, you may ask who needs to be involved, what the team can own, what support would help people move, or what action will show that commitment is becoming real. You may be direct about the need for progress while still attending to the people carrying it."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For many teams, this can feel motivating. People may feel seen, trusted, and called into useful action. They may experience your leadership as a push, but not a cold one."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that the bigger direction may be less visible. People may understand what needs to happen and feel involved in making it happen, but still not know what the work is building beyond the current objective. Vision can arrive late when the team's willingness is already high."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The mature version of this pattern keeps the mobilisation and practical action, then explains the larger direction early enough that effort feels significant, not only necessary."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by asking what will unlock progress and what people can realistically carry."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels useful when it creates action and commitment. You may weigh whether the team is ready, who needs to own the work, and what support will make movement possible. You are unlikely to be satisfied with decisions that sound sensible but leave people passive."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People strengthens your decision-making by keeping human capacity and ownership in view. You may notice whether a decision will create commitment or resentment, energy or overload, clarity or confusion."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process adds the next level of quality. A decision that people support still needs a route. The team needs to know how the work will be sequenced, where standards sit, what review points matter, and how handovers will be managed."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision is the edge. A decision can mobilise people and organise effort while still under-explaining the future. That can make the work feel like repeated short-term response. The question to add is: what larger purpose does this progress serve?"
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful decision checks include",
+                  "prompts": [
+                    "Who needs to be with this for it to move well?",
+                    "What structure will make shared effort reliable?",
+                    "What future reason should guide this decision?",
+                    "Where could people overcommit because they want to help?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through urgency, involvement, and practical ownership."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when people need to move from concern or willingness into action. You can speak directly about what needs to happen while making the team's role feel important. This can create momentum without making progress feel detached from people."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Your communication may include clear asks, ownership language, encouragement, and practical next steps. You may be good at making people feel that their contribution matters now."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The limitation is that communication may become too immediate. People may hear what they need to do and feel valued in doing it, but not understand the larger direction clearly enough to use judgement when the situation changes."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, communication becomes stronger when it adds future context:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Here is what needs to move now. Here is why your contribution matters. Here is the route that will help us coordinate. Here is what this progress is meant to build beyond the immediate task."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward asking people to respond, contribute, and deliver."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be valuable. When work is stuck, your ability to mobilise people around action can create movement quickly. You may help the team feel capable rather than paralysed."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The tightening risk is that commitment can be used before direction is fully explained. You may lean on people's willingness, loyalty, or responsiveness because the work needs to move. The team may deliver, but later wonder whether the effort was connected to a coherent future."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process may also become corrective under pressure. You may introduce structure after signs of strain appear rather than before. That can help, but it may feel like control if people were first mobilised emotionally and then managed operationally."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "The pressure move is to protect commitment with direction and method",
+                  "prompts": [
+                    "What are we asking people to carry?",
+                    "What route will keep effort coordinated?",
+                    "What future reason makes this effort worth it?",
+                    "Where might commitment become fatigue if the purpose stays unclear?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Mobilised progress",
+                  "text": "You help people turn willingness into action. This is useful when the team cares but needs a practical move, a decision, or a shared point of focus."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Human accountability",
+                  "text": "You can make progress feel owned by people, not only assigned to them. That helps create commitment rather than bare compliance."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Responsive energy",
+                  "text": "You may be able to raise energy quickly when the team needs to act. People can feel that their contribution matters and that movement is possible."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Commitment before direction",
+                  "text": "People may be willing to move before the future reason has been made clear. That can create action, but not always strategic confidence.",
+                  "rangeToAdd": "Bring Vision in early. Explain what the effort is meant to build, strengthen, prevent, or make possible.",
+                  "whyItMatters": "Bring Vision in early. Explain what the effort is meant to build, strengthen, prevent, or make possible."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Goodwill carries the system",
+                  "text": "The team may coordinate through effort and relationships rather than through clear process. That can work for a while, then become uneven.",
+                  "rangeToAdd": "Use Process to define roles, standards, handovers, and review points before strain appears.",
+                  "whyItMatters": "Use Process to define roles, standards, handovers, and review points before strain appears."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Action becomes personal pressure",
+                  "text": "Because progress is tied to people, performance pressure may feel personal. People may not want to disappoint the group or the leader.",
+                  "rangeToAdd": "Separate accountability from personal approval. Make the work clear without making pressure relationally heavy.",
+                  "whyItMatters": "Separate accountability from personal approval. Make the work clear without making pressure relationally heavy."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How Process expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Process expands this pattern by making shared effort reliable."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When Process is brought in deliberately, your leadership does not become less human. It becomes fairer and easier to sustain. People know what they own, how work moves, what standard matters, and where decisions will be reviewed."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This matters because Results and People can create strong mobilisation. The team may want to help and may move quickly. But without enough method, effort can become uneven. Some people may carry too much, some may wait for direction, and some may solve the problem in different ways."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process helps turn willingness into coordination. It gives commitment a route so people are not left to organise progress through informal effort alone."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "What role does each person actually own?",
+                    "What handover could break under pressure?",
+                    "What standard tells us the work is good enough?",
+                    "What review rhythm will protect people from repeated urgency?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How Vision expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Vision expands this pattern by giving effort a larger reason."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because Vision is the furthest extension, the team may sometimes know what needs to happen before it fully understands why the work matters beyond the current demand. People may be willing to act, but the future story may remain implicit."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision helps you connect mobilisation to purpose. It asks what the progress is building, what capability is being strengthened, what future risk is being reduced, or what direction the team is helping to make real."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This is not decorative inspiration. For this pattern, Vision protects people from feeling that commitment is only being used to meet the next urgent need. It helps effort feel significant and strategic."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "What future are we asking people to help create?",
+                    "What will this effort make possible if we get it right?",
+                    "How does this progress connect to the direction we say matters?",
+                    "What story would make the work feel worth carrying?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "The development work is to connect mobilisation with structure and direction."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Explain the future before asking for extra effort",
+                  "text": "When people are ready to move, give them the larger reason. Do not let willingness replace strategic context.",
+                  "useCases": [
+                    "urgent delivery",
+                    "change programmes",
+                    "team briefings",
+                    "performance recovery."
+                  ],
+                  "whyItMatters": "Use this in: urgent delivery, change programmes, team briefings, performance recovery.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Build a coordination route",
+                  "text": "Translate commitment into roles, sequence, standards, and review. This helps people work together without guessing.",
+                  "useCases": [
+                    "cross-functional work",
+                    "delegation",
+                    "project delivery",
+                    "operational pressure."
+                  ],
+                  "whyItMatters": "Use this in: cross-functional work, delegation, project delivery, operational pressure.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Watch for over-responsibility",
+                  "text": "People may take on too much because they care. Check where commitment is turning into hidden strain.",
+                  "useCases": [
+                    "manager check-ins",
+                    "workload reviews",
+                    "high-pressure delivery."
+                  ],
+                  "whyItMatters": "Use this in: manager check-ins, workload reviews, high-pressure delivery.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Make accountability less personal",
+                  "text": "Keep expectations clear, but avoid making progress feel like a test of loyalty or worth.",
+                  "useCases": [
+                    "performance conversations",
+                    "urgent asks",
+                    "team recovery."
+                  ],
+                  "whyItMatters": "Use this in: performance conversations, urgent asks, team recovery.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Use the team to improve the route",
+                  "text": "Invite people to shape the method, not only deliver through it. Their local judgement can strengthen the action.",
+                  "useCases": [
+                    "planning sessions",
+                    "retrospectives",
+                    "implementation reviews."
+                  ],
+                  "whyItMatters": "Use this in: planning sessions, retrospectives, implementation reviews.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it turns people's willingness into progress."
+              },
+              {
+                "type": "paragraph",
+                "text": "You are likely to bring action where the team is engaged but not yet moving, ownership where responsibility has been vague, and practical energy where work needs visible movement. Results gives the pattern its drive. People gives that drive commitment and human relevance."
+              },
+              {
+                "type": "paragraph",
+                "text": "The main tightening risk is that progress may become immediate before it becomes clearly directional. People may be ready to act, and the work may even become organised, but the larger future can remain under-explained. Over time, that can turn commitment into fatigue."
+              },
+              {
+                "type": "paragraph",
+                "text": "Your growth is to make effort meaningful and reliable. Bring Process in so shared work has structure. Bring Vision in so people understand what their effort is building."
+              },
+              {
+                "type": "paragraph",
+                "text": "At your best, you give people more than a task to deliver. You give them a practical role in progress, a method for working together, and a future reason that makes their commitment worth sustaining."
+              }
+            ],
+            "finalLine": "Your leadership turns commitment into progress; the next step is naming the future that makes the effort worth carrying."
+          },
+          "pdf": {
+            "title": "Download your Leadership Approach report as a PDF.",
+            "body": "This report is designed as a reference document. Save it, revisit it before important decisions, and use the development questions to broaden your leadership range over time."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Results, People, Process, Vision"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Results and strengthened by People, while Process and Vision are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "results_people_vision_process",
+      "report_key": "results_people_vision_process",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_people_vision_process.md",
+      "source_content_hash": "98125729cfe819ee3bb22fc911732b98c61cd55c61e7df1ec3105760188eeb30",
+      "content_hash": "98125729cfe819ee3bb22fc911732b98c61cd55c61e7df1ec3105760188eeb30",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "results_people_vision_process",
+        "patternKey": "results_people_vision_process",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "results_people_vision_process",
+          "patternKey": "results_people_vision_process",
+          "reportTitle": "Leadership Approach — Results, People, Vision, Process",
+          "hero": {
+            "title": "You lead by moving people toward a future worth acting on",
+            "resultStatement": "You create confidence by mobilising people into progress and connecting that progress to something meaningful. Your leadership is at its best when a team needs to feel involved, needed, and pointed toward a future that deserves visible action.\n\nVision expands this pattern by giving commitment a larger direction. Process extends it further by giving that commitment the operating spine required to last."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Results and strengthened by People. You are likely to create confidence by helping people turn commitment into action. You may notice where a team cares about the work but has not yet moved, where people are waiting for a practical next step, or where shared energy needs to become visible progress."
+            },
+            {
+              "type": "paragraph",
+              "text": "People gives your Results drive a human route. You are unlikely to see progress as purely mechanical. You may care whether people understand their contribution, feel trusted to act, and have enough energy to move together."
+            },
+            {
+              "type": "paragraph",
+              "text": "Vision is the first expansion. This means your leadership becomes stronger when mobilisation is connected to a larger direction. People can move because they are needed; Vision helps them understand what their effort is building."
+            },
+            {
+              "type": "paragraph",
+              "text": "Process is the furthest extension and the main development edge. When people are committed and the purpose is meaningful, the work can still become scattered if the route is underdefined. The team may care deeply and still need clearer roles, sequence, handovers, standards, and review rhythm."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your most effective leadership builds human momentum, connects it to a future, and then gives that momentum enough method to become reliable."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the first movement",
+                    "roleSummary": "You tend to lead first by identifying the action, priority, or visible progress the work needs."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the close mobilisation",
+                    "roleSummary": "People gives your progress commitment, involvement, trust, and attention to how others will carry the work."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the meaning range",
+                    "roleSummary": "Vision expands your leadership by connecting human effort to a larger direction and future value."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the operating extension",
+                    "roleSummary": "Process expands the pattern by adding method, rhythm, role clarity, standards, and review discipline."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Results — the first movement"
+                    },
+                    {
+                      "text": "You tend to lead first by identifying the action, priority, or visible progress the work needs."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "People — the close mobilisation"
+                    },
+                    {
+                      "text": "People gives your progress commitment, involvement, trust, and attention to how others will carry the work."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "Vision — the meaning range"
+                    },
+                    {
+                      "text": "Vision expands your leadership by connecting human effort to a larger direction and future value."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "Process — the operating extension"
+                    },
+                    {
+                      "text": "Process expands the pattern by adding method, rhythm, role clarity, standards, and review discipline."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a progress-and-people pattern with a future expansion. At its strongest, it creates committed action that feels meaningful and eventually becomes well organised."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by mobilising people into meaningful progress. The development edge is to translate that commitment into a working method before energy fragments or people start solving the same problem in different ways."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by helping people act with purpose."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Where others may see team energy as encouraging but unfocused, you are likely to ask what progress that energy should create. What should people do now? What contribution matters? What visible movement would show that the team is serious?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pattern is useful in change work, team recovery, performance mobilisation, customer experience improvements, growth initiatives, and situations where progress depends on people choosing to engage. You can help teams feel that their effort matters and that movement is possible."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision adds depth by connecting action to a future worth working for. Without Vision, mobilisation can become only response. With Vision, the team can see what the progress is meant to build, protect, or make possible."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process is the missing operating edge. Commitment and meaning are powerful, but they do not automatically create coordination. People may begin with shared energy and then diverge in execution because the method is not clear enough."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When this pattern works well, others feel both needed and oriented. The work has energy, purpose, and a visible next step. The next level is making that movement repeatable."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as engaging, activating, and purposeful. You can create the sense that people are not simply being managed toward output; they are being invited into work that matters."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In meetings, you may connect the practical ask to the people in the room. You may talk about what the team can influence, what contribution is needed, and why the progress is worth their effort."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can create strong engagement. People may feel trusted and called into action. They may understand that progress is expected, but also that their involvement matters."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that the route may be less clear than the commitment. People can leave aligned around purpose and willing to move, then become uncertain about ownership, sequence, decision rights, or standards. That uncertainty can quietly drain the energy that your leadership created."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The mature version of this pattern keeps the human mobilisation and future meaning, then gives the team enough structure to work together without guessing."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by asking what will create progress, involve people, and serve a meaningful direction."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels useful when it activates the team and moves the work forward. You may be alert to whether people can carry the decision and whether the action connects to something larger than the immediate demand."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People strengthens your decision-making by keeping commitment in view. You may notice whether the decision will create energy or resistance, ownership or passivity. Vision adds the question of significance: what future does this decision serve?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that a decision can be high-commitment and high-meaning while still low-method. People may agree with the decision and care about the outcome, but still lack the operating clarity needed to execute consistently."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful decision checks include",
+                  "prompts": [
+                    "What progress should this decision create?",
+                    "Who needs to own it, not only support it?",
+                    "What larger direction does it serve?",
+                    "What method will stop people from translating it differently?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through involvement, action, and meaning."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when people need to feel both trusted and directed. Your communication can make the ask feel personal in a constructive way: the team has a role, the work matters, and action is needed now."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision helps you explain why the action matters. You may connect the work to a customer, a capability, a future state, or a promise the organisation needs to make real."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The limitation is that communication may not always define the route tightly enough. A strong message can create commitment, but commitment still needs practical guidance. Without it, people may improvise in ways that create rework or confusion."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, communication becomes stronger when it adds method:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Here is the progress we need. Here is why your contribution matters. Here is the future this helps us build. Here is the way we will coordinate the work."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward emotional urgency and visible output."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be useful when the team is flat, hesitant, or disconnected from the work. You may be able to re-engage people by naming why the progress matters and why their effort is needed."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The tightening risk is that commitment can be expected to compensate for weak structure. People may act because they care, but unclear process can create duplicated work, uneven decisions, or hidden overload."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pressure pattern can make people work hard without always making work easier to coordinate. The team may feel the importance of the moment, but still need sharper operating support."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "The pressure move is to support commitment with method",
+                  "prompts": [
+                    "What are people being asked to carry?",
+                    "Where do roles or decisions need to be clearer?",
+                    "What sequence will reduce rework?",
+                    "How will we review progress without relying on constant urgency?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Committed action",
+                  "text": "You can help people move because they feel involved and needed. Progress becomes something the team participates in, not only something imposed on them."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Purposeful mobilisation",
+                  "text": "You can connect effort to a larger future. That helps people understand why the work deserves their energy."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Human momentum",
+                  "text": "You may be able to raise energy in moments where work has become stuck, abstract, or disconnected from the people who need to carry it."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Commitment before coordination",
+                  "text": "People may be ready to move before the route is clear. That can create activity without consistent execution.",
+                  "rangeToAdd": "Bring Process in early. Define roles, standards, sequence, and review points before the work spreads.",
+                  "whyItMatters": "Bring Process in early. Define roles, standards, sequence, and review points before the work spreads."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Purpose hides practical gaps",
+                  "text": "The future may feel meaningful enough that people tolerate ambiguity longer than they should.",
+                  "rangeToAdd": "Ask where the method is unclear. Treat process gaps as risks to commitment, not administrative detail.",
+                  "whyItMatters": "Ask where the method is unclear. Treat process gaps as risks to commitment, not administrative detail."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Energy becomes uneven",
+                  "text": "Some people may carry more because they care more, have more context, or respond faster to the call.",
+                  "rangeToAdd": "Use Process to distribute work fairly and make ownership visible.",
+                  "whyItMatters": "Use Process to distribute work fairly and make ownership visible."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How Vision expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Vision expands this pattern by giving commitment a larger reason."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When Vision is brought in deliberately, people do not only know that progress is needed. They understand what their effort is helping to build. This can make mobilisation more resilient because the work has meaning beyond the immediate ask."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This matters because Results and People can create strong responsiveness. The team may be willing to act, but repeated action without a future story can become draining. Vision protects against that by naming what the work is for."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision also improves judgement. When people understand the direction, they can make better choices in the details. They are less dependent on you to define every next step."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "What future are we asking people to help create?",
+                    "What should this progress make possible?",
+                    "How does this work connect to the direction we care about?",
+                    "What story would help people use judgement, not only effort?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How Process expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Process expands this pattern by turning committed action into coordinated progress."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because Process is the furthest extension, it may be easy to assume that people will work out the route because they care about the outcome. That assumption can create avoidable strain."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process gives people a fairer way to work. It clarifies who owns what, where handovers sit, what standard applies, and how progress will be reviewed. It reduces the hidden burden of interpretation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, Process should not feel bureaucratic. It should feel like support for commitment. The aim is to protect energy, reduce rework, and make meaningful progress easier to sustain."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "What method will make this easier to carry?",
+                    "Where could committed people duplicate effort?",
+                    "What decision rights need to be named?",
+                    "What cadence will keep progress visible without constant pressure?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "The development work is to give commitment an operating route."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Define roles after mobilisation",
+                  "text": "When people are ready to act, quickly clarify ownership. Do not let enthusiasm blur accountability.",
+                  "useCases": [
+                    "team launches",
+                    "change work",
+                    "urgent delivery",
+                    "cross-functional projects."
+                  ],
+                  "whyItMatters": "Use this in: team launches, change work, urgent delivery, cross-functional projects.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Turn purpose into operating choices",
+                  "text": "Explain how the future direction changes priorities, standards, or trade-offs.",
+                  "useCases": [
+                    "strategy updates",
+                    "team briefings",
+                    "planning",
+                    "stakeholder communication."
+                  ],
+                  "whyItMatters": "Use this in: strategy updates, team briefings, planning, stakeholder communication.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Protect people from ambiguity",
+                  "text": "Ambiguity often becomes extra work for the most committed people. Clarify the route before strain builds.",
+                  "useCases": [
+                    "workload reviews",
+                    "delivery planning",
+                    "team retrospectives."
+                  ],
+                  "whyItMatters": "Use this in: workload reviews, delivery planning, team retrospectives.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Review coordination, not only output",
+                  "text": "Ask whether the way of working is helping people sustain progress.",
+                  "useCases": [
+                    "project reviews",
+                    "operating meetings",
+                    "manager check-ins."
+                  ],
+                  "whyItMatters": "Use this in: project reviews, operating meetings, manager check-ins.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Make progress less dependent on your energy",
+                  "text": "Build rhythms and standards that help the team continue when you are not the person driving the moment.",
+                  "useCases": [
+                    "delegation",
+                    "leadership team routines",
+                    "scaling work",
+                    "handovers."
+                  ],
+                  "whyItMatters": "Use this in: delegation, leadership team routines, scaling work, handovers.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it moves people toward meaningful progress."
+              },
+              {
+                "type": "paragraph",
+                "text": "You are likely to bring action where people care but have not yet moved, purpose where effort could feel merely reactive, and commitment where progress needs human energy. Results gives the pattern its movement. People gives that movement ownership and trust. Vision gives it a future reason."
+              },
+              {
+                "type": "paragraph",
+                "text": "The main tightening risk is that the method may arrive too late. People may believe in the work and want to contribute, but still lack the operating clarity that makes contribution reliable. Over time, that can scatter energy and create hidden strain."
+              },
+              {
+                "type": "paragraph",
+                "text": "Your growth is to translate commitment into method. Bring Vision in so people know what their progress is building. Bring Process in so that progress has a way to hold."
+              },
+              {
+                "type": "paragraph",
+                "text": "At your best, you give people more than a reason to care. You give them a meaningful direction, a visible way to contribute, and a practical method for turning commitment into progress."
+              }
+            ],
+            "finalLine": "Your leadership turns people’s commitment into meaningful movement; the next step is giving that movement a method strong enough to last."
+          },
+          "pdf": {
+            "title": "Download your Leadership Approach report as a PDF.",
+            "body": "This report is designed as a reference document. Save it, revisit it before important decisions, and use the development questions to broaden your leadership range over time."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Results, People, Vision, Process"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Results and strengthened by People, while Vision and Process are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
       "pattern_key": "results_process_people_vision",
       "report_key": "results_process_people_vision",
       "report_contract": "report_first_canonical_payload_v1",
@@ -2546,6 +3981,2252 @@
           "generatedFrom": "compiled_report_first_template",
           "adminNotesExcluded": true,
           "editorialQaNotesDetected": true,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "results_process_vision_people",
+      "report_key": "results_process_vision_people",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_process_vision_people.md",
+      "source_content_hash": "5375cc590122a0567318140a9f69f54755536938e42fbf2856f16237693dea39",
+      "content_hash": "5375cc590122a0567318140a9f69f54755536938e42fbf2856f16237693dea39",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "results_process_vision_people",
+        "patternKey": "results_process_vision_people",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "results_process_vision_people",
+          "patternKey": "results_process_vision_people",
+          "reportTitle": "Leadership Approach — Results, Process, Vision, People",
+          "hero": {
+            "title": "You lead by making progress visible and usable",
+            "resultStatement": "You create confidence by finding the point where work can move, then giving that movement enough structure to hold. Your leadership is at its best when people have talked around a problem long enough and now need a decision, a priority, a route, and evidence that something is changing.\n\nVision broadens this pattern by connecting action to a larger direction. People extends it further by making sure the route is not only clear and useful, but also owned by the people who have to carry it."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Results and strengthened by Process. You are likely to create confidence by helping work cross the line from intention into visible progress. You notice the decision that is being avoided, the owner that has not been named, the priority that needs to become sharper, or the action that would prove whether a conversation is becoming real work."
+            },
+            {
+              "type": "paragraph",
+              "text": "Process gives that progress a working spine. It helps your pace become less dependent on urgency and more capable of being repeated. The work needs a route, a standard, a sequence, an owner, and a way to review whether the first move is producing useful evidence."
+            },
+            {
+              "type": "paragraph",
+              "text": "The distinctive feature of this pattern is that Vision is the first expansion. The further development is not only to involve people earlier. It is first to make sure visible progress is connected to something worth building. Your strongest leadership does not simply ask, \"What needs to move?\" It also asks, \"What future capability, position, or advantage will this movement support?\""
+            },
+            {
+              "type": "paragraph",
+              "text": "The growth edge is that People sits furthest from the automatic pattern. When pressure rises, you may move quickly toward progress, method, and strategic usefulness while leaving less room for how others are experiencing the route. People may understand the plan and even understand the purpose, but still feel they were brought in after the action had already hardened."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your most effective leadership keeps the traction and the method, adds the strategic reason early, and then creates enough participation that commitment can shape the route rather than react to it."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the first movement",
+                    "roleSummary": "You tend to lead first by identifying the action, decision, priority, or evidence that gets work moving."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the stabilising method",
+                    "roleSummary": "Process gives your progress sequence, ownership, standards, review points, and enough discipline to survive beyond the first push."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the direction range",
+                    "roleSummary": "Vision expands your leadership by connecting visible progress to future value, capability, and strategic meaning."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the ownership extension",
+                    "roleSummary": "People expands the pattern by making sure the route is shaped, trusted, and carried by the team, not only understood by them."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Results — the first movement"
+                    },
+                    {
+                      "text": "You tend to lead first by identifying the action, decision, priority, or evidence that gets work moving."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "Process — the stabilising method"
+                    },
+                    {
+                      "text": "Process gives your progress sequence, ownership, standards, review points, and enough discipline to survive beyond the first push."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "Vision — the direction range"
+                    },
+                    {
+                      "text": "Vision expands your leadership by connecting visible progress to future value, capability, and strategic meaning."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "People — the ownership extension"
+                    },
+                    {
+                      "text": "People expands the pattern by making sure the route is shaped, trusted, and carried by the team, not only understood by them."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a progress-and-method pattern with a strategic expansion. At its strongest, it creates practical movement that is repeatable, purposeful, and eventually shared."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by making progress visible and structured. The development edge is to make sure the people who must carry that progress can shape it before the route becomes fixed."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by turning unresolved work into usable movement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Where others may stay with discussion, concern, or possibility, you are likely to look for the next piece of evidence. What decision would change the situation? What priority needs to become less negotiable? What owner needs to be named? What action would show whether the team is serious?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This is commercially useful in environments where delay is expensive: delivery recovery, implementation planning, performance improvement, customer issues, operational change, and senior decision forums. In those settings, insight alone is not enough. The organisation needs progress that can be seen, tested, and held."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process strengthens your value because it prevents movement from becoming a burst of effort. You are likely to care whether progress has a route. You may ask how the work will be sequenced, who owns the next step, what standard applies, and when the evidence will be reviewed. That makes your leadership more reliable than simple urgency."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision adds a further contribution. It helps progress serve more than the immediate task. You can use visible action to build future capability, prove a strategic direction, strengthen a system, or create a more credible path toward a larger aim."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When this pattern is working well, teams experience a shift from suspended intention into purposeful traction. The work has movement, method, and a reason that reaches beyond the next deadline."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as decisive, practical, and stabilising. You can create the sense that important work will not be allowed to remain abstract. If something matters, it is likely to become a priority, a route, a next step, or a test of progress."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For colleagues who are frustrated by drift, this can be a relief. You may help a group stop repeating the same issue in different language. You may ask what would prove progress, where the work is blocked, or which decision would let people move."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because Process sits close behind Results, your pace is often easier to work with than raw pressure. People can see the route, the owner, and the review point. The work does not feel entirely dependent on your energy."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that others may feel the route is already moving before they have fully shaped it. Vision may help them understand the point of the progress, but People is still the furthest extension. The team may know where the work is going and how it will move, while still feeling that the human impact, concern, or local knowledge arrived late in the conversation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The mature version of this pattern keeps the pace, method, and future direction, but lets people influence the route while it is still open enough to be improved."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by looking for the option that creates traction and can be organised into a credible route."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels useful when it moves the work out of uncertainty. It should clarify what matters now, who owns the next step, what evidence will be created, and how progress will be reviewed. You may become impatient with decisions that generate more language than movement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process improves this decision style by asking whether the action can hold. A fast decision is not enough if the route is unclear, the standard is vague, or the review point is missing. You are likely to trust progress more when it has enough operating discipline around it."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision asks a different question: what future does this action support? That question can lift your decision-making above immediate closure. It helps you distinguish between action that only clears pressure and action that builds capability, confidence, or strategic position."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that the decision may be practically and strategically sound before it is socially complete. People may understand the logic and the direction, but not feel sufficiently included in the judgement. That can reduce commitment later, especially if the decision affects roles, workload, identity, or trust."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful decision checks include",
+                  "prompts": [
+                    "What would this decision make possible beyond the immediate issue?",
+                    "What structure will keep progress honest?",
+                    "Who needs to shape the route before we treat it as settled?",
+                    "Where could commitment weaken if people only receive the decision after it is made?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through action, structure, and strategic usefulness."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when the conversation needs to become concrete. You can name the progress required, define the route, and explain what the work is meant to build. This can be especially valuable when a team is caught between operational pressure and strategic ambiguity."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Your communication often has a practical order: here is what needs to move, here is how we will hold it, here is what this movement should make possible. That combination can create confidence because people hear both the immediate action and the reason it matters."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The limitation is that communication may still become too concluded. You may explain the decision, the route, and the purpose clearly enough that you assume people are with you. But understanding is not the same as ownership. A team can follow a well-communicated route while still feeling that its judgement was not invited early enough."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, communication becomes stronger when it adds an explicit opening:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Here is the progress I think we need. Here is the route that would make it credible. Here is the future value I believe it supports. Here is where I want your challenge before we commit."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "That final line changes the emotional contract. It tells people that they are not only being briefed on progress; they are being invited to improve it."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward pace, closure, route control, and evidence of movement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be valuable. When stakes rise, teams often need someone to reduce hesitation, clarify priorities, and make the work move. Your instinct to create traction and hold it through process can prevent panic, drift, or endless escalation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision may also become more forceful under pressure. You may explain why the work matters, what future risk is being avoided, or what larger opportunity is being protected. That can give pressure a reason instead of leaving it as urgency alone."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The tightening risk is that People becomes too delayed. You may involve fewer people, shorten the conversation, and expect others to trust the logic of the route. The team may comply because the action is clear and the purpose sounds credible, but unspoken concern may remain beneath the surface."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pressure pattern can produce progress without full ownership. People may deliver the next step while holding back context that would improve the route. They may understand the strategic point while feeling personally managed through the pressure rather than trusted within it."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "The pressure move is not to slow down everything. It is to create a short ownership check before closure",
+                  "prompts": [
+                    "Who has information that could change the route?",
+                    "Where might this action land heavily on the team?",
+                    "What concern should we hear before the decision hardens?",
+                    "What would help people carry this progress, not only accept it?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Structured traction",
+                  "text": "You help teams move from discussion into progress without leaving the movement unsupported. The work gets a decision, a next step, an owner, and a method for review. This reduces the risk of action becoming only a burst of pressure."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Strategic usefulness",
+                  "text": "You can connect visible progress to a larger reason. That helps people see why the action matters beyond the current deadline. Progress becomes a way to build capability, prove direction, improve confidence, or strengthen a future position."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Practical prioritisation",
+                  "text": "You can help groups separate useful movement from noise. When too many issues are competing for attention, you may be able to name what would create the most meaningful evidence now and what can be reviewed later."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Progress before participation",
+                  "text": "The action and route may become clear before enough people have shaped them. That matters because people are more likely to sustain progress when their judgement has influenced the way forward.",
+                  "rangeToAdd": "Bring People in before final closure. Ask where input, concern, or local knowledge would materially improve the route.",
+                  "whyItMatters": "Bring People in before final closure. Ask where input, concern, or local knowledge would materially improve the route."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Purpose before ownership",
+                  "text": "You may explain why progress matters and assume that clear purpose is enough. But people can understand the purpose without feeling included in the decision.",
+                  "rangeToAdd": "Treat ownership as a design requirement, not only a communication outcome. Ask who needs to help shape the work, not only hear why it matters.",
+                  "whyItMatters": "Treat ownership as a design requirement, not only a communication outcome. Ask who needs to help shape the work, not only hear why it matters."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Evidence becomes pressure",
+                  "text": "The need to prove movement can become too strong. The team may feel that action is valued more than reflection, especially when early evidence is messy.",
+                  "rangeToAdd": "Use Process to define what learning counts as progress. Make space for evidence that changes the route rather than only evidence that confirms it.",
+                  "whyItMatters": "Use Process to define what learning counts as progress. Make space for evidence that changes the route rather than only evidence that confirms it."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How Vision expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Vision expands this pattern by connecting progress to a future worth building."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When Vision is brought in deliberately, your leadership becomes more than delivery discipline. You can explain what the action is strengthening, what capability it is building, what risk it is reducing, or what opportunity it is making more credible."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This matters because Results and Process can sometimes create an efficient route without a sufficiently compelling reason. People may know what to do and how to do it, but not why this particular movement deserves their attention and judgement."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision helps you move from \"What needs to happen next?\" to \"What should this progress make possible?\" That question improves prioritisation. It prevents every urgent task from being treated as equally important."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "What future capability are we building through this progress?",
+                    "What should become stronger if we get this right?",
+                    "How does this action support the direction we say matters?",
+                    "What story would help people understand the value of the work?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How People expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "People expands this pattern by turning a clear route into shared commitment."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because People is the furthest extension, it may not arrive naturally before the action starts moving. You may communicate the route well, explain the purpose clearly, and still leave too little space for others to influence the judgement behind it."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People adds a different kind of evidence. It helps you notice hesitation, overload, local knowledge, trust, and the difference between agreement and ownership. It asks whether people are genuinely with the progress or simply responding to clarity."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, People works best when brought in before the route hardens. The aim is not to open every decision endlessly. It is to identify where participation will materially improve commitment, risk awareness, and execution quality."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "Who needs to shape this before the route is fixed?",
+                    "What concern would make the action stronger if we heard it now?",
+                    "Where might the team comply without committing?",
+                    "What support or context would help people carry this progress well?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "The development work is not to reduce your drive for progress. It is to make progress more complete before it accelerates."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Add an ownership check before closure",
+                  "text": "Before finalising a route, identify whose judgement needs to be heard. This is especially important when the action affects workload, role clarity, trust, or team confidence.",
+                  "useCases": [
+                    "delivery recovery",
+                    "operating changes",
+                    "senior decision meetings",
+                    "team mobilisation."
+                  ],
+                  "whyItMatters": "Use this in: delivery recovery, operating changes, senior decision meetings, team mobilisation.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Connect action to future value",
+                  "text": "When you name the next step, also name what it is meant to build. Make the strategic reason concrete rather than abstract.",
+                  "useCases": [
+                    "change communication",
+                    "prioritisation",
+                    "stakeholder updates",
+                    "project reviews."
+                  ],
+                  "whyItMatters": "Use this in: change communication, prioritisation, stakeholder updates, project reviews.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Define the evidence loop",
+                  "text": "Clarify what the team will review and what kind of evidence could change the route. This keeps progress from becoming premature certainty.",
+                  "useCases": [
+                    "pilots",
+                    "implementation plans",
+                    "commercial experiments",
+                    "operational fixes."
+                  ],
+                  "whyItMatters": "Use this in: pilots, implementation plans, commercial experiments, operational fixes.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Invite challenge while the route is still shapeable",
+                  "text": "Make it clear where challenge is welcome. People are more likely to contribute honestly when the decision is not already presented as final.",
+                  "useCases": [
+                    "planning sessions",
+                    "risk reviews",
+                    "leadership meetings",
+                    "delegation."
+                  ],
+                  "whyItMatters": "Use this in: planning sessions, risk reviews, leadership meetings, delegation.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Watch for quiet compliance",
+                  "text": "When progress looks smooth, check whether people are genuinely owning it. Silence may mean confidence, but it can also mean resignation.",
+                  "useCases": [
+                    "pressure moments",
+                    "team briefings",
+                    "performance recovery",
+                    "cross-functional work."
+                  ],
+                  "whyItMatters": "Use this in: pressure moments, team briefings, performance recovery, cross-functional work.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it makes progress practical."
+              },
+              {
+                "type": "paragraph",
+                "text": "You are likely to bring movement where there has been delay, structure where action could become scattered, and strategic usefulness where immediate tasks could otherwise feel disconnected. Results gives the pattern its drive. Process gives that drive a route. Vision helps the route point somewhere that matters."
+              },
+              {
+                "type": "paragraph",
+                "text": "The main tightening risk is that People may arrive after the action, method, and purpose have already been shaped. The team may understand what is happening and why it matters, but still feel that their judgement entered late. Over time, that can create compliance without the deeper commitment needed to sustain difficult work."
+              },
+              {
+                "type": "paragraph",
+                "text": "Your growth is not to become less decisive. It is to let participation improve the progress before the progress hardens. Bring Vision in to make action meaningful. Bring People in to make action owned."
+              },
+              {
+                "type": "paragraph",
+                "text": "At your best, you give people more than a way to move. You give them a clear route, a meaningful reason, and enough voice to help carry the work when progress becomes demanding."
+              }
+            ],
+            "finalLine": "Your leadership makes progress visible and useful; the next step is making sure people can shape the route before they are asked to carry it."
+          },
+          "pdf": {
+            "title": "Download your Leadership Approach report as a PDF.",
+            "body": "This report is designed as a reference document. Save it, revisit it before important decisions, and use the development questions to broaden your leadership range over time."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Results, Process, Vision, People"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Results and strengthened by Process, while Vision and People are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "results_vision_people_process",
+      "report_key": "results_vision_people_process",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_vision_people_process.md",
+      "source_content_hash": "c1ab04ca506b76a690a80f7f2a68e832ae21df8c8a9f531fce34a96aeab05286",
+      "content_hash": "c1ab04ca506b76a690a80f7f2a68e832ae21df8c8a9f531fce34a96aeab05286",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "results_vision_people_process",
+        "patternKey": "results_vision_people_process",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "results_vision_people_process",
+          "patternKey": "results_vision_people_process",
+          "reportTitle": "Leadership Approach — Results, Vision, People, Process",
+          "hero": {
+            "title": "You lead by mobilising people around meaningful progress",
+            "resultStatement": "You create confidence by making the future feel close enough to act on. Your leadership is at its best when people need to see why movement matters, feel invited into that movement, and begin turning shared belief into visible progress.\n\nPeople expands this pattern by turning future-facing momentum into commitment. Process extends it further by giving that commitment the operating discipline it needs to last."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Results and strengthened by Vision. You are likely to create confidence by finding the practical move that makes a larger future feel real. You may be drawn to situations where a team has enough aspiration, concern, or opportunity, but still needs visible action."
+            },
+            {
+              "type": "paragraph",
+              "text": "Vision gives your Results drive meaning. The action is not only a task to complete; it is evidence that the team is moving toward something important. You are likely to care about the future the progress represents: the capability being built, the opportunity being pursued, the customer experience being improved, or the organisation becoming more credible."
+            },
+            {
+              "type": "paragraph",
+              "text": "People is the first expansion. This means the pattern becomes stronger when you bring others into the energy of the direction. Progress becomes more powerful when it is not only asserted by you but carried by people who understand why it matters and can see themselves in it."
+            },
+            {
+              "type": "paragraph",
+              "text": "Process is the furthest extension. That is the main development edge. When a future-facing push has energy and commitment, it can still become difficult to sustain if priorities, roles, standards, cadence, and handovers remain too loose."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your most effective leadership turns belief into progress, then gives that progress enough method to avoid becoming dependent on urgency, personality, or enthusiasm."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the first movement",
+                    "roleSummary": "You tend to lead first by naming the action, proof point, or decision that makes progress visible."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the close direction",
+                    "roleSummary": "Vision gives your progress a larger horizon and helps people understand what the action is meant to build."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the mobilisation range",
+                    "roleSummary": "People expands your leadership by turning future-facing momentum into shared commitment and human energy."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the operating extension",
+                    "roleSummary": "Process expands the pattern by adding rhythm, sequence, roles, standards, and review discipline."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Results — the first movement"
+                    },
+                    {
+                      "text": "You tend to lead first by naming the action, proof point, or decision that makes progress visible."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "Vision — the close direction"
+                    },
+                    {
+                      "text": "Vision gives your progress a larger horizon and helps people understand what the action is meant to build."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "People — the mobilisation range"
+                    },
+                    {
+                      "text": "People expands your leadership by turning future-facing momentum into shared commitment and human energy."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "Process — the operating extension"
+                    },
+                    {
+                      "text": "Process expands the pattern by adding rhythm, sequence, roles, standards, and review discipline."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a progress-and-future pattern with a people expansion. At its strongest, it creates meaningful movement that people want to join and can eventually organise."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by making the future feel actionable. The development edge is to build enough method around that movement so people do not have to turn energy into structure by themselves."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by making meaningful progress feel possible now."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Where others may talk about a future direction without knowing how to begin, you are likely to look for the action that creates evidence. You may ask what would show the team is serious, what move would change confidence, or what result would make the future less theoretical."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pattern is especially useful in change leadership, growth initiatives, new ventures, cultural mobilisation, strategic recovery, and moments when people need a reason to move. Your leadership can turn a broad aspiration into something people can feel, discuss, and act on."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People becomes important because the future does not become real only through activity. It becomes real when people begin to identify with it. You can help others feel that progress is not just being demanded from them, but created with them."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The missing edge is Process. When people are energised by the future, the work can still become uneven. Different people may interpret the direction differently. Enthusiasm may run ahead of role clarity. A strong message may create movement before the operating route is stable enough."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When this pattern works well, teams experience progress that feels significant and human. They can see why the work matters, feel invited into it, and begin to move. The next level is making that movement repeatable."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as energising, ambitious, and mobilising. You can make people feel that the work matters and that progress is possible now, not only someday."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In meetings, you may be the person who links the action to the bigger reason. You may ask what move would make the future credible, what people need to believe in order to act, or what visible step would show that the direction is becoming real."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can create strong commitment. People may feel called into the work rather than simply assigned to it. They may experience your leadership as a push, but a push with meaning."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that the operating detail may arrive late. People can leave a conversation inspired and still be unclear about sequence, ownership, decision rights, or what standard will define good work. The team may agree on the future but then start solving the practical route in different ways."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The mature version of this pattern keeps the energy and invitation, then adds method early enough that people know how to coordinate their commitment."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by asking what action advances the future and creates visible evidence."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels strong when it turns aspiration into movement. You may prefer a practical move that tests the direction over a long discussion that preserves every option but creates no progress. You are likely to be alert to the point where planning becomes a substitute for action."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision gives your decisions meaning. You may ask what the decision is building, what future risk it reduces, or what story it helps the organisation prove. People adds a further question: who needs to believe in this enough to carry it?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that the decision may be emotionally and directionally compelling before the operating route is ready. People may want to move, but not know how. They may share the ambition, but lack the process required to coordinate action without confusion."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful decision checks include",
+                  "prompts": [
+                    "What action would make the future real enough to test?",
+                    "Who needs to feel part of this before it moves?",
+                    "What operating method will stop energy from scattering?",
+                    "What do people need to know, own, and review after the first move?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through possibility, momentum, purpose, and invitation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when people need to understand not only what must happen, but why it matters. Your communication can make a future feel closer and more practical. You may use examples, stories, outcomes, and human stakes to make the work feel significant."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People expands that communication by making it relational. You may be able to speak to the contribution people can make, the role they can play, or the commitment the work needs from them."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The limitation is that the message can become stronger than the method. People may understand the purpose and feel the energy, but still have to infer priorities or standards. This can create hidden friction after the meeting, when the team needs to turn belief into coordinated action."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, communication becomes stronger when it adds operating clarity:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Here is the future we are moving toward. Here is the progress that will make it real. Here is why your contribution matters. Here is the method we will use to coordinate the work."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward rallying people around the next visible move."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be valuable. When teams are discouraged, uncertain, or stuck in abstraction, your ability to connect action with future meaning can restore energy. You may help people believe that the work is still worth moving."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The tightening risk is that belief can be asked to carry too much. You may rely on shared purpose, urgency, or commitment while the practical route remains underdefined. People may respond to the message but then absorb the coordination cost themselves."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pressure pattern can create heroic effort. People may stretch because they believe in the direction. They may act quickly because the progress feels important. But without enough Process, the effort can become tiring, uneven, or dependent on constant re-energising."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "The pressure move is to give belief a working route",
+                  "prompts": [
+                    "What must move now?",
+                    "What do people need in order to coordinate?",
+                    "Where could enthusiasm hide a process gap?",
+                    "What cadence will help us keep moving after the first push?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Meaningful momentum",
+                  "text": "You can help people move because the work matters, not simply because a deadline exists. That gives progress emotional and strategic energy."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Mobilising belief",
+                  "text": "You can connect people to the future in a way that makes action feel worthwhile. This is useful when teams need more than instruction; they need commitment."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Visible proof",
+                  "text": "You help the future become credible through evidence. Instead of leaving purpose in language, you look for the action that proves the direction is being taken seriously."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Energy before method",
+                  "text": "People may feel motivated before they have enough route clarity. That can create enthusiasm in the room and confusion in the work.",
+                  "rangeToAdd": "Bring Process in before the mobilisation spreads. Define the roles, sequence, standards, and review rhythm.",
+                  "whyItMatters": "Bring Process in before the mobilisation spreads. Define the roles, sequence, standards, and review rhythm."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Purpose becomes pressure",
+                  "text": "When the work matters deeply, people may feel pressure to commit even when they have practical concerns.",
+                  "rangeToAdd": "Make concern legitimate. Treat practical hesitation as useful information, not a lack of belief.",
+                  "whyItMatters": "Make concern legitimate. Treat practical hesitation as useful information, not a lack of belief."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Action outruns governance",
+                  "text": "Visible progress can begin before decision rights, dependencies, and handovers are clear.",
+                  "rangeToAdd": "Name how decisions will be made and how friction will be escalated before the work accelerates.",
+                  "whyItMatters": "Name how decisions will be made and how friction will be escalated before the work accelerates."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How People expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "People expands this pattern by turning future-facing momentum into shared commitment."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When People is brought in deliberately, your leadership becomes more than a compelling push. You invite others to see their own role in the progress. The future becomes not only something you describe, but something people can help carry."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This matters because Results and Vision can create movement that feels exciting but still externally driven. People helps you notice whether others are truly connected to the work or simply responding to your energy."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People adds trust, voice, and contribution. It helps you ask what people need to understand, what they need to influence, and where they may be quietly uncertain even while supporting the direction."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "Who needs to feel part of this before we accelerate?",
+                    "What contribution are we asking people to make?",
+                    "Where might commitment be enthusiastic but fragile?",
+                    "What would make this progress feel shared rather than announced?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How Process expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Process expands this pattern by giving meaningful movement a working spine."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because Process is the furthest extension, it may be the easiest to underplay when energy is high. The team may believe in the direction, understand the action, and feel motivated, while still lacking the method needed to sustain progress."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process does not reduce the human energy of this pattern. It protects it. It gives people fewer hidden decisions to carry, fewer repeated interpretations to resolve, and a clearer way to know whether the work is moving well."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, Process should be practical and light enough to support movement without smothering it. It should clarify roles, sequence, standards, review points, and how learning will change the route."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "What rhythm will keep this movement coordinated?",
+                    "Who owns the next decision and the next handover?",
+                    "What standard tells us the work is good enough?",
+                    "What will we review before asking people for more effort?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "The development work is to turn energy into a repeatable way of working."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Add operating clarity after the call to action",
+                  "text": "When people are mobilised, give them the method immediately. Do not leave them to infer the route from the message.",
+                  "useCases": [
+                    "launches",
+                    "change moments",
+                    "team mobilisation",
+                    "urgent strategic work."
+                  ],
+                  "whyItMatters": "Use this in: launches, change moments, team mobilisation, urgent strategic work.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Separate belief from agreement",
+                  "text": "People may believe in the direction and still disagree about the route. Invite that distinction openly.",
+                  "useCases": [
+                    "leadership meetings",
+                    "stakeholder alignment",
+                    "implementation planning."
+                  ],
+                  "whyItMatters": "Use this in: leadership meetings, stakeholder alignment, implementation planning.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Define handovers early",
+                  "text": "Movement often breaks at the points between teams or roles. Name those points before the work accelerates.",
+                  "useCases": [
+                    "cross-functional work",
+                    "delivery programmes",
+                    "customer-facing change."
+                  ],
+                  "whyItMatters": "Use this in: cross-functional work, delivery programmes, customer-facing change.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Use progress reviews to protect energy",
+                  "text": "Review what is working and what is draining people. Do not let commitment become an unlimited resource.",
+                  "useCases": [
+                    "sustained change",
+                    "performance pressure",
+                    "transformation work."
+                  ],
+                  "whyItMatters": "Use this in: sustained change, performance pressure, transformation work.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Turn purpose into priorities",
+                  "text": "If the future matters, define what matters most now. Purpose should sharpen priorities, not expand everything.",
+                  "useCases": [
+                    "planning",
+                    "team briefings",
+                    "resource trade-offs",
+                    "senior updates."
+                  ],
+                  "whyItMatters": "Use this in: planning, team briefings, resource trade-offs, senior updates.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it makes meaningful progress feel possible."
+              },
+              {
+                "type": "paragraph",
+                "text": "You are likely to bring movement where aspiration has stayed too distant, belief where people need a reason to act, and visible proof where the future needs credibility. Results gives the pattern its traction. Vision gives that traction significance. People helps others join the work with commitment."
+              },
+              {
+                "type": "paragraph",
+                "text": "The main tightening risk is that commitment may outrun method. People may be energised and willing, but still unclear about how to coordinate, what standard applies, or how decisions will be made. Over time, that can turn shared belief into avoidable friction."
+              },
+              {
+                "type": "paragraph",
+                "text": "Your growth is not to reduce the energy of the pattern. It is to give energy a route. Bring People in so the future is shared. Bring Process in so shared commitment has a dependable way to move."
+              },
+              {
+                "type": "paragraph",
+                "text": "At your best, you give people more than a reason to act. You give them a future they can believe in, a visible step they can take, and a method that helps their commitment become lasting progress."
+              }
+            ],
+            "finalLine": "Your leadership makes the future feel worth acting on; the next step is giving that action enough method to last."
+          },
+          "pdf": {
+            "title": "Download your Leadership Approach report as a PDF.",
+            "body": "This report is designed as a reference document. Save it, revisit it before important decisions, and use the development questions to broaden your leadership range over time."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Results, Vision, People, Process"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Results and strengthened by Vision, while People and Process are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
+          "warningList": []
+        }
+      },
+      "status": "active",
+      "manifest_status": "ready_for_import",
+      "publishable": true,
+      "ready_for_import": true,
+      "generation_metadata": {
+        "generated_from": "leadership_report_first_manifest",
+        "deterministic": true,
+        "source_of_truth": "content/authoring/leadership-approach/report-first/canonical-reports"
+      }
+    },
+    {
+      "assessment_key": "leadership-approach",
+      "assessment_version": "p9-report-first-coverage",
+      "package_key": "leadership-approach-report-first",
+      "package_version": "p9-report-first-coverage",
+      "domain_key": "leadership-approach",
+      "pattern_key": "results_vision_process_people",
+      "report_key": "results_vision_process_people",
+      "report_contract": "report_first_canonical_payload_v1",
+      "score_shape_policy": "pattern_level_score_shape_neutral",
+      "score_shape": null,
+      "supported_score_shapes": [
+        "concentrated",
+        "paired",
+        "graduated",
+        "balanced"
+      ],
+      "source_markdown_path": "content/authoring/leadership-approach/report-first/canonical-reports/results_vision_process_people.md",
+      "source_content_hash": "e5d8b2bb09e1e6020e87d77c1dafebc423f31ea40406e12702506e9f3a8842e5",
+      "content_hash": "e5d8b2bb09e1e6020e87d77c1dafebc423f31ea40406e12702506e9f3a8842e5",
+      "report_template_json": {
+        "metadata": {
+          "payloadVersion": 1,
+          "contractName": "report_first_canonical_payload_v1",
+          "mode": "single_domain_ranked_pattern",
+          "reportModel": "report_first_canonical",
+          "templateVersion": 1
+        },
+        "reportKey": "results_vision_process_people",
+        "patternKey": "results_vision_process_people",
+        "domainKey": "leadership-approach",
+        "report": {
+          "reportKey": "results_vision_process_people",
+          "patternKey": "results_vision_process_people",
+          "reportTitle": "Leadership Approach — Results, Vision, Process, People",
+          "hero": {
+            "title": "You lead by turning future intent into visible progress",
+            "resultStatement": "You create confidence by making ambition move. Your leadership is at its best when people can see that a direction matters, but the work still needs a practical move, a proof point, and enough structure to make the future executable.\n\nProcess expands this pattern by grounding purposeful momentum in method. People extends it further by making sure commitment is shaped with others, not only requested once the direction is already moving."
+          },
+          "opening": [
+            {
+              "type": "paragraph",
+              "text": "Your leadership approach is led by Results and strengthened by Vision. You are likely to create confidence by finding the practical action that makes a future direction feel real. You may notice where ambition has become too abstract, where a team is inspired but not moving, or where a strategic conversation needs its first visible proof point."
+            },
+            {
+              "type": "paragraph",
+              "text": "This is not only achievement pressure. Vision sits close behind Results, which means the movement you create is usually connected to something larger than the immediate task. You are likely to ask what the action should make possible, what future value it protects, or what opportunity it brings closer."
+            },
+            {
+              "type": "paragraph",
+              "text": "The first expansion is Process. Purposeful momentum still needs a route. Without method, a bold move can become a burst of energy that is hard to coordinate, review, or repeat. Process gives your future-facing progress ownership, sequence, standards, and the practical discipline needed to make the direction executable."
+            },
+            {
+              "type": "paragraph",
+              "text": "The furthest extension is People. Because the direction and action may feel clear to you, you may sometimes expect commitment to follow the logic of the opportunity. Others may need more visible participation before they can fully own the push."
+            },
+            {
+              "type": "paragraph",
+              "text": "Your most effective leadership keeps the urgency and ambition, then grounds them in method and participation. It makes the future practical enough to move toward and shared enough to sustain."
+            }
+          ],
+          "patternSummary": {
+            "title": "Pattern at a glance",
+            "blocks": [
+              {
+                "type": "signal_stack",
+                "signals": [
+                  {
+                    "rank": 1,
+                    "signalKey": "results",
+                    "signalLabel": "Results",
+                    "roleLabel": "the first movement",
+                    "roleSummary": "You tend to lead first by identifying the action, proof point, or decision that makes progress visible."
+                  },
+                  {
+                    "rank": 2,
+                    "signalKey": "vision",
+                    "signalLabel": "Vision",
+                    "roleLabel": "the close direction",
+                    "roleSummary": "Vision gives your progress a future horizon, helping action serve a larger purpose, opportunity, or capability."
+                  },
+                  {
+                    "rank": 3,
+                    "signalKey": "process",
+                    "signalLabel": "Process",
+                    "roleLabel": "the execution range",
+                    "roleSummary": "Process expands your leadership by turning purposeful momentum into a route people can coordinate, review, and repeat."
+                  },
+                  {
+                    "rank": 4,
+                    "signalKey": "people",
+                    "signalLabel": "People",
+                    "roleLabel": "the commitment extension",
+                    "roleSummary": "People expands the pattern by making sure the direction is shaped with enough voice, trust, and shared ownership."
+                  }
+                ]
+              },
+              {
+                "type": "table",
+                "columns": [
+                  {
+                    "key": "rank",
+                    "label": "Rank"
+                  },
+                  {
+                    "key": "role_in_your_pattern",
+                    "label": "Role in your pattern"
+                  },
+                  {
+                    "key": "what_it_means_in_practice",
+                    "label": "What it means in practice"
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "text": "1"
+                    },
+                    {
+                      "text": "Results — the first movement"
+                    },
+                    {
+                      "text": "You tend to lead first by identifying the action, proof point, or decision that makes progress visible."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "2"
+                    },
+                    {
+                      "text": "Vision — the close direction"
+                    },
+                    {
+                      "text": "Vision gives your progress a future horizon, helping action serve a larger purpose, opportunity, or capability."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "3"
+                    },
+                    {
+                      "text": "Process — the execution range"
+                    },
+                    {
+                      "text": "Process expands your leadership by turning purposeful momentum into a route people can coordinate, review, and repeat."
+                    }
+                  ],
+                  [
+                    {
+                      "text": "4"
+                    },
+                    {
+                      "text": "People — the commitment extension"
+                    },
+                    {
+                      "text": "People expands the pattern by making sure the direction is shaped with enough voice, trust, and shared ownership."
+                    }
+                  ]
+                ]
+              },
+              {
+                "type": "paragraph",
+                "text": "This is a progress-and-direction pattern. At its strongest, it makes the future feel urgent, practical, and worth organising around."
+              }
+            ]
+          },
+          "keyInsight": {
+            "type": "pull_quote",
+            "text": "Your leadership creates confidence by making the future move. The development edge is to ground that movement in enough method and participation that people can carry it, not only respond to it."
+          },
+          "chapters": [
+            {
+              "chapterKey": "value_creation",
+              "chapterNumber": 1,
+              "title": "How your leadership creates value",
+              "railLabel": "Value",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Your leadership creates value by reducing the distance between ambition and evidence."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Where others may stay with strategy, possibility, or broad aspiration, you are likely to look for the move that proves the direction is becoming real. What action would show commitment? What first result would make the future credible? What priority would turn intent into traction?"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pattern is especially useful in growth work, transformation, market repositioning, innovation, strategic change, and senior leadership moments where the organisation needs both belief and movement. People may understand the direction, but confidence often rises when they can see practical evidence that the direction is being acted on."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision gives your Results drive a larger frame. You are not only asking people to do more. You are asking what progress should build. That can make your leadership energising because the action has a reason beyond the current pressure."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process is needed because ambition can outrun execution. A future-facing move needs cadence, owners, handovers, standards, and a review loop. Without those, the direction may remain compelling but unevenly delivered."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When this pattern works well, teams feel that the future is not just being described. It is being advanced through practical movement that can be organised, tested, and learned from."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "others_experience",
+              "chapterNumber": 2,
+              "title": "How others experience your leadership",
+              "railLabel": "Others",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Others may experience your leadership as energising, ambitious, and action-oriented. You can create the sense that a future direction is not simply a presentation or aspiration. It is something the team must begin to prove through real work."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In meetings, you may listen for the point where strategic discussion needs to become movement. You may ask what action would demonstrate belief, what outcome would make the opportunity credible, or what decision would stop the future from remaining theoretical."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For people who want purpose and pace, this can be compelling. You may help them feel that the work matters and that it is time to move."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The possible tension is that your certainty about the direction may run ahead of other people's participation. You may believe the opportunity is clear and the action sensible. Others may still need to test assumptions, raise implications, or connect the future to their own responsibilities before they can commit fully."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The mature version of this pattern does not dilute ambition. It makes the ambition more usable. It invites challenge, defines the route, and gives people a visible place in shaping how the future becomes work."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "decision_behaviour",
+              "chapterNumber": 3,
+              "title": "Decision behaviour",
+              "railLabel": "Decisions",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You are likely to make decisions by asking what will create meaningful progress toward the future."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A decision feels strong when it moves the direction closer. You may prefer a decision that creates practical evidence over a decision that perfects the language of strategy. If the future matters, you are likely to want a visible move that tests it."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Vision gives your decision-making a sense of significance. You may ask whether the option builds capability, opens a market, strengthens trust, creates learning, or moves the organisation closer to where it needs to be."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The risk is that purposeful action may be trusted before the operating route is ready. A decision can be strategically right and still difficult to execute if ownership, sequence, resourcing, and review are unclear. That is why Process is the first expansion."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People is the deeper growth edge. A decision may be bold, sensible, and well structured, but still under-owned if people were not included early enough. Participation is not a courtesy after the decision. It is part of making the decision durable."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful decision checks include",
+                  "prompts": [
+                    "What future are we trying to make more credible?",
+                    "What action would create evidence without overcommitting?",
+                    "What method will help the team execute and learn?",
+                    "Who needs a real voice before commitment is expected?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "communication_behaviour",
+              "chapterNumber": 4,
+              "title": "Communication behaviour",
+              "railLabel": "Communication",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "You tend to communicate through momentum, opportunity, and future value."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may be effective when people need to understand why action matters now. You can connect a practical move to the larger purpose behind it. That makes your communication more compelling than simple task direction."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "You may use language about proof, progress, opportunity, and what the team is building. You are likely to be at your best when you translate the future into a practical next step: what needs to move, why it matters, and what it will make possible."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The limitation is that communication may become too directional. People may hear the future and the action before they hear enough room for challenge. If the message is too complete, they may feel invited to support rather than invited to shape."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, communication becomes stronger when it includes method and participation:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Here is the future we need to move toward. Here is the progress that would make it real. Here is the route I think can hold the work. Here is where I want challenge, concern, and local judgement before we commit."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "That keeps the energy of Vision and Results, while making Process and People visible enough for others to trust the work."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "pressure_behaviour",
+              "chapterNumber": 5,
+              "title": "What happens under pressure",
+              "railLabel": "Pressure",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Under pressure, your leadership may tighten toward bold movement, high expectation, and fast commitment."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This can be valuable when hesitation is costing the organisation. You can help people stop over-explaining the future and start acting on it. You may press for a decision, a proof point, or a visible move that shows the direction is serious."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The pressure risk is that practical method and team readiness can be compressed. You may move from strategic conviction to action before the route is clear enough or before people have enough voice to own the work. The action may be exciting, but the operating system behind it may be thin."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This pressure pattern can create uneven follow-through. People may feel inspired in the room, then uncertain when they need to coordinate work across roles, timelines, and constraints. They may support the future, but not know how to convert support into consistent action."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "The pressure move is to make ambition executable",
+                  "prompts": [
+                    "What proof point matters now?",
+                    "What route will hold the work after the first push?",
+                    "Who needs to test the implications before we commit?",
+                    "What would make the future feel practical rather than only compelling?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "strengths",
+              "chapterNumber": 6,
+              "title": "The strength of this pattern",
+              "railLabel": "Strengths",
+              "blocks": [
+                {
+                  "type": "strength_card",
+                  "title": "Purposeful traction",
+                  "text": "You help teams take action that is connected to a larger future. This creates movement without reducing the work to short-term output."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Strategic urgency",
+                  "text": "You can make the future feel immediate. Instead of leaving strategy as distant language, you help people identify the decision or action that should happen now."
+                },
+                {
+                  "type": "strength_card",
+                  "title": "Momentum that can inspire",
+                  "text": "Because Vision sits close behind Results, your progress can carry meaning. People may feel that the work matters, not only that it is overdue."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "tightening",
+              "chapterNumber": 7,
+              "title": "Where the pattern can tighten",
+              "railLabel": "Tightening",
+              "blocks": [
+                {
+                  "type": "tightening_card",
+                  "title": "Future before method",
+                  "text": "The direction may be compelling while the route remains underdeveloped. People may understand why the work matters but not how to coordinate it.",
+                  "rangeToAdd": "Bring Process in early. Define owners, sequence, standards, review points, and the evidence that will guide the next move.",
+                  "whyItMatters": "Bring Process in early. Define owners, sequence, standards, review points, and the evidence that will guide the next move."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Conviction before participation",
+                  "text": "Your belief in the opportunity may become clear before others have had enough space to test it. Commitment may be requested before it has been built.",
+                  "rangeToAdd": "Bring People in before the push. Ask what concerns, implications, or role realities need to shape the plan.",
+                  "whyItMatters": "Bring People in before the push. Ask what concerns, implications, or role realities need to shape the plan."
+                },
+                {
+                  "type": "tightening_card",
+                  "title": "Proof becomes performance pressure",
+                  "text": "The need to demonstrate progress can become intense. People may feel that hesitation is disloyal to the future rather than useful evidence.",
+                  "rangeToAdd": "Separate challenge from resistance. Invite concerns as a way to protect the direction, not slow it down.",
+                  "whyItMatters": "Separate challenge from resistance. Invite concerns as a way to protect the direction, not slow it down."
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_3_expansion",
+              "chapterNumber": 8,
+              "title": "How Process expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Process expands this pattern by making purposeful momentum executable."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When Process is brought in deliberately, your leadership does not become less ambitious. It becomes more credible. The future gains a route, the action gains owners, and progress becomes easier to review."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This matters because Results and Vision together can create strong energy. The team may leave a conversation believing something important is happening. But without enough method, that energy can fragment across interpretations. One person may act quickly, another may wait for more detail, and another may interpret the direction differently."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Process helps you translate the future into operating choices. What is the first move? Who owns it? What standard matters? What dependency needs managing? What evidence will tell us whether the move is working?"
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "What working rhythm will hold this direction?",
+                    "What must be sequenced before we accelerate?",
+                    "Where could enthusiasm create coordination risk?",
+                    "What evidence will tell us whether the future is becoming real?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "rank_4_expansion",
+              "chapterNumber": 9,
+              "title": "How People expands your leadership",
+              "railLabel": "Range",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "People expands this pattern by making commitment participative."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because People is the furthest extension, you may sometimes communicate the future and the action before creating enough space for others to shape the judgement. The direction may be strong, but people still need to see where their voice matters."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "People helps you notice whether support is genuine or only polite. It helps you ask whether people have the context, trust, and ownership required to carry the work when enthusiasm meets friction."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For this pattern, People is not about softening ambition. It is about making ambition shared enough to survive reality. People can raise constraints, concerns, and insights that improve the route before the organisation has committed too publicly."
+                },
+                {
+                  "type": "prompt_group",
+                  "title": "Useful activation questions include",
+                  "prompts": [
+                    "Who needs to test this direction before we ask for commitment?",
+                    "What concern would make the action stronger?",
+                    "Where might people feel carried by the message rather than included in the work?",
+                    "What would help the team own the future, not only believe in it?"
+                  ]
+                }
+              ],
+              "readerFacing": true
+            },
+            {
+              "chapterKey": "development_focus",
+              "chapterNumber": 10,
+              "title": "Development focus",
+              "railLabel": "Development",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "The development work is to make ambitious progress more executable and more shared."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Turn the horizon into an operating route",
+                  "text": "After naming the future, define the first practical route. Make the work visible enough for people to coordinate.",
+                  "useCases": [
+                    "strategy execution",
+                    "transformation planning",
+                    "new initiatives",
+                    "growth work."
+                  ],
+                  "whyItMatters": "Use this in: strategy execution, transformation planning, new initiatives, growth work.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Define the first proof point",
+                  "text": "Name the evidence that would show the direction is becoming real without pretending the whole future can be proven immediately.",
+                  "useCases": [
+                    "innovation",
+                    "market tests",
+                    "leadership priorities",
+                    "customer-facing change."
+                  ],
+                  "whyItMatters": "Use this in: innovation, market tests, leadership priorities, customer-facing change.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Invite participation before commitment",
+                  "text": "Ask for challenge while the direction is still shapeable. This makes commitment stronger because people can influence the terms of the work.",
+                  "useCases": [
+                    "senior alignment",
+                    "team mobilisation",
+                    "cross-functional initiatives",
+                    "change communication."
+                  ],
+                  "whyItMatters": "Use this in: senior alignment, team mobilisation, cross-functional initiatives, change communication.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Make constraints part of the plan",
+                  "text": "Do not treat constraints as a loss of ambition. Use them to design a route that can actually carry the future.",
+                  "useCases": [
+                    "resourcing",
+                    "sequencing",
+                    "governance",
+                    "operational planning."
+                  ],
+                  "whyItMatters": "Use this in: resourcing, sequencing, governance, operational planning.."
+                },
+                {
+                  "type": "development_action",
+                  "title": "Review progress as learning",
+                  "text": "When the first action produces evidence, use it to learn, not only to confirm. The route may need to change as the future becomes clearer.",
+                  "useCases": [
+                    "pilots",
+                    "staged delivery",
+                    "new operating models",
+                    "strategic experiments."
+                  ],
+                  "whyItMatters": "Use this in: pilots, staged delivery, new operating models, strategic experiments.."
+                }
+              ],
+              "readerFacing": true
+            }
+          ],
+          "closing": {
+            "synthesis": [
+              {
+                "type": "paragraph",
+                "text": "Your leadership is valuable because it makes the future move."
+              },
+              {
+                "type": "paragraph",
+                "text": "You are likely to bring action where ambition has stayed theoretical, urgency where direction has become distant, and practical evidence where people need confidence that the future is more than a statement. Results gives the pattern its movement. Vision gives the movement meaning."
+              },
+              {
+                "type": "paragraph",
+                "text": "The main tightening risk is that ambition can outrun method and participation. People may believe in the direction but still lack the route to execute it. They may support the action but not feel they helped shape the judgement behind it."
+              },
+              {
+                "type": "paragraph",
+                "text": "Your growth is to make the future more usable. Bring Process in so the direction has a working path. Bring People in so commitment is formed with others, not assumed from them."
+              },
+              {
+                "type": "paragraph",
+                "text": "At your best, you give people more than an ambitious push. You give them evidence that the future can move, a route for making it practical, and enough shared ownership to keep going when the first proof point raises harder questions."
+              }
+            ],
+            "finalLine": "Your leadership turns ambition into progress; the next step is making the future structured and shared enough for people to carry."
+          },
+          "pdf": {
+            "title": "Download your Leadership Approach report as a PDF.",
+            "body": "This report is designed as a reference document. Save it, revisit it before important decisions, and use the development questions to broaden your leadership range over time."
+          },
+          "readerNavigation": [
+            {
+              "id": "overview",
+              "label": "Overview"
+            },
+            {
+              "id": "pattern",
+              "label": "Pattern"
+            },
+            {
+              "id": "evidence",
+              "label": "Evidence"
+            },
+            {
+              "id": "key-insight",
+              "label": "Insight"
+            },
+            {
+              "id": "value_creation",
+              "label": "Value",
+              "targetChapterKey": "value_creation"
+            },
+            {
+              "id": "others_experience",
+              "label": "Others",
+              "targetChapterKey": "others_experience"
+            },
+            {
+              "id": "decision_behaviour",
+              "label": "Decisions",
+              "targetChapterKey": "decision_behaviour"
+            },
+            {
+              "id": "communication_behaviour",
+              "label": "Communication",
+              "targetChapterKey": "communication_behaviour"
+            },
+            {
+              "id": "pressure_behaviour",
+              "label": "Pressure",
+              "targetChapterKey": "pressure_behaviour"
+            },
+            {
+              "id": "strengths",
+              "label": "Strengths",
+              "targetChapterKey": "strengths"
+            },
+            {
+              "id": "tightening",
+              "label": "Tightening",
+              "targetChapterKey": "tightening"
+            },
+            {
+              "id": "rank_3_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_3_expansion"
+            },
+            {
+              "id": "rank_4_expansion",
+              "label": "Range",
+              "targetChapterKey": "rank_4_expansion"
+            },
+            {
+              "id": "development_focus",
+              "label": "Development",
+              "targetChapterKey": "development_focus"
+            },
+            {
+              "id": "closing",
+              "label": "Closing"
+            }
+          ]
+        },
+        "evidenceTemplate": {
+          "title": "Evidence behind your result",
+          "blocks": [
+            {
+              "type": "callout",
+              "tone": "evidence",
+              "text": "Assessment: Leadership Approach"
+            },
+            {
+              "type": "paragraph",
+              "text": "Result pattern: Results, Vision, Process, People"
+            },
+            {
+              "type": "signal_stack",
+              "signals": [
+                {
+                  "rank": 1,
+                  "signalKey": "results",
+                  "signalLabel": "Results"
+                },
+                {
+                  "rank": 2,
+                  "signalKey": "vision",
+                  "signalLabel": "Vision"
+                },
+                {
+                  "rank": 3,
+                  "signalKey": "process",
+                  "signalLabel": "Process"
+                },
+                {
+                  "rank": 4,
+                  "signalKey": "people",
+                  "signalLabel": "People"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "key": "signal",
+                  "label": "Signal"
+                },
+                {
+                  "key": "normalised_score",
+                  "label": "Normalised score"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "text": "Results"
+                  },
+                  {
+                    "text": "42%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Vision"
+                  },
+                  {
+                    "text": "33%"
+                  }
+                ],
+                [
+                  {
+                    "text": "Process"
+                  },
+                  {
+                    "text": "17%"
+                  }
+                ],
+                [
+                  {
+                    "text": "People"
+                  },
+                  {
+                    "text": "8%"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These scores show why your report is led by Results and strengthened by Vision, while Process and People are best understood as useful range to bring in deliberately. The numbers provide evidence for the pattern; the report explains what that pattern means in practice."
+            }
+          ]
+        },
+        "diagnostics": {
+          "generatedFrom": "compiled_report_first_template",
+          "adminNotesExcluded": true,
+          "editorialQaNotesDetected": false,
           "warningList": []
         }
       },
