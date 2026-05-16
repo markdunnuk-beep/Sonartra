@@ -148,5 +148,5 @@ test('admin preview missing template state remains clear', async () => {
     throw new Error('Expected missing template error.');
   }
   assert.equal(preview.code, 'REPORT_FIRST_PREVIEW_TEMPLATE_NOT_FOUND');
-  assert.match(preview.message, /No canonical report-first template is available/);
+  assert.match(preview.message, /No generated or imported report-first template is available/);
 });

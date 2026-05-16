@@ -111,8 +111,19 @@ test('admin report-first preview fails clearly when selected template data is un
   }
 
   assert.equal(preview.code, 'REPORT_FIRST_PREVIEW_TEMPLATE_NOT_FOUND');
-  assert.match(preview.message, /No canonical report-first template is available/);
+  assert.match(preview.message, /No generated or imported report-first template is available/);
   assert.ok(preview.options.length >= 1);
+});
+
+test('admin report-first preview uses generated artifact instead of authoring markdown fallback', () => {
+  const previewHelperSource = readFileSync(
+    join(process.cwd(), 'lib', 'server', 'admin-report-first-preview.ts'),
+    'utf8',
+  );
+
+  assert.match(previewHelperSource, /getGeneratedLeadershipReportFirstImportArtifact/);
+  assert.doesNotMatch(previewHelperSource, /buildLeadershipReportFirstImportArtifact/);
+  assert.doesNotMatch(previewHelperSource, /compileReportFirstTemplate|canonical-reports/);
 });
 
 test('admin report-first preview is wired to the ranked-pattern workflow without changing user result routes', () => {

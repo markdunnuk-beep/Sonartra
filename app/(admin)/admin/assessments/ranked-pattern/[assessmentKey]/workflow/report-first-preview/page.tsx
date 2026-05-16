@@ -221,6 +221,12 @@ export default async function ReportFirstAdminPreviewPage({
               <MetaItem label="Finding code" value={preview.code} />
               <MetaItem label="Selected signal order" value={preview.selectedPatternKey || 'None'} />
             </div>
+            {preview.sourceAttempts && preview.sourceAttempts.length > 0 ? (
+              <SecondaryText>
+                Source attempted: {preview.sourceAttempts.join(' / ')}. Publish remains blocked
+                until all report-first templates are available.
+              </SecondaryText>
+            ) : null}
           </SurfaceCard>
         ) : (
           <>

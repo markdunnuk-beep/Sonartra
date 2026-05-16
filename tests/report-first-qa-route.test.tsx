@@ -6,7 +6,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import sitemap from '@/app/sitemap';
 import { ReportFirstResultReport } from '@/components/results/report-first-result-report';
-import { buildAdminReportFirstPreview } from '@/lib/server/admin-report-first-preview';
+import {
+  buildAdminReportFirstPreview,
+  buildAdminReportFirstPreviewWithArtifact,
+} from '@/lib/server/admin-report-first-preview';
 
 function readSource(...segments: string[]): string {
   return readFileSync(join(process.cwd(), ...segments), 'utf8');
@@ -36,6 +39,19 @@ test('report-first QA route is admin-gated and noindexed', () => {
   assert.match(qaRouteSource, /buildAdminReportFirstPreview/);
 });
 
+test('report-first QA route avoids authoring markdown fallback at request time', () => {
+  const qaRouteSource = readSource('app', '(admin)', 'admin', 'qa', 'report-first', 'page.tsx');
+  const previewHelperSource = readSource('lib', 'server', 'admin-report-first-preview.ts');
+
+  assert.match(qaRouteSource, /getGeneratedLeadershipReportFirstImportArtifact/);
+  assert.doesNotMatch(qaRouteSource, /buildLeadershipReportFirstImportArtifact/);
+  assert.doesNotMatch(qaRouteSource, /compileReportFirstTemplate|canonical-reports|source_markdown_path/);
+
+  assert.match(previewHelperSource, /getGeneratedLeadershipReportFirstImportArtifact/);
+  assert.doesNotMatch(previewHelperSource, /buildLeadershipReportFirstImportArtifact/);
+  assert.doesNotMatch(previewHelperSource, /compileReportFirstTemplate|canonical-reports/);
+});
+
 test('report-first QA default preview renders the full report body without internal labels', async () => {
   const preview = await buildAdminReportFirstPreview({
     assessmentKey: 'leadership-approach',
@@ -50,6 +66,7 @@ test('report-first QA default preview renders the full report body without inter
   if (preview.status !== 'ready') {
     throw new Error('Expected ready QA preview.');
   }
+  assert.equal(preview.review.sourceStatus, 'Loaded from generated report-first import artifact');
 
   const markup = renderToStaticMarkup(<ReportFirstResultReport payload={preview.payload} />);
   const renderedText = textFromMarkup(markup);
@@ -117,7 +134,35 @@ test('report-first QA missing template state remains admin-readable', async () =
     throw new Error('Expected missing template error.');
   }
   assert.equal(preview.code, 'REPORT_FIRST_PREVIEW_TEMPLATE_NOT_FOUND');
-  assert.match(preview.message, /No canonical report-first template is available/);
+  assert.match(preview.message, /No generated or imported report-first template is available/);
+  assert.deepEqual(preview.sourceAttempts, [
+    'Imported draft template storage',
+    'Generated report-first import artifact',
+  ]);
+});
+
+test('report-first QA artifact failure returns controlled admin error', async () => {
+  const preview = await buildAdminReportFirstPreviewWithArtifact({
+    assessmentKey: 'leadership-approach',
+    assessmentTitle: 'Leadership Approach',
+    assessmentVersionId: 'version-report-first-qa',
+    assessmentVersionTag: 'qa-preview',
+    patternKey: 'process_results_people_vision',
+    scoreShape: 'paired',
+  }, () => {
+    throw new Error('missing generated artifact');
+  });
+
+  assert.equal(preview.status, 'error');
+  if (preview.status !== 'error') {
+    throw new Error('Expected artifact error.');
+  }
+  assert.equal(preview.code, 'REPORT_FIRST_PREVIEW_ARTIFACT_UNAVAILABLE');
+  assert.match(preview.message, /generated report-first import artifact is unavailable or malformed/i);
+  assert.deepEqual(preview.sourceAttempts, [
+    'Imported draft template storage',
+    'Generated report-first import artifact',
+  ]);
 });
 
 test('report-first QA route is absent from public sitemap and public route registry', () => {

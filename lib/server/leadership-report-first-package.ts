@@ -6,6 +6,7 @@ import {
   type CompiledReportFirstTemplate,
   type ReportFirstTemplateJson,
 } from '@/scripts/authoring/compile-report-first-template';
+import generatedLeadershipReportFirstImportArtifact from '@/content/assessment-packages/leadership-approach/generated/report-first-template-import-rows.json';
 
 export const leadershipReportFirstManifestPath = join(
   /* turbopackIgnore: true */ process.cwd(),
@@ -185,6 +186,35 @@ export type LeadershipReportFirstImportArtifact = {
   readonly missing_templates: readonly LeadershipReportFirstMissingImportTemplate[];
   readonly import_rows: readonly LeadershipReportFirstImportRow[];
 };
+
+function isGeneratedImportArtifact(value: unknown): value is LeadershipReportFirstImportArtifact {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  const coverage = record.coverage as Record<string, unknown> | undefined;
+
+  return record.artifact_contract === 'leadership_report_first_template_import_rows_v1'
+    && record.assessment_key === 'leadership-approach'
+    && record.report_contract === 'report_first_canonical_payload_v1'
+    && record.score_shape_policy === leadershipReportFirstScoreShapePolicy
+    && Array.isArray(record.import_rows)
+    && Array.isArray(record.expected_pattern_keys)
+    && typeof coverage === 'object'
+    && coverage !== null
+    && typeof coverage.expected_template_count === 'number'
+    && typeof coverage.generated_import_ready_count === 'number'
+    && typeof coverage.missing_template_count === 'number';
+}
+
+export function getGeneratedLeadershipReportFirstImportArtifact(): LeadershipReportFirstImportArtifact {
+  if (!isGeneratedImportArtifact(generatedLeadershipReportFirstImportArtifact)) {
+    throw new Error('Generated Leadership report-first import artifact is unavailable or malformed.');
+  }
+
+  return generatedLeadershipReportFirstImportArtifact;
+}
 
 function permutations(values: readonly string[]): readonly string[][] {
   if (values.length === 0) {

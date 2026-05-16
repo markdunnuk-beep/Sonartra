@@ -17,7 +17,10 @@ import {
   adminReportFirstRequiredPreviewHeadings,
   buildAdminReportFirstPreview,
 } from '@/lib/server/admin-report-first-preview';
-import { buildLeadershipReportFirstImportArtifact } from '@/lib/server/leadership-report-first-package';
+import {
+  getGeneratedLeadershipReportFirstImportArtifact,
+  type LeadershipReportFirstImportArtifact,
+} from '@/lib/server/leadership-report-first-package';
 import { getSingleDomainBuilderAssessment } from '@/lib/server/admin-single-domain-builder';
 import { getDbPool } from '@/lib/server/db';
 
@@ -37,6 +40,14 @@ function sourceLabel(sourceStatus: string): string {
   return 'Generated package artifact';
 }
 
+function loadGeneratedArtifactForQa(): LeadershipReportFirstImportArtifact | null {
+  try {
+    return getGeneratedLeadershipReportFirstImportArtifact();
+  } catch {
+    return null;
+  }
+}
+
 export default async function ReportFirstQaRoutePage({
   searchParams,
 }: Readonly<{
@@ -46,7 +57,7 @@ export default async function ReportFirstQaRoutePage({
   const db = getDbPool();
   const [{ assessment, redirectTo }, artifact] = await Promise.all([
     getSingleDomainBuilderAssessment(db, 'leadership-approach'),
-    buildLeadershipReportFirstImportArtifact(),
+    Promise.resolve(loadGeneratedArtifactForQa()),
   ]);
 
   if (redirectTo) {
@@ -111,7 +122,11 @@ export default async function ReportFirstQaRoutePage({
               <MetaItem label="Source" value={sourceStatus} />
               <MetaItem
                 label="Coverage"
-                value={`${artifact.coverage.generated_import_ready_count} of ${artifact.coverage.expected_template_count} available`}
+                value={
+                  artifact
+                    ? `${artifact.coverage.generated_import_ready_count} of ${artifact.coverage.expected_template_count} available`
+                    : 'Unavailable'
+                }
               />
               <MetaItem label="Publish status" value="Blocked" />
             </div>
@@ -181,6 +196,12 @@ export default async function ReportFirstQaRoutePage({
                 <MetaItem label="Finding code" value={preview.code} />
                 <MetaItem label="Selected signal order" value={preview.selectedPatternKey || 'None'} />
               </div>
+              {preview.sourceAttempts && preview.sourceAttempts.length > 0 ? (
+                <SecondaryText>
+                  Source attempted: {preview.sourceAttempts.join(' / ')}. Publish remains blocked
+                  until all report-first templates are available.
+                </SecondaryText>
+              ) : null}
             </SurfaceCard>
           ) : (
             <SurfaceCard muted className="space-y-3 p-5 lg:p-6" data-report-first-qa-boundaries="true">

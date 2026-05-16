@@ -126,7 +126,8 @@ test('report-first package work does not alter user result retrieval or scoring 
   );
   const completionSource = readFileSync(join(process.cwd(), 'lib', 'server', 'single-domain-completion.ts'), 'utf8');
 
-  assert.match(previewSource, /buildLeadershipReportFirstImportArtifact/);
+  assert.match(previewSource, /getGeneratedLeadershipReportFirstImportArtifact/);
+  assert.doesNotMatch(previewSource, /buildLeadershipReportFirstImportArtifact/);
   assert.doesNotMatch(userRouteSource, /leadership-report-first-package|canonical-reports|compileReportFirstTemplate/);
   assert.doesNotMatch(completionSource, /leadership-report-first-package|canonical-reports/);
 });

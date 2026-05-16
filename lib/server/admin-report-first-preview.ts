@@ -3,7 +3,8 @@ import { buildReportFirstCanonicalPayload } from '@/lib/server/report-first-resu
 import { getDbPool } from '@/lib/server/db';
 import { REPORT_FIRST_TEMPLATE_CONTRACT } from '@/lib/server/report-first-template-storage';
 import {
-  buildLeadershipReportFirstImportArtifact,
+  getGeneratedLeadershipReportFirstImportArtifact,
+  type LeadershipReportFirstImportArtifact,
   type LeadershipReportFirstImportRow,
 } from '@/lib/server/leadership-report-first-package';
 import type { NormalizedResult, RuntimeResponseSet, ScoreResult } from '@/lib/engine/types';
@@ -77,6 +78,7 @@ export type AdminReportFirstPreviewResult =
       readonly code: string;
       readonly message: string;
       readonly selectedPatternKey: string;
+      readonly sourceAttempts?: readonly string[];
     };
 
 type PreviewTemplateRow = {
@@ -337,16 +339,83 @@ async function loadImportedPreviewTemplate(params: {
   }
 }
 
-export async function buildAdminReportFirstPreview(params: {
+async function loadImportedPreviewTemplates(params: {
+  readonly assessmentVersionId: string | null;
+}): Promise<readonly ImportedPreviewTemplateRow[]> {
+  if (!params.assessmentVersionId || !process.env.DATABASE_URL) {
+    return [];
+  }
+
+  try {
+    const result = await getDbPool().query<ImportedPreviewTemplateRow>(
+      `
+      SELECT
+        id,
+        assessment_version_id,
+        domain_key,
+        pattern_key,
+        report_key,
+        report_contract,
+        report_template_json,
+        content_hash,
+        status
+      FROM assessment_report_first_templates
+      WHERE assessment_version_id = $1
+        AND status = 'draft'
+      ORDER BY pattern_key ASC, updated_at DESC, id DESC
+      `,
+      [params.assessmentVersionId],
+    );
+
+    const latestByPattern = new Map<string, ImportedPreviewTemplateRow>();
+    for (const row of result.rows) {
+      if (!latestByPattern.has(row.pattern_key)) {
+        latestByPattern.set(row.pattern_key, row);
+      }
+    }
+
+    return [...latestByPattern.values()];
+  } catch {
+    return [];
+  }
+}
+
+export type AdminReportFirstPreviewArtifactProvider = () => LeadershipReportFirstImportArtifact;
+
+export async function buildAdminReportFirstPreviewWithArtifact(params: {
   readonly assessmentKey: string;
   readonly assessmentTitle: string;
   readonly assessmentVersionId: string | null;
   readonly assessmentVersionTag: string | null;
   readonly patternKey?: string | null;
   readonly scoreShape?: string | null;
-}): Promise<AdminReportFirstPreviewResult> {
-  const artifact = await buildLeadershipReportFirstImportArtifact();
-  const rows = artifact.import_rows;
+}, artifactProvider: AdminReportFirstPreviewArtifactProvider = getGeneratedLeadershipReportFirstImportArtifact): Promise<AdminReportFirstPreviewResult> {
+  const importedRows = await loadImportedPreviewTemplates({
+    assessmentVersionId: params.assessmentVersionId,
+  });
+  let rows: readonly (LeadershipReportFirstImportRow | ImportedPreviewTemplateRow)[] = importedRows;
+  let usingImportedRows = importedRows.length > 0;
+
+  if (rows.length === 0) {
+    let artifact: LeadershipReportFirstImportArtifact;
+    try {
+      artifact = artifactProvider();
+    } catch {
+      return {
+        status: 'error',
+        options: [],
+        code: 'REPORT_FIRST_PREVIEW_ARTIFACT_UNAVAILABLE',
+        message:
+          'No imported draft templates are available, and the generated report-first import artifact is unavailable or malformed. Preview cannot be assembled, and publish remains blocked.',
+        selectedPatternKey: params.patternKey?.trim() ?? '',
+        sourceAttempts: ['Imported draft template storage', 'Generated report-first import artifact'],
+      };
+    }
+
+    rows = artifact.import_rows;
+    usingImportedRows = false;
+  }
+
   const options = rows.map((row) => ({
     patternKey: row.pattern_key,
     reportKey: row.report_key,
@@ -363,8 +432,9 @@ export async function buildAdminReportFirstPreview(params: {
       status: 'error',
       options,
       code: 'REPORT_FIRST_PREVIEW_TEMPLATE_NOT_FOUND',
-      message: 'No canonical report-first template is available for the selected signal order.',
+      message: 'No generated or imported report-first template is available for the selected signal order.',
       selectedPatternKey,
+      sourceAttempts: ['Imported draft template storage', 'Generated report-first import artifact'],
     };
   }
 
@@ -375,13 +445,16 @@ export async function buildAdminReportFirstPreview(params: {
       code: 'REPORT_FIRST_PREVIEW_UNSUPPORTED_CONTRACT',
       message: 'The selected template does not use the supported report-first payload contract.',
       selectedPatternKey,
+      sourceAttempts: ['Imported draft template storage', 'Generated report-first import artifact'],
     };
   }
 
-  const importedTemplate = await loadImportedPreviewTemplate({
-    assessmentVersionId: params.assessmentVersionId,
-    patternKey: selected.pattern_key,
-  });
+  const importedTemplate = usingImportedRows
+    ? selected as ImportedPreviewTemplateRow
+    : await loadImportedPreviewTemplate({
+      assessmentVersionId: params.assessmentVersionId,
+      patternKey: selected.pattern_key,
+    });
   const template = importedTemplate ?? selected;
   const sourceStatus = importedTemplate
     ? 'Loaded from imported draft report-first template storage'
@@ -395,6 +468,7 @@ export async function buildAdminReportFirstPreview(params: {
       code: 'REPORT_FIRST_PREVIEW_INVALID_PATTERN',
       message: 'The selected template does not resolve to exactly four ranked signals.',
       selectedPatternKey,
+      sourceAttempts: ['Imported draft template storage', 'Generated report-first import artifact'],
     };
   }
 
@@ -414,7 +488,10 @@ export async function buildAdminReportFirstPreview(params: {
     rankedSignals,
     scoreShape: shape,
     patternKey: template.pattern_key,
-    template: importedTemplate ?? templateRowFromImportRow(selected, params.assessmentVersionId ?? 'admin-preview-version'),
+    template: importedTemplate ?? templateRowFromImportRow(
+      selected as LeadershipReportFirstImportRow,
+      params.assessmentVersionId ?? 'admin-preview-version',
+    ),
     counts: {
       domainCount: 1,
       questionCount: 24,
@@ -436,6 +513,17 @@ export async function buildAdminReportFirstPreview(params: {
       sourceStatus,
     }),
   };
+}
+
+export async function buildAdminReportFirstPreview(params: {
+  readonly assessmentKey: string;
+  readonly assessmentTitle: string;
+  readonly assessmentVersionId: string | null;
+  readonly assessmentVersionTag: string | null;
+  readonly patternKey?: string | null;
+  readonly scoreShape?: string | null;
+}): Promise<AdminReportFirstPreviewResult> {
+  return buildAdminReportFirstPreviewWithArtifact(params);
 }
 
 export const adminReportFirstRequiredPreviewHeadings = requiredPreviewHeadings;
