@@ -275,6 +275,16 @@ test('report-first result renderer hides internal diagnostics and raw identifier
   assert.doesNotMatch(renderedText, /PDF export CTA/);
 });
 
+test('report-first result renderer does not promise unavailable PDF export', () => {
+  const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
+  const renderedText = textFromMarkup(markup);
+
+  assert.match(renderedText, /Save this report/);
+  assert.match(renderedText, /Keep this report for reference/);
+  assert.doesNotMatch(renderedText, /Download your Leadership Approach report as a PDF/);
+  assert.doesNotMatch(renderedText, /Export your Leadership Approach report/);
+});
+
 test('report-first result renderer uses reader-facing navigation and card labels', () => {
   const markup = renderToStaticMarkup(<ReportFirstResultReport payload={buildReportFirstPayload()} />);
   const renderedText = textFromMarkup(markup);
@@ -293,9 +303,48 @@ test('report-first result renderer uses reader-facing navigation and card labels
   assert.match(renderedText, /Vision expansion/);
   assert.doesNotMatch(renderedText, /RangeRange/);
   assert.match(renderedText, /Why this matters:/);
-  assert.match(renderedText, /What to bring in:/);
   assert.doesNotMatch(renderedText, /Why it matters:/);
   assert.doesNotMatch(renderedText, /Range to add:/);
+});
+
+test('report-first result renderer keeps tightening range label when source text is distinct', () => {
+  const payload = structuredClone(buildReportFirstPayload()) as ReportFirstCanonicalPayloadV1;
+  const tighteningChapter = payload.report.chapters?.find((chapter) => /tighten/i.test(chapter.title));
+  const distinctBlock = tighteningChapter?.blocks.find((block) => block.type === 'tightening_card');
+
+  assert.ok(distinctBlock);
+  if (distinctBlock?.type === 'tightening_card') {
+    distinctBlock.whyItMatters = 'People may feel motivated before they have enough route clarity.';
+    distinctBlock.rangeToAdd = 'Define the roles, sequence, standards, and review rhythm.';
+  }
+
+  const markup = renderToStaticMarkup(<ReportFirstResultReport payload={payload} />);
+  const tighteningSectionMarkup =
+    markup.match(/data-report-first-section="tightening"[\s\S]*?data-report-first-section="rank-3-expansion"/)?.[0] ?? '';
+  const tighteningText = textFromMarkup(tighteningSectionMarkup);
+
+  assert.match(tighteningText, /Why this matters: People may feel motivated before they have enough route clarity\./);
+  assert.match(tighteningText, /What to bring in: Define the roles, sequence, standards, and review rhythm\./);
+});
+
+test('report-first result renderer suppresses duplicated tightening-card support text', () => {
+  const payload = structuredClone(buildReportFirstPayload()) as ReportFirstCanonicalPayloadV1;
+  const tighteningChapter = payload.report.chapters?.find((chapter) => /tighten/i.test(chapter.title));
+  const duplicateBlock = tighteningChapter?.blocks.find((block) => block.type === 'tightening_card');
+
+  assert.ok(duplicateBlock);
+  if (duplicateBlock?.type === 'tightening_card') {
+    duplicateBlock.whyItMatters = 'Bring Process in before the mobilisation spreads.';
+    duplicateBlock.rangeToAdd = 'Bring Process in before the mobilisation spreads.';
+  }
+
+  const markup = renderToStaticMarkup(<ReportFirstResultReport payload={payload} />);
+  const tighteningSectionMarkup =
+    markup.match(/data-report-first-section="tightening"[\s\S]*?data-report-first-section="rank-3-expansion"/)?.[0] ?? '';
+  const tighteningText = textFromMarkup(tighteningSectionMarkup);
+
+  assert.match(tighteningText, /Why this matters: Bring Process in before the mobilisation spreads\./);
+  assert.doesNotMatch(tighteningText, /What to bring in: Bring Process in before the mobilisation spreads\./);
 });
 
 test('report-first renderer formats Chapter 10 development actions without duplicated metadata labels', () => {

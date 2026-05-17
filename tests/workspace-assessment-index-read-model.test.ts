@@ -573,6 +573,35 @@ test('assessment index exposes a safe not-started row', async () => {
   );
 });
 
+test('Leadership Approach public inventory uses paid-facing description override', async () => {
+  const workspace = await createWorkspaceService({
+    db: createFakeDb({
+      inventory: [{
+        assessmentId: 'assessment-leadership-approach',
+        assessmentKey: 'leadership-approach',
+        title: 'Leadership Approach',
+        description:
+          'Test package for validating the ranked-pattern Leadership Approach import workflow. Content is proposed and not final commercial copy.',
+        assessmentVersionId: 'version-leadership-approach',
+        versionTag: '3',
+        publishedAt: '2026-05-17T10:09:27.439Z',
+      }],
+      questionCountByVersionId: {
+        'version-leadership-approach': 24,
+      },
+    }),
+  }).getWorkspaceViewModel({ userId: 'user-1' });
+
+  const row = workspace.assessments[0];
+  assert.equal(
+    row?.description,
+    'Understand the leadership pattern that shapes how you create direction, build momentum, involve others, and move work forward.',
+  );
+  assert.equal(row?.description?.includes('Test package'), false);
+  assert.equal(row?.description?.includes('not final commercial copy'), false);
+  assert.equal(row?.chapterDescription, row?.description);
+});
+
 test('assessment index exposes in-progress lifecycle and no signal scores', async () => {
   const workspace = await createWorkspaceService({
     db: createFakeDb({

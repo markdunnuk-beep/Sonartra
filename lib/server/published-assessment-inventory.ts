@@ -22,6 +22,15 @@ type PublishedAssessmentInventoryRow = {
   question_count: string;
 };
 
+const publicAssessmentDescriptions: Record<string, string> = {
+  'leadership-approach':
+    'Understand the leadership pattern that shapes how you create direction, build momentum, involve others, and move work forward.',
+};
+
+function publicAssessmentDescription(row: PublishedAssessmentInventoryRow): string | null {
+  return publicAssessmentDescriptions[row.assessment_key] ?? row.assessment_description;
+}
+
 function mapPublishedAssessmentInventoryRow(
   row: PublishedAssessmentInventoryRow,
 ): PublishedAssessmentInventoryItem {
@@ -29,7 +38,7 @@ function mapPublishedAssessmentInventoryRow(
     assessmentId: row.assessment_id,
     assessmentKey: row.assessment_key,
     title: row.assessment_title,
-    description: row.assessment_description,
+    description: publicAssessmentDescription(row),
     assessmentVersionId: row.assessment_version_id,
     versionTag: row.version_tag,
     publishedAt: row.published_at,

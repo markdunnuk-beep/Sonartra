@@ -202,6 +202,34 @@ function normalizeUseCase(value: string): string {
   return value.replace(/\s+/g, ' ').replace(/[.\s]+$/g, '').trim();
 }
 
+function normalizeComparableText(value: string | null | undefined): string {
+  return (value ?? '')
+    .replace(/\s+/g, ' ')
+    .replace(/[.\s]+$/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+function shouldDisplayRangeToAdd(block: Extract<ReportFirstBlock, { readonly type: 'tightening_card' }>): boolean {
+  if (!block.rangeToAdd) {
+    return false;
+  }
+
+  return normalizeComparableText(block.rangeToAdd) !== normalizeComparableText(block.whyItMatters);
+}
+
+function safePdfReferenceTitle(title: string | null | undefined): string | null {
+  if (!title) {
+    return null;
+  }
+
+  if (/\b(download|pdf|export)\b/i.test(title)) {
+    return 'Keep this report for reference';
+  }
+
+  return title;
+}
+
 function developmentActionUseCases(block: Extract<ReportFirstBlock, { readonly type: 'development_action' }>): readonly string[] {
   const explicitUseCases = (block.useCases ?? [])
     .map(normalizeUseCase)
@@ -559,13 +587,14 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
         </ContentCard>
       );
     case 'tightening_card':
+      const showRangeToAdd = shouldDisplayRangeToAdd(block);
       return (
         <ContentCard tone="warm" type="tightening">
           <SignalTags signalKeys={block.linkedSignals} />
           <h3 className="mt-4 text-xl font-semibold leading-7 text-[#F3F1EA]">{block.title}</h3>
           <p className="mt-3 text-sm leading-7 text-[#C8CEC7]/88">{block.text}</p>
           {block.whyItMatters ? <p className="mt-4 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">Why this matters: </strong>{block.whyItMatters}</p> : null}
-          {block.rangeToAdd ? <p className="mt-3 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">What to bring in: </strong>{block.rangeToAdd}</p> : null}
+          {showRangeToAdd ? <p className="mt-3 text-sm leading-7 text-[#A8B0AA]/88"><strong className="text-[#E3AF8C]">What to bring in: </strong>{block.rangeToAdd}</p> : null}
         </ContentCard>
       );
     case 'development_action': {
@@ -787,13 +816,15 @@ function MobileSectionNav({
     };
   }
 
+  const activeSection = sections.find((section) => section.id === activeSectionId) ?? sections[0] ?? null;
+
   return (
     <nav
       aria-label="Result sections"
-      className="report-first-mobile-nav sticky top-3 z-20 mb-4 max-w-full overflow-hidden rounded-[1rem] border border-white/[0.09] bg-[#080A0D]/88 p-2 shadow-[0_18px_46px_rgba(4,7,6,0.22)] backdrop-blur-[14px] xl:hidden"
+      className="report-first-mobile-nav sticky top-3 z-20 mb-4 max-w-full overflow-hidden rounded-[1rem] border border-white/[0.09] bg-[#080A0D]/90 p-2.5 shadow-[0_18px_46px_rgba(4,7,6,0.22)] backdrop-blur-[14px] xl:hidden"
       data-report-first-mobile-nav="true"
     >
-      <div className="mb-2 flex items-center justify-between gap-3 px-1.5 pt-1">
+      <div className="flex items-center justify-between gap-3 px-1 pt-0.5">
         <Image
           src={
             readingMode === 'light'
@@ -803,40 +834,56 @@ function MobileSectionNav({
           alt="Sonartra"
           width={6259}
           height={1529}
-          className="report-first-logo h-auto w-[112px] opacity-85"
+          className="report-first-logo h-auto w-[104px] opacity-85"
         />
         <span className="font-mono text-[0.58rem] uppercase tracking-[0.18em] text-[#32D6B0]/72">
           Report guide
         </span>
       </div>
-      <div className="mb-2 flex gap-2">
+      <div className="mt-2 grid grid-cols-2 gap-2">
         <DraftReadingModeToggle
-          className="report-first-reading-toggle flex-1 justify-center px-2.5 py-2 text-[0.62rem]"
+          className="report-first-reading-toggle justify-center px-2.5 py-2 text-[0.62rem]"
           mode={readingMode}
           onToggle={onReadingModeToggle}
         />
         <DraftFocusModeToggle
           active={focusMode}
-          className="report-first-focus-toggle flex-1 justify-center px-2.5 py-2 text-[0.62rem]"
+          className="report-first-focus-toggle justify-center px-2.5 py-2 text-[0.62rem]"
           onToggle={onFocusModeToggle}
         />
       </div>
-      <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
-        {sections.map((section) => (
-          <a
-            href={`#${section.id}`}
-            aria-current={activeSectionId === section.id ? 'step' : undefined}
-            className={cx(
-              'shrink-0 rounded-[0.78rem] border border-transparent px-3 py-2 text-sm text-[#C8CEC7]/84 outline-none hover:border-[#32D6B0]/20 hover:bg-[#32D6B0]/[0.07] focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55',
-              activeSectionId === section.id && 'border-[#32D6B0]/24 bg-[#32D6B0]/[0.095] text-[#F5F1EA]',
-            )}
-            key={section.id}
-            onClick={handleSectionAnchorClick(section.id)}
-          >
-            {section.label}
-          </a>
-        ))}
-      </div>
+      <details className="group mt-2 rounded-[0.85rem] border border-white/[0.08] bg-white/[0.035]">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 text-sm text-[#F5F1EA] outline-none focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55 [&::-webkit-details-marker]:hidden">
+          <span className="min-w-0">
+            <span className="block font-mono text-[0.56rem] uppercase tracking-[0.18em] text-[#8EF0D9]/70">
+              Now reading
+            </span>
+            <span className="mt-0.5 block truncate">{activeSection?.label ?? 'Overview'}</span>
+          </span>
+          <span aria-hidden="true" className="shrink-0 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#8EF0D9]/78">
+            Open
+          </span>
+        </summary>
+        <div className="grid max-h-[18rem] gap-1 overflow-y-auto border-t border-white/[0.08] p-2">
+          {sections.map((section, index) => (
+            <a
+              href={`#${section.id}`}
+              aria-current={activeSectionId === section.id ? 'step' : undefined}
+              className={cx(
+                'grid grid-cols-[2rem_minmax(0,1fr)] items-center rounded-[0.72rem] px-2.5 py-2 text-sm text-[#C8CEC7]/84 outline-none hover:bg-[#32D6B0]/[0.07] focus-visible:ring-2 focus-visible:ring-[#32D6B0]/55',
+                activeSectionId === section.id && 'bg-[#32D6B0]/[0.095] text-[#F5F1EA]',
+              )}
+              key={section.id}
+              onClick={handleSectionAnchorClick(section.id)}
+            >
+              <span className="font-mono text-[0.62rem] text-[#32D6B0]/60">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="min-w-0 truncate">{section.label}</span>
+            </a>
+          ))}
+        </div>
+      </details>
     </nav>
   );
 }
@@ -861,6 +908,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
   const resultStatementParagraphs = splitParagraphText(resultStatement);
   const completionDate = formatDate(payload.attempt.completedAt ?? payload.metadata.completedAt);
   const rankedPatternSummary = payload.rankedSignals.map((signal) => signal.signalLabel).join(', ');
+  const pdfReferenceTitle = safePdfReferenceTitle(report.pdf?.title);
 
   function toggleReadingMode() {
     setReadingMode((current) => (current === 'dark' ? 'light' : 'dark'));
@@ -1190,8 +1238,8 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
             {report.pdf ? (
               <SectionShell id="pdf-export" heading="Save this report">
                 <div className="rounded-[1.15rem] border border-[#F3F1EA]/[0.08] bg-[#1B211F]/72 p-5 md:p-6">
-                  {report.pdf.title ? (
-                    <h3 className="text-xl font-semibold leading-7 text-[#F3F1EA]">{report.pdf.title}</h3>
+                  {pdfReferenceTitle ? (
+                    <h3 className="text-xl font-semibold leading-7 text-[#F3F1EA]">{pdfReferenceTitle}</h3>
                   ) : null}
                   {report.pdf.body ? (
                     <p className="mt-3 max-w-[52rem] text-[1rem] leading-8 text-[#C8CEC7]/88">{report.pdf.body}</p>
