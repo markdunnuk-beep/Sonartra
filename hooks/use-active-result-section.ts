@@ -155,6 +155,22 @@ export function pickActiveSectionCandidate({
     return currentActiveSectionId ?? orderedSectionIds[0] ?? DEFAULT_ACTIVE_SECTION_ID;
   }
 
+  const readingLineCandidates = candidateObservations.filter(
+    (observation) => observation.isIntersecting && observation.hasPassedReadingLine,
+  );
+
+  if (readingLineCandidates.length > 0) {
+    const latestReadingLineCandidate = readingLineCandidates.sort((first, second) => {
+      const firstOrder = orderedSectionIds.indexOf(first.id);
+      const secondOrder = orderedSectionIds.indexOf(second.id);
+      return secondOrder - firstOrder;
+    })[0];
+
+    if (latestReadingLineCandidate) {
+      return latestReadingLineCandidate.id;
+    }
+  }
+
   const sortedCandidates = [...candidateObservations]
     .filter((observation) => observation.isIntersecting)
     .sort((first, second) => {

@@ -189,8 +189,10 @@ test('user shell uses reduced chrome on ranked-pattern result detail routes', ()
   );
   assert.match(shellSource, /if \(isRankedPatternResultRoute\) \{/);
   assert.match(shellSource, /data-user-shell-variant="ranked-pattern-result"/);
-  assert.match(shellSource, /aria-label="Back to results"/);
-  assert.match(shellSource, /href="\/app\/results"/);
+  assert.doesNotMatch(shellSource, /aria-label="Back to results"/);
+  assert.doesNotMatch(shellSource, /href="\/app\/results"/);
+  assert.match(shellSource, /aria-label="Back to workspace"/);
+  assert.match(shellSource, /href="\/app\/workspace"/);
   assert.match(shellSource, />\s*Report reading\s*<\/p>/);
   assert.match(shellSource, />\s*Workspace\s*<\/span>/);
   assert.match(

@@ -230,6 +230,10 @@ function safePdfReferenceTitle(title: string | null | undefined): string | null 
   return title;
 }
 
+function isNumericMarker(value: string): boolean {
+  return /^\d{1,2}\.?$/.test(value.trim());
+}
+
 function developmentActionUseCases(block: Extract<ReportFirstBlock, { readonly type: 'development_action' }>): readonly string[] {
   const explicitUseCases = (block.useCases ?? [])
     .map(normalizeUseCase)
@@ -443,29 +447,91 @@ function EvidenceTable({ rows }: { rows: readonly ReportFirstScoreRow[] }) {
 }
 
 function GenericTable({ block }: { block: Extract<ReportFirstBlock, { type: 'table' }> }) {
-  const columns = block.columns && block.columns.length > 0
-    ? block.columns
-    : (block.rows[0] ?? []).map((cell, index) => ({ key: cell.columnKey || `column-${index}`, label: cellText(cell) }));
+  const columns =
+    block.columns && block.columns.length > 0
+      ? block.columns
+      : (block.rows[0] ?? []).map((cell, index) => ({
+          key: cell.columnKey || `column-${index}`,
+          label: cellText(cell),
+        }));
   const bodyRows = block.columns && block.columns.length > 0 ? block.rows : block.rows.slice(1);
+  const hasNumericLeadColumn =
+    bodyRows.length > 0 &&
+    bodyRows.every((row) =>
+      isNumericMarker(
+        cellText(row.find((cell) => cell.columnKey === columns[0]?.key)) || cellText(row[0]),
+      ),
+    );
 
   return (
-    <div className="my-6 block w-full max-w-full min-w-0 overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]" data-report-first-table-block="true">
-      <table className="min-w-full divide-y divide-[#F3F1EA]/[0.08] text-left text-sm">
+    <div
+      className={cx(
+        'my-6 block w-full max-w-full min-w-0 overflow-x-auto rounded-[1rem] border border-[#F3F1EA]/[0.08]',
+        hasNumericLeadColumn &&
+          'bg-[linear-gradient(180deg,rgba(245,241,234,0.035),rgba(12,16,14,0.3))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]',
+      )}
+      data-report-first-table-block="true"
+      data-report-first-ranked-table={hasNumericLeadColumn ? 'true' : undefined}
+    >
+      <table
+        className={cx(
+          'min-w-full text-left text-sm',
+          hasNumericLeadColumn
+            ? 'border-separate border-spacing-y-2'
+            : 'divide-y divide-[#F3F1EA]/[0.08]',
+        )}
+      >
         <thead className="bg-[#F3F1EA]/[0.035] text-[#A8B0AA]">
           <tr>
-            {columns.map((column) => (
-              <th className="px-4 py-3 font-medium" key={column.key}>{column.label}</th>
+            {columns.map((column, columnIndex) => (
+              <th
+                className={cx(
+                  'px-4 py-3 font-medium',
+                  hasNumericLeadColumn && columnIndex === 0 && 'w-[4.5rem] text-center',
+                )}
+                key={column.key}
+              >
+                {column.label}
+              </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#F3F1EA]/[0.07]">
+        <tbody className={hasNumericLeadColumn ? '' : 'divide-y divide-[#F3F1EA]/[0.07]'}>
           {bodyRows.map((row, rowIndex) => (
-            <tr key={`row-${rowIndex}`}>
-              {columns.map((column, columnIndex) => (
-                <td className="px-4 py-3 leading-6 text-[#D3D7D1]/88" key={column.key}>
-                  {cellText(row.find((cell) => cell.columnKey === column.key)) || cellText(row[columnIndex])}
-                </td>
-              ))}
+            <tr
+              className={cx(
+                hasNumericLeadColumn &&
+                  'rounded-[0.9rem] bg-[#101714]/72 shadow-[inset_0_0_0_1px_rgba(245,241,234,0.07)]',
+              )}
+              key={`row-${rowIndex}`}
+            >
+              {columns.map((column, columnIndex) => {
+                const value =
+                  cellText(row.find((cell) => cell.columnKey === column.key)) ||
+                  cellText(row[columnIndex]);
+                return (
+                  <td
+                    className={cx(
+                      'px-4 py-3 leading-6 text-[#D3D7D1]/88',
+                      hasNumericLeadColumn &&
+                        'border-y border-[#F3F1EA]/[0.06] first:rounded-l-[0.9rem] first:border-l last:rounded-r-[0.9rem] last:border-r',
+                      hasNumericLeadColumn && columnIndex === 0 && 'w-[4.5rem] align-top',
+                      hasNumericLeadColumn &&
+                        columnIndex === 1 &&
+                        'font-semibold text-[#F3F1EA]/92',
+                    )}
+                    key={column.key}
+                  >
+                    {hasNumericLeadColumn && columnIndex === 0 ? (
+                      <span className="mx-auto flex h-8 w-8 items-center justify-center rounded-full border border-[#32D6B0]/24 bg-[#32D6B0]/[0.09] font-mono text-xs font-semibold text-[#8EF0D9]">
+                        {value.replace(/\.$/, '')}
+                      </span>
+                    ) : (
+                      value
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -534,10 +600,13 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
       );
     case 'ordered_list':
       return (
-        <ol className="grid gap-2.5 text-[0.98rem] leading-7 text-[#C8CEC7]/88">
+        <ol className="grid gap-3 text-[0.98rem] leading-7 text-[#C8CEC7]/88">
           {block.items.map((item, index) => (
-            <li className="grid grid-cols-[1.8rem_minmax(0,1fr)] gap-3" key={item}>
-              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#F3F1EA]/12 bg-[#101312]/72 font-mono text-xs text-[#A8B0AA]">
+            <li
+              className="grid grid-cols-[2.35rem_minmax(0,1fr)] gap-3 rounded-[0.95rem] border border-[#F3F1EA]/[0.08] bg-[#111714]/68 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]"
+              key={item}
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#32D6B0]/22 bg-[#32D6B0]/[0.075] font-mono text-xs font-semibold text-[#8EF0D9]">
                 {index + 1}
               </span>
               <span>{item}</span>
@@ -566,10 +635,13 @@ function RenderBlock({ block }: { block: ReportFirstBlock }) {
       return (
         <div className="rounded-[1rem] border border-[#F3F1EA]/[0.08] bg-[#171D1A]/78 p-5" data-report-first-prompt-group="true">
           {block.title ? <h3 className="text-lg font-semibold text-[#F3F1EA]">{block.title}</h3> : null}
-          <ol className={cx('grid gap-2.5', block.title && 'mt-4')}>
+          <ol className={cx('grid gap-3', block.title && 'mt-4')}>
             {block.prompts.map((prompt, index) => (
-              <li className="grid grid-cols-[1.9rem_minmax(0,1fr)] gap-3 text-[0.98rem] leading-7 text-[#C8CEC7]/88" key={prompt}>
-                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#F3F1EA]/12 bg-[#101312]/72 font-mono text-xs text-[#A8B0AA]">
+              <li
+                className="grid grid-cols-[2.35rem_minmax(0,1fr)] gap-3 rounded-[0.9rem] border border-[#F3F1EA]/[0.075] bg-[#0F1512]/66 p-3 text-[0.98rem] leading-7 text-[#C8CEC7]/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]"
+                key={prompt}
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#32D6B0]/22 bg-[#32D6B0]/[0.075] font-mono text-xs font-semibold text-[#8EF0D9]">
                   {index + 1}
                 </span>
                 <span>{prompt}</span>

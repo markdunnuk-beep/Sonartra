@@ -16,6 +16,7 @@ function buildObservationMap(
     intersectionRatio: number;
     centerDistanceRatio: number;
     isIntersecting?: boolean;
+    hasPassedReadingLine?: boolean;
   }>,
 ) {
   return new Map(
@@ -24,6 +25,7 @@ function buildObservationMap(
       {
         ...item,
         isIntersecting: item.isIntersecting ?? true,
+        hasPassedReadingLine: item.hasPassedReadingLine ?? false,
       },
     ]),
   );
@@ -142,6 +144,25 @@ test('stability logic keeps current section when centre shift is still marginal'
   });
 
   assert.equal(nextSection, 'hero');
+});
+
+test('reading-line progression advances past a lingering tall current section', () => {
+  const nextSection = pickActiveSectionCandidate({
+    orderedSectionIds: [
+      'decision-behaviour',
+      'communication-behaviour',
+      'pressure-behaviour',
+      'strengths',
+    ],
+    currentActiveSectionId: 'decision-behaviour',
+    observations: buildObservationMap([
+      { id: 'decision-behaviour', intersectionRatio: 0.38, centerDistanceRatio: 0.36, hasPassedReadingLine: true },
+      { id: 'communication-behaviour', intersectionRatio: 0.44, centerDistanceRatio: 0.28, hasPassedReadingLine: true },
+      { id: 'pressure-behaviour', intersectionRatio: 0.18, centerDistanceRatio: 0.62, hasPassedReadingLine: false },
+    ]),
+  });
+
+  assert.equal(nextSection, 'communication-behaviour');
 });
 
 test('progress state remains top-level domains while a domain subsection is active', () => {
