@@ -452,31 +452,16 @@ export function UserAppShell({
         data-user-shell-variant="ranked-pattern-result"
       >
         <header className="border-white/8 sticky top-0 z-30 border-b bg-[rgba(8,10,13,0.84)] backdrop-blur-xl">
-          <div className="mx-auto flex min-h-[4.25rem] w-full max-w-[1560px] items-center justify-between gap-3 px-4 py-3 sm:px-5 lg:px-7">
+          <div className="mx-auto flex min-h-[4.25rem] w-full max-w-[1560px] items-center justify-center px-4 py-3 sm:px-5 lg:px-7">
             <Link
               aria-label="Back to workspace"
-              className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-white/14 flex min-w-0 items-center gap-3 rounded-[1.15rem] border bg-white/[0.035] px-3 py-2.5 text-white/72 hover:bg-white/[0.055] hover:text-white"
+              className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-[#32D6B0]/25 flex max-w-full items-center justify-center gap-3 rounded-[1.15rem] border bg-white/[0.035] px-3.5 py-2.5 text-white/74 hover:bg-[#32D6B0]/[0.08] hover:text-white sm:px-4"
               href="/app/workspace"
             >
               <SessionAvatar className="h-9 w-9 rounded-[0.95rem]" />
-              <span className="hidden min-w-0 text-sm font-medium tracking-[-0.01em] sm:inline">
+              <span className="min-w-0 truncate text-sm font-medium tracking-[-0.01em]">
                 Workspace
               </span>
-            </Link>
-
-            <div className="min-w-0 flex-1 text-center">
-              <p className="sonartra-type-caption text-white/42">Result</p>
-              <p className="truncate text-sm font-medium tracking-[-0.01em] text-white/82 sm:text-[0.95rem]">
-                Report reading
-              </p>
-            </div>
-
-            <Link
-              aria-label="Back to workspace"
-              className="sonartra-focus-ring sonartra-motion-button border-white/8 hover:border-[#32D6B0]/25 flex h-11 items-center justify-center rounded-[1.1rem] border bg-white/[0.035] px-3 text-sm font-medium tracking-[-0.01em] text-white/74 hover:bg-[#32D6B0]/[0.08] hover:text-white sm:px-4"
-              href="/app/workspace"
-            >
-              <span>Workspace</span>
             </Link>
           </div>
         </header>
