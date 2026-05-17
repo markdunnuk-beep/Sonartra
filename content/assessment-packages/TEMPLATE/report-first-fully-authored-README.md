@@ -1,107 +1,65 @@
-# Sonartra Report-First Fully Authored Import Template
+# Sonartra Report-First Fully Authored Template
 
-This folder contains the reusable workbook template for the current Sonartra ranked-pattern report-first authoring model.
+This folder contains the clean report-first fully authored workbook template:
 
-Use this template by copying `sonartra_report_first_fully_authored_import_TEMPLATE.xlsx` into a new assessment package folder, then replacing the placeholder metadata, signals, questions, options, weights, ranked patterns, and report-first report rows with the new assessment's authored content.
+`sonartra_report_first_fully_authored_TEMPLATE.xlsx`
 
-## Current Model
+Use it as an authoring and import-preparation artifact for future ranked-pattern report-first assessments. Copy the workbook into the assessment package folder, replace placeholder values, complete the authored reports, and then run the future compiler/import workflow for the package.
 
-The current report-first model is based on the production-ready Leadership Approach version 3 package:
+Runtime must not read this workbook directly. Published database rows and persisted `canonical_result_payload` remain the runtime source for result retrieval and rendering.
 
-- one assessment domain
+## Clean Model
+
+The clean model is:
+
+- one assessment
+- one active domain
 - four scored signals
 - twenty-four ranked signal patterns
-- one fully authored report per `pattern_key`
-- twenty-four total report-first templates per assessment version
-- deterministic scoring from `option_signal_weights`
-- persisted canonical report payloads for result retrieval
-- no runtime AI-generated prose
-
-Runtime must not read this workbook directly. The workbook is an authoring and import artifact only. After import and publish preparation, report-first templates are stored in the database and completion persists the canonical report payload used by result pages, workspace cards, and assessment inventory.
-
-## What This Template Is Not
-
-The old single-domain builder is legacy and is not the source for report-first authoring.
-
-This template does not use:
-
-- score-shape language variants
-- WPLP authoring
-- multi-domain authoring
-- pair-oriented single-domain builder rows
-- overlays, archetypes, thresholds, or sentence-library rule-engine prose
-
-Do not create separate report-first report rows for `concentrated`, `paired`, `graduated`, or `balanced`. Report-first coverage is one fully authored report per ranked `pattern_key`.
+- twenty-four fully authored premium reports
+- one report template per `pattern_key`
+- deterministic scoring from selected options and option weights
+- persisted `canonical_result_payload` rendered by result pages
 
 ## Workbook Structure
 
-The current ranked-pattern workbook parser still expects sheets `00_Metadata` through `18_Lookups` by exact name and header. Those sheets remain in this template so the package stays aligned with the current importer contract.
+The clean workbook has these sheets:
 
-For report-first authoring, use `19_Report_First_Templates`.
+- `00_Assessment`
+- `01_Signals`
+- `02_Questions`
+- `03_Options`
+- `04_Option_Weights`
+- `05_Ranked_Patterns`
+- `06_Report_Templates`
+- `07_Report_QA_Cases`
+- `08_Import_Summary`
+- `09_Lookups`
 
-The old score-shape language sheets are retained as contract placeholders only:
+The central authoring sheet is `06_Report_Templates`. It contains twenty-four report rows, one for each ranked signal `pattern_key`.
 
-- `06_Orientation`
-- `07_Recognition`
-- `09_Pattern_Mechanics`
-- `10_Pattern_Synthesis`
-- `14_Closing_Integration`
+## Report Template Rules
 
-Do not fill those sheets with score-shape report variants for report-first packages unless the importer is explicitly changed for a different model.
+Each row in `06_Report_Templates` represents one complete premium report for one ranked pattern.
 
-## Report-First Template Sheet
+Required report-template expectations:
 
-`19_Report_First_Templates` contains twenty-four placeholder rows, one for each ranked order of four generic signal keys:
+- exactly 24 report templates
+- exactly one active report template per active `pattern_key`
+- `report_contract = report_first_canonical_payload_v1`
+- `report_body_json` contains the complete structured report body when used as the canonical report content field
+- no duplicate active report rows for the same `pattern_key`
 
-- `signal_a`
-- `signal_b`
-- `signal_c`
-- `signal_d`
+The workbook does not use score-shape report variants. Do not create separate report rows for concentrated, paired, graduated, or balanced outcomes.
 
-For a real assessment, replace those keys with the assessment's four scored `signal_key` values and keep exactly one row per `pattern_key`.
+The workbook does not use the old modular `05_Context` through `14_Closing_Integration` report-language authoring model. Reports are authored as complete report templates, not assembled from modular worksheet fragments.
 
-Required report-first storage fields include:
+## Relationship To The Legacy-Compatible Workbook
 
-- `assessment_key`
-- `assessment_version`
-- `package_key`
-- `package_version`
-- `domain_key`
-- `pattern_key`
-- `report_key`
-- `report_contract`
-- `score_shape_policy`
-- `score_shape`
-- `supported_score_shapes`
-- `source_markdown_path`
-- `source_content_hash`
-- `content_hash`
-- `report_template_json`
-- `status`
-- `manifest_status`
-- `publishable`
-- `ready_for_import`
+`sonartra_report_first_fully_authored_import_TEMPLATE.xlsx` is a legacy-compatible bridge artifact for the current parser/import shape. It is not the clean authoring source of truth.
 
-`report_contract` must be `report_first_canonical_payload_v1`.
+The clean template in `sonartra_report_first_fully_authored_TEMPLATE.xlsx` is based on the RFA package contract in:
 
-`score_shape_policy` must be `pattern_level_score_shape_neutral`.
+`docs/report-authoring/report-first-fully-authored-package-contract.md`
 
-`score_shape` must stay blank/null for report-first templates. The database column exists for compatibility metadata, but report-first publish readiness requires pattern-level score-shape-neutral rows with `score_shape` set to null.
-
-## Coverage Rule
-
-Publish readiness expects:
-
-- 24 active/publishable report-first templates
-- exactly one active template per ranked `pattern_key`
-- no duplicate `pattern_key`
-- no missing ranked patterns
-- each `pattern_key` resolves to an active ranked pattern
-- each template uses the report-first contract
-- each template contains a complete structured report body
-- no score-shape language expansion
-
-## Authoring Notes
-
-The `report_template_json` cell is intended to hold the compiled structured report JSON for that pattern. The current Leadership package generates this from fully authored markdown and stores/imports it through the report-first template artifact path. If future workflow work imports this sheet directly, it should preserve the same storage contract and still avoid runtime workbook reads.
-
+Future importer or compiler work should map this clean workbook into the production storage/import requirements. Do not preserve legacy sheet names in the clean authoring package solely because the current parser expects them.
