@@ -50,7 +50,7 @@ const reportFirstTemplateHeaders = [
 ] as const;
 
 function workbook() {
-  return XLSX.readFile(workbookPath, { cellDates: false });
+  return XLSX.readFile(workbookPath, { cellDates: false, WTF: true });
 }
 
 function sheetRows(sheet: XLSX.WorkSheet): readonly unknown[][] {
@@ -92,6 +92,18 @@ test('report-first fully authored workbook template exists with importer sheets 
     const [headerRow] = sheetRows(sheet);
     assert.deepEqual(headerRow, [...entry.required_columns, ...entry.optional_columns]);
   }
+});
+
+test('report-first fully authored workbook template is structurally readable as xlsx', () => {
+  assert.doesNotThrow(() => workbook());
+  const template = workbook();
+
+  assert.equal(template.SheetNames.length, rankedPatternImportSheetKeys.length + 1);
+  assert.ok(template.Sheets['00_Metadata'], '00_Metadata must parse from the workbook package');
+  assert.ok(
+    template.Sheets[reportFirstSheetName],
+    `${reportFirstSheetName} must parse from the workbook package`,
+  );
 });
 
 test('report-first template sheet is pattern-level and contains exactly twenty-four placeholder reports', () => {
