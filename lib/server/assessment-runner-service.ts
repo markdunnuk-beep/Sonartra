@@ -1,7 +1,10 @@
 import { createAssessmentDefinitionRepository } from '@/lib/engine/repository';
 import { getRunnerState } from '@/lib/assessment-runner/runner-state';
 import type { Queryable } from '@/lib/engine/repository-sql';
-import { createAssessmentAttemptLifecycleService } from '@/lib/server/assessment-attempt-lifecycle';
+import {
+  AssessmentLifecycleNotFoundError,
+  createAssessmentAttemptLifecycleService,
+} from '@/lib/server/assessment-attempt-lifecycle';
 import { createAssessmentCompletionService } from '@/lib/server/assessment-completion-service';
 import { createResultReadModelService } from '@/lib/server/result-read-model';
 import {
@@ -83,6 +86,35 @@ function getWorkspaceHref(assessmentKey: string): string {
   return `/app/assessments#${assessmentKey}`;
 }
 
+function getUnavailableResolution(assessmentKey: string): AssessmentRunnerEntryResolution {
+  return {
+    kind: 'unavailable',
+    assessmentKey,
+    href: getWorkspaceHref(assessmentKey),
+  };
+}
+
+async function getAssessmentAttemptLifecycleOrUnavailable(
+  params: {
+    lifecycleService: ReturnType<typeof createAssessmentAttemptLifecycleService>;
+    userId: string;
+    assessmentKey: string;
+  },
+) {
+  try {
+    return await params.lifecycleService.getAssessmentAttemptLifecycle({
+      userId: params.userId,
+      assessmentKey: params.assessmentKey,
+    });
+  } catch (error) {
+    if (error instanceof AssessmentLifecycleNotFoundError) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
 async function loadOwnedAttemptOrThrow(
   db: Queryable,
   params: {
@@ -124,10 +156,14 @@ export function createAssessmentRunnerService(
 
   return {
     async resolveAssessmentLanding(params) {
-      const lifecycle = await lifecycleService.getAssessmentAttemptLifecycle({
+      const lifecycle = await getAssessmentAttemptLifecycleOrUnavailable({
+        lifecycleService,
         userId: params.userId,
         assessmentKey: params.assessmentKey,
       });
+      if (!lifecycle) {
+        return getUnavailableResolution(params.assessmentKey);
+      }
 
       if (lifecycle.status === 'ready') {
         const readyResult = lifecycle.latestResultId
@@ -193,10 +229,14 @@ export function createAssessmentRunnerService(
     },
 
     async resolveAssessmentEntry(params) {
-      const lifecycle = await lifecycleService.getAssessmentAttemptLifecycle({
+      const lifecycle = await getAssessmentAttemptLifecycleOrUnavailable({
+        lifecycleService,
         userId: params.userId,
         assessmentKey: params.assessmentKey,
       });
+      if (!lifecycle) {
+        return getUnavailableResolution(params.assessmentKey);
+      }
 
       if (lifecycle.status === 'ready') {
         const readyResult = lifecycle.latestResultId

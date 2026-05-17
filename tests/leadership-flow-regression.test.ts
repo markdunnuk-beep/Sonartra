@@ -649,8 +649,10 @@ test('leadership entry and attempt routes keep the starting and processing hando
 
   assert.match(entryPageSource, /resolveAssessmentLanding/);
   assert.match(entryPageSource, /AssessmentIntroductionPage/);
+  assert.match(entryPageSource, /AssessmentUnavailablePage/);
   assert.match(startPageSource, /const STARTING_MINIMUM_VISIBLE_MS = 800;/);
   assert.match(startPageSource, /resolveAssessmentEntry/);
+  assert.match(startPageSource, /AssessmentUnavailablePage/);
   assert.match(startLoadingSource, /title="Preparing your assessment"/);
   assert.match(startLoadingSource, /variant="initialising"/);
   assert.match(attemptPageSource, /runner\.status === 'completed_processing'/);

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { AssessmentIntroductionPage } from '@/components/assessment/assessment-introduction-page';
+import { AssessmentUnavailablePage } from '@/components/assessment/assessment-unavailable-page';
 import { getDbPool } from '@/lib/server/db';
 import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
 import { getRequestUserId } from '@/lib/server/request-user';
@@ -23,6 +24,10 @@ export default async function AssessmentEntryPage({
     userId,
     assessmentKey,
   });
+
+  if (resolution.kind === 'unavailable') {
+    return <AssessmentUnavailablePage assessmentKey={resolution.assessmentKey} />;
+  }
 
   if (resolution.kind === 'introduction') {
     return (

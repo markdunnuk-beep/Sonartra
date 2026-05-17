@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { AssessmentUnavailablePage } from '@/components/assessment/assessment-unavailable-page';
 import { getDbPool } from '@/lib/server/db';
 import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
 import { getRequestUserId } from '@/lib/server/request-user';
@@ -21,7 +22,6 @@ type AssessmentStartPageProps = {
 export default async function AssessmentStartPage({
   params,
 }: AssessmentStartPageProps) {
-  const startedAt = Date.now();
   const { assessmentKey } = await params;
   const userId = await getRequestUserId();
   const service = createAssessmentRunnerService({
@@ -32,13 +32,12 @@ export default async function AssessmentStartPage({
     assessmentKey,
   });
 
-  if (resolution.kind === 'runner') {
-    const elapsedMs = Date.now() - startedAt;
-    const remainingMs = Math.max(0, STARTING_MINIMUM_VISIBLE_MS - elapsedMs);
+  if (resolution.kind === 'unavailable') {
+    return <AssessmentUnavailablePage assessmentKey={resolution.assessmentKey} />;
+  }
 
-    if (remainingMs > 0) {
-      await wait(remainingMs);
-    }
+  if (resolution.kind === 'runner') {
+    await wait(STARTING_MINIMUM_VISIBLE_MS);
   }
 
   redirect(resolution.href);

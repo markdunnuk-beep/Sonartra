@@ -52,6 +52,11 @@ export type AssessmentRunnerViewModel = {
 
 export type AssessmentRunnerEntryResolution =
   | {
+      kind: 'unavailable';
+      assessmentKey: string;
+      href: string;
+    }
+  | {
       kind: 'runner';
       assessmentKey: string;
       attemptId: string;

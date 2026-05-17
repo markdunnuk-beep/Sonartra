@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import type { Queryable } from '@/lib/engine/repository-sql';
 import type { RuntimeAssessmentDefinition } from '@/lib/engine/types';
+import { AssessmentLifecycleNotFoundError } from '@/lib/server/assessment-attempt-lifecycle';
 import { createAssessmentRunnerService } from '@/lib/server/assessment-runner-service';
 import {
   AssessmentRunnerForbiddenError,
@@ -291,6 +292,72 @@ test('entry resolution creates or reuses runner path for start and resume states
     assessmentKey: 'wplp80',
     attemptId: 'attempt-1',
     href: '/app/assessments/wplp80/attempts/attempt-1',
+  });
+});
+
+test('landing resolution returns unavailable when no published assessment exists', async () => {
+  let startCalls = 0;
+
+  const service = createAssessmentRunnerService({
+    db: createFakeDb({ attempts: [] }),
+    lifecycleService: {
+      async getAssessmentAttemptLifecycle() {
+        throw new AssessmentLifecycleNotFoundError('Published assessment not found for key leadership-approach');
+      },
+      async startAssessmentAttempt() {
+        startCalls += 1;
+        throw new Error('start_should_not_be_called');
+      },
+      async getOrCreateInProgressAttempt() {
+        throw new Error('not_used');
+      },
+    },
+  });
+
+  const resolution = await service.resolveAssessmentLanding({
+    userId: 'user-1',
+    assessmentKey: 'leadership-approach',
+  });
+
+  assert.equal(startCalls, 0);
+  assert.deepEqual(resolution, {
+    kind: 'unavailable',
+    assessmentKey: 'leadership-approach',
+    href: '/app/assessments#leadership-approach',
+  });
+});
+
+test('entry resolution returns unavailable for archived-only assessment state without creating attempts', async () => {
+  let startCalls = 0;
+
+  const service = createAssessmentRunnerService({
+    db: createFakeDb({ attempts: [] }),
+    lifecycleService: {
+      async getAssessmentAttemptLifecycle() {
+        throw new AssessmentLifecycleNotFoundError(
+          'Published assessment not found for key archived-leadership',
+        );
+      },
+      async startAssessmentAttempt() {
+        startCalls += 1;
+        throw new Error('archived_versions_must_not_start_attempts');
+      },
+      async getOrCreateInProgressAttempt() {
+        throw new Error('not_used');
+      },
+    },
+  });
+
+  const resolution = await service.resolveAssessmentEntry({
+    userId: 'user-1',
+    assessmentKey: 'archived-leadership',
+  });
+
+  assert.equal(startCalls, 0);
+  assert.deepEqual(resolution, {
+    kind: 'unavailable',
+    assessmentKey: 'archived-leadership',
+    href: '/app/assessments#archived-leadership',
   });
 });
 
