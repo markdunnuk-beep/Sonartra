@@ -9,8 +9,11 @@ import {
 } from '@/lib/results/result-reading-sections';
 
 const DEFAULT_ACTIVE_SECTION_ID = RESULT_READING_SECTION_IDS[0] ?? null;
-const OBSERVER_THRESHOLDS = [0, 0.08, 0.18, 0.32, 0.5, 0.68, 0.84, 1] as const;
 const READING_LINE_VIEWPORT_RATIO = 0.36;
+const MIN_READING_LINE_OFFSET_PX = 180;
+const MAX_READING_LINE_OFFSET_PX = 420;
+const READING_LINE_ACTIVATION_TOLERANCE_PX = 8;
+const PAGE_BOTTOM_ACTIVATION_THRESHOLD_PX = 32;
 const ANCHOR_SCROLL_OFFSET_PX = 96;
 const ANCHOR_ACTIVE_LOCK_MS = 900;
 export const RESULT_SECTION_JUMP_EVENT = 'sonartra:result-section-jump';
@@ -37,6 +40,21 @@ type PickActiveSectionCandidateParams = {
   orderedSectionIds: readonly string[];
   currentActiveSectionId: string | null;
   observations: ReadonlyMap<string, SectionObservation>;
+};
+
+export type SectionScrollPosition = {
+  id: string;
+  top: number;
+  bottom: number;
+};
+
+type PickActiveSectionFromScrollPositionParams = {
+  orderedSectionIds: readonly string[];
+  currentActiveSectionId: string | null;
+  sectionPositions: readonly SectionScrollPosition[];
+  scrollY: number;
+  viewportHeight: number;
+  documentHeight: number;
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -240,25 +258,47 @@ export function pickActiveSectionCandidate({
   return bestCandidate.id;
 }
 
-function buildSectionObservation(element: HTMLElement): SectionObservation {
-  const viewportHeight = Math.max(window.innerHeight || 0, 1);
-  const viewportCenter = viewportHeight / 2;
-  const readingLine = viewportHeight * READING_LINE_VIEWPORT_RATIO;
-  const rect = element.getBoundingClientRect();
-  const visibleTop = Math.max(rect.top, 0);
-  const visibleBottom = Math.min(rect.bottom, viewportHeight);
-  const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-  const elementHeight = Math.max(rect.height, 1);
-  const elementCenter = rect.top + rect.height / 2;
+function getReadingLineOffset(viewportHeight: number): number {
+  return clamp(
+    viewportHeight * READING_LINE_VIEWPORT_RATIO,
+    MIN_READING_LINE_OFFSET_PX,
+    MAX_READING_LINE_OFFSET_PX,
+  );
+}
 
-  return {
-    id: element.id,
-    isIntersecting: visibleHeight > 0,
-    intersectionRatio: clamp(visibleHeight / elementHeight, 0, 1),
-    centerDistanceRatio: clamp(Math.abs(elementCenter - viewportCenter) / viewportCenter, 0, 2),
-    readingLineDistanceRatio: clamp(Math.abs(rect.top - readingLine) / readingLine, 0, 2),
-    hasPassedReadingLine: rect.top <= readingLine && rect.bottom > readingLine * 0.42,
-  };
+export function pickActiveSectionIdFromScrollPosition({
+  orderedSectionIds,
+  currentActiveSectionId,
+  sectionPositions,
+  scrollY,
+  viewportHeight,
+  documentHeight,
+}: PickActiveSectionFromScrollPositionParams): string | null {
+  const orderedPositions = orderedSectionIds
+    .map((sectionId) => sectionPositions.find((position) => position.id === sectionId))
+    .filter((position): position is SectionScrollPosition => Boolean(position))
+    .sort((first, second) => first.top - second.top);
+
+  if (orderedPositions.length === 0) {
+    return currentActiveSectionId ?? orderedSectionIds[0] ?? DEFAULT_ACTIVE_SECTION_ID;
+  }
+
+  const lastPosition = orderedPositions.at(-1);
+  if (
+    lastPosition &&
+    scrollY + viewportHeight >= documentHeight - PAGE_BOTTOM_ACTIVATION_THRESHOLD_PX
+  ) {
+    return lastPosition.id;
+  }
+
+  const readingLineY = scrollY + getReadingLineOffset(viewportHeight);
+  const activePosition = orderedPositions.reduce<SectionScrollPosition | null>(
+    (active, position) =>
+      position.top <= readingLineY + READING_LINE_ACTIVATION_TOLERANCE_PX ? position : active,
+    null,
+  );
+
+  return activePosition?.id ?? orderedPositions[0]?.id ?? currentActiveSectionId ?? null;
 }
 
 export function scrollToResultSection(sectionId: string): boolean {
@@ -326,17 +366,22 @@ export function useActiveResultSectionWithConfig(
       return;
     }
 
-    const byTopOffset = [...trackedElements].sort(
-      (first, second) => first.offsetTop - second.offsetTop,
-    );
-    const orderedTrackedSectionIds = byTopOffset.map((element) => element.id);
-    const observations = new Map<string, SectionObservation>();
     let frameId: number | null = null;
 
     const resolveActiveSection = () => {
-      for (const sectionElement of byTopOffset) {
-        observations.set(sectionElement.id, buildSectionObservation(sectionElement));
-      }
+      const sectionPositions = trackedElements
+        .map((sectionElement) => {
+          const rect = sectionElement.getBoundingClientRect();
+          const top = rect.top + window.scrollY;
+
+          return {
+            id: sectionElement.id,
+            top,
+            bottom: rect.bottom + window.scrollY,
+          };
+        })
+        .sort((first, second) => first.top - second.top);
+      const orderedTrackedSectionIds = sectionPositions.map((position) => position.id);
 
       const anchorJumpLock = anchorJumpLockRef.current;
       if (anchorJumpLock) {
@@ -351,10 +396,17 @@ export function useActiveResultSectionWithConfig(
         anchorJumpLockRef.current = null;
       }
 
-      const nextActiveSectionId = pickActiveSectionCandidate({
+      const nextActiveSectionId = pickActiveSectionIdFromScrollPosition({
         orderedSectionIds: orderedTrackedSectionIds,
         currentActiveSectionId: activeSectionIdRef.current,
-        observations,
+        sectionPositions,
+        scrollY: window.scrollY,
+        viewportHeight: Math.max(window.innerHeight || 0, 1),
+        documentHeight: Math.max(
+          document.documentElement.scrollHeight,
+          document.body.scrollHeight,
+          window.innerHeight || 0,
+        ),
       });
 
       if (nextActiveSectionId && nextActiveSectionId !== activeSectionIdRef.current) {
@@ -375,54 +427,6 @@ export function useActiveResultSectionWithConfig(
     };
 
     resolveActiveSection();
-
-    const observer =
-      typeof IntersectionObserver === 'undefined'
-        ? null
-        : new IntersectionObserver(
-            (entries) => {
-              for (const entry of entries) {
-                const element = entry.target as HTMLElement;
-                const viewportHeight = Math.max(window.innerHeight || 0, 1);
-                const viewportCenter = viewportHeight / 2;
-                const rect = entry.boundingClientRect;
-                const elementCenter = rect.top + rect.height / 2;
-
-                observations.set(element.id, {
-                  id: element.id,
-                  isIntersecting: entry.isIntersecting,
-                  intersectionRatio: clamp(entry.intersectionRatio, 0, 1),
-                  centerDistanceRatio: clamp(
-                    Math.abs(elementCenter - viewportCenter) / viewportCenter,
-                    0,
-                    2,
-                  ),
-                  readingLineDistanceRatio: clamp(
-                    Math.abs(rect.top - viewportHeight * READING_LINE_VIEWPORT_RATIO) /
-                      (viewportHeight * READING_LINE_VIEWPORT_RATIO),
-                    0,
-                    2,
-                  ),
-                  hasPassedReadingLine:
-                    rect.top <= viewportHeight * READING_LINE_VIEWPORT_RATIO &&
-                    rect.bottom > viewportHeight * READING_LINE_VIEWPORT_RATIO * 0.42,
-                });
-              }
-
-              scheduleResolveActiveSection();
-            },
-            {
-              root: null,
-              rootMargin: '-8% 0px -18% 0px',
-              threshold: OBSERVER_THRESHOLDS as unknown as number[],
-            },
-          );
-
-    if (observer) {
-      for (const sectionElement of byTopOffset) {
-        observer.observe(sectionElement);
-      }
-    }
 
     window.addEventListener('scroll', scheduleResolveActiveSection, { passive: true });
     window.addEventListener('resize', scheduleResolveActiveSection);
@@ -447,7 +451,6 @@ export function useActiveResultSectionWithConfig(
         window.cancelAnimationFrame(frameId);
       }
 
-      observer?.disconnect();
       window.removeEventListener('scroll', scheduleResolveActiveSection);
       window.removeEventListener('resize', scheduleResolveActiveSection);
       window.removeEventListener(RESULT_SECTION_JUMP_EVENT, handleAnchorJump);

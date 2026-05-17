@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   getSafeDefaultActiveState,
+  pickActiveSectionIdFromScrollPosition,
   pickActiveSectionCandidate,
   RESULT_SECTION_JUMP_EVENT,
   scrollToResultSection,
@@ -29,6 +30,58 @@ function buildObservationMap(
       },
     ]),
   );
+}
+
+const REPORT_FIRST_SECTION_IDS = [
+  'overview',
+  'pattern',
+  'evidence',
+  'key-insight',
+  'value-creation',
+  'others-experience',
+  'decision-behaviour',
+  'communication-behaviour',
+  'pressure-behaviour',
+  'strengths',
+  'tightening',
+  'rank-3-expansion',
+  'rank-4-expansion',
+  'development-focus',
+  'closing',
+] as const;
+
+const REPORT_FIRST_SECTION_HEIGHTS = [
+  706,
+  702,
+  874,
+  379,
+  811,
+  695,
+  930,
+  747,
+  983,
+  500,
+  600,
+  919,
+  919,
+  951,
+  823,
+] as const;
+
+function buildReportFirstSectionPositions() {
+  let top = 1487;
+
+  return REPORT_FIRST_SECTION_IDS.map((id, index) => {
+    const height = REPORT_FIRST_SECTION_HEIGHTS[index] ?? 700;
+    const position = {
+      id,
+      top,
+      bottom: top + height,
+    };
+
+    top += height;
+    return position;
+  });
 }
 
 test('canonical hierarchy maps domain subsection to top-level domains', () => {
@@ -163,6 +216,76 @@ test('reading-line progression advances past a lingering tall current section', 
   });
 
   assert.equal(nextSection, 'communication-behaviour');
+});
+
+test('scroll-position tracking activates every report-first section in order', () => {
+  const positions = buildReportFirstSectionPositions();
+  const viewportHeight = 1000;
+  const documentHeight = positions.at(-1)?.bottom ?? 0;
+  let activeSectionId: string | null = null;
+
+  for (const position of positions) {
+    activeSectionId = pickActiveSectionIdFromScrollPosition({
+      orderedSectionIds: REPORT_FIRST_SECTION_IDS,
+      currentActiveSectionId: activeSectionId,
+      sectionPositions: positions,
+      scrollY: Math.max(0, position.top - viewportHeight * 0.36),
+      viewportHeight,
+      documentHeight,
+    });
+
+    assert.equal(activeSectionId, position.id);
+  }
+});
+
+test('scroll-position tracking covers the P20 section 08 through 15 regression path', () => {
+  const positions = buildReportFirstSectionPositions();
+  const viewportHeight = 1000;
+  const documentHeight = positions.at(-1)?.bottom ?? 0;
+  let activeSectionId: string | null = 'decision-behaviour';
+  const expectedPath = [
+    'communication-behaviour',
+    'pressure-behaviour',
+    'strengths',
+    'tightening',
+    'rank-3-expansion',
+    'rank-4-expansion',
+    'development-focus',
+    'closing',
+  ];
+
+  for (const sectionId of expectedPath) {
+    const position = positions.find((item) => item.id === sectionId);
+    assert.ok(position, `${sectionId} must have a tracked position`);
+
+    activeSectionId = pickActiveSectionIdFromScrollPosition({
+      orderedSectionIds: REPORT_FIRST_SECTION_IDS,
+      currentActiveSectionId: activeSectionId,
+      sectionPositions: positions,
+      scrollY: Math.max(0, position.top - viewportHeight * 0.36),
+      viewportHeight,
+      documentHeight,
+    });
+
+    assert.equal(activeSectionId, sectionId);
+  }
+});
+
+test('scroll-position tracking activates the final section near the page bottom', () => {
+  const positions = buildReportFirstSectionPositions();
+  const viewportHeight = 1000;
+  const documentHeight = positions.at(-1)?.bottom ?? 0;
+
+  const activeSectionId = pickActiveSectionIdFromScrollPosition({
+    orderedSectionIds: REPORT_FIRST_SECTION_IDS,
+    currentActiveSectionId: 'development-focus',
+    sectionPositions: positions,
+    scrollY: documentHeight - viewportHeight - 12,
+    viewportHeight,
+    documentHeight,
+  });
+
+  assert.equal(activeSectionId, 'closing');
 });
 
 test('progress state remains top-level domains while a domain subsection is active', () => {
