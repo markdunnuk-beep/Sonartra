@@ -12,7 +12,7 @@ Create a clean, package-ready draft of Decision Style question and scoring input
 - status: `draft`
 
 ## 3. Signal Model
-Signals are evidence, instinct, principle, and pragmatism. Distinction rule: known facts, experienced judgement, standards/obligations, and workable execution respectively.
+Signals are evidence, judgement, standards, and practicality. Distinction rule: known facts, experienced judgement, standards/obligations, and workable execution respectively.
 
 ## 4. Question Design Strategy
 RFA-09 updated the 24 questions to role-neutral workplace prompts so the draft resonates across roles, functions, seniority levels, and industries while preserving one option per signal per question.
@@ -27,7 +27,7 @@ Deterministic primary mapping: each selected option contributes `1` to one prima
 Each signal appears exactly once per question and 24 times overall across the 96 options, producing equal scoring opportunity.
 
 ## 8. Option Letter Rotation Summary
-Letter-to-signal mapping rotates in a 4-question cycle (E-I-P-Pg, I-P-Pg-E, P-Pg-E-I, Pg-E-I-P) repeated across q01–q24 to avoid positional advantage.
+Letter-to-signal mapping rotates in a 4-question cycle (E-J-S-P, J-S-P-E, S-P-E-J, P-E-J-S) repeated across q01–q24 to avoid positional advantage.
 
 ## 9. Ranked Pattern Coverage
 All 24 permutations of the four signals are present in `05-ranked-patterns.psv` with deterministic `pattern_key` formatting.

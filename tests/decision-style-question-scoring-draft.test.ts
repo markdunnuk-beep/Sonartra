@@ -21,7 +21,7 @@ test('decision style package draft integrity', () => {
   requiredFiles.forEach((f) => assert.ok(fs.existsSync(path.join(base, f)), `missing ${f}`));
   const signals = parsePsv(path.join(base, '01-signals.psv'));
   assert.equal(signals.length, 4);
-  assert.deepEqual(signals.map((s) => s.signal_key).sort(), ['evidence','instinct','pragmatism','principle']);
+  assert.deepEqual(signals.map((s) => s.signal_key).sort(), ['evidence','judgement','practicality','standards']);
 
   const questions = parsePsv(path.join(base, '02-questions.psv'));
   assert.equal(questions.length, 24);
@@ -53,7 +53,7 @@ test('decision style package draft integrity', () => {
     letterSignal.get(w.option_key)!.add(w.signal_key);
   }
   for (const q of questions) assert.equal(optionSignalsByQuestion.get(q.question_key)?.size, 4);
-  ['evidence','instinct','principle','pragmatism'].forEach((s) => assert.equal(signalCounts.get(s), 24));
+  ['evidence','judgement','standards','practicality'].forEach((s) => assert.equal(signalCounts.get(s), 24));
   ['A','B','C','D'].forEach((l) => assert.ok((letterSignal.get(l)?.size ?? 0) > 1));
 
   const patterns = parsePsv(path.join(base, '05-ranked-patterns.psv'));

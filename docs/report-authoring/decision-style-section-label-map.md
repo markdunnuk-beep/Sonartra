@@ -49,15 +49,15 @@ Decision Style should keep existing stable ids/anchors used by the report-first 
 | 12 | `rank-3-expansion` | Wider perspective | How other perspectives improve the decision | Explain how other people can widen the decision field |
 | 13 | `rank-4-expansion` | Decision range | Where to use, stretch, or adapt this pattern | Explain contexts where the pattern works and where range is needed |
 | 14 | `development-focus` | Development | How to mature your decision pattern | Give pattern-specific growth actions |
-| 15 | `closing` | Closing | Your decision style in mature form | Integrate the pattern into a final usable principle |
+| 15 | `closing` | Closing | Your decision style in mature form | Integrate the pattern into a final usable standards |
 
 ### Renderer-id note
 
 The current renderer/test contract uses `rank-3-expansion` and `rank-4-expansion` stable ids (not `people-expansion`) and `development-focus` (not `development`). Decision Style authoring should align to these stable ids until an explicit anchor migration task is approved.
 
-## 4. Label Principles
+## 4. Label Standardss
 
-Decision Style labels should follow these principles:
+Decision Style labels should follow these standardss:
 
 - Keep labels concise enough for premium reading rail/mobile nav.
 - Keep labels decision-specific without gimmicky phrasing.
@@ -264,9 +264,9 @@ For each section: stable id, visible label, title, writer job, must include, mus
   - contexts where this matters
 - **Must avoid:**
   - moralising
-  - making Instinct sound irrational
-  - making Principle sound superior or rigid by default
-  - making Pragmatism sound shallow
+  - making Judgement sound irrational
+  - making Standards sound superior or rigid by default
+  - making Practicality sound shallow
   - making Evidence sound cold
 - **Signal treatment:** Keep balanced, non-caricature language.
 - **Repetition warning:** Keep this section distinct from Section 09 (pressure changes).
@@ -325,7 +325,7 @@ For each section: stable id, visible label, title, writer job, must include, mus
 - **Stable id:** `closing`
 - **Label:** Closing
 - **Title:** Your decision style in mature form
-- **Writer job:** Integrate the pattern into a final usable decision principle.
+- **Writer job:** Integrate the pattern into a final usable decision standards.
 - **Must include:**
   - mature form of the pattern
   - final synthesis
@@ -333,7 +333,7 @@ For each section: stable id, visible label, title, writer job, must include, mus
 - **Must avoid:**
   - repeating Section 04
   - vague motivational language
-- **Signal treatment:** Synthesize all four rank roles into one practical principle.
+- **Signal treatment:** Synthesize all four rank roles into one practical standards.
 - **Repetition warning:** Do not restate full sections; close with integration.
 
 ## 8. Assessment-Level Consistency Rules
@@ -358,9 +358,9 @@ Apply across all 24 Decision Style reports:
 Use concise, balanced signal language consistently:
 
 - **Evidence:** groundedness, proof, observation, known reality — not cold rationality.
-- **Instinct:** experienced judgement, pattern recognition, tacit synthesis — not impulsiveness.
-- **Principle:** standards, obligations, defensibility, consistency — not moral superiority.
-- **Pragmatism:** workability, momentum, constraint navigation, implementation fit — not shallow compromise.
+- **Judgement:** experienced judgement, pattern recognition, tacit synthesis — not impulsiveness.
+- **Standards:** standards, obligations, defensibility, consistency — not moral superiority.
+- **Practicality:** workability, momentum, constraint navigation, implementation fit — not shallow compromise.
 
 Section-level guidance:
 
