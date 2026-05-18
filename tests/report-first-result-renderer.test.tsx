@@ -365,6 +365,47 @@ test('report-first renderer formats Chapter 10 development actions without dupli
   assert.equal(useThisInCount, actionCardCount);
 });
 
+
+
+test('report-first renderer uses custom payload labels in body navigation while keeping stable anchors', () => {
+  const payload = structuredClone(buildReportFirstPayload()) as ReportFirstCanonicalPayloadV1;
+  const chapterLabelOverrides: Array<[RegExp, string]> = [
+    [/creates value/i, 'Decision value'],
+    [/others experience/i, 'How others experience your judgement'],
+    [/decision behaviour/i, 'Decision mechanics'],
+    [/communication behaviour/i, 'Explaining the decision'],
+    [/under pressure/i, 'Judgement under pressure'],
+    [/strength of this pattern/i, 'Decision strengths'],
+    [/can tighten/i, 'Decision tightening'],
+    [/People expands/i, 'Wider perspective'],
+    [/Vision expands/i, 'Decision range'],
+    [/development focus/i, 'Development'],
+  ];
+
+  payload.report.chapters = (payload.report.chapters ?? []).map((chapter) => ({
+    ...chapter,
+    railLabel: chapterLabelOverrides.find(([pattern]) => pattern.test(chapter.title))?.[1] ?? chapter.railLabel,
+  }));
+
+  payload.report.readerNavigation = [
+    ...(payload.report.readerNavigation ?? []).filter((item) => item.id !== 'key-insight' && item.id !== 'closing'),
+    { id: 'key-insight', label: 'Key judgement' },
+    { id: 'closing', label: 'Closing' },
+  ];
+
+  const markup = renderToStaticMarkup(<ReportFirstResultReport payload={payload} />);
+  const renderedText = textFromMarkup(markup);
+
+  for (const [, label] of chapterLabelOverrides) {
+    assert.ok(renderedText.includes(label), `Expected custom label in rendered output: ${label}`);
+  }
+  assert.match(renderedText, /Key judgement/);
+  assert.match(renderedText, /Closing/);
+  assert.match(markup, /data-report-first-section="key-insight"/);
+  assert.match(markup, /data-report-first-section="closing"/);
+  assert.match(markup, /data-report-first-section="rank-3-expansion"/);
+  assert.match(markup, /data-report-first-section="rank-4-expansion"/);
+});
 test('report-first renderer stays disconnected from template storage and scoring recomputation', () => {
   const componentSource = readFileSync(
     join(process.cwd(), 'components', 'results', 'report-first-result-report.tsx'),
