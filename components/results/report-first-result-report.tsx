@@ -250,16 +250,74 @@ function developmentActionUseCases(block: Extract<ReportFirstBlock, { readonly t
     .filter(Boolean);
 }
 
+const defaultReportFirstSectionLabels: Readonly<Record<string, string>> = {
+  overview: 'Overview',
+  pattern: 'Pattern',
+  evidence: 'Evidence',
+  'key-insight': 'Insight',
+  closing: 'Closing',
+  'rank-3-expansion': 'People expansion',
+  'rank-4-expansion': 'Vision expansion',
+};
+
+function resolveReportFirstSectionLabel({
+  sectionId,
+  payloadLabel,
+  payloadTitle,
+}: {
+  sectionId: string;
+  payloadLabel?: string | null;
+  payloadTitle?: string | null;
+}): string {
+  if (isNonEmptyText(payloadLabel)) {
+    return payloadLabel.trim();
+  }
+
+  const fallbackLabel = defaultReportFirstSectionLabels[sectionId];
+  if (isNonEmptyText(fallbackLabel)) {
+    return fallbackLabel;
+  }
+
+  if (isNonEmptyText(payloadTitle)) {
+    return payloadTitle.trim();
+  }
+
+  return 'Section';
+}
+
 function readerNavLabelForChapter(chapter: ReportFirstChapter): string {
   if (/How People expands your leadership/i.test(chapter.title)) {
-    return 'People expansion';
+    const payloadLabel = isNonEmptyText(chapter.railLabel) && !/^range$/i.test(chapter.railLabel.trim())
+      ? chapter.railLabel
+      : null;
+    return resolveReportFirstSectionLabel({
+      sectionId: 'rank-3-expansion',
+      payloadLabel,
+      payloadTitle: chapter.title,
+    });
   }
 
   if (/How Vision expands your leadership/i.test(chapter.title)) {
-    return 'Vision expansion';
+    const payloadLabel = isNonEmptyText(chapter.railLabel) && !/^range$/i.test(chapter.railLabel.trim())
+      ? chapter.railLabel
+      : null;
+    return resolveReportFirstSectionLabel({
+      sectionId: 'rank-4-expansion',
+      payloadLabel,
+      payloadTitle: chapter.title,
+    });
   }
 
-  return chapter.railLabel ?? `Chapter ${chapter.chapterNumber}`;
+  return resolveReportFirstSectionLabel({
+    sectionId: slugify(chapter.chapterKey || chapter.title),
+    payloadLabel: chapter.railLabel,
+    payloadTitle: chapter.title,
+  });
+}
+
+function navigationLabelById(report: ReportFirstReport, id: string): string | null {
+  const entry = report.readerNavigation?.find((item) => item.id === id);
+  return isNonEmptyText(entry?.label) ? entry.label.trim() : null;
 }
 
 function buildSections(report: ReportFirstReport): readonly ReportFirstSection[] {
@@ -268,10 +326,10 @@ function buildSections(report: ReportFirstReport): readonly ReportFirstSection[]
     : [];
 
   return [
-    { id: 'overview', label: 'Overview', heading: 'Overview' },
-    ...(report.patternSummary ? [{ id: 'pattern', label: 'Pattern', heading: report.patternSummary.title ?? 'Pattern at a glance' }] : []),
-    { id: 'evidence', label: 'Evidence', heading: 'Evidence behind your result' },
-    ...(report.keyInsight ? [{ id: 'key-insight', label: 'Insight', heading: 'Key insight' }] : []),
+    { id: 'overview', label: resolveReportFirstSectionLabel({ sectionId: 'overview' }), heading: 'Overview' },
+    ...(report.patternSummary ? [{ id: 'pattern', label: resolveReportFirstSectionLabel({ sectionId: 'pattern', payloadTitle: report.patternSummary.title }), heading: report.patternSummary.title ?? 'Pattern at a glance' }] : []),
+    { id: 'evidence', label: resolveReportFirstSectionLabel({ sectionId: 'evidence' }), heading: 'Evidence behind your result' },
+    ...(report.keyInsight ? [{ id: 'key-insight', label: resolveReportFirstSectionLabel({ sectionId: 'key-insight', payloadLabel: navigationLabelById(report, 'key-insight') }), heading: 'Key insight' }] : []),
     ...chapters.map((chapter) => ({
       id: slugify(chapter.chapterKey || chapter.title),
       label: readerNavLabelForChapter(chapter),
@@ -279,7 +337,7 @@ function buildSections(report: ReportFirstReport): readonly ReportFirstSection[]
       eyebrow: `Chapter ${chapter.chapterNumber}`,
       chapter,
     })),
-    ...(report.closing ? [{ id: 'closing', label: 'Closing', heading: 'Closing synthesis' }] : []),
+    ...(report.closing ? [{ id: 'closing', label: resolveReportFirstSectionLabel({ sectionId: 'closing', payloadLabel: navigationLabelById(report, 'closing') }), heading: 'Closing synthesis' }] : []),
   ];
 }
 
@@ -1284,7 +1342,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
               </SectionShell>
 
             {report.keyInsight ? (
-              <SectionShell id="key-insight" heading="Key insight">
+              <SectionShell id="key-insight" heading={sections.find((section) => section.id === 'key-insight')?.heading ?? 'Key insight'}>
                 <RenderBlock block={report.keyInsight} />
               </SectionShell>
             ) : null}
@@ -1294,7 +1352,7 @@ export function ReportFirstResultReport({ payload }: { payload: ReportFirstCanon
             ))}
 
             {report.closing ? (
-              <SectionShell id="closing" heading="Closing synthesis">
+              <SectionShell id="closing" heading={sections.find((section) => section.id === 'closing')?.heading ?? 'Closing synthesis'}>
                 <BlockGroup blocks={toBlocks(report.closing.synthesis)} />
                 {report.closing.finalLine ? (
                   <div className="mt-7">
