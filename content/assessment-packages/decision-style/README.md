@@ -1,6 +1,6 @@
 # Decision Style Draft Package
 
-This package contains the RFA-08 Decision Style draft question/scoring source using the clean report-first fully authored model.
+This package contains the RFA-08 Decision Style draft question/scoring source, updated in RFA-09 with role-neutral workplace decision prompts and responses, using the clean report-first fully authored model.
 
 - One assessment, one active domain, four scored signals.
 - 24 questions and 96 options with deterministic one-to-one option-signal weights.
