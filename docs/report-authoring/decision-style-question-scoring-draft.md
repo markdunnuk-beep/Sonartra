@@ -15,10 +15,10 @@ Create a clean, package-ready draft of Decision Style question and scoring input
 Signals are evidence, instinct, principle, and pragmatism. Distinction rule: known facts, experienced judgement, standards/obligations, and workable execution respectively.
 
 ## 4. Question Design Strategy
-24 questions were selected to match the full set of workplace decision contexts in scope and to preserve signal balance with one option per signal per question.
+RFA-09 updated the 24 questions to role-neutral workplace prompts so the draft resonates across roles, functions, seniority levels, and industries while preserving one option per signal per question.
 
 ## 5. Option Design Rules
-Options are scenario-specific, behaviour-first, and balanced for maturity to reduce social desirability bias and avoid obvious keyed wording.
+Options were revised in RFA-09 to role-neutral A–D responses, remain behaviour-first, and are balanced for maturity to reduce social desirability bias without changing the scoring model.
 
 ## 6. Scoring Model
 Deterministic primary mapping: each selected option contributes `1` to one primary signal via `04-option-weights.psv`; no thresholds, archetypes, overlays, or variant dimensions are introduced.
@@ -45,4 +45,4 @@ Eight QA cases are included (two led by each signal) with plausible normalized p
 - Should helper_text vary by question theme or remain constant for response consistency?
 
 ## 13. Recommended Next Task
-RFA-09 — Review and refine Decision Style questions/options for signal clarity and reader quality before full clean workbook/report template drafting.
+RFA-10 — Generate clean Decision Style workbook draft.
