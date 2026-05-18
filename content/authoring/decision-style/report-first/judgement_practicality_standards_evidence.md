@@ -13,11 +13,11 @@ rank_4_signal_key: evidence
 rank_4_signal_label: Evidence
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Experience-to-Action Decider
+working_title: The Experience-Led Practical Decision Maker
 editorial_version: rfa-17b-judgement-led-draft
 ---
 
-# The Experience-to-Action Decider
+# The Experience-Led Practical Decision Maker
 
 Your decision style moves quickly from experience to action.
 

@@ -13,11 +13,11 @@ rank_4_signal_key: standards
 rank_4_signal_label: Standards
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Practical Experience Decision Maker
+working_title: The Experience-Led Action Decision Maker
 editorial_version: rfa-17b-judgement-led-draft
 ---
 
-# The Practical Experience Decision Maker
+# The Experience-Led Action Decision Maker
 
 Your decision style is experience-led and action-oriented.
 

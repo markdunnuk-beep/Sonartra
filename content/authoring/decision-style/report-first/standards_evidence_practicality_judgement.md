@@ -13,11 +13,11 @@ rank_4_signal_key: judgement
 rank_4_signal_label: Judgement
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Responsible Evidence Decision Maker
+working_title: The Evidence-Backed Responsibility Decision Maker
 editorial_version: rfa-17c-standards-led-draft
 ---
 
-# The Responsible Evidence Decision Maker
+# The Evidence-Backed Responsibility Decision Maker
 
 Your decision style is responsible, factual, and practical.
 

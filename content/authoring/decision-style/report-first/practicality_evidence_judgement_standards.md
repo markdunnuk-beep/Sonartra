@@ -13,11 +13,11 @@ rank_4_signal_key: standards
 rank_4_signal_label: Standards
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Practical Evidence Decision Maker
+working_title: The Fact-Checked Practical Decision Maker
 editorial_version: rfa-17d-practicality-led-draft
 ---
 
-# The Practical Evidence Decision Maker
+# The Fact-Checked Practical Decision Maker
 
 Your decision style is practical, clear, and focused on what can work.
 

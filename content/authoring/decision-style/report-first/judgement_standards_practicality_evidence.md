@@ -13,11 +13,11 @@ rank_4_signal_key: evidence
 rank_4_signal_label: Evidence
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Experience-and-Responsibility Decider
+working_title: The Responsible Experience Decision Maker
 editorial_version: rfa-17b-judgement-led-draft
 ---
 
-# The Experience-and-Responsibility Decider
+# The Responsible Experience Decision Maker
 
 Your decision style starts with what experience tells you and quickly checks what would be fair.
 

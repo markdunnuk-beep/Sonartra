@@ -13,11 +13,11 @@ rank_4_signal_key: judgement
 rank_4_signal_label: Judgement
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Evidence-Checked Practical Decision Maker
+working_title: The Evidence-Backed Practical Decision Maker
 editorial_version: rfa-17d-practicality-led-draft
 ---
 
-# The Evidence-Checked Practical Decision Maker
+# The Evidence-Backed Practical Decision Maker
 
 Your decision style is practical, factual, and careful about whether action can be defended.
 

@@ -13,11 +13,11 @@ rank_4_signal_key: judgement
 rank_4_signal_label: Judgement
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Practical Responsibility Decision Maker
+working_title: The Responsible Practical Decision Maker
 editorial_version: rfa-17d-practicality-led-draft
 ---
 
-# The Practical Responsibility Decision Maker
+# The Responsible Practical Decision Maker
 
 Your decision style is practical, responsible, and focused on useful action.
 

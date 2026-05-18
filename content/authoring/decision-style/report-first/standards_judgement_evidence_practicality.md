@@ -13,11 +13,11 @@ rank_4_signal_key: practicality
 rank_4_signal_label: Practicality
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Responsible Experience Decision Maker
+working_title: The Responsibility-and-Experience Decision Maker
 editorial_version: rfa-17c-standards-led-draft
 ---
 
-# The Responsible Experience Decision Maker
+# The Responsibility-and-Experience Decision Maker
 
 Your decision style is responsible, experienced, and careful with trust.
 

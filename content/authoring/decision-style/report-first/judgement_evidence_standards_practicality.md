@@ -13,11 +13,11 @@ rank_4_signal_key: practicality
 rank_4_signal_label: Practicality
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Experience-First Evidence Decider
+working_title: The Experience-and-Evidence Decision Maker
 editorial_version: rfa-17b-judgement-led-draft
 ---
 
-# The Experience-First Evidence Decider
+# The Experience-and-Evidence Decision Maker
 
 Your decision style often starts with a professional read of what is happening.
 

@@ -15,7 +15,7 @@ const expectedReports = [
   {
     file: "judgement_evidence_standards_practicality.md",
     patternKey: "judgement_evidence_standards_practicality",
-    title: "The Experience-First Evidence Decider",
+    title: "The Experience-and-Evidence Decision Maker",
     ranks: ["judgement", "evidence", "standards", "practicality"],
   },
   {
@@ -27,25 +27,25 @@ const expectedReports = [
   {
     file: "judgement_standards_evidence_practicality.md",
     patternKey: "judgement_standards_evidence_practicality",
-    title: "The Responsible Experience Decider",
+    title: "The Experience-and-Responsibility Decision Maker",
     ranks: ["judgement", "standards", "evidence", "practicality"],
   },
   {
     file: "judgement_standards_practicality_evidence.md",
     patternKey: "judgement_standards_practicality_evidence",
-    title: "The Experience-and-Responsibility Decider",
+    title: "The Responsible Experience Decision Maker",
     ranks: ["judgement", "standards", "practicality", "evidence"],
   },
   {
     file: "judgement_practicality_evidence_standards.md",
     patternKey: "judgement_practicality_evidence_standards",
-    title: "The Practical Experience Decision Maker",
+    title: "The Experience-Led Action Decision Maker",
     ranks: ["judgement", "practicality", "evidence", "standards"],
   },
   {
     file: "judgement_practicality_standards_evidence.md",
     patternKey: "judgement_practicality_standards_evidence",
-    title: "The Experience-to-Action Decider",
+    title: "The Experience-Led Practical Decision Maker",
     ranks: ["judgement", "practicality", "standards", "evidence"],
   },
 ] as const;

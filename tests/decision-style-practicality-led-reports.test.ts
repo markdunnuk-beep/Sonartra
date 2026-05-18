@@ -15,37 +15,37 @@ const expectedReports = [
   {
     file: "practicality_evidence_judgement_standards.md",
     patternKey: "practicality_evidence_judgement_standards",
-    title: "The Practical Evidence Decision Maker",
+    title: "The Fact-Checked Practical Decision Maker",
     ranks: ["practicality", "evidence", "judgement", "standards"],
   },
   {
     file: "practicality_evidence_standards_judgement.md",
     patternKey: "practicality_evidence_standards_judgement",
-    title: "The Evidence-Checked Practical Decision Maker",
+    title: "The Evidence-Backed Practical Decision Maker",
     ranks: ["practicality", "evidence", "standards", "judgement"],
   },
   {
     file: "practicality_judgement_evidence_standards.md",
     patternKey: "practicality_judgement_evidence_standards",
-    title: "The Practical Experience Decision Maker",
+    title: "The Practical Experience-Led Decision Maker",
     ranks: ["practicality", "judgement", "evidence", "standards"],
   },
   {
     file: "practicality_judgement_standards_evidence.md",
     patternKey: "practicality_judgement_standards_evidence",
-    title: "The Experience-Shaped Action Decision Maker",
+    title: "The Experience-Guided Practical Decision Maker",
     ranks: ["practicality", "judgement", "standards", "evidence"],
   },
   {
     file: "practicality_standards_evidence_judgement.md",
     patternKey: "practicality_standards_evidence_judgement",
-    title: "The Practical Responsibility Decision Maker",
+    title: "The Responsible Practical Decision Maker",
     ranks: ["practicality", "standards", "evidence", "judgement"],
   },
   {
     file: "practicality_standards_judgement_evidence.md",
     patternKey: "practicality_standards_judgement_evidence",
-    title: "The Practical Standards Decision Maker",
+    title: "The Responsibility-Checked Practical Decision Maker",
     ranks: ["practicality", "standards", "judgement", "evidence"],
   },
 ] as const;

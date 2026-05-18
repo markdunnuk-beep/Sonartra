@@ -13,11 +13,11 @@ rank_4_signal_key: standards
 rank_4_signal_label: Standards
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Practical Experience Decision Maker
+working_title: The Practical Experience-Led Decision Maker
 editorial_version: rfa-17d-practicality-led-draft
 ---
 
-# The Practical Experience Decision Maker
+# The Practical Experience-Led Decision Maker
 
 Your decision style is practical, experienced, and focused on what will work in real conditions.
 

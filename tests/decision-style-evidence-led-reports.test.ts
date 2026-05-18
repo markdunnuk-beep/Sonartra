@@ -21,25 +21,25 @@ const expectedReports = [
   {
     file: "evidence_judgement_practicality_standards.md",
     patternKey: "evidence_judgement_practicality_standards",
-    title: "The Evidence-and-Read Decision Maker",
+    title: "The Evidence-and-Action Decision Maker",
     ranks: ["evidence", "judgement", "practicality", "standards"],
   },
   {
     file: "evidence_standards_judgement_practicality.md",
     patternKey: "evidence_standards_judgement_practicality",
-    title: "The Responsible Evidence Decision Maker",
+    title: "The Evidence-and-Responsibility Decision Maker",
     ranks: ["evidence", "standards", "judgement", "practicality"],
   },
   {
     file: "evidence_standards_practicality_judgement.md",
     patternKey: "evidence_standards_practicality_judgement",
-    title: "The Evidence-and-Responsibility Decider",
+    title: "The Responsible Evidence Decision Maker",
     ranks: ["evidence", "standards", "practicality", "judgement"],
   },
   {
     file: "evidence_practicality_judgement_standards.md",
     patternKey: "evidence_practicality_judgement_standards",
-    title: "The Practical Evidence Decision Maker",
+    title: "The Evidence-to-Practice Decision Maker",
     ranks: ["evidence", "practicality", "judgement", "standards"],
   },
 ] as const;

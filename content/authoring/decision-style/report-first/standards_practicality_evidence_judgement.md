@@ -13,11 +13,11 @@ rank_4_signal_key: judgement
 rank_4_signal_label: Judgement
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Responsible Action Decider
+working_title: The Responsibility-to-Action Decision Maker
 editorial_version: rfa-17c-standards-led-draft
 ---
 
-# The Responsible Action Decider
+# The Responsibility-to-Action Decision Maker
 
 Your decision style is responsible, practical, and careful about proof.
 

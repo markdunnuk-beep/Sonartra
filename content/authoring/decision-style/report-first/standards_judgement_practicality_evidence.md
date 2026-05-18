@@ -13,11 +13,11 @@ rank_4_signal_key: evidence
 rank_4_signal_label: Evidence
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Responsible Practical Judgement Maker
+working_title: The Experience-Guided Responsibility Decision Maker
 editorial_version: rfa-17c-standards-led-draft
 ---
 
-# The Responsible Practical Judgement Maker
+# The Experience-Guided Responsibility Decision Maker
 
 Your decision style is responsible, experience-led, and ready to respond.
 

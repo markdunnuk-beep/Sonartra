@@ -13,11 +13,11 @@ rank_4_signal_key: evidence
 rank_4_signal_label: Evidence
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Practical Standards Decision Maker
+working_title: The Responsibility-Checked Practical Decision Maker
 editorial_version: rfa-17d-practicality-led-draft
 ---
 
-# The Practical Standards Decision Maker
+# The Responsibility-Checked Practical Decision Maker
 
 Your decision style is practical, responsible, and shaped by experience.
 

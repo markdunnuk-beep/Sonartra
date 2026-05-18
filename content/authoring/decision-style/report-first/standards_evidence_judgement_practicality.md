@@ -13,11 +13,11 @@ rank_4_signal_key: practicality
 rank_4_signal_label: Practicality
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Responsibility-First Evidence Decider
+working_title: The Responsibility-and-Evidence Decision Maker
 editorial_version: rfa-17c-standards-led-draft
 ---
 
-# The Responsibility-First Evidence Decider
+# The Responsibility-and-Evidence Decision Maker
 
 Your decision style is responsible, careful, and evidence-aware.
 

@@ -13,11 +13,11 @@ rank_4_signal_key: evidence
 rank_4_signal_label: Evidence
 report_contract: report_first_canonical_payload_v1
 status: canonical_draft
-working_title: The Experience-Shaped Action Decision Maker
+working_title: The Experience-Guided Practical Decision Maker
 editorial_version: rfa-17d-practicality-led-draft
 ---
 
-# The Experience-Shaped Action Decision Maker
+# The Experience-Guided Practical Decision Maker
 
 Your decision style is practical, experienced, and aware of responsibility.
 
